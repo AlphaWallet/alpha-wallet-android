@@ -167,8 +167,9 @@ public class RepositoriesModule {
 	TransactionsService provideTransactionsService(TokensService tokensService,
 												   PreferenceRepositoryType preferenceRepository,
 												   EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-												   TransactionsNetworkClientType transactionsNetworkClientType) {
-		return new TransactionsService(tokensService, preferenceRepository, ethereumNetworkRepositoryType, transactionsNetworkClientType);
+												   TransactionsNetworkClientType transactionsNetworkClientType,
+												   TransactionLocalSource transactionLocalSource) {
+		return new TransactionsService(tokensService, preferenceRepository, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
 	}
 
 	@Singleton
@@ -206,8 +207,10 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-    AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService, TokenLocalSource tls, AlphaWalletService alphaService) {
-		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, alphaService);
+    AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager,
+														 EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService,
+														 TokenLocalSource tls, TransactionLocalSource trs, AlphaWalletService alphaService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, trs, alphaService);
 	}
 
 	@Singleton

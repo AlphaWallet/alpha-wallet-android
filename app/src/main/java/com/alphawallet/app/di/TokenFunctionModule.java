@@ -1,8 +1,10 @@
 package com.alphawallet.app.di;
 
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
@@ -32,10 +34,11 @@ public class TokenFunctionModule
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService) {
+            OpenseaService openseaService,
+            FetchTransactionsInteract fetchTransactionsInteract) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService);
+                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTransactionsInteract);
     }
 
     @Provides
@@ -51,5 +54,11 @@ public class TokenFunctionModule
     @Provides
     GenericWalletInteract provideGenericWalletInteract(WalletRepositoryType walletRepository) {
         return new GenericWalletInteract(walletRepository);
+    }
+
+    @Provides
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
+                                                               TokenRepositoryType tokenRepositoryType) {
+        return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
     }
 }

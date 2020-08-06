@@ -62,7 +62,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @return
      */
     @Override
-    public Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String checkingAddress, long lastBlock, long sync, boolean isEth)
+    public Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String checkingAddress, long lastBlock, long sync)
     {
         oldestTxBlock = 0;
         long lastBlockNumber = lastBlock + 1;
@@ -75,16 +75,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 if (sync == -1)
                 {
-                    lastTransaction = syncUpwards(instance, updates, networkInfo, checkingAddress, lastBlockNumber, walletAddress, isEth);
+                    lastTransaction = syncUpwards(instance, updates, networkInfo, checkingAddress, lastBlockNumber, walletAddress);
                     if (oldestTxBlock != 0) updateTokenBlockSync(instance, networkInfo.chainId, checkingAddress); //require re-sync
                 }
                 else
                 {
                     //not synced, read latest transactions (sync upwards) then move downward from previous sync point
-                    if (lastBlockNumber > 1) lastTransaction = syncUpwards(instance, updates, networkInfo, checkingAddress, lastBlockNumber - 1, walletAddress, isEth); //-1 to ensure we pick up the highest tx value
+                    if (lastBlockNumber > 1) lastTransaction = syncUpwards(instance, updates, networkInfo, checkingAddress, lastBlockNumber - 1, walletAddress); //-1 to ensure we pick up the highest tx value
                     if (oldestTxBlock == 0)
                     {
-                        EtherscanTransaction firstTx = syncDownwards(instance, networkInfo, checkingAddress, sync, walletAddress, isEth);
+                        EtherscanTransaction firstTx = syncDownwards(instance, networkInfo, checkingAddress, sync, walletAddress);
                         if (lastTransaction == null)
                             lastTransaction = firstTx; //record highest read tx if there was no sync
                     }
@@ -110,7 +110,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }).subscribeOn(Schedulers.io());
     }
 
-    private EtherscanTransaction syncDownwards(Realm instance, NetworkInfo networkInfo, String checkingAddress, long sync, String walletAddress, boolean isAccount) throws Exception
+    private EtherscanTransaction syncDownwards(Realm instance, NetworkInfo networkInfo, String checkingAddress, long sync, String walletAddress) throws Exception
     {
         int page = 1;
         if (sync == 0) sync = 999999999L;
@@ -120,7 +120,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         while (response != null && page <= 4) // only 4 pages at a time for each check, to avoid congestion
         {
             EtherscanTransaction[] myTxs = getEtherscanTransactions(response);
-            getRelatedTransactionList(txList, myTxs, isAccount, walletAddress, context, networkInfo.chainId);
+            getRelatedTransactionList(txList, myTxs, walletAddress, context, networkInfo.chainId);
             if (myTxs.length > 0 && firstTransaction == null)
             {
                 firstTransaction = myTxs[0];
@@ -147,7 +147,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return firstTransaction;
     }
 
-    private EtherscanTransaction syncUpwards(Realm instance, List<Transaction> updates, NetworkInfo networkInfo, String checkingAddress, long lastBlockNumber, String walletAddress, boolean isAccount) throws Exception
+    private EtherscanTransaction syncUpwards(Realm instance, List<Transaction> updates, NetworkInfo networkInfo, String checkingAddress, long lastBlockNumber, String walletAddress) throws Exception
     {
         int page = 1;
         List<Transaction> txList = new ArrayList<>();
@@ -156,7 +156,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         while (response != null && page <= 4) // only 4 pages at a time for each check, to avoid congestion
         {
             EtherscanTransaction[] myTxs = getEtherscanTransactions(response);
-            getRelatedTransactionList(txList, myTxs, isAccount, walletAddress, context, networkInfo.chainId);
+            getRelatedTransactionList(txList, myTxs, walletAddress, context, networkInfo.chainId);
             if (myTxs.length > 0)
             {
                 lastTransaction = myTxs[myTxs.length-1];
@@ -174,7 +174,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //didn't fully sync, skim off top 100 Txns to ensure user sees top txns - only happens if user has previously synced and hasn't checked for a while
             response = readTransactions(networkInfo, checkingAddress, "9999999999", false, 1, 100);
             EtherscanTransaction[] myTxs = getEtherscanTransactions(response);
-            getRelatedTransactionList(txList, myTxs, isAccount, walletAddress, context, networkInfo.chainId);
+            getRelatedTransactionList(txList, myTxs, walletAddress, context, networkInfo.chainId);
             writeTransactions(instance, txList);
             updates.addAll(txList);
             lastTransaction = myTxs[0];
@@ -184,12 +184,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return lastTransaction;
     }
 
-    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, boolean isAccount, String walletAddress, Context context, int chainId)
+    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, Context context, int chainId)
     {
         txList.clear();
         for (EtherscanTransaction etx : myTxs)
         {
-            Transaction tx = etx.createTransaction(isAccount ? null : walletAddress.toLowerCase(), context, chainId);
+            Transaction tx = etx.createTransaction(null, context, chainId);
             if (tx != null)
             {
                 txList.add(tx);
@@ -320,7 +320,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return result;
     }
 
-    @Override
+    /*@Override
     public Single<ContractType> checkConstructorArgs(NetworkInfo networkInfo, String address)
     {
         return Single.fromCallable(() -> {
@@ -361,7 +361,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             return result;
         });
-    }
+    }*/
 
     private boolean checkERC20(NetworkInfo networkInfo, String address)
     {

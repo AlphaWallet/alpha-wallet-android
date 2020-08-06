@@ -109,9 +109,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final LifecycleObserver lifeCycle;
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
-    private TutoShowcase findWalletAddressDialog;
     private PinAuthenticationCallbackInterface authInterface;
-    private String importFileName;
     private boolean bottomMarginSet = false;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
@@ -123,7 +121,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public HomeActivity()
     {
-        importFileName = null;
         if (VisibilityFilter.hideDappBrowser()) dappBrowserFragment = new Fragment();
         else dappBrowserFragment = new DappBrowserFragment();
         settingsFragment = new NewSettingsFragment();

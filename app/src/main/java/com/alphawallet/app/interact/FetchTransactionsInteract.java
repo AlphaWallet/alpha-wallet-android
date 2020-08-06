@@ -15,6 +15,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.TokensService;
 
 import java.util.List;
@@ -35,6 +36,11 @@ public class FetchTransactionsInteract {
                 .fetchCachedTransactionMetas(wallet, networkFilters, fetchTime, fetchLimit)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters)
+    {
+        return transactionRepository.fetchEventMetas(wallet, networkFilters);
     }
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
@@ -59,5 +65,11 @@ public class FetchTransactionsInteract {
                 .fetchCachedTransactionMetas(wallet, chainId, tokenAddress, historyCount)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public RealmAuxData fetchEvent(String walletAddress, String eventKey)
+    {
+        return transactionRepository
+                .fetchCachedEvent(walletAddress, eventKey);
     }
 }

@@ -2,46 +2,56 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
-    <include layout="@layout/layout_simple_toolbar" />
+    <include layout="@layout/layout_simple_toolbar_no_divider" />
 
-    <RelativeLayout
-        android:id="@+id/layout_hide_zero_balance"
+    <LinearLayout
+        android:id="@+id/layout_search_tokens"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="44dp"
         android:orientation="horizontal"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginBottom="@dimen/dp16"
+        android:gravity="center_vertical"
+        android:background="@drawable/background_round_search"
         android:layout_marginTop="?actionBarSize">
 
-        <TextView
-            android:id="@+id/text_hide_zero_balance_tokens"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:textAllCaps="true"
-            android:fontFamily="@font/font_bold"
-            android:text="Hide zero balance tokens"
-            android:textSize="14sp" />
+        <android.support.v7.widget.AppCompatImageView
+            android:layout_width="@dimen/dp24"
+            android:layout_height="@dimen/dp24"
+            android:layout_marginStart="@dimen/dp12"
+            android:src="@drawable/ic_search_small"/>
 
-        <CheckBox
-            android:layout_centerVertical="true"
-            android:id="@+id/checkbox_hide_zero_balance_tokens"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true" />
-    </RelativeLayout>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/edit_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dp8"
+            android:inputType="textFilter"
+            android:hint="@string/search_for_tokens"
+            android:background="@null"
+            android:layout_marginEnd="@dimen/dp16"
+            android:maxLines="1"
+            android:maxLength="20"
+            android:textColor="@color/dove"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17"/>
+
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/token_list"
-        android:layout_below="@id/layout_hide_zero_balance"
+        android:layout_below="@id/layout_search_tokens"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_buttons" />
+        android:layout_above="@id/layout_buttons"
+        tools:listitem="@layout/item_manage_token" />
 
     <LinearLayout
         android:id="@+id/layout_buttons"
@@ -52,6 +62,7 @@
         android:layout_marginTop="15dp"
         android:background="@color/white"
         android:gravity="center"
+        android:visibility="gone"
         android:orientation="horizontal">
 
         <Button

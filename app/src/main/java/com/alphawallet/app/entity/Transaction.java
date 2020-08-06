@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
 import com.alphawallet.app.entity.tokens.Token;
@@ -347,17 +348,16 @@ public class Transaction implements Parcelable {
 		TransactionOperation operation = operations == null
 				|| operations.length == 0 ? null : operations[0];
 
-		if (walletAddress.equals(contractAddress)) //transactions sent from or sent to the main currency account
+		if (walletAddress.equalsIgnoreCase(contractAddress)) //transactions sent from or sent to the main currency account
 		{
-			return from.equals(walletAddress) || to.equals(walletAddress);
+			return from.equalsIgnoreCase(walletAddress) || to.equalsIgnoreCase(walletAddress);
 		}
 		else
 		{
-			if (to.equals(contractAddress)) return true;
-			if (operation != null && (operations[0].contract.address.equals(contractAddress))) return true;
+			if (to.equalsIgnoreCase(contractAddress)) return true;
+			else return operation != null && (operations[0].contract.address.equalsIgnoreCase(contractAddress));
 		}
 
-		return false;
 	}
 
     public TransactionContract getOperation()
@@ -522,14 +522,14 @@ public class Transaction implements Parcelable {
 		}
 	}
 
-	public int getOperationImage(Token token)
+	public StatusType getOperationImage(Token token)
 	{
 		TransactionOperation operation = operations == null
 												 || operations.length == 0 ? null : operations[0];
 
 		if (operation == null || operation.contract == null)
 		{
-			return from.equalsIgnoreCase(token.getWallet()) ? R.drawable.ic_arrow_downward_black_24dp : R.drawable.ic_arrow_upward_black_24dp;
+			return from.equalsIgnoreCase(token.getWallet()) ? StatusType.SENT : StatusType.RECEIVE;
 		}
 		else
 		{

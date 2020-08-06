@@ -904,6 +904,9 @@ public abstract class TokenscriptFunction
                     convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000000"));
                     break;
                 case e4:
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("10000"));
+                    break;
+                case e3:
                     convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
                     break;
                 case e2:

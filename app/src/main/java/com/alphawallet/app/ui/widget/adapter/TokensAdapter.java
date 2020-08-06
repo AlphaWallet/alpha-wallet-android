@@ -105,11 +105,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.tokensService = null;
     }
 
-//    @Override
-//    public long getItemId(int position) {
-//        return position;
-//    }
-
     @Override
     public long getItemId(int position) {
         Object obj = items.get(position);

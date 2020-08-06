@@ -2,8 +2,8 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.text.format.DateUtils;
 
-import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 import com.alphawallet.app.entity.TransactionMeta;
+import com.alphawallet.app.ui.widget.holder.EventHolder;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -23,8 +23,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             TransactionMeta oldTx;
             TransactionMeta newTx;
             TimestampSortedItem otherTimestamp = (TimestampSortedItem) other;
-            //first see if this is a replacement TX
-            if (viewType == TransactionHolder.VIEW_TYPE && viewType == other.viewType)
+            if (viewType == other.viewType)
             {
                 oldTx = value;
                 newTx = (TransactionMeta) other.value;
@@ -43,6 +42,10 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
                     return super.compare(other);
                 }
             }
+            else if (other.viewType == EventHolder.VIEW_TYPE && ((EventSortedItem)other).value.hash.equals(value.hash)) //first see if this is a replacement TX
+            {
+                return 0;
+            }
             else
             {
                 return super.compare(other);
@@ -55,18 +58,21 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     }
 
     @Override
-    public boolean areContentsTheSame(SortedItem newItem) {
+    public boolean areContentsTheSame(SortedItem other) {
         try
         {
-            if (viewType == newItem.viewType)
+            if (viewType == other.viewType)
             {
-                TransactionMeta oldTx = value;
-                TransactionMeta newTx = (TransactionMeta) newItem.value;
+                TransactionMeta newTx = (TransactionMeta) other.value;
 
                 //boolean hashMatch = oldTx.hash.equals(newTx.hash);
-                boolean pendingMatch = oldTx.isPending == newTx.isPending;
+                boolean pendingMatch = value.isPending == newTx.isPending;
 
                 return pendingMatch;
+            }
+            else if (other.viewType == EventHolder.VIEW_TYPE && ((EventSortedItem)other).value.hash.equals(value.hash))
+            {
+                return false;
             }
             else
             {
@@ -84,16 +90,18 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     {
         try
         {
-            if (viewType == other.viewType && viewType == TransactionHolder.VIEW_TYPE)
+            if (viewType == other.viewType)
             {
-                TransactionMeta oldTx = value;
                 TransactionMeta newTx = (TransactionMeta) other.value;
-
-                return oldTx.hash.equals(newTx.hash);
+                return value.hash.equals(newTx.hash);
+            }
+            else if (other.viewType == EventHolder.VIEW_TYPE && ((EventSortedItem)other).value.hash.equals(value.hash))
+            {
+                return true;
             }
             else
             {
-                return viewType == other.viewType;
+                return false;
             }
         }
         catch (Exception e)

@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigInteger;
@@ -332,21 +333,21 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         return BalanceUtils.getScaledValue(operation.value, 0);
     }
 
-    public int getOperationImage(Token token, Transaction tx)
+    public StatusType getOperationImage(Token token, Transaction tx)
     {
         switch (type)
         {
             case 1:
             case 2:
-                return R.drawable.ic_arrow_downward_black_24dp;
+                return StatusType.RECEIVE;
             case -1:
-                return R.drawable.ic_arrow_upward_black_24dp;
+                return StatusType.SENT;
             case -2:
             case -3:
                 //Contract creation
-                return R.drawable.ic_ethereum;
+                return StatusType.CONSTRUCTOR;
             default:
-                return R.drawable.ic_error_outline_black_24dp;
+                return StatusType.FAILED;
         }
     }
 

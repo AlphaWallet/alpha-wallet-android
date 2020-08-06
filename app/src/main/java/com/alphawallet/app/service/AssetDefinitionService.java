@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -16,11 +15,8 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ActionEventCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
@@ -31,8 +27,12 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
+import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
@@ -113,7 +113,6 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
@@ -131,9 +130,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public static final String ASSET_SUMMARY_VIEW_NAME = "item-view";
     public static final String ASSET_DETAIL_VIEW_NAME = "view";
     private final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
-    private final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
+    private final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/alphawallet/iconassets/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
     private static final String CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
-    private static final long CHECK_TX_LOGS_INTERVAL = 15;
+    private static final long CHECK_TX_LOGS_INTERVAL = 20;
 
     private final Context context;
     private final OkHttpClient okHttpClient;
@@ -148,13 +149,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final TokensService tokensService;
     private final TokenLocalSource tokenLocalSource;
     private final AlphaWalletService alphaWalletService;
+    private final TransactionLocalSource transactionsCache;
     private TokenDefinition cachedDefinition = null;
     private final SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
     private final List<EventDefinition> eventList = new ArrayList<>(); //List of events built during file load
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
     private Disposable eventListener;           // timer thread that periodically checks event logs for scripts that require events
-    private ActionEventCallback eventCallback;
-    private boolean requireEventSend = false;
     private final Semaphore eventConnection;
     private FragmentMessenger homeMessenger;
 
@@ -169,7 +169,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
                                   RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService,
-                                  TokenLocalSource trs, AlphaWalletService alphaService)
+                                  TokenLocalSource trs, TransactionLocalSource tls,
+                                  AlphaWalletService alphaService)
     {
         context = ctx;
         okHttpClient = client;
@@ -184,8 +185,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         this.eventUtils = new EventUtils() { }; //no overridden functions
         tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions
         tokenLocalSource = trs;
+        transactionsCache = tls;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
+        //quick check for old style event data
+        checkLegacyEventData();
         loadAssetScripts();
     }
 
@@ -791,9 +795,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
             List<ContractLocator> originContracts = addContractAddresses(newFile);
-            Intent intent = new Intent(ADDED_TOKEN);
-            intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, (ArrayList)originContracts);
-            context.sendBroadcast(intent);
+            //update tokensService
+            for (ContractLocator cl : originContracts)
+            {
+                tokensService.addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
+            }
             fileLoad = newFile.getName();
         }
 
@@ -901,14 +907,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void finishLoading()
     {
         assetLoadingLock.release();
-        if (eventCallback != null)
-        {
-            generateAndSendEvents();
-        }
-        else
-        {
-            requireEventSend = true;
-        }
+        updateEventBlockTimes();
         startEventListeners();
     }
 
@@ -943,6 +942,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 System.out.println("TSOverride: " + newTsFile + " Overrides " + oldTsFile.getAbsolutePath());
             }
+
+            tokensService.addUnknownTokenToCheck(new ContractAddress(network, address));
         }
     }
 
@@ -1051,9 +1052,36 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Attribute attr = tokenDef.attributes.get(attrName);
             if (attr.event != null && attr.event.contract != null)
             {
-                eventList.add(attr.event); //note: event definition contains link back to the contract it refers to
+                checkAddToEventList(attr.event); //note: event definition contains link back to the contract it refers to
             }
         }
+
+        if (tokenDef.getActivityCards().size() > 0)
+        {
+            for (String activityName : tokenDef.getActivityCards().keySet())
+            {
+                EventDefinition ev = tokenDef.getActivityEvent(activityName);
+                checkAddToEventList(ev);
+            }
+        }
+    }
+
+    private void checkAddToEventList(EventDefinition ev)
+    {
+        int evChainId = ev.contract.getfirstChainId();
+        String evAddress = ev.contract.getFirstAddress();
+        //check we haven't already added the event
+        boolean found = false;
+        for (EventDefinition evCheck : eventList)
+        {
+            if (ev.equals(evCheck))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) eventList.add(ev);
     }
 
     private void stopEventListener()
@@ -1068,7 +1096,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public void startEventListeners()
     {
-        stopEventListener();
+        if (eventListener != null) eventListener.dispose();
         eventListener =  Observable.interval(0, CHECK_TX_LOGS_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> {
                     checkEvents()
@@ -1100,23 +1128,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void getEvents(EventDefinition ev) throws Exception
     {
-        int chainId = ev.contract.addresses.keySet().iterator().next();
-        String address = ev.contract.addresses.get(chainId).get(0);
+        int chainId = ev.getEventChainId();
+        String address = ev.getEventContractAddress();
 
-        int originChainId = ev.parentAttribute.originContract.addresses.keySet().iterator().next();
-        String originAddress = ev.parentAttribute.originContract.addresses.get(originChainId).get(0);
+        Token originToken = tokensService.getToken(chainId, address);
 
-        Token originToken = tokensService.getToken(originChainId, originAddress);
-        if (originToken == null ||
-                (originToken.isNonFungible() && !originToken.hasPositiveBalance())) return; // early return if NFT and wallet has zero balance for this token
-                                                                                            // Note: Fungible with zero balance is safe to query events as filter is always ownerAddress
-        Web3j web3j = getWeb3jService(chainId);
+        //Some events don't require a token to be present
+        if (originToken == null) return;
 
         final EthFilter filter = eventUtils.generateLogFilter(ev, originToken, this);
+
+        //don't process an invalid filter - eg if filter requires a tokenId (NFT) and balance is zero
+        if (filter == null) return;
 
         try
         {
             eventConnection.acquire(); //prevent overlapping event calls
+            Web3j web3j = getWeb3jService(chainId);
             EthLog ethLogs = web3j.ethGetLogs(filter).send();
             processLogs(ev, ethLogs.getLogs());
         }
@@ -1143,16 +1171,130 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         if (logs.size() == 0) return; //early return
         int chainId = ev.contract.addresses.keySet().iterator().next();
+        String eventAddress = ev.contract.getFirstAddress();
         Web3j web3j = getWeb3jService(chainId);
 
         for (EthLog.LogResult ethLog : logs)
         {
+            String txHash = ((Log)ethLog.get()).getTransactionHash();
             String selectVal = eventUtils.getSelectVal(ev, ethLog);
-            EthBlock txBlock = eventUtils.getTransactionDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
-
+            EthBlock txBlock = eventUtils.getBlockDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
+            //do we need to fetch transaction from chain or do we have it already
+            com.alphawallet.app.entity.Transaction tx = transactionsCache.fetchTransaction(new Wallet(tokensService.getCurrentAddress()), txHash);
             long blockTime = txBlock.getBlock().getTimestamp().longValue();
-            if (eventCallback != null) eventCallback.receivedEvent(ev.attributeName, ev.parentAttribute.getSyntaxVal(selectVal), blockTime, chainId);
-            storeEventValue(ev, ethLog, ev.parentAttribute, blockTime, selectVal);
+            BigInteger blockNumber = ((Log)ethLog.get()).getBlockNumber();
+
+            if (tx == null)
+            {
+                //fetchTx & store, we will need the transaction info for the view data
+                eventUtils.getTransactionDetails(txHash, web3j)
+                        .observeOn(Schedulers.io())
+                        .subscribeOn(Schedulers.computation())
+                        .subscribe(ethTx -> transactionsCache.storeRawTx(new Wallet(tokensService.getCurrentAddress()), ethTx, blockTime))
+                        .isDisposed();
+            }
+
+            storeLatestEventBlockTime(chainId, eventAddress, ev.type.name, ev.filter, blockNumber, blockTime);
+
+            if (ev.parentAttribute != null)
+            {
+                storeEventValue(ev, ethLog, ev.parentAttribute, blockTime, selectVal);
+            }
+            else
+            {
+                //Activity event - store as event but first let's pass this to activity pane
+                //To produce event we need:
+                //all the elements in the sequence (can use a CSV string)
+                //block#, timeStamp
+                //TODO: normalise this in a new database to allow it to be indexable
+                storeActivityValue(ev, ethLog, blockTime, ev.activityName);
+            }
+        }
+    }
+
+    private void storeLatestEventBlockTime(int chainId, String eventAddress, String namedType, String filter, BigInteger readBlock, long timeStamp)
+    {
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        {
+            String databaseKey = TokensRealmSource.eventBlockKey(chainId, eventAddress, namedType, filter);
+            realm.executeTransaction(r -> {
+                RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                        .equalTo("instanceKey", databaseKey)
+                        .findFirst();
+                if (realmToken == null) realmToken = realm.createObject(RealmAuxData.class, databaseKey);
+                realmToken.setResultTime(timeStamp);
+                realmToken.setResult(readBlock.toString(16));
+                realmToken.setFunctionId("");
+                realmToken.setChainId(chainId);
+                realmToken.setTokenAddress("");
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void storeActivityValue(EventDefinition ev, EthLog.LogResult log, long blockTime, String activityName)
+    {
+        //split out all the event data
+        String valueList = eventUtils.getAllTopics(ev, log);
+
+        ContractAddress eventContractAddress = new ContractAddress(ev.getEventChainId(),
+                ev.getEventContractAddress());
+
+        //store this data
+        String txHash = ((Log) log.get()).getTransactionHash();
+        storeAuxData(txHash, BigInteger.ZERO, valueList, activityName, eventContractAddress, ev.type.name, blockTime); //store the event itself
+    }
+
+    private void storeAuxData(String txHash, BigInteger tokenId, String eventData, String activityName, ContractAddress cAddr, String eventName, long blockTime)
+    {
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        {
+            String databaseKey = TokensRealmSource.eventKey(txHash, eventName);
+            realm.executeTransaction(r -> {
+                RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                        .equalTo("instanceKey", databaseKey)
+                        .findFirst();
+                if (realmToken == null) realmToken = realm.createObject(RealmAuxData.class, databaseKey);
+                realmToken.setResultTime(blockTime);
+                realmToken.setResult(eventData);
+                realmToken.setFunctionId(activityName);
+                realmToken.setChainId(cAddr.chainId);
+                realmToken.setTokenId(tokenId.toString(16));
+                realmToken.setTokenAddress(cAddr.address);
+                realmToken.setResultReceivedTime(System.currentTimeMillis());
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void storeEventData(TransactionResult tResult)
+    {
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        {
+            String databaseKey = eventKey(tResult);
+            realm.executeTransaction(r -> {
+                RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                        .equalTo("instanceKey", databaseKey)
+                        .findFirst();
+                if (realmToken == null) realmToken = realm.createObject(RealmAuxData.class, databaseKey);
+
+                realmToken.setResultTime(tResult.resultTime);
+                realmToken.setResult(tResult.result);
+                realmToken.setChainId(tResult.contractChainId);
+                realmToken.setFunctionId(tResult.method);
+                realmToken.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
+                realmToken.setResultReceivedTime(System.currentTimeMillis());
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -1181,26 +1323,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             tokenId = BigInteger.ZERO;
         }
 
-        ContractAddress eventContractAddress = new ContractAddress(attr.event.contract.addresses.keySet().iterator().next(),
-                                                                   attr.event.contract.addresses.values().iterator().next().get(0));
+        String txHash = ((Log)log.get()).getTransactionHash();
+
+        ContractAddress eventContractAddress = new ContractAddress(ev.getEventChainId(),
+                ev.getEventContractAddress());
         txResult = getFunctionResult(eventContractAddress, attr, tokenId);
 
-        txResult.result = selectVal;
-
-        if (txResult.resultTime == 0 || blockTime >= txResult.resultTime)
-        {
-            //store
-            txResult.resultTime = blockTime;
-            storeAuxData(txResult); // updates the entry for the attribute
-            ev.hasNewEvent = true;
-        }
-
         txResult.resultTime = blockTime;
-        txResult.result = attr.getSyntaxVal(selectVal) + "," + ev.readBlock.toString(16); //store block time as well as block number
-        storeAuxData(txResult); //store the event itself
+        txResult.result = attr.getSyntaxVal(selectVal);
+
+        storeAuxData(txHash, tokenId, txResult.result, ev.attributeName, eventContractAddress, ev.type.name, blockTime);
     }
 
-    public boolean checkTokenForNewEvent(Token token)
+    /*public boolean checkTokenForNewEvent(Token token)
     {
         boolean hasEvent = false;
         for (EventDefinition ev : eventList)
@@ -1218,7 +1353,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return hasEvent;
-    }
+    }*/
 
     private void onLogError(Throwable throwable)
     {
@@ -1697,7 +1832,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         {
                             if (file.contains(".xml") || file.contains(".tsml"))
                             {
-                                System.out.println("FILE: " + file);
                                 //form filename
                                 TokenScriptFile newTSFile = new TokenScriptFile(context, listenerPath, file);
                                 List<ContractLocator> originContracts = addContractAddresses(newTSFile);
@@ -1711,9 +1845,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe().isDisposed();
 
-                                    Intent intent = new Intent(ADDED_TOKEN);
-                                    intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, (ArrayList)originContracts);
-                                    context.sendBroadcast(intent);
+                                    //update tokensService
+                                    for (ContractLocator cl : originContracts)
+                                    {
+                                        tokensService.addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
+                                    }
                                 }
                             }
                         }
@@ -1852,7 +1988,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
         String dataBaseKey = functionKey(contract, tokenId, attr.name);
-        try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress()))
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
         {
             RealmAuxData realmToken = realm.where(RealmAuxData.class)
                     .equalTo("instanceKey", dataBaseKey)
@@ -1886,13 +2022,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     {
                         if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
                         if (tResult.result == null || tResult.resultTime < 0) return;
-                        realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
+                        realm = realmManager.getRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
-                        if (tResult.result.contains(","))
-                        {
-                            databaseKey = eventKey(tResult);
-                        }
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)
                                 .equalTo("instanceKey", databaseKey)
                                 .equalTo("chainId", tResult.contractChainId)
@@ -1910,6 +2042,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             realm.beginTransaction();
                             realmToken.setResult(tResult.result);
                             realmToken.setResultTime(tResult.resultTime);
+                            realmToken.setResultReceivedTime(System.currentTimeMillis());
                         }
                     }
 
@@ -1941,48 +2074,73 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tResult;
     }
 
-    private void generateAndSendEvents()
+    private void updateEventBlockTimes()
     {
-        List<Event> storedEvents = new ArrayList<>();
-        try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress()))
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
         {
             RealmResults<RealmAuxData> realmEvents = realm.where(RealmAuxData.class)
-                    .endsWith("instanceKey", "-log")
+                    .endsWith("instanceKey", "-eventBlock")
                     .sort("resultTime", Sort.ASCENDING)
                     .findAll();
 
             for (RealmAuxData eventData : realmEvents)
             {
-                String[] results = eventData.getResult().split(",");
-                if (results.length != 2) continue;
-                String result = results[0];
-                BigInteger blockNumber = new BigInteger(results[1], 16);
-                String eventText = "Event: " + eventData.getFunctionId() + " becomes " + result;
-                Event ev = new Event(eventText, eventData.getResultTime(), eventData.getChainId());
-                storedEvents.add(ev);
-
-                //load event with top block value
-                updateEventList(eventData, blockNumber);
+                updateEventList(eventData);
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-
-        if (eventCallback != null) eventCallback.eventsLoaded(storedEvents.toArray(new Event[0]));
     }
 
-    private void updateEventList(RealmAuxData eventData, BigInteger blockNumber)
+    private void checkLegacyEventData()
     {
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        {
+            RealmResults<RealmAuxData> realmEvents = realm.where(RealmAuxData.class)
+                    .endsWith("instanceKey", "-eventName")
+                    .not().beginsWith("tokenAddress", "0x")
+                    .findAll();
+
+            if (realmEvents.size() > 0)
+            {
+                RealmResults<RealmAuxData> realmBlockTimes = realm.where(RealmAuxData.class)
+                        .endsWith("instanceKey", "-eventBlock")
+                        .sort("resultTime", Sort.ASCENDING)
+                        .findAll();
+                //re-do all these events and reset block times
+                realm.beginTransaction();
+                realmEvents.deleteAllFromRealm();
+                realmBlockTimes.deleteAllFromRealm();
+                realm.commitTransaction();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+
+    //TODO: Can this be optimised? Maybe a 2 dimensional map using the namedType name as the first key, then filter as the second key
+    //TODO: This would replace the event list
+    private void updateEventList(RealmAuxData eventData)
+    {
+        String[] contractDetails = eventData.getInstanceKey().split("-");
+        if (contractDetails.length != 5) return;
+        String eventAddress = contractDetails[0];
+        int chainId = Integer.parseInt(contractDetails[1]);
+        String namedType = contractDetails[2];
+        String filter = contractDetails[3];
+
         for (EventDefinition ev : eventList)
         {
-            if (ev.attributeName.equals(eventData.getFunctionId()))
+            String evContract = ev.contract.getFirstAddress();
+            int evChainId =  ev.contract.getfirstChainId();
+
+            if (evChainId == chainId && evContract.equalsIgnoreCase(eventAddress) && ev.type.name.equals(namedType) && ev.filter.equals(filter))
             {
-                //does the event module correspond to this contract?
-                String[] contractDetails = eventData.getInstanceKey().split("-");
-                //return tResult.contractAddress + "-" + tResult.tokenId.toString(Character.MAX_RADIX) + "-" + tResult.contractChainId + "-" + tResult.attrId + tResult.resultTime + "-log";
-                ev.readBlock = blockNumber;
+                ev.readBlock = new BigInteger(eventData.getResult(), 16).add(BigInteger.ONE); // add one so we don't pick up the same event again
             }
         }
     }
@@ -1998,6 +2156,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realmData.setChainId(tResult.contractChainId);
             realmData.setFunctionId(tResult.method);
             realmData.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
+            realmData.setResultReceivedTime(System.currentTimeMillis());
         }
         catch (RealmPrimaryKeyConstraintException e)
         {
@@ -2236,16 +2395,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tokenscriptUtility.convertInputValue(attr, valueFromInput);
     }
 
-    public void setEventCallback(ActionEventCallback callback)
-    {
-        eventCallback = callback;
-        if (requireEventSend)
-        {
-            requireEventSend = false;
-            generateAndSendEvents();
-        }
-    }
-
     public String resolveReference(@NotNull Token token, TSAction action, TokenscriptElement arg, BigInteger tokenId)
     {
         TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
@@ -2349,7 +2498,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     public void onStart()
                     {
                         TransactionsRealmCache.addRealm();
-                        realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
+                        realm = realmManager.getRealmInstance(tokensService.getCurrentAddress());
                         //determine hash
                         TokenScriptFile tsf = getTokenScriptFile(chainId, address);
                         if (tsf == null || !tsf.exists()) return;
@@ -2396,7 +2545,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         String url = "";
         String instanceKey = address.toLowerCase() + "-" + networkId;
-        try (Realm realm = realmManager.getAuxRealmInstance(IMAGES_DB))
+        try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
         {
             RealmAuxData instance = realm.where(RealmAuxData.class)
                     .equalTo("instanceKey", instanceKey)
@@ -2422,7 +2571,31 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
+            tURL = TRUST_ICON_REPO;
+            String repoChain;
+            switch (token.tokenInfo.chainId)
+            {
+                case EthereumNetworkRepository.CLASSIC_ID:
+                    repoChain = "classic";
+                    break;
+                case EthereumNetworkRepository.XDAI_ID:
+                    repoChain = "xdai";
+                    break;
+                case EthereumNetworkRepository.POA_ID:
+                    repoChain = "poa";
+                    break;
+                case EthereumNetworkBase.KOVAN_ID:
+                case EthereumNetworkBase.RINKEBY_ID:
+                case EthereumNetworkBase.SOKOL_ID:
+                case EthereumNetworkBase.ROPSTEN_ID:
+                    tURL = ALPHAWALLET_ICON_REPO;
+                    repoChain = "";
+                    break;
+                default:
+                    repoChain = "ethereum";
+                    break;
+            }
+            tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
         }
 
         boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
@@ -2434,7 +2607,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public Single<Integer> fetchViewHeight(int chainId, String address)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress()))
+            try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
             {
                 //determine hash
                 TokenScriptFile tsf = getTokenScriptFile(chainId, address);

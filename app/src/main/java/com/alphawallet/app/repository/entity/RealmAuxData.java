@@ -14,24 +14,35 @@ public class RealmAuxData extends RealmObject
     @PrimaryKey
     private String instanceKey; //should be token address, token Id, chainId
     private int chainId;
+    private String tokenAddress;
     private String tokenId;
     private String functionId;
     private String result;
     private long resultTime;
+    private long resultReceivedTime; //allows us to filter new events
 
     public String getInstanceKey()
     {
         return instanceKey;
     }
 
-    public void setInstanceKey(String instanceKey)
-    {
-        this.instanceKey = instanceKey;
-    }
-
     public int getChainId()
     {
         return chainId;
+    }
+
+    public String getTransactionHash()
+    {
+        String[] split = instanceKey.split("-");
+        if (split.length > 0) return split[0];
+        else return "";
+    }
+
+    public String getEventName()
+    {
+        String[] split = instanceKey.split("-");
+        if (split.length > 1) return split[1];
+        else return "";
     }
 
     public void setChainId(int chainId)
@@ -41,8 +52,14 @@ public class RealmAuxData extends RealmObject
 
     public BigInteger getTokenId()
     {
-        BigInteger tokenIdInstance = new BigInteger(tokenId, Character.MAX_RADIX);
-        return tokenIdInstance;
+        try
+        {
+            return new BigInteger(tokenId, Character.MAX_RADIX);
+        }
+        catch (Exception e)
+        {
+            return BigInteger.ZERO;
+        }
     }
 
     public void setTokenId(String tokenId)
@@ -83,5 +100,25 @@ public class RealmAuxData extends RealmObject
     public String getAddress()
     {
         return instanceKey.split("-")[0];
+    }
+
+    public String getTokenAddress()
+    {
+        return tokenAddress;
+    }
+
+    public void setTokenAddress(String address)
+    {
+        tokenAddress = address;
+    }
+
+    public void setResultReceivedTime(long resultReceivedTime)
+    {
+        this.resultReceivedTime = resultReceivedTime;
+    }
+
+    public long getResultReceivedTime()
+    {
+        return resultReceivedTime;
     }
 }

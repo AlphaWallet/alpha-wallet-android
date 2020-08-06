@@ -359,7 +359,7 @@ public class WalletDataRealmSource {
                 transactionOps.deleteAllFromRealm();
                 realm.commitTransaction();
             }
-            try (Realm realm = realmManager.getAuxRealmInstance(wallet.address))
+            try (Realm realm = realmManager.getRealmInstance(wallet.address))
             {
                 RealmResults<RealmAuxData> allResults = realm.where(RealmAuxData.class).findAll();
                 realm.beginTransaction();

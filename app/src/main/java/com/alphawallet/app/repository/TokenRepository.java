@@ -186,6 +186,13 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, String searchTerm) {
+        if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
+        return localSource
+                .fetchAllTokenMetas(wallet, networkFilters, searchTerm);
+    }
+
+    @Override
     public Realm getRealmInstance(Wallet wallet)
     {
         return localSource.getRealmInstance(wallet);
@@ -248,6 +255,12 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<BigDecimal> fetchChainBalance(String walletAddress, int chainId)
     {
         return Single.fromCallable(() -> updateNativeToken(new Wallet(walletAddress), chainId));
+    }
+
+    @Override
+    public Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs)
+    {
+        return localSource.fixFullNames(wallet, svs);
     }
 
     @Override
@@ -1275,7 +1288,7 @@ public class TokenRepository implements TokenRepositoryType {
         {
             return Single.fromCallable(() -> checked);
         }
-        else return transactionClient.checkConstructorArgs(networkInfo, address);
+        else return Single.fromCallable(() -> ContractType.OTHER);
     }
 
     public Single<ContractType> additionalHandling(ContractType type, TokenInfo tokenInfo)

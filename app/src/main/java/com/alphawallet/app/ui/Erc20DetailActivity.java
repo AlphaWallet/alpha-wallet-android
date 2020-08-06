@@ -9,35 +9,32 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
+import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -49,7 +46,6 @@ import io.realm.RealmResults;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.app.repository.TransactionsRealmCache.convert;
 
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface
 {
@@ -65,19 +61,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private TokenCardMeta tokenMeta;
 
     private FunctionButtonBar functionBar;
-    private ProgressBar progressBar;
     private LinearLayout noTransactionsLayout;
     private TextView noTransactionsSubText;
     private RecyclerView tokenView;
-    private RecyclerView recentTransactionsView;
     private CertifiedToolbarView toolbarView;
 
-    private ActivityAdapter recentTransactionsAdapter;
     private TokensAdapter tokenViewAdapter;
-    private Realm realm;
+    private ActivityHistoryList activityHistoryList = null;
+    private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
-    private RealmResults<RealmTransaction> realmTransactionUpdates;
-    private long lastTxTimeStamp = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,17 +88,10 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                     .get(Erc20DetailViewModel.class);
-            viewModel.transactions().observe(this, this::onTransactions);
             viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
-            viewModel.prepare(token, wallet);
             viewModel.newScriptFound().observe(this, this::onNewScript);
             findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
             viewModel.checkForNewScript(token);
-        }
-
-        if (realm == null)
-        {
-            realm = viewModel.getRealmInstance(wallet);
         }
     }
 
@@ -120,12 +105,16 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void setUpRecentTransactionsView()
     {
-        if (recentTransactionsAdapter != null) return;
-        recentTransactionsView = findViewById(R.id.list);
-        recentTransactionsView.setLayoutManager(new LinearLayoutManager(this));
-        recentTransactionsAdapter = new ActivityAdapter(this::onTransactionClick, viewModel.getTokensService(),
-                viewModel.getTransactionsInteract(), R.layout.item_recent_transaction);
-        recentTransactionsView.setAdapter(recentTransactionsAdapter);
+        if (activityHistoryList != null) return;
+        activityHistoryList = findViewById(R.id.history_list);
+        ActivityAdapter adapter = new ActivityAdapter(this::onTransactionClick, this::onEventClick, viewModel.getTokensService(),
+                viewModel.getTransactionsInteract(), viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
+
+        adapter.setDefaultWallet(wallet);
+
+        activityHistoryList.setupAdapter(adapter);
+        activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
+                token.tokenInfo.chainId, token.getAddress(), HISTORY_LENGTH);
     }
 
     private void setUpTokenView()
@@ -168,9 +157,10 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void setTokenListener()
     {
+        if (realm == null) realm = viewModel.getRealmInstance(wallet);
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
-                .greaterThan("addedTime", System.currentTimeMillis()).findAllAsync();
+                .greaterThan("addedTime", System.currentTimeMillis()-5*DateUtils.MINUTE_IN_MILLIS).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.size() == 0) return;
             for (RealmToken t : realmTokens)
@@ -185,29 +175,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 }
 
                 tokenViewAdapter.updateToken(meta, true);
-            }
-        });
-    }
-
-    private void setTransactionListener()
-    {
-        realmTransactionUpdates = realm.where(RealmTransaction.class).equalTo("chainId", token.tokenInfo.chainId)
-                .greaterThan("timeStamp", lastTxTimeStamp-60*10).findAllAsync();
-        realmTransactionUpdates.addChangeListener(realmTransactions -> {
-            List<TransactionMeta> metas = new ArrayList<>();
-            if (realmTransactions.size() == 0) return;
-            for (RealmTransaction item : realmTransactions)
-            {
-                if (convert(item).isRelated(token.getAddress(), wallet.address))
-                {
-                    boolean pendingTx = item.getBlockNumber().equals("0");
-                    metas.add(new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), pendingTx));
-                }
-            }
-
-            if (metas.size() > 0)
-            {
-                recentTransactionsAdapter.addNewTransactions(metas.toArray(new TransactionMeta[0]));
             }
         });
     }
@@ -230,26 +197,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewModel.showDetails(this, wallet, transaction);
     }
 
-    private void onTransactions(ActivityMeta[] transactions) {
-        progressBar.setVisibility(View.GONE);
-        recentTransactionsView.setVisibility(View.VISIBLE);
-
-        if (transactions.length > 0)
-        {
-            recentTransactionsAdapter.addNewTransactions(transactions);
-            noTransactionsLayout.setVisibility(View.GONE);
-            recentTransactionsAdapter.notifyDataSetChanged();
-            for (ActivityMeta a : transactions)
-            {
-                if (a.timeStamp > lastTxTimeStamp) lastTxTimeStamp = a.timeStamp;
-            }
-        }
-        else if (recentTransactionsAdapter.getItemCount() == 0)
-        {
-            noTransactionsLayout.setVisibility(View.VISIBLE);
-        }
-
-        setTransactionListener();
+    private void onEventClick(View view, String eventKey)
+    {
+        //
     }
 
     private void initViews(Wallet wallet) {
@@ -264,8 +214,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             noTransactionsSubText.setText(getString(R.string.no_recent_transactions_subtext,
                     getString(R.string.no_recent_transactions_subtext_tokens)));
         }
-
-        progressBar = findViewById(R.id.progress_bar);
     }
 
     @Override
@@ -291,7 +239,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
+        if (activityHistoryList != null) activityHistoryList.onDestroy();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
     }
 
@@ -311,7 +259,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             initViews(wallet);
             setUpTokenView();
             setUpRecentTransactionsView();
-            recentTransactionsAdapter.setDefaultWallet(wallet);
         }
         viewModel.getTokensService().setFocusToken(token);
     }

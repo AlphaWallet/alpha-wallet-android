@@ -102,10 +102,10 @@ public class WalletViewModel extends BaseViewModel
                 fetchTokensInteract.fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(metaTokens -> onTokenMetas(metaTokens, wallet), this::onError);
+                        .subscribe(this::onTokenMetas, this::onError);
     }
 
-    private void onTokenMetas(TokenCardMeta[] metaTokens, Wallet wallet)
+    private void onTokenMetas(TokenCardMeta[] metaTokens)
     {
         tokens.postValue(metaTokens);
         tokensService.updateTickers();

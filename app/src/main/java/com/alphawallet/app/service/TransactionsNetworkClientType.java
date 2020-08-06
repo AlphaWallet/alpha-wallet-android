@@ -8,7 +8,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import io.reactivex.Single;
 
 public interface TransactionsNetworkClientType {
-    Single<ContractType> checkConstructorArgs(NetworkInfo networkInfo, String address);
-    Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String tokenAddress, long lastBlock, long lastTxUpdate, boolean isAccount);
+    Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String tokenAddress, long lastBlock, long lastTxUpdate);
     void storeBlockRead(Token token, String walletAddress);
 }

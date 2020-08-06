@@ -64,10 +64,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
         this.tokensService = tokensService;
     }
 
-    public LiveData<ActivityMeta[]> transactions() {
-        return transactions;
-    }
-
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
 
     public LiveData<Boolean> newScriptFound() { return newScriptFound; }
@@ -94,21 +90,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void showDetails(Context context, Wallet wallet, Transaction transaction) {
         transactionDetailRouter.open(context, transaction, wallet);
-    }
-
-    public void prepare(Token token, Wallet wallet)
-    {
-        progress.postValue(true);
-        disposable =
-                fetchTransactionsInteract.fetchTransactionMetas(wallet, token.tokenInfo.chainId, token.getAddress(), HISTORY_LENGTH)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTransactions, this::onError);
-    }
-
-    private void onTransactions(ActivityMeta[] activityMetas)
-    {
-        transactions.postValue(activityMetas);
     }
 
     public void showSendToken(Context ctx, Wallet wallet, Token token)

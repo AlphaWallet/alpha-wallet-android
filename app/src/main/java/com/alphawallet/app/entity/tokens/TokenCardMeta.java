@@ -10,10 +10,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.List;
-
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 /**
@@ -27,6 +23,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final int nameWeight;
     public final ContractType type;
     public final String balance;
+
+    public boolean isEnabled;
 
     public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
     {

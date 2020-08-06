@@ -1,6 +1,7 @@
 package com.alphawallet.app.service;
 
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.entity.NetworkInfo;
@@ -10,7 +11,10 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.TransactionLocalSource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,29 +33,29 @@ import static com.alphawallet.app.service.TokensService.PENDING_TIME_LIMIT;
  */
 public class TransactionsService
 {
+    private static final String NO_TRANSACTION_EXCEPTION = "NoSuchElementException";
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
-    private static final Map<String, Integer> pendingHashMap = new ConcurrentHashMap<>();
+    private final TransactionLocalSource transactionsCache;
     private String currentAddress;
-    private long pendingCheckTimeout = 0;
 
     @Nullable
     private Disposable fetchTransactionDisposable;
     @Nullable
     private Disposable eventTimer;
-    @Nullable
-    private Disposable queryUnknownTokensDisposable;
 
     public TransactionsService(TokensService tokensService,
                                PreferenceRepositoryType preferenceRepositoryType,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                               TransactionsNetworkClientType transactionsClient) {
+                               TransactionsNetworkClientType transactionsClient,
+                               TransactionLocalSource transactionsCache) {
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepositoryType;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
         this.transactionsClient = transactionsClient;
+        this.transactionsCache = transactionsCache;
         this.currentAddress = preferenceRepository.getCurrentWalletAddress();
 
         fetchTransactions();
@@ -73,29 +77,43 @@ public class TransactionsService
     {
         if (fetchTransactionDisposable == null)
         {
-            Token t = tokensService.getRequiresTransactionUpdate(pendingHashMap.values());
+            Token t = tokensService.getRequiresTransactionUpdate(getPendingChains());
 
             if (t != null)
             {
-                String tick = (t.isEthereum() && pendingHashMap.values().contains(t.tokenInfo.chainId)) ? "*" : "";
+                String tick = (t.isEthereum() && getPendingChains().contains(t.tokenInfo.chainId)) ? "*" : "";
                 if (t.isEthereum()) System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
-                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck, t.txSync, t.isEthereum())
+                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck, t.txSync)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
             }
         }
-        checkPendingTransactionTimeout();
     }
 
-    private void checkPendingTransactionTimeout()
+    private List<Integer> getPendingChains()
     {
-        if (pendingCheckTimeout > 0 && System.currentTimeMillis() > (pendingCheckTimeout + PENDING_TIME_LIMIT))
+        List<Integer> pendingChains = new ArrayList<>();
+        Transaction[] pendingTransactions = fetchPendingTransactions();
+        for (Transaction tx : pendingTransactions)
         {
-            pendingCheckTimeout = 0;
-            pendingHashMap.clear(); //transactions taking a long time to clear, resume normal checking
+            if (!pendingChains.contains(tx.chainId)) pendingChains.add(tx.chainId);
+        }
+
+        return pendingChains;
+    }
+
+    private Transaction[] fetchPendingTransactions()
+    {
+        if (!TextUtils.isEmpty(currentAddress))
+        {
+            return transactionsCache.fetchPendingTransactions(currentAddress);
+        }
+        else
+        {
+            return new Transaction[0];
         }
     }
 
@@ -114,21 +132,6 @@ public class TransactionsService
 
         Transaction placeHolder = transactions.length > 0 ? transactions[transactions.length - 1] : null;
 
-        for (Transaction t : transactions)
-        {
-            //find any pending transactions that have been found
-            if (pendingHashMap.containsKey(t.hash))
-            {
-                System.out.println("Removed pending tx: " + t.hash);
-                pendingHashMap.remove(t.hash);
-                if (pendingHashMap.size() == 0)
-                {
-                    System.out.println("All pending tx resolved");
-                    pendingCheckTimeout = 0;
-                }
-            }
-        }
-
         //The final transaction is the last transaction read, and will have the highest block number we read
         if (placeHolder != null)
         {
@@ -138,6 +141,7 @@ public class TransactionsService
 
         //update token details
         transactionsClient.storeBlockRead(token, currentAddress);
+        checkPendingTransactions(token.tokenInfo.chainId);
     }
 
     public void changeWallet(Wallet newWallet)
@@ -147,8 +151,6 @@ public class TransactionsService
             onDestroy();
             currentAddress = newWallet.address;
             fetchTransactions();
-            pendingCheckTimeout = 0;
-            pendingHashMap.clear();
         }
     }
 
@@ -165,30 +167,36 @@ public class TransactionsService
             eventTimer.dispose();
         }
         eventTimer = null;
-
-        if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed())
-        {
-            queryUnknownTokensDisposable.dispose();
-        }
-        queryUnknownTokensDisposable = null;
     }
 
     public void markPending(Transaction tx)
     {
         System.out.println("Marked Pending Tx Chain: " + tx.chainId);
-        pendingHashMap.put(tx.hash, tx.chainId);
-        pendingCheckTimeout = System.currentTimeMillis();
         tokensService.markChainPending(tx.chainId);
     }
 
-    public void removePending(Transaction tx)
+    private void checkPendingTransactions(int chainId)
     {
-        if (pendingHashMap.containsKey(tx.hash))
+        Transaction[] pendingTxs = fetchPendingTransactions();
+        for (Transaction tx : pendingTxs)
         {
-            System.out.println("Removed Pending Hash: " + tx.hash);
-            pendingHashMap.remove(tx.hash);
-
-
+            if (tx.chainId == chainId)
+            {
+                TokenRepository.getWeb3jService(tx.chainId).ethGetTransactionByHash(tx.hash)
+                        .sendAsync().thenAccept(txDetails -> {
+                    org.web3j.protocol.core.methods.response.Transaction fetchedTx = txDetails.getTransaction().orElseThrow(); //try to read the transaction data
+                    //either still pending or written, take no action
+                }).exceptionally(throwable -> {
+                    String c1 = throwable.getMessage(); //java.util.NoSuchElementException: No value present
+                    if (!TextUtils.isEmpty(c1) && c1.contains(NO_TRANSACTION_EXCEPTION))
+                    {
+                        //transaction is no longer in pool or on chain. Cause: dropped from mining pool
+                        //mark transaction as dropped
+                        transactionsCache.markTransactionDropped(currentAddress, tx.hash);
+                    }
+                    return null;
+                });
+            }
         }
     }
 }

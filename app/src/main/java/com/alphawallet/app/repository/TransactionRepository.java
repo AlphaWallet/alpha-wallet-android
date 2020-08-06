@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
@@ -290,8 +291,20 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters)
+	{
+		return inDiskCache.fetchEventMetas(wallet, networkFilters);
+	}
+
+	@Override
 	public Realm getRealmInstance(Wallet wallet)
 	{
 		return inDiskCache.getRealmInstance(wallet);
+	}
+
+	@Override
+	public RealmAuxData fetchCachedEvent(String walletAddress, String eventKey)
+	{
+		return inDiskCache.fetchEvent(walletAddress, eventKey);
 	}
 }

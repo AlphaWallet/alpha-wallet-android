@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +15,13 @@ import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
@@ -34,6 +37,8 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmModel;
 import io.realm.RealmResults;
 
 /**
@@ -50,7 +55,9 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private RecyclerView listView;
     private Realm realm;
     private RealmResults<RealmTransaction> realmUpdates;
+    private RealmResults<RealmAuxData> auxRealmUpdates;
     private String realmId;
+    private long eventTimeFilter;
 
     @Nullable
     @Override
@@ -90,12 +97,13 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private void startTxListener(long lastUpdateTime)
     {
         String walletAddress = viewModel.defaultWallet().getValue() != null ? viewModel.defaultWallet().getValue().address : "";
+        eventTimeFilter = lastUpdateTime;
         if (realmId == null || !realmId.equals(walletAddress))
         {
             if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
 
             realmId = walletAddress;
-            realm = viewModel.getRealmInstance(new Wallet(walletAddress));
+            realm = viewModel.getRealmInstance();
             realmUpdates = realm.where(RealmTransaction.class).greaterThan("timeStamp", lastUpdateTime).findAllAsync();
             realmUpdates.addChangeListener(realmTransactions -> {
                 List<TransactionMeta> metas = new ArrayList<>();
@@ -120,13 +128,38 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                 //Check for new unknown tokens
                 viewModel.checkTokens(realmTransactions);
             });
+
+            auxRealmUpdates = realm.where(RealmAuxData.class)
+                    .endsWith("instanceKey", "-eventName")
+                    .greaterThan("resultReceivedTime", lastUpdateTime)
+                    .findAllAsync();
+            auxRealmUpdates.addChangeListener(realmEvents -> {
+                List<ActivityMeta> metas = new ArrayList<>();
+                if (realmEvents.size() == 0) return;
+                for (RealmAuxData item : realmEvents)
+                {
+                    if (item.getResultReceivedTime() >= eventTimeFilter && viewModel.getTokensService().getNetworkFilters().contains(item.getChainId()))
+                    {
+                        EventMeta newMeta = new EventMeta(item.getTransactionHash(), item.getEventName(), item.getFunctionId(), item.getResultTime(), item.getChainId());
+                        metas.add(newMeta);
+                    }
+                }
+
+                eventTimeFilter = System.currentTimeMillis() - DateUtils.SECOND_IN_MILLIS; // allow for async; may receive many event updates
+
+                if (metas.size() > 0)
+                {
+                    adapter.updateActivityItems(metas.toArray(new ActivityMeta[0]));
+                    systemView.hide();
+                }
+            });
         }
     }
 
     private void initViews(View view)
     {
-        adapter = new ActivityAdapter(this::onActivityClick, viewModel.getTokensService(),
-                viewModel.provideTransactionsInteract(), this);
+        adapter = new ActivityAdapter(this::onActivityClick, this::onEventClick, viewModel.getTokensService(),
+                viewModel.provideTransactionsInteract(), viewModel.getAssetDefinitionService(), this);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         listView = view.findViewById(R.id.list);
@@ -152,6 +185,11 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private void onActivityClick(View view, Transaction transaction)
     {
         viewModel.showDetails(view.getContext(), transaction);
+    }
+
+    private void onEventClick(View view, String eventKey)
+    {
+        //
     }
 
     private void showEmptyTx()
@@ -190,10 +228,12 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     public void resetTokens()
     {
-        //wallet changed, reset
-        adapter.clear();
-        viewModel.prepare();
-
+        if (adapter != null)
+        {
+            //wallet changed, reset
+            adapter.clear();
+            viewModel.prepare();
+        }
     }
 
     public void addedToken(List<ContractLocator> tokenContracts)
@@ -206,6 +246,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         super.onDestroy();
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
+        if (auxRealmUpdates != null) auxRealmUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
         if (viewModel != null) viewModel.onDestroy();
     }

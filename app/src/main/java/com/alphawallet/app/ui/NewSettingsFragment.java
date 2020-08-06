@@ -147,7 +147,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         walletConnectSetting =
                 new SettingsItemView.Builder(getContext())
-                        .withIcon(R.drawable.ic_settings_backup)
+                        .withIcon(R.drawable.ic_wallet_connect)
                         .withTitle(R.string.title_wallet_connect)
                         .withListener(this::onWalletConnectSettingClicked)
                         .build();

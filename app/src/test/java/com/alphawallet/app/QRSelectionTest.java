@@ -34,6 +34,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.realm.Realm;
 
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 
 import static org.junit.Assert.assertEquals;
@@ -151,7 +152,20 @@ public class QRSelectionTest
             }
 
             @Override
+            public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet,
+                                                          List<Integer> networkFilters)
+            {
+                return null;
+            }
+
+            @Override
             public Realm getRealmInstance(Wallet wallet)
+            {
+                return null;
+            }
+
+            @Override
+            public RealmAuxData fetchCachedEvent(String walletAddress, String eventKey)
             {
                 return null;
             }

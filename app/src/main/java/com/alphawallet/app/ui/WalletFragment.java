@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -85,7 +86,6 @@ public class WalletFragment extends BaseFragment implements
     private static final int TAB_CURRENCY = 1;
     private static final int TAB_COLLECTIBLES = 2;
     private static final int TAB_ATTESTATIONS = 3;
-
 
     @Inject
     WalletViewModelFactory walletViewModelFactory;
@@ -197,7 +197,6 @@ public class WalletFragment extends BaseFragment implements
     private void setRealmListener()
     {
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
-                .greaterThan("addedTime", System.currentTimeMillis())
                 .like("address", ADDRESS_FORMAT).findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;
@@ -206,6 +205,7 @@ public class WalletFragment extends BaseFragment implements
             for (RealmToken t : realmTokens)
             {
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
+
                 String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
@@ -214,6 +214,13 @@ public class WalletFragment extends BaseFragment implements
                 metas.add(meta);
             }
 
+            updateMetas(metas);
+        });
+    }
+
+    private void updateMetas(List<TokenCardMeta> metas)
+    {
+        handler.post(() -> {
             if (metas.size() > 0)
             {
                 adapter.setTokens(metas.toArray(new TokenCardMeta[0]));
@@ -458,7 +465,8 @@ public class WalletFragment extends BaseFragment implements
     {
         super.onDestroy();
         //viewModel.clearProcess();
-        realmUpdates.removeAllChangeListeners();
+        if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
+        if (realm != null && !realm.isClosed()) realm.close();
     }
 
     public void resetTokens()

@@ -4,6 +4,9 @@ import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.entity.RealmAuxData;
+
+import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.util.List;
 
@@ -18,4 +21,11 @@ public interface TransactionLocalSource {
 
 	Realm getRealmInstance(Wallet wallet);
 	Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount);
+	Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters);
+	void markTransactionDropped(String walletAddress, String hash);
+	Transaction[] fetchPendingTransactions(String currentAddress);
+
+	RealmAuxData fetchEvent(String walletAddress, String eventKey);
+
+	void storeRawTx(Wallet wallet, EthTransaction object, long timeStamp);
 }

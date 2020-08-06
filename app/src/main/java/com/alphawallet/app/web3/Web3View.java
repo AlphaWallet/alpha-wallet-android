@@ -304,19 +304,11 @@ public class Web3View extends WebView {
                     || internalClient.shouldOverrideUrlLoading(view, url);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             loadingError = true;
             if (externalClient != null)
                 externalClient.onReceivedError(view, request, error);
-        }
-
-        @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
-        {
-            super.onReceivedError(view, errorCode, description, failingUrl);
-            loadingError = true;
         }
 
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -328,7 +320,6 @@ public class Web3View extends WebView {
                     || internalClient.shouldOverrideUrlLoading(view, request);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);

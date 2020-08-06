@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import android.text.TextUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -137,6 +139,7 @@ public class EthereumProtocolParser
 
         for (String item : tokens)
         {
+            if (TextUtils.isEmpty(item)) continue;
             switch (item.charAt(0))
             {
                 case '@':

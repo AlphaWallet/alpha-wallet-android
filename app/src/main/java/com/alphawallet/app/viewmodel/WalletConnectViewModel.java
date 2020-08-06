@@ -13,6 +13,7 @@ import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -58,15 +59,11 @@ public class WalletConnectViewModel extends BaseViewModel {
         return defaultWallet;
     }
 
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
-    }
-
     public void getAuthenticationForSignature(Wallet wallet, Activity activity, SignAuthenticationCallback callback) {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
+    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message) {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, 1)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())

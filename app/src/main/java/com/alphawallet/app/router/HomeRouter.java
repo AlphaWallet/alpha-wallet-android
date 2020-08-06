@@ -13,4 +13,11 @@ public class HomeRouter {
         }
         context.startActivity(intent);
     }
+
+    public void openWithIntent(Context context, String importData) {
+        Intent intent = new Intent(context, HomeActivity.class);
+        if (importData != null) intent.putExtra("startIntent", importData);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
+    }
 }

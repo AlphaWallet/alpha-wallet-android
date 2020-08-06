@@ -31,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -162,16 +163,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
+        Bundle bundle = null;
         Intent intent = getIntent();
-        Uri data = intent.getData();
-        if (data != null)
+        if (intent != null)
         {
-            String flags = data.toString();
-            if (flags.startsWith(NotificationService.AWSTARTUP))
+            bundle = intent.getExtras();
+            Uri data = intent.getData();
+            if (data != null)
             {
-                flags = flags.substring(NotificationService.AWSTARTUP.length());
-                //move window to token if found
-                ((WalletFragment)walletFragment).setImportFilename(flags);
+                String flags = data.toString();
+                if (flags.startsWith(NotificationService.AWSTARTUP))
+                {
+                    flags = flags.substring(NotificationService.AWSTARTUP.length());
+                    //move window to token if found
+                    ((WalletFragment) walletFragment).setImportFilename(flags);
+                }
             }
         }
 
@@ -227,15 +233,27 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             removeDappBrowser();
         }
-        else if (getIntent() != null && getIntent().getStringExtra("url") != null) {
+        else if (intent != null && intent.getStringExtra("url") != null) {
             String url = getIntent().getStringExtra("url");
 
-            Bundle bundle = new Bundle();
+            bundle = new Bundle();
             bundle.putString("url", url);
             dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
             //remove navbar if running as pure browser. clicking back will send you back to the Action/click that took you there
             hideNavBar();
+        }
+
+        if (bundle != null)
+        {
+            getIntent().getExtras();
+            String startIntent = bundle.getString("startIntent");
+            if (!TextUtils.isEmpty(startIntent) && startIntent.startsWith("wcintent:"))
+            {
+                intent = new Intent(this, WalletConnectActivity.class);
+                intent.putExtra("qrCode", startIntent);
+                startActivity(intent);
+            }
         }
 
         //Ensure when keyboard appears the webview gets squashed into remaining view. Also remove navigation bar to increase screen size
@@ -975,7 +993,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 updateLocale(data);
                 break;
             case C.REQUEST_UNIVERSAL_SCAN:
-                if(resultCode == Activity.RESULT_OK)
+                if(data != null && resultCode == Activity.RESULT_OK)
                 {
                     if (data.hasExtra(C.EXTRA_QR_CODE))
                     {

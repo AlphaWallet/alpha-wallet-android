@@ -332,6 +332,7 @@
     <string name="signer_address">签署人地址</string>
     <string name="requester_url">请求链接</string>
     <string name="dialog_title_sign_message">签署消息</string>
+    <string name="dialog_title_sign_typed_message">签署消息\'Typed\'</string>
     <string name="dialog_reject">拒绝</string>
     <string name="dialog_approve">同意</string>
     <string name="transaction_value">交易价格</string>

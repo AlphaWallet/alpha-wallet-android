@@ -34,9 +34,9 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
-import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -220,7 +220,7 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
     }
 
-    public void onSignPersonalMessageSuccessful(@NotNull Message message, String signHex) {
+    public void onSignPersonalMessageSuccessful(@NotNull EthereumMessage message, String signHex) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
@@ -269,14 +269,14 @@ public class Web3TokenView extends WebView
 
     private final OnSignMessageListener innerOnSignMessageListener = new OnSignMessageListener() {
         @Override
-        public void onSignMessage(Message message) {
+        public void onSignMessage(EthereumMessage message) {
 
         }
     };
 
     private final OnSignPersonalMessageListener innerOnSignPersonalMessageListener = new OnSignPersonalMessageListener() {
         @Override
-        public void onSignPersonalMessage(Message message) {
+        public void onSignPersonalMessage(EthereumMessage message) {
             onSignPersonalMessageListener.onSignPersonalMessage(message);
         }
     };
@@ -289,7 +289,7 @@ public class Web3TokenView extends WebView
         }
     };
 
-    public void onSignCancel(@NotNull Message message) {
+    public void onSignCancel(@NotNull EthereumMessage message) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }

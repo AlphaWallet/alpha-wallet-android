@@ -1,6 +1,5 @@
 package com.alphawallet.token.entity;
 
-<<<<<<< HEAD
 import com.alphawallet.token.tools.Numeric;
 
 import java.nio.ByteBuffer;
@@ -110,24 +109,4 @@ public class EthereumMessage implements Signable {
         CharBuffer cb = StandardCharsets.UTF_8.decode(buff);
         return cb.toString();
     }
-=======
-/**
- * Class for EthereumMessages to be sigden.
- * Weiwu, Aug 2020
-*/
-public class EthereumMessage implements Signable {
-
-    public final String value;
-    public final String message;
-    public final String displayOrigin;
-    public final long leafPosition;
-
-    public EthereumMessage(String message, String displayOrigin, long leafPosition) {
-        this.value = message;
-        this.message = message;
-        this.displayOrigin = displayOrigin;
-        this.leafPosition = leafPosition;
-    }
-
->>>>>>> 380d8f64f... Addding EthereumMessage and replace all Message<String> with it
 }

@@ -21,11 +21,7 @@ public class EventDefinition
     public NamedType type;
     public String filter;
     public String select;
-<<<<<<< HEAD
     public BigInteger readBlock = BigInteger.ZERO;
-=======
-    public BigInteger readBlock;
->>>>>>> 5b797a144... parse activity code and populate layouts
     public Attribute parentAttribute;
     public String activityName = null;
 
@@ -108,11 +104,7 @@ public class EventDefinition
         if (contract.getfirstChainId() == ev.contract.getfirstChainId() && contract.getFirstAddress().equalsIgnoreCase(ev.contract.getFirstAddress()) &&
                 filter.equals(ev.filter) && type.name.equals(ev.type.name) && (
                 (activityName != null && ev.activityName != null && activityName.equals(ev.activityName)) ||
-<<<<<<< HEAD
                         (attributeName != null && ev.attributeName != null && attributeName.equals(ev.attributeName))))
-=======
-                (attributeName != null && ev.attributeName != null && attributeName.equals(ev.attributeName))) )
->>>>>>> 5b797a144... parse activity code and populate layouts
         {
             return true;
         }
@@ -121,7 +113,6 @@ public class EventDefinition
             return false;
         }
     }
-<<<<<<< HEAD
 
     public String getEventKey()
     {
@@ -163,6 +154,3 @@ public class EventDefinition
         return ret;
     }
 }
-=======
-}
->>>>>>> 5b797a144... parse activity code and populate layouts

@@ -115,7 +115,7 @@ public class EthereumMessage implements Signable {
  * Class for EthereumMessages to be sigden.
  * Weiwu, Aug 2020
 */
-public class EthereumMessage {
+public class EthereumMessage implements Signable {
 
     public final String value;
     public final String message;

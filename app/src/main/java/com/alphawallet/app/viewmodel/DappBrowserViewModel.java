@@ -35,7 +35,7 @@ import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -178,12 +178,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
                             .find()).toObservable();
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
+    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message) {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                           error -> dAppFunction.DAppError(error, message));
+                        error -> dAppFunction.DAppError(error, message));
     }
 
     public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException

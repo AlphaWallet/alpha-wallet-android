@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -138,7 +138,7 @@ public class Hex {
         return byteArrayToHexString(input, 0, input.length, true);
     }
 
-    public static String decodeMessageData(Message<String> message) {
+    public static String decodeMessageData(EthereumMessage message) {
         if (cleanHexPrefix(message.value).length() == 64) {
             return message.value;
         } else {

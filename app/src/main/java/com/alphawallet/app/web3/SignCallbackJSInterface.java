@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.alphawallet.token.entity.EthereumMessage;
 import com.google.gson.Gson;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Message;
@@ -66,12 +67,12 @@ public class SignCallbackJSInterface {
 
     @JavascriptInterface
     public void signMessage(int callbackId, String data) {
-        webView.post(() -> onSignMessageListener.onSignMessage(new Message<>(data, getUrl(), callbackId)));
+        webView.post(() -> onSignMessageListener.onSignMessage(new EthereumMessage(data, getUrl(), callbackId)));
     }
 
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
-        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new Message<>(data, getUrl(), callbackId)));
+        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId)));
     }
 
     @JavascriptInterface

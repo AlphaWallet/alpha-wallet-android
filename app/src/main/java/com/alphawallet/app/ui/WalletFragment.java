@@ -87,7 +87,6 @@ public class WalletFragment extends BaseFragment implements
     private static final int TAB_COLLECTIBLES = 2;
     private static final int TAB_ATTESTATIONS = 3;
 
-
     @Inject
     WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
@@ -206,6 +205,7 @@ public class WalletFragment extends BaseFragment implements
             for (RealmToken t : realmTokens)
             {
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
+
                 String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,

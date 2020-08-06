@@ -3,11 +3,17 @@ package com.alphawallet.app.service;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 
 import io.realm.DynamicRealm;
+import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
 
+
+/**
+ * Important! If you make a change to any of the realm objects (eg RealmToken) you need to perform a DataBase migration
+ * NB: Ensure the primitive types match up. EG if you used long timeObject; in the DataBase class then use long.class here, don't use Long.class!
+ */
 public class AWRealmMigration implements RealmMigration
 {
     @Override
@@ -47,6 +53,15 @@ public class AWRealmMigration implements RealmMigration
         {
             RealmObjectSchema realmData = schema.get("RealmAuxData");
             if (!realmData.hasField("tokenAddress")) realmData.addField("tokenAddress", String.class);
+            if (!realmData.hasField("resultReceivedTime")) realmData.addField("resultReceivedTime", long.class);
+            oldVersion += 2;
+        }
+        else if (oldVersion == 8)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAuxData");
+            if (!realmData.hasField("resultReceivedTime")) realmData.addField("resultReceivedTime", long.class)
+                                    .transform(obj -> obj.set("resultReceivedTime", 0L));
+            oldVersion++;
         }
     }
 

@@ -186,7 +186,10 @@ public abstract class EventUtils
         {
             if (i == topicIndex)
             {
-                addTopicFilter(ev, filter, filterTopicValue, originToken, eventContractAddr, attrIf); //add the required log filter - allowing for multiple tokenIds
+                if (!addTopicFilter(ev, filter, filterTopicValue, originToken, eventContractAddr, attrIf)) //add the required log filter - allowing for multiple tokenIds
+                {
+                    return null;
+                }
                 break;
             }
             else
@@ -641,8 +644,9 @@ public abstract class EventUtils
         return new Event(ev.type.name, eventArgSpec);
     }
 
-    private void addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, Token originToken, String contractAddr, AttributeInterface attrIf) throws Exception
+    private boolean addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, Token originToken, String contractAddr, AttributeInterface attrIf) throws Exception
     {
+        boolean filterSuccess = true;
         //find the topic value
         switch (filterTopicValue)
         {
@@ -655,7 +659,11 @@ public abstract class EventUtils
                 {
                     //get unique tokenId balance
                     List<BigInteger> uniqueTokenIds = originToken.getUniqueTokenIds();
-                    if (uniqueTokenIds.size() == 1)
+                    if (uniqueTokenIds.size() == 0)
+                    {
+                        filterSuccess = false;
+                    }
+                    else if (uniqueTokenIds.size() == 1)
                     {
                         filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(uniqueTokenIds.get(0))));
                     }
@@ -675,6 +683,7 @@ public abstract class EventUtils
                 {
                     //TODO: report error in tokenscript management page
                     System.out.println("ERROR: using 'tokenId' with Fungible token");
+                    filterSuccess = false;
                 }
                 break;
             case "ownerAddress":
@@ -686,7 +695,11 @@ public abstract class EventUtils
                 {
                     ContractAddress tokenAddr = new ContractAddress(originToken.tokenInfo.chainId, originToken.getAddress());
                     List<BigInteger> uniqueTokenIds = originToken.getUniqueTokenIds();
-                    if (uniqueTokenIds.size() == 1)
+                    if (uniqueTokenIds.size() == 0)
+                    {
+                        filterSuccess = false;
+                    }
+                    else if (uniqueTokenIds.size() == 1)
                     {
                         TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, uniqueTokenIds.get(0));
                         filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(attrResult.value)));
@@ -706,10 +719,13 @@ public abstract class EventUtils
                 }
                 else
                 {
+                    filterSuccess = false;
                     throw new Exception("Unresolved event filter name: " + filterTopicValue);
                 }
                 break;
         }
+
+        return filterSuccess;
     }
 
     public String getAllTopics(EventDefinition ev, EthLog.LogResult log)

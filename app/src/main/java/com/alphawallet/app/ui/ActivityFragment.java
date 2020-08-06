@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,8 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmModel;
 import io.realm.RealmResults;
 
 /**
@@ -54,6 +57,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private RealmResults<RealmTransaction> realmUpdates;
     private RealmResults<RealmAuxData> auxRealmUpdates;
     private String realmId;
+    private long eventTimeFilter;
 
     @Nullable
     @Override
@@ -93,6 +97,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private void startTxListener(long lastUpdateTime)
     {
         String walletAddress = viewModel.defaultWallet().getValue() != null ? viewModel.defaultWallet().getValue().address : "";
+        eventTimeFilter = lastUpdateTime;
         if (realmId == null || !realmId.equals(walletAddress))
         {
             if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
@@ -125,20 +130,22 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
             });
 
             auxRealmUpdates = realm.where(RealmAuxData.class)
-                    .greaterThan("resultTime", lastUpdateTime)
                     .endsWith("instanceKey", "-eventName")
+                    .greaterThan("resultReceivedTime", lastUpdateTime)
                     .findAllAsync();
             auxRealmUpdates.addChangeListener(realmEvents -> {
                 List<ActivityMeta> metas = new ArrayList<>();
                 if (realmEvents.size() == 0) return;
                 for (RealmAuxData item : realmEvents)
                 {
-                    if (viewModel.getTokensService().getNetworkFilters().contains(item.getChainId()))
+                    if (item.getResultReceivedTime() >= eventTimeFilter && viewModel.getTokensService().getNetworkFilters().contains(item.getChainId()))
                     {
                         EventMeta newMeta = new EventMeta(item.getTransactionHash(), item.getEventName(), item.getFunctionId(), item.getResultTime(), item.getChainId());
                         metas.add(newMeta);
                     }
                 }
+
+                eventTimeFilter = System.currentTimeMillis() - DateUtils.SECOND_IN_MILLIS; // allow for async; may receive many event updates
 
                 if (metas.size() > 0)
                 {
@@ -221,10 +228,12 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     public void resetTokens()
     {
-        //wallet changed, reset
-        adapter.clear();
-        viewModel.prepare();
-
+        if (adapter != null)
+        {
+            //wallet changed, reset
+            adapter.clear();
+            viewModel.prepare();
+        }
     }
 
     public void addedToken(List<ContractLocator> tokenContracts)

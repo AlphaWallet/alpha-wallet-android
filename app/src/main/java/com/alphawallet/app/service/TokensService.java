@@ -596,10 +596,10 @@ public class TokensService
 
         for (TokenUpdateEntry check : tokenUpdateList)
         {
-            if (!check.needsTransactionCheck() || !walletInFocus) continue;
+            if (!check.isEthereum() || !check.needsTransactionCheck() || !walletInFocus) continue;
             long timeIntervalCheck = getTokenTimeInterval(check, pendingTxChains);
 
-            if (focusToken != null && check.chainId == focusToken.chainId && check.isEthereum())
+            if (focusToken != null && check.chainId == focusToken.chainId)
             {
                 timeIntervalCheck = 10*DateUtils.SECOND_IN_MILLIS;
             }
@@ -634,25 +634,13 @@ public class TokensService
     {
         long nextTimeCheck;
 
-        if (t.isEthereum() && pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
+        if (pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
         {
             nextTimeCheck = 10*DateUtils.SECOND_IN_MILLIS;
         }
-        else if (t.isEthereum())
-        {
-            nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds when not pending
-        }
-        else if (EthereumNetworkRepository.hasRealValue(t.chainId))
-        {
-            nextTimeCheck = 4*DateUtils.MINUTE_IN_MILLIS; //has balance and real value, check every 360 seconds (non chain token, no need to check often)
-        }
-        else if (t.balanceUpdateWeight >= 0.3f)
-        {
-            nextTimeCheck = 10*DateUtils.MINUTE_IN_MILLIS; //has balance but is testnet, check every 500 seconds (ie at startup)
-        }
         else
         {
-            nextTimeCheck = DateUtils.HOUR_IN_MILLIS; //no balance, only one check or hourly
+            nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds when not pending
         }
 
         return nextTimeCheck;

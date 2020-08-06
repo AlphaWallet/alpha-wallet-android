@@ -45,8 +45,6 @@ public class TransactionsService
     private Disposable fetchTransactionDisposable;
     @Nullable
     private Disposable eventTimer;
-    @Nullable
-    private Disposable queryUnknownTokensDisposable;
 
     public TransactionsService(TokensService tokensService,
                                PreferenceRepositoryType preferenceRepositoryType,
@@ -87,7 +85,7 @@ public class TransactionsService
                 if (t.isEthereum()) System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
-                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck, t.txSync, t.isEthereum())
+                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck, t.txSync)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
@@ -169,12 +167,6 @@ public class TransactionsService
             eventTimer.dispose();
         }
         eventTimer = null;
-
-        if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed())
-        {
-            queryUnknownTokensDisposable.dispose();
-        }
-        queryUnknownTokensDisposable = null;
     }
 
     public void markPending(Transaction tx)

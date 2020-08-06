@@ -92,6 +92,7 @@ public class TokenIcon extends ConstraintLayout {
      */
     public void bindData(Token token, AssetDefinitionService assetDefinition)
     {
+        if (token == null) return;
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
         this.assetDefinition = assetDefinition;

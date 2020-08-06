@@ -131,7 +131,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             try (Realm instance = realmManager.getRealmInstance(wallet.address))
             {
                 RealmResults<RealmAuxData> evs = instance.where(RealmAuxData.class)
-                        .like("instanceKey", "*-*-eventName")
+                        .endsWith("instanceKey", "-eventName")
                         .findAll();
                 Log.d(TAG, "Found " + evs.size() + " TX Results");
                 for (RealmAuxData item : evs)

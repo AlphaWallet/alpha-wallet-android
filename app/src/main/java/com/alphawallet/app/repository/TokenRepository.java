@@ -1288,7 +1288,7 @@ public class TokenRepository implements TokenRepositoryType {
         {
             return Single.fromCallable(() -> checked);
         }
-        else return transactionClient.checkConstructorArgs(networkInfo, address);
+        else return Single.fromCallable(() -> ContractType.OTHER);
     }
 
     public Single<ContractType> additionalHandling(ContractType type, TokenInfo tokenInfo)

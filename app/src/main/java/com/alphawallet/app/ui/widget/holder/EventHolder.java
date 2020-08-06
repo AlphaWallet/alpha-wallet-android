@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
@@ -123,18 +124,19 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 
     private String getEventAmount(RealmAuxData eventData, Map<String, EventResult> resultMap, Transaction tx)
     {
+        int decimals = token != null ? token.tokenInfo.decimals : C.ETHER_DECIMALS;
         String value = "";
         switch (eventData.getFunctionId())
         {
             case "received":
             case "sent":
                 value = BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("amount").value),
-                        token.tokenInfo.decimals, 4);
+                        decimals, 4);
                 break;
             case "approvalObtained":
             case "ownerApproved":
                 value = BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("value").value),
-                        token.tokenInfo.decimals, 4);
+                        decimals, 4);
                 break;
             default:
                 if (token != null && tx != null)

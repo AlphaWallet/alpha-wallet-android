@@ -19,6 +19,7 @@ public class RealmAuxData extends RealmObject
     private String functionId;
     private String result;
     private long resultTime;
+    private long resultReceivedTime; //allows us to filter new events
 
     public String getInstanceKey()
     {
@@ -109,5 +110,15 @@ public class RealmAuxData extends RealmObject
     public void setTokenAddress(String address)
     {
         tokenAddress = address;
+    }
+
+    public void setResultReceivedTime(long resultReceivedTime)
+    {
+        this.resultReceivedTime = resultReceivedTime;
+    }
+
+    public long getResultReceivedTime()
+    {
+        return resultReceivedTime;
     }
 }

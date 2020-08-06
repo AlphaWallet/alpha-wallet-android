@@ -188,6 +188,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         transactionsCache = tls;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
+        //quick check for old style event data
+        checkLegacyEventData();
         loadAssetScripts();
     }
 
@@ -1132,15 +1134,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Token originToken = tokensService.getToken(chainId, address);
 
         //Some events don't require a token to be present
-        if (originToken == null) return; // early return if NFT and wallet has zero balance for this token
-                                         // Note: Fungible with zero balance is safe to query events as filter is always ownerAddress
-        Web3j web3j = getWeb3jService(chainId);
+        if (originToken == null) return;
 
         final EthFilter filter = eventUtils.generateLogFilter(ev, originToken, this);
+
+        //don't process an invalid filter - eg if filter requires a tokenId (NFT) and balance is zero
+        if (filter == null) return;
 
         try
         {
             eventConnection.acquire(); //prevent overlapping event calls
+            Web3j web3j = getWeb3jService(chainId);
             EthLog ethLogs = web3j.ethGetLogs(filter).send();
             processLogs(ev, ethLogs.getLogs());
         }
@@ -1260,6 +1264,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 realmToken.setChainId(cAddr.chainId);
                 realmToken.setTokenId(tokenId.toString(16));
                 realmToken.setTokenAddress(cAddr.address);
+                realmToken.setResultReceivedTime(System.currentTimeMillis());
             });
         }
         catch (Exception e)
@@ -1284,6 +1289,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 realmToken.setChainId(tResult.contractChainId);
                 realmToken.setFunctionId(tResult.method);
                 realmToken.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
+                realmToken.setResultReceivedTime(System.currentTimeMillis());
             });
         }
         catch (Exception e)
@@ -2036,6 +2042,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             realm.beginTransaction();
                             realmToken.setResult(tResult.result);
                             realmToken.setResultTime(tResult.resultTime);
+                            realmToken.setResultReceivedTime(System.currentTimeMillis());
                         }
                     }
 
@@ -2087,6 +2094,34 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    private void checkLegacyEventData()
+    {
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        {
+            RealmResults<RealmAuxData> realmEvents = realm.where(RealmAuxData.class)
+                    .endsWith("instanceKey", "-eventName")
+                    .not().beginsWith("tokenAddress", "0x")
+                    .findAll();
+
+            if (realmEvents.size() > 0)
+            {
+                RealmResults<RealmAuxData> realmBlockTimes = realm.where(RealmAuxData.class)
+                        .endsWith("instanceKey", "-eventBlock")
+                        .sort("resultTime", Sort.ASCENDING)
+                        .findAll();
+                //re-do all these events and reset block times
+                realm.beginTransaction();
+                realmEvents.deleteAllFromRealm();
+                realmBlockTimes.deleteAllFromRealm();
+                realm.commitTransaction();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+
     //TODO: Can this be optimised? Maybe a 2 dimensional map using the namedType name as the first key, then filter as the second key
     //TODO: This would replace the event list
     private void updateEventList(RealmAuxData eventData)
@@ -2094,7 +2129,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String[] contractDetails = eventData.getInstanceKey().split("-");
         if (contractDetails.length != 5) return;
         String eventAddress = contractDetails[0];
-        int chainId = Integer.valueOf(contractDetails[1]);
+        int chainId = Integer.parseInt(contractDetails[1]);
         String namedType = contractDetails[2];
         String filter = contractDetails[3];
 
@@ -2121,6 +2156,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realmData.setChainId(tResult.contractChainId);
             realmData.setFunctionId(tResult.method);
             realmData.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
+            realmData.setResultReceivedTime(System.currentTimeMillis());
         }
         catch (RealmPrimaryKeyConstraintException e)
         {

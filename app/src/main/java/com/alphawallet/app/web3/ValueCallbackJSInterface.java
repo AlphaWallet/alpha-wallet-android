@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
-import com.alphawallet.app.web3.entity.Message;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

@@ -85,13 +85,12 @@ import com.alphawallet.app.web3.OnSignTransactionListener;
 import com.alphawallet.app.web3.OnSignTypedMessageListener;
 import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
-import com.alphawallet.app.web3.entity.Message;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
@@ -934,7 +933,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     //TODO: add TypedMessageSupport
 
     @Override
-    public void onSignTypedMessage(Message<TypedData[]> message) {
+    public void onSignTypedMessage(EthereumTypedMessage message) {
         //TODO
         Toast.makeText(getActivity(), new Gson().toJson(message), Toast.LENGTH_LONG).show();
         web3.onSignCancel(message);

@@ -28,6 +28,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigDecimal;
@@ -56,6 +57,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
+    private final TextView testnet;
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private String tokenName;
     private boolean primaryElement;
@@ -82,6 +84,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
+        testnet = findViewById(R.id.text_chain_name);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -130,6 +133,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             setContractType();
 
             setPendingAmount();
+
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -157,15 +161,41 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
             setIssuerDetails();
+
+            if (!EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
+            {
+                showTestnet();
+            }
+            else
+            {
+                hideTestnet();
+            }
         }
-        else
+        else if (EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
         {
             primaryElement = true;
             hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
+            hideTestnet();
             startRealmListener();
         }
+        else
+        {
+            showTestnet();
+            layoutAppreciation.setVisibility(View.GONE);
+            hideIssuerViews();
+        }
+    }
+
+    private void showTestnet() {
+        testnet.setVisibility(View.VISIBLE);
+        Utils.setChainColour(testnet, token.tokenInfo.chainId);
+        testnet.setText(token.getNetworkName());
+    }
+
+    private void hideTestnet() {
+        testnet.setVisibility(View.GONE);
     }
 
     private void fillEmpty() {

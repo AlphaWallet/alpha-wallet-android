@@ -21,11 +21,10 @@ import android.webkit.WebViewClient;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
-import com.alphawallet.app.web3.entity.Message;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
 import org.json.JSONObject;
 
@@ -200,12 +199,6 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
-    // TODO: Weiwu issue #1556 - delete this when Signal is fully introduced.
-    public void onSignCancel(Message message) {
-        long callbackId = message.leafPosition;
-        callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
-    }
-
     private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -240,7 +233,7 @@ public class Web3View extends WebView {
 
     private final OnSignTypedMessageListener innerOnSignTypedMessageListener = new OnSignTypedMessageListener() {
         @Override
-        public void onSignTypedMessage(Message<TypedData[]> message) {
+        public void onSignTypedMessage(EthereumTypedMessage message) {
             onSignTypedMessageListener.onSignTypedMessage(message);
         }
     };

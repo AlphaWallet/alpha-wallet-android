@@ -14,6 +14,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.alphawallet.token.entity.Signable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.realm.Realm;
@@ -22,7 +23,7 @@ public interface TransactionRepositoryType {
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId);
-	Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId);
+	Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId);
 	Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, int chainId);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);

@@ -138,6 +138,7 @@ public class Hex {
         return byteArrayToHexString(input, 0, input.length, true);
     }
 
+    /* not used
     public static String decodeMessageData(EthereumMessage message) {
         if (cleanHexPrefix(message.value).length() == 64) {
             return message.value;
@@ -146,6 +147,7 @@ public class Hex {
                     ? new String(hexStringToByteArray(message.value)) : message.value;
         }
     }
+    */
 
     public static String hexToUtf8(String hex) {
         hex = org.web3j.utils.Numeric.cleanHexPrefix(hex);

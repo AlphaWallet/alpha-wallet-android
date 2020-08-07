@@ -24,6 +24,7 @@ import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.SignableBytes;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
@@ -116,7 +117,7 @@ public class SellDetailViewModel extends BaseViewModel {
         int[] indexList = new int[ticketSendIndexList.size()];
         for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
 
-        byte[] tradeBytes = parser.getTradeBytes(indexList, contractAddress, price, expiry);
+        SignableBytes tradeBytes = new SignableBytes(parser.getTradeBytes(indexList, contractAddress, price, expiry));
         try {
             linkMessage = ParseMagicLink.generateLeadingLinkBytes(indexList, contractAddress, price, expiry);
         } catch (SalesOrderMalformed e) {

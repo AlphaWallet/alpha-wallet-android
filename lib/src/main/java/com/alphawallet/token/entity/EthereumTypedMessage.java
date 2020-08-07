@@ -12,6 +12,7 @@ public class EthereumTypedMessage implements Signable {
         this.leafPosition = leafPosition;
     }
 
+    // TODO: the message before adding "Ethereum Signed Message" prefix
     public String getMessage() {
         return null;
     }
@@ -19,6 +20,7 @@ public class EthereumTypedMessage implements Signable {
     public long getCallbackId() {
         return this.leafPosition;
     }
+
     public static class TypedData  {
         public final String name;
         public final String type;
@@ -29,5 +31,9 @@ public class EthereumTypedMessage implements Signable {
             this.type = type;
             this.data = data;
         }
+    }
+
+    public byte[] getPrehash() {
+        return EthereumMessage.getEthereumMessage(getMessage().getBytes());
     }
 }

@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
+import com.alphawallet.token.entity.Signable;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -325,9 +326,20 @@ public class KeystoreAccountService implements AccountKeystoreService
         }).subscribeOn(Schedulers.io());
     }
 
+
     //In all cases where we need to sign data the signature needs to be in Ethereum format
     //Geth gives us the pure EC function, but for hash signing
     @Override
+    public Single<SignatureFromKey> signMessage(Wallet signer, Signable message, long chainId)
+    {
+        return Single.fromCallable(() -> {
+            //byte[] messageHash = Hash.sha3(message);
+            SignatureFromKey returnSig = keyService.signData(signer, message.getPrehash());
+            returnSig.signature = patchSignatureVComponent(returnSig.signature);
+            return returnSig;
+        }).subscribeOn(Schedulers.io());
+    }
+
     public Single<SignatureFromKey> signTransaction(Wallet signer, byte[] message, long chainId)
     {
         return Single.fromCallable(() -> {

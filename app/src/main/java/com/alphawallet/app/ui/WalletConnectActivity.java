@@ -18,7 +18,8 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
@@ -294,19 +295,18 @@ public class WalletConnectActivity extends BaseActivity {
             public void gotAuthorisation(boolean gotAuth) {
                 if (gotAuth) {
                     viewModel.signMessage(
-                            getEthereumMessage(Numeric.hexStringToByteArray(data)),
+                            new EthereumMessage(data, peerMeta.getUrl(), 1),
                             new DAppFunction() {
                                 @Override
-                                public void DAppError(Throwable error, Message<String> message) {
+                                public void DAppError(Throwable error, Signable message) {
                                     showErrorDialog(error.getMessage());
                                 }
 
                                 @Override
-                                public void DAppReturn(byte[] data, Message<String> message) {
+                                public void DAppReturn(byte[] data, Signable message) {
                                     client.approveRequest(id, Numeric.toHexString(data));
                                 }
-                            },
-                            new Message<>(data, peerMeta.getUrl(), 1)
+                            }
                     );
                 } else {
                     showErrorDialog(getString(R.string.message_authentication_failed));

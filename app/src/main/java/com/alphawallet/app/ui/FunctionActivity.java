@@ -452,10 +452,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void signMessage(byte[] sign, DAppFunction dAppFunction, EthereumMessage message)
+    public void signMessage( Signable message, DAppFunction dAppFunction)
     {
         showProgressSpinner(true);
-        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
+        viewModel.signMessage(message, dAppFunction, token.tokenInfo.chainId);
     }
 
     @Override
@@ -555,7 +555,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         dialog = new SignMessageDialog(this, message);
         dialog.setAddress(token.getAddress());
-        dialog.setMessage(message.value);
+        dialog.setMessage(message.getMessage());
         dialog.setOnApproveListener(v -> {
             dialog.dismiss();
             messageToSign = message;
@@ -731,11 +731,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 }
             };
 
-            String convertedMessage = messageToSign.value;
-            String signMessage = DappBrowserFragment.PERSONAL_MESSAGE_PREFIX
-                    + convertedMessage.length()
-                    + convertedMessage;
-            signMessage(signMessage.getBytes(), dAppFunction, messageToSign);
+            signMessage(messageToSign, dAppFunction);
         }
     }
 

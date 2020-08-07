@@ -5,8 +5,10 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 
 import java.math.BigInteger;
 
+import com.alphawallet.token.entity.Signable;
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import org.web3j.crypto.RawTransaction;
 
 public interface AccountKeystoreService {
 	/**
@@ -58,9 +60,14 @@ public interface AccountKeystoreService {
 			byte[] data,
 			long chainId);
 
+	Single<SignatureFromKey> signMessage(
+			Wallet signer,
+			Signable message,
+			long chainId);
+
 	Single<SignatureFromKey> signTransaction(
 			Wallet signer,
-			byte[] message,
+			byte[] rawTx,
 			long chainId);
 
 	Single<byte[]> signTransactionFast(

@@ -842,11 +842,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 // ensure we generate the signature correctly:
                 if (messageTBS.message != null)
                 {
-                    messageBytes = messageTBS.message.getBytes();
-                    if (messageTBS.message.substring(0, 2).equals("0x"))
-                    {
-                        messageBytes = Numeric.hexStringToByteArray(message.message);
-                    }
                     viewModel.getAuthorisation(wallet, getActivity(), this);
                 }
                 else
@@ -898,7 +893,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             if (!Charset.forName("ISO-8859-1").newEncoder().canEncode(signString)) signString = messageTBS.message;
             dialog.setMessage(signString);
             dialog.setOnApproveListener(v -> {
-                messageBytes = getEthereumMessage(Numeric.hexStringToByteArray(message.value));
+                messageBytes = getEthereumMessage(Numeric.hexStringToByteArray(message.getMessage()));
                 viewModel.getAuthorisation(wallet, getActivity(), this);
             });
             dialog.setOnRejectListener(v -> {
@@ -915,6 +910,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
+    // TODO: move this into a Signable implementation
     static byte[] getEthereumMessage(byte[] message) {
         byte[] prefix = getEthereumMessagePrefix(message.length);
 
@@ -1537,7 +1533,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (gotAuth)
         {
             viewModel.completeAuthentication(SIGN_DATA);
-            viewModel.signMessage(messageBytes, dAppFunction, messageTBS);
+            viewModel.signMessage(messageTBS, dAppFunction);
         }
         else if (dialog != null && dialog.isShowing())
         {

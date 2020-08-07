@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.MarketQueueService;
 
+import com.alphawallet.token.entity.Signable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
@@ -104,7 +105,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId) {
+            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId) {
                 return null;
             }
 

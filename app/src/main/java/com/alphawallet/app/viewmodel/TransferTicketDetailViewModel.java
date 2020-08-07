@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 
+import com.alphawallet.token.entity.SignableBytes;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -136,7 +137,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
-        byte[] tradeBytes = parser.getTradeBytes(indexList, contractAddress, BigInteger.ZERO, expiry);
+        SignableBytes tradeBytes = new SignableBytes(parser.getTradeBytes(indexList, contractAddress, BigInteger.ZERO, expiry));
         try
         {
             linkMessage = ParseMagicLink.generateLeadingLinkBytes(indexList, contractAddress, BigInteger.ZERO, expiry);
@@ -155,7 +156,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void generateSpawnLink(List<BigInteger> tokenIds, String contractAddress, long expiry)
     {
         initParser();
-        byte[] tradeBytes = parser.getSpawnableBytes(tokenIds, contractAddress, BigInteger.ZERO, expiry);
+        SignableBytes tradeBytes = new SignableBytes(parser.getSpawnableBytes(tokenIds, contractAddress, BigInteger.ZERO, expiry));
         try
         {
             linkMessage = ParseMagicLink.generateSpawnableLeadingLinkBytes(tokenIds, contractAddress, BigInteger.ZERO, expiry);

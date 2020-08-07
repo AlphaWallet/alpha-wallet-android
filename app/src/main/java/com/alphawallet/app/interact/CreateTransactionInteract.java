@@ -11,6 +11,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 
 import java.math.BigInteger;
 
+import com.alphawallet.token.entity.Signable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -26,11 +27,11 @@ public class CreateTransactionInteract
 
     public Single<SignaturePair> sign(Wallet wallet, MessagePair messagePair, int chainId)
     {
-        return transactionRepository.getSignature(wallet, messagePair.message.getBytes(), chainId)
+        return transactionRepository.getSignature(wallet, messagePair, chainId)
                 .map(sig -> new SignaturePair(messagePair.selection, sig.signature, messagePair.message));
     }
 
-    public Single<SignatureFromKey> sign(Wallet wallet, byte[] message, int chainId)
+    public Single<SignatureFromKey> sign(Wallet wallet, Signable message, int chainId)
     {
         return transactionRepository.getSignature(wallet, message, chainId)
                         .subscribeOn(Schedulers.computation())

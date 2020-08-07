@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
+import com.alphawallet.token.entity.Signable;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 
@@ -311,7 +312,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      * @param transactionBytes
      * @return
      */
-    synchronized SignatureFromKey signData(Wallet wallet, byte[] transactionBytes)
+    synchronized SignatureFromKey signData(Wallet wallet, byte[] TBSdata)
     {
         SignatureFromKey returnSig = new SignatureFromKey();
         returnSig.sigType = SignatureReturnType.KEY_AUTHENTICATION_ERROR;
@@ -322,7 +323,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                returnSig = signWithKeystore(transactionBytes);
+                returnSig = signWithKeystore(TBSdata);
                 break;
 
             case HDKEY:
@@ -331,7 +332,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     String mnemonic = unpackMnemonic();
                     HDWallet newWallet = new HDWallet(mnemonic, "");
                     PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
-                    byte[] digest = Hash.keccak256(transactionBytes);
+                    byte[] digest = Hash.keccak256(TBSdata);
                     returnSig.signature = pk.sign(digest, Curve.SECP256K1);
                     returnSig.sigType = SignatureReturnType.SIGNATURE_GENERATED;
                 }

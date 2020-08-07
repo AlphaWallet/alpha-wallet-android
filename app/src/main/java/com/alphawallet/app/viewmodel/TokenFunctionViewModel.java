@@ -43,16 +43,7 @@ import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.entity.EthereumMessage;
-import com.alphawallet.token.entity.ContractAddress;
-import com.alphawallet.token.entity.FunctionDefinition;
-import com.alphawallet.token.entity.MethodArg;
-import com.alphawallet.token.entity.SigReturnType;
-import com.alphawallet.token.entity.TSAction;
-import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.entity.TokenscriptElement;
-import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.entity.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -197,8 +188,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         sig.postValue(failSig);
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message, int chainId) {
-        disposable = createTransactionInteract.sign(wallet, signRequest, chainId)
+    public void signMessage(Signable message, DAppFunction dAppFunction, int chainId) {
+        disposable = createTransactionInteract.sign(wallet, message, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),

@@ -19,6 +19,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.service.TransactionsService;
 
+import com.alphawallet.token.entity.Signable;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
@@ -251,8 +252,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId) {
-		return accountKeystoreService.signTransaction(wallet, message, chainId);
+	public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId) {
+		return accountKeystoreService.signMessage(wallet, message, chainId);
 	}
 
 	@Override

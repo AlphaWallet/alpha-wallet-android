@@ -1,5 +1,6 @@
 package com.alphawallet.app;
 
+import com.alphawallet.token.entity.Signable;
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -89,7 +90,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId)
+            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId)
             {
                 return null;
             }

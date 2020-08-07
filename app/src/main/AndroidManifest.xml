@@ -282,6 +282,10 @@
         <activity
             android:name=".ui.WalletConnectActivity"
             android:label="WalletConnect" />
+
+        <activity
+            android:name=".ui.BackupFlowActivity"
+            android:label="WalletConnect" />
     </application>
 
 </manifest>

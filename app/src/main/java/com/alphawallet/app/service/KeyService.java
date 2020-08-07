@@ -796,6 +796,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
+        /*
+        Making "cancelable" true will prevent users to press "Back" button and force to either press
+        "Cancel" or "Use PIN" buttons. This way application will get appropriate callback.
+         */
+        signDialog.setCancelable(false);
         signDialog.setCancelListener(v -> {
             authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
         });

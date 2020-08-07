@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -28,7 +29,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
-import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -37,6 +37,8 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
+import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 public class NewSettingsFragment extends BaseFragment {
@@ -226,16 +228,16 @@ public class NewSettingsFragment extends BaseFragment {
     }
 
     private void openBackupActivity(Wallet wallet) {
-        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+        Intent intent = new Intent(getContext(), BackupFlowActivity.class);
         intent.putExtra(WALLET, wallet);
 
         switch (wallet.type) {
             case HDKEY:
-                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
+                intent.putExtra("TYPE", BACKUP_HD_KEY);
                 break;
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
+                intent.putExtra("TYPE", BACKUP_KEYSTORE_KEY);
                 break;
         }
 
@@ -245,7 +247,7 @@ public class NewSettingsFragment extends BaseFragment {
             case STRONGBOX_NO_AUTHENTICATION:
             case TEE_NO_AUTHENTICATION:
                 if (wallet.lastBackupTime > 0) {
-                    intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.UPGRADE_KEY);
+                    intent.putExtra("TYPE", BackupOperationType.UPGRADE_KEY);
                 }
                 break;
             default:

@@ -43,7 +43,7 @@ import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
@@ -197,7 +197,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         sig.postValue(failSig);
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message, int chainId) {
+    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message, int chainId) {
         disposable = createTransactionInteract.sign(wallet, signRequest, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())

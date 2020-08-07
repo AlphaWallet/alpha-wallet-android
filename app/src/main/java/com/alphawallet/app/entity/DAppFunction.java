@@ -1,9 +1,9 @@
 package com.alphawallet.app.entity;
 
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.Signable;
 
 public interface DAppFunction
 {
-    void DAppError(Throwable error, Message<String> message);
-    void DAppReturn(byte[] data, Message<String> message);
+    void DAppError(Throwable error, Signable message);
+    void DAppReturn(byte[] data, Signable message);
 }

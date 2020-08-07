@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -33,7 +33,7 @@ public class TokenScriptCallbackInterface {
 
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
-        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new Message<>(data, getUrl(), callbackId)));
+        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId)));
     }
 
     private String getUrl() {

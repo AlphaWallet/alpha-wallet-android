@@ -85,13 +85,14 @@ import com.alphawallet.app.web3.OnSignTransactionListener;
 import com.alphawallet.app.web3.OnSignTypedMessageListener;
 import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
-import com.alphawallet.app.web3.entity.Message;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.Gson;
@@ -195,7 +196,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String currentFragment;
 
     private PinAuthenticationCallbackInterface authInterface;
-    private Message<String> messageToSign;
+    private EthereumMessage messageTBS;  // To-Be-Signed
     private byte[] messageBytes;
     private DAppFunction dAppFunction;
     private SignType signType;
@@ -814,19 +815,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void onSignMessage(Message<String> message) {
-        messageToSign = message;
+    public void onSignMessage(EthereumMessage message) {
+        messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message) {
+            public void DAppError(Throwable error, Signable message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
 
             @Override
-            public void DAppReturn(byte[] data, Message<String> message) {
+            public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.value);
+                Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
                 dialog.dismiss();
             }
@@ -837,13 +838,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             dialog = new SignMessageDialog(getActivity(), message);
             dialog.setAddress(wallet.address);
             dialog.setOnApproveListener(v -> {
-                //ensure we generate the signature correctly:
-                if (message.value != null)
+                // TODO: Weiwu: this segment should be encapsulated in EthereumMessage
+                // ensure we generate the signature correctly:
+                if (messageTBS.message != null)
                 {
-                    messageBytes = message.value.getBytes();
-                    if (message.value.substring(0, 2).equals("0x"))
+                    messageBytes = messageTBS.message.getBytes();
+                    if (messageTBS.message.substring(0, 2).equals("0x"))
                     {
-                        messageBytes = Numeric.hexStringToByteArray(message.value);
+                        messageBytes = Numeric.hexStringToByteArray(message.message);
                     }
                     viewModel.getAuthorisation(wallet, getActivity(), this);
                 }
@@ -865,33 +867,35 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void onSignPersonalMessage(Message<String> message) {
-        messageToSign = message;
+    public void onSignPersonalMessage(EthereumMessage message) {
+        messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message) {
+            public void DAppError(Throwable error, Signable message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
 
+            // TODO: Weiwu issue #1556 move this code to a class.
             @Override
-            public void DAppReturn(byte[] data, Message<String> message) {
+            public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.value);
+                Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignPersonalMessageSuccessful(message, signHex);
                 //Test Sig in debug build
-                if (BuildConfig.DEBUG) testRecoverAddressFromSignature(Hex.hexToUtf8(message.value), signHex);
+                if (BuildConfig.DEBUG) testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
                 dialog.dismiss();
             }
         };
 
         try
         {
+            // opens a dialogue to ask the user to sign
             dialog = new SignMessageDialog(getActivity(), message);
             dialog.setAddress(wallet.address);
-            String signString = Hex.hexToUtf8(message.value);
+            String signString = Hex.hexToUtf8(messageTBS.message);
             //Analyse if this is an ISO-8859-1 string, otherwise show the hex
-            if (!Charset.forName("ISO-8859-1").newEncoder().canEncode(signString)) signString = message.value;
+            if (!Charset.forName("ISO-8859-1").newEncoder().canEncode(signString)) signString = messageTBS.message;
             dialog.setMessage(signString);
             dialog.setOnApproveListener(v -> {
                 messageBytes = getEthereumMessage(Numeric.hexStringToByteArray(message.value));
@@ -921,12 +925,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return result;
     }
 
+    //TODO: add TypedMessageSupport
+
     @Override
-    public void onSignTypedMessage(Message<TypedData[]> message) {
+    public void onSignTypedMessage(EthereumTypedMessage message) {
         //TODO
         Toast.makeText(getActivity(), new Gson().toJson(message), Toast.LENGTH_LONG).show();
         web3.onSignCancel(message);
     }
+
 
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url)
@@ -1523,17 +1530,18 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
+    // this is called when the signing is approved by the user (e.g. fingerprint / PIN)
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
             viewModel.completeAuthentication(SIGN_DATA);
-            viewModel.signMessage(messageBytes, dAppFunction, messageToSign);
+            viewModel.signMessage(messageBytes, dAppFunction, messageTBS);
         }
         else if (dialog != null && dialog.isShowing())
         {
-            web3.onSignCancel(messageToSign);
+            web3.onSignCancel(messageTBS);
             dialog.dismiss();
         }
     }

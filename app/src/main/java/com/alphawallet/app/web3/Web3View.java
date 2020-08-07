@@ -2,7 +2,6 @@ package com.alphawallet.app.web3;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -22,17 +21,16 @@ import android.webkit.WebViewClient;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
-import com.alphawallet.app.web3.entity.Message;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.EthereumTypedMessage;
+import com.alphawallet.token.entity.Signable;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static com.alphawallet.app.C.PAGE_LOADED;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
@@ -171,13 +169,13 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
-    public void onSignMessageSuccessful(Message message, String signHex) {
-        long callbackId = message.leafPosition;
+    public void onSignMessageSuccessful(Signable message, String signHex) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
-    public void onSignPersonalMessageSuccessful(Message message, String signHex) {
-        long callbackId = message.leafPosition;
+    public void onSignPersonalMessageSuccessful(Signable message, String signHex) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
@@ -186,7 +184,7 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
-    public void onSignError(Message message, String error) {
+    public void onSignError(EthereumMessage message, String error) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
@@ -196,8 +194,8 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
-    public void onSignCancel(Message message) {
-        long callbackId = message.leafPosition;
+    public void onSignCancel(Signable message) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
@@ -217,7 +215,7 @@ public class Web3View extends WebView {
 
     private final OnSignMessageListener innerOnSignMessageListener = new OnSignMessageListener() {
         @Override
-        public void onSignMessage(Message message) {
+        public void onSignMessage(EthereumMessage message) {
             if (onSignMessageListener != null) {
                 onSignMessageListener.onSignMessage(message);
             }
@@ -226,14 +224,14 @@ public class Web3View extends WebView {
 
     private final OnSignPersonalMessageListener innerOnSignPersonalMessageListener = new OnSignPersonalMessageListener() {
         @Override
-        public void onSignPersonalMessage(Message message) {
+        public void onSignPersonalMessage(EthereumMessage message) {
             onSignPersonalMessageListener.onSignPersonalMessage(message);
         }
     };
 
     private final OnSignTypedMessageListener innerOnSignTypedMessageListener = new OnSignTypedMessageListener() {
         @Override
-        public void onSignTypedMessage(Message<TypedData[]> message) {
+        public void onSignTypedMessage(EthereumTypedMessage message) {
             onSignTypedMessageListener.onSignTypedMessage(message);
         }
     };

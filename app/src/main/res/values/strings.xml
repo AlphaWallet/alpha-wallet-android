@@ -485,7 +485,7 @@
     <string name="touch_fingerprint_sensor">Touch the fingerprint sensor</string>
     <string name="unlock_private_key">Unlock Private Key</string>
     <string name="device_insecure">Device Not Secure</string>
-    <string name="device_not_secure_warning">Your device is not locked by Pin or Fingerprint. Cannot create a secured private key until the device has some protection.</string>
+    <string name="device_not_secure_warning">Your device is not locked by Fingerprint, PIN or other Biometric. Cannot create a secured private key until the device has some protection.</string>
     <string name="action_remind_later">Remind me later</string>
     <string name="title_change_wallet">Change Wallet</string>
     <string name="legacy_wallets">Legacy Wallets</string>

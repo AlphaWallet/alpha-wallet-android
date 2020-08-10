@@ -659,5 +659,5 @@
     <string name="activity_approval_granted">批准给 %1$s</string>
     <string name="tokenscript_call">TokenScript调用:</string>
     <string name="today">今天</string>
-    <string name="go_to_token">看着通证</string>
+    <string name="go_to_token">前往通证</string>
 </resources>

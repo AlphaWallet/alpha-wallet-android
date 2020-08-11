@@ -410,6 +410,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case ACTIVITY: {
+                viewPager.setBottomMargin(false);
                 showPage(ACTIVITY);
                 return true;
             }
@@ -431,7 +432,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void openExchangeDialog() {
+    public void openExchangeDialog() {
         Wallet wallet = ((WalletFragment)walletFragment).getCurrentWallet();
         if (wallet == null) {
             Toast.makeText(this, getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
@@ -779,6 +780,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void changedLocale()
     {
         ((WalletFragment)walletFragment).changedLocale();
+    }
+
+    @Override
+    public void resetTransactions()
+    {
+        ((ActivityFragment)activityFragment).resetTransactions();
     }
 
     @Override

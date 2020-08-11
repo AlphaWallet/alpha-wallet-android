@@ -673,4 +673,6 @@
     <string name="activity_approval_granted">Approval granted %1$s</string>
     <string name="tokenscript_call">TokenScript call:</string>
     <string name="testnet" translatable="false">Testnet</string>
+    <string name="today">Today</string>
+    <string name="go_to_token">Go to Token</string>
 </resources>

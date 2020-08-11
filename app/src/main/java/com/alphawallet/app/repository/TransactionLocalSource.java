@@ -27,5 +27,5 @@ public interface TransactionLocalSource {
 
 	RealmAuxData fetchEvent(String walletAddress, String eventKey);
 
-	void storeRawTx(Wallet wallet, EthTransaction object, long timeStamp);
+	Transaction storeRawTx(Wallet wallet, EthTransaction object, long timeStamp);
 }

@@ -59,6 +59,9 @@ import static com.alphawallet.app.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
 public class SplashViewModel extends ViewModel
 {
+    private static final String LEGACY_CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
+    private static final String LEGACY_AUX_DB_PREFIX = "AuxData-";
+
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
@@ -334,7 +337,7 @@ public class SplashViewModel extends ViewModel
             for (File file : files)
             {
                 String fileName = file.getName();
-                if (fileName.startsWith("AuxData-"))
+                if (fileName.startsWith(LEGACY_AUX_DB_PREFIX) || fileName.equals(LEGACY_CERTIFICATE_DB))
                 {
                     deleteRecursive(file);
                 }

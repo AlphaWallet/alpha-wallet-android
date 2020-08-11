@@ -174,4 +174,9 @@ public class TokenScriptFile extends File
                 sigDescriptor.type = SigReturnType.NO_SIGNATURE;
         }
     }
+
+    public boolean fileChanged(String fileHash)
+    {
+        return fileHash == null || !isValidTokenScript() || !fileHash.equals(calcMD5());
+    }
 }

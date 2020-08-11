@@ -168,8 +168,9 @@ public class RepositoriesModule {
 												   PreferenceRepositoryType preferenceRepository,
 												   EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
 												   TransactionsNetworkClientType transactionsNetworkClientType,
-												   TransactionLocalSource transactionLocalSource) {
-		return new TransactionsService(tokensService, preferenceRepository, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
+												   TransactionLocalSource transactionLocalSource,
+												   Context context) {
+		return new TransactionsService(tokensService, preferenceRepository, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource, context);
 	}
 
 	@Singleton

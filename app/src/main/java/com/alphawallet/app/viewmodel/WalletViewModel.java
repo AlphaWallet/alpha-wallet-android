@@ -92,6 +92,7 @@ public class WalletViewModel extends BaseViewModel
     private void onDefaultWallet(Wallet wallet)
     {
         tokensService.setCurrentAddress(wallet.address);
+        assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
         fetchTokens(wallet);
     }

@@ -24,7 +24,7 @@ public class HomeReceiver extends BroadcastReceiver
         ctx.registerReceiver(this, new IntentFilter(C.RESET_WALLET));
         ctx.registerReceiver(this, new IntentFilter(C.ADDED_TOKEN));
         ctx.registerReceiver(this, new IntentFilter(C.CHANGED_LOCALE));
-        ctx.registerReceiver(this, new IntentFilter(C.REFRESH_TOKENS));
+        ctx.registerReceiver(this, new IntentFilter(C.RESET_TRANSACTIONS));
         this.homeCommsInterface = homeCommsInterface;
     }
 
@@ -60,8 +60,8 @@ public class HomeReceiver extends BroadcastReceiver
             case C.CHANGED_LOCALE:
                 homeCommsInterface.changedLocale();
                 break;
-            case C.REFRESH_TOKENS:
-                homeCommsInterface.refreshTokens();
+            case C.RESET_TRANSACTIONS:
+                homeCommsInterface.resetTransactions();
                 break;
             default:
                 break;

@@ -8,31 +8,35 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.EventMeta;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
-import static com.alphawallet.app.repository.TransactionsRealmCache.convert;
+import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 
 /**
  * Created by JB on 5/08/2020.
  */
-public class ActivityHistoryList extends ScrollView
+public class ActivityHistoryList extends LinearLayout
 {
     private ActivityAdapter activityAdapter;
     private Realm realm;
@@ -40,7 +44,9 @@ public class ActivityHistoryList extends ScrollView
     private RealmResults<RealmAuxData> auxRealmUpdates;
     private final RecyclerView recentTransactionsView;
     private final LinearLayout noTxNotice;
+    private final ProgressBar loadingTransactions;
     private final Handler handler = new Handler();
+    private final Context context;
 
     public ActivityHistoryList(Context context, @Nullable AttributeSet attrs)
     {
@@ -49,8 +55,9 @@ public class ActivityHistoryList extends ScrollView
 
         recentTransactionsView = findViewById(R.id.list);
         recentTransactionsView.setLayoutManager(new LinearLayoutManager(getContext()));
+        loadingTransactions = findViewById(R.id.loading_transactions);
         noTxNotice = findViewById(R.id.layout_no_recent_transactions);
-        noTxNotice.setVisibility(View.VISIBLE);
+        this.context = context;
     }
 
     public void setupAdapter(ActivityAdapter adapter)
@@ -59,7 +66,7 @@ public class ActivityHistoryList extends ScrollView
         recentTransactionsView.setAdapter(adapter);
     }
 
-    public void startActivityListeners(Realm realm, Wallet wallet, int chainId, final String tokenAddress, final int historyCount)
+    public void startActivityListeners(Realm realm, Wallet wallet, Token token, BigInteger tokenId, final int historyCount)
     {
         this.realm = realm;
 
@@ -69,57 +76,103 @@ public class ActivityHistoryList extends ScrollView
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (auxRealmUpdates != null) auxRealmUpdates.removeAllChangeListeners();
 
-        //start listeners
-        realmTransactionUpdates = realm.where(RealmTransaction.class)
-                .sort("timeStamp", Sort.DESCENDING)
-                .equalTo("chainId",chainId)
-                .findAllAsync();
+        if (token.isEthereum())
+        {
+            realmTransactionUpdates = getEthListener(token.tokenInfo.chainId, wallet, historyCount);
+            initViews(true);
+        }
+        else
+        {
+            realmTransactionUpdates = getContractListener(token.tokenInfo.chainId, wallet, token.getAddress(), historyCount);
+            initViews(false);
+        }
+
         realmTransactionUpdates.addChangeListener(realmTransactions -> {
             List<ActivityMeta> metas = new ArrayList<>();
             //make list
-            if (realmTransactions.size() == 0) return;
             for (RealmTransaction item : realmTransactions)
             {
-                Transaction tx = convert(item);
-                if (tx.isRelated(tokenAddress, wallet.address))
-                {
-                    TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber().equals("0"));
-                    metas.add(tm);
-                    if (metas.size() >= historyCount) break;
-                }
+                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber().equals("0"));
+                metas.add(tm);
             }
 
             addItems(metas);
         });
 
-        auxRealmUpdates = realm.where(RealmAuxData.class)
-                .endsWith("instanceKey", "-eventName")
-                .sort("resultTime", Sort.DESCENDING)
-                .equalTo("chainId", chainId)
-                .equalTo("tokenAddress", tokenAddress)
-                .findAllAsync();
+        auxRealmUpdates = getEventListener(token, tokenId, historyCount);
         auxRealmUpdates.addChangeListener(realmEvents -> {
             List<ActivityMeta> metas = new ArrayList<>();
-            if (realmEvents.size() == 0) return;
             for (RealmAuxData item : realmEvents)
             {
                 EventMeta newMeta = new EventMeta(item.getTransactionHash(), item.getEventName(), item.getFunctionId(), item.getResultTime(), item.getChainId());
                 metas.add(newMeta);
-                if (metas.size() >= historyCount) break;
             }
 
             addItems(metas);
         });
     }
 
+    private RealmResults<RealmAuxData> getEventListener(Token token, BigInteger tokenId, int historyCount)
+    {
+        String tokenIdHex = tokenId.toString(16);
+        return realm.where(RealmAuxData.class)
+                .endsWith("instanceKey", EVENT_CARDS)
+                .sort("resultTime", Sort.DESCENDING)
+                .equalTo("chainId", token.tokenInfo.chainId)
+                .beginGroup().equalTo("tokenId", "0").or().equalTo("tokenId", tokenIdHex).endGroup()
+                .equalTo("tokenAddress", token.getAddress())
+                .limit(historyCount)
+                .findAllAsync();
+    }
+
+    private void initViews(boolean isEth)
+    {
+        TextView noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
+
+        if (isEth)
+        {
+            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
+                    context.getString(R.string.no_recent_transactions_subtext_ether)));
+        }
+        else
+        {
+            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
+                    context.getString(R.string.no_recent_transactions_subtext_tokens)));
+        }
+    }
+
+    private RealmResults<RealmTransaction> getContractListener(int chainId, Wallet wallet, String tokenAddress, int count)
+    {
+        return realm.where(RealmTransaction.class)
+                .sort("timeStamp", Sort.DESCENDING)
+                .beginGroup().not().equalTo("input", "0x").and().equalTo("to", tokenAddress, Case.INSENSITIVE).endGroup()
+                .equalTo("chainId", chainId)
+                .limit(count)
+                .findAllAsync();
+    }
+
+    private RealmResults<RealmTransaction> getEthListener(int chainId, Wallet wallet, int count)
+    {
+        return realm.where(RealmTransaction.class)
+                .sort("timeStamp", Sort.DESCENDING)
+                .beginGroup().equalTo("input", "0x").or().equalTo("from", wallet.address, Case.INSENSITIVE).endGroup()
+                .equalTo("chainId", chainId)
+                .limit(count)
+                .findAllAsync();
+    }
+
     private void addItems(List<ActivityMeta> metas)
     {
         handler.post(() -> {
+            loadingTransactions.setVisibility(View.GONE);
             if (metas.size() > 0 && !realm.isClosed())
             {
                 activityAdapter.updateActivityItems(metas.toArray(new ActivityMeta[0]));
-                noTxNotice.setVisibility(View.GONE);
                 recentTransactionsView.setVisibility(View.VISIBLE);
+            }
+            else if (metas.size() == 0 && activityAdapter.getItemCount() == 0)
+            {
+                noTxNotice.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -127,6 +180,7 @@ public class ActivityHistoryList extends ScrollView
     public void onDestroy()
     {
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
+        if (auxRealmUpdates != null) auxRealmUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
         handler.removeCallbacksAndMessages(null);
     }

@@ -645,6 +645,7 @@ public class BackupKeyActivity extends BaseActivity implements
                 case SEED_PHRASE_INVALID:
                     break;
                 case ENTER_JSON_BACKUP:
+                    viewModel.getPasswordForKeystore(wallet, this, this);
                     break;
                 case SET_JSON_PASSWORD:
                     break;
@@ -793,7 +794,8 @@ public class BackupKeyActivity extends BaseActivity implements
         inputView = findViewById(R.id.input_password);
         keystorePassword = inputView.getText().toString();
         if (keystorePassword.length() > 5) {
-            viewModel.getPasswordForKeystore(wallet, this, this);
+            //first get authentication
+            viewModel.getAuthentication(wallet, this, this);
         } else {
             inputView.setError(R.string.password_6_characters_or_more);
         }

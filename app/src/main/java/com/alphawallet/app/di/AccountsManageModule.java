@@ -10,6 +10,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
@@ -30,6 +31,7 @@ class AccountsManageModule {
 			FindDefaultNetworkInteract findDefaultNetworkInteract,
 			KeyService keyService,
 			TokensService tokensService,
+			AssetDefinitionService assetDefinitionService,
 			Context context)
 	{
 		return new WalletsViewModelFactory(setDefaultWalletInteract,
@@ -40,6 +42,7 @@ class AccountsManageModule {
 				findDefaultNetworkInteract,
 				keyService,
 				tokensService,
+				assetDefinitionService,
 				context);
 	}
 

@@ -33,6 +33,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
     public static final int FILTER_ALL = 0;
@@ -40,6 +42,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_ASSETS = 2;
     public static final int FILTER_COLLECTIBLES = 3;
     private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(99999999999L);
+    private final Realm realm;
 
     private int filterType;
     protected final AssetDefinitionService assetService;
@@ -97,12 +100,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.assetService = aService;
         this.tokensService = tService;
         this.context = context;
+        this.realm = tokensService.getTickerRealmInstance();
     }
 
     protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = null;
+        this.realm = null;
     }
 
     @Override
@@ -125,7 +130,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, tokensService);
+                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, tokensService, realm);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
                 break;

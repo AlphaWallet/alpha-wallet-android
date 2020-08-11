@@ -67,6 +67,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	@Override
 	public void bind(@Nullable Wallet data, @NonNull Bundle addition) {
 		walletAddressText.setText(null);
+		if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
+
 		if (data != null) {
 			wallet = fetchWallet(data);
 			walletClickLayout.setOnClickListener(this);

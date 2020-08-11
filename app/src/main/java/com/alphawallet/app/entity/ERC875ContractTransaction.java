@@ -127,7 +127,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         parcel.writeInt(type);
         parcel.writeString(otherParty);
 
-        if (indices != null)
+        if (indices != null && indices.size() > 0)
         {
             parcel.writeInt(indices.size());
             parcel.writeArray(indices.toArray());

@@ -61,13 +61,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private String tokenName;
     private boolean primaryElement;
+    private final Realm realm;
 
     private Handler handler;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
         super(resId, parent);
 
@@ -88,6 +89,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
+        realm = r;
     }
 
     @Override
@@ -296,7 +298,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void startTickerRealmListener()
     {
-        Realm realm = tokensService.getTickerRealmInstance();
         realmUpdate = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
                 .findAllAsync();

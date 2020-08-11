@@ -20,6 +20,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -55,6 +56,8 @@ public class TokensRealmSource implements TokenLocalSource {
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
+
+    public static final String EVENT_CARDS = "-eventName";
 
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -271,9 +274,9 @@ public class TokensRealmSource implements TokenLocalSource {
         return databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
     }
 
-    public static String eventKey(String txHash, String activityName)
+    public static String eventActivityKey(String txHash, String activityName)
     {
-        return txHash + "-" + activityName + "-eventName";
+        return txHash + "-" + activityName + EVENT_CARDS;
     }
 
     public static String eventBlockKey(int chainId, String eventAddress, String namedType, String filter)
@@ -663,18 +666,23 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void removeLocalTickers(Realm realm) throws Exception
+    private void removeLocalTickers(Realm realm)
     {
-        RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
-                .findAll();
-        if (realmItems.size() > 0)
+
+        try
         {
-            realm.beginTransaction();
-            for (RealmTokenTicker t : realmItems)
+            RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
+                .findAll();
+            if (realmItems.size() > 0)
             {
-                t.deleteFromRealm();
+                realm.executeTransaction(r -> {
+                    realmItems.deleteAllFromRealm();
+                });
             }
-            realm.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            //
         }
     }
 

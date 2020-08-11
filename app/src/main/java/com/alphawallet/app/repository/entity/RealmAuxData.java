@@ -1,9 +1,20 @@
 package com.alphawallet.app.repository.entity;
 
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
+import android.content.Context;
+import android.text.TextUtils;
+
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.ui.widget.entity.StatusType;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by James on 6/05/2019.
@@ -120,5 +131,141 @@ public class RealmAuxData extends RealmObject
     public long getResultReceivedTime()
     {
         return resultReceivedTime;
+    }
+
+
+    public StatusType getEventStatusType()
+    {
+        switch (getFunctionId())
+        {
+            case "sent":
+                return StatusType.SENT;
+            case "received":
+                return StatusType.RECEIVE;
+            case "ownerApproved":
+            case "approvalObtained":
+            default:
+                //use name of event
+                return StatusType.NONE;
+        }
+    }
+
+    public String getDetail(Context ctx, Transaction tx, final String itemView)
+    {
+        Map<String, EventResult> resultMap = getEventResultMap();
+        if (tx != null) tx.addTransactionElements(resultMap);
+
+        if (!TextUtils.isEmpty(itemView))
+        {
+            String eventDesc = itemView;
+            Matcher m = Pattern.compile("\\$\\{([^}]+)\\}").matcher(itemView);
+            while (m.find())
+            {
+                String match = m.group(1);
+                String replacement = resultMap.containsKey(match) ? resultMap.get(match).value : null;
+                if (replacement != null)
+                {
+                    int index = eventDesc.indexOf(m.group(0));
+                    eventDesc = eventDesc.substring(0,index) + replacement + eventDesc.substring(index + m.group(0).length());
+                }
+            }
+
+            return eventDesc;
+        }
+        //catch standard Token events
+        switch (getFunctionId())
+        {
+            case "sent":
+                if (resultMap.containsKey("to")) return ctx.getString(R.string.sent_to, resultMap.get("to").value);
+                break;
+            case "received":
+                if (resultMap.containsKey("from")) return ctx.getString(R.string.from, resultMap.get("from").value);
+                break;
+            case "ownerApproved":
+                if (resultMap.containsKey("spender")) return ctx.getString(R.string.approval_granted_to, resultMap.get("spender").value);
+                break;
+            case "approvalObtained":
+                if (resultMap.containsKey("owner")) return ctx.getString(R.string.approval_obtained_from, resultMap.get("owner").value);
+                break;
+            default:
+                //use name of event
+                return getEventName();
+        }
+
+        //TODO: display event result
+        return tokenId + " " + result;
+    }
+
+    public String getTitle(Context ctx, String sym)
+    {
+        //TODO: pick up item-view
+        //catch standard Token events
+        switch (getFunctionId())
+        {
+            case "sent":
+                return ctx.getString(R.string.activity_sent, sym);
+            case "received":
+                return ctx.getString(R.string.activity_received, sym);
+            case "ownerApproved":
+                return ctx.getString(R.string.activity_approved, sym);
+            case "approvalObtained":
+                return ctx.getString(R.string.activity_approval_granted, sym);
+            default:
+                //display non indexed value
+                //getString(R.string.valueSymbol, transactionValue, sym)
+                return ctx.getString(R.string.valueSymbol, getFunctionId(), sym);
+        }
+    }
+
+    private enum resultState {
+        NAME,
+        TYPE,
+        RESULT
+    }
+
+    public static class EventResult
+    {
+        public final String type;
+        public final String value;
+
+        public EventResult(String t, String v)
+        {
+            type = t;
+            value = v;
+        }
+    }
+
+    public Map<String, EventResult> getEventResultMap()
+    {
+        String[] split = result.split(",");
+        resultState state = resultState.NAME;
+        Map<String, EventResult> resultMap = new HashMap<>();
+        String name = null;
+        String type = null;
+        for (String r : split)
+        {
+            switch (state)
+            {
+                case NAME:
+                    name = r;
+                    state = resultState.TYPE;
+                    break;
+                case TYPE:
+                    type = r;
+                    state = resultState.RESULT;
+                    break;
+                case RESULT:
+                    if (name != null && type != null)
+                    {
+                        resultMap.put(name, new EventResult(type, r));
+                        name = null;
+                        type = null;
+                    }
+                    state = resultState.NAME;
+                    break;
+            }
+        }
+
+        return resultMap;
     }
 }

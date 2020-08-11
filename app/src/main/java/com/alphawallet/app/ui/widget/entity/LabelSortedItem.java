@@ -1,13 +1,19 @@
 package com.alphawallet.app.ui.widget.entity;
 
-import com.alphawallet.app.ui.widget.holder.TransactionDateHolder;
+import com.alphawallet.app.ui.widget.holder.TokenLabelViewHolder;
 import com.alphawallet.app.util.LocaleUtils;
 
 import java.util.Date;
 
-public class DateSortedItem extends TimestampSortedItem<Date> {
-    public DateSortedItem(Date value) {
-        super(TransactionDateHolder.VIEW_TYPE, value, 0, DESC);
+/**
+ * Created by JB on 10/08/2020.
+ */
+public class LabelSortedItem extends TimestampSortedItem<Date>
+{
+    public static final int VIEW_TYPE = 1016;
+
+    public LabelSortedItem(Date value) {
+        super(VIEW_TYPE, value, 0, DESC);
     }
 
     @Override
@@ -23,10 +29,6 @@ public class DateSortedItem extends TimestampSortedItem<Date> {
     @Override
     public boolean areItemsTheSame(SortedItem other) {
         return viewType == other.viewType;
-    }
-
-    public static DateSortedItem round(long timeStampInSec) {
-        return new DateSortedItem(LocaleUtils.getLocalDateFromTimestamp(timeStampInSec));
     }
 
     public long getUID()

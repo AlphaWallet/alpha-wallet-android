@@ -21,7 +21,7 @@ public class TokenLabelViewHolder extends BinderViewHolder<ManageTokensLabelData
         super(resId, parent);
         textTitle = itemView.findViewById(R.id.text_title);
         textIgnore = itemView.findViewById(R.id.text_ignore);
-        textIgnore.setOnClickListener(this);
+        if (textIgnore != null) textIgnore.setOnClickListener(this);
     }
 
     @Override

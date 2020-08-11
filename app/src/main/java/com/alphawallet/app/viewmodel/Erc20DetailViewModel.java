@@ -3,10 +3,8 @@ package com.alphawallet.app.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -15,7 +13,6 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;

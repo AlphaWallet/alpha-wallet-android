@@ -98,6 +98,16 @@ public class ActivityViewModel extends BaseViewModel
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(activityItems::postValue, this::onError);
+
+//        disposable = transactionsService.fetchAndStoreTransactions(1, startTime)
+//                          .subscribeOn(Schedulers.io())
+//                          .observeOn(AndroidSchedulers.mainThread())
+//                          .subscribe(activityItems::postValue, this::onError);
+
+//                fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(activityItems::postValue, this::onError);
     }
 
     public void onDestroy()

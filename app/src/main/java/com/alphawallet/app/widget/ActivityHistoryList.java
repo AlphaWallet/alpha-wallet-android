@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -30,9 +29,6 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
-
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
-
 /**
  * Created by JB on 5/08/2020.
  */
@@ -157,6 +153,10 @@ public class ActivityHistoryList extends LinearLayout
                 activityAdapter.updateActivityItems(metas.toArray(new ActivityMeta[0]));
                 recentTransactionsView.setVisibility(View.VISIBLE);
                 noTxNotice.setVisibility(View.GONE);
+            }
+            else if (metas.size() == 0 && activityAdapter.getItemCount() == 0)
+            {
+                noTxNotice.setVisibility(View.VISIBLE);
             }
             else if (metas.size() == 0 && activityAdapter.getItemCount() == 0)
             {

@@ -11,6 +11,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
@@ -25,6 +26,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final HomeRouter homeRouter;
     private final KeyService keyService;
     private final TokensService tokensService;
+    private final AssetDefinitionService assetService;
     private final Context context;
 
     @Inject
@@ -37,6 +39,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
             TokensService tokensService,
+            AssetDefinitionService assetService,
             Context context) {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -46,6 +49,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
         this.tokensService = tokensService;
+        this.assetService = assetService;
         this.context = context;
     }
 
@@ -61,6 +65,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultNetworkInteract,
                 keyService,
                 tokensService,
+                assetService,
                 context);
     }
 }

@@ -25,6 +25,7 @@ public class RealmToken extends RealmObject {
     private String auxData;
     private long lastBlockRead;
     private int chainId;
+    private long earliestTxBlock;
 
     public int getDecimals() {
         return decimals;
@@ -161,5 +162,15 @@ public class RealmToken extends RealmObject {
     public void setLastTxTime(long lastTxTime)
     {
         this.lastTxTime = lastTxTime;
+    }
+
+    public long getEarliestTransactionBlock()
+    {
+        return earliestTxBlock;
+    }
+
+    public void setEarliestTransactionBlock(long earliestTransactionBlock)
+    {
+        this.earliestTxBlock = earliestTransactionBlock;
     }
 }

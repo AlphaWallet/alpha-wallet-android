@@ -20,6 +20,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -663,18 +664,23 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void removeLocalTickers(Realm realm) throws Exception
+    private void removeLocalTickers(Realm realm)
     {
-        RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
-                .findAll();
-        if (realmItems.size() > 0)
+
+        try
         {
-            realm.beginTransaction();
-            for (RealmTokenTicker t : realmItems)
+            RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
+                .findAll();
+            if (realmItems.size() > 0)
             {
-                t.deleteFromRealm();
+                realm.executeTransaction(r -> {
+                    realmItems.deleteAllFromRealm();
+                });
             }
-            realm.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            //
         }
     }
 

@@ -164,6 +164,20 @@ public class TokenDefinition {
         }
     }
 
+    public EventDefinition getEventDefinition(String activityName)
+    {
+        if (getActivityCards().size() > 0)
+        {
+            TSActivityView v = getActivityCards().get(activityName);
+            if (v != null)
+            {
+                return getActivityEvent(activityName);
+            }
+        }
+
+        return null;
+    }
+
     public EventDefinition getActivityEvent(String activityCardName)
     {
         TSActivityView av = activityCards.get(activityCardName);

@@ -11,6 +11,8 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 
+import org.web3j.protocol.core.methods.response.EthTransaction;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -38,4 +40,5 @@ public interface TransactionRepositoryType {
 	Realm getRealmInstance(Wallet wallet);
 
 	RealmAuxData fetchCachedEvent(String walletAddress, String eventKey);
+	Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp);
 }

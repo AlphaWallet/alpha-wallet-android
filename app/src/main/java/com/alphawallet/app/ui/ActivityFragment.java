@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -58,6 +59,9 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private RealmResults<RealmAuxData> auxRealmUpdates;
     private String realmId;
     private long eventTimeFilter;
+    private final Handler handler = new Handler();
+    private boolean checkTimer;
+    private int lastPos;
 
     @Nullable
     @Override
@@ -158,8 +162,8 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void initViews(View view)
     {
-        adapter = new ActivityAdapter(this::onActivityClick, this::onEventClick, viewModel.getTokensService(),
-                viewModel.provideTransactionsInteract(), viewModel.getAssetDefinitionService(), this);
+        adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.provideTransactionsInteract(),
+                viewModel.getAssetDefinitionService(), this);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         listView = view.findViewById(R.id.list);
@@ -182,16 +186,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         adapter.setDefaultWallet(wallet);
     }
 
-    private void onActivityClick(View view, Transaction transaction)
-    {
-        viewModel.showDetails(view.getContext(), transaction);
-    }
-
-    private void onEventClick(View view, String eventKey)
-    {
-        //
-    }
-
     private void showEmptyTx()
     {
         if (adapter.getItemCount() == 0)
@@ -203,20 +197,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         {
             systemView.hide();
         }
-    }
-
-    /**
-     * 1. ListView + generic update
-     * 2. Move transaction update to tokensService
-     * 2. Fetch transactions from chain (?)
-     * 3. Fetch events relating to the user from contracts
-     * 4.
-     */
-
-    @Override
-    public void onClick(View v)
-    {
-
     }
 
     private void refreshTransactionList()
@@ -263,11 +243,34 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         {
             viewModel.prepare();
         }
+
+        checkTimer = true;
+        lastPos = 0;
     }
 
     @Override
     public void fetchMoreData(long latestDate)
     {
-        viewModel.fetchMoreTransactions(latestDate);
+        if (checkTimer)
+        {
+            viewModel.fetchMoreTransactions(latestDate);
+            checkTimer = false;
+            handler.postDelayed(() -> {
+                checkTimer = true;
+            }, 5*DateUtils.SECOND_IN_MILLIS); //restrict checking for previous transactions every 5 seconds
+        }
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        //open exchange dialog
+        ((HomeActivity)getActivity()).openExchangeDialog();
+    }
+
+    public void resetTransactions()
+    {
+        //called when we just refreshed the database
+        refreshTransactionList();
     }
 }

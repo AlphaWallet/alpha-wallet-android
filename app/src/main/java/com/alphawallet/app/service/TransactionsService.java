@@ -1,32 +1,35 @@
 package com.alphawallet.app.service;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
 
+import org.web3j.protocol.Web3j;
+
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.service.TokensService.PENDING_TIME_LIMIT;
 
 /**
  * Created by JB on 8/07/2020.
@@ -39,6 +42,7 @@ public class TransactionsService
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
     private final TransactionLocalSource transactionsCache;
+    private final Context context;
     private String currentAddress;
 
     @Nullable
@@ -50,13 +54,15 @@ public class TransactionsService
                                PreferenceRepositoryType preferenceRepositoryType,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
-                               TransactionLocalSource transactionsCache) {
+                               TransactionLocalSource transactionsCache,
+                               Context ctx) {
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepositoryType;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
         this.currentAddress = preferenceRepository.getCurrentWalletAddress();
+        this.context = ctx;
 
         fetchTransactions();
     }
@@ -85,12 +91,18 @@ public class TransactionsService
                 if (t.isEthereum()) System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
-                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck, t.txSync)
+                        transactionsClient.storeNewTransactions(currentAddress, network, t.lastBlockCheck)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
             }
         }
+    }
+
+    public Single<TransactionMeta[]> fetchAndStoreTransactions(int chainId, long lastTxTime)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+        return transactionsClient.fetchMoreTransactions(currentAddress, network, lastTxTime);
     }
 
     private List<Integer> getPendingChains()
@@ -137,6 +149,11 @@ public class TransactionsService
         {
             token.lastBlockCheck = Long.parseLong(placeHolder.blockNumber);
             token.lastTxTime = placeHolder.timeStamp * 1000; //update last transaction received time
+
+            if (placeHolder.nonce == -1)
+            {
+                context.sendBroadcast(new Intent(C.RESET_TRANSACTIONS));
+            }
         }
 
         //update token details
@@ -182,10 +199,20 @@ public class TransactionsService
         {
             if (tx.chainId == chainId)
             {
-                TokenRepository.getWeb3jService(tx.chainId).ethGetTransactionByHash(tx.hash)
-                        .sendAsync().thenAccept(txDetails -> {
+                final String currentWallet = currentAddress;
+                Web3j web3j = TokenRepository.getWeb3jService(tx.chainId);
+                web3j.ethGetTransactionByHash(tx.hash).sendAsync().thenAccept(txDetails -> {
                     org.web3j.protocol.core.methods.response.Transaction fetchedTx = txDetails.getTransaction().orElseThrow(); //try to read the transaction data
-                    //either still pending or written, take no action
+                    //if transaction is complete; record it here
+                    if (fetchedTx.getBlockNumber() != null && fetchedTx.getBlockNumber().compareTo(BigInteger.ZERO) > 0)
+                    {
+                        //get timestamp and write tx
+                        EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
+                                .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), txDetails, ethBlock.getBlock().getTimestamp().longValue()))
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe().isDisposed();
+                    }
                 }).exceptionally(throwable -> {
                     String c1 = throwable.getMessage(); //java.util.NoSuchElementException: No value present
                     if (!TextUtils.isEmpty(c1) && c1.contains(NO_TRANSACTION_EXCEPTION))

@@ -1,6 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.graphics.PorterDuff;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,11 +9,11 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -21,7 +21,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTransactionClickListener;
+import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
@@ -51,13 +51,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final RelativeLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
     private final AssetDefinitionService assetService;
-    private final OnTransactionClickListener onTransactionClickListener;
 
     private Transaction transaction;
     private String defaultAddress;
+    private boolean fromTokenView;
 
-    public TransactionHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs,
-                             OnTransactionClickListener txClickListener) {
+    public TransactionHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs)
+    {
         super(resId, parent);
 
         if (resId == R.layout.item_recent_transaction) {
@@ -76,7 +76,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         tokensService = service;
         transactionsInteract = interact;
         assetService = svs;
-        onTransactionClickListener = txClickListener;
         itemView.setOnClickListener(this);
     }
 
@@ -84,6 +83,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     public void bind(@Nullable TransactionMeta data, @NonNull Bundle addition) {
         defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         supplemental.setText("");
+        fromTokenView = false;
 
         //fetch data from database
         String hash = data.hash;
@@ -133,7 +133,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             setFailed();
             tokenIcon.setStatusIcon(StatusType.REJECTED);
-            pendingSpinner.setVisibility(View.GONE);
             address.setText(R.string.tx_rejected);
         }
         else if (transaction.blockNumber.equals("0"))
@@ -141,13 +140,17 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
-            pendingSpinner.setVisibility(View.VISIBLE);
         }
         else if (transactionBackground != null)
         {
-            pendingSpinner.setVisibility(View.GONE);
             transactionBackground.setBackgroundResource(R.color.white);
         }
+    }
+
+    @Override
+    public void setFromTokenView()
+    {
+        fromTokenView = true;
     }
 
     private int getSupplementalColour(String supplementalTxt)
@@ -220,10 +223,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     }
 
     @Override
-    public void onClick(View view) {
-        if (onTransactionClickListener != null) {
-            onTransactionClickListener.onTransactionClick(view, transaction);
-        }
+    public void onClick(View view)
+    {
+        Intent intent = new Intent(getContext(), TokenActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, transaction.hash);
+        intent.putExtra(C.EXTRA_STATE, fromTokenView);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getContext().startActivity(intent);
     }
 
     private void setFailed()

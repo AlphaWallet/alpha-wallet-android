@@ -5,5 +5,5 @@ package com.alphawallet.app.ui.widget.entity;
  */
 public enum StatusType
 {
-    SENT, RECEIVE, PENDING, FAILED, REJECTED, CONSTRUCTOR, SELF
+    SENT, RECEIVE, PENDING, FAILED, REJECTED, CONSTRUCTOR, SELF, NONE
 }

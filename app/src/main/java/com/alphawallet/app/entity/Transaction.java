@@ -7,11 +7,12 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
-import com.alphawallet.app.entity.tokens.Token;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
@@ -19,8 +20,7 @@ import org.web3j.crypto.Sign;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -332,23 +332,16 @@ public class Transaction implements Parcelable {
 		dest.writeParcelableArray(operations, flags);
 	}
 
-	public static void sortTransactions(List<Transaction> txList)
-	{
-		Collections.sort(txList, (e1, e2) -> {
-			long w1 = e1.timeStamp;
-			long w2 = e2.timeStamp;
-			if (w1 > w2) return -1;
-			if (w1 < w2) return 1;
-			return 0;
-		});
-	}
-
 	public boolean isRelated(String contractAddress, String walletAddress)
 	{
 		TransactionOperation operation = operations == null
 				|| operations.length == 0 ? null : operations[0];
 
-		if (walletAddress.equalsIgnoreCase(contractAddress)) //transactions sent from or sent to the main currency account
+		if (contractAddress.equals("eth"))
+		{
+			return (input.equals("0x") || from.equals(walletAddress));
+		}
+		else if (walletAddress.equalsIgnoreCase(contractAddress)) //transactions sent from or sent to the main currency account
 		{
 			return from.equalsIgnoreCase(walletAddress) || to.equalsIgnoreCase(walletAddress);
 		}
@@ -357,7 +350,6 @@ public class Transaction implements Parcelable {
 			if (to.equalsIgnoreCase(contractAddress)) return true;
 			else return operation != null && (operations[0].contract.address.equalsIgnoreCase(contractAddress));
 		}
-
 	}
 
     public TransactionContract getOperation()
@@ -582,5 +574,43 @@ public class Transaction implements Parcelable {
 			TransactionOperation operation = operations[0];
 			return operation.getRawValue();
 		}
+    }
+
+	public StatusType getTransactionStatus()
+	{
+		if (error != null && error.equals("1"))
+		{
+			return StatusType.FAILED;
+		}
+		else if (blockNumber.equals("-1"))
+		{
+			return StatusType.REJECTED;
+		}
+		else if (blockNumber.equals("0"))
+		{
+			return StatusType.PENDING;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public void completeSetup(String walletAddress)
+	{
+		if (operations.length > 0)
+		{
+			TransactionOperation op = operations[0];
+			if (op.contract != null) op.contract.completeSetup(walletAddress.toLowerCase(), this);
+		}
+	}
+
+    public void addTransactionElements(Map<String, RealmAuxData.EventResult> resultMap)
+    {
+    	resultMap.put("__hash", new RealmAuxData.EventResult("", hash));
+		resultMap.put("__to", new RealmAuxData.EventResult("", to));
+		resultMap.put("__from", new RealmAuxData.EventResult("", from));
+		resultMap.put("__value", new RealmAuxData.EventResult("", value));
+		resultMap.put("__chainId", new RealmAuxData.EventResult("", String.valueOf(chainId)));
     }
 }

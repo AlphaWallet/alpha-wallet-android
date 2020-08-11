@@ -9,7 +9,6 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.router.TransactionDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
@@ -22,12 +21,10 @@ class Erc20DetailModule {
     @Provides
     Erc20DetailViewModelFactory provideErc20DetailViewModelFactory(MyAddressRouter myAddressRouter,
                                                                    FetchTransactionsInteract fetchTransactionsInteract,
-                                                                   TransactionDetailRouter transactionDetailRouter,
                                                                    AssetDefinitionService assetDefinitionService,
                                                                    TokensService tokensService) {
         return new Erc20DetailViewModelFactory(myAddressRouter,
                 fetchTransactionsInteract,
-                transactionDetailRouter,
                 assetDefinitionService,
                 tokensService);
     }
@@ -35,11 +32,6 @@ class Erc20DetailModule {
     @Provides
     MyAddressRouter provideMyAddressRouter() {
         return new MyAddressRouter();
-    }
-
-    @Provides
-    TransactionDetailRouter provideTransactionDetailRouter() {
-        return new TransactionDetailRouter();
     }
 
     @Provides

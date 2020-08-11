@@ -61,8 +61,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private TokenCardMeta tokenMeta;
 
     private FunctionButtonBar functionBar;
-    private LinearLayout noTransactionsLayout;
-    private TextView noTransactionsSubText;
     private RecyclerView tokenView;
     private CertifiedToolbarView toolbarView;
 
@@ -107,14 +105,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (activityHistoryList != null) return;
         activityHistoryList = findViewById(R.id.history_list);
-        ActivityAdapter adapter = new ActivityAdapter(this::onTransactionClick, this::onEventClick, viewModel.getTokensService(),
-                viewModel.getTransactionsInteract(), viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
+        ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
+                viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
 
         adapter.setDefaultWallet(wallet);
 
+        String tokenAddress = token.isEthereum() ? "eth" : token.getAddress();
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token.tokenInfo.chainId, token.getAddress(), HISTORY_LENGTH);
+                token.tokenInfo.chainId, tokenAddress, HISTORY_LENGTH);
     }
 
     private void setUpTokenView()
@@ -193,29 +192,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void onTransactionClick(View view, Transaction transaction) {
-        viewModel.showDetails(this, wallet, transaction);
-    }
-
-    private void onEventClick(View view, String eventKey)
-    {
-        //
-    }
-
-    private void initViews(Wallet wallet) {
-        if (noTransactionsLayout != null) return;
-        noTransactionsLayout = findViewById(R.id.layout_no_recent_transactions);
-        noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
-
-        if (token.addressMatches(wallet.address)) {
-            noTransactionsSubText.setText(getString(R.string.no_recent_transactions_subtext,
-                    getString(R.string.no_recent_transactions_subtext_ether)));
-        } else {
-            noTransactionsSubText.setText(getString(R.string.no_recent_transactions_subtext,
-                    getString(R.string.no_recent_transactions_subtext_tokens)));
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
@@ -256,7 +232,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             getIntentData();
             setupViewModel();
-            initViews(wallet);
             setUpTokenView();
             setUpRecentTransactionsView();
         }

@@ -3,42 +3,25 @@ package com.alphawallet.app.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.support.annotation.Nullable;
+import android.content.Intent;
 import android.text.TextUtils;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.TransactionMeta;
-import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.interact.FetchTokensInteract;
-import com.alphawallet.token.entity.SigReturnType;
-import com.alphawallet.token.entity.TSAction;
-import com.alphawallet.token.entity.XMLDsigDescriptor;
-
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.interact.AddTokenInteract;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
-import com.alphawallet.app.router.TransactionDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.token.tools.TokenDefinition;
+import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.token.entity.SigReturnType;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
 
-import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 public class Erc20DetailViewModel extends BaseViewModel {
 
@@ -48,18 +31,15 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
                                 FetchTransactionsInteract fetchTransactionsInteract,
-                                TransactionDetailRouter transactionDetailRouter,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService) {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
     }
@@ -86,10 +66,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public AssetDefinitionService getAssetDefinitionService() {
         return this.assetDefinitionService;
-    }
-
-    public void showDetails(Context context, Wallet wallet, Transaction transaction) {
-        transactionDetailRouter.open(context, transaction, wallet);
     }
 
     public void showSendToken(Context ctx, Wallet wallet, Token token)

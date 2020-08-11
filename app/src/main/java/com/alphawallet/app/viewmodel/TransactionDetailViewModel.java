@@ -11,15 +11,27 @@ import android.text.TextUtils;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
+import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.ConfirmationActivity;
+
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.EthTransaction;
+import org.web3j.protocol.core.methods.response.Log;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -27,15 +39,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.ConfirmationActivity;
-import com.alphawallet.app.ui.TransactionDetailActivity;
-import com.alphawallet.app.util.Utils;
-
-import org.web3j.crypto.RawTransaction;
-
-import java.math.BigInteger;
-import java.util.concurrent.TimeUnit;
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
 public class TransactionDetailViewModel extends BaseViewModel {
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -46,10 +50,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private final MutableLiveData<BigInteger> lastestBlock = new MutableLiveData<>();
     private final MutableLiveData<Transaction> lastestTx = new MutableLiveData<>();
+    private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
     public LiveData<BigInteger> latestBlock() {
         return lastestBlock;
     }
     public LiveData<Transaction> lastestTx() { return lastestTx; }
+    public LiveData<Transaction> onTransaction() { return transaction; }
     private String walletAddress;
 
     @Nullable
@@ -182,5 +188,40 @@ public class TransactionDetailViewModel extends BaseViewModel {
         intent.putExtra(C.TOKEN_TYPE, type.ordinal());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(intent);
+    }
+
+    public void fetchTransaction(Wallet wallet, String txHash, int chainId)
+    {
+        Transaction tx = fetchTransactionsInteract.fetchCached(wallet.address, txHash);
+        if (tx == null || tx.gas.startsWith("0x"))
+        {
+            //fetch Transaction from chain
+            Web3j web3j = getWeb3jService(chainId);
+            disposable = EventUtils.getTransactionDetails(txHash, web3j)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(ethTx -> storeTx(ethTx, wallet, web3j), this::onError);
+        }
+        else
+        {
+            transaction.postValue(tx);
+        }
+    }
+
+    private void storeTx(EthTransaction rawTx, Wallet wallet, Web3j web3j)
+    {
+        //need to fetch the tx block time
+        if (rawTx == null)
+        {
+            error.postValue(new ErrorEnvelope("no transaction"));
+            return;
+        }
+
+        org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
+        disposable = EventUtils.getBlockDetails(ethTx.getBlockHash(), web3j)
+                .map(ethBlock -> fetchTransactionsInteract.storeRawTx(wallet, rawTx, ethBlock.getBlock().getTimestamp().longValue()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(transaction::postValue, this::onError);
     }
 }

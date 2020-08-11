@@ -160,28 +160,6 @@ public class TokensService
         return tokenRepository.fetchAllTokenMetas(new Wallet(currentAddress), networkFilter, searchString);
     }
 
-    /**
-     * Fetches token held on any account with live balance
-     *
-     * @param wallet
-     * @param chainId
-     * @param address
-     * @return
-     */
-    public Single<Token> getLiveToken(Wallet wallet, int chainId, String address)
-    {
-        final String tokenAddress = (TextUtils.isEmpty(address)) ? wallet.address : address;
-        final Token t = tokenRepository.fetchToken(chainId, wallet.address, tokenAddress.toLowerCase());
-        return Single.fromCallable(() ->
-        {
-            boolean hasUpdate = tokenRepository.updateTokenBalance(wallet.address, chainId, tokenAddress.toLowerCase(), t.getInterfaceSpec())// .fetchActiveTokenBalance(currentAddress, t)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()).blockingGet();
-
-            return hasUpdate ? tokenRepository.fetchToken(chainId, wallet.address, tokenAddress.toLowerCase()) : t;
-        });
-    }
-
     public List<Token> getAllAtAddress(String addr)
     {
         List<Token> tokens = new ArrayList<>();
@@ -202,6 +180,11 @@ public class TokensService
             tokenValueMap.clear();
             tokenUpdateList.clear();
             pendingChainMap.clear();
+            if (eventTimer != null && !eventTimer.isDisposed())
+            {
+                eventTimer.dispose();
+                eventTimer = null;
+            }
         }
     }
 
@@ -332,16 +315,18 @@ public class TokensService
         nextOpenSeaCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
         openSeaCount = 0;
 
+        if (eventTimer != null && !eventTimer.isDisposed())
+        {
+            eventTimer.dispose();
+        }
+
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) balanceCheckDisposable.dispose();
         if (tokenCheckDisposable != null && !tokenCheckDisposable.isDisposed()) tokenCheckDisposable.dispose();
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
 
-        if (eventTimer == null || eventTimer.isDisposed())
-        {
-            eventTimer = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+        eventTimer = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkTokensBalance()).subscribe();
-        }
     }
 
     private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
@@ -406,7 +391,7 @@ public class TokensService
     {
         openSeaCount++;
         nextOpenSeaCheck = System.currentTimeMillis() + OPENSEA_CHECK_INTERVAL;
-        Wallet wallet = new Wallet(currentAddress);
+        final Wallet wallet = new Wallet(currentAddress);
         NetworkInfo info = openSeaCount != OPENSEA_RINKEBY_CHECK ? ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
         if (BuildConfig.DEBUG) Log.d("OPENSEA", "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
         tokenCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
@@ -423,10 +408,11 @@ public class TokensService
     {
         //mark tokens as checked
         updateCheckTime(checkedERC721Tokens);
+        final String walletAddress = currentAddress;
 
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
-        tokenCheckDisposable = tickerService.getTokensOnNetwork(info, currentAddress, this)
-                .flatMap(tokens -> tokenRepository.addERC20(new Wallet(currentAddress), tokens))
+        tokenCheckDisposable = tickerService.getTokensOnNetwork(info, walletAddress, this)
+                .flatMap(tokens -> tokenRepository.addERC20(new Wallet(walletAddress), tokens))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::finishCheckChain, this::onERC20Error);

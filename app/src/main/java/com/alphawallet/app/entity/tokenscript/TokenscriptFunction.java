@@ -613,7 +613,7 @@ public abstract class TokenscriptFunction
 
         if (attr.syntax == TokenDefinition.Syntax.Boolean)
         {
-            if (res.equalsIgnoreCase("TRUE")) val = BigInteger.ONE;
+            if (!TextUtils.isEmpty(res) && res.equalsIgnoreCase("TRUE")) val = BigInteger.ONE;
             else val = BigInteger.ZERO;
         }
         else if (attr.syntax == TokenDefinition.Syntax.NumericString && attr.as != As.Address)
@@ -648,10 +648,9 @@ public abstract class TokenscriptFunction
      * @return
      */
     public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress contractAddress, Attribute attr,
-                                                                 BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf, long lastTransactionTime)
+                                                                 BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         return Observable.fromCallable(() -> {
-            long txUpdateTime = lastTransactionTime;
             TransactionResult transactionResult = new TransactionResult(contractAddress.chainId, contractAddress.address, tokenId, attr);
             Function transaction = generateTransactionFunction(token, tokenId, definition, attr.function, attrIf);
 
@@ -660,7 +659,6 @@ public abstract class TokenscriptFunction
             {
                 //couldn't validate all the input param values
                 result = "";
-                txUpdateTime = -1;
             }
             else
             {
@@ -668,7 +666,7 @@ public abstract class TokenscriptFunction
                 result = callSmartContractFunction(TokenRepository.getWeb3jService(contractAddress.chainId), transaction, contractAddress.address, ZERO_ADDRESS);
             }
 
-            transactionResult.result = handleTransactionResult(transactionResult, transaction, result, attr, txUpdateTime);
+            transactionResult.result = handleTransactionResult(transactionResult, transaction, result, attr, System.currentTimeMillis());
             return transactionResult;
         });
     }
@@ -802,16 +800,17 @@ public abstract class TokenscriptFunction
             ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
             long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
-            if (cachedResult.resultTime > 0 && (itemView || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
+            if ((itemView || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }
             else  //if cached value is invalid or if value is dynamic
             {
-                return fetchResultFromEthereum(token, useAddress, attr, tokenId, td, attrIf, lastTxUpdate)       // Fetch function result from blockchain
+                final String walletAddress = attrIf.getWalletAddr();
+                return fetchResultFromEthereum(token, useAddress, attr, tokenId, td, attrIf)       // Fetch function result from blockchain
                         .map(transactionResult -> addParseResultIfValid(token, tokenId, attr, transactionResult))// only cache live transaction result
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
-                        .map(attrIf::storeAuxData)                                     // store new data
+                        .map(txResult -> attrIf.storeAuxData(walletAddress, txResult))                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
             }
         }

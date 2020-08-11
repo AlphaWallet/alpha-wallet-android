@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -34,11 +35,15 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.ConfirmationActivity;
+import com.alphawallet.app.ui.Erc20DetailActivity;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
+import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
@@ -53,6 +58,8 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -475,5 +482,46 @@ public class TokenFunctionViewModel extends BaseViewModel
     public FetchTransactionsInteract getTransactionsInteract()
     {
         return fetchTransactionsInteract;
+    }
+
+    public void showTransactionDetail(Context ctx, String txHash, int chainId)
+    {
+        Intent intent = new Intent(ctx, TransactionDetailActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, txHash);
+        intent.putExtra(C.EXTRA_CHAIN_ID, chainId);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ctx.startActivity(intent);
+    }
+
+    public Transaction fetchTransaction(String txHash)
+    {
+        return fetchTransactionsInteract.fetchCached(wallet.address, txHash);
+    }
+
+    @Override
+    public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
+    {
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
+        Intent intent = new Intent(context, Erc20DetailActivity.class);
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, !token.isEthereum());
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
+        intent.putExtra(C.EXTRA_SYMBOL, symbol);
+        intent.putExtra(C.EXTRA_DECIMALS, decimals);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.putExtra(C.EXTRA_HAS_DEFINITION, hasDefinition);
+        context.startActivity(intent);
+    }
+
+    @Override
+    public void showTokenList(Context context, Token token)
+    {
+        Intent intent = new Intent(context, AssetDisplayActivity.class);
+        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivity(intent);
     }
 }

@@ -51,6 +51,7 @@ import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TSActivityView;
 import com.alphawallet.token.entity.TSSelection;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptContext;
@@ -66,6 +67,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
@@ -160,6 +162,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private final TokenscriptFunction tokenscriptUtility;
     private final EventUtils eventUtils;
+
+    @Nullable
+    private Disposable checkEventDisposable;
 
     private final Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
 
@@ -361,19 +366,48 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         boolean optimised = false;
         if (attr.function == null) return false;
         Token checkToken = tokensService.getToken(contract.chainId, contract.address);
-        if (attr.function.method.equals("balanceOf") && checkToken != null)
+        if (checkToken == null) return false;
+        boolean hasNoParams = attr.function.parameters == null || attr.function.parameters.size() == 0;
+
+        switch (attr.function.method)
         {
-            //ensure the arg check for this function call is checking the correct balance address
-            for (MethodArg arg : attr.function.parameters)
-            {
-                if (arg.parameterType.equals("address") && arg.element.ref.equals("ownerAddress"))
+            case "balanceOf":
+                //ensure the arg check for this function call is checking the correct balance address
+                for (MethodArg arg : attr.function.parameters)
                 {
-                    transactionResult.result = checkToken.balance.toString();
+                    if (arg.parameterType.equals("address") && arg.element.ref.equals("ownerAddress"))
+                    {
+                        transactionResult.result = checkToken.balance.toString();
+                        transactionResult.resultTime = checkToken.updateBlancaTime;
+                        optimised = true;
+                        break;
+                    }
+                }
+                break;
+            case "name":
+                if (hasNoParams)
+                {
+                    transactionResult.result = checkToken.tokenInfo.name;
                     transactionResult.resultTime = checkToken.updateBlancaTime;
                     optimised = true;
-                    break;
                 }
-            }
+                break;
+            case "symbol":
+                if (hasNoParams)
+                {
+                    transactionResult.result = checkToken.tokenInfo.symbol;
+                    transactionResult.resultTime = checkToken.updateBlancaTime;
+                    optimised = true;
+                }
+                break;
+            case "decimals":
+                if (hasNoParams)
+                {
+                    transactionResult.result = String.valueOf(checkToken.tokenInfo.decimals);
+                    transactionResult.resultTime = checkToken.updateBlancaTime;
+                    optimised = true;
+                }
+                break;
         }
 
         return optimised;
@@ -908,7 +942,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         assetLoadingLock.release();
         updateEventBlockTimes();
-        startEventListeners();
+        startEventListener();
     }
 
     private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
@@ -1068,8 +1102,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void checkAddToEventList(EventDefinition ev)
     {
-        int evChainId = ev.contract.getfirstChainId();
-        String evAddress = ev.contract.getFirstAddress();
         //check we haven't already added the event
         boolean found = false;
         for (EventDefinition evCheck : eventList)
@@ -1084,19 +1116,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (!found) eventList.add(ev);
     }
 
-    private void stopEventListener()
+    public void stopEventListener()
     {
-        if (eventListener != null) eventListener.dispose();
-        //blank all events
-        for (EventDefinition ev : eventList)
-        {
-            ev.readBlock = BigInteger.ZERO;
-        }
+        if (eventListener != null && !eventListener.isDisposed()) eventListener.dispose();
+        if (checkEventDisposable != null && !checkEventDisposable.isDisposed()) checkEventDisposable.dispose();
     }
 
-    public void startEventListeners()
+    public void startEventListener()
     {
-        if (eventListener != null) eventListener.dispose();
+        if (assetLoadingLock.availablePermits() == 0) return;
+
+        if (eventListener != null && !eventListener.isDisposed()) eventListener.dispose();
         eventListener =  Observable.interval(0, CHECK_TX_LOGS_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> {
                     checkEvents()
@@ -1113,50 +1143,51 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Completable.fromAction(() -> {
             for (EventDefinition ev : eventList)
             {
-                try
-                {
-                    getEvents(ev);
-                }
-                catch (Exception e)
-                {
-                    //TODO: Handle event issues
-                    e.printStackTrace();
-                }
+                getEvent(ev);
             }
         });
     }
 
-    private void getEvents(EventDefinition ev) throws Exception
+    private void getEvent(EventDefinition ev)
     {
-        int chainId = ev.getEventChainId();
-        String address = ev.getEventContractAddress();
-
-        Token originToken = tokensService.getToken(chainId, address);
-
-        //Some events don't require a token to be present
-        if (originToken == null) return;
-
-        final EthFilter filter = eventUtils.generateLogFilter(ev, originToken, this);
-
-        //don't process an invalid filter - eg if filter requires a tokenId (NFT) and balance is zero
-        if (filter == null) return;
-
         try
         {
+            EthFilter filter = getEventFilter(ev);
+            if (filter == null) return;
             eventConnection.acquire(); //prevent overlapping event calls
-            Web3j web3j = getWeb3jService(chainId);
-            EthLog ethLogs = web3j.ethGetLogs(filter).send();
-            processLogs(ev, ethLogs.getLogs());
+            final String walletAddress = tokensService.getCurrentAddress();
+            Web3j web3j = getWeb3jService(ev.getEventChainId());
+
+            checkEventDisposable = handleLogs(ev, filter, web3j, walletAddress)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.computation())
+                    .subscribe();
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-        finally
-        {
-            eventConnection.release();
-        }
+    }
 
+    private Single<String> handleLogs(EventDefinition ev, EthFilter filter, Web3j web3j, final String walletAddress)
+    {
+        return Single.fromCallable(() -> {
+            String txHash = "";
+            try
+            {
+                EthLog ethLogs = web3j.ethGetLogs(filter).send();
+                txHash = processLogs(ev, ethLogs.getLogs(), walletAddress);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
+                eventConnection.release();
+            }
+            return txHash;
+        });
         //More elegant, but requires a private node
 //        return web3j.ethLogFlowable(filter)
 //                .subscribeOn(Schedulers.io())
@@ -1167,20 +1198,36 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 //        }, this::onLogError);
     }
 
-    private void processLogs(EventDefinition ev, List<EthLog.LogResult> logs)
+    private EthFilter getEventFilter(EventDefinition ev) throws Exception
     {
-        if (logs.size() == 0) return; //early return
+        int chainId = ev.getEventChainId();
+        String address = ev.getEventContractAddress();
+
+        Token originToken = tokensService.getToken(chainId, address);
+
+        //Some events don't require a tokenId to be present, but if we don't have the contract then don't proceed. TODO: Check this assumption. Could be a contract with events with no token
+        if (originToken == null) return null;
+
+        return eventUtils.generateLogFilter(ev, originToken, this);
+    }
+
+    private String processLogs(EventDefinition ev, List<EthLog.LogResult> logs, String walletAddress)
+    {
+        if (logs.size() == 0) return ""; //early return
         int chainId = ev.contract.addresses.keySet().iterator().next();
         String eventAddress = ev.contract.getFirstAddress();
         Web3j web3j = getWeb3jService(chainId);
 
+        String firstTxHash = "";
+
         for (EthLog.LogResult ethLog : logs)
         {
             String txHash = ((Log)ethLog.get()).getTransactionHash();
+            if (TextUtils.isEmpty(firstTxHash)) firstTxHash = txHash;
             String selectVal = eventUtils.getSelectVal(ev, ethLog);
             EthBlock txBlock = eventUtils.getBlockDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
             //do we need to fetch transaction from chain or do we have it already
-            com.alphawallet.app.entity.Transaction tx = transactionsCache.fetchTransaction(new Wallet(tokensService.getCurrentAddress()), txHash);
+            com.alphawallet.app.entity.Transaction tx = transactionsCache.fetchTransaction(new Wallet(walletAddress), txHash);
             long blockTime = txBlock.getBlock().getTimestamp().longValue();
             BigInteger blockNumber = ((Log)ethLog.get()).getBlockNumber();
 
@@ -1188,17 +1235,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 //fetchTx & store, we will need the transaction info for the view data
                 eventUtils.getTransactionDetails(txHash, web3j)
-                        .observeOn(Schedulers.io())
-                        .subscribeOn(Schedulers.computation())
-                        .subscribe(ethTx -> transactionsCache.storeRawTx(new Wallet(tokensService.getCurrentAddress()), ethTx, blockTime))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.computation())
+                        .subscribe(ethTx -> transactionsCache.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
                         .isDisposed();
             }
 
-            storeLatestEventBlockTime(chainId, eventAddress, ev.type.name, ev.filter, blockNumber, blockTime);
+            //Should store the latest event value
+            storeLatestEventBlockTime(walletAddress, chainId, eventAddress, ev.type.name, ev.filter, blockNumber, blockTime);
 
             if (ev.parentAttribute != null)
             {
-                storeEventValue(ev, ethLog, ev.parentAttribute, blockTime, selectVal);
+                storeEventValue(walletAddress, ev, ethLog, ev.parentAttribute, blockTime, selectVal);
             }
             else
             {
@@ -1207,14 +1255,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 //all the elements in the sequence (can use a CSV string)
                 //block#, timeStamp
                 //TODO: normalise this in a new database to allow it to be indexable
-                storeActivityValue(ev, ethLog, blockTime, ev.activityName);
+                storeActivityValue(walletAddress, ev, ethLog, blockTime, ev.activityName);
             }
         }
+
+        return firstTxHash;
     }
 
-    private void storeLatestEventBlockTime(int chainId, String eventAddress, String namedType, String filter, BigInteger readBlock, long timeStamp)
+    private void storeLatestEventBlockTime(String walletAddress, int chainId, String eventAddress, String namedType, String filter, BigInteger readBlock, long timeStamp)
     {
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
             String databaseKey = TokensRealmSource.eventBlockKey(chainId, eventAddress, namedType, filter);
             realm.executeTransaction(r -> {
@@ -1235,7 +1285,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void storeActivityValue(EventDefinition ev, EthLog.LogResult log, long blockTime, String activityName)
+    private void storeActivityValue(String walletAddress, EventDefinition ev, EthLog.LogResult log, long blockTime, String activityName)
     {
         //split out all the event data
         String valueList = eventUtils.getAllTopics(ev, log);
@@ -1245,12 +1295,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //store this data
         String txHash = ((Log) log.get()).getTransactionHash();
-        storeAuxData(txHash, BigInteger.ZERO, valueList, activityName, eventContractAddress, ev.type.name, blockTime); //store the event itself
+        storeAuxData(walletAddress, txHash, BigInteger.ZERO, valueList, activityName, eventContractAddress, ev.type.name, blockTime); //store the event itself
     }
 
-    private void storeAuxData(String txHash, BigInteger tokenId, String eventData, String activityName, ContractAddress cAddr, String eventName, long blockTime)
+    private void storeAuxData(String walletAddress, String txHash, BigInteger tokenId, String eventData, String activityName, ContractAddress cAddr, String eventName, long blockTime)
     {
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
             String databaseKey = TokensRealmSource.eventKey(txHash, eventName);
             realm.executeTransaction(r -> {
@@ -1273,32 +1323,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public void storeEventData(TransactionResult tResult)
-    {
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
-        {
-            String databaseKey = eventKey(tResult);
-            realm.executeTransaction(r -> {
-                RealmAuxData realmToken = realm.where(RealmAuxData.class)
-                        .equalTo("instanceKey", databaseKey)
-                        .findFirst();
-                if (realmToken == null) realmToken = realm.createObject(RealmAuxData.class, databaseKey);
-
-                realmToken.setResultTime(tResult.resultTime);
-                realmToken.setResult(tResult.result);
-                realmToken.setChainId(tResult.contractChainId);
-                realmToken.setFunctionId(tResult.method);
-                realmToken.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
-                realmToken.setResultReceivedTime(System.currentTimeMillis());
-            });
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private void storeEventValue(EventDefinition ev, EthLog.LogResult log, Attribute attr,
+    private void storeEventValue(String walletAddress, EventDefinition ev, EthLog.LogResult log, Attribute attr,
                                  long blockTime, String selectVal)
     {
         //store result
@@ -1328,37 +1353,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ContractAddress eventContractAddress = new ContractAddress(ev.getEventChainId(),
                 ev.getEventContractAddress());
         txResult = getFunctionResult(eventContractAddress, attr, tokenId);
-
-        txResult.resultTime = blockTime;
         txResult.result = attr.getSyntaxVal(selectVal);
 
-        storeAuxData(txHash, tokenId, txResult.result, ev.attributeName, eventContractAddress, ev.type.name, blockTime);
-    }
-
-    /*public boolean checkTokenForNewEvent(Token token)
-    {
-        boolean hasEvent = false;
-        for (EventDefinition ev : eventList)
+        //Updates the entry for the attribute if required
+        if (txResult.resultTime == 0 || blockTime >= txResult.resultTime)
         {
-            if (ev.type == null || ev.contract == null) continue;
-            if (ev.contract.addresses.containsKey(token.tokenInfo.chainId))
-            {
-                if (ev.contract.addresses.get(token.tokenInfo.chainId).contains(token.getAddress().toLowerCase()))
-                {
-                    hasEvent = ev.hasNewEvent;
-                    ev.hasNewEvent = false;
-                    break;
-                }
-            }
+            txResult.resultTime = blockTime;
+            storeAuxData(walletAddress, txResult);
         }
 
-        return hasEvent;
-    }*/
-
-    private void onLogError(Throwable throwable)
-    {
-        System.out.println("Log error: " + throwable.getMessage());
-        throwable.printStackTrace();
+        txResult.resultTime = blockTime;
+        //Always store the event for the event log
+        storeAuxData(walletAddress, txHash, tokenId, txResult.result, ev.attributeName, eventContractAddress, ev.type.name, blockTime);
     }
 
     private boolean allowableExtension(File file)
@@ -2010,66 +2016,36 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     @Override
-    public TransactionResult storeAuxData(TransactionResult tResult)
+    public TransactionResult storeAuxData(String walletAddress, TransactionResult tResult)
     {
-        Completable.complete()
-                .subscribeWith(new DisposableCompletableObserver()
+        if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return tResult;
+        if (tResult.result == null || tResult.resultTime < 0) return tResult;
+        try (Realm realm = realmManager.getRealmInstance(walletAddress))
+        {
+            ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
+            String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
+            RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", databaseKey)
+                    .equalTo("chainId", tResult.contractChainId)
+                    .findFirst();
+
+            realm.executeTransaction(r -> {
+                if (realmToken == null)
                 {
-                    Realm realm = null;
-
-                    @Override
-                    public void onStart()
-                    {
-                        if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
-                        if (tResult.result == null || tResult.resultTime < 0) return;
-                        realm = realmManager.getRealmInstance(tokensService.getCurrentAddress());
-                        ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
-                        String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
-                        RealmAuxData realmToken = realm.where(RealmAuxData.class)
-                                .equalTo("instanceKey", databaseKey)
-                                .equalTo("chainId", tResult.contractChainId)
-                                .findFirst();
-
-                        if (realmToken == null)
-                        {
-                            TransactionsRealmCache.addRealm();
-                            realm.beginTransaction();
-                            createAuxData(realm, tResult, databaseKey);
-                        }
-                        else if (tResult.result != null)
-                        {
-                            TransactionsRealmCache.addRealm();
-                            realm.beginTransaction();
-                            realmToken.setResult(tResult.result);
-                            realmToken.setResultTime(tResult.resultTime);
-                            realmToken.setResultReceivedTime(System.currentTimeMillis());
-                        }
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        if (realm != null)
-                        {
-                            if (realm.isInTransaction())
-                            {
-                                realm.commitTransaction();
-                                TransactionsRealmCache.subRealm();
-                            }
-                            if (!realm.isClosed()) realm.close();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        if (realm != null && !realm.isClosed())
-                        {
-                            if (realm.isInTransaction()) TransactionsRealmCache.subRealm();
-                            realm.close();
-                        }
-                    }
-                }).isDisposed();
+                    createAuxData(realm, tResult, databaseKey);
+                }
+                else if (tResult.result != null)
+                {
+                    realmToken.setResult(tResult.result);
+                    realmToken.setResultTime(tResult.resultTime);
+                    realmToken.setResultReceivedTime(System.currentTimeMillis());
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
         return tResult;
     }

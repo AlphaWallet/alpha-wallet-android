@@ -237,7 +237,7 @@ public abstract class EventUtils
         return topicVal;
     }
 
-    public Single<EthBlock> getBlockDetails(String blockHash, Web3j web3j)
+    public static Single<EthBlock> getBlockDetails(String blockHash, Web3j web3j)
     {
         return Single.fromCallable(() -> {
             EthBlock txResult;
@@ -256,7 +256,7 @@ public abstract class EventUtils
         });
     }
 
-    public Single<EthTransaction> getTransactionDetails(String blockHash, Web3j web3j)
+    public static Single<EthTransaction> getTransactionDetails(String blockHash, Web3j web3j)
     {
         return Single.fromCallable(() -> {
             EthTransaction txResult;

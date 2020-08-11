@@ -96,7 +96,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
     private final Handler handler = new Handler();
-    private int parsePass;
+    private int parsePass = 0;
     private int resolveInputCheckCount;
     private TSAction action;
 
@@ -126,6 +126,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
+        parsePass = 0;
     }
 
     private void displayFunction(String tokenAttrs)
@@ -254,10 +255,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             initViews();
         }
 
-        parsePass = 1;
-        viewModel.getAssetDefinitionService().clearResultMap();
-        args.clear();
-        getAttrs();
+        if (parsePass == 0)
+        {
+            parsePass = 1;
+            viewModel.getAssetDefinitionService().clearResultMap();
+            args.clear();
+            getAttrs();
+        }
     }
 
     private void initViewModel()
@@ -536,23 +540,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         super.onPause();
         viewModel.resetSignDialog();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        super.onSaveInstanceState(savedInstanceState);
-        tokenView.saveState(savedInstanceState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState)
-    {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null)
-        {
-            tokenView.restoreState(savedInstanceState);
-        }
     }
 
     @Override

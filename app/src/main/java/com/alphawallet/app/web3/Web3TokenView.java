@@ -154,7 +154,7 @@ public class Web3TokenView extends WebView
                             }
                         }
                     }
-                    catch (IOException e)
+                    catch (Exception e)
                     {
                         errorLine = "";
                     }

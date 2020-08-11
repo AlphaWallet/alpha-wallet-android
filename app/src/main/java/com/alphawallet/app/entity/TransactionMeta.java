@@ -5,6 +5,8 @@ package com.alphawallet.app.entity;
  * Stormbird in Singapore
  */
 
+import java.util.UUID;
+
 /**
  * Cut down version of transaction which is used to populate the Transaction view adapter data.
  * The actual transaction data is retrieved just-in-time from the database when the user looks at the transaction
@@ -27,6 +29,6 @@ public class TransactionMeta extends ActivityMeta
 
     public long getUID()
     {
-        return hash.hashCode();
+        return UUID.nameUUIDFromBytes((this.hash + "t").getBytes()).getMostSignificantBits();
     }
 }

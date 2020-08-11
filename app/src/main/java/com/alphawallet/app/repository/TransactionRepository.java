@@ -24,6 +24,7 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
@@ -197,6 +198,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return Single.fromCallable(() -> {
 			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, contractAddr);
+			newTx.completeSetup(from.address);
 			inDiskCache.putTransaction(from, newTx);
 			transactionsService.markPending(newTx);
 
@@ -210,6 +212,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 			Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, "");
+			newTx.completeSetup(from.address);
 			inDiskCache.putTransaction(from, newTx);
 			transactionsService.markPending(newTx);
 
@@ -306,5 +309,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public RealmAuxData fetchCachedEvent(String walletAddress, String eventKey)
 	{
 		return inDiskCache.fetchEvent(walletAddress, eventKey);
+	}
+
+	@Override
+	public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+	{
+		return inDiskCache.storeRawTx(wallet, rawTx, timeStamp);
 	}
 }

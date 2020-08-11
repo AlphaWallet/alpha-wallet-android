@@ -215,9 +215,21 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
             instance.executeTransaction(realm -> {
-                RealmTransaction item = instance.createObject(RealmTransaction.class, tx.hash);
-                fill(instance, item, tx);
-                realm.insertOrUpdate(item);
+                RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                        .equalTo("hash", tx.hash)
+                        .findFirst();
+
+                if (realmTx != null)
+                {
+                    deleteOperations(realmTx);
+                }
+                else
+                {
+                    realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+                }
+
+                fill(instance, realmTx, tx);
+                realm.insertOrUpdate(realmTx);
             });
         }
         catch (Exception e)
@@ -227,17 +239,29 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         }
     }
 
-    @Override
-    public void storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+    private boolean alreadyRecorded(Realm instance, String hash)
     {
-        if (rawTx.getResult() == null) return;
+        RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                .equalTo("hash", hash)
+                .findFirst();
+
+        return realmTx != null && !realmTx.getBlockNumber().equals("0");
+    }
+
+    @Override
+    public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+    {
+        if (rawTx.getResult() == null) return null;
+        org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
+        final Transaction tx = new Transaction(ethTx.getHash(), "0", ethTx.getBlockNumber().toString(), timeStamp, ethTx.getNonce().intValue(), ethTx.getFrom(),
+                ethTx.getTo(), ethTx.getValue().toString(), ethTx.getGas().toString(), ethTx.getGasPrice().toString(), ethTx.getInput(), ethTx.getGas().toString(), ethTx.getChainId().intValue(), "");
+        tx.completeSetup(wallet.address);
+
+        deleteTransaction(wallet, ethTx.getHash());
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
             instance.executeTransaction(realm -> {
                 RealmTransaction item = instance.createObject(RealmTransaction.class, ethTx.getHash());
-                Transaction tx = new Transaction(ethTx.getHash(), "0", ethTx.getBlockNumber().toString(), timeStamp, ethTx.getNonce().intValue(), ethTx.getFrom(),
-                        ethTx.getTo(), ethTx.getValue().toString(), ethTx.getGasRaw(), ethTx.getGasPriceRaw(), ethTx.getInput(), ethTx.getGasRaw(), ethTx.getChainId().intValue(), "");
                 fill(instance, item, tx);
                 realm.insertOrUpdate(item);
             });
@@ -246,6 +270,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         {
             //
         }
+
+        return tx;
     }
 
     @Override
@@ -259,10 +285,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
             if (realmTx != null)
             {
-                instance.beginTransaction();
-                realmTx.deleteFromRealm();
-                instance.commitTransaction();
-                //signal to transaction view to refresh
+                instance.executeTransaction(realm -> {
+                    deleteOperations(realmTx);
+                    realmTx.deleteFromRealm();
+                });
             }
         }
         catch (Exception e)

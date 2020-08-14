@@ -44,6 +44,8 @@ public class SignTransactionDialog extends BottomSheetDialog
     private final String unlockTitle;
     private final String unlockDetail;
     private AuthenticationCallback authCallback;
+    private BiometricPrompt biometricPrompt;
+    private CancellationSignal cancellationSignal;
 
     public SignTransactionDialog(@NonNull Activity activity, Operation callBackId, String msg, String desc)
     {
@@ -90,7 +92,7 @@ public class SignTransactionDialog extends BottomSheetDialog
                 return;
             }
 
-            BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(context)
+            biometricPrompt = new BiometricPrompt.Builder(context)
                     .setTitle(unlockTitle)
                     .setSubtitle(unlockDetail)
                     .setNegativeButton(context.getString(R.string.action_cancel), context.getMainExecutor(),
@@ -244,7 +246,7 @@ public class SignTransactionDialog extends BottomSheetDialog
     }
 
     private CancellationSignal getCancellationSignal() {
-        CancellationSignal cancellationSignal = new CancellationSignal();
+        cancellationSignal = new CancellationSignal();
         cancellationSignal.setOnCancelListener(() ->
                 authCallback.authenticateFail(context.getString(R.string.authentication_cancelled),
                         AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callBackId));
@@ -259,6 +261,15 @@ public class SignTransactionDialog extends BottomSheetDialog
                                               CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
                 authCallback.authenticateFail(context.getString(R.string.authentication_failed), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);
+                switch (errorCode)
+                {
+                    case BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT:
+                    case BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
+                    case BiometricPrompt.BIOMETRIC_ERROR_UNABLE_TO_PROCESS:
+                        cancellationSignal.cancel();
+                        showAuthenticationScreen();
+                        break;
+                }
             }
 
             @Override

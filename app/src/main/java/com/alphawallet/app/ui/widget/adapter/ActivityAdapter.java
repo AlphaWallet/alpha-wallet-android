@@ -280,6 +280,11 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
 
+        if (items.get(items.size()-1) instanceof DateSortedItem)
+        {
+            removalObjects.add(items.get(items.size()-1));
+        }
+
         for (SortedItem sortedItem : removalObjects)
         {
             items.remove(sortedItem);

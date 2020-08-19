@@ -759,7 +759,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
         }
 
-        return new TokenScriptFile();
+        return new TokenScriptFile(context);
     }
 
     /**
@@ -935,6 +935,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             List<ContractLocator> originContracts = getOriginContracts(td);
             //remove all old definitions & certificates
             deleteScriptEntriesFromRealm(originContracts, isDebugOverride);
+            cachedDefinition = null;
             return cacheSignature(tsf)
                     .map(contracts -> fileLoadComplete(originContracts, tsf, td));
         }
@@ -2697,5 +2698,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private String tokenSizeDBKey(int chainId, String address)
     {
         return "szkey-" + chainId + "-" + address.toLowerCase();
+    }
+
+    public Realm getEventRealm()
+    {
+        return realmManager.getRealmInstance(tokensService.getCurrentAddress());
     }
 }

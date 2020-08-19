@@ -99,7 +99,7 @@ public class ActivityHistoryList extends LinearLayout
             addItems(metas);
         });
 
-        auxRealmUpdates = getEventListener(token, tokenId, historyCount);
+        auxRealmUpdates = RealmAuxData.getEventListener(realm, token, tokenId, historyCount, 0);
         auxRealmUpdates.addChangeListener(realmEvents -> {
             List<ActivityMeta> metas = new ArrayList<>();
             for (RealmAuxData item : realmEvents)
@@ -110,19 +110,6 @@ public class ActivityHistoryList extends LinearLayout
 
             addItems(metas);
         });
-    }
-
-    private RealmResults<RealmAuxData> getEventListener(Token token, BigInteger tokenId, int historyCount)
-    {
-        String tokenIdHex = tokenId.toString(16);
-        return realm.where(RealmAuxData.class)
-                .endsWith("instanceKey", EVENT_CARDS)
-                .sort("resultTime", Sort.DESCENDING)
-                .equalTo("chainId", token.tokenInfo.chainId)
-                .beginGroup().equalTo("tokenId", "0").or().equalTo("tokenId", tokenIdHex).endGroup()
-                .equalTo("tokenAddress", token.getAddress())
-                .limit(historyCount)
-                .findAllAsync();
     }
 
     private void initViews(boolean isEth)
@@ -169,6 +156,7 @@ public class ActivityHistoryList extends LinearLayout
             {
                 activityAdapter.updateActivityItems(metas.toArray(new ActivityMeta[0]));
                 recentTransactionsView.setVisibility(View.VISIBLE);
+                noTxNotice.setVisibility(View.GONE);
             }
             else if (metas.size() == 0 && activityAdapter.getItemCount() == 0)
             {

@@ -21,10 +21,10 @@ public class TokenScriptFile extends File
     private boolean resourceFile;
     private String fileName;
 
-    public TokenScriptFile()
+    public TokenScriptFile(Context ctx)
     {
         super("");
-        context = null;
+        context = ctx;
         active = false;
         resourceFile = false;
     }

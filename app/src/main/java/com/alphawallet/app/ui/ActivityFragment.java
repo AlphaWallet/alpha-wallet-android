@@ -220,7 +220,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     public void addedToken(List<ContractLocator> tokenContracts)
     {
-        adapter.updateItems(tokenContracts);
+        if (adapter != null) adapter.updateItems(tokenContracts);
     }
 
     @Override

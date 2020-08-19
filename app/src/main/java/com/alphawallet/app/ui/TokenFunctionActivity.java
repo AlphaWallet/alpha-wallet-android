@@ -3,6 +3,7 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
@@ -41,6 +43,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
+import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 

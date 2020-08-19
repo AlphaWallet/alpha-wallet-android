@@ -592,7 +592,7 @@
     <string name="label_estimated_transaction_time">估计交易时间</string>
     <string name="minutes_0">0 分钟</string>
     <string name="created_aw_directory">已创建的 AlphaWallet 目录</string>
-    <string name="created_aw_directory_detail">已创建 AlphaWallet 目录。将脚本放入此目录中以使用您的脚本。欲知如何为您的通证轻松创建一个安全有用的接口，请参见 tokenscript.org 了解更多细节。</string>
+    <string name="created_aw_directory_detail">已创建 AlphaWallet 目录。将TokenScript放入此目录中以使用您的TokenScript。欲知如何为您的通证轻松创建一个安全有用的接口，请参见 tokenscript.org 了解更多细节。</string>
     <string name="title_no_need_to_watch">已经查看</string>
     <string name="error_while_signing_transaction">签署交易时发生错误。请重新导入该钱包的密钥。</string>
     <string name="error_not_whitelisted">页面未列入白名单</string>
@@ -620,7 +620,7 @@
     <string name="second_plural">%s秒</string>
     <string name="transaction_pending_for">交易待定时间：%s</string>
     <string name="speedup_tx_description">以更高的燃料价格提交替换交易。</string>
-    <string name="cancel_tx_description">通过将未确定项替换为零值交易以取消交易。</string>
+    <string name="cancel_tx_description">通过将未确认的交易替换为零值交易以取消交易。</string>
     <string name="file_error">TokenScript 错误：%1$s\n\n</string>
     <string name="message_scan_camera">将相机对准二维码</string>
     <string name="light">闪光灯</string>

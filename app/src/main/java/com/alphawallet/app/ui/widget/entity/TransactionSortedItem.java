@@ -2,8 +2,11 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.text.format.DateUtils;
 
+import com.alphawallet.app.entity.EventMeta;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
+import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -20,31 +23,32 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     {
         if (other.tags.contains(IS_TIMESTAMP_TAG))
         {
-            TransactionMeta oldTx;
-            TransactionMeta newTx;
             TimestampSortedItem otherTimestamp = (TimestampSortedItem) other;
-            if (viewType == other.viewType)
+            String otherHash = null;
+            if (other.viewType == TransactionHolder.VIEW_TYPE)
             {
-                oldTx = value;
-                newTx = (TransactionMeta) other.value;
+                otherHash = ((TransactionMeta) other.value).hash;
+            }
+            else if (other.viewType == EventHolder.VIEW_TYPE)
+            {
+                otherHash = ((EventMeta) other.value).hash;
+            }
 
+            if (otherHash != null)
+            {
                 // Check if this is a written block replacing a pending block
-                if (oldTx.hash.equals(newTx.hash)) return 0; // match
+                if (value.hash.equals(otherHash)) return 0; // match
 
                 //we were getting an instance where two transactions went through on the same
                 //block - so the timestamp was the same. The display flickered between the two transactions.
                 if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
                 {
-                    return oldTx.hash.compareTo(newTx.hash);
+                    return value.hash.compareTo(otherHash);
                 }
                 else
                 {
                     return super.compare(other);
                 }
-            }
-            else if (other.viewType == EventHolder.VIEW_TYPE && ((EventSortedItem)other).value.hash.equals(value.hash)) //first see if this is a replacement TX
-            {
-                return 0;
             }
             else
             {
@@ -56,6 +60,60 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             return super.compare(other);
         }
     }
+
+    /*@Override
+    public boolean areContentsTheSame(SortedItem other) {
+        try
+        {
+            if (viewType == other.viewType)
+            {
+                TransactionMeta newTx = (TransactionMeta) other.value;
+
+                //boolean hashMatch = oldTx.hash.equals(newTx.hash);
+                boolean pendingMatch = value.isPending == newTx.isPending;
+
+                return pendingMatch;
+            }
+            else if (other.viewType == EventHolder.VIEW_TYPE)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean areItemsTheSame(SortedItem other)
+    {
+        try
+        {
+            if (viewType == other.viewType)
+            {
+                return true;
+                //TransactionMeta newTx = (TransactionMeta) other.value;
+                //return value.hash.equals(newTx.hash);
+            }
+            else if (other.viewType == EventHolder.VIEW_TYPE)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }*/
 
     @Override
     public boolean areContentsTheSame(SortedItem other) {
@@ -70,7 +128,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
 
                 return pendingMatch;
             }
-            else if (other.viewType == EventHolder.VIEW_TYPE && ((EventSortedItem)other).value.hash.equals(value.hash))
+            else if (other.viewType == EventHolder.VIEW_TYPE)
             {
                 return false;
             }
@@ -95,7 +153,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
                 TransactionMeta newTx = (TransactionMeta) other.value;
                 return value.hash.equals(newTx.hash);
             }
-            else if (other.viewType == EventHolder.VIEW_TYPE && ((EventSortedItem)other).value.hash.equals(value.hash))
+            else if (other.viewType == EventHolder.VIEW_TYPE)
             {
                 return true;
             }

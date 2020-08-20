@@ -1459,6 +1459,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //split out all the event data
         String valueList = EventUtils.getAllTopics(ev, log);
 
+        String selectVal = EventUtils.getSelectVal(ev, log);
+
         ContractAddress eventContractAddress = new ContractAddress(ev.getEventChainId(),
                 ev.getEventContractAddress());
 

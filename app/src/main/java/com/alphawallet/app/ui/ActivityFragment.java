@@ -83,6 +83,8 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         {
             viewModel = ViewModelProviders.of(this, activityViewModelFactory)
                     .get(ActivityViewModel.class);
+            viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+            viewModel.activityItems().observe(this, this::onItemsLoaded);
         }
     }
 
@@ -177,9 +179,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
         systemView.showProgress(false);
-
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.activityItems().observe(this, this::onItemsLoaded);
         refreshLayout.setOnRefreshListener(this::refreshTransactionList);
     }
 

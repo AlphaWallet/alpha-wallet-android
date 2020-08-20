@@ -2,6 +2,7 @@ package com.alphawallet.app.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 
 import com.alphawallet.app.entity.ActivityMeta;
@@ -72,7 +73,6 @@ public class ActivityViewModel extends BaseViewModel
     private void onDefaultWallet(Wallet defaultWallet)
     {
         wallet.postValue(defaultWallet);
-
         disposable =
                 fetchTransactionsInteract.fetchTransactionMetas(defaultWallet, tokensService.getNetworkFilters(), 0, TRANSACTION_FETCH_LIMIT)
                         .subscribeOn(Schedulers.io())
@@ -98,16 +98,6 @@ public class ActivityViewModel extends BaseViewModel
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(activityItems::postValue, this::onError);
-
-//        disposable = transactionsService.fetchAndStoreTransactions(1, startTime)
-//                          .subscribeOn(Schedulers.io())
-//                          .observeOn(AndroidSchedulers.mainThread())
-//                          .subscribe(activityItems::postValue, this::onError);
-
-//                fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .subscribe(activityItems::postValue, this::onError);
     }
 
     public void onDestroy()

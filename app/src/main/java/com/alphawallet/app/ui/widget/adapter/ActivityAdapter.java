@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.BuildConfig;
@@ -18,6 +19,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.EventMeta;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ActivityDataInteract;
@@ -42,7 +44,7 @@ import java.util.List;
 public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int layoutResId = -1;
 
-    private final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
+    private final ActivitySortedList<SortedItem> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem left, SortedItem right)
         {
@@ -240,7 +242,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             if (item instanceof TransactionMeta)
             {
                 TransactionSortedItem sortedItem = new TransactionSortedItem(TransactionHolder.VIEW_TYPE, (TransactionMeta)item, TimestampSortedItem.DESC);
-                items.add(sortedItem);
+                items.addTransaction(sortedItem); //event has higher UI priority than an event, don't overwrite
             }
             else if (item instanceof EventMeta)
             {
@@ -335,6 +337,36 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         @Override
         public void bind(@Nullable Date data, @NonNull Bundle addition) {
 
+        }
+    }
+
+    private class ActivitySortedList<T> extends SortedList<T>
+    {
+        public ActivitySortedList(@NonNull Class klass, @NonNull Callback callback)
+        {
+            super(klass, callback);
+        }
+
+        public void addTransaction(T item)
+        {
+            if (item instanceof TransactionSortedItem)
+            {
+                TransactionSortedItem txSortedItem = (TransactionSortedItem)item;
+                int index = items.indexOf(txSortedItem);
+                if (index >= 0 && items.get(index).value instanceof EventMeta)
+                {
+                    EventMeta em = (EventMeta)items.get(index).value;
+                    if (!em.hash.equals(txSortedItem.value.hash)) add(item); //don't replace matching Event
+                }
+                else
+                {
+                    add(item);
+                }
+            }
+            else
+            {
+                if (BuildConfig.DEBUG) Log.e("ActivityAdapter", "Wrong item type in addTransaction (" + item.getClass().getName() + ")");
+            }
         }
     }
 }

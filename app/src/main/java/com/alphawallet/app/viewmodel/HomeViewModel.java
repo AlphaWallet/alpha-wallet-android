@@ -204,20 +204,27 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setLocale(HomeActivity activity) {
         //get the current locale
-        String currentLocale = localeRepository.getDefaultLocale();
-        //get the device locale
-        String deviceLocale = getDeviceLocale(activity);
-        /*
-        1. Check for Device language is different then current locale in application.
-        2. Check if application supports Device language in the app
-         */
-        if (!currentLocale.equalsIgnoreCase(deviceLocale)
-                && localeRepository.isLocalePresent(deviceLocale))
+        //only do this once, allow user to override
+        if (!localeRepository.hasOverridenLangSetting())
         {
-            currentLocale = deviceLocale;
-            localeRepository.setDefaultLocale(activity, currentLocale);
+            String currentLocale = localeRepository.getDefaultLocale();
+            //get the device locale
+            String deviceLocale = getDeviceLocale(activity);
+
+            if (currentLocale == null) currentLocale = "en";
+            /*
+            1. Check for Device language is different then current locale in application.
+            2. Check if application supports Device language in the app
+            */
+            if (!currentLocale.equalsIgnoreCase(deviceLocale)
+                    && localeRepository.isLocalePresent(deviceLocale))
+            {
+                currentLocale = deviceLocale;
+                localeRepository.setDefaultLocale(activity, currentLocale);
+                localeRepository.setOverridenLangSetting();
+            }
+            LocaleUtils.setLocale(activity, currentLocale);
         }
-        LocaleUtils.setLocale(activity, currentLocale);
     }
 
     /**

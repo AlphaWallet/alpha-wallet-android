@@ -14,4 +14,7 @@ public interface LocaleRepositoryType {
     ArrayList<LocaleItem> getLocaleList(Context context);
 
     boolean isLocalePresent(String locale);
+
+    boolean hasOverridenLangSetting();
+    void setOverridenLangSetting();
 }

@@ -34,6 +34,11 @@ public class LocaleRepository implements LocaleRepositoryType {
     }
 
     @Override
+    public boolean hasOverridenLangSetting() { return preferences.getHasOverriden(); }
+    @Override
+    public void setOverridenLangSetting() { preferences.setHasOverriden(); }
+
+    @Override
     public ArrayList<LocaleItem> getLocaleList(Context context) {
         ArrayList<LocaleItem> list = new ArrayList<>();
         for (String locale : LOCALES) {

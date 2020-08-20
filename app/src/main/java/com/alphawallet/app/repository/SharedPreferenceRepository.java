@@ -23,6 +23,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String FIND_WALLET_ADDRESS_SHOWN = "find_wallet_address_shown";
     private static final String CURRENCY_CODE_KEY = "currency_locale";
     private static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
+    private static final String OVERRIDE_LANG_PREFS = "override_lang";
 
     private final SharedPreferences pref;
 
@@ -121,5 +122,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public String getDefaultCurrency() {
         return pref.getString(CURRENCY_CODE_KEY, C.DEFAULT_CURRENCY_CODE);
+    }
+
+    @Override
+    public boolean getHasOverriden()
+    {
+        return pref.getBoolean(OVERRIDE_LANG_PREFS, false);
+    }
+
+    @Override
+    public void setHasOverriden()
+    {
+        pref.edit().putBoolean(OVERRIDE_LANG_PREFS, true).apply();
     }
 }

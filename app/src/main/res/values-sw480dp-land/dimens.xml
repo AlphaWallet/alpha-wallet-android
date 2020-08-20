@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dashboard -->
+    <dimen name="create_new_wallet_margin_bottom">25dp</dimen>
+    <dimen name="divider_margin_top">27dp</dimen>
+    <dimen name="already_label_margin_top">20dp</dimen>
+    <dimen name="bottom_buttons_holder_margin_bottom">25dp</dimen>
+
+</resources>

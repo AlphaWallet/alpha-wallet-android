@@ -2,7 +2,6 @@ package com.alphawallet.app.repository.entity;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;

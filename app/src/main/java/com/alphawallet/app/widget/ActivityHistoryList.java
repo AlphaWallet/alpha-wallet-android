@@ -30,7 +30,6 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
-
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 
 /**

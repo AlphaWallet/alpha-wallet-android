@@ -584,8 +584,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             return handled;
         });
 
-        urlTv.setOnClickListener(v -> {
+        urlTv.setOnTouchListener((view, motionEvent) -> {
             beginSearchSession();
+            return false;
         });
 
         urlTv.addTextChangedListener(new TextWatcher() {
@@ -616,6 +617,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         back.setVisibility(View.GONE);
         clear.setVisibility(View.VISIBLE);
         urlTv.showDropDown();
+
+        if (urlTv.getText().length() == 0)
+        {
+            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+            try
+            {
+                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
+                if (textToPaste.length() > 0)
+                {
+                    urlTv.performLongClick();
+                    KeyboardUtils.showKeyboard(urlTv);
+                }
+            }
+            catch (Exception e) {
+                //Do nothing
+            }
+        }
     }
 
     private void addToBackStack(String nextFragment)

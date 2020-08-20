@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.io.File;
+import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -202,8 +204,46 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setLocale(HomeActivity activity) {
         //get the current locale
-        String currentLocale = localeRepository.getDefaultLocale();
-        LocaleUtils.setLocale(activity, currentLocale);
+        //only do this once, allow user to override
+        if (!localeRepository.hasOverridenLangSetting())
+        {
+            String currentLocale = localeRepository.getDefaultLocale();
+            //get the device locale
+            String deviceLocale = getDeviceLocale(activity);
+
+            if (currentLocale == null) currentLocale = "en";
+            /*
+            1. Check for Device language is different then current locale in application.
+            2. Check if application supports Device language in the app
+            */
+            if (!currentLocale.equalsIgnoreCase(deviceLocale)
+                    && localeRepository.isLocalePresent(deviceLocale))
+            {
+                currentLocale = deviceLocale;
+                localeRepository.setDefaultLocale(activity, currentLocale);
+                localeRepository.setOverridenLangSetting();
+            }
+            LocaleUtils.setLocale(activity, currentLocale);
+        }
+    }
+
+    /**
+     * This method will check for existing Device OS Language set.
+     * @param activity To reference with "Resource"
+     * @return String as a Language Locale
+     */
+    private String getDeviceLocale(HomeActivity activity) {
+        String locale;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            locale = activity.getResources().getConfiguration().getLocales().get(0).getLanguage();
+        }
+        else
+        {
+            locale = activity.getResources().getConfiguration().locale.getLanguage();
+        }
+        return locale;
     }
 
     public void downloadAndInstall(String build, Context ctx) {

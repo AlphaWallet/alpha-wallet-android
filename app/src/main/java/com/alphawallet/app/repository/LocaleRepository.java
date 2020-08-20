@@ -5,6 +5,7 @@ import android.content.Context;
 import com.alphawallet.app.util.LocaleUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 
 import com.alphawallet.app.entity.LocaleItem;
@@ -33,6 +34,11 @@ public class LocaleRepository implements LocaleRepositoryType {
     }
 
     @Override
+    public boolean hasOverridenLangSetting() { return preferences.getHasOverriden(); }
+    @Override
+    public void setOverridenLangSetting() { preferences.setHasOverriden(); }
+
+    @Override
     public ArrayList<LocaleItem> getLocaleList(Context context) {
         ArrayList<LocaleItem> list = new ArrayList<>();
         for (String locale : LOCALES) {
@@ -40,5 +46,10 @@ public class LocaleRepository implements LocaleRepositoryType {
             list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale, getDefaultLocale()), locale));
         }
         return list;
+    }
+
+    @Override
+    public boolean isLocalePresent(String locale) {
+        return Arrays.asList(LOCALES).contains(locale);
     }
 }

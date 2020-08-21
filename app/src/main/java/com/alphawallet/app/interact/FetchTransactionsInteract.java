@@ -82,4 +82,9 @@ public class FetchTransactionsInteract {
     {
         return transactionRepository.fetchCachedTransaction(walletAddress, hash);
     }
+
+    public Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash)
+    {
+        return transactionRepository.markTransactionDropped(wallet, hash);
+    }
 }

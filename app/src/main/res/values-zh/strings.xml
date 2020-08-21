@@ -635,4 +635,5 @@
     <string name="transaction_fail_warning">Transaction Fail Warning</string>
     <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
     <string name="error_browse_selection">Selected image doesn\'t contain any data.</string>
+    <string name="tx_rejected">交易被拒绝（尝试使用更多的燃料）</string>
 </resources>

@@ -33,21 +33,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:orientation="horizontal"
             android:layout_marginEnd="10dp">
 
-        <ImageView
-            android:id="@+id/type_icon"
-            android:layout_width="18sp"
-            android:layout_height="18sp"
-            android:src="@drawable/ic_arrow_downward_black_24dp" />
+            <ImageView
+                android:id="@+id/type_icon"
+                android:layout_width="18sp"
+                android:layout_height="18sp"
+                android:src="@drawable/ic_arrow_downward_black_24dp" />
 
-        <ProgressBar
-            android:id="@+id/pending_spinner"
-            android:visibility="gone"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:indeterminateTint="@color/colorPrimaryDark"
-            android:contentDescription="@string/empty"/>
+            <ImageView
+                android:id="@+id/icon_tx_rejected"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/empty"
+                android:layout_marginEnd="2dp"
+                android:src="@drawable/ic_tx_not_written"
+                android:visibility="gone"/>
+
+            <ProgressBar
+                android:id="@+id/pending_spinner"
+                android:visibility="gone"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:indeterminateTint="@color/colorPrimaryDark"
+                android:contentDescription="@string/empty"/>
         </LinearLayout>
 
         <TextView
@@ -93,7 +103,7 @@
         <TextView
             android:id="@+id/supplimental"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"    
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="5dp"
             android:layout_toStartOf="@id/value"

@@ -1,7 +1,9 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.animation.LayoutTransition;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
@@ -24,6 +26,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -105,10 +108,13 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.realm.RealmResults;
 
 import static android.app.Activity.RESULT_OK;
@@ -150,6 +156,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
 
+    /**
+     Below object is used to set Animation duration for expand/collapse and rotate
+     */
+    private final int ANIMATION_DURATION = 100;
+
     static byte[] getEthereumMessagePrefix(int messageLength) {
         return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
     }
@@ -185,6 +196,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private LinearLayout currentNetworkClicker;
     private TextView balance;
     private TextView symbol;
+    private View layoutNavigation;
     private GeolocationPermissions.Callback geoCallback = null;
     private String geoOrigin;
     private final Handler handler;
@@ -489,6 +501,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setRefreshInterface(this);
         toolbar = view.findViewById(R.id.address_bar);
+
+        layoutNavigation = view.findViewById(R.id.layout_navigator);
         if (CustomViewSettings.minimiseBrowserURLBar())
         {
             toolbar.inflateMenu(R.menu.menu_scan);
@@ -582,7 +596,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
 
         urlTv.setOnTouchListener((view, motionEvent) -> {
-            beginSearchSession();
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP)
+            {
+                beginSearchSession();
+            }
             return false;
         });
 
@@ -609,12 +626,37 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             cancelSearchSession();
         });
         attachFragment(f, SEARCH);
-        currentNetwork.setVisibility(View.GONE);
-        next.setVisibility(View.GONE);
-        back.setVisibility(View.GONE);
-        clear.setVisibility(View.VISIBLE);
-        urlTv.showDropDown();
 
+        Observable.zip(
+                Observable.interval(100, TimeUnit.MILLISECONDS).take(3),
+                Observable.fromArray(currentNetwork, layoutNavigation), (interval, item) -> item)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(this::checkForPaste)
+                .subscribe(item -> expandCollapseView(item, true));
+
+        Observable.zip(
+                Observable.interval(300, TimeUnit.MILLISECONDS).take(1),
+                Observable.fromArray(clear), (interval, item) -> item)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(this::checkForPaste)
+                .subscribe(item -> {
+                    if (item.getVisibility() == View.GONE)
+                    {
+                        expandCollapseView(item, false);
+                    }
+                });
+
+        Observable.timer(5000, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe();
+
+        urlTv.showDropDown();
+    }
+
+    private void checkForPaste() {
         if (urlTv.getText().length() == 0)
         {
             ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
@@ -631,6 +673,70 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 //Do nothing
             }
         }
+    }
+
+    /**
+     * Used to expand or collapse the view
+     */
+    private synchronized void expandCollapseView(View view, boolean isViewExpanded)
+    {
+        //Collapse view
+        if(isViewExpanded)
+        {
+            int finalWidth = view.getWidth();
+            ValueAnimator valueAnimator = slideAnimator(finalWidth, 0, view);
+            valueAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    view.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            valueAnimator.start();
+        }
+        //Expand view
+        else
+        {
+            view.setVisibility(View.VISIBLE);
+
+            int widthSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+
+            view.measure(widthSpec, heightSpec);
+            int width = view.getMeasuredWidth();
+            ValueAnimator valueAnimator = slideAnimator(0, width, view);
+            valueAnimator.start();
+        }
+    }
+
+    private ValueAnimator slideAnimator(int start, int end, final View view) {
+
+        final ValueAnimator animator = ValueAnimator.ofInt(start, end);
+
+        animator.addUpdateListener(valueAnimator -> {
+            // Update Height
+            int value = (Integer) valueAnimator.getAnimatedValue();
+
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            layoutParams.width = value;
+            view.setLayoutParams(layoutParams);
+        });
+        animator.setDuration(ANIMATION_DURATION);
+        return animator;
     }
 
     private void addToBackStack(String nextFragment)
@@ -650,9 +756,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (toolbar != null)
         {
             toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
-            currentNetwork.setVisibility(View.VISIBLE);
-            next.setVisibility(View.VISIBLE);
-            back.setVisibility(View.VISIBLE);
+            expandCollapseView(currentNetwork, false);
+            expandCollapseView(layoutNavigation, false);
             clear.setVisibility(View.GONE);
             urlTv.dismissDropDown();
         }

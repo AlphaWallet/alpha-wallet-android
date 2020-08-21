@@ -160,6 +160,12 @@ public class QRSelectionTest
             {
 
             }
+
+            @Override
+            public Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash)
+            {
+                return null;
+            }
         };
 
         signatureGenerateInteract = new SignatureGenerateInteract(null)

@@ -171,6 +171,12 @@ public class MarketOrderTest
             {
 
             }
+
+            @Override
+            public Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash)
+            {
+                return null;
+            }
         };
 
         marketService = new MarketQueueService(null, null, transactionRepository);

@@ -321,4 +321,10 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		inDiskCache.deleteTransaction(wallet, oldTxHash);
 	}
+
+	@Override
+	public Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash)
+	{
+		return inDiskCache.markTransactionDropped(wallet, hash);
+	}
 }

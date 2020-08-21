@@ -347,14 +347,14 @@ public class Transaction implements Parcelable {
 		TransactionOperation operation = operations == null
 				|| operations.length == 0 ? null : operations[0];
 
-		if (walletAddress.equals(contractAddress)) //transactions sent from or sent to the main currency account
+		if (walletAddress.equalsIgnoreCase(contractAddress)) //transactions sent from or sent to the main currency account
 		{
-			return from.equals(walletAddress) || to.equals(walletAddress);
+			return from.equalsIgnoreCase(walletAddress) || to.equalsIgnoreCase(walletAddress);
 		}
 		else
 		{
-			if (to.equals(contractAddress)) return true;
-			if (operation != null && (operations[0].contract.address.equals(contractAddress))) return true;
+			if (to.equalsIgnoreCase(contractAddress)) return true;
+			if (operation != null && (operations[0].contract.address.equalsIgnoreCase(contractAddress))) return true;
 		}
 
 		return false;

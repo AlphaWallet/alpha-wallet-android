@@ -130,21 +130,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                             .equalTo("hash", transaction.hash)
                             .findFirst();
 
+                    //always use newer transaction information
                     if (realmTx != null)
                     {
-                        if (realmTx.getBlockNumber().equals("0"))
-                        {
-                            //replacing pending TX
-                            //erase pending tx operations now we have the transaction results
-                            deleteOperations(realmTx);
-                        }
-                        else
-                        {
-                            //already recorded
-                            continue;
-                        }
+                        deleteOperations(realmTx);
                     }
-                    if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, transaction.hash);
+                    else
+                    {
+                        realmTx = instance.createObject(RealmTransaction.class, transaction.hash);
+                    }
 
                     try
                     {
@@ -381,6 +375,32 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getChainId(),
                 operations
                 );
+    }
+
+    @Override
+    public Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash)
+    {
+        return Single.fromCallable(() -> {
+            Transaction[] tx = new Transaction[1];
+            tx[0] = null;
+            try (Realm instance = realmManager.getRealmInstance(wallet))
+            {
+                RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                        .equalTo("hash", hash)
+                        .findFirst();
+
+                if (realmTx != null)
+                {
+                    instance.executeTransaction(realm -> {
+                        realmTx.setBlockNumber("-1");
+                    });
+
+                    tx[0] = convert(realmTx);
+                }
+            }
+
+            return tx;
+        });
     }
 
 

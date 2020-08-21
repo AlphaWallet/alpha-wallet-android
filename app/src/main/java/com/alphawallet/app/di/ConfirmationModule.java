@@ -1,8 +1,6 @@
 package com.alphawallet.app.di;
 
 
-import dagger.Module;
-import dagger.Provides;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -14,6 +12,9 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.ConfirmationViewModelFactory;
+
+import dagger.Module;
+import dagger.Provides;
 
 @Module
 public class ConfirmationModule {
@@ -27,7 +28,14 @@ public class ConfirmationModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService
     ) {
-        return new ConfirmationViewModelFactory(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract, keyService);
+        return new ConfirmationViewModelFactory(
+                genericWalletInteract,
+                gasService,
+                createTransactionInteract,
+                gasSettingsRouter,
+                tokensService,
+                findDefaultNetworkInteract,
+                keyService);
     }
 
     @Provides

@@ -189,7 +189,7 @@
                                             android:layout_height="wrap_content"
                                             android:layout_centerInParent="true"
                                             android:contentDescription="@string/empty"
-                                            android:src="@drawable/ic_plus" />
+                                            android:src="@drawable/ic_add_plus" />
                                     </RelativeLayout>
 
                                     <TextView

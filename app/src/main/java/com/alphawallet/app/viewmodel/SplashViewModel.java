@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -58,6 +59,9 @@ import static com.alphawallet.app.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
 public class SplashViewModel extends ViewModel
 {
+    private static final String LEGACY_CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
+    private static final String LEGACY_AUX_DB_PREFIX = "AuxData-";
+
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
@@ -323,5 +327,40 @@ public class SplashViewModel extends ViewModel
 
     public void setCurrency() {
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
+    }
+
+    public void cleanAuxData(Context ctx)
+    {
+        try
+        {
+            File[] files = ctx.getFilesDir().listFiles();
+            for (File file : files)
+            {
+                String fileName = file.getName();
+                if (fileName.startsWith(LEGACY_AUX_DB_PREFIX) || fileName.equals(LEGACY_CERTIFICATE_DB))
+                {
+                    deleteRecursive(file);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+
+    private void deleteRecursive(File fp)
+    {
+        if (fp.isDirectory())
+        {
+            File[] contents = fp.listFiles();
+            if (contents != null)
+            {
+                for (File child : contents)
+                    deleteRecursive(child);
+            }
+        }
+
+        fp.delete();
     }
 }

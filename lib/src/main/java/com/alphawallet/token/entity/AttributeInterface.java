@@ -11,7 +11,7 @@ import java.math.BigInteger;
 public interface AttributeInterface
 {
     TransactionResult getFunctionResult(ContractAddress contract, Attribute attr, BigInteger tokenId);
-    TransactionResult storeAuxData(TransactionResult tResult);
+    TransactionResult storeAuxData(String walletAddress, TransactionResult tResult);
     boolean resolveOptimisedAttr(ContractAddress contract, Attribute attr, TransactionResult transactionResult);
 
     String getWalletAddr();

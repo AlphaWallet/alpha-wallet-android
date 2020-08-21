@@ -232,6 +232,7 @@
     <string name="tx_label">Transactions</string>
     <string name="browser_label">Browser</string>
     <string name="settings_label">Settings</string>
+    <string name="activity_label">Activity</string>
     <string name="toolbar_header_importing_tickets">Importing Tokens</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
@@ -484,7 +485,7 @@
     <string name="touch_fingerprint_sensor">Touch the fingerprint sensor</string>
     <string name="unlock_private_key">Unlock Private Key</string>
     <string name="device_insecure">Device Not Secure</string>
-    <string name="device_not_secure_warning">Your device is not locked by Pin or Fingerprint. Cannot create a secured private key until the device has some protection.</string>
+    <string name="device_not_secure_warning">Your device is not locked by Fingerprint, PIN or other Biometric. Cannot create a secured private key until the device has some protection.</string>
     <string name="action_remind_later">Remind me later</string>
     <string name="title_change_wallet">Change Wallet</string>
     <string name="legacy_wallets">Legacy Wallets</string>
@@ -624,7 +625,7 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
-    <string name="speedup_transaction">Speedup</string>
+    <string name="speedup_transaction">Speedup TX</string>
     <string name="cancel_transaction">Cancel</string>
     <string name="day_single">1 day</string>
     <string name="day_plural">%s days</string>
@@ -649,5 +650,29 @@
     <string name="transaction_fail_warning">Transaction Fail Warning</string>
     <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
     <string name="error_browse_selection">Selected image doesn\'t contain any data.</string>
+    <string name="display_tokens">Display Tokens</string>
+    <string name="hidden_tokens">Hidden Tokens</string>
+    <string name="ignore">Ignore</string>
+    <string name="search_for_tokens">Search for Tokens...</string>
+    <string name="title_wallet_connect">WalletConnect</string>
+    <string name="action_end_session">End Session</string>
+    <string name="dialog_send_eth_transaction">Send ETH Transaction</string>
+    <string name="message_reject_request">Rejected by the user</string>
+    <string name="dialog_title_disconnect_session">Disconnect Session</string>
+    <string name="message_authentication_failed">Authentication failed</string>
     <string name="tx_rejected">Transaction rejected (try using more gas)</string>
+    <string name="from">from: %1$s</string>
+    <string name="valueSymbol">%1$s %2$s</string>
+    <string name="sent_to">to: %1$s</string>
+    <string name="approval_granted_to">approved to transfer tokens: %1$s</string>
+    <string name="approval_obtained_from">to spend on behalf of: %1$s</string>
+    <string name="unknown_event">Unknown event</string>
+    <string name="activity_sent">Sent %1$s</string>
+    <string name="activity_received">Received %1$s</string>
+    <string name="activity_approved">Approved %1$s</string>
+    <string name="activity_approval_granted">Approval granted %1$s</string>
+    <string name="tokenscript_call">TokenScript call:</string>
+    <string name="testnet" translatable="false">Testnet</string>
+    <string name="today">Today</string>
+    <string name="go_to_token">Go to Token</string>
 </resources>

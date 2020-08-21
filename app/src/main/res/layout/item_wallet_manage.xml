@@ -8,7 +8,8 @@
     android:minHeight="80dp"
     android:orientation="horizontal"
     android:paddingStart="5dp"
-    android:paddingEnd="15dp">
+    android:paddingEnd="15dp"
+    android:focusable="false">
 
     <LinearLayout
         android:id="@+id/layout_manage_wallet"
@@ -125,4 +126,16 @@
         android:layout_centerVertical="true"
         android:src="@drawable/selector_radio_tick"
         android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/wallet_click_layer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_alignStart="@id/wallet_info_layout"
+        android:layout_alignTop="@id/layout_manage_wallet"
+        android:layout_alignEnd="@id/selected_wallet_indicator"
+        android:layout_alignBottom="@id/layout_manage_wallet"
+        android:layout_marginBottom="-17dp"
+        android:orientation="vertical" />
 </RelativeLayout>

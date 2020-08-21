@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository.entity;
 
+import com.alphawallet.app.entity.ContractType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,7 @@ public class RealmToken extends RealmObject {
     private String auxData;
     private long lastBlockRead;
     private int chainId;
+    private long earliestTxBlock;
 
     public int getDecimals() {
         return decimals;
@@ -48,12 +51,20 @@ public class RealmToken extends RealmObject {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public String getTokenAddress() {
+        String tAddress = address;
+        if (tAddress.contains(".")) //base chain
+        {
+            return tAddress.split(".")[0];
+        }
+        else if (tAddress.contains("-"))
+        {
+            return tAddress.split("-")[0];
+        }
+        else
+        {
+            return address;
+        }
     }
 
     public long getUpdateTime() {
@@ -112,6 +123,13 @@ public class RealmToken extends RealmObject {
         return interfaceSpec;
     }
 
+    public ContractType getContractType()
+    {
+        int typeOrdinal = interfaceSpec;
+        if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
+        return ContractType.values()[typeOrdinal];
+    }
+
     public void setInterfaceSpec(int interfaceSpec)
     {
         this.interfaceSpec = interfaceSpec;
@@ -144,5 +162,15 @@ public class RealmToken extends RealmObject {
     public void setLastTxTime(long lastTxTime)
     {
         this.lastTxTime = lastTxTime;
+    }
+
+    public long getEarliestTransactionBlock()
+    {
+        return earliestTxBlock;
+    }
+
+    public void setEarliestTransactionBlock(long earliestTransactionBlock)
+    {
+        this.earliestTxBlock = earliestTransactionBlock;
     }
 }

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/alabaster"
-    android:paddingLeft="1dp"
-    android:paddingRight="1dp">
+    android:background="@color/colorTheme"
+    android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
@@ -13,18 +12,21 @@
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar">
+        android:layout_marginBottom="?actionBarSize"
+        android:background="@color/alabaster">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
         tools:visibility="gone" />
 
-</RelativeLayout>
+</LinearLayout>

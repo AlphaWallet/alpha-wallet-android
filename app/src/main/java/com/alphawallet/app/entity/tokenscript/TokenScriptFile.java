@@ -21,10 +21,10 @@ public class TokenScriptFile extends File
     private boolean resourceFile;
     private String fileName;
 
-    public TokenScriptFile()
+    public TokenScriptFile(Context ctx)
     {
         super("");
-        context = null;
+        context = ctx;
         active = false;
         resourceFile = false;
     }
@@ -173,5 +173,10 @@ public class TokenScriptFile extends File
             else
                 sigDescriptor.type = SigReturnType.NO_SIGNATURE;
         }
+    }
+
+    public boolean fileChanged(String fileHash)
+    {
+        return fileHash == null || !isValidTokenScript() || !fileHash.equals(calcMD5());
     }
 }

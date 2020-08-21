@@ -3,6 +3,7 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -31,8 +32,16 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
         }
     }
 
-    private String getDate(Date date) {
-        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(getContext()));
-        return dateFormat.format(date);
+    private String getDate(Date date)
+    {
+        if (DateUtils.isToday(date.getTime()))
+        {
+            return getString(R.string.today);
+        }
+        else
+        {
+            java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(getContext()));
+            return dateFormat.format(date);
+        }
     }
 }

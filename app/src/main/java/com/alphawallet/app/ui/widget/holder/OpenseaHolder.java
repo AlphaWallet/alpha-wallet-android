@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -22,6 +23,10 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -108,11 +113,27 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
 
         Glide.with(getContext())
                 .load(asset.getImagePreviewUrl())
+                .listener(requestListener)
                 .into(image);
 
         layoutToken.setOnClickListener(v -> handleClick(v, data));
         layoutToken.setOnLongClickListener(v -> handleLongClick(v, data));
     }
+
+    /**
+     * Prevent glide dumping log errors - it is expected that load will fail
+     */
+    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            return false;
+        }
+    };
 
     private Asset getAsset(TicketRange data)
     {

@@ -3,8 +3,6 @@ package com.alphawallet.app.ui;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -58,7 +56,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.ErrorCode.ALREADY_ADDED;
-import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
@@ -84,7 +81,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_import_wallet);
-        LockOrientation();
 
         toolbar();
         setTitle(getString(R.string.title_import));
@@ -233,8 +229,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             dialog.setCancelable(false);
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
-
-            sendBroadcast(new Intent(RESET_WALLET));
         }
     }
 
@@ -512,17 +506,5 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             dialog.dismiss();
         });
         dialog.show();
-    }
-
-    private void LockOrientation()
-    {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-        {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        }
-        else
-        {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
     }
 }

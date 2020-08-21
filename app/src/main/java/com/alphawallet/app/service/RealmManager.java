@@ -20,10 +20,14 @@ public class RealmManager {
     }
 
     public Realm getRealmInstance(Wallet wallet) {
-        return getRealmInstance(getRealmInstanceName(wallet));
+        return getRealmInstanceInternal(getRealmInstanceName(wallet));
     }
 
-    Realm getRealmInstance(String name) {
+    public Realm getRealmInstance(String walletAddress) {
+        return getRealmInstanceInternal(walletAddress.toLowerCase() + "-db.realm");
+    }
+
+    Realm getRealmInstanceInternal(String name) {
         try
         {
             RealmConfiguration config = realmConfigurations.get(name);
@@ -54,16 +58,10 @@ public class RealmManager {
     }
 
     public Realm getWalletDataRealmInstance() {
-        return getRealmInstance("WalletData-db.realm");
+        return getRealmInstanceInternal("WalletData-db.realm");
     }
 
     public Realm getWalletTypeRealmInstance() {
-        return getRealmInstance("WalletType-db.realm");
-    }
-
-    public Realm getAuxRealmInstance(String walletAddress)
-    {
-        String name = "AuxData-" + walletAddress.toLowerCase() + "-db.realm";
-        return getRealmInstance(name);
+        return getRealmInstanceInternal("WalletType-db.realm");
     }
 }

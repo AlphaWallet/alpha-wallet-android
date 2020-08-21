@@ -28,4 +28,9 @@ public class DateSortedItem extends TimestampSortedItem<Date> {
     public static DateSortedItem round(long timeStampInSec) {
         return new DateSortedItem(LocaleUtils.getLocalDateFromTimestamp(timeStampInSec));
     }
+
+    public long getUID()
+    {
+        return ((Date)value).getTime();
+    }
 }

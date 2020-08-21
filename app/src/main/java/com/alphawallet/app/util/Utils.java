@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,6 +93,8 @@ public class Utils {
         if (TextUtils.isEmpty(text)) return "";
         String firstWord = getFirstWord(text);
         switch (firstWord.length()) {
+            case 0:
+                return "";
             case 1:
             case 2:
             case 3:
@@ -457,5 +460,9 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static long randomId() {
+        return new Date().getTime();
     }
 }

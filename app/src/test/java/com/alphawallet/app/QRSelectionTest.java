@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -31,6 +33,9 @@ import com.alphawallet.app.interact.SignatureGenerateInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.realm.Realm;
+
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 
 import static org.junit.Assert.assertEquals;
@@ -66,17 +71,6 @@ public class QRSelectionTest
 
         transactionRepository = new TransactionRepositoryType()
         {
-            @Override
-            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
-                return null;
-            }
-
-            @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress)
-            {
-                return null;
-            }
-
             @Override
             public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
             {
@@ -126,24 +120,6 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
-            {
-                return null;
-            }
-
-            @Override
             public Transaction fetchCachedTransaction(String walletAddr, String hash)
             {
                 return null;
@@ -162,7 +138,41 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash)
+            public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet,
+                                                                      List<Integer> networkFilters, long fetchTime, int fetchLimit)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId,
+                                                                      String tokenAddress,
+                                                                      int historyCount)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet,
+                                                          List<Integer> networkFilters)
+            {
+                return null;
+            }
+
+            @Override
+            public Realm getRealmInstance(Wallet wallet)
+            {
+                return null;
+            }
+
+            @Override
+            public RealmAuxData fetchCachedEvent(String walletAddress, String eventKey)
+            {
+                return null;
+            }
+
+            @Override
+            public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
             {
                 return null;
             }

@@ -121,6 +121,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
@@ -151,7 +152,18 @@ import static org.web3j.tx.Contract.staticExtractEventParameters;
  */
 public abstract class EventUtils
 {
-    public EthFilter generateLogFilter(EventDefinition ev, Token originToken, AttributeInterface attrIf) throws Exception
+    public static EthFilter generateLogFilter(EventDefinition ev, List<BigInteger> tokenIds, AttributeInterface attrIf) throws Exception
+    {
+        return generateLogFilter(ev, null, tokenIds, attrIf);
+    }
+
+    public static EthFilter generateLogFilter(EventDefinition ev, Token originToken, AttributeInterface attrIf) throws Exception
+    {
+        if (originToken == null) return null;
+        else return generateLogFilter(ev, originToken, originToken.getUniqueTokenIds(), attrIf);
+    }
+
+    public static EthFilter generateLogFilter(EventDefinition ev, Token originToken, List<BigInteger> tokenIds, AttributeInterface attrIf) throws Exception
     {
         int chainId = ev.contract.addresses.keySet().iterator().next();
         String eventContractAddr = ev.contract.addresses.get(chainId).get(0);
@@ -169,7 +181,7 @@ public abstract class EventUtils
 
         DefaultBlockParameter startBlock = DefaultBlockParameterName.EARLIEST;
 
-        if (ev.readBlock != null && ev.readBlock.compareTo(BigInteger.ZERO) > 0)
+        if (ev.readBlock.compareTo(BigInteger.ZERO) > 0)
         {
             startBlock = DefaultBlockParameter.valueOf(ev.readBlock);
         }
@@ -178,14 +190,17 @@ public abstract class EventUtils
                 new org.web3j.protocol.core.methods.request.EthFilter(
                         startBlock,
                         DefaultBlockParameterName.LATEST,
-                        eventContractAddr)                            // contract address
-                        .addSingleTopic(EventEncoder.encode(resolverEvent)); // event name
+                        eventContractAddr) // contract address
+                        .addSingleTopic(EventEncoder.encode(resolverEvent));// event name
 
         for (int i = 0; i < indexedParams.size(); i++)
         {
             if (i == topicIndex)
             {
-                addTopicFilter(ev, filter, filterTopicValue, originToken, eventContractAddr, attrIf); //add the required log filter - allowing for multiple tokenIds
+                if (!addTopicFilter(ev, filter, filterTopicValue, tokenIds, attrIf)) //add the required log filter - allowing for multiple tokenIds
+                {
+                    return null;
+                }
                 break;
             }
             else
@@ -197,7 +212,7 @@ public abstract class EventUtils
         return filter;
     }
 
-    public String getSelectVal(EventDefinition ev, EthLog.LogResult ethLog)
+    public static String getSelectVal(EventDefinition ev, EthLog.LogResult ethLog)
     {
         String selectVal = "";
         final Event resolverEvent = generateEventFunction(ev);
@@ -214,13 +229,10 @@ public abstract class EventUtils
             selectVal = getValueFromParams(eventValues.getIndexedValues(), selectIndexInIndexed);
         }
 
-        Log log = (Log)ethLog;
-        ev.readBlock = log.getBlockNumber().add(BigInteger.ONE);
-
         return selectVal;
     }
 
-    public String getTopicVal(EventDefinition ev, EthLog.LogResult ethLog)
+    public static String getTopicVal(EventDefinition ev, EthLog.LogResult ethLog)
     {
         String topicVal = "";
         final Event resolverEvent = generateEventFunction(ev);
@@ -233,7 +245,7 @@ public abstract class EventUtils
         return topicVal;
     }
 
-    public Single<EthBlock> getTransactionDetails(String blockHash, Web3j web3j)
+    public static Single<EthBlock> getBlockDetails(String blockHash, Web3j web3j)
     {
         return Single.fromCallable(() -> {
             EthBlock txResult;
@@ -252,7 +264,26 @@ public abstract class EventUtils
         });
     }
 
-    private String getValueFromParams(List<Type> responseParams, int selectIndex)
+    public static Single<EthTransaction> getTransactionDetails(String blockHash, Web3j web3j)
+    {
+        return Single.fromCallable(() -> {
+            EthTransaction txResult;
+            try
+            {
+                txResult = web3j.ethGetTransactionByHash(blockHash.trim()).send();
+                System.out.println(txResult.getResult());
+            }
+            catch (IOException | NullPointerException e)
+            {
+                e.printStackTrace();
+                txResult = new EthTransaction();
+            }
+
+            return txResult;
+        });
+    }
+
+    private static String getValueFromParams(List<Type> responseParams, int selectIndex)
     {
         Type t = responseParams.get(selectIndex);
         String typeName = t.getTypeAsString();
@@ -615,46 +646,37 @@ public abstract class EventUtils
         return paramList;
     }
 
-    private Event generateEventFunction(EventDefinition ev)
+    private static Event generateEventFunction(EventDefinition ev)
     {
         List<TypeReference<?>> eventArgSpec = EventUtils.generateFunctionDefinition(ev.type.getSequenceArgs());
         return new Event(ev.type.name, eventArgSpec);
     }
 
-    private void addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, Token originToken, String contractAddr, AttributeInterface attrIf) throws Exception
+    private static boolean addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, List<BigInteger> tokenIds, AttributeInterface attrIf) throws Exception
     {
+        boolean filterSuccess = true;
         //find the topic value
         switch (filterTopicValue)
         {
             case "tokenId":
-                if (originToken == null)
+                if (tokenIds.size() == 0)
                 {
-                    throw new Exception("Unable to use tokenId with unknown Token: " + contractAddr);
+                    filterSuccess = false;
                 }
-                else if (originToken.isNonFungible())
+                else if (tokenIds.size() == 1)
                 {
-                    //get unique tokenId balance
-                    List<BigInteger> uniqueTokenIds = originToken.getUniqueTokenIds();
-                    if (uniqueTokenIds.size() == 1)
-                    {
-                        filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(uniqueTokenIds.get(0))));
-                    }
-                    else
-                    {
-                        //listen for multiple tokenIds
-                        List<String> optionals = new ArrayList<>();
-                        for (BigInteger uid : uniqueTokenIds)
-                        {
-                            String entry = "0x" + TypeEncoder.encode(new Uint256(uid));
-                            optionals.add(entry);
-                        }
-                        filter.addOptionalTopics(optionals.toArray(new String[0]));
-                    }
+                    filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(tokenIds.get(0))));
                 }
                 else
                 {
-                    //TODO: report error in tokenscript management page
-                    System.out.println("ERROR: using 'tokenId' with Fungible token");
+                    //listen for multiple tokenIds
+                    List<String> optionals = new ArrayList<>();
+                    for (BigInteger uid : tokenIds)
+                    {
+                        String entry = "0x" + TypeEncoder.encode(new Uint256(uid));
+                        optionals.add(entry);
+                    }
+                    filter.addOptionalTopics(optionals.toArray(new String[0]));
                 }
                 break;
             case "ownerAddress":
@@ -664,18 +686,21 @@ public abstract class EventUtils
                 Attribute attr = attrIf.fetchAttribute(ev.contract, filterTopicValue);
                 if (attr != null)
                 {
-                    ContractAddress tokenAddr = new ContractAddress(originToken.tokenInfo.chainId, originToken.getAddress());
-                    List<BigInteger> uniqueTokenIds = originToken.getUniqueTokenIds();
-                    if (uniqueTokenIds.size() == 1)
+                    ContractAddress tokenAddr = new ContractAddress(ev.getEventChainId(), ev.getEventContractAddress());//new ContractAddress(originToken.tokenInfo.chainId, originToken.getAddress());
+                    if (tokenIds.size() == 0)
                     {
-                        TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, uniqueTokenIds.get(0));
+                        filterSuccess = false;
+                    }
+                    else if (tokenIds.size() == 1)
+                    {
+                        TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, tokenIds.get(0));
                         filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(attrResult.value)));
                     }
                     else
                     {
                         //listen for multiple tokenId results
                         List<String> optionals = new ArrayList<>();
-                        for (BigInteger uid : uniqueTokenIds)
+                        for (BigInteger uid : tokenIds)
                         {
                             TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, uid);
                             String entry = "0x" + TypeEncoder.encode(new Uint256(attrResult.value));
@@ -686,9 +711,74 @@ public abstract class EventUtils
                 }
                 else
                 {
+                    filterSuccess = false;
                     throw new Exception("Unresolved event filter name: " + filterTopicValue);
                 }
                 break;
         }
+
+        return filterSuccess;
+    }
+
+    public static String getAllTopics(EventDefinition ev, EthLog.LogResult log)
+    {
+        final Event resolverEvent = generateEventFunction(ev);
+        final EventValues eventValues = staticExtractEventParameters(resolverEvent, (Log)log.get());
+
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (NamedType.SequenceElement e : ev.type.getSequenceArgs())
+        {
+            if (!first) sb.append(",");
+            sb.append(e.name);
+            sb.append(",");
+            sb.append(e.type);
+            sb.append(",");
+
+            String result = getEventResult(ev, e.name, eventValues);
+            sb.append(result);
+            first = false;
+        }
+
+        return sb.toString();
+    }
+
+    private static String getEventResult(EventDefinition ev, String name, final EventValues eventValues)
+    {
+        int indexed = ev.getTopicIndex(name);
+        int nonIndexed = ev.getNonIndexedIndex(name);
+
+        if (indexed >= 0)
+        {
+            return eventValues.getIndexedValues().get(indexed).getValue().toString();
+        }
+        else
+        {
+            return eventValues.getNonIndexedValues().get(nonIndexed).getValue().toString();
+        }
+    }
+
+    public static BigInteger getTokenId(EventDefinition ev, EthLog.LogResult log)
+    {
+        BigInteger tokenId;
+        String filterTopicValue = ev.getFilterTopicValue();
+        if (filterTopicValue.equals("tokenId"))
+        {
+            String tokenIdStr = EventUtils.getTopicVal(ev, log);
+            if (tokenIdStr.startsWith("0x"))
+            {
+                tokenId = com.alphawallet.token.tools.Numeric.toBigInt(tokenIdStr);
+            }
+            else
+            {
+                tokenId = new BigInteger(tokenIdStr);
+            }
+        }
+        else
+        {
+            tokenId = BigInteger.ZERO;
+        }
+
+        return tokenId;
     }
 }

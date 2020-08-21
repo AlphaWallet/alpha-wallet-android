@@ -62,4 +62,8 @@
         <attr name="borderAlpha" format="float" />
         <attr name="finderOffset" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="TokenIcon">
+        <attr name="showStatus" format="boolean" />
+        <attr name="largeIcon" format="boolean" />
+    </declare-styleable>
 </resources>

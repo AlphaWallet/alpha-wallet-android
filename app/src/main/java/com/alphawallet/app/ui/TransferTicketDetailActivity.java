@@ -269,7 +269,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
         minusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity - 1) >= 0) {
+            if ((quantity - 1) > 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
                 selection = token.pruneIDList(ticketIds, 1);

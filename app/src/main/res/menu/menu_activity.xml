@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <item
+        android:id="@+id/action_view_transaction_details"
+        android:icon="@drawable/ic_view_details"
+        android:orderInCategory="20"
+        android:title="@string/title_transaction_details"
+        app:showAsAction="always"
+        />
+</menu>

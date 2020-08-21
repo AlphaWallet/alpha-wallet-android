@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/view_container"
+    android:layout_width="86dp"
+    android:layout_height="86dp"
+    android:orientation="horizontal">
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.98" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.98" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineInnerRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.92" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineInnerBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.92" />
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:background="@color/logo_grey"
+        android:contentDescription="@string/empty"
+        android:foreground="@drawable/white_circle"
+        android:gravity="center"
+        android:src="@drawable/ropsten_logo"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom" />
+
+    <TextView
+        android:id="@+id/text_icon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:background="@drawable/grid_icon"
+        android:backgroundTint="@color/azure"
+        android:fontFamily="@font/font_bold"
+        android:gravity="center"
+        android:lines="1"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:autoSizeMaxTextSize="@dimen/sp24"
+        app:autoSizeMinTextSize="@dimen/sp17"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintEnd_toEndOf="@+id/icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="UEFA" />
+
+    <ImageView
+        android:id="@+id/status_icon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:visibility="visible"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/ic_sent_white_small"
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
+
+</android.support.constraint.ConstraintLayout>

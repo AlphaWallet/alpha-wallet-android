@@ -21,16 +21,6 @@ public class RealmCertificateData extends RealmObject
     private String certificateName;
     private int type;
 
-    public String getInstanceKey()
-    {
-        return instanceKey;
-    }
-
-    public void setInstanceKey(String instanceKey)
-    {
-        this.instanceKey = instanceKey;
-    }
-
     public void setFromSig(XMLDsigDescriptor sig)
     {
         result = sig.result;

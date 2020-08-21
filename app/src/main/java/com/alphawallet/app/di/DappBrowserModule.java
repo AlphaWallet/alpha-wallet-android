@@ -1,21 +1,20 @@
 package com.alphawallet.app.di;
 
-import dagger.Module;
-import dagger.Provides;
-
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
+
+import dagger.Module;
+import dagger.Provides;
 
 @Module
 public class DappBrowserModule {
@@ -25,21 +24,21 @@ public class DappBrowserModule {
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            FetchTokensInteract fetchTokensInteract,
+            TokensService tokensService,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService,
-            KeyService keyService) {
+            KeyService keyService,
+            GasService gasService) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 genericWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
-                fetchTokensInteract,
+                tokensService,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService,
-                keyService);
+                keyService,
+                gasService);
     }
 
     @Provides
@@ -62,10 +61,5 @@ public class DappBrowserModule {
     @Provides
     CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
         return new CreateTransactionInteract(transactionRepository);
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
     }
 }

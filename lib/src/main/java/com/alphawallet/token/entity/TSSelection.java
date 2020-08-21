@@ -1,6 +1,7 @@
 package com.alphawallet.token.entity;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
  * Created by JB on 21/05/2020.

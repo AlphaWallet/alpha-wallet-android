@@ -1,9 +1,7 @@
 package com.alphawallet.app.di;
 
-import dagger.Module;
-import dagger.Provides;
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FetchTokensInteract;
+import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -16,6 +14,9 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
+
+import dagger.Module;
+import dagger.Provides;
 /**
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
@@ -34,10 +35,10 @@ public class TokenFunctionModule
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenseaService openseaService,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTokensInteract);
+                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTransactionsInteract);
     }
 
     @Provides
@@ -51,12 +52,13 @@ public class TokenFunctionModule
     }
 
     @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
+    GenericWalletInteract provideGenericWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
-    GenericWalletInteract provideGenericWalletInteract(WalletRepositoryType walletRepository) {
-        return new GenericWalletInteract(walletRepository);
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
+                                                               TokenRepositoryType tokenRepositoryType) {
+        return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
     }
 }

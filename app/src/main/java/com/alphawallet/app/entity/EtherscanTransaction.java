@@ -14,7 +14,7 @@ public class EtherscanTransaction
     public String blockNumber;
     long timeStamp;
     String hash;
-    int nonce;
+    public int nonce;
     String blockHash;
     int transactionIndex;
     String from;
@@ -32,22 +32,12 @@ public class EtherscanTransaction
 
     private static TransactionDecoder decoder = null;
 
-    public Transaction createTransaction(String walletAddress, Context ctx, int chainId)
+    public Transaction createTransaction(String walletAddress, int chainId)
     {
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
                                          gasUsed, chainId, contractAddress);
 
-        if (tx.operations.length > 0)
-        {
-            TransactionOperation op = tx.operations[0];
-            if (op.contract != null) op.contract.completeSetup(walletAddress, tx);
-        }
-
-        if (walletAddress != null && !walletInvolvedInTransaction(tx, walletAddress))
-        {
-            tx = null; //this transaction is not relevant to the wallet we're scanning for
-        }
-
+        if (walletAddress != null) tx.completeSetup(walletAddress);
         return tx;
     }
 

@@ -1,21 +1,23 @@
 package com.alphawallet.app.ui.widget.entity;
 
-import com.alphawallet.app.ui.widget.holder.TokenHolder;
-import com.alphawallet.app.entity.tokens.Ticket;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 
-public class TokenSortedItem extends SortedItem<Token> {
+public class TokenSortedItem extends SortedItem<TokenCardMeta> {
 
-    public TokenSortedItem(Token value, int weight) {
-        super(TokenHolder.VIEW_TYPE, value, weight);
+    private boolean debugging = false;
+
+    public TokenSortedItem(int viewType, TokenCardMeta value, int weight) {
+        super(viewType, value, weight);
     }
 
-    public TokenSortedItem(int viewType, Token value, int weight) {
-        super(viewType, value, weight);
+    public void debug()
+    {
+        debugging = true;
     }
 
     @Override
     public int compare(SortedItem other) {
+        if (debugging) System.out.println("DEBUG: Compare: " + weight + " " + other.weight);
         return weight - other.weight;
     }
 
@@ -23,28 +25,11 @@ public class TokenSortedItem extends SortedItem<Token> {
     public boolean areContentsTheSame(SortedItem newItem) {
         if (viewType == newItem.viewType)
         {
-            Token oldToken = value;
-            Token newToken = (Token) newItem.value;
-            if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
-            else if (weight != newItem.weight) return false;
-            else if (!oldToken.getFullBalance().equals(newToken.getFullBalance())) return false;
-            else if (!oldToken.pendingBalance.equals(newToken.pendingBalance)) return false;
-            else if (!oldToken.getFullName().equals(newToken.getFullName())) return false;
-            else if (oldToken.checkTickerChange(newToken)) return false;
-            else if (oldToken.getInterfaceSpec() != newToken.getInterfaceSpec()) return false;
-
-            //Had a redeem
-            if (oldToken instanceof Ticket && newToken instanceof Ticket)
-            {
-                Ticket oTick = (Ticket) oldToken;
-                Ticket nTick = (Ticket) newToken;
-
-                return oTick.isMatchedInXML() == nTick.isMatchedInXML();
-            }
-
-            //TODO: balance value gone stale
-
-            return true;
+            TokenCardMeta newToken = (TokenCardMeta) newItem.value;
+            //if (!oldToken.tokenId.equalsIgnoreCase(newToken.tokenId)) return false;
+            if (debugging) System.out.println("DEBUG: Contents: " + weight + " " + newItem.weight + " Balance: " + value.balance + " " + newToken.balance);
+            if (weight != newItem.weight) return false;
+            else return value.balance.equals(newToken.balance);
         }
         else
         {
@@ -57,11 +42,17 @@ public class TokenSortedItem extends SortedItem<Token> {
     {
         if (viewType == other.viewType)
         {
-            Token oldToken = value;
-            Token newToken = (Token) other.value;
+            TokenCardMeta oldToken = value;
+            TokenCardMeta newToken = (TokenCardMeta) other.value;
+
+            if (debugging)
+            {
+                if (oldToken == null || newToken == null) System.out.println("DEBUG: Item: One is null");
+                else System.out.println("DEBUG: Item: " + oldToken.tokenId + " " + newToken.tokenId);
+            }
 
             if (oldToken == null || newToken == null) return false;
-            else return oldToken.getAddress().equals(newToken.getAddress()) && oldToken.tokenInfo.chainId == newToken.tokenInfo.chainId;
+            else return oldToken.tokenId.equalsIgnoreCase(newToken.tokenId);
         }
         else
         {

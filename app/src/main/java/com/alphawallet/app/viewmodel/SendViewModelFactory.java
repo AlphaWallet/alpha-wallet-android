@@ -4,9 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.interact.AddTokenInteract;
-import com.alphawallet.app.interact.ENSInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
-import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -19,30 +17,24 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
 
     private final ConfirmationRouter confirmationRouter;
     private final MyAddressRouter myAddressRouter;
-    private final ENSInteract ensInteract;
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
-    private final SetupTokensInteract setupTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
     private final GasService gasService;
 
     public SendViewModelFactory(ConfirmationRouter confirmationRouter,
                                 MyAddressRouter myAddressRouter,
-                                ENSInteract ensInteract,
                                 EthereumNetworkRepositoryType networkRepository,
                                 TokensService tokensService,
-                                GasService gasService,
-                                SetupTokensInteract setupTokensInteract,
                                 FetchTransactionsInteract fetchTransactionsInteract,
-                                AddTokenInteract addTokenInteract) {
+                                AddTokenInteract addTokenInteract,
+                                GasService gasService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
-        this.ensInteract = ensInteract;
         this.networkRepository = networkRepository;
         this.tokensService = tokensService;
         this.gasService = gasService;
-        this.setupTokensInteract = setupTokensInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.addTokenInteract = addTokenInteract;
     }
@@ -50,6 +42,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SendViewModel(confirmationRouter, myAddressRouter, ensInteract, networkRepository, tokensService, gasService, setupTokensInteract, fetchTransactionsInteract, addTokenInteract);
+        return (T) new SendViewModel(confirmationRouter, myAddressRouter, networkRepository, tokensService, fetchTransactionsInteract, addTokenInteract, gasService);
     }
 }

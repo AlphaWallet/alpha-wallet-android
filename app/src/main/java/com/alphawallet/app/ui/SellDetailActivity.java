@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -367,7 +368,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 
         //set default for tomorrow
-        long tomorrowStamp = System.currentTimeMillis() + 1000*60*60*24;
+        long tomorrowStamp = System.currentTimeMillis() + 1 * DateUtils.DAY_IN_MILLIS;
         Date tomorrow = new Date(tomorrowStamp);
         expiryDateEditText.setText(dateFormatter.format(tomorrow.getTime()));
     }
@@ -446,26 +447,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());
-    }
-
-    private void sellTicketFinal() {
-        if (sellPriceValue <= 0) return;
-        //1. validate price
-        BigInteger price = getPriceInWei();
-        //2. get indicies
-        //int[] prunedIndices = token.getTicketIndices(prunedIds);
-        int quantity = Integer.parseInt(textQuantity.getText().toString());
-
-        if (price.doubleValue() > 0.0 && quantity > 0) {
-            //get the specific ID's, pick from the start of the run
-            List<BigInteger> ticketIdList = token.stringHexToBigIntegerList(ticketIds);
-            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
-            viewModel.generateSalesOrders(token.getAddress(), totalValue, selection, ticketIdList.get(0));
-            finish();
-        }
-
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
-        //go back to previous screen
     }
 
     private BigInteger getPriceInWei() {

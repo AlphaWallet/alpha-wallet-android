@@ -5,27 +5,26 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.interact.FetchTokensInteract;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import com.alphawallet.app.service.AssetDefinitionService;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FetchTokensInteract fetchTokensInteract;
+    private final TokensService tokensService;
     private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
@@ -38,12 +37,12 @@ public class TransferTicketViewModel extends BaseViewModel {
     private Disposable getBalanceDisposable;
 
     TransferTicketViewModel(
-            FetchTokensInteract fetchTokensInteract,
+            TokensService tokensService,
             GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
-        this.fetchTokensInteract = fetchTokensInteract;
+        this.tokensService = tokensService;
         this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
@@ -61,16 +60,16 @@ public class TransferTicketViewModel extends BaseViewModel {
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
-    public LiveData<Token> ticket() {
+    public LiveData<Token> token() {
         return token;
     }
 
     public void fetchCurrentTicketBalance() {
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .fetchSingle(defaultWallet.getValue(), ticket().getValue())
-                        .subscribe(this::onToken, t -> {}))
-                .subscribe(l -> {}, t -> {});
+                .doOnNext(l -> {
+                    Token t = tokensService.getToken(token.getValue().tokenInfo.chainId, token.getValue().getAddress());
+                    onToken(t);
+                }).subscribe(l -> {}, t -> {});
     }
 
     public void prepare(Token t) {

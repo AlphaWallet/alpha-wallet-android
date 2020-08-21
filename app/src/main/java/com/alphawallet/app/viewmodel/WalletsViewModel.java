@@ -5,20 +5,14 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -27,12 +21,10 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,11 +32,10 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
@@ -57,28 +48,22 @@ public class WalletsViewModel extends BaseViewModel
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
-    private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final KeyService keyService;
-    private final GasService gasService;
-    private final Context context;
-
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
     private final TokensService tokensService;
     private final AWEnsResolver ensResolver;
+    private final AssetDefinitionService assetService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> updateBalance = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> updateENSName = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
-    private int walletUpdateCount;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -89,11 +74,10 @@ public class WalletsViewModel extends BaseViewModel
             GenericWalletInteract genericWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
-            FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
-            GasService gasService,
             TokensService tokensService,
+            AssetDefinitionService assetService,
             Context context)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
@@ -101,12 +85,10 @@ public class WalletsViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.importWalletRouter = importWalletRouter;
         this.homeRouter = homeRouter;
-        this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
-        this.gasService = gasService;
         this.tokensService = tokensService;
-        this.context = context;
+        this.assetService = assetService;
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
     }
@@ -132,13 +114,6 @@ public class WalletsViewModel extends BaseViewModel
     }
     public LiveData<Boolean> noWalletsError() { return noWalletsError; }
 
-    public LiveData<Wallet> updateBalance()
-    {
-        return updateBalance;
-    }
-
-    public LiveData<Wallet> updateENSName() { return updateENSName; }
-
     public void setDefaultWallet(Wallet wallet)
     {
         disposable = setDefaultWalletInteract
@@ -146,17 +121,11 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(() -> onDefaultWallet(wallet), this::onError);
     }
 
-    private Wallet addWalletToMap(Wallet wallet) {
-        if (wallet.address != null && !walletBalances.containsKey(wallet.address.toLowerCase())) walletBalances.put(wallet.address.toLowerCase(), wallet);
-        return wallet;
-    }
-
-    public void onPrepare()
+    public void onPrepare(int chainId)
     {
         walletBalances.clear();
         progress.postValue(true);
-        ContractLocator override = EthereumNetworkRepository.getOverrideToken();
-        currentNetwork = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
+        currentNetwork = findDefaultNetworkInteract.getNetworkInfo(chainId);
 
         disposable = genericWalletInteract
                 .find()
@@ -198,14 +167,6 @@ public class WalletsViewModel extends BaseViewModel
         startBalanceUpdateTimer(items);
     }
 
-    public void updateBalancesIfRequired(Wallet[] wallets)
-    {
-        if (walletBalances.size() == 0)
-        {
-            getWalletsBalance(wallets);
-        }
-    }
-
     public void swipeRefreshWallets()
     {
         //check for updates
@@ -213,29 +174,19 @@ public class WalletsViewModel extends BaseViewModel
         disposable = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensResolver.resolveEnsName(wallet.address)
+                        .map(ensName -> { wallet.ENSname = ensName; return wallet;})
+                        .flatMap(fetchWalletsInteract::updateWalletData)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(ensName -> updateOnName(wallet, ensName), this::onError));
+                        .subscribe(w -> { }, this::onError).isDisposed());
 
         updateWallets();
-    }
-
-    private void updateOnName(Wallet wallet, String ensName)
-    {
-        if (!TextUtils.isEmpty(ensName))
-        {
-            wallet.ENSname = ensName;
-            disposable = fetchWalletsInteract.updateWalletData(wallet)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(updateENSName::postValue, this::onError);
-        }
     }
 
     public void fetchWallets()
     {
         progress.postValue(true);
-        onPrepare();
+        onPrepare(currentNetwork.chainId);
     }
 
     public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
@@ -251,72 +202,27 @@ public class WalletsViewModel extends BaseViewModel
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
 
-        balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS)
+        balanceTimerDisposable = Observable.interval(1, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS) //initial delay 1 second to allow view to stabilise
                 .doOnNext(l -> getWalletsBalance(wallets)).subscribe();
     }
 
     /**
-     * Sequentially updates the wallet balances on the current network
+     * Sequentially updates the wallet balances on the current network and stores to database if necessary
      *
-     * @param wallets
+     * @param wallets - array of wallets
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        ContractLocator override = EthereumNetworkRepository.getOverrideToken();
-        NetworkInfo    network  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
-        walletUpdateCount = wallets.length;
-
+        //loop through wallets and update balance
         disposable = Observable.fromArray(wallets)
-                .map(this::addWalletToMap)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(wallet -> {
-                    fetchTokensInteract.fetchStoredToken(network, wallet, override.address) //fetch cached balance from this wallet's DB
-                    .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
-                    .subscribe(this::updateWallet, error -> onFetchError(wallet)).isDisposed();
-                }, this::onError, () -> progress.postValue(false));
-    }
+                .forEach(wallet -> tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
+                            .flatMap(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(Schedulers.io())
+                            .subscribe(w -> { }, e -> { })
+                            .isDisposed());
 
-    private void onFetchError(Wallet wallet)
-    {
-        //leave wallet with stale value, but grey out balance
-        if (walletBalances.containsKey(wallet.address.toLowerCase()))
-        {
-            wallet.balance = "*" + wallet.balance; //stale balance annotation - only used in WalletHolder
-            updateBalance.postValue(wallet);
-            wallet.balance = wallet.balance.substring(1); //don't store the stale balance annotation
-            walletBalances.put(wallet.address.toLowerCase(), wallet);
-        }
-        storeWallets();
-    }
-
-    private void updateWallet(Token token)
-    {
-        Wallet wallet = walletBalances.get(token.getWallet().toLowerCase());
-        if (wallet != null)
-        {
-            wallet.setWalletBalance(token);
-            updateBalance.postValue(wallet);
-        }
-        storeWallets();
-    }
-
-    private void storeWallets()
-    {
-        walletUpdateCount--;
-        if (walletUpdateCount == 0)
-        {
-            //write wallets to DB
-            disposable = fetchWalletsInteract.storeWallets(walletBalances.values().toArray(new Wallet[0]))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onStored, this::onError);
-        }
-    }
-
-    private void onStored(Wallet[] wallets)
-    {
-        Log.d(TAG, "Stored " + wallets.length + " Wallets");
+        progress.postValue(false);
     }
 
     private void onCreateWalletError(Throwable throwable)
@@ -374,5 +280,15 @@ public class WalletsViewModel extends BaseViewModel
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
         balanceTimerDisposable = null;
+    }
+
+    public Realm getRealmManager()
+    {
+        return genericWalletInteract.getWalletRealm();
+    }
+
+    public void stopUpdates()
+    {
+        assetService.stopEventListener();
     }
 }

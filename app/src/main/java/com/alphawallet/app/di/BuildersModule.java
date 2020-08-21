@@ -1,5 +1,6 @@
 package com.alphawallet.app.di;
 
+import com.alphawallet.app.ui.ActivityFragment;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.AdvancedSettingsActivity;
 import com.alphawallet.app.ui.AssetDisplayActivity;
@@ -21,18 +22,18 @@ import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.SplashActivity;
+import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
-import com.alphawallet.app.ui.TransactionsFragment;
 import com.alphawallet.app.ui.TransferTicketActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.WalletActionsActivity;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.WalletFragment;
 import com.alphawallet.app.ui.WalletsActivity;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -87,6 +88,10 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = NewSettingsModule.class)
 	abstract NewSettingsFragment bindNewSettingsFragment();
 
+	@FragmentScope
+	@ContributesAndroidInjector(modules = ActivityModule.class)
+	abstract ActivityFragment bindActivityFragment();
+
 	@ActivityScope
 	@ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
 	abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
@@ -110,10 +115,6 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TransferTicketModule.class)
 	abstract TransferTicketActivity bindTransferTicketActivity();
-
-	@FragmentScope
-	@ContributesAndroidInjector(modules = TransactionsModule.class)
-	abstract TransactionsFragment bindTransactionsFragment();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = HelpModule.class)
@@ -151,6 +152,10 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
 	abstract TokenDetailActivity bindTokenDetailActivity();
 
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract TokenActivity bindTokenActivity();
+
 	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
 	abstract SelectNetworkActivity bindSelectNetworkActivity();
 
@@ -161,6 +166,10 @@ public abstract class BuildersModule {
 	abstract AdvancedSettingsActivity bindAdvancedSettingsActivity();
 
     @ActivityScope
-    @ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
-    abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
+	@ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
+	abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletConnectModule.class)
+	abstract WalletConnectActivity bindWalletConnectActivity();
 }

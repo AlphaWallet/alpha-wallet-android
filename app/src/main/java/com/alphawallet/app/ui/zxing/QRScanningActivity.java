@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.BaseActivity;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.zxing.BinaryBitmap;
@@ -55,6 +56,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     public void onCreate(Bundle state)
     {
         super.onCreate(state);
+
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
         {
@@ -189,9 +191,21 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
 
     public void handleQRCode(String qrCode)
     {
-        Intent intent = new Intent();
-        intent.putExtra(C.EXTRA_QR_CODE, qrCode);
-        setResult(Activity.RESULT_OK, intent);
+        if (qrCode.startsWith("wc:")) {
+            startWalletConnect(qrCode);
+        } else {
+            Intent intent = new Intent();
+            intent.putExtra(C.EXTRA_QR_CODE, qrCode);
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    private void startWalletConnect(String qrCode) {
+        Intent intent = new Intent(this, WalletConnectActivity.class);
+        intent.putExtra("qrCode", qrCode);
+        startActivity(intent);
+        setResult(RESULT_OK);
         finish();
     }
 

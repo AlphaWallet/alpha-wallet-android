@@ -6,6 +6,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.Log;
@@ -28,6 +29,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
@@ -50,6 +52,8 @@ import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
@@ -74,6 +78,7 @@ public class Web3TokenView extends WebView
     private PageReadyCallback assetHolder;
     private boolean showingError = false;
     private String unencodedPage;
+    private RealmResults<RealmAuxData> realmAuxUpdates;
 
     protected WebCompletionCallback keyPressCallback;
 
@@ -112,7 +117,7 @@ public class Web3TokenView extends WebView
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUserAgentString(webSettings.getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        WebView.setWebContentsDebuggingEnabled(true);
 
         setScrollBarSize(0);
         setVerticalScrollBarEnabled(false);
@@ -154,7 +159,7 @@ public class Web3TokenView extends WebView
                             }
                         }
                     }
-                    catch (IOException e)
+                    catch (Exception e)
                     {
                         errorLine = "";
                     }
@@ -232,9 +237,7 @@ public class Web3TokenView extends WebView
     }
 
     public void callToJS(String function) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
-        }
+        post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
     }
 
     @JavascriptInterface
@@ -246,9 +249,7 @@ public class Web3TokenView extends WebView
     @JavascriptInterface
     public void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
-        }
+        post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
     }
 
     public void setOnSignPersonalMessageListener(@Nullable OnSignPersonalMessageListener onSignPersonalMessageListener) {
@@ -471,6 +472,38 @@ public class Web3TokenView extends WebView
 
         String base64 = android.util.Base64.encodeToString(unencodedPage.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         loadData(base64, "text/html; charset=utf-8", "base64");
+
+        //TODO: Re-do this to use the JavaScript minimal interface
+        //now set realm listener ready to refresh view
+        Realm realm = assetService.getEventRealm();
+        long lastUpdateTime = getLastUpdateTime(realm, token, range.tokenIds.get(0));
+        realmAuxUpdates = RealmAuxData.getEventListener(realm, token, range.tokenIds.get(0), 1, lastUpdateTime);
+        realmAuxUpdates.addChangeListener(realmAux -> {
+            if (realmAux.size() == 0) return;
+            //reload token view, updated event will be fetched from DB
+            displayTicketHolder(token, range, assetService, iconified);
+        });
+    }
+
+    private long getLastUpdateTime(Realm realm, Token token, BigInteger tokenId)
+    {
+        long lastResultTime = 0;
+        RealmResults<RealmAuxData> lastEntry = RealmAuxData.getEventQuery(realm, token, tokenId, 1, 0).findAll();
+        if (lastEntry.size() > 0)
+        {
+            RealmAuxData data = lastEntry.first();
+            lastResultTime = data.getResultTime();
+        }
+
+        return lastResultTime + 1;
+    }
+
+    @Override
+    public void destroy()
+    {
+        super.destroy();
+        //remove listeners
+        if (realmAuxUpdates != null) realmAuxUpdates.removeAllChangeListeners();
     }
 
     /**

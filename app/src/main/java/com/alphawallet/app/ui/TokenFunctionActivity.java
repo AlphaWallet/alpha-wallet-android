@@ -3,6 +3,7 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,12 +16,16 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.entity.TSAction;
@@ -34,8 +39,13 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
+import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 
 /**
  * Created by James on 2/04/2019.
@@ -55,7 +65,9 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private boolean reloaded;
     private AWalletAlertDialog dialog;
     private LinearLayout webWrapper;
-
+    private ActivityHistoryList activityHistoryList = null;
+    private Realm realm = null;
+    private RealmResults<RealmToken> realmTokenUpdates;
     private void initViews(Token t) {
         token = t;
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
@@ -69,6 +81,9 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
+
+        activityHistoryList = findViewById(R.id.history_list);
+        activityHistoryList.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -81,7 +96,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
                 .get(TokenFunctionViewModel.class);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
-        viewModel.tokenUpdate().observe(this, this::onTokenUpdate);
         viewModel.walletUpdate().observe(this, this::onWalletUpdate);
 
         SystemView systemView = findViewById(R.id.system_view);
@@ -92,11 +106,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         setTitle(getString(R.string.token_function));
 
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-    }
-
-    private void onTokenUpdate(Token t)
-    {
-        initViews(t);
+        viewModel.getCurrentWallet();
     }
 
     private void onWalletUpdate(Wallet w)
@@ -107,13 +117,45 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, idList);
             functionBar.setWalletType(w.type);
         }
+
+        setupRealmListeners(w);
+    }
+
+    private void setupRealmListeners(Wallet w)
+    {
+        realm = viewModel.getRealmInstance(w);
+        setTokenListener();
+        setEventListener(w);
+    }
+
+    private void setTokenListener()
+    {
+        String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
+        realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey).findAllAsync();
+        realmTokenUpdates.addChangeListener(realmTokens -> {
+            if (realmTokens.size() == 0) return;
+            RealmToken t = realmTokens.first();
+            Token update = viewModel.getToken(t.getChainId(), t.getTokenAddress());
+            if (update != null) initViews(update);
+        });
+    }
+
+    private void setEventListener(Wallet wallet)
+    {
+        ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
+                viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
+
+        adapter.setDefaultWallet(wallet);
+
+        activityHistoryList.setupAdapter(adapter);
+        activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
+                token, idList.get(0), HISTORY_LENGTH);
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
-        viewModel.prepare(token);
     }
 
     @Override
@@ -131,8 +173,10 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     {
         super.onDestroy();
         viewModel.stopGasSettingsFetch();
+        if (activityHistoryList != null) activityHistoryList.onDestroy();
+        if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
+        if (realm != null) realm.close();
     }
-
 
     @Override
     public void onPageLoaded(WebView view)

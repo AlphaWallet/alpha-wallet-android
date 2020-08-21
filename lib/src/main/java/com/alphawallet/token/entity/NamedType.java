@@ -99,6 +99,29 @@ public class NamedType
         return topicIndex;
     }
 
+    int getNonIndexedIndex(String topic)
+    {
+        int topicIndex = -1;
+        int currentIndex = 0;
+        for (SequenceElement se : sequence)
+        {
+            if (!se.indexed)
+            {
+                if (se.name.equals(topic))
+                {
+                    topicIndex = currentIndex;
+                    break;
+                }
+                else
+                {
+                    currentIndex++;
+                }
+            }
+        }
+
+        return topicIndex;
+    }
+
     public class SequenceElement
     {
         public String name;

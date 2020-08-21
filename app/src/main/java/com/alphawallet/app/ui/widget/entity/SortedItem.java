@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class SortedItem<T> {
     protected final List<Integer> tags = new ArrayList<>();
 
-    public final int viewType;
+    public int viewType;
     public T value;
     public final int weight;
     public BinderViewHolder view;

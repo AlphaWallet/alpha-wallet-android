@@ -9,8 +9,12 @@ import com.alphawallet.app.entity.Wallet;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.realm.Realm;
 
 import java.math.BigDecimal;
+
+import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 
 public class GenericWalletInteract
 {
@@ -87,7 +91,26 @@ public class GenericWalletInteract
 		return b.compareTo(BigDecimal.ZERO) > 0;
 	}
 
-	public enum BackupLevel
+	public Single<Wallet> updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)
+	{
+		String newBalanceStr = BalanceUtils.getScaledValueFixed(newBalance, ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
+		if (!newBalance.equals(BigDecimal.valueOf(-1)) && !wallet.balance.equals(newBalanceStr))
+		{
+			wallet.balance = newBalanceStr;
+			return walletRepository.updateWalletData(wallet);
+		}
+		else
+		{
+			return Single.fromCallable(() -> wallet);
+		}
+	}
+
+	public Realm getWalletRealm()
+	{
+		return walletRepository.getWalletRealm();
+	}
+
+    public enum BackupLevel
 	{
 		BACKUP_NOT_REQUIRED, WALLET_HAS_LOW_VALUE, WALLET_HAS_HIGH_VALUE
 	}

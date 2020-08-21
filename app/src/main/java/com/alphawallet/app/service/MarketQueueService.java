@@ -2,10 +2,17 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BaseViewCallback;
+import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.TradeInstance;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.MessageData;
+import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,20 +27,11 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.BaseViewCallback;
-import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.TradeInstance;
-import com.alphawallet.app.entity.Wallet;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.entity.MessageData;
-import com.alphawallet.token.tools.ParseMagicLink;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

@@ -36,18 +36,15 @@ public class OpenseaService {
     private static OkHttpClient httpClient;
     private static Map<String, Long> balanceAccess = new ConcurrentHashMap<>();
     private final Context context;
-    private final TokensService tokensService;
     private static final int PAGE_SIZE = 40;
-    private int checkInProgress = 0;
     private final Map<String, String> imageUrls = new HashMap<>();
     private final List<Integer> storedImagesForChain = new ArrayList<>();
 
     //TODO: remove old files not accessed for some time
     //      On service creation, check files for old files and delete
 
-    public OpenseaService(Context ctx, TokensService tService) {
+    public OpenseaService(Context ctx) {
         context = ctx;
-        tokensService = tService;
         balanceAccess.clear();
         httpClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -57,24 +54,12 @@ public class OpenseaService {
                 .build();
     }
 
-    public Single<Token[]> getTokens(String address, int networkId, String networkName) {
-        return queryBalance(address, networkId, networkName);
-    }
-
-    private Single<Token[]> queryBalance(String address, int networkId, String networkName)
+    public Single<Token[]> getTokens(String address, int networkId, String networkName, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
             int receivedTokens;
             int offset = 0;
-            if (checkInProgress != 0)
-            {
-                //long updateBlancaTime, String networkName, ContractType type
-                Token[] tokens = new Token[1];
-                tokens[0] = new Token(null, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
-                return tokens;
-            }
 
-            checkInProgress = networkId;
             Map<String, Token> foundTokens = new HashMap<>();
 
             do
@@ -87,7 +72,7 @@ public class OpenseaService {
                 offset++;
 
                 //process this page of results
-                processOpenseaTokens(foundTokens, assets, address, networkId, networkName);
+                processOpenseaTokens(foundTokens, assets, address, networkId, networkName, tokensService);
             }
             while (receivedTokens == PAGE_SIZE); //keep fetching until last page
 
@@ -102,13 +87,12 @@ public class OpenseaService {
                 imageUrls.clear();
             }
 
-            checkInProgress = 0;
-
             return foundTokens.values().toArray(new Token[0]);
         });
     }
 
-    private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address, int networkId, String networkName) throws Exception
+    private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address,
+                                      int networkId, String networkName, TokensService tokensService) throws Exception
     {
         TokenFactory tf = new TokenFactory();
         for (int i = 0; i < assets.length(); i++)

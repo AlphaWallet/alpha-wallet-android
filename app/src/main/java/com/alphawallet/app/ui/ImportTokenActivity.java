@@ -528,7 +528,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     protected void onDestroy()
     {
         super.onDestroy();
-        viewModel.stopGasPriceChecker();
+        viewModel.onDestroy();
     }
 
     @Override

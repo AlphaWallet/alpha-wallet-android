@@ -1,6 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.graphics.PorterDuff;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,20 +9,23 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTransactionClickListener;
+import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.TokenIcon;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -35,26 +38,26 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     public static final int TRANSACTION_BALANCE_PRECISION = 4;
 
     public static final String DEFAULT_ADDRESS_ADDITIONAL = "default_address";
-    public static final String DEFAULT_SYMBOL_ADDITIONAL = "network_symbol";
 
+    private final TokenIcon tokenIcon;
     private final TextView date;
     private final TextView type;
     private final TextView address;
     private final TextView value;
     private final TextView chainName;
-    private final ImageView typeIcon;
     private final TextView supplemental;
     private final TokensService tokensService;
     private final ProgressBar pendingSpinner;
     private final RelativeLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
-    private final ImageView txRejected;
+    private final AssetDefinitionService assetService;
 
     private Transaction transaction;
     private String defaultAddress;
-    private OnTransactionClickListener onTransactionClickListener;
+    private boolean fromTokenView;
 
-    public TransactionHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact) {
+    public TransactionHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs)
+    {
         super(resId, parent);
 
         if (resId == R.layout.item_recent_transaction) {
@@ -62,7 +65,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         } else {
             date = null;
         }
-        typeIcon = findViewById(R.id.type_icon);
+        tokenIcon = findViewById(R.id.token_icon);
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
@@ -70,9 +73,9 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         supplemental = findViewById(R.id.supplimental);
         pendingSpinner = findViewById(R.id.pending_spinner);
         transactionBackground = findViewById(R.id.layout_background);
-        txRejected = findViewById(R.id.icon_tx_rejected);
         tokensService = service;
         transactionsInteract = interact;
+        assetService = svs;
         itemView.setOnClickListener(this);
     }
 
@@ -80,6 +83,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     public void bind(@Nullable TransactionMeta data, @NonNull Bundle addition) {
         defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         supplemental.setText("");
+        fromTokenView = false;
 
         //fetch data from database
         String hash = data.hash;
@@ -91,7 +95,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         value.setVisibility(View.VISIBLE);
         pendingSpinner.setVisibility(View.GONE);
-        typeIcon.setVisibility(View.VISIBLE);
 
         setChainElement();
 
@@ -110,7 +113,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         address.setText(destinationOrContract);
 
         //set colours and up/down arrow
-        typeIcon.setImageResource(token.getTxImage(transaction));
+        tokenIcon.bindData(token, assetService);
+        tokenIcon.setStatusIcon(token.getTxStatus(transaction));
 
         String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), tokensService.getNetworkName(token.tokenInfo.chainId));
         supplemental.setText(supplementalTxt);
@@ -121,35 +125,32 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (transaction.error != null && transaction.error.equals("1"))
         {
             setFailed();
-        }
-        else
-        {
-            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
-                                    PorterDuff.Mode.SRC_ATOP);
+            tokenIcon.setStatusIcon(StatusType.FAILED);
         }
 
         //Handle displaying the transaction item as pending or completed
         if (transaction.blockNumber.equals("-1"))
         {
             setFailed();
-            txRejected.setVisibility(View.VISIBLE);
-            pendingSpinner.setVisibility(View.GONE);
+            tokenIcon.setStatusIcon(StatusType.REJECTED);
             address.setText(R.string.tx_rejected);
         }
         else if (transaction.blockNumber.equals("0"))
         {
-            txRejected.setVisibility(View.GONE);
+            tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
-            pendingSpinner.setVisibility(View.VISIBLE);
-            typeIcon.setVisibility(View.GONE);
         }
         else if (transactionBackground != null)
         {
-            txRejected.setVisibility(View.GONE);
-            pendingSpinner.setVisibility(View.GONE);
             transactionBackground.setBackgroundResource(R.color.white);
         }
+    }
+
+    @Override
+    public void setFromTokenView()
+    {
+        fromTokenView = true;
     }
 
     private int getSupplementalColour(String supplementalTxt)
@@ -222,10 +223,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     }
 
     @Override
-    public void onClick(View view) {
-        if (onTransactionClickListener != null) {
-            onTransactionClickListener.onTransactionClick(view, transaction);
-        }
+    public void onClick(View view)
+    {
+        Intent intent = new Intent(getContext(), TokenActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, transaction.hash);
+        intent.putExtra(C.EXTRA_STATE, fromTokenView);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getContext().startActivity(intent);
     }
 
     private void setFailed()
@@ -235,12 +239,5 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String failure = getString(R.string.failed) + " ☹";
         supplemental.setText(failure);
         supplemental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        typeIcon.setImageResource(R.drawable.ic_error);
-        typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
-                                PorterDuff.Mode.SRC_ATOP);
-    }
-
-    public void setOnTransactionClickListener(OnTransactionClickListener onTransactionClickListener) {
-        this.onTransactionClickListener = onTransactionClickListener;
     }
 }

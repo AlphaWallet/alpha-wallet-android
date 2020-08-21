@@ -21,14 +21,21 @@
             android:layout_height="wrap_content" />
 
         <LinearLayout
+            android:id="@id/token_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@id/layoutButtons"
             android:layout_alignParentTop="true"
             android:background="@color/greyffive"
-            android:layout_above="@id/layoutButtons"
             android:orientation="vertical">
 
             <include layout="@layout/item_ticket" />
+
+            <com.alphawallet.app.widget.ActivityHistoryList
+                android:id="@+id/history_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

@@ -203,9 +203,7 @@ public class Web3View extends WebView {
 
     private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
-        }
+        post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
     }
 
     private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {
@@ -306,19 +304,11 @@ public class Web3View extends WebView {
                     || internalClient.shouldOverrideUrlLoading(view, url);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             loadingError = true;
             if (externalClient != null)
                 externalClient.onReceivedError(view, request, error);
-        }
-
-        @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
-        {
-            super.onReceivedError(view, errorCode, description, failingUrl);
-            loadingError = true;
         }
 
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -330,7 +320,6 @@ public class Web3View extends WebView {
                     || internalClient.shouldOverrideUrlLoading(view, request);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);

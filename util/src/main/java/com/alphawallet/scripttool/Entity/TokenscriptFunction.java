@@ -914,7 +914,7 @@ public abstract class TokenscriptFunction
                 //for function query, never need wallet address
                 return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, 0)          // Fetch function result from blockchain
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
-                        .map(attrIf::storeAuxData)                                          // store new data
+                        .map(result -> attrIf.storeAuxData("", result))                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write
             }
         }

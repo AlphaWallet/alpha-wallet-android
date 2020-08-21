@@ -197,23 +197,6 @@ public class ERC721Token extends Token implements Parcelable
         }
     }
 
-    /**
-     * Detect a change of balance for ERC721 balance
-     * @param balanceArray
-     * @return
-     */
-    @Override
-    public boolean checkBalanceChange(List<BigInteger> balanceArray)
-    {
-        if (balanceArray.size() != tokenBalanceAssets.size()) return true; //quick check for new tokens
-        List<BigInteger> oldBalance = getArrayBalance();
-        for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
-        {
-            if (!balanceArray.get(index).equals(oldBalance.get(index))) return true;
-        }
-        return false;
-    }
-
     @Override
     public boolean hasArrayBalance()
     {
@@ -227,31 +210,13 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    protected float calculateBalanceUpdateWeight()
-    {
-        return 0.75f;
-    }
-
-    @Override
     public void setRealmBalance(RealmToken realmToken)
     {
         realmToken.setBalance(getFullBalance());
     }
 
-    @Override
-    public void zeroiseBalance()
-    {
-        tokenBalanceAssets.clear();
-    }
-
     public boolean isERC721() { return true; }
     public boolean isNonFungible() { return true; }
-
-    @Override
-    public boolean requiresTransactionRefresh(int pendingChain)
-    {
-        return false;
-    }
 
     /**
      * This is a list of legacy contracts which are known to use the old ERC721 source,

@@ -12,7 +12,6 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.token.entity.EthereumMessage;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;

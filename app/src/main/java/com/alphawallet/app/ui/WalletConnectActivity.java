@@ -27,6 +27,7 @@ import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.gson.GsonBuilder;
 
@@ -284,27 +285,32 @@ public class WalletConnectActivity extends BaseActivity
     private void onEthSign(Long id, WCEthereumSignMessage message)
     {
         int signType = 0;
-        EthereumMessage ethMessage;
+        EthereumMessage eMessage = null;
         switch (message.getType())
         {
             case MESSAGE:
                 signType = R.string.dialog_title_sign_message;
-                //new EthereumMessage(data, getUrl(), callbackId)
-                ethMessage = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
+                eMessage = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
                 break;
             case PERSONAL_MESSAGE:
                 signType = R.string.dialog_title_sign_message;
+                byte[] messageToSign = getEthereumMessage(Numeric.hexStringToByteArray(message.getData()));
+                eMessage = new EthereumMessage(Numeric.toHexString(messageToSign), peerUrl.getText().toString(), id);
                 break;
             case TYPED_MESSAGE:
                 signType = R.string.dialog_title_sign_typed_message;
+                //TODO
+                eMessage = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
                 break;
         }
+
+        final EthereumMessage ethMessage = eMessage;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog = builder.setTitle(signType)
                 .setMessage(message.getData())
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> {
-                    signMessage(id, message);
+                    doSignMessage(ethMessage);
                 })
                 .setNegativeButton(R.string.action_cancel, (d, w) -> {
                     client.rejectRequest(id, getString(R.string.message_reject_request));
@@ -359,7 +365,7 @@ public class WalletConnectActivity extends BaseActivity
         dialog.show();
     }
 
-    private void doSignMessage(Long id, String data)
+    private void doSignMessage(EthereumMessage ethMessage)
     {
         viewModel.getAuthenticationForSignature(wallet, this, new SignAuthenticationCallback()
         {
@@ -369,29 +375,29 @@ public class WalletConnectActivity extends BaseActivity
                 if (gotAuth)
                 {
                     viewModel.signMessage(
-                            getEthereumMessage(Numeric.hexStringToByteArray(data)),
+                            Numeric.hexStringToByteArray(ethMessage.value),
                             new DAppFunction()
                             {
                                 @Override
-                                public void DAppError(Throwable error, EthereumMessage message)
+                                public void DAppError(Throwable error, Signable message)
                                 {
                                     showErrorDialog(error.getMessage());
                                 }
 
                                 @Override
-                                public void DAppReturn(byte[] data, EthereumMessage message)
+                                public void DAppReturn(byte[] data, Signable message)
                                 {
-                                    client.approveRequest(id, Numeric.toHexString(data));
+                                    client.approveRequest(message.getCallbackId(), Numeric.toHexString(data));
                                     if (fromDappBrowser) switchToDappBrowser();
                                 }
                             },
-                            new EthereumMessage(data, peerMeta.getUrl(), 1)
+                            ethMessage
                     );
                 }
                 else
                 {
                     showErrorDialog(getString(R.string.message_authentication_failed));
-                    client.rejectRequest(id, getString(R.string.message_authentication_failed));
+                    client.rejectRequest(ethMessage.leafPosition, getString(R.string.message_authentication_failed));
                 }
             }
 
@@ -399,7 +405,7 @@ public class WalletConnectActivity extends BaseActivity
             public void cancelAuthentication()
             {
                 showErrorDialog(getString(R.string.message_authentication_failed));
-                client.rejectRequest(id, getString(R.string.message_authentication_failed));
+                client.rejectRequest(ethMessage.leafPosition, getString(R.string.message_authentication_failed));
             }
         });
     }
@@ -460,11 +466,6 @@ public class WalletConnectActivity extends BaseActivity
                 client.rejectRequest(id, getString(R.string.message_authentication_failed));
             }
         });
-    }
-
-    private void signMessage(Long id, WCEthereumSignMessage message)
-    {
-        doSignMessage(id, message.getData());
     }
 
     private byte[] getEthereumMessage(byte[] message)

@@ -195,7 +195,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String currentWebpageTitle;
     private String currentFragment;
 
-    private PinAuthenticationCallbackInterface authInterface;
     private EthereumMessage messageTBS;  // To-Be-Signed
     private byte[] messageBytes;
     private DAppFunction dAppFunction;

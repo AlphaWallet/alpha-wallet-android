@@ -2,28 +2,44 @@ package com.alphawallet.app;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
-import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.util.QRParser;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.math.BigInteger;
 import java.util.Base64;
 import java.util.Map;
 
+import static org.mockito.Mockito.when;
+
+import static com.alphawallet.app.entity.EIP681Type.OTHER;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({TextUtils.class})
 public class QRExtractorTest {
+
+    @Before
+    public void setUp()
+    {
+        PowerMockito.mockStatic(TextUtils.class);
+    }
 
     @Test
     public void extractingIsCorrect()
     {
-
         QRParser parser = QRParser.getInstance(null);
 
         // Correct string
@@ -112,6 +128,8 @@ public class QRExtractorTest {
         QRResult result;
         Map<String, String> params;
 
+        when(TextUtils.isEmpty(anyString())).thenReturn(false);
+
         CryptoFunctions cryptoFunctions = new CryptoFunctions()
         {
             @Override
@@ -155,7 +173,7 @@ public class QRExtractorTest {
 
         // Too many ':'
         result = parser.parse("something:coin:0x0000000000000000000000000000000000000XyZ?k1=v1&k2=v2");
-        assertTrue(result.type == EIP681Type.OTHER);
+        assertTrue(result.type == OTHER);
 
         //Test EIP681
         result = parser.parse("ethereum:0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359?value=2.014e18");

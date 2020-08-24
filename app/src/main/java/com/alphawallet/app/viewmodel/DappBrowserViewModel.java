@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.webkit.WebViewClient;
 
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
@@ -15,6 +16,7 @@ import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
@@ -42,7 +44,7 @@ import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.util.List;
@@ -68,6 +70,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.Key.WALLET;
 
 public class DappBrowserViewModel extends BaseViewModel  {
@@ -174,12 +177,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
                             .find()).toObservable();
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
+    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message) {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                           error -> dAppFunction.DAppError(error, message));
+                        error -> dAppFunction.DAppError(error, message));
     }
 
     public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
@@ -312,5 +315,19 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
         balanceTimerDisposable = null;
+    }
+
+    public void handleWalletConnect(Context context, String url)
+    {
+        String importPassData = "wclocal:" + url;
+        Intent intent = new Intent(context, WalletConnectActivity.class);
+        if (!url.contains("?bridge"))
+        {
+            //re-open the existing activity, when using walletconnect locally
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        }
+
+        intent.putExtra("qrCode", importPassData);
+        context.startActivity(intent);
     }
 }

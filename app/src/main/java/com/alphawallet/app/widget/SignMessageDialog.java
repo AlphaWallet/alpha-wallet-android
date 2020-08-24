@@ -12,9 +12,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.alphawallet.app.web3.entity.Message;
-
 import com.alphawallet.app.R;
+import com.alphawallet.token.entity.EthereumMessage;
 
 public class SignMessageDialog extends Dialog {
     //    private LinearLayout container;
@@ -56,11 +55,11 @@ public class SignMessageDialog extends Dialog {
         btnReject.setOnClickListener(v -> dismiss());
     }
 
-    public SignMessageDialog(Context activity, Message<String> message) {
+    public SignMessageDialog(Context activity, EthereumMessage message) {
         this(activity);
 
-        setMessage(message.value);
-        setRequester(message.url);
+        setMessage(message.message);
+        setRequester(message.displayOrigin);
     }
 
     public void setMessage(CharSequence message) {

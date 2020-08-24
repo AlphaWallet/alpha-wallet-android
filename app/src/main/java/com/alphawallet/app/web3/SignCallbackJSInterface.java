@@ -5,10 +5,10 @@ import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.google.gson.Gson;
 import com.alphawallet.app.web3.entity.Address;
-import com.alphawallet.app.web3.entity.Message;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
@@ -66,12 +66,12 @@ public class SignCallbackJSInterface {
 
     @JavascriptInterface
     public void signMessage(int callbackId, String data) {
-        webView.post(() -> onSignMessageListener.onSignMessage(new Message<>(data, getUrl(), callbackId)));
+        webView.post(() -> onSignMessageListener.onSignMessage(new EthereumMessage(data, getUrl(), callbackId)));
     }
 
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
-        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new Message<>(data, getUrl(), callbackId)));
+        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId)));
     }
 
     @JavascriptInterface
@@ -79,11 +79,11 @@ public class SignCallbackJSInterface {
         webView.post(() -> {
             TrustProviderTypedData[] rawData = new Gson().fromJson(data, TrustProviderTypedData[].class);
             int len = rawData.length;
-            TypedData[] typedData = new TypedData[len];
+            EthereumTypedMessage.TypedData[] typedData = new EthereumTypedMessage.TypedData[len];
             for (int i = 0; i < len; i++) {
-                typedData[i] = new TypedData(rawData[i].name, rawData[i].type, rawData[i].value);
+                typedData[i] = new EthereumTypedMessage.TypedData(rawData[i].name, rawData[i].type, rawData[i].value);
             }
-            onSignTypedMessageListener.onSignTypedMessage(new Message<>(typedData, getUrl(), callbackId));
+            onSignTypedMessageListener.onSignTypedMessage(new EthereumTypedMessage(typedData, getUrl(), callbackId));
         });
     }
 

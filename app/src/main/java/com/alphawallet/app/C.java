@@ -171,6 +171,7 @@ public abstract class C {
     public static final String DAPP_PREFIX_ALPHAWALLET = "alphawallet";
     public static final String DAPP_SUFFIX_RECEIVE = "receive";
     public static final String DAPP_PREFIX_MAPS = "maps.google.com/maps?daddr=";
+    public static final String DAPP_PREFIX_WALLETCONNECT = "wc";
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
     public static final String ENS_HISTORY = "ensHistory";

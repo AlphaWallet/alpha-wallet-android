@@ -1,5 +1,7 @@
 package com.alphawallet.app.walletconnect.entity
 
+//TODO: Integrate the EthereumMessage here
+
 data class WCEthereumSignMessage(
         val raw: List<String>,
         val type: WCSignType

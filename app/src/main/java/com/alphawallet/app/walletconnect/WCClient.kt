@@ -55,29 +55,25 @@ open class WCClient(
     var onGetAccounts: (id: Long) -> Unit = { _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d(TAG, "WebSocket Opened")
+        Log.d(TAG, "<< websocket opened >>")
         isConnected = true
 
         listeners.forEach { it.onOpen(webSocket, response) }
 
-        this.session?.let {
-            subscribe(it.topic)
-        } ?: run {
-            throw IllegalStateException("Session is null")
-        }
-
-        this.peerId?.let {
-            subscribe(it)
-        } ?: run {
-            throw IllegalStateException("Peer ID is null")
-        }
+        val session = this.session ?: throw IllegalStateException("session can't be null on connection open")
+        val peerId = this.peerId ?: throw IllegalStateException("peerId can't be null on connection open")
+        // The Session.topic channel is used to listen session request messages only.
+        subscribe(session.topic)
+        // The peerId channel is used to listen to all messages sent to this httpClient.
+        subscribe(peerId)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
+            Log.d(TAG, "<== message $text")
             decrypted = decryptMessage(text)
-            Log.d(TAG, "Received: $decrypted")
+            Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)
         } catch (e: Exception) {
             onFailure(e)
@@ -89,11 +85,13 @@ open class WCClient(
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         resetState()
         onFailure(t)
+
         listeners.forEach { it.onFailure(webSocket, t, response) }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG, "WebSocket Closed")
+        Log.d(TAG,"<< websocket closed >>")
+
         listeners.forEach { it.onClosed(webSocket, code, reason) }
     }
 
@@ -103,9 +101,11 @@ open class WCClient(
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG, "Closing WebSocket")
+        Log.d(TAG,"<< closing socket >>")
+
         resetState()
         onDisconnect(code, reason)
+
         listeners.forEach { it.onClosing(webSocket, code, reason) }
     }
 
@@ -127,7 +127,8 @@ open class WCClient(
     }
 
     fun approveSession(accounts: List<String>, chainId: Int): Boolean {
-        check(handshakeId > 0) { "handshakeId must be greater than 0" }
+        check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
+
         val result = WCApproveSessionResponse(
                 chainId = chainId,
                 accounts = accounts,
@@ -138,12 +139,13 @@ open class WCClient(
                 id = handshakeId,
                 result = result
         )
+
         return encryptAndSend(gson.toJson(response))
     }
 
     fun updateSession(accounts: List<String>? = null, chainId: Int? = null, approved: Boolean = true): Boolean {
         val request = JsonRpcRequest(
-                id = Utils.randomId(),
+                id = Date().time,
                 method = WCMethod.SESSION_UPDATE,
                 params = listOf(
                         WCSessionUpdate(
@@ -298,8 +300,16 @@ open class WCClient(
         return socket?.send(json) ?: false
     }
 
-    private fun disconnect(): Boolean {
+    fun disconnect(): Boolean {
         return socket?.close(1000, null) ?: false
+    }
+
+    fun addSocketListener(listener: WebSocketListener) {
+        listeners.add(listener)
+    }
+
+    fun removeSocketListener(listener: WebSocketListener) {
+        listeners.remove(listener)
     }
 
     private fun resetState() {

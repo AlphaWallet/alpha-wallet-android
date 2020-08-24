@@ -33,18 +33,13 @@ import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
-import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-import com.alphawallet.token.entity.Attribute;
-import com.alphawallet.token.entity.MethodArg;
-import com.alphawallet.token.entity.TSAction;
-import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.entity.TokenscriptElement;
+import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.crypto.Hash;
@@ -93,7 +88,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private final Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
-    private Message<String> messageToSign;
+    private EthereumMessage messageToSign;
     private FunctionButtonBar functionBar;
     private final Handler handler = new Handler();
     private int parsePass = 0;
@@ -461,7 +456,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
+    public void signMessage(byte[] sign, DAppFunction dAppFunction, EthereumMessage message)
     {
         showProgressSpinner(true);
         viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
@@ -542,8 +537,24 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.resetSignDialog();
     }
 
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+        tokenView.saveState(savedInstanceState);
+    }
+
     @Override
-    public void onSignPersonalMessage(Message<String> message)
+    public void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null)
+        {
+            tokenView.restoreState(savedInstanceState);
+        }
+    }
+
+    @Override
+    public void onSignPersonalMessage(EthereumMessage message)
     {
         dialog = new SignMessageDialog(this, message);
         dialog.setAddress(token.getAddress());
@@ -705,7 +716,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             DAppFunction dAppFunction = new DAppFunction()
             {
                 @Override
-                public void DAppError(Throwable error, Message<String> message)
+                public void DAppError(Throwable error, Signable message)
                 {
                     showProgressSpinner(false);
                     tokenView.onSignCancel(message);
@@ -713,13 +724,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 }
 
                 @Override
-                public void DAppReturn(byte[] data, Message<String> message)
+                public void DAppReturn(byte[] data, Signable message)
                 {
                     showProgressSpinner(false);
                     String signHex = Numeric.toHexString(data);
                     signHex = Numeric.cleanHexPrefix(signHex);
                     tokenView.onSignPersonalMessageSuccessful(message, signHex);
-                    testRecoverAddressFromSignature(message.value, signHex);
+                    testRecoverAddressFromSignature(message.getMessage(), signHex);
                 }
             };
 

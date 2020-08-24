@@ -1,7 +1,7 @@
 package com.alphawallet.app.web3;
 
-import com.alphawallet.app.web3.entity.Message;
+import com.alphawallet.token.entity.EthereumMessage;
 
 public interface OnSignPersonalMessageListener {
-    void onSignPersonalMessage(Message<String> message);
+    void onSignPersonalMessage(EthereumMessage message);
 }

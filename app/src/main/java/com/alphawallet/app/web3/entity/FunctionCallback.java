@@ -1,6 +1,7 @@
 package com.alphawallet.app.web3.entity;
 
 import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.token.entity.EthereumMessage;
 
 /**
  * Created by James on 6/04/2019.
@@ -8,7 +9,7 @@ import com.alphawallet.app.entity.DAppFunction;
  */
 public interface FunctionCallback
 {
-    void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message);
+    void signMessage(byte[] sign, DAppFunction dAppFunction, EthereumMessage message);
     void functionSuccess();
     void functionFailed();
 }

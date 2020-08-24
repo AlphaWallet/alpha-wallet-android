@@ -51,6 +51,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
     private String importData;
     private String importPath = null;
+    private String importPassData = null;
     private Handler handler = new Handler();
     private String errorMessage;
 
@@ -182,6 +183,26 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
                 }
                 catch (SalesOrderMalformed ignored) { }
             }
+            else if (importData != null && importData.startsWith("wc:"))
+            {
+                importPassData = importData;
+                if (!importData.contains("?bridge"))
+                {
+                    //this is a 'signing' intent, used with an existing, active connection
+                    Intent intent = new Intent(this, WalletConnectActivity.class);
+                    intent.putExtra("qrCode", importPassData);
+                    //re-open the existing activity, when using WalletConnect locally (that is, with a browser app running on the same device)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    setResult(RESULT_OK);
+                    finish();
+                }
+                else
+                {
+                    handler.post(this);
+                }
+                return;
+            }
             else if (importPath != null)
             {
                 boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !splashViewModel.checkDebugDirectory();
@@ -264,7 +285,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     public void run()
     {
-        new HomeRouter().open(this, true);
+        new HomeRouter().openWithIntent(this, importPassData);
         finish();
     }
 }

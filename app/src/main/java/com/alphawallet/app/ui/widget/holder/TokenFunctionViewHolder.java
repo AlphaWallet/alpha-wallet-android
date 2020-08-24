@@ -13,13 +13,14 @@ import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
-import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.ScriptFunction;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
@@ -110,18 +111,18 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     }
 
     @Override
-    public void onSignPersonalMessage(Message<String> message)
+    public void onSignPersonalMessage(EthereumMessage message)
     {
         DAppFunction dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message) {
+            public void DAppError(Throwable error, Signable message) {
                 tokenView.onSignCancel(message);
                 dialog.dismiss();
                 functionCallback.functionFailed();
             }
 
             @Override
-            public void DAppReturn(byte[] data, Message<String> message) {
+            public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
                 signHex = Numeric.cleanHexPrefix(signHex);
                 tokenView.onSignPersonalMessageSuccessful(message, signHex);

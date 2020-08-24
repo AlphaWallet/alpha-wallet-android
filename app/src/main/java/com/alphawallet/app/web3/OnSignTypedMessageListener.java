@@ -1,8 +1,8 @@
 package com.alphawallet.app.web3;
 
-import com.alphawallet.app.web3.entity.Message;
-import com.alphawallet.app.web3.entity.TypedData;
+
+import com.alphawallet.token.entity.EthereumTypedMessage;
 
 public interface OnSignTypedMessageListener {
-    void onSignTypedMessage(Message<TypedData[]> message);
+    void onSignTypedMessage(EthereumTypedMessage message);
 }

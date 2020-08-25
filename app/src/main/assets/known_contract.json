@@ -1,0 +1,44 @@
+{
+"MainNet":
+  [
+    {"address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd", "isPopular": false, "network": 1},
+    {"address": "0x8e870d67f660d95d5be530380d0ec0bd388289e1", "isPopular": false, "network": 1},
+    {"address": "0x0000000000085d4780B73119b644AE5ecd22b376", "isPopular": false, "network": 1},
+    {"address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "isPopular": false, "network": 1},
+    {"address": "0xa74476443119A942dE498590Fe1f2454d7D4aC0d", "isPopular": false, "network": 1},
+    {"address": "0x98f2ab72198f2e64527bdb28931f60c0f77ac2fc", "isPopular": false, "network": 1},
+    {"address": "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", "isPopular": false, "network": 1},
+
+    {"address": "0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0", "isPopular": true, "network": 1},
+    {"address": "0xf230b790e05390fc8295f4d3f60332c93bed42e2", "isPopular": true, "network": 1},
+    {"address": "0xd850942ef8811f2a866692a623011bde52a462c1", "isPopular": true, "network": 1},
+    {"address": "0xb5a5f22694352c15b00323844ad545abb2b11028", "isPopular": true, "network": 1},
+    {"address": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52", "isPopular": true, "network": 1},
+    {"address": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07", "isPopular": true, "network": 1},
+    {"address": "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27", "isPopular": true, "network": 1},
+    {"address": "0xe41d2489571d322189246dafa5ebde1f4699f498", "isPopular": true, "network": 1},
+    {"address": "0xcb97e65f07da24d46bcdd078ebebd7c6e6e3d750", "isPopular": true, "network": 1},
+    {"address": "0xd4fa1460f537bb9085d22c7bccb5dd450ef28e3a", "isPopular": true, "network": 1},
+    {"address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2", "isPopular": true, "network": 1},
+    {"address": "0x168296bb09e24a88805cb9c33356536b980d3fc5", "isPopular": true, "network": 1},
+    {"address": "0xe94327d07fc17907b4db788e5adf2ed424addff6", "isPopular": true, "network": 1},
+    {"address": "0xa74476443119A942dE498590Fe1f2454d7D4aC0d", "isPopular": true, "network": 1},
+    {"address": "0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab", "isPopular": true, "network": 1},
+    {"address": "0x744d70fdbe2ba4cf95131626614a1763df805b9e", "isPopular": true, "network": 1},
+    {"address": "0x4CEdA7906a5Ed2179785Cd3A40A69ee8bc99C466", "isPopular": true, "network": 1},
+    {"address": "0xEF68e7C694F40c8202821eDF525dE3782458639f", "isPopular": true, "network": 1},
+    {"address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef", "isPopular": true, "network": 1},
+    {"address": "0x5ca9a71b1d01849c0a95490cc00559717fcf0d1d", "isPopular": true, "network": 1}
+  ],
+"xDAI":
+  [
+    {"address": "0x6a814843de5967cf94d7720ce15cba8b0da81967", "isPopular": false, "network": 100},
+    {"address": "0x94819805310cf736198df0de856b0ff5584f0903", "isPopular": false, "network": 100},
+    {"address": "0xdec31651bec1fbbff392aa7de956d6ee4559498b", "isPopular": false, "network": 100},
+    {"address": "0xa95d505e6933cb790ed3431805871efe4e6bbafd", "isPopular": false, "network": 100},
+    {"address": "0xbdc3df563a3959a373916b724c683d69ba4097f7", "isPopular": false, "network": 100},
+    {"address": "0x6e251ee9cadf0145babfd3b64664a9d7f941fcc3", "isPopular": false, "network": 100},
+    {"address": "0x3e50bf6703fc132a94e4baff068db2055655f11b", "isPopular": false, "network": 100},
+    {"address": "0xa16b70e8fad839e62abba2d962e4ca5a28af9e76", "isPopular": false, "network": 100}
+  ]
+}

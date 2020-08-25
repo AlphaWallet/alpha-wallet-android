@@ -112,7 +112,7 @@ public class TokensService
 
             if (t != null && getToken(t.chainId, t.address) == null)
             {
-                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId).toObservable() //fetch tokenInfo
+                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId, t.isEnabled).toObservable() //fetch tokenInfo
                         .filter(tokenInfo -> tokenInfo.name != null)
                         .flatMap(tokenInfo -> tokenRepository.determineCommonType(tokenInfo).toObservable()
                                 .flatMap(contractType -> tokenRepository.addToken(new Wallet(currentAddress), tokenInfo, contractType).toObservable()))
@@ -336,7 +336,11 @@ public class TokensService
         {
             for (ContractLocator cl : contractCandidates)
             {
-                if (getToken(cl.chainId, cl.address) == null) addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
+                Log.d("Home","Chain Id : " + cl.chainId + " , Address : " + cl.address);
+                if (getToken(cl.chainId, cl.address) == null)
+                {
+                    addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address, cl.isEnabled));
+                }
             }
         }
     }

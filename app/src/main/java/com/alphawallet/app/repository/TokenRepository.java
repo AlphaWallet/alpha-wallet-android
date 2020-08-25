@@ -381,6 +381,11 @@ public class TokenRepository implements TokenRepositoryType {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
+    @Override
+    public Single<TokenInfo> update(String contractAddr, int chainId, boolean isEnabled) {
+        return setupTokensFromLocal(contractAddr, chainId, isEnabled);
+    }
+
     private Single<Boolean> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
     {
         return Single.fromCallable(() -> {
@@ -1222,7 +1227,25 @@ public class TokenRepository implements TokenRepositoryType {
                     getName(address, network),
                     getContractData(network, address, stringParam("symbol"), ""),
                     getDecimals(address, network),
-                    true, chainId);
+                    true,
+                    chainId);
+        });
+    }
+
+    /*
+     * This method is introduced to set "Enabled" for popular tokens as can't enable all tokens.
+     */
+    private Single<TokenInfo> setupTokensFromLocal(String address, int chainId, boolean isEnabled) //pass exception up the chain
+    {
+        return Single.fromCallable(() -> {
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+            return new TokenInfo(
+                    address,
+                    getName(address, network),
+                    getContractData(network, address, stringParam("symbol"), ""),
+                    getDecimals(address, network),
+                    isEnabled,
+                    chainId);
         });
     }
 

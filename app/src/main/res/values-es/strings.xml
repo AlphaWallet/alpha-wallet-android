@@ -657,4 +657,5 @@
     <string name="tokenscript_call">Llamada de TokenScript:</string>
     <string name="today">Hoy</string>
     <string name="go_to_token">Ir al token</string>
+    <string name="popular_tokens">Popular tokens</string>
 </resources>

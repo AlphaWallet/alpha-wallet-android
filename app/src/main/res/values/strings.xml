@@ -675,4 +675,5 @@
     <string name="testnet" translatable="false">Testnet</string>
     <string name="today">Today</string>
     <string name="go_to_token">Go to Token</string>
+    <string name="popular_tokens">Popular tokens</string>
 </resources>

@@ -657,4 +657,5 @@
     <string name="tokenscript_call">TokenScript调用:</string>
     <string name="today">今天</string>
     <string name="go_to_token">前往通证</string>
+    <string name="popular_tokens">Popular tokens</string>
 </resources>

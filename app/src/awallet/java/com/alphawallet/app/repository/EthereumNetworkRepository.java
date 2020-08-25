@@ -5,8 +5,13 @@ import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.UnknownToken;
+import com.google.gson.Gson;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,12 +59,44 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     public List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters)
     {
         List<ContractLocator> knownContracts = new ArrayList<>();
-        if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID)) {
-            knownContracts.addAll(Arrays.asList(ContractLocator.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID)));
+
+        KnownContract knownContract = readContracts();
+
+        if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID))
+        {
+            for (UnknownToken unknownToken: knownContract.getMainNet())
+            {
+                knownContracts.add(new ContractLocator(unknownToken.address, EthereumNetworkRepository.MAINNET_ID, !unknownToken.isPopular));
+            }
         }
-        if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID)) {
-            knownContracts.addAll(Arrays.asList(ContractLocator.fromAddresses(context.getResources().getStringArray(R.array.xDAI), EthereumNetworkRepository.XDAI_ID)));
+        if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID))
+        {
+            for (UnknownToken unknownToken: knownContract.getXDAI())
+            {
+                knownContracts.add(new ContractLocator(unknownToken.address, EthereumNetworkRepository.XDAI_ID));
+            }
         }
         return knownContracts;
+    }
+
+    private KnownContract readContracts()
+    {
+        String jsonString;
+        try
+        {
+            InputStream is = context.getAssets().open("known_contract.json");
+
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            jsonString = new String(buffer, "UTF-8");
+        }
+        catch (IOException e) {
+            return null;
+        }
+
+        return new Gson().fromJson(jsonString, KnownContract.class);
     }
 }

@@ -26,6 +26,7 @@ public class RealmToken extends RealmObject {
     private long lastBlockRead;
     private int chainId;
     private long earliestTxBlock;
+    private boolean isPopular;
 
     public int getDecimals() {
         return decimals;

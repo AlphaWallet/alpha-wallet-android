@@ -623,39 +623,33 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void beginSearchSession() {
+        expandCollapseView(currentNetwork, true);
+        expandCollapseView(layoutNavigation, true);
+
+        Observable.zip(
+                Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
+                Observable.fromArray(clear), (interval, item) -> item)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(this::checkForPaste)
+                .subscribe(item -> postBeginSearchSession(item));
+
+        urlTv.showDropDown();
+    }
+
+    private void postBeginSearchSession(ImageView item) {
+        if (item.getVisibility() == View.GONE)
+        {
+            expandCollapseView(item, false);
+            KeyboardUtils.showKeyboard(urlTv);
+        }
+
+        //Set Fragment after sometime
         SearchFragment f = new SearchFragment();
         f.setCallbacks(view -> {
             cancelSearchSession();
         });
         attachFragment(f, SEARCH);
-
-        Observable.zip(
-                Observable.interval(100, TimeUnit.MILLISECONDS).take(3),
-                Observable.fromArray(currentNetwork, layoutNavigation), (interval, item) -> item)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .doOnComplete(this::checkForPaste)
-                .subscribe(item -> expandCollapseView(item, true));
-
-        Observable.zip(
-                Observable.interval(300, TimeUnit.MILLISECONDS).take(1),
-                Observable.fromArray(clear), (interval, item) -> item)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .doOnComplete(this::checkForPaste)
-                .subscribe(item -> {
-                    if (item.getVisibility() == View.GONE)
-                    {
-                        expandCollapseView(item, false);
-                    }
-                });
-
-        Observable.timer(5000, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe();
-
-        urlTv.showDropDown();
     }
 
     private void checkForPaste() {
@@ -668,7 +662,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 if (textToPaste.length() > 0)
                 {
                     urlTv.performLongClick();
-                    KeyboardUtils.showKeyboard(urlTv);
                 }
             }
             catch (Exception e) {

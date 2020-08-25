@@ -436,7 +436,6 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private void saveToken(Realm realm, Token token) throws RealmException
     {
-        Log.d("Home","Save Token : " + token.getFullName());
         String databaseKey = databaseKey(token);
 
         RealmToken realmToken = realm.where(RealmToken.class)

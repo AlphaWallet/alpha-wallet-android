@@ -7,10 +7,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.KnownContract;
@@ -34,8 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -121,13 +116,6 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         This list to identify popular tokens
          */
         unknownTokenList = Objects.requireNonNull(readContracts()).getMainNet();
-
-        Log.d("Home","**************");
-        for(UnknownToken unknownToken : unknownTokenList)
-        {
-            Log.d("Home","Address : " + unknownToken.address + " isPopular : " + unknownToken.isPopular);
-        }
-        Log.d("Home","**************");
 
         setupList(tokenList, false);
     }
@@ -251,11 +239,9 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         {
             if(unknownToken.address.equalsIgnoreCase(address))
             {
-                Log.d("Home","Popular Address : " + address);
                 return unknownToken.isPopular;
             }
         }
-        Log.d("Home","Not Popular Address : " + address);
         return false;
     }
 

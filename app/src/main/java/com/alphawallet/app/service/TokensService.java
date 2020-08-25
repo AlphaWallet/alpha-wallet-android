@@ -336,7 +336,6 @@ public class TokensService
         {
             for (ContractLocator cl : contractCandidates)
             {
-                Log.d("Home","Chain Id : " + cl.chainId + " , Address : " + cl.address);
                 if (getToken(cl.chainId, cl.address) == null)
                 {
                     addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address, cl.isEnabled));

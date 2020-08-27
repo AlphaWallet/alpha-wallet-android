@@ -34,9 +34,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class TokenIcon extends ConstraintLayout {
 
-    private ImageView icon;
-    private TextView textIcon;
-    private ImageView statusIcon;
+    private final ImageView icon;
+    private final TextView textIcon;
+    private final ImageView statusIcon;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -44,13 +44,26 @@ public class TokenIcon extends ConstraintLayout {
     private String tokenName;
     private AssetDefinitionService assetDefinition;
     private boolean showStatus = false;
+    private boolean largeIcon = false;
 
     public TokenIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        inflate(context, R.layout.item_token_icon, this);
-
         getAttrs(context, attrs);
+
+        if (largeIcon)
+        {
+            inflate(context, R.layout.item_token_icon_large, this);
+        }
+        else
+        {
+            inflate(context, R.layout.item_token_icon, this);
+        }
+
+        icon = findViewById(R.id.icon);
+        textIcon = findViewById(R.id.text_icon);
+        statusIcon = findViewById(R.id.status_icon);
+        statusIcon.setVisibility(View.GONE);
 
         bindViews();
     }
@@ -65,6 +78,7 @@ public class TokenIcon extends ConstraintLayout {
         try
         {
             showStatus = a.getBoolean(R.styleable.TokenIcon_showStatus, false);
+            largeIcon = a.getBoolean(R.styleable.TokenIcon_largeIcon, false);
         }
         finally
         {
@@ -74,13 +88,7 @@ public class TokenIcon extends ConstraintLayout {
 
     private void bindViews()
     {
-        icon = findViewById(R.id.icon);
-        textIcon = findViewById(R.id.text_icon);
-        statusIcon = findViewById(R.id.status_icon);
         View layout = findViewById(R.id.view_container);
-
-        statusIcon.setVisibility(View.GONE);
-
         layout.setOnClickListener(this::performTokenClick);
     }
 
@@ -188,6 +196,9 @@ public class TokenIcon extends ConstraintLayout {
             case SELF:
                 statusIcon.setImageResource(R.drawable.ic_send_self_small);
                 break;
+            case NONE:
+                statusIcon.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -237,7 +248,10 @@ public class TokenIcon extends ConstraintLayout {
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            return false;
+            textIcon.setVisibility(View.GONE);
+            icon.setVisibility(View.VISIBLE);
+            icon.setImageDrawable(resource);
+            return true;
         }
     };
 }

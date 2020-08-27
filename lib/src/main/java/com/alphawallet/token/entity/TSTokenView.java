@@ -5,6 +5,7 @@ import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
+import static org.w3c.dom.Node.TEXT_NODE;
 
 /**
  * Holds an individual Token View which consists of style and HTML view code
@@ -34,6 +35,13 @@ public class TSTokenView
                         default:
                             tokenView += getElementHTML(child);
                             break;
+                    }
+                    break;
+                case TEXT_NODE:
+                    if (element.getChildNodes().getLength() == 1)
+                    {
+                        //handle text item-view
+                        tokenView = child.getTextContent().replace("\u2019", "&#x2019;");
                     }
                     break;
                 default:

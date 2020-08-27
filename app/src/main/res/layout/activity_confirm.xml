@@ -380,13 +380,6 @@
                                     tools:text="23000"
                                     android:textSize="@dimen/sp15" />
 
-                                <TextView
-                                    style="@style/TransactionDetailsStyle"
-                                    android:layout_marginStart="@dimen/dp5"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Gwei" />
-
                                 <ProgressBar
                                     android:id="@+id/progress_gas_estimate"
                                     style="?android:attr/progressBarStyleSmall"
@@ -416,11 +409,6 @@
                                 android:textColor="@color/text_dark_gray"
                                 android:textSize="18sp" />
 
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
                                 <TextView
                                     android:id="@+id/text_gas_limit"
                                     android:layout_width="wrap_content"
@@ -432,14 +420,6 @@
                                     tools:text="23000"
                                     android:textSize="@dimen/sp15" />
 
-                                <TextView
-                                    style="@style/TransactionDetailsStyle"
-                                    android:layout_marginStart="@dimen/dp5"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Gwei" />
-
-                            </LinearLayout>
 
                         </LinearLayout>
 

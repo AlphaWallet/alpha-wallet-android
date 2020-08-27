@@ -19,20 +19,20 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, Attribute> attributes = new HashMap<>();
+    public final Map<String, Attribute> attributes = new HashMap<>();
     protected Locale locale;
 
-    public Map<String, ContractInfo> contracts = new HashMap<>();
-    public Map<String, TSAction> actions = new HashMap<>();
+    public final Map<String, ContractInfo> contracts = new HashMap<>();
+    public final Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
-    private Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
-    private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
-    private Map<String, TSSelection> selections = new HashMap<>();
-    private Map<String, TSActivityView> activityCards = new HashMap<>();
+    private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
+    private final TSTokenViewHolder tokenViews = new TSTokenViewHolder();
+    private final Map<String, TSSelection> selections = new HashMap<>();
+    private final Map<String, TSActivityView> activityCards = new HashMap<>();
 
     public String nameSpace;
     public TokenscriptContext context;
-    public String holdingToken;
+    public String holdingToken = null;
     private int actionCount;
 
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/06";
@@ -164,6 +164,20 @@ public class TokenDefinition {
         }
     }
 
+    public EventDefinition getEventDefinition(String activityName)
+    {
+        if (getActivityCards().size() > 0)
+        {
+            TSActivityView v = getActivityCards().get(activityName);
+            if (v != null)
+            {
+                return getActivityEvent(activityName);
+            }
+        }
+
+        return null;
+    }
+
     public EventDefinition getActivityEvent(String activityCardName)
     {
         TSActivityView av = activityCards.get(activityCardName);
@@ -175,6 +189,25 @@ public class TokenDefinition {
         ev.parentAttribute = null;
         ev.select = null;
         return ev;
+    }
+
+    public boolean hasEvents()
+    {
+        for (String attrName : attributes.keySet())
+        {
+            Attribute attr = attributes.get(attrName);
+            if (attr.event != null && attr.event.contract != null)
+            {
+                return true;
+            }
+        }
+
+        if (getActivityCards().size() > 0)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public enum Syntax {
@@ -762,6 +795,20 @@ public class TokenDefinition {
         return this.keyName;
     }
 
+    public String getTokenNameList()
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String labelKey : labels.keySet())
+        {
+            if (!first) sb.append(",");
+            sb.append(labelKey).append(",").append(labels.get(labelKey));
+            first = false;
+        }
+
+        return sb.toString();
+    }
+
     public String getTokenName(int count)
     {
         String value = null;
@@ -1178,6 +1225,20 @@ public class TokenDefinition {
     public boolean hasTokenView()
     {
         return tokenViews.views.size() > 0;
+    }
+
+    public String getViews()
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String s : tokenViews.views.keySet())
+        {
+            if (!first) sb.append(",");
+            sb.append(s);
+            first = false;
+        }
+
+        return sb.toString();
     }
 
     public String getTokenView(String viewTag)

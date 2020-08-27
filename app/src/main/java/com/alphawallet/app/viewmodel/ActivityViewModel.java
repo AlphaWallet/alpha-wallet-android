@@ -2,31 +2,23 @@ package com.alphawallet.app.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 
 import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.Event;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.interact.ActivityDataInteract;
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.router.TransactionDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
-import com.alphawallet.app.ui.ActivityFragment;
-import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.token.entity.ContractAddress;
 
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -47,7 +39,6 @@ public class ActivityViewModel extends BaseViewModel
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final TransactionDetailRouter transactionDetailRouter;
     private final TransactionsService transactionsService;
 
     @Nullable
@@ -61,13 +52,11 @@ public class ActivityViewModel extends BaseViewModel
     ActivityViewModel(
             GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
-            TransactionDetailRouter transactionDetailRouter,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             TransactionsService transactionsService) {
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.transactionsService = transactionsService;
@@ -84,7 +73,6 @@ public class ActivityViewModel extends BaseViewModel
     private void onDefaultWallet(Wallet defaultWallet)
     {
         wallet.postValue(defaultWallet);
-
         disposable =
                 fetchTransactionsInteract.fetchTransactionMetas(defaultWallet, tokensService.getNetworkFilters(), 0, TRANSACTION_FETCH_LIMIT)
                         .subscribeOn(Schedulers.io())
@@ -104,11 +92,22 @@ public class ActivityViewModel extends BaseViewModel
 
     public void fetchMoreTransactions(long startTime)
     {
-        disposable =
-                fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
+        List<Integer> currentChains = tokensService.getNetworkFilters();
+        disposable = Observable.fromIterable(currentChains)
+                .flatMap(chainId -> transactionsService.fetchAndStoreTransactions(chainId, startTime).toObservable())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(activityItems::postValue, this::onError);
+
+//        disposable = transactionsService.fetchAndStoreTransactions(1, startTime)
+//                          .subscribeOn(Schedulers.io())
+//                          .observeOn(AndroidSchedulers.mainThread())
+//                          .subscribe(activityItems::postValue, this::onError);
+
+//                fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(activityItems::postValue, this::onError);
     }
 
     public void onDestroy()
@@ -149,11 +148,6 @@ public class ActivityViewModel extends BaseViewModel
                 if (token == null) tokensService.addUnknownTokenToCheck(new ContractAddress(tx.getChainId(), tx.getTo()));
             }
         }
-    }
-
-    public void showDetails(Context context, Transaction transaction)
-    {
-        transactionDetailRouter.open(context, transaction, wallet.getValue());
     }
 
     public AssetDefinitionService getAssetDefinitionService()

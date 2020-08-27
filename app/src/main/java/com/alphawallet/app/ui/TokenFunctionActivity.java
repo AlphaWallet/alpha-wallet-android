@@ -14,13 +14,10 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
@@ -46,6 +43,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
+import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 
@@ -70,7 +68,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
-
     private void initViews(Token t) {
         token = t;
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
@@ -86,6 +83,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         tokenView.setOnSetValuesListener(this);
 
         activityHistoryList = findViewById(R.id.history_list);
+        activityHistoryList.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -144,36 +142,14 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
     private void setEventListener(Wallet wallet)
     {
-        ActivityAdapter adapter = new ActivityAdapter(this::onTransactionClick, this::onEventClick, viewModel.getTokensService(),
-                viewModel.getTransactionsInteract(), viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
+        ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
+                viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
 
         adapter.setDefaultWallet(wallet);
 
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token.tokenInfo.chainId, token.getAddress(), HISTORY_LENGTH);
-
-//        String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
-//        realmAuxUpdates = realm.where(RealmAuxData.class).endsWith("instanceKey", "-eventName")
-//                .equalTo("chainId", token.tokenInfo.chainId)
-//                .equalTo("tokenId", token.tokenInfo.address.toLowerCase()).findAllAsync();
-//        realmAuxUpdates.addChangeListener(realmAux -> {
-//            if (realmAux.size() == 0) return;
-//            //reload token view, updated event will be fetched from DB
-//            RealmAuxData d = realmAux.first();
-//            Token update = viewModel.getToken(d.getChainId(), d.getTokenAddress());
-//            if (update != null) initViews(update);
-//        });
-    }
-
-    private void onTransactionClick(View view, Transaction transaction)
-    {
-        //
-    }
-
-    private void onEventClick(View view, String eventKey)
-    {
-        //
+                token, idList.get(0), HISTORY_LENGTH);
     }
 
     @Override
@@ -201,7 +177,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         if (realm != null) realm.close();
     }
-
 
     @Override
     public void onPageLoaded(WebView view)

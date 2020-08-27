@@ -1,65 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_transactions"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/layout_transactions"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/super_light_grey" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/layout_no_recent_transactions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/dp18"
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <TextView
+            android:id="@+id/no_recent_transactions"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginStart="22dp"
-            android:gravity="center_vertical"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/recent_transactions"
-            android:textColor="@color/grey76"
-            android:textSize="15sp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/super_light_grey" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/font_light"
+            android:text="@string/no_recent_transactions"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="18sp" />
 
-        <LinearLayout
-            android:id="@+id/layout_no_recent_transactions"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/no_recent_transactions_subtext"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/no_recent_transactions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:text="@string/no_recent_transactions"
-                android:textColor="@color/text_dark_gray"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/no_recent_transactions_subtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/no_recent_transactions_subtext"
-                android:textColor="@color/text_dark_gray"
-                android:textSize="13sp" />
-        </LinearLayout>
-
+            android:layout_gravity="center"
+            android:fontFamily="@font/font_regular"
+            android:text="@string/no_recent_transactions_subtext"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="13sp" />
     </LinearLayout>
 
-</ScrollView>
+    <ProgressBar
+        android:id="@+id/loading_transactions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="visible" />
+
+</LinearLayout>

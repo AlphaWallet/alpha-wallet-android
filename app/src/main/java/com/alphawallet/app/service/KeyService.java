@@ -903,6 +903,22 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
     }
 
+    @Override
+    public void legacyAuthRequired(Operation callbackId, String dialogTitle, String desc)
+    {
+        signDialog = new SignTransactionDialog(activity, callbackId, dialogTitle, desc);
+        signDialog.setCanceledOnTouchOutside(false);
+        signDialog.setCancelListener(v -> {
+            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
+        });
+        signDialog.setOnDismissListener(v -> {
+            signDialog = null;
+        });
+        signDialog.show();
+        signDialog.getLegacyAuthentication(this);
+        requireAuthentication = false;
+    }
+
     private void keyFailure(String message)
     {
         if (message == null || message.length() == 0 || !AuthorisationFailMessage(message))

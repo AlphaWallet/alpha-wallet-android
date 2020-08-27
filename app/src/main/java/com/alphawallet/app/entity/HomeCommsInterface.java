@@ -12,5 +12,6 @@ public interface HomeCommsInterface
     void resetTokens();
     void addedToken(List<ContractLocator> tokenContracts);
     void changedLocale();
+    void resetTransactions();
     default void refreshTokens() { };
 }

@@ -79,8 +79,8 @@ public class TickerService
     private static final String ETHERSCAN = "https://api.etherscan.io/api?module=stats&action=ethprice";
     private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
 
-    public static final long TICKER_TIMEOUT = 1 * DateUtils.DAY_IN_MILLIS;
-    public static final long TICKER_STALE_TIMEOUT = 1 * DateUtils.HOUR_IN_MILLIS;
+    public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
+    public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -234,10 +234,6 @@ public class TickerService
                     JSONObject data = stateData.getJSONObject("result");
                     TokenTicker tt = decodeEtherscanTicker(data);
                     ethTickers.put(MAINNET_ID, tt);
-                    ethTickers.put(RINKEBY_ID, tt);
-                    ethTickers.put(ROPSTEN_ID, tt);
-                    ethTickers.put(KOVAN_ID, tt);
-                    ethTickers.put(GOERLI_ID, tt);
                     newTickers = 5;
                 }
             }
@@ -307,7 +303,6 @@ public class TickerService
     private TokenTicker addArtisTickers(TokenTicker tokenTicker)
     {
         ethTickers.put(ARTIS_SIGMA1_ID, tokenTicker);
-        ethTickers.put(ARTIS_TAU1_ID, tokenTicker);
         return tokenTicker;
     }
 

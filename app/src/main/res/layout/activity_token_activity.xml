@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:layout_above="@id/layoutButtons">
+
+        <LinearLayout
+            android:id="@id/token_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/event_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_light"
+                tools:text="10:57 PM | July 22, 2020"
+                android:textColor="@color/black"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="@dimen/dp18"
+                android:textSize="@dimen/sp14" />
+
+            <com.alphawallet.app.widget.TokenIcon
+                android:id="@+id/token_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:showStatus="true"
+                app:largeIcon="true" />
+
+            <TextView
+                android:id="@+id/event_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                tools:text="Sent ETH"
+                android:textColor="@color/black"
+                android:layout_marginTop="@dimen/dp6"
+                android:layout_marginBottom="10dp"
+                android:textSize="@dimen/sp17" />
+
+            <TextView
+                android:id="@+id/event_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                tools:text="+ 1.234 ETH"
+                android:textColor="@color/black"
+                android:layout_marginTop="@dimen/dp16"
+                android:layout_marginBottom="10dp"
+                android:textSize="@dimen/sp24" />
+
+            <include layout="@layout/item_ticket" />
+
+        </LinearLayout>
+        </ScrollView>
+
+        <com.alphawallet.app.widget.FunctionButtonBar
+            android:layout_alignParentBottom="true"
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+    <com.alphawallet.app.widget.SystemView
+        android:id="@+id/system_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:background="@color/white"
+        tools:visibility="gone" />
+
+</LinearLayout>

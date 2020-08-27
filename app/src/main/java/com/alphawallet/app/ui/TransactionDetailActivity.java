@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -40,6 +41,7 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TRANSACTION;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface
 {
@@ -60,17 +62,26 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_detail);
 
-        transaction = getIntent().getParcelableExtra(TRANSACTION);
+        viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
+                .get(TransactionDetailViewModel.class);
+        viewModel.latestBlock().observe(this, this::onLatestBlock);
+        viewModel.onTransaction().observe(this, this::onTransaction);
+
+        String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
+        viewModel.fetchTransaction(wallet, txHash, chainId);
+    }
+
+    private void onTransaction(Transaction tx)
+    {
+        transaction = tx;
         if (transaction == null) {
             finish();
             return;
         }
         toolbar();
         setTitle();
-        viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
-                .get(TransactionDetailViewModel.class);
-        viewModel.latestBlock().observe(this, this::onLatestBlock);
         viewModel.prepare(transaction.chainId, wallet.address);
         functionBar = findViewById(R.id.layoutButtons);
 

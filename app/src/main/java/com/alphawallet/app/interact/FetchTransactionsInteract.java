@@ -18,6 +18,8 @@ import io.realm.Realm;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.TokensService;
 
+import org.web3j.protocol.core.methods.response.EthTransaction;
+
 import java.util.List;
 
 public class FetchTransactionsInteract {
@@ -71,5 +73,10 @@ public class FetchTransactionsInteract {
     {
         return transactionRepository
                 .fetchCachedEvent(walletAddress, eventKey);
+    }
+
+    public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+    {
+        return transactionRepository.storeRawTx(wallet, rawTx, timeStamp);
     }
 }

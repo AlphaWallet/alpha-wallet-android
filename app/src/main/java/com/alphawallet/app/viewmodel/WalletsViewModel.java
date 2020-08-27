@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -53,6 +54,7 @@ public class WalletsViewModel extends BaseViewModel
     private final HomeRouter homeRouter;
     private final TokensService tokensService;
     private final AWEnsResolver ensResolver;
+    private final AssetDefinitionService assetService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -75,6 +77,7 @@ public class WalletsViewModel extends BaseViewModel
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
             TokensService tokensService,
+            AssetDefinitionService assetService,
             Context context)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
@@ -85,6 +88,7 @@ public class WalletsViewModel extends BaseViewModel
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
         this.tokensService = tokensService;
+        this.assetService = assetService;
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
     }
@@ -281,5 +285,10 @@ public class WalletsViewModel extends BaseViewModel
     public Realm getRealmManager()
     {
         return genericWalletInteract.getWalletRealm();
+    }
+
+    public void stopUpdates()
+    {
+        assetService.stopEventListener();
     }
 }

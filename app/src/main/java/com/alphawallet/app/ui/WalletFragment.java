@@ -473,7 +473,10 @@ public class WalletFragment extends BaseFragment implements
     public void resetTokens()
     {
         //first abort the current operation
-        adapter.clear();
+        if (viewModel != null && adapter != null)
+        {
+            adapter.clear();
+        }
     }
 
     public void refreshTokens()

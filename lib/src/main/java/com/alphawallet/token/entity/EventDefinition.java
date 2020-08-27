@@ -1,6 +1,11 @@
 package com.alphawallet.token.entity;
 
+import com.alphawallet.token.tools.Numeric;
+
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +21,7 @@ public class EventDefinition
     public NamedType type;
     public String filter;
     public String select;
-    public BigInteger readBlock;
+    public BigInteger readBlock = BigInteger.ZERO;
     public Attribute parentAttribute;
     public String activityName = null;
 
@@ -99,7 +104,7 @@ public class EventDefinition
         if (contract.getfirstChainId() == ev.contract.getfirstChainId() && contract.getFirstAddress().equalsIgnoreCase(ev.contract.getFirstAddress()) &&
                 filter.equals(ev.filter) && type.name.equals(ev.type.name) && (
                 (activityName != null && ev.activityName != null && activityName.equals(ev.activityName)) ||
-                (attributeName != null && ev.attributeName != null && attributeName.equals(ev.attributeName))) )
+                        (attributeName != null && ev.attributeName != null && attributeName.equals(ev.attributeName))))
         {
             return true;
         }
@@ -107,5 +112,45 @@ public class EventDefinition
         {
             return false;
         }
+    }
+
+    public String getEventKey()
+    {
+        return getEventKey(contract.getfirstChainId(), contract.getFirstAddress(), activityName, attributeName);
+    }
+
+    public static String getEventKey(int chainId, String eventAddress, String activityName, String attributeName)
+    {
+        StringBuilder sb = new StringBuilder();
+        try
+        {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.update(intToByteArray(chainId));
+            digest.update(eventAddress.getBytes());
+            if (activityName != null) digest.update(activityName.getBytes());
+            if (attributeName != null) digest.update(attributeName.getBytes());
+
+            byte[] bytes = digest.digest();
+            for (byte aByte : bytes)
+            {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+
+        return sb.toString();
+    }
+
+    private static byte[] intToByteArray(int a)
+    {
+        byte[] ret = new byte[4];
+        ret[3] = (byte) (a & 0xFF);
+        ret[2] = (byte) ((a >> 8) & 0xFF);
+        ret[1] = (byte) ((a >> 16) & 0xFF);
+        ret[0] = (byte) ((a >> 24) & 0xFF);
+        return ret;
     }
 }

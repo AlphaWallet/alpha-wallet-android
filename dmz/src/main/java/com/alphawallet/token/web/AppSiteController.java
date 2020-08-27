@@ -484,7 +484,7 @@ public class AppSiteController implements AttributeInterface
     }
 
     @Override
-    public TransactionResult storeAuxData(TransactionResult tResult)
+    public TransactionResult storeAuxData(String wAddress, TransactionResult tResult)
     {
         String addressFunctionKey = tResult.contractAddress + "-" + tResult.attrId;
         if (!transactionResults.containsKey(tResult.contractChainId)) transactionResults.put(tResult.contractChainId, new HashMap<>());

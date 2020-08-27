@@ -61,13 +61,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private String tokenName;
     private boolean primaryElement;
+    private final Realm realm;
 
     private Handler handler;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
         super(resId, parent);
 
@@ -88,6 +89,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
+        realm = r;
     }
 
     @Override
@@ -156,12 +158,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private void populateTicker()
     {
         TokenTicker ticker = tokensService.getTokenTicker(token);
-        if (ticker == null && !token.isEthereum())
+        if (ticker != null)
+        {
+            handleTicker();
+        }
+        else
         {
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
             setIssuerDetails();
-
             if (!EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
             {
                 showTestnet();
@@ -171,21 +176,16 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 hideTestnet();
             }
         }
-        else if (EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
-        {
-            primaryElement = true;
-            hideIssuerViews();
-            layoutAppreciation.setVisibility(View.VISIBLE);
-            balanceCurrency.setVisibility(View.VISIBLE);
-            hideTestnet();
-            startRealmListener();
-        }
-        else
-        {
-            showTestnet();
-            layoutAppreciation.setVisibility(View.GONE);
-            hideIssuerViews();
-        }
+    }
+
+    private void handleTicker()
+    {
+        primaryElement = true;
+        hideIssuerViews();
+        layoutAppreciation.setVisibility(View.VISIBLE);
+        balanceCurrency.setVisibility(View.VISIBLE);
+        hideTestnet();
+        startTickerRealmListener();
     }
 
     private void showTestnet() {
@@ -241,32 +241,29 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         this.onTokenClickListener = onTokenClickListener;
     }
 
-    private void animateTextWhileWaiting() {
-        emptyTicker();
-        Animation anim = new AlphaAnimation(0.0f, 1.0f);
-        anim.setDuration(450);
-        anim.setStartOffset(20);
-        anim.setRepeatMode(Animation.REVERSE);
-        anim.setRepeatCount(Animation.INFINITE);
-
-        text24Hours.startAnimation(anim);
-        textAppreciation.startAnimation(anim);
-        balanceCurrency.startAnimation(anim);
-    }
-
     private void setIssuerDetails()
     {
-        String issuerName = assetDefinition.getIssuerName(token);
-        if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
+        if (token.isEthereum())
         {
             issuer.setVisibility(View.VISIBLE);
-            issuerPlaceholder.setVisibility(View.VISIBLE);
+            issuer.setText(R.string.testnet);
+            issuerPlaceholder.setVisibility(View.GONE);
             primaryElement = true;
-            issuer.setText(issuerName);
         }
         else
         {
-            hideIssuerViews();
+            String issuerName = assetDefinition.getIssuerName(token);
+            if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
+            {
+                issuer.setVisibility(View.VISIBLE);
+                issuerPlaceholder.setVisibility(View.VISIBLE);
+                primaryElement = true;
+                issuer.setText(issuerName);
+            }
+            else
+            {
+                hideIssuerViews();
+            }
         }
     }
 
@@ -299,9 +296,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceCurrency.setText(R.string.unknown_balance_without_symbol);
     }
 
-    private void startRealmListener()
+    private void startTickerRealmListener()
     {
-        Realm realm = tokensService.getTickerRealmInstance();
         realmUpdate = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
                 .findAllAsync();

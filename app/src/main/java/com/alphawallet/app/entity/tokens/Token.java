@@ -854,15 +854,20 @@ public class Token implements Parcelable, Comparable<Token>
 
     public StatusType getTxStatus(Transaction transaction)
     {
-        int asset;
-        if (isEthereum())
+        StatusType status = transaction.getTransactionStatus();
+        if (status == null)
         {
-            return ethereumTxImage(transaction);
+            if (isEthereum())
+            {
+                status = ethereumTxImage(transaction);
+            }
+            else
+            {
+                status = transaction.getOperationImage(this);
+            }
         }
-        else
-        {
-            return transaction.getOperationImage(this);
-        }
+
+        return status;
     }
 
     public TokenScriptResult.Attribute getAttributeResult(String attrId, BigInteger tokenId)

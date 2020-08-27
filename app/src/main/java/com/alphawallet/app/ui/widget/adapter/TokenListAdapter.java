@@ -1,7 +1,9 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +39,8 @@ import static com.alphawallet.app.entity.TokenManageType.DISPLAY_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.HIDDEN_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_DISPLAY_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_HIDDEN_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.SHOW_ZERO_BALANCE;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 
 public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> implements OnTokenManageClickListener {
 
@@ -121,6 +125,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     private void setupList(List<TokenCardMeta> tokens)
     {
         int hiddenTokensCount = 0;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
 
         items.clear();
         items.beginBatchedUpdates();
@@ -146,6 +151,13 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             }
             items.add(sortedItem);
         }
+
+        TokenCardMeta tcmZero = new TokenCardMeta(0, "", context.getString(R.string.zero_balance_tokens_off), 0, 0, null);
+        tcmZero.isEnabled = pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false);
+        items.add(new TokenSortedItem(
+                SHOW_ZERO_BALANCE,
+                tcmZero, 0));
+
         items.add(new ManageTokensLabelSortedItem(
                 LABEL_DISPLAY_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.display_tokens)),
@@ -167,10 +179,13 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     @Override
     public BinderViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, @TokenManageType.ManageType int viewType) {
         switch (viewType) {
+            case SHOW_ZERO_BALANCE:
+                TokenListHolder showZeros = new TokenListHolder(R.layout.item_manage_token, viewGroup, assetService, tokensService);
+                showZeros.setOnTokenClickListener(this);
+                return showZeros;
             case LABEL_DISPLAY_TOKEN:
             case LABEL_HIDDEN_TOKEN:
-                TokenLabelViewHolder tokenLabelViewHolder = new TokenLabelViewHolder(R.layout.layout_manage_tokens_label, viewGroup);
-                return tokenLabelViewHolder;
+                return new TokenLabelViewHolder(R.layout.layout_manage_tokens_label, viewGroup);
             case DISPLAY_TOKEN:
             case HIDDEN_TOKEN:
             default:
@@ -197,6 +212,12 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     public void onTokenClick(Token token, int position, boolean isChecked)
     {
         if (!(items.get(position).value instanceof TokenCardMeta)) return;
+
+        if (position == 0)
+        {
+            handleShowHideEmptyTokens(isChecked);
+            return;
+        }
 
         TokenCardMeta tcm = (TokenCardMeta)items.get(position).value;
 
@@ -228,6 +249,12 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         notifyDataSetChanged();
 
         listener.onItemClick(token, isChecked);
+    }
+
+    private void handleShowHideEmptyTokens(boolean isChecked)
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, isChecked).apply();
     }
 
     public void filter(String searchString)

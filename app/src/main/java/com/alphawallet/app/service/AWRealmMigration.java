@@ -63,6 +63,31 @@ public class AWRealmMigration implements RealmMigration
                                     .transform(obj -> obj.set("resultReceivedTime", 0L));
             oldVersion++;
         }
+
+        if (oldVersion == 9)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmToken");
+            if (!realmToken.hasField("earliestTxBlock")) realmToken.addField("earliestTxBlock", long.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 10)
+        {
+            schema.create("RealmTokenScriptData")
+                    .addField("instanceKey", String.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("fileHash", String.class)
+                    .addField("filePath", String.class)
+                    .addField("names", String.class)
+                    .addField("viewList", String.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 11)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmTokenScriptData");
+            if (!realmToken.hasField("hasEvents")) realmToken.addField("hasEvents", boolean.class);
+            oldVersion++;
+        }
     }
 
     @Override

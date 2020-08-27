@@ -690,6 +690,7 @@ public class BackupKeyActivity extends BaseActivity implements
                 case SEED_PHRASE_INVALID:
                     break;
                 case ENTER_JSON_BACKUP:
+                    viewModel.getPasswordForKeystore(wallet, this, this);
                     break;
                 case SET_JSON_PASSWORD:
                     break;

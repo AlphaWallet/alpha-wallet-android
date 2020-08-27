@@ -295,6 +295,7 @@ public class WalletsActivity extends BaseActivity implements
         adapter.setDefaultWallet(wallet);
         if (requiresHomeRefresh)
         {
+            viewModel.stopUpdates();
             requiresHomeRefresh = false;
             viewModel.showHome(this);
         }

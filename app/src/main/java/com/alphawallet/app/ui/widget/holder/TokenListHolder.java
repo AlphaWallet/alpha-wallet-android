@@ -60,6 +60,12 @@ public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements 
         position = addition.getInt("position");
         token = tokensService.getToken(data.getChain(), data.getAddress());
 
+        if (token == null)
+        {
+            bindEmptyText(data);
+            return;
+        }
+
         tokenName.setText(token.getFullName(assetDefinition, 1));
         chainId = token.tokenInfo.chainId;
         switchEnabled.setOnCheckedChangeListener(null);
@@ -75,6 +81,15 @@ public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements 
         {
             overlay.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void bindEmptyText(TokenCardMeta data)
+    {
+        tokenIcon.setVisibility(View.GONE);
+        tokenName.setText(data.balance);
+        switchEnabled.setOnCheckedChangeListener(null);
+        switchEnabled.setChecked(data.isEnabled);
+        switchEnabled.setOnCheckedChangeListener(this);
     }
 
     @Override

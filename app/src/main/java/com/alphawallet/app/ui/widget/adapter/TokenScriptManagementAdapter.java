@@ -131,6 +131,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
     private void displayFileDialog(TokenScriptFile override, TokenLocator tokenLocator)
     {
         if (dialog != null && dialog.isShowing()) dialog.hide();
+
         dialog = new AWalletAlertDialog(activity);
         dialog.makeWide();
         dialog.setIcon(AWalletAlertDialog.NONE);
@@ -146,12 +147,15 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         }
 
         message.append(context.getString(R.string.origin_token_title));
-        for (int chainId : tokenLocator.addresses.keySet())
+        if (tokenLocator != null)
         {
-            String chainName = MagicLinkInfo.getNetworkNameById(chainId);
-            for (String address : tokenLocator.addresses.get(chainId))
+            for (int chainId : tokenLocator.addresses.keySet())
             {
-                message.append(context.getString(R.string.tokenscript_contract_line, chainName, address));
+                String chainName = MagicLinkInfo.getNetworkNameById(chainId);
+                for (String address : tokenLocator.addresses.get(chainId))
+                {
+                    message.append(context.getString(R.string.tokenscript_contract_line, chainName, address));
+                }
             }
         }
         dialog.setMessage(message);

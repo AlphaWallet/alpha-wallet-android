@@ -1,7 +1,5 @@
 package com.alphawallet.app.ui.widget.entity;
 
-import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
-
 public class ManageTokensLabelSortedItem extends SortedItem<ManageTokensLabelData> {
 
     public ManageTokensLabelSortedItem(int type, ManageTokensLabelData data, int weight) {

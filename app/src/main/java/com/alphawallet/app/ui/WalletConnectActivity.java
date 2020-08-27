@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.text.SpannableStringBuilder;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,6 +19,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.util.MessageUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -25,14 +28,20 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.EthereumTypedMessage;
+import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -42,11 +51,14 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
+import wallet.core.jni.Hash;
 
-public class WalletConnectActivity extends BaseActivity
+import com.alphawallet.app.web3j.StructuredData;
+import com.google.gson.JsonSyntaxException;
+
+public class WalletConnectActivity extends BaseActivity implements SignAuthenticationCallback
 {
     private static final String TAG = WalletConnectActivity.class.getSimpleName();
-    private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
     @Inject
     WalletConnectViewModelFactory viewModelFactory;
@@ -66,6 +78,9 @@ public class WalletConnectActivity extends BaseActivity
     private LinearLayout infoLayout;
     private FunctionButtonBar functionBar;
     private boolean fromDappBrowser = false;
+
+    private Signable signable;
+    private DAppFunction dappFunction;
 
     private Wallet wallet;
     private String qrCode;
@@ -285,32 +300,51 @@ public class WalletConnectActivity extends BaseActivity
     private void onEthSign(Long id, WCEthereumSignMessage message)
     {
         int signType = 0;
-        EthereumMessage eMessage = null;
+        signable = null;
         switch (message.getType())
         {
             case MESSAGE:
                 signType = R.string.dialog_title_sign_message;
-                eMessage = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
+                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
                 break;
             case PERSONAL_MESSAGE:
                 signType = R.string.dialog_title_sign_message;
-                byte[] messageToSign = getEthereumMessage(Numeric.hexStringToByteArray(message.getData()));
-                eMessage = new EthereumMessage(Numeric.toHexString(messageToSign), peerUrl.getText().toString(), id);
+                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, true);
                 break;
             case TYPED_MESSAGE:
                 signType = R.string.dialog_title_sign_typed_message;
-                //TODO
-                eMessage = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
+                //See TODO in SignCallbackJSInterface, refactor duplicate code
+                try
+                {
+                    try
+                    {
+                        ProviderTypedData[] rawData = new Gson().fromJson(message.getData(), ProviderTypedData[].class);
+                        ByteArrayOutputStream writeBuffer = new ByteArrayOutputStream();
+                        writeBuffer.write(Hash.keccak256(MessageUtils.encodeParams(rawData)));
+                        writeBuffer.write(Hash.keccak256(MessageUtils.encodeValues(rawData)));
+                        CharSequence signMessage = MessageUtils.formatTypedMessage(rawData);
+                        signable = new EthereumTypedMessage(writeBuffer.toByteArray(), signMessage, peerUrl.getText().toString(), id);
+                    }
+                    catch (JsonSyntaxException e)
+                    {
+                        StructuredDataEncoder eip721Object = new StructuredDataEncoder(message.getData());
+                        CharSequence signMessage = MessageUtils.formatEIP721Message(eip721Object);
+                        signable = new EthereumTypedMessage(eip721Object.getStructuredData(), signMessage, peerUrl.getText().toString(), id);
+                    }
+                }
+                catch (IOException e)
+                {
+                    showErrorDialog(getString(R.string.message_authentication_failed));
+                    client.rejectRequest(id, getString(R.string.message_authentication_failed));
+                }
                 break;
         }
 
-        final EthereumMessage ethMessage = eMessage;
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog = builder.setTitle(signType)
-                .setMessage(message.getData())
+                .setMessage(signable.getUserMessage())
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> {
-                    doSignMessage(ethMessage);
+                    doSignMessage();
                 })
                 .setNegativeButton(R.string.action_cancel, (d, w) -> {
                     client.rejectRequest(id, getString(R.string.message_reject_request));
@@ -365,49 +399,24 @@ public class WalletConnectActivity extends BaseActivity
         dialog.show();
     }
 
-    private void doSignMessage(EthereumMessage ethMessage)
+    private void doSignMessage()
     {
-        viewModel.getAuthenticationForSignature(wallet, this, new SignAuthenticationCallback()
+        viewModel.getAuthenticationForSignature(wallet, this, this);
+        dappFunction = new DAppFunction()
         {
             @Override
-            public void gotAuthorisation(boolean gotAuth)
+            public void DAppError(Throwable error, Signable message)
             {
-                if (gotAuth)
-                {
-                    viewModel.signMessage(
-                            Numeric.hexStringToByteArray(ethMessage.value),
-                            new DAppFunction()
-                            {
-                                @Override
-                                public void DAppError(Throwable error, Signable message)
-                                {
-                                    showErrorDialog(error.getMessage());
-                                }
-
-                                @Override
-                                public void DAppReturn(byte[] data, Signable message)
-                                {
-                                    client.approveRequest(message.getCallbackId(), Numeric.toHexString(data));
-                                    if (fromDappBrowser) switchToDappBrowser();
-                                }
-                            },
-                            ethMessage
-                    );
-                }
-                else
-                {
-                    showErrorDialog(getString(R.string.message_authentication_failed));
-                    client.rejectRequest(ethMessage.leafPosition, getString(R.string.message_authentication_failed));
-                }
+                showErrorDialog(error.getMessage());
             }
 
             @Override
-            public void cancelAuthentication()
+            public void DAppReturn(byte[] data, Signable message)
             {
-                showErrorDialog(getString(R.string.message_authentication_failed));
-                client.rejectRequest(ethMessage.leafPosition, getString(R.string.message_authentication_failed));
+                client.approveRequest(message.getCallbackId(), Numeric.toHexString(data));
+                if (fromDappBrowser) switchToDappBrowser();
             }
-        });
+        };
     }
 
     private void sendTransaction(Long id, WCEthereumTransaction transaction)
@@ -466,20 +475,6 @@ public class WalletConnectActivity extends BaseActivity
                 client.rejectRequest(id, getString(R.string.message_authentication_failed));
             }
         });
-    }
-
-    private byte[] getEthereumMessage(byte[] message)
-    {
-        byte[] prefix = getEthereumMessagePrefix(message.length);
-        byte[] result = new byte[prefix.length + message.length];
-        System.arraycopy(prefix, 0, result, 0, prefix.length);
-        System.arraycopy(message, 0, result, prefix.length, message.length);
-        return result;
-    }
-
-    private byte[] getEthereumMessagePrefix(int messageLength)
-    {
-        return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
     }
 
     private void killSession()
@@ -554,10 +549,40 @@ public class WalletConnectActivity extends BaseActivity
         return false;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK)
+        {
+            gotAuthorisation(true);
+        }
+        else
+        {
+            cancelAuthentication();
+        }
+    }
+
     private void switchToDappBrowser()
     {
         Intent intent = new Intent(this, HomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
+    }
+
+    @Override
+    public void gotAuthorisation(boolean gotAuth)
+    {
+        viewModel.signMessage(
+                signable,
+                dappFunction);
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+        showErrorDialog(getString(R.string.message_authentication_failed));
+        client.rejectRequest(signable.getCallbackId(), getString(R.string.message_authentication_failed));
     }
 }

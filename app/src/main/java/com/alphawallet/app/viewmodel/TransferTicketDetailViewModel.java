@@ -11,24 +11,16 @@ import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.tokens.Ticket;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokenRepository;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.ParseMagicLink;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.ENSInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
@@ -36,9 +28,16 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.SignableBytes;
+import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by James on 21/02/2018.
@@ -136,7 +135,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
-        byte[] tradeBytes = parser.getTradeBytes(indexList, contractAddress, BigInteger.ZERO, expiry);
+        SignableBytes tradeBytes = new SignableBytes(parser.getTradeBytes(indexList, contractAddress, BigInteger.ZERO, expiry));
         try
         {
             linkMessage = ParseMagicLink.generateLeadingLinkBytes(indexList, contractAddress, BigInteger.ZERO, expiry);
@@ -149,13 +148,15 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         //sign this link
         disposable = createTransactionInteract
                 .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotSignature, this::onError);
     }
 
     public void generateSpawnLink(List<BigInteger> tokenIds, String contractAddress, long expiry)
     {
         initParser();
-        byte[] tradeBytes = parser.getSpawnableBytes(tokenIds, contractAddress, BigInteger.ZERO, expiry);
+        SignableBytes tradeBytes = new SignableBytes(parser.getSpawnableBytes(tokenIds, contractAddress, BigInteger.ZERO, expiry));
         try
         {
             linkMessage = ParseMagicLink.generateSpawnableLeadingLinkBytes(tokenIds, contractAddress, BigInteger.ZERO, expiry);
@@ -168,6 +169,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         //sign this link
         disposable = createTransactionInteract
                 .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotSignature, this::onError);
     }
 

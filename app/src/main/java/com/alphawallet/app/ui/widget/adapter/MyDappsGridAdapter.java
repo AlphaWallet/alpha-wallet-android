@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.adapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,17 +59,12 @@ public class MyDappsGridAdapter extends RecyclerView.Adapter<MyDappsGridAdapter.
     @Override
     public void onBindViewHolder(@NonNull MyDappsGridAdapter.ViewHolder viewHolder, int i) {
         DApp dApp = data.get(i);
-        String visibleUrl = null;
-        try {
-            visibleUrl = Utils.getDomainName(dApp.getUrl());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        String visibleUrl = Utils.getDomainName(dApp.getUrl());
         viewHolder.name.setText(dApp.getName());
         viewHolder.url.setText(visibleUrl);
 
         String favicon;
-        if (visibleUrl != null) {
+        if (!TextUtils.isEmpty(visibleUrl)) {
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(viewHolder.icon.getContext())
                     .load(favicon)

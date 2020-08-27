@@ -1,23 +1,16 @@
 package com.alphawallet.app.repository;
 
-import android.util.Log;
-
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AccountKeystoreService;
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.token.entity.Signable;
 
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
@@ -33,8 +26,6 @@ import org.web3j.utils.Numeric;
 import java.math.BigInteger;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
@@ -254,8 +245,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId) {
-		return accountKeystoreService.signTransaction(wallet, message, chainId);
+	public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId) {
+		return accountKeystoreService.signMessage(wallet, message, chainId);
 	}
 
 	@Override

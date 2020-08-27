@@ -217,16 +217,6 @@ public class Utils {
         }
     }
 
-    public static String getDomainName(String url) throws URISyntaxException {
-        URI uri = new URI(url);
-        String domain = uri.getHost();
-        if (domain != null) {
-            return domain.startsWith("www.") ? domain.substring(4) : domain;
-        } else {
-            return "";
-        }
-    }
-
     public static String loadJSONFromAsset(Context context, String fileName) {
         String json = null;
         try {
@@ -464,5 +454,19 @@ public class Utils {
 
     public static long randomId() {
         return new Date().getTime();
+    }
+
+    public static String getDomainName(String url)
+    {
+        try
+        {
+            URI uri = new URI(url);
+            String domain = uri.getHost();
+            return domain.startsWith("www.") ? domain.substring(4) : domain;
+        }
+        catch (Exception e)
+        {
+            return url != null ? url : "";
+        }
     }
 }

@@ -38,7 +38,7 @@ window.AlphaWallet.init(rpcURL, {
     const { data } = msgParams
     const { id = 8888 } = msgParams
     AlphaWallet.addCallback(id, cb)
-    alpha.signTypedMessage(id, JSON.stringify(data))
+    alpha.signTypedMessage(id, JSON.stringify(msgParams))
   },
   enable: function() {
       return new Promise(function(resolve, reject) {

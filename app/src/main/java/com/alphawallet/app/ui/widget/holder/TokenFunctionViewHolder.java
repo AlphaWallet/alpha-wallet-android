@@ -132,13 +132,9 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
 
         dialog = new SignMessageDialog(getContext(), message);
         dialog.setAddress(token.getAddress());
-        dialog.setMessage(message.value);
+        dialog.setMessage(message.getMessage());
         dialog.setOnApproveListener(v -> {
-            String convertedMessage = message.value;
-            String signMessage = PERSONAL_MESSAGE_PREFIX
-                    + convertedMessage.length()
-                    + convertedMessage;
-            functionCallback.signMessage(signMessage.getBytes(), dAppFunction, message);
+            functionCallback.signMessage(message, dAppFunction);
         });
         dialog.setOnRejectListener(v -> {
             tokenView.onSignCancel(message);

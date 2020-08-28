@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 
@@ -81,6 +82,12 @@ public class QRSelectionTest
 
             @Override
             public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, int chainId)
             {
                 return null;
             }

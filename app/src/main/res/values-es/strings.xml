@@ -658,4 +658,9 @@
     <string name="tokenscript_call">Llamada de TokenScript:</string>
     <string name="today">Hoy</string>
     <string name="go_to_token">Ir al token</string>
+    <string name="invalid_walletconnect_session">Sesión de WalletConnect no válida</string>
+    <string name="restart_walletconnect_session">La sesión anterior de WalletConnect no finalizó correctamente. Regrese a la página web y desconéctese, luego inicie una nueva sesión.</string>
+    <string name="invalid_walletconnect_data">Datos QR de WalletConnect no válidos</string>
+    <string name="label_nonce">Nonce</string>
+    <string name="payload">Datos</string>
 </resources>

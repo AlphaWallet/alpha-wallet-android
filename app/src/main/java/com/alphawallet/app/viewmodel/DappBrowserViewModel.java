@@ -321,9 +321,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void handleWalletConnect(Context context, String url)
     {
-        String importPassData = "wclocal:" + url;
+        String importPassData = WalletConnectActivity.WC_LOCAL_PREFIX + url;
         Intent intent = new Intent(context, WalletConnectActivity.class);
-        if (!url.contains("?bridge"))
+        if (!url.contains(WalletConnectActivity.WC_SESSION_CREATE_ELEMENT))
         {
             //re-open the existing activity, when using walletconnect locally
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

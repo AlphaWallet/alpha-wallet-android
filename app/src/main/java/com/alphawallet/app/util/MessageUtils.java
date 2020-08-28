@@ -1,8 +1,6 @@
 package com.alphawallet.app.util;
 
 import android.graphics.Typeface;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.style.StyleSpan;
 
 import com.alphawallet.app.web3j.StructuredDataEncoder;
@@ -13,11 +11,8 @@ import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,23 +116,18 @@ public class MessageUtils
     public static CharSequence formatTypedMessage(ProviderTypedData[] rawData)
     {
         //produce readable text to display in the signing prompt
-        SpannableStringBuilder sb = new SpannableStringBuilder();
+        StyledStringBuilder sb = new StyledStringBuilder();
         boolean firstVal = true;
-        List<SpanType> spanners = new ArrayList<>();
         for (ProviderTypedData data : rawData)
         {
             if (!firstVal) sb.append("\n");
-            int begin = sb.length();
-            sb.append(data.name).append(":");
-            spanners.add(new SpanType(begin, sb.length(), new StyleSpan(Typeface.BOLD)));
+            sb.startStyleGroup().append(data.name).append(":");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
             sb.append("\n  ").append(data.value.toString());
             firstVal = false;
         }
 
-        for (SpanType s : spanners)
-        {
-            sb.setSpan(new StyleSpan(Typeface.BOLD), s.begin, s.end, Spanned.SPAN_POINT_POINT);
-        }
+        sb.applyStyles();
 
         return sb;
     }
@@ -145,13 +135,11 @@ public class MessageUtils
     public static CharSequence formatEIP721Message(StructuredDataEncoder messageData)
     {
         HashMap<String, Object> messageMap = (HashMap<String, Object>) messageData.jsonMessageObject.getMessage();
-        SpannableStringBuilder sb = new SpannableStringBuilder();
-        List<SpanType> spanners = new ArrayList<>();
+        StyledStringBuilder sb = new StyledStringBuilder();
         for (String entry : messageMap.keySet())
         {
-            int begin = sb.length();
-            sb.append(entry).append(":").append("\n");
-            spanners.add(new SpanType(begin, sb.length(), new StyleSpan(Typeface.BOLD)));
+            sb.startStyleGroup().append(entry).append(":").append("\n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
             Object v = messageMap.get(entry);
             if (v instanceof LinkedHashMap)
             {
@@ -159,9 +147,8 @@ public class MessageUtils
                 for (String paramName : valueMap.keySet())
                 {
                     String value = valueMap.get(paramName).toString();
-                    begin = sb.length();
-                    sb.append(" ").append(paramName).append(": ");
-                    spanners.add(new SpanType(begin, sb.length(), new StyleSpan(Typeface.BOLD)));
+                    sb.startStyleGroup().append(" ").append(paramName).append(": ");
+                    sb.setStyle(new StyleSpan(Typeface.BOLD));
                     sb.append(value).append("\n");
                 }
             }
@@ -171,10 +158,7 @@ public class MessageUtils
             }
         }
 
-        for (SpanType s : spanners)
-        {
-            sb.setSpan(new StyleSpan(Typeface.BOLD), s.begin, s.end, Spanned.SPAN_POINT_POINT);
-        }
+        sb.applyStyles();
 
         return sb;
     }
@@ -192,19 +176,5 @@ public class MessageUtils
         }
 
         return 256; //if no value then default to 256
-    }
-
-    private static class SpanType
-    {
-        int begin;
-        int end;
-        StyleSpan style;
-
-        public SpanType(int begin, int end, StyleSpan style)
-        {
-            this.begin = begin;
-            this.end = end;
-            this.style = style;
-        }
     }
 }

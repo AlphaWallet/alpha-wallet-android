@@ -223,6 +223,11 @@ public class GasService implements ContractGasProvider
         else return new BigInteger(C.DEFAULT_GAS_LIMIT);
     }
 
+    public BigInteger getGasLimitOverride()
+    {
+        return currentGasLimitOverride;
+    }
+
     public void setOverrideGasLimit(BigInteger gasOverride)
     {
         currentGasLimitOverride = gasOverride;

@@ -658,4 +658,9 @@
     <string name="tokenscript_call">TokenScript调用:</string>
     <string name="today">今天</string>
     <string name="go_to_token">前往通证</string>
+    <string name="invalid_walletconnect_session">无效的WalletConnect会话</string>
+    <string name="restart_walletconnect_session">先前的WalletConnect会话未正确终止。请返回网页并断开连接，然后开始新的会话。</string>
+    <string name="invalid_walletconnect_data">无效的WalletConnect二维码数据</string>
+    <string name="label_nonce">Nonce</string>
+    <string name="payload">数据</string>
 </resources>

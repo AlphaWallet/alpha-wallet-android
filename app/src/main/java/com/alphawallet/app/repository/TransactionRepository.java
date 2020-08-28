@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
 
 import org.web3j.crypto.RawTransaction;
@@ -147,6 +148,29 @@ public class TransactionRepository implements TransactionRepositoryType {
 				}))
 				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, tx.nonce, useGasPrice, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x", ""))
 				.subscribeOn(Schedulers.io());
+	}
+
+	/**
+	 * Given a Web3Transaction, return a signature. Note that we can't fix up nonce, gas price or limit;
+	 * This is a request to sign a transaction from an external source -
+	 * presumably that external source will broadcast the transaction; together with this signature
+	 *
+	 * @param wallet
+	 * @param w3tx
+	 * @param chainId
+	 * @return
+	 */
+	@Override
+	public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, int chainId) {
+		TransactionData txData = new TransactionData();
+
+		return getRawTransaction(txData.nonce, w3tx.gasPrice, w3tx.gasLimit, w3tx.value, w3tx.payload)
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, wallet, chainId))
+				.flatMap(signedMessage -> Single.fromCallable( () -> {
+					txData.signature = Numeric.toHexString(signedMessage);
+					txData.txHash = "";
+					return txData;
+				}));
 	}
 
 	// Called for constructors from web3 Dapp transaction

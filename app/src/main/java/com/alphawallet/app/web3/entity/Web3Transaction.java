@@ -1,9 +1,24 @@
 package com.alphawallet.app.web3.entity;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.text.style.StyleSpan;
 
+import com.alphawallet.app.R;
+import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Hex;
+import com.alphawallet.app.util.StyledStringBuilder;
+import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
+import com.alphawallet.token.entity.MagicLinkInfo;
+
+import org.web3j.protocol.core.methods.request.Transaction;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
+
 
 public class Web3Transaction implements Parcelable {
     public final Address recipient;
@@ -45,6 +60,23 @@ public class Web3Transaction implements Parcelable {
         this.leafPosition = leafPosition;
     }
 
+    /**
+     * Initialise from WalletConnect Transaction
+     * @param wcTx
+     * @param callbackId
+     */
+    public Web3Transaction(WCEthereumTransaction wcTx, long callbackId)
+    {
+        this.recipient = TextUtils.isEmpty(wcTx.getTo()) ? Address.EMPTY : new Address(wcTx.getTo());
+        this.contract = null;
+        this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue());;
+        this.gasPrice = Hex.hexToBigInteger(wcTx.getGasPrice(), BigInteger.ZERO);
+        this.gasLimit = Hex.hexToBigInteger(wcTx.getGasLimit(), BigInteger.ZERO);
+        this.nonce = Hex.hexToLong(wcTx.getNonce(), -1);
+        this.payload = wcTx.getData();
+        this.leafPosition = callbackId;
+    }
+
     Web3Transaction(Parcel in) {
         recipient = in.readParcelable(Address.class.getClassLoader());
         contract = in.readParcelable(Address.class.getClassLoader());
@@ -84,5 +116,59 @@ public class Web3Transaction implements Parcelable {
         dest.writeLong(nonce);
         dest.writeString(payload);
         dest.writeLong(leafPosition);
+    }
+
+    /**
+     * Can be used anywhere to generate an 'instant' human readable transaction dump
+     * @param ctx
+     * @param chainId
+     * @return
+     */
+    public CharSequence getFormattedTransaction(Context ctx, int chainId)
+    {
+        StyledStringBuilder sb = new StyledStringBuilder();
+        sb.startStyleGroup().append(ctx.getString(R.string.to)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(recipient.toString());
+
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.value)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(BalanceUtils.getScaledValueWithLimit(new BigDecimal(value), 18));
+
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(BalanceUtils.weiToGwei(gasPrice));
+
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_limit)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(gasLimit.toString());
+
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_nonce)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(String.valueOf(nonce));
+
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.payload)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(payload);
+
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.subtitle_network)).append(":\n ");
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+        sb.append(MagicLinkInfo.getNetworkNameById(chainId));
+
+        sb.applyStyles();
+
+        return sb;
+    }
+
+    public Transaction getWeb3jTransaction(String walletAddress, long nonce)
+    {
+        return new Transaction(
+                walletAddress,
+                BigInteger.valueOf(nonce),
+                gasPrice,
+                gasLimit,
+                recipient.toString(),
+                value,
+                payload);
     }
 }

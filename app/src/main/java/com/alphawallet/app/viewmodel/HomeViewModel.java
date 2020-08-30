@@ -203,55 +203,11 @@ public class HomeViewModel extends BaseViewModel {
 
     public void updateLocale(String newLocale, Context context)
     {
-        localeRepository.setDefaultLocale(context, newLocale);
+        localeRepository.setLocale(context, newLocale);
         //restart activity
         Intent intent = new Intent(context, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
-    }
-
-    public void setLocale(HomeActivity activity) {
-        //get the current locale
-        //only do this once, allow user to override
-        if (!localeRepository.hasOverridenLangSetting())
-        {
-            String currentLocale = localeRepository.getDefaultLocale();
-            //get the device locale
-            String deviceLocale = getDeviceLocale(activity);
-
-            if (currentLocale == null) currentLocale = "en";
-            /*
-            1. Check for Device language is different then current locale in application.
-            2. Check if application supports Device language in the app
-            */
-            if (!currentLocale.equalsIgnoreCase(deviceLocale)
-                    && localeRepository.isLocalePresent(deviceLocale))
-            {
-                currentLocale = deviceLocale;
-                localeRepository.setDefaultLocale(activity, currentLocale);
-                localeRepository.setOverridenLangSetting();
-            }
-            LocaleUtils.setLocale(activity, currentLocale);
-        }
-    }
-
-    /**
-     * This method will check for existing Device OS Language set.
-     * @param activity To reference with "Resource"
-     * @return String as a Language Locale
-     */
-    private String getDeviceLocale(HomeActivity activity) {
-        String locale;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            locale = activity.getResources().getConfiguration().getLocales().get(0).getLanguage();
-        }
-        else
-        {
-            locale = activity.getResources().getConfiguration().locale.getLanguage();
-        }
-        return locale;
     }
 
     public void downloadAndInstall(String build, Context ctx) {

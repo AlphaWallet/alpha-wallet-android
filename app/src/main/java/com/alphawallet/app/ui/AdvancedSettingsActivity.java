@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
@@ -100,7 +101,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
                 .withListener(this::onTokenScriptManagementClicked)
                 .build();
 
-        changeLanguage.setSubtitle(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
+        changeLanguage.setSubtitle(LocaleUtils.getDisplayLanguage(viewModel.getActiveLocale(), viewModel.getActiveLocale()));
     }
 
     private void addSettingsToLayout() {
@@ -132,8 +133,8 @@ public class AdvancedSettingsActivity extends BaseActivity {
 
     private void onChangeLanguageClicked() {
         Intent intent = new Intent(this, SelectLocaleActivity.class);
-        String currentLocale = viewModel.getDefaultLocale();
-        intent.putExtra(EXTRA_LOCALE, currentLocale);
+        String selectedLocale = viewModel.getActiveLocale();
+        intent.putExtra(EXTRA_LOCALE, selectedLocale);
         intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getLocaleList(this));
         startActivityForResult(intent, C.UPDATE_LOCALE);
     }
@@ -181,10 +182,15 @@ public class AdvancedSettingsActivity extends BaseActivity {
     }
 
     public void updateLocale(Intent data) {
-        if (data != null) {
+        if (data != null)
+        {
             String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
-            sendBroadcast(new Intent(CHANGED_LOCALE));
-            viewModel.updateLocale(newLocale, this);
+            String oldLocale = viewModel.getActiveLocale();
+            if (!TextUtils.isEmpty(newLocale) && !newLocale.equals(oldLocale))
+            {
+                sendBroadcast(new Intent(CHANGED_LOCALE));
+                viewModel.updateLocale(newLocale, this);
+            }
         }
     }
 

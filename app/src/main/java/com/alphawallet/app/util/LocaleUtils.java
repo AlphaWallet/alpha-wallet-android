@@ -6,8 +6,11 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+
+import com.alphawallet.app.repository.SharedPreferenceRepository;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -57,6 +60,68 @@ public class LocaleUtils {
         String deviceLocaleStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_locale", "en");
         String deviceCountryStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_country", "US");
         return new Locale(deviceLocaleStr, deviceCountryStr);
+    }
+
+    /**
+     * Set the language locale from any activity
+     * @param context
+     */
+    public static String setActiveLocale(Context context)
+    {
+        String useLocale = getActiveLocaleName(context);
+        // Change locale settings in the app.
+        Resources res = context.getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        android.content.res.Configuration conf = res.getConfiguration();
+        conf.setLocale(new Locale(useLocale));
+        res.updateConfiguration(conf, dm);
+
+        context.getApplicationContext().getResources().updateConfiguration(conf,
+                context.getApplicationContext().getResources().getDisplayMetrics());
+
+        return useLocale;
+    }
+
+    /**
+     * Fetches a new Context which was created with the currently active locale;
+     * This is required for menu text on the main 4 wallet pages due to initialisation issues
+     * @param context
+     * @return
+     */
+    public static Context getActiveLocaleContext(Context context) {
+        String useLocale = getActiveLocaleName(context);
+        Locale activeLocale = new Locale(useLocale);
+        Configuration configuration = context.getResources().getConfiguration();
+        configuration.setLocale(activeLocale);
+        configuration.setLayoutDirection(activeLocale);
+
+        return context.createConfigurationContext(configuration);
+    }
+
+    private static String getActiveLocaleName(Context context)
+    {
+        String useLocale = PreferenceManager.getDefaultSharedPreferences(context).getString(SharedPreferenceRepository.USER_LOCALE_PREF, "");
+        if (TextUtils.isEmpty(useLocale)) useLocale = getDeviceSettingsLocale(context);
+        return useLocale;
+    }
+
+    /**
+     * This method will check for existing Device OS Language set.
+     * @param context To reference with "Resource"
+     * @return String as a Language Locale
+     */
+    public static String getDeviceSettingsLocale(Context context) {
+        String locale;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            locale = context.getResources().getConfiguration().getLocales().get(0).getLanguage();
+        }
+        else
+        {
+            locale = context.getResources().getConfiguration().locale.getLanguage();
+        }
+        return locale;
     }
 
     private static String getCurrentLanguage()

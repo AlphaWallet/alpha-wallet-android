@@ -29,8 +29,9 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
     }
 
-    public String getDefaultLocale() {
-        return localeRepository.getDefaultLocale();
+    public String getUserPreferenceLocale()
+    {
+        return localeRepository.getUserPreferenceLocale();
     }
 
     public ArrayList<LocaleItem> getLocaleList(Context context) {
@@ -38,12 +39,13 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     }
 
     public void setLocale(Context activity) {
-        String currentLocale = localeRepository.getDefaultLocale();
+        String currentLocale = localeRepository.getActiveLocale();
         LocaleUtils.setLocale(activity, currentLocale);
     }
 
     public void updateLocale(String newLocale, Context context) {
-        localeRepository.setDefaultLocale(context, newLocale);
+        localeRepository.setUserPreferenceLocale(newLocale);
+        localeRepository.setLocale(context, newLocale);
         Intent intent = new Intent(context, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
@@ -79,5 +81,10 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public void startFileListeners()
     {
         assetDefinitionService.startAlphaWalletListener();
+    }
+
+    public String getActiveLocale()
+    {
+        return localeRepository.getActiveLocale();
     }
 }

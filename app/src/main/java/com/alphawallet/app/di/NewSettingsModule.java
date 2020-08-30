@@ -2,17 +2,11 @@ package com.alphawallet.app.di;
 
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.GetDefaultWalletBalance;
-
-import com.alphawallet.app.repository.CurrencyRepository;
-import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.LocaleRepository;
-import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 
 import dagger.Module;
@@ -23,25 +17,17 @@ class NewSettingsModule {
     @Provides
     NewSettingsViewModelFactory provideNewSettingsViewModelFactory(
             GenericWalletInteract genericWalletInteract,
-            GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
-            PreferenceRepositoryType preferenceRepository,
-            LocaleRepositoryType localeRepository,
-            TokensService tokensService,
-            CurrencyRepositoryType currencyRepository
+            PreferenceRepositoryType preferenceRepository
     ) {
         return new NewSettingsViewModelFactory(
                 genericWalletInteract,
-                getDefaultWalletBalance,
                 myAddressRouter,
                 ethereumNetworkRepository,
                 manageWalletsRouter,
-                preferenceRepository,
-                localeRepository,
-                tokensService,
-                currencyRepository);
+                preferenceRepository);
     }
 
     @Provides
@@ -63,15 +49,5 @@ class NewSettingsModule {
     @Provides
     ManageWalletsRouter provideManageWalletsRouter() {
         return new ManageWalletsRouter();
-    }
-
-    @Provides
-    LocaleRepositoryType provideLocaleRepository(PreferenceRepositoryType preferenceRepository) {
-        return new LocaleRepository(preferenceRepository);
-    }
-
-    @Provides
-    CurrencyRepositoryType provideCurrencyRepository(PreferenceRepositoryType preferenceRepository) {
-        return new CurrencyRepository(preferenceRepository);
     }
 }

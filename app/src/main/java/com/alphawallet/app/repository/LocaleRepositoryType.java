@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import com.alphawallet.app.entity.LocaleItem;
 
 public interface LocaleRepositoryType {
-    String getDefaultLocale();
+    String getUserPreferenceLocale();
+    void setUserPreferenceLocale(String locale);
 
-    void setDefaultLocale(Context context, String locale);
+    void setLocale(Context context, String locale);
 
     ArrayList<LocaleItem> getLocaleList(Context context);
 
-    boolean isLocalePresent(String locale);
+    String getActiveLocale();
 
-    boolean hasOverridenLangSetting();
-    void setOverridenLangSetting();
+    boolean isLocalePresent(String locale);
 }

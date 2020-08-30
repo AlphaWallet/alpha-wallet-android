@@ -38,7 +38,6 @@ public interface PreferenceRepositoryType {
 
     String getDefaultCurrency();
 
-    boolean getHasOverriden();
-
-    void setHasOverriden();
+    String getUserPreferenceLocale();
+    void setUserPreferenceLocale(String locale);
 }

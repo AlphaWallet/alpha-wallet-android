@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.util.LocaleUtils;
 
 
 public class DappHomeFragment extends Fragment {
@@ -37,6 +38,7 @@ public class DappHomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        LocaleUtils.setActiveLocale(getContext());
         View view = inflater.inflate(R.layout.layout_dapp_home, container, false);
         LinearLayout myDappsLayout = view.findViewById(R.id.my_dapps);
         myDappsLayout.setOnClickListener(v -> onDappHomeNavClickListener.onDappHomeNavClick(0));

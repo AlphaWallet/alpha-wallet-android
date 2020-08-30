@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AdapterCallback;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
@@ -53,6 +54,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private final TextView detail;
     private final TextView timeStamp;
     private final AssetDefinitionService assetDefinition;
+    private final AdapterCallback refreshSignaller;
     private Token token;
     private BigInteger tokenId = BigInteger.ZERO;
 
@@ -62,7 +64,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private boolean fromTokenView;
 
     public EventHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
-                       AssetDefinitionService svs)
+                       AssetDefinitionService svs, AdapterCallback signaller)
     {
         super(resId, parent);
         icon = findViewById(R.id.token_icon);
@@ -75,6 +77,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 
         fetchTransactionsInteract = interact;
         tokensService = service;
+        refreshSignaller = signaller;
     }
 
     @Override
@@ -88,6 +91,14 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 
         RealmAuxData eventData = fetchTransactionsInteract.fetchEvent(walletAddress, eventKey);
         Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
+
+        if (eventData == null || tx == null)
+        {
+            // probably caused by a new script detected. Signal to holder we need a reset
+            refreshSignaller.resetRequired();
+            return;
+        }
+
         token = tokensService.getToken(eventData.getChainId(), eventData.getTokenAddress());
         String sym = token != null ? token.getSymbol() : getContext().getString(R.string.eth);
         icon.bindData(token, assetDefinition);

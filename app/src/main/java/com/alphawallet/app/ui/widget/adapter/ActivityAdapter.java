@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.AdapterCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback {
     private int layoutResId = -1;
 
     private final ActivitySortedList<SortedItem> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem>() {
@@ -91,6 +92,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private final Handler handler = new Handler();
     private int itemLimit = 0;
     private int lastItemPos = 0;
+    private boolean pendingReset = false;
 
     public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract,
                            AssetDefinitionService svs, ActivityDataInteract dataInteract) {
@@ -121,7 +123,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
             case EventHolder.VIEW_TYPE:
                 holder = new EventHolder(R.layout.item_event, parent, tokensService, fetchTransactionsInteract,
-                        assetService);
+                        assetService, this);
                 break;
             case TransactionDateHolder.VIEW_TYPE:
                 holder = new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
@@ -327,6 +329,21 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         itemLimit = historyCount;
     }
+
+    @Override
+    public void resetRequired()
+    {
+        if (!pendingReset)
+        {
+            pendingReset = true;
+            handler.postDelayed(resetAdapter, 1500);
+        }
+    }
+
+    private Runnable resetAdapter = () -> {
+        pendingReset = false;
+        notifyDataSetChanged();
+    };
 
     private static class LabelHolder extends BinderViewHolder<Date> {
 

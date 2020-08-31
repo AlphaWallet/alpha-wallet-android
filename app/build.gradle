@@ -37,6 +37,9 @@ android {
         }
     }
     defaultConfig {
+        versionCode 126
+        versionName "3.14.0-beta"
+
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
         targetSdkVersion 29
@@ -54,13 +57,6 @@ android {
         }
     }
     flavorDimensions "targetting"
-    productFlavors {
-	awallet {
-		dimension "targetting"
-        versionCode 126
-        versionName "3.14.0-beta"
-	}
-    }
     buildTypes {
         debug {
             minifyEnabled false

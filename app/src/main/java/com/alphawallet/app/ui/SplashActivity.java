@@ -19,7 +19,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
@@ -209,7 +209,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
                 splashViewModel.importScriptFile(this, importData, useAppExternalDir);
             }
 
-            handler.postDelayed(this, VisibilityFilter.startupDelay());
+            handler.postDelayed(this, CustomViewSettings.startupDelay());
         }
     }
 

@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 
-public class VisibilityFilter
+public class CustomViewSettings
 {
     private static int primaryChain = EthereumNetworkRepository.MAINNET_ID;
     private static String primaryChainName = C.ETHEREUM_NETWORK_NAME;

@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
@@ -28,7 +28,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
-import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -197,7 +196,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
-        if (VisibilityFilter.canChangeWallets())
+        if (CustomViewSettings.canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);

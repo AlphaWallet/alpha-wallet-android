@@ -21,12 +21,10 @@ import android.view.View;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.KeyService;
@@ -42,8 +40,6 @@ import com.alphawallet.app.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.RINKEBY_ID;
 
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
@@ -184,7 +180,7 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (VisibilityFilter.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
+        if (CustomViewSettings.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

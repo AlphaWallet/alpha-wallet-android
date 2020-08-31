@@ -55,6 +55,7 @@ public class AttestationCrypto {
    * @return
    */
   public static String addressFromKey(PublicKey key) {
+    // Todo should be verified that is works as intended, are there any reference values?
     byte[] pubKey = key.getEncoded();
     //discard the first byte which only tells what kind of key it is //i.e. encoded/un-encoded
     pubKey = Arrays.copyOfRange(pubKey,1,pubKey.length);

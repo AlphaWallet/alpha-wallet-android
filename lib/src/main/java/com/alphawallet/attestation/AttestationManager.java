@@ -1,6 +1,5 @@
 package com.alphawallet.attestation;
 
-import com.alphawallet.attestation.Attestation;
 import com.alphawallet.token.entity.Signable;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -15,16 +14,14 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class AttestationManager {
-//  private static final AlgorithmIdentifier identifier = new AlgorithmIdentifier(new ASN1ObjectIdentifier(Attestation.OID_SHA256ECDSA));
-
     private final KeyPair keys;
     private final Signature sig;
 
-    public AttestationManager(String signatureOid, KeyPair keys) {
+    public AttestationManager(KeyPair keys) {
         this.keys = keys;
         try {
             Security.addProvider(new BouncyCastleProvider());
-            sig = Signature.getInstance(signatureOid, "BC");
+            sig = Signature.getInstance(AttestationCrypto.OID_SIGNATURE_ALG, "BC");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -21,7 +21,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,7 +32,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
@@ -59,7 +58,6 @@ import com.alphawallet.app.widget.SystemView;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -113,7 +111,7 @@ public class WalletFragment extends BaseFragment implements
 
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
-        if (VisibilityFilter.canAddTokens()) {
+        if (CustomViewSettings.canAddTokens()) {
             toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
         } else {
             toolbar(view);
@@ -175,7 +173,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
-        if (VisibilityFilter.showManageTokens()) {
+        if (CustomViewSettings.showManageTokens()) {
             adapter.setWalletAddress(wallet.address);
         }
 
@@ -260,7 +258,7 @@ public class WalletFragment extends BaseFragment implements
     private void initTabLayout(View view)
     {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        if (VisibilityFilter.hideTabBar())
+        if (CustomViewSettings.hideTabBar())
         {
             tabLayout.setVisibility(View.GONE);
             return;

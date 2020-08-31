@@ -33,7 +33,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -319,7 +319,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                if (VisibilityFilter.hasDirectTransfer())
+                if (CustomViewSettings.hasDirectTransfer())
                 {
                     newState = DisplayState.PICK_TRANSFER_METHOD;
                 }

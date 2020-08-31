@@ -23,7 +23,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -176,7 +176,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (VisibilityFilter.hideEIP681()) return super.onCreateOptionsMenu(menu);
+        if (CustomViewSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
         //only pay when token null, eth or erc20
         if (token != null && token.isNonFungible() || currentMode == MODE_POS)// || EthereumNetworkRepository.isPriorityToken(token)) //Currently only allow request for native chain currency, can get here via routes where token is not set.

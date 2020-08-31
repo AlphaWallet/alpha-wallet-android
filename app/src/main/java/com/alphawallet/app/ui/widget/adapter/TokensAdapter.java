@@ -7,8 +7,7 @@ import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.VisibilityFilter;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -295,7 +294,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = VisibilityFilter.filterToken(token, true, context);
+        boolean allowThroughFilter = CustomViewSettings.filterToken(token, true, context);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)

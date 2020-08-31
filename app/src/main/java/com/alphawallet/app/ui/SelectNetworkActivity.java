@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
@@ -187,7 +187,7 @@ public class SelectNetworkActivity extends BaseActivity {
 
             if (!singleItem) {
                 for (NetworkItem item : data) {
-                    if (VisibilityFilter.isPrimaryNetwork(item)) {
+                    if (CustomViewSettings.isPrimaryNetwork(item)) {
                         item.setSelected(true);
                         break;
                     }
@@ -205,7 +205,7 @@ public class SelectNetworkActivity extends BaseActivity {
                 holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
                 holder.checkbox.setSelected(item.isSelected());
 
-                if (!singleItem && dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {
+                if (!singleItem && dataSet.get(position).getName().equals(CustomViewSettings.primaryNetworkName())) {
                     holder.checkbox.setAlpha(0.5f);
                 } else {
                     holder.checkbox.setAlpha(1.0f);
@@ -221,7 +221,7 @@ public class SelectNetworkActivity extends BaseActivity {
                 }
                 dataSet.get(position).setSelected(true);
                 notifyDataSetChanged();
-            } else if (!dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {
+            } else if (!dataSet.get(position).getName().equals(CustomViewSettings.primaryNetworkName())) {
                 dataSet.get(position).setSelected(!dataSet.get(position).isSelected());
             }
             holder.checkbox.setSelected(dataSet.get(position).isSelected());

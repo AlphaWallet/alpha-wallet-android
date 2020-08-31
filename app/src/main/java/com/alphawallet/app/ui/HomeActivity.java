@@ -53,7 +53,7 @@ import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -122,7 +122,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public HomeActivity()
     {
-        if (VisibilityFilter.hideDappBrowser()) dappBrowserFragment = new Fragment();
+        if (CustomViewSettings.hideDappBrowser()) dappBrowserFragment = new Fragment();
         else dappBrowserFragment = new DappBrowserFragment();
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
@@ -229,7 +229,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             showPage(WALLET);
         }
 
-        if (VisibilityFilter.hideDappBrowser())
+        if (CustomViewSettings.hideDappBrowser())
         {
             removeDappBrowser();
         }

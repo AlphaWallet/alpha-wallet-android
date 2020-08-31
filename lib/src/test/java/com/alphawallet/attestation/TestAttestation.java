@@ -1,13 +1,10 @@
 package com.alphawallet.attestation;
 
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Date;
 import org.bouncycastle.asn1.ASN1Boolean;
@@ -21,37 +18,31 @@ import org.junit.Assert;
 import sun.security.x509.X509CertImpl;
 
 public class TestAttestation {
-    public static final String ECDSA_CURVE = "secp256k1";
-    public static final String OID_SHA256ECDSA = "1.2.840.10045.4.3.2";
 
     private static KeyPair subjectKeys;
     private static KeyPair issuerKeys;
     private static SecureRandom rand;
 
     @org.junit.BeforeClass
-    public static void constructKeys() throws Exception {
+    public static void setupKeys() throws Exception {
         rand = SecureRandom.getInstance("SHA1PRNG");
         rand.setSeed("seed".getBytes());
 
-        Security.addProvider(new BouncyCastleProvider());
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
-        ECGenParameterSpec ecSpec = new ECGenParameterSpec(ECDSA_CURVE);
-        keyGen.initialize(ecSpec, rand);
-        subjectKeys = keyGen.generateKeyPair();
-        issuerKeys = keyGen.generateKeyPair();
+        subjectKeys = TestHelper.constructKeys(rand);
+        issuerKeys = TestHelper.constructKeys(rand);
     }
 
     private Attestation makeUnsignedx509Att() {
         Attestation att = new Attestation();
         att.setVersion(2); // =v3 since counting starts from 0
         att.setSerialNumber(42);
-        att.setSignature(OID_SHA256ECDSA);
+        att.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
         att.setIssuer("CN=ALX");
         Date now = new Date();
         att.setNotValidBefore(now);
         att.setNotValidAfter(new Date(System.currentTimeMillis()+3600000)); // Valid for an hour
         att.setSubject("CN=0x2042424242424564648");
-        att.setSubjectPublicKeyInfo(OID_SHA256ECDSA, subjectKeys.getPublic().getEncoded());
+        att.setSubjectPublicKeyInfo(AttestationCrypto.OID_SIGNATURE_ALG, subjectKeys.getPublic().getEncoded());
 
         ASN1EncodableVector extensions = new ASN1EncodableVector();
         extensions.add(new ASN1ObjectIdentifier(Attestation.OID_OCTETSTRING));
@@ -67,7 +58,7 @@ public class TestAttestation {
         Attestation att = new Attestation();
         att.setVersion(18); // Our initial version
         att.setSerialNumber(42);
-        att.setSignature(OID_SHA256ECDSA);
+        att.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
         att.setSubject("CN=0x2042424242424564648");
         att.setSmartcontracts(Arrays.asList(42L, 1337L));
         ASN1EncodableVector dataObject = new ASN1EncodableVector();
@@ -117,7 +108,7 @@ public class TestAttestation {
 
     @org.junit.Test
     public void testSignAttestration() {
-        AttestationManager manager = new AttestationManager(OID_SHA256ECDSA, issuerKeys);
+        AttestationManager manager = new AttestationManager(issuerKeys);
         Attestation att = makeUnsignedAtt();
         byte[] signature = manager.sign(att);
         Assert.assertTrue(manager.verifySigned(att, signature, issuerKeys.getPublic()));
@@ -125,7 +116,7 @@ public class TestAttestation {
 
     @org.junit.Test
     public void testX509Comp() throws Exception {
-        AttestationManager manager = new AttestationManager(OID_SHA256ECDSA, issuerKeys);
+        AttestationManager manager = new AttestationManager(issuerKeys);
         Attestation att = makeUnsignedx509Att();
         byte[] signature = manager.sign(att);
         byte[] signedAtt = manager.constructSignedAttestation(att, signature);

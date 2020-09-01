@@ -1,25 +1,13 @@
 package com.alphawallet.attestation;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Arrays;
-import java.util.IllegalFormatException;
 import org.bouncycastle.asn1.ASN1Boolean;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERUTF8String;
-
 
 public class StandardAttestation extends Attestation {
   enum AttestationType {
@@ -56,7 +44,7 @@ public class StandardAttestation extends Attestation {
         .startsWith("CN=0x")) { // The address is 2*20+5 chars long because it starts with CN=0x
         throw new IllegalArgumentException("The subject is supposed to only be an Ethereum address as the Common Name");
     }
-    if (getSignature() != AttestationCrypto.OID_SIGNATURE_ALG) {
+    if (!getSignature().equals(AttestationCrypto.OID_SIGNATURE_ALG)) {
       throw new IllegalArgumentException("The signature algorithm is supposed to be " + AttestationCrypto.OID_SIGNATURE_ALG);
     }
     this.PoK = pok;

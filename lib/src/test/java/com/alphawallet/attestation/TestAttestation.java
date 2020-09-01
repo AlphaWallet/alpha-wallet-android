@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
+import org.junit.Test;
 import sun.security.x509.X509CertImpl;
 
 public class TestAttestation {
@@ -127,6 +128,13 @@ public class TestAttestation {
             Assert.fail();
         }
         cert.verify(issuerKeys.getPublic(), new BouncyCastleProvider());
+    }
+
+    @org.junit.Test
+    public void testDecoding() throws Exception {
+        byte[] encoding = makeUnsignedAtt().getPrehash();
+        Attestation newAtt = new Attestation(encoding);
+        Assert.assertArrayEquals(encoding, newAtt.getPrehash());
     }
 }
 

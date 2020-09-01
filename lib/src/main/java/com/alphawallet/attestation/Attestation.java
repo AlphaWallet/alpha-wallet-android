@@ -7,23 +7,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import jdk.internal.loader.AbstractClassLoaderValue.Sub;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -273,6 +268,9 @@ public class Attestation implements Signable {
     if (dataObject != null) {
       return false;
     }
+    if (version == null || serialNumber == null || signature == null) {
+      return false;
+    }
     return true;
   }
 
@@ -282,17 +280,6 @@ public class Attestation implements Signable {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public String getMessage() {
-    throw new RuntimeException("Not allowed");
-  }
-
-  @Override
-  public long getCallbackId() {
-    // TODO check that dataObject is actually an Extensions
-    return 0;
   }
 
   /**
@@ -342,5 +329,16 @@ public class Attestation implements Signable {
   @Override
   public CharSequence getUserMessage() {
     return null;
+  }
+
+  @Override
+  public String getMessage() {
+    throw new RuntimeException("Not allowed");
+  }
+
+  @Override
+  public long getCallbackId() {
+    // TODO check that dataObject is actually an Extensions
+    return 0;
   }
 }

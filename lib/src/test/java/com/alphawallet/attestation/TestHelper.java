@@ -1,13 +1,23 @@
 package com.alphawallet.attestation;
 
+import com.alphawallet.attestation.StandardAttestation.AttestationType;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
+import org.bouncycastle.asn1.ASN1Boolean;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.Assert;
 
 public class TestHelper {
   public static final int CHARS_IN_LINE = 65;
@@ -18,6 +28,73 @@ public class TestHelper {
     ECGenParameterSpec ecSpec = new ECGenParameterSpec(AttestationCrypto.ECDSA_CURVE);
     keyGen.initialize(ecSpec, rand);
     return keyGen.generateKeyPair();
+  }
+
+  public static StandardAttestation makeUnsignedStandardAtt(PublicKey key) {
+    StandardAttestation att = new StandardAttestation("test@test.ts", AttestationType.EMAIL, key);
+    att.setIssuer("CN=ALX");
+    att.setSerialNumber(1);
+    Date now = new Date();
+    att.setNotValidBefore(now);
+    att.setNotValidAfter(new Date(System.currentTimeMillis() + 3600000)); // Valid for an hour
+    att.setSmartcontracts(Arrays.asList(42L, 1337L));
+    Assert.assertTrue(att.isValid());
+    Assert.assertFalse(att.isValidX509()); // Since the version is wrong, and algorithm is non-standard
+    return att;
+  }
+
+  public static Attestation makeUnsignedx509Att(PublicKey key) {
+    Attestation att = new Attestation();
+    att.setVersion(2); // =v3 since counting starts from 0
+    att.setSerialNumber(42);
+    att.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
+    att.setIssuer("CN=ALX");
+    Date now = new Date();
+    att.setNotValidBefore(now);
+    att.setNotValidAfter(new Date(System.currentTimeMillis()+3600000)); // Valid for an hour
+    att.setSubject("CN=0x2042424242424564648");
+    att.setSubjectPublicKeyInfo(AttestationCrypto.OID_SIGNATURE_ALG, key.getEncoded());
+
+    ASN1EncodableVector extensions = new ASN1EncodableVector();
+    extensions.add(new ASN1ObjectIdentifier(Attestation.OID_OCTETSTRING));
+    extensions.add(ASN1Boolean.TRUE);
+    extensions.add(new DEROctetString("hello world".getBytes()));
+    // Double Sequence is needed to be compatible with X509V3
+    att.setExtensions(new DERSequence(new DERSequence(extensions)));
+    Assert.assertTrue(att.isValidX509());
+    return att;
+  }
+
+  public static Attestation makeMaximalAtt(PublicKey key) {
+    Attestation att = new Attestation();
+    att.setVersion(18); // Our initial version
+    att.setSerialNumber(42);
+    att.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
+    att.setIssuer("CN=ALX");
+    Date now = new Date();
+    att.setNotValidBefore(now);
+    att.setNotValidAfter(new Date(System.currentTimeMillis()+3600000)); // Valid for an hour
+    att.setSubject("CN=0x2042424242424564648");
+    att.setSubjectPublicKeyInfo(AttestationCrypto.OID_SIGNATURE_ALG, key.getEncoded());
+    att.setSmartcontracts(Arrays.asList(42L, 1337L));
+    ASN1EncodableVector dataObject = new ASN1EncodableVector();
+    dataObject.add(new DEROctetString("hello world".getBytes()));
+    dataObject.add(new ASN1Integer(42));
+    att.setDataObject(new DERSequence(dataObject));
+    Assert.assertTrue(att.isValid());
+    return att;
+  }
+
+  public static Attestation makeMinimalAtt() {
+    Attestation att = new Attestation();
+    att.setVersion(18); // Our initial version
+    att.setSerialNumber(42);
+    att.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
+    ASN1EncodableVector dataObject = new ASN1EncodableVector();
+    dataObject.add(new DEROctetString("hello world".getBytes()));
+    att.setDataObject(new DERSequence(dataObject));
+    Assert.assertTrue(att.isValid());
+    return att;
   }
 
   public static String printDER(byte[] input) {

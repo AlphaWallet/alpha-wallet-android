@@ -1,16 +1,13 @@
 package com.alphawallet.attestation;
 
-import com.alphawallet.attestation.StandardAttestation.AttestationType;
+import static org.junit.Assert.fail;
+
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Date;
 import org.junit.Assert;
 
 public class TestStandardAttestation {
   private static KeyPair subjectKeys;
-  private static KeyPair issuerKeys;
   private static SecureRandom rand;
 
   @org.junit.BeforeClass
@@ -19,37 +16,28 @@ public class TestStandardAttestation {
     rand.setSeed("seed".getBytes());
 
     subjectKeys = TestHelper.constructKeys(rand);
-    issuerKeys = TestHelper.constructKeys(rand);
-  }
-
-  private Attestation makeUnsignedAtt(PublicKey key) {
-    Attestation att = new StandardAttestation("test@test.ts", AttestationType.EMAIL, key);
-    att.setIssuer("CN=ALX");
-    att.setSerialNumber(1);
-    Date now = new Date();
-    att.setNotValidBefore(now);
-    att.setNotValidAfter(new Date(System.currentTimeMillis() + 3600000)); // Valid for an hour
-    att.setSmartcontracts(Arrays.asList(42L, 1337L));
-    Assert.assertTrue(att.isValid());
-    Assert.assertFalse(att.isValidX509()); // Since the version is wrong, and algorithm is non-standard
-    return att;
   }
 
   @org.junit.Test
-  public void testConstructCert() {
-    Attestation att = makeUnsignedAtt(subjectKeys.getPublic());
-    System.out.println(TestHelper.printDER(att.getPrehash()));
+  public void testFullDecoding() throws Exception {
+    StandardAttestation initial = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic());
+    ProofOfExponent pok = initial.getPoK();
+    byte[] encoding = initial.getPrehash();
+    Attestation newAtt = new StandardAttestation(encoding, pok);
+    Assert.assertArrayEquals(encoding, newAtt.getPrehash());
   }
 
-
   @org.junit.Test
-  public void testSignAttestation() {
-    AttestationManager manager = new AttestationManager(issuerKeys);
-    Attestation att = makeUnsignedAtt(subjectKeys.getPublic());
-    byte[] signature = manager.sign(att);
-    byte[] signedAtt = manager.constructSignedAttestation(att, signature);
-    Assert.assertTrue(manager.verifySigned(att, signature, issuerKeys.getPublic()));
-    System.out.println(TestHelper.printDER(signedAtt));
+  public void testNotStandard() throws Exception {
+    Attestation initial = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic());
+    byte[] encoding = initial.getPrehash();
+    ProofOfExponent pok = new ProofOfExponent(null, null, null, null);
+    try {
+      new StandardAttestation(encoding, pok);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
   }
 
 }

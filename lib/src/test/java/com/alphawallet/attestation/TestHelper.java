@@ -1,6 +1,7 @@
 package com.alphawallet.attestation;
 
 import com.alphawallet.attestation.StandardAttestation.AttestationType;
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
@@ -30,8 +31,8 @@ public class TestHelper {
     return keyGen.generateKeyPair();
   }
 
-  public static StandardAttestation makeUnsignedStandardAtt(PublicKey key) {
-    StandardAttestation att = new StandardAttestation("test@test.ts", AttestationType.EMAIL, key);
+  public static StandardAttestation makeUnsignedStandardAtt(PublicKey key, BigInteger secret) {
+    StandardAttestation att = new StandardAttestation("test@test.ts", AttestationType.EMAIL, key, secret);
     att.setIssuer("CN=ALX");
     att.setSerialNumber(1);
     Date now = new Date();

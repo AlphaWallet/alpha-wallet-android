@@ -1,5 +1,6 @@
 package com.alphawallet.attestation;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.security.cert.CertificateExpiredException;
@@ -25,31 +26,31 @@ public class TestSignedAttestation {
 
   @org.junit.Test
   public void testSignAttestation() {
-    Attestation att = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic());
+    Attestation att = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), BigInteger.ONE);
     SignedAttestation signed = new SignedAttestation(att, issuerKeys.getPrivate());
-    Assert.assertTrue(AttestationManager.verifySigned(att, signed.getSignature(), issuerKeys.getPublic()));
+    Assert.assertTrue(SignatureUtility.verify(att.getPrehash(), signed.getSignature(), issuerKeys.getPublic()));
     Assert.assertArrayEquals(att.getPrehash(), signed.getUnsignedAttestation().getPrehash());
-    System.out.println(TestHelper.printDER(signed.getEncodedSignedAttesation()));
+    System.out.println(TestHelper.printDER(signed.getDerEncoding()));
   }
 
   @org.junit.Test
   public void testDecoding() throws Exception {
     Attestation att = TestHelper.makeMaximalAtt(subjectKeys.getPublic());
     SignedAttestation signed = new SignedAttestation(att, issuerKeys.getPrivate());
-    Assert.assertTrue(AttestationManager.verifySigned(att, signed.getSignature(), issuerKeys.getPublic()));
+    Assert.assertTrue(SignatureUtility.verify(att.getPrehash(), signed.getSignature(), issuerKeys.getPublic()));
     Assert.assertArrayEquals(att.getPrehash(), signed.getUnsignedAttestation().getPrehash());
-    byte[] signedEncoded = signed.getEncodedSignedAttesation();
+    byte[] signedEncoded = signed.getDerEncoding();
     SignedAttestation newSigned = new SignedAttestation(signedEncoded);
-    Assert.assertArrayEquals(signed.getEncodedSignedAttesation(), newSigned.getEncodedSignedAttesation());
+    Assert.assertArrayEquals(signed.getDerEncoding(), newSigned.getDerEncoding());
   }
 
   @org.junit.Test
   public void testX509Comp() throws Exception {
     Attestation att = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic());
     SignedAttestation signed = new SignedAttestation(att, issuerKeys.getPrivate());
-    Assert.assertTrue(AttestationManager.verifySigned(att, signed.getSignature(), issuerKeys.getPublic()));
+    Assert.assertTrue(SignatureUtility.verify(att.getPrehash(), signed.getSignature(), issuerKeys.getPublic()));
     // Test X509 compliance
-    X509Certificate cert = new X509CertImpl(signed.getEncodedSignedAttesation());
+    X509Certificate cert = new X509CertImpl(signed.getDerEncoding());
     try {
       cert.checkValidity();
     } catch (CertificateExpiredException | CertificateNotYetValidException e) {

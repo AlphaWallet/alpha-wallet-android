@@ -24,7 +24,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
 
-public class Attestation implements Signable {
+public class Attestation implements Signable, ASNEncodable {
 
   public static final String OID_OCTETSTRING = "1.3.6.1.4.1.1466.115.121.1.40";
 
@@ -280,6 +280,11 @@ public class Attestation implements Signable {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public byte[] getDerEncoding() {
+    return getPrehash();
   }
 
   /**

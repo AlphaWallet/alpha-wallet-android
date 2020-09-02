@@ -11,13 +11,13 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-public class SignedAttestation {
+public class SignedAttestation implements ASNEncodable {
   private final Attestation att;
   private final byte[] signature;
 
   public SignedAttestation(Attestation att, PrivateKey key) {
     this.att = att;
-    this.signature = AttestationManager.sign(att, key);
+    this.signature = SignatureUtility.sign(att.getPrehash(), key);
   }
 
   public SignedAttestation(byte[] derEncoding) throws IOException {
@@ -37,7 +37,8 @@ public class SignedAttestation {
     return signature;
   }
 
-  public byte[] getEncodedSignedAttesation() {
+  @Override
+  public byte[] getDerEncoding() {
     return constructSignedAttestation(this.att, this.signature);
   }
 

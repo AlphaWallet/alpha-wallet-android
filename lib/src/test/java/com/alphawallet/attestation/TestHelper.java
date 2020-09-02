@@ -17,11 +17,19 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 
 public class TestHelper {
   public static final int CHARS_IN_LINE = 65;
+  private static final X9ECParameters curve = SECNamedCurves.getByName(AttestationCrypto.ECDSA_CURVE);
+  private static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
 
   public static KeyPair constructKeys(SecureRandom rand) throws Exception {
     Security.addProvider(new BouncyCastleProvider());
@@ -29,6 +37,13 @@ public class TestHelper {
     ECGenParameterSpec ecSpec = new ECGenParameterSpec(AttestationCrypto.ECDSA_CURVE);
     keyGen.initialize(ecSpec, rand);
     return keyGen.generateKeyPair();
+  }
+
+  public static AsymmetricCipherKeyPair constructBCKeys(SecureRandom rand) {
+    ECKeyPairGenerator generator = new ECKeyPairGenerator();
+    ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(domain, rand);
+    generator.init(keygenParams);
+    return generator.generateKeyPair();
   }
 
   public static StandardAttestation makeUnsignedStandardAtt(PublicKey key, BigInteger secret) {

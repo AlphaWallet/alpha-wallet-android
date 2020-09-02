@@ -2,6 +2,7 @@ package com.alphawallet.attestation;
 
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.SecureRandom;
 import org.junit.Assert;
@@ -20,9 +21,9 @@ public class TestStandardAttestation {
 
   @org.junit.Test
   public void testFullDecoding() throws Exception {
-    StandardAttestation initial = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic());
+    StandardAttestation initial = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), BigInteger.ONE);
     ProofOfExponent pok = initial.getPoK();
-    byte[] encoding = initial.getPrehash();
+    byte[] encoding = initial.getDerEncoding();
     Attestation newAtt = new StandardAttestation(encoding, pok);
     Assert.assertArrayEquals(encoding, newAtt.getPrehash());
   }

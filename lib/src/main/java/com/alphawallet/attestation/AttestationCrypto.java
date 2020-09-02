@@ -27,7 +27,7 @@ public class AttestationCrypto {
   public static final String ECDSA_CURVE = "secp256k1";
   public static final String MAC_ALGO = "HmacSHA256";
   public static final String SIGNATURE_ALG = "ECDSA";
-  public static final String OID_SIGNATURE_ALG = "1.2.840.10045.4.3.2"; // TODO ECDSA WIT HSHA256
+  public static final String OID_SIGNATURE_ALG = "1.2.840.10045.4.3.2"; // TODO ECDSA WIT HSHA256 maybe 1.2.840.10045.2.1 will work (just ECC)
 
   public final BigInteger fieldSize;
   public final BigInteger curveOrder;
@@ -62,17 +62,21 @@ public class AttestationCrypto {
   }
 
   /**
-   * Picks a riddle and returns a proof of knowledge of this
+   * Constructs a riddle based on a secret and returns a proof of knowledge of this
    */
-  public ProofOfExponent constructRiddle(String identity, AttestationType type) {
-    BigInteger secret = makeRandomExponent();
+  public ProofOfExponent constructProof(String identity, AttestationType type, BigInteger secret) {
     ECPoint hashedIdentity = hashIdentifier(type.ordinal(), identity);
     ECPoint identifier = hashedIdentity.multiply(secret);
     return computeProof(hashedIdentity, identifier, secret);
   }
 
-  public ProofOfExponent computeProof(ECPoint base, ECPoint riddle, BigInteger exponent) {
-    BigInteger r = makeRandomExponent();
+  public byte[] makeRiddle(String identity, AttestationType type, BigInteger secret) {
+    ECPoint hashedIdentity = hashIdentifier(type.ordinal(), identity);
+    return hashedIdentity.multiply(secret).getEncoded(false);
+  }
+
+  private ProofOfExponent computeProof(ECPoint base, ECPoint riddle, BigInteger exponent) {
+    BigInteger r = makeSecret();
     ECPoint t = base.multiply(r);
     // TODO ideally Bob's ethreum address should also be part of the challenge
     BigInteger c = mapToInteger(makeArray(Arrays.asList(base, riddle, t))).mod(curveOrder);
@@ -87,7 +91,7 @@ public class AttestationCrypto {
     return lhs.equals(rhs);
   }
 
-  private BigInteger makeRandomExponent() {
+  public BigInteger makeSecret() {
     return new BigInteger(256, rand).mod(curveOrder);
   }
 

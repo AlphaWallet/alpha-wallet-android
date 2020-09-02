@@ -24,8 +24,11 @@ import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 public class Cheque implements ASNEncodable {
   private final byte[] riddle;
   private final long amount;
-  private final long validity;
+  private final long notValidBefore;
+  private final long notValidAfter;
   private final AsymmetricKeyParameter publicKey;
+  private final byte[] signature;
+
   private final byte[] encoded;
 
   /**
@@ -42,16 +45,40 @@ public class Cheque implements ASNEncodable {
     this.riddle = crypto.makeRiddle(identifier, type, secret);
     this.publicKey = keys.getPublic();
     this.amount = amount;
-    this.validity = validity;
-    this.encoded = signCheque(makeCheque(this.riddle, amount, validity), keys);
+    long current =  System.currentTimeMillis();
+    this.notValidBefore = current - (current % 1000); // Round down to nearest second
+    this.notValidAfter = this.notValidBefore + validity;
+    ASN1Sequence cheque = makeCheque(this.riddle, amount, notValidBefore, notValidAfter);
+    try {
+      this.signature = SignatureUtility.sign(cheque.getEncoded(), keys.getPrivate());
+      this.encoded = encodeSignedCheque(cheque, this.signature, this.publicKey);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    if (!verifySignature()) {
+      throw new IllegalArgumentException("Public and private keys are incorrect");
+    }
   }
 
-  public Cheque(byte[] riddle, long amount, long validity, AsymmetricCipherKeyPair keys) {
+  public Cheque(byte[] riddle, long amount, long notValidBefore, long notValidAfter, byte[] signature, AsymmetricKeyParameter publicKey) {
     this.riddle = riddle;
-    this.publicKey = keys.getPublic();
+    this.publicKey = publicKey;
     this.amount = amount;
-    this.validity = validity;
-    this.encoded = signCheque(makeCheque(this.riddle, amount, validity), keys);
+    if (notValidBefore % 1000 != 0 || notValidAfter % 1000 != 0) {
+      throw new IllegalArgumentException("Can only support time granularity to the second");
+    }
+    this.notValidBefore = notValidBefore;
+    this.notValidAfter = notValidAfter;
+    this.signature = signature;
+    ASN1Sequence cheque = makeCheque(this.riddle, amount, notValidBefore, notValidAfter);
+    try {
+      this.encoded = encodeSignedCheque(cheque, this.signature, this.publicKey);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    if (!verifySignature()) {
+      throw new IllegalArgumentException("Signature is invalid");
+    }
   }
 
   public Cheque(byte[] derEncoded) throws IOException {
@@ -61,37 +88,34 @@ public class Cheque implements ASNEncodable {
     ASN1Sequence cheque = ASN1Sequence.getInstance(asn1.getObjectAt(0));
     this.amount = (ASN1Integer.getInstance(cheque.getObjectAt(0))).getValue().longValueExact();
 
-    ASN1Sequence validity = ASN1Sequence.getInstance(asn1.getObjectAt(1));
-    ASN1GeneralizedTime notValidBefore = ASN1GeneralizedTime.getInstance(validity.getObjectAt(0));
-    ASN1GeneralizedTime notValidAfter = ASN1GeneralizedTime.getInstance(validity.getObjectAt(1));
+    ASN1Sequence validity = ASN1Sequence.getInstance(cheque.getObjectAt(1));
+    ASN1GeneralizedTime notValidBeforeEnc = ASN1GeneralizedTime.getInstance(validity.getObjectAt(0));
+    ASN1GeneralizedTime notValidAfterEnc = ASN1GeneralizedTime.getInstance(validity.getObjectAt(1));
     try {
-      this.validity = notValidAfter.getDate().getTime() - notValidBefore.getDate().getTime();
+      this.notValidBefore = notValidBeforeEnc.getDate().getTime();
+      this.notValidAfter = notValidAfterEnc.getDate().getTime();
     } catch (ParseException e) {
       throw new IOException("Validity is not encoded properly");
     }
 
     this.riddle = (ASN1OctetString.getInstance(cheque.getObjectAt(2))).getOctets();
 
-     this.publicKey = SignatureUtility.restoreKey(asn1.getObjectAt(1).toASN1Primitive()
-        .getEncoded());
+    this.publicKey = SignatureUtility.restoreKey(DERBitString.getInstance(asn1.getObjectAt(1)).getEncoded());
 
     // Verify signature
-    byte[] signature = DERBitString.getInstance(asn1.getObjectAt(2)).getBytes();
-    if (!SignatureUtility.verify(cheque.getEncoded(), signature, this.publicKey)) {
-      throw new IllegalArgumentException("The signature on the cheque is invalid");
+    this.signature = DERBitString.getInstance(asn1.getObjectAt(2)).getBytes();
+    if (!verifySignature()) {
+      throw new IllegalArgumentException("Signature is invalid");
     }
   }
 
-  private ASN1Sequence makeCheque(byte[] riddle, long amount, long validity) {
+  private ASN1Sequence makeCheque(byte[] riddle, long amount, long notValidBefore, long notValidAfter) {
     ASN1EncodableVector cheque = new ASN1EncodableVector();
     cheque.add(new ASN1Integer(amount));
 
-    long currentTime = System.currentTimeMillis();
-    Date current = new Date(currentTime);
-    ASN1GeneralizedTime notValidBefore = new ASN1GeneralizedTime(current);
-    Date later = new Date(currentTime+validity);
-    ASN1GeneralizedTime notValidAfter = new ASN1GeneralizedTime(later);
-    ASN1Sequence validityEnc = new DERSequence(new ASN1Encodable[] {notValidBefore, notValidAfter});
+    ASN1GeneralizedTime notValidBeforeEnc = new ASN1GeneralizedTime(new Date(notValidBefore));
+    ASN1GeneralizedTime notValidAfterEnc = new ASN1GeneralizedTime(new Date(notValidAfter));
+    ASN1Sequence validityEnc = new DERSequence(new ASN1Encodable[] {notValidBeforeEnc, notValidAfterEnc});
     cheque.add(validityEnc);
 
     cheque.add(new DEROctetString(riddle));
@@ -99,17 +123,22 @@ public class Cheque implements ASNEncodable {
     return new DERSequence(cheque);
   }
 
-  private byte[] signCheque(ASN1Sequence cheque, AsymmetricCipherKeyPair keys) {
-    try {
+  private byte[] encodeSignedCheque(ASN1Sequence cheque, byte[] signature, AsymmetricKeyParameter publicKey) throws IOException {
       ASN1EncodableVector signedCheque = new ASN1EncodableVector();
       signedCheque.add(cheque);
 
-      SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(keys.getPublic());
+      SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(publicKey);
       signedCheque.add(spki.getPublicKeyData());
 
-      byte[] signature = SignatureUtility.sign(cheque.getEncoded(), keys.getPrivate());
-      signedCheque.add(new DEROctetString(signature));
+      signedCheque.add(new DERBitString(signature));
       return new DERSequence(signedCheque).getEncoded();
+  }
+
+  public boolean verifySignature() {
+    try {
+      ASN1Sequence cheque = makeCheque(this.riddle, this.amount, this.getNotValidBefore(),
+          this.notValidAfter);
+      return SignatureUtility.verify(cheque.getEncoded(), signature, this.publicKey);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -120,7 +149,6 @@ public class Cheque implements ASNEncodable {
     return encoded;
   }
 
-
   public byte[] getRiddle() {
     return riddle;
   }
@@ -129,8 +157,16 @@ public class Cheque implements ASNEncodable {
     return amount;
   }
 
-  public long getValidity() {
-    return validity;
+  public long getNotValidBefore() {
+    return notValidBefore;
+  }
+
+  public long getNotValidAfter() {
+    return notValidAfter;
+  }
+
+  public byte[] getSignature() {
+    return signature;
   }
 
   public AsymmetricKeyParameter getPublicKey() {

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 import com.alphawallet.token.tools.Convert;
@@ -34,6 +35,15 @@ public class EthereumWriteBuffer extends DataOutputStream
     public void writeAddress(String addr) throws IOException {
         BigInteger addrBI = new BigInteger(Numeric.cleanHexPrefix(addr), 16);
         writeAddress(addrBI);
+    }
+
+    public void writeBytes(String hex, int length) throws IOException {
+        byte[] hexBytes = Numeric.hexStringToByteArray(hex);
+        if (hexBytes.length < length)
+        {
+            for (int i = 0; i < (length - hexBytes.length); i++) writeByte(0);
+        }
+        write(hexBytes);
     }
 
     public void writeUnsigned4(BigInteger value) throws IOException {
@@ -99,6 +109,49 @@ public class EthereumWriteBuffer extends DataOutputStream
 
         byte[] uValBytes = UnsignedLong.createBytes(microEth.longValue());
         write(uValBytes);
+    }
+
+    /**
+     * Write any decimal string value of any length into bytes
+     * @param value
+     * @param convSize
+     */
+    public void writeValue(String value, int convSize) throws IOException
+    {
+        BigInteger val = new BigInteger(value);
+        byte[] valueBytes = val.toByteArray();
+        byte[] toBeWritten = new byte[convSize];
+        if (val.compareTo(BigInteger.ZERO) < 0) //pad with 0xFF if value is negative
+        {
+            for (int i = 0; i < convSize; i++) toBeWritten[i] = (byte) 0xFF;
+        }
+
+        if (valueBytes.length > convSize)
+        {
+            toBeWritten = new byte[convSize];
+            int startTruncate = valueBytes.length - convSize;
+            System.arraycopy(val.toByteArray(), startTruncate, toBeWritten, 0, convSize);
+        }
+        else
+        {
+            int bytesLength;
+            int srcOffset;
+            if (valueBytes[0] == 0)
+            {
+                bytesLength = valueBytes.length - 1;
+                srcOffset = 1;
+            }
+            else
+            {
+                bytesLength = valueBytes.length;
+                srcOffset = 0;
+            }
+
+            int destOffset = convSize - bytesLength;
+            System.arraycopy(valueBytes, srcOffset, toBeWritten, destOffset, bytesLength);
+        }
+
+        write(toBeWritten);
     }
 }
 

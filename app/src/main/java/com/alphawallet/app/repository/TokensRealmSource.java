@@ -208,7 +208,9 @@ public class TokensRealmSource implements TokenLocalSource {
             Token t = convertSingle(realmItem, realm, null, wallet);
             if (t == null && address.equalsIgnoreCase(wallet.address))
             {
-                t = createCurrencyToken(ethereumNetworkRepository.getNetworkByChain(chainId), wallet);
+                NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+                if (info == null) return t;
+                t = createCurrencyToken(info, wallet);
                 realm.beginTransaction();
                 saveToken(realm, t);
                 realm.commitTransaction();

@@ -6,10 +6,13 @@ import android.text.Spanned;
 import android.text.style.StyleSpan;
 
 import com.alphawallet.app.web3j.StructuredDataEncoder;
+import com.alphawallet.token.entity.EthereumWriteBuffer;
 import com.alphawallet.token.entity.ProviderTypedData;
 
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,10 +52,11 @@ public class MessageUtils
      * @param rawData
      * @return
      */
-    public static byte[] encodeValues(ProviderTypedData[] rawData)
+    public static byte[] encodeValues(ProviderTypedData[] rawData) throws IOException
     {
         int size;
-        StringBuilder sb = new StringBuilder();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        EthereumWriteBuffer eb = new EthereumWriteBuffer(buffer);
 
         for (ProviderTypedData data : rawData)
         {
@@ -61,19 +65,19 @@ public class MessageUtils
 
             if (type.equals("bytes"))
             {
-                sb.append(Numeric.cleanHexPrefix(value));
+                eb.write(Numeric.hexStringToByteArray(value));
             }
             else if (type.equals("string"))
             {
-                sb.append(Numeric.toHexStringNoPrefix(value.getBytes()));
+                eb.write(value.getBytes());
             }
             else if (type.equals("bool"))
             {
-                sb.append(((boolean) data.value) ? "01" : "00");
+                eb.write(((boolean) data.value) ? (byte)0x01 : (byte)0x00);
             }
             else if (type.equals("address"))
             {
-                sb.append(Numeric.cleanHexPrefix(value));
+                eb.writeAddress(value);
             }
             else if (type.startsWith("bytes"))
             {
@@ -82,7 +86,7 @@ public class MessageUtils
                     throw new NumberFormatException("Invalid bytes<N> width: " + size);
                 }
 
-                sb.append(value);
+                eb.writeBytes(value, size);
             }
             else if (type.startsWith("uint"))
             {
@@ -92,12 +96,7 @@ public class MessageUtils
                     throw new NumberFormatException("Invalid uint<N> width: " + size);
                 }
 
-                int convSize = size / 4;
-
-                BigInteger bi = convertValue(data.value);
-
-                String hexAddU = Numeric.toHexStringNoPrefixZeroPadded(bi, convSize);
-                sb.append(hexAddU);
+                eb.writeValue(value, size / 8);
             }
             else if (type.startsWith("int"))
             {
@@ -107,12 +106,7 @@ public class MessageUtils
                     throw new NumberFormatException("Invalid uint<N> width: " + size);
                 }
 
-                int convSize = size / 4;
-
-                BigInteger bi = convertValue(data.value);
-
-                String hexAddU = Numeric.toHexStringNoPrefixZeroPadded(bi, convSize);
-                sb.append(hexAddU);
+                eb.writeValue(value, size / 8);
             }
             else
             {
@@ -121,7 +115,7 @@ public class MessageUtils
             }
         }
 
-        return Numeric.hexStringToByteArray(sb.toString());
+        return buffer.toByteArray();
     }
 
     public static CharSequence formatTypedMessage(ProviderTypedData[] rawData)
@@ -197,24 +191,7 @@ public class MessageUtils
             }
         }
 
-        return 0;
-    }
-
-    private static BigInteger convertValue(Object v)
-    {
-        String value = (String) v;
-        BigInteger bi;
-        try {
-            if (value.startsWith("0x")) {
-                bi = Numeric.toBigInt(value);
-            } else {
-                bi = new BigInteger(value);
-            }
-        } catch (NumberFormatException | NullPointerException e) {
-            bi = BigInteger.ZERO;
-        }
-
-        return bi;
+        return 256; //if no value then default to 256
     }
 
     private static class SpanType

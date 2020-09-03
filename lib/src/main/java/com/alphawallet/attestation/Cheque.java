@@ -21,7 +21,7 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
-public class Cheque implements ASNEncodable {
+public class Cheque implements ASNEncodable, Verifiable {
   private final byte[] riddle;
   private final long amount;
   private final long notValidBefore;
@@ -55,7 +55,7 @@ public class Cheque implements ASNEncodable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    if (!verifySignature()) {
+    if (!verify()) {
       throw new IllegalArgumentException("Public and private keys are incorrect");
     }
   }
@@ -76,7 +76,7 @@ public class Cheque implements ASNEncodable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    if (!verifySignature()) {
+    if (!verify()) {
       throw new IllegalArgumentException("Signature is invalid");
     }
   }
@@ -104,7 +104,7 @@ public class Cheque implements ASNEncodable {
 
     // Verify signature
     this.signature = DERBitString.getInstance(asn1.getObjectAt(2)).getBytes();
-    if (!verifySignature()) {
+    if (!verify()) {
       throw new IllegalArgumentException("Signature is invalid");
     }
   }
@@ -134,7 +134,8 @@ public class Cheque implements ASNEncodable {
       return new DERSequence(signedCheque).getEncoded();
   }
 
-  public boolean verifySignature() {
+  @Override
+  public boolean verify() {
     try {
       ASN1Sequence cheque = makeCheque(this.riddle, this.amount, this.getNotValidBefore(),
           this.notValidAfter);

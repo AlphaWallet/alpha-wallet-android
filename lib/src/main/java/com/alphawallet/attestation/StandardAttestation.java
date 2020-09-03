@@ -15,7 +15,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
-public class StandardAttestation extends Attestation {
+public class StandardAttestation extends Attestation implements Verifiable {
   enum AttestationType {
     PHONE,
     EMAIL
@@ -87,6 +87,11 @@ public class StandardAttestation extends Attestation {
 
   public ProofOfExponent getPoK() {
     return PoK;
+  }
+
+  @Override
+  public boolean verify() {
+    return getPoK().verify();
   }
 
   @Override

@@ -45,7 +45,7 @@ public class TestSignedAttestation {
     Assert.assertTrue(SignatureUtility.verify(att.getPrehash(), signed.getSignature(), issuerKeys.getPublic()));
     Assert.assertArrayEquals(att.getPrehash(), signed.getUnsignedAttestation().getPrehash());
     byte[] signedEncoded = signed.getDerEncoding();
-    SignedAttestation newSigned = new SignedAttestation(signedEncoded);
+    SignedAttestation newSigned = new SignedAttestation(signedEncoded, issuerKeys.getPublic());
     Assert.assertArrayEquals(signed.getDerEncoding(), newSigned.getDerEncoding());
   }
 

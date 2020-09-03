@@ -32,9 +32,8 @@ public class TestStandardAttestation {
   public void testNotStandard() throws Exception {
     Attestation initial = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic());
     byte[] encoding = initial.getPrehash();
-    ProofOfExponent pok = new ProofOfExponent(null, null, null, null);
     try {
-      new StandardAttestation(encoding, pok);
+      new StandardAttestation(encoding, null);
       fail();
     } catch (IllegalArgumentException e) {
       // Expected

@@ -35,15 +35,14 @@ public class AttestationCrypto {
   public static final String OID_SIGNATURE_ALG = "1.2.840.10045.2.1"; // OID for elliptic curve crypto
   public static final X9ECParameters curve = SECNamedCurves.getByName(AttestationCrypto.ECDSA_CURVE);
   public static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
+  public static final ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec(ECDSA_CURVE);
 
   public final BigInteger fieldSize;
   public final BigInteger curveOrder;
-  public final ECNamedCurveParameterSpec spec;
   private final SecureRandom rand;
 
   public AttestationCrypto(SecureRandom rand) {
     this.rand = rand;
-    spec = ECNamedCurveTable.getParameterSpec(ECDSA_CURVE);
     ECNamedCurveSpec params = new ECNamedCurveSpec(ECDSA_CURVE, spec.getCurve(), spec.getG(),
         spec.getN());
     fieldSize = ((ECFieldFp) params.getCurve().getField()).getP();
@@ -88,7 +87,7 @@ public class AttestationCrypto {
     return hashedIdentity.multiply(secret).getEncoded(false);
   }
 
-  private ProofOfExponent computeProof(ECPoint base, ECPoint riddle, BigInteger exponent) {
+  ProofOfExponent computeProof(ECPoint base, ECPoint riddle, BigInteger exponent) {
     BigInteger r = makeSecret();
     ECPoint t = base.multiply(r);
     // TODO ideally Bob's ethreum address should also be part of the challenge
@@ -98,9 +97,9 @@ public class AttestationCrypto {
   }
 
   public boolean verifyProof(ProofOfExponent pok)  {
-    BigInteger c = mapToInteger(makeArray(Arrays.asList(pok.getBase(), pok.getRiddle(), pok.gettPoint()))).mod(curveOrder);
+    BigInteger c = mapToInteger(makeArray(Arrays.asList(pok.getBase(), pok.getRiddle(), pok.getPoint()))).mod(curveOrder);
     ECPoint lhs = pok.getBase().multiply(pok.getChallenge());
-    ECPoint rhs = pok.getRiddle().multiply(c).add(pok.gettPoint());
+    ECPoint rhs = pok.getRiddle().multiply(c).add(pok.getPoint());
     return lhs.equals(rhs);
   }
 
@@ -173,5 +172,9 @@ public class AttestationCrypto {
       expected = y.multiply(y).mod(p);
     } while (!expected.equals(ySquare));
     return params.createPoint(x, y);
+  }
+
+  public static ECPoint decodePoint(byte[] point) {
+    return spec.getCurve().decodePoint(point);
   }
 }

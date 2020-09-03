@@ -60,6 +60,12 @@ public class SignatureUtility {
     }
 
     public static boolean verify(byte[] unsigned, byte[] signature, AsymmetricKeyParameter key) {
+        Digest256 digest = new Keccak.Digest256();
+        byte[] digestBytes = digest.digest(unsigned);
+        return verifyHashed(digestBytes, signature, key);
+    }
+
+    static boolean verifyHashed(byte[] digest, byte[] signature, AsymmetricKeyParameter key) {
         try {
             ASN1InputStream input = new ASN1InputStream(signature);
             ASN1Sequence seq = ASN1Sequence.getInstance(input.readObject());
@@ -72,9 +78,7 @@ public class SignatureUtility {
             }
             ECDSASigner signer = new ECDSASigner();
             signer.init(false, key);
-            Digest256 digest = new Keccak.Digest256();
-            byte[] digestBytes = digest.digest(unsigned);
-            return signer.verifySignature(digestBytes, r, s);
+            return signer.verifySignature(digest, r, s);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

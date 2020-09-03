@@ -9,11 +9,9 @@ public class NetworkInfo {
     public final String name;
     public final String symbol;
     public final String rpcServerUrl;
-    public final String etherscanUrl;
+    public final String etherscanUrl; // This is used by the Transaction Detail page for the user to visit a website with detailed transaction information
     public final int chainId;
     public final boolean isMainNetwork;
-    public final String tickerId;
-    public final String blockscoutAPI;
 
     public NetworkInfo(
             String name,
@@ -21,17 +19,13 @@ public class NetworkInfo {
             String rpcServerUrl,
             String etherscanUrl,
             int chainId,
-            boolean isMainNetwork,
-            String tickerId,
-            String blockscoutAPI) {
+            boolean isMainNetwork) {
         this.name = name;
         this.symbol = symbol;
         this.rpcServerUrl = rpcServerUrl;
         this.etherscanUrl = etherscanUrl;
         this.chainId = chainId;
         this.isMainNetwork = isMainNetwork;
-        this.tickerId = tickerId;
-        this.blockscoutAPI = blockscoutAPI;
     }
 
 }

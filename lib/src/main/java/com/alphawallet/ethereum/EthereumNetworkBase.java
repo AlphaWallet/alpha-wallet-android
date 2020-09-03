@@ -19,6 +19,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int GOERLI_ID = 5;
     public static final int ARTIS_SIGMA1_ID = 246529;
     public static final int ARTIS_TAU1_ID = 246785;
+    public static final int BINANCE_TEST_ID = 97;
+    public static final int BINANCE_MAIN_ID = 56;
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
@@ -31,46 +33,41 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
-
-    public static final String MAINNET_BLOCKSCOUT = "eth/mainnet";
-    public static final String CLASSIC_BLOCKSCOUT = "etc/mainnet";
-    public static final String XDAI_BLOCKSCOUT = "poa/dai";
-    public static final String POA_BLOCKSCOUT = "poa/core";
-    public static final String ROPSTEN_BLOCKSCOUT = "eth/ropsten";
-    public static final String RINKEBY_BLOCKSCOUT = "eth/rinkeby";
-    public static final String SOKOL_BLOCKSCOUT = "poa/sokol";
-    public static final String KOVAN_BLOCKSCOUT = "eth/kovan";
-    public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
+    public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
+    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
 
     static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
-                    MAINNET_ID, true, "ethereum", MAINNET_BLOCKSCOUT));
+                    MAINNET_ID, true));
             put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
-                    CLASSIC_ID, true, "ethereum-classic", CLASSIC_BLOCKSCOUT));
+                    CLASSIC_ID, true));
             put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/poa/dai/tx/",
-                    XDAI_ID, false, "dai", XDAI_BLOCKSCOUT));
+                    XDAI_ID, false));
             put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
-                    POA_ID, false, "ethereum", POA_BLOCKSCOUT));
+                    POA_ID, false));
             put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
-                    ARTIS_SIGMA1_ID, false, "artis", ""));
+                    ARTIS_SIGMA1_ID, false));
             put(KOVAN_ID, new NetworkInfo("Kovan (Test)", "ETH", KOVAN_RPC_URL, "https://kovan.etherscan.io/tx/",
-                    KOVAN_ID, false, "ethereum", KOVAN_BLOCKSCOUT));
+                    KOVAN_ID, false));
             put(ROPSTEN_ID, new NetworkInfo("Ropsten (Test)", "ETH", ROPSTEN_RPC_URL, "https://ropsten.etherscan.io/tx/",
-                    ROPSTEN_ID, false, "ethereum", ROPSTEN_BLOCKSCOUT));
+                    ROPSTEN_ID, false));
             put(SOKOL_ID, new NetworkInfo("Sokol (Test)", "POA", SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/tx/",
-                    SOKOL_ID, false, "ethereum", SOKOL_BLOCKSCOUT));
+                    SOKOL_ID, false));
             put(RINKEBY_ID, new NetworkInfo("Rinkeby (Test)", "ETH", RINKEBY_RPC_URL, "https://rinkeby.etherscan.io/tx/",
-                    RINKEBY_ID, false, "ethereum", RINKEBY_BLOCKSCOUT));
+                    RINKEBY_ID, false));
             put(GOERLI_ID, new NetworkInfo("Görli (Test)", "GÖETH", GOERLI_RPC_URL, "https://goerli.etherscan.io/tx/",
-                    GOERLI_ID, false, "ethereum", GOERLI_BLOCKSCOUT));
+                    GOERLI_ID, false));
             put(ARTIS_TAU1_ID, new NetworkInfo("ARTIS tau1 (Test)", "ATS", ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/tx/",
-                    ARTIS_TAU1_ID, false, "artis", ""));
+                    ARTIS_TAU1_ID, false));
+            put(BINANCE_TEST_ID, new NetworkInfo("Binance (Test)", "BNB", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
+                    ARTIS_TAU1_ID, false));
+            put(BINANCE_MAIN_ID, new NetworkInfo("Binance", "BNB", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",
+                    ARTIS_TAU1_ID, false));
         }
     };
 
     public static NetworkInfo getNetworkByChain(int chainId) {
         return networkMap.get(chainId);
     }
-
 }

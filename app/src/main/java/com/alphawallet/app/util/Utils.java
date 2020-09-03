@@ -131,6 +131,10 @@ public class Utils {
                 return R.color.artis_sigma1;
             case EthereumNetworkRepository.ARTIS_TAU1_ID:
                 return R.color.artis_tau1;
+            case EthereumNetworkRepository.BINANCE_MAIN_ID:
+                return R.color.binance_main;
+            case EthereumNetworkRepository.BINANCE_TEST_ID:
+                return R.color.binance_test;
             default:
                 return R.color.mine;
         }
@@ -173,6 +177,12 @@ public class Utils {
             case EthereumNetworkRepository.ARTIS_TAU1_ID:
                 view.setBackgroundResource(R.drawable.background_artis_tau1);
                 break;
+            case EthereumNetworkRepository.BINANCE_MAIN_ID:
+                view.setBackgroundResource(R.drawable.background_binance_main);
+                break;
+            case EthereumNetworkRepository.BINANCE_TEST_ID:
+                view.setBackgroundResource(R.drawable.background_binance_test);
+                break;
             default:
                 EthereumNetworkRepository.setChainColour(view, chainId);
                 break;
@@ -209,6 +219,12 @@ public class Utils {
                 break;
             case EthereumNetworkRepository.MAINNET_ID:
                 view.setBackgroundResource(R.drawable.item_eth_circle);
+                break;
+            case EthereumNetworkRepository.BINANCE_MAIN_ID:
+                view.setBackgroundResource(R.drawable.item_binance_main_circle);
+                break;
+            case EthereumNetworkRepository.BINANCE_TEST_ID:
+                view.setBackgroundResource(R.drawable.item_binance_test_circle);
                 break;
             default:
                 EthereumNetworkRepository.setChainCircle(view, chainId);

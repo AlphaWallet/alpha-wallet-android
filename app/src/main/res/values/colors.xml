@@ -85,6 +85,8 @@
 	<color name="goerli">#BBAE9A</color>
 	<color name="artis_sigma1">#53A271</color>
 	<color name="artis_tau1">#F97599</color>
+	<color name="binance_test">#ffca2f</color>
+	<color name="binance_main">#f3ba2f</color>
 
 	<!-- Fiji Colour Pallette -->
 	<color name="black">#000000</color>

@@ -188,16 +188,11 @@ public class TickerService
             EthereumReadBuffer ds = new EthereumReadBuffer(buffer);
 
             BigInteger chainId = ds.readBI(4);
-            BigInteger changeBI = ds.readBI(6);
-            BigInteger correctedPrice = ds.readBI(22);
+            int changeVal = ds.readInt();
+            BigInteger correctedPrice = ds.readBI(24);
             ds.close();
 
-            if (changeBI.testBit(24))
-            {
-                changeBI = changeBI.clearBit(24).negate();
-            }
-
-            BigDecimal changeValue = new BigDecimal(changeBI).movePointLeft(3);
+            BigDecimal changeValue = new BigDecimal(changeVal).movePointLeft(3);
             BigDecimal priceValue = new BigDecimal(correctedPrice).movePointLeft(12);
 
             double price = priceValue.doubleValue();
@@ -206,7 +201,6 @@ public class TickerService
                     changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", tickerTime);
 
             ethTickers.put(chainId.intValue(), tTicker);
-
         }
         catch (Exception e)
         {

@@ -3,12 +3,12 @@ package com.alphawallet.attestation;
 import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
-import java.security.KeyPair;
 import java.security.SecureRandom;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.junit.Assert;
 
 public class TestStandardAttestation {
-  private static KeyPair subjectKeys;
+  private static AsymmetricCipherKeyPair subjectKeys;
   private static SecureRandom rand;
 
   @org.junit.BeforeClass
@@ -16,7 +16,7 @@ public class TestStandardAttestation {
     rand = SecureRandom.getInstance("SHA1PRNG");
     rand.setSeed("seed".getBytes());
 
-    subjectKeys = TestHelper.constructKeys(rand);
+    subjectKeys = TestHelper.constructBCKeys(rand);
   }
 
   @org.junit.Test

@@ -2,7 +2,6 @@ package com.alphawallet.attestation;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import org.bouncycastle.asn1.ASN1Boolean;
@@ -12,6 +11,9 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
 public class StandardAttestation extends Attestation {
   enum AttestationType {
@@ -27,13 +29,18 @@ public class StandardAttestation extends Attestation {
    * You still need to set the optional fields, that is
    * issuer, notValidBefore, notValidAfter, smartcontracts
    */
-  public StandardAttestation(String identity, AttestationType type, PublicKey key, BigInteger secret)  {
+  public StandardAttestation(String identity, AttestationType type, AsymmetricKeyParameter key, BigInteger secret)  {
     super();
     this.crypto = new AttestationCrypto(new SecureRandom());
     super.setVersion(18); // Our initial version
     super.setSubject("CN=" + crypto.addressFromKey(key));
     super.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
-    super.setSubjectPublicKeyInfo(AttestationCrypto.OID_SIGNATURE_ALG, key.getEncoded());
+    try {
+      SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(key);
+      super.setSubjectPublicKeyInfo(spki);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     PoK = setRiddle(identity, type, secret);
   }
 

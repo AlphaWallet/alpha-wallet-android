@@ -7,13 +7,18 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.ECFieldFp;
 import java.util.Arrays;
 import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
@@ -27,7 +32,9 @@ public class AttestationCrypto {
   public static final String ECDSA_CURVE = "secp256k1";
   public static final String MAC_ALGO = "HmacSHA256";
   public static final String SIGNATURE_ALG = "ECDSA";
-  public static final String OID_SIGNATURE_ALG = "1.2.840.10045.4.3.2"; // TODO ECDSA WIT HSHA256 maybe 1.2.840.10045.2.1 will work (just ECC)
+  public static final String OID_SIGNATURE_ALG = "1.2.840.10045.2.1"; // OID for elliptic curve crypto
+  public static final X9ECParameters curve = SECNamedCurves.getByName(AttestationCrypto.ECDSA_CURVE);
+  public static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
 
   public final BigInteger fieldSize;
   public final BigInteger curveOrder;
@@ -48,9 +55,15 @@ public class AttestationCrypto {
    * @param key
    * @return
    */
-  public static String addressFromKey(PublicKey key) {
+  public static String addressFromKey(AsymmetricKeyParameter key) {
     // Todo should be verified that is works as intended, are there any reference values?
-    byte[] pubKey = key.getEncoded();
+    byte[] pubKey;
+    try {
+      SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(key);
+      pubKey = spki.getPublicKeyData().getEncoded();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     //discard the first byte which only tells what kind of key it is //i.e. encoded/un-encoded
     pubKey = Arrays.copyOfRange(pubKey,1,pubKey.length);
     MessageDigest KECCAK = new Keccak.Digest256();
@@ -58,7 +71,7 @@ public class AttestationCrypto {
     KECCAK.update(pubKey);
     byte[] hash = KECCAK.digest();
     //finally get only the last 20 bytes
-    return "0x" + Hex.toHexString(Arrays.copyOfRange(hash,hash.length-20,hash.length));
+    return "0x" + Hex.toHexString(Arrays.copyOfRange(hash,hash.length-20,hash.length)).toUpperCase();
   }
 
   /**

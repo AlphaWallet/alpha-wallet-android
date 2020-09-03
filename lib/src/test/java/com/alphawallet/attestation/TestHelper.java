@@ -1,10 +1,10 @@
 package com.alphawallet.attestation;
 
 import com.alphawallet.attestation.StandardAttestation.AttestationType;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
@@ -17,19 +17,19 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
-import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
+import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 
 public class TestHelper {
   public static final int CHARS_IN_LINE = 65;
-  private static final X9ECParameters curve = SECNamedCurves.getByName(AttestationCrypto.ECDSA_CURVE);
-  private static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
+
 
   public static KeyPair constructKeys(SecureRandom rand) throws Exception {
     Security.addProvider(new BouncyCastleProvider());
@@ -41,12 +41,12 @@ public class TestHelper {
 
   public static AsymmetricCipherKeyPair constructBCKeys(SecureRandom rand) {
     ECKeyPairGenerator generator = new ECKeyPairGenerator();
-    ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(domain, rand);
+    ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(AttestationCrypto.domain, rand);
     generator.init(keygenParams);
     return generator.generateKeyPair();
   }
 
-  public static StandardAttestation makeUnsignedStandardAtt(PublicKey key, BigInteger secret) {
+  public static StandardAttestation makeUnsignedStandardAtt(AsymmetricKeyParameter key, BigInteger secret) {
     StandardAttestation att = new StandardAttestation("test@test.ts", AttestationType.EMAIL, key, secret);
     att.setIssuer("CN=ALX");
     att.setSerialNumber(1);
@@ -59,18 +59,20 @@ public class TestHelper {
     return att;
   }
 
-  public static Attestation makeUnsignedx509Att(PublicKey key) {
+  public static Attestation makeUnsignedx509Att(AsymmetricKeyParameter key) throws IOException  {
     Attestation att = new Attestation();
     att.setVersion(2); // =v3 since counting starts from 0
     att.setSerialNumber(42);
-    att.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
+    att.setSignature("1.2.840.10045.4.3.2"); // ECDSA with SHA256 which is needed for a proper x509
     att.setIssuer("CN=ALX");
     Date now = new Date();
     att.setNotValidBefore(now);
     att.setNotValidAfter(new Date(System.currentTimeMillis()+3600000)); // Valid for an hour
     att.setSubject("CN=0x2042424242424564648");
-    att.setSubjectPublicKeyInfo(AttestationCrypto.OID_SIGNATURE_ALG, key.getEncoded());
-
+    SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(key);
+    spki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.10045.4.3.2")),  // ECDSA with SHA256 which is needed for a proper x509
+        spki.getPublicKeyData());
+    att.setSubjectPublicKeyInfo(spki);
     ASN1EncodableVector extensions = new ASN1EncodableVector();
     extensions.add(new ASN1ObjectIdentifier(Attestation.OID_OCTETSTRING));
     extensions.add(ASN1Boolean.TRUE);
@@ -81,7 +83,7 @@ public class TestHelper {
     return att;
   }
 
-  public static Attestation makeMaximalAtt(PublicKey key) {
+  public static Attestation makeMaximalAtt(AsymmetricKeyParameter key) throws IOException {
     Attestation att = new Attestation();
     att.setVersion(18); // Our initial version
     att.setSerialNumber(42);
@@ -91,7 +93,8 @@ public class TestHelper {
     att.setNotValidBefore(now);
     att.setNotValidAfter(new Date(System.currentTimeMillis()+3600000)); // Valid for an hour
     att.setSubject("CN=0x2042424242424564648");
-    att.setSubjectPublicKeyInfo(AttestationCrypto.OID_SIGNATURE_ALG, key.getEncoded());
+    SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(key);
+    att.setSubjectPublicKeyInfo(spki);
     att.setSmartcontracts(Arrays.asList(42L, 1337L));
     ASN1EncodableVector dataObject = new ASN1EncodableVector();
     dataObject.add(new DEROctetString("hello world".getBytes()));

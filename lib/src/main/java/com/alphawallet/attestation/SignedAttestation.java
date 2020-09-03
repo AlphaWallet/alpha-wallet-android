@@ -1,7 +1,6 @@
 package com.alphawallet.attestation;
 
 import java.io.IOException;
-import java.security.PrivateKey;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -10,14 +9,15 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 
 public class SignedAttestation implements ASNEncodable {
   private final Attestation att;
   private final byte[] signature;
 
-  public SignedAttestation(Attestation att, PrivateKey key) {
+  public SignedAttestation(Attestation att, AsymmetricCipherKeyPair key) {
     this.att = att;
-    this.signature = SignatureUtility.sign(att.getPrehash(), key);
+    this.signature = SignatureUtility.sign(att.getPrehash(), key.getPrivate());
   }
 
   public SignedAttestation(byte[] derEncoding) throws IOException {
@@ -42,7 +42,7 @@ public class SignedAttestation implements ASNEncodable {
     return constructSignedAttestation(this.att, this.signature);
   }
 
-  private byte[] constructSignedAttestation(Attestation unsignedAtt, byte[] signature) {
+  static byte[] constructSignedAttestation(Attestation unsignedAtt, byte[] signature) {
     try {
       byte[] rawAtt = unsignedAtt.getPrehash();
       ASN1EncodableVector res = new ASN1EncodableVector();

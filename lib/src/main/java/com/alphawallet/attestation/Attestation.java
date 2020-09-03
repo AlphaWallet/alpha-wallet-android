@@ -185,20 +185,12 @@ public class Attestation implements Signable, ASNEncodable {
     this.subject = new X500Name(subject);
   }
 
-  public byte[] getSubjectPublicKeyInfo() {
-    try {
-      return subjectPublicKeyInfo.getEncoded();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public SubjectPublicKeyInfo getSubjectPublicKeyInfo() {
+    return subjectPublicKeyInfo;
   }
 
-  /**
-   * Takes a public key as input along with the OID of that key
-   */
-  public void setSubjectPublicKeyInfo(String oid, byte[] subjectPublicKey) {
-    this.subjectPublicKeyInfo = new SubjectPublicKeyInfo(
-        new AlgorithmIdentifier(new ASN1ObjectIdentifier(oid)), subjectPublicKey);
+  public void setSubjectPublicKeyInfo(SubjectPublicKeyInfo spki) {
+    this.subjectPublicKeyInfo = spki;
   }
 
   public List<Long> getSmartcontracts() {

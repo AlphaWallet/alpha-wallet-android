@@ -185,7 +185,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             }
             else if (importData != null && importData.startsWith("wc:"))
             {
-                importPassData = importData;
+                importPassData = WalletConnectActivity.WC_INTENT + importData;
                 if (!importData.contains(WalletConnectActivity.WC_SESSION_CREATE_ELEMENT))
                 {
                     //this is a 'signing' intent, used with an existing, active connection

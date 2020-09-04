@@ -61,6 +61,7 @@ public class WalletConnectActivity extends BaseActivity
 {
     private static final String TAG = WalletConnectActivity.class.getSimpleName();
     public static final String WC_LOCAL_PREFIX = "wclocal:";
+    public static final String WC_INTENT = "wcintent:";
     public static final String WC_SESSION_CREATE_ELEMENT = "?bridge";
 
     @Inject
@@ -81,6 +82,7 @@ public class WalletConnectActivity extends BaseActivity
     private LinearLayout infoLayout;
     private FunctionButtonBar functionBar;
     private boolean fromDappBrowser = false;
+    private boolean fromPhoneBrowser = false;
 
     private Signable signable;
     private DAppFunction dappFunction;
@@ -205,9 +207,13 @@ public class WalletConnectActivity extends BaseActivity
         if (data != null)
         {
             String walletConnectCode = data.getString("qrCode");
-            if (walletConnectCode != null && walletConnectCode.startsWith(WC_LOCAL_PREFIX)){
+            if (walletConnectCode != null && walletConnectCode.startsWith(WC_LOCAL_PREFIX)) {
                 walletConnectCode = walletConnectCode.replace(WC_LOCAL_PREFIX, "");
                 fromDappBrowser = true;
+            }
+            else if (walletConnectCode != null && walletConnectCode.startsWith(WC_INTENT)) {
+                walletConnectCode = walletConnectCode.replace(WC_INTENT, "");
+                fromPhoneBrowser = true; //don't use this yet, but could use it for switching between apps
             }
             this.qrCode = walletConnectCode;
             System.out.println("WCClient: " + qrCode);

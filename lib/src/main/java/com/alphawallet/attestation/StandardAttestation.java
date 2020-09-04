@@ -41,6 +41,7 @@ public class StandardAttestation extends Attestation implements Verifiable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    // TODO I am not sure this actually belongs here
     PoK = setRiddle(identity, type, secret);
   }
 

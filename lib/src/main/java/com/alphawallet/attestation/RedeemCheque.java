@@ -14,7 +14,7 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.math.ec.ECPoint;
 
-public class RedeemCheque implements ASNEncodable {
+public class RedeemCheque implements ASNEncodable, Verifiable {
   private final Cheque cheque;
   private final SignedAttestation att;
   private final ProofOfExponent pok;
@@ -38,7 +38,7 @@ public class RedeemCheque implements ASNEncodable {
       vec.add(ASN1Sequence.getInstance(pok.getDerEncoding()));
       this.unsignedEncoding = new DERSequence(vec).getEncoded();
       this.signature = SignatureUtility.sign(this.unsignedEncoding, userKeys.getPrivate());
-      vec.add(DERBitString.getInstance(this.signature));
+      vec.add(new DERBitString(this.signature));
       this.encoding = new DERSequence(vec).getEncoded();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -61,7 +61,7 @@ public class RedeemCheque implements ASNEncodable {
       vec.add(ASN1Sequence.getInstance(att.getDerEncoding()));
       vec.add(ASN1Sequence.getInstance(pok.getDerEncoding()));
       this.unsignedEncoding = new DERSequence(vec).getEncoded();
-      vec.add(DERBitString.getInstance(this.signature));
+      vec.add(new DERBitString(this.signature));
       this.encoding = new DERSequence(vec).getEncoded();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -80,9 +80,8 @@ public class RedeemCheque implements ASNEncodable {
       this.cheque = new Cheque(asn1.getObjectAt(0).toASN1Primitive().getEncoded());
       this.att = new SignedAttestation(asn1.getObjectAt(1).toASN1Primitive().getEncoded(), publicAttestationSigningKey);
       this.pok = new ProofOfExponent(asn1.getObjectAt(2).toASN1Primitive().getEncoded());
-      this.signature = DERBitString.getInstance(asn1.getObjectAt(3)).getEncoded();
-
-      this.unsignedEncoding = new DERSequence(Arrays.copyOfRange(asn1.toArray(), 0, 4)).getEncoded();
+      this.unsignedEncoding = new DERSequence(Arrays.copyOfRange(asn1.toArray(), 0, 3)).getEncoded();
+      this.signature = DERBitString.getInstance(asn1.getObjectAt(3)).getBytes();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -91,6 +90,28 @@ public class RedeemCheque implements ASNEncodable {
     }
   }
 
+  public Cheque getCheque() {
+    return cheque;
+  }
+
+  public SignedAttestation getAtt() {
+    return att;
+  }
+
+  public ProofOfExponent getPok() {
+    return pok;
+  }
+
+  public byte[] getSignature() {
+    return signature;
+  }
+
+  public AsymmetricKeyParameter getUserPublicKey() {
+    return userPublicKey;
+  }
+
+
+  @Override
   public boolean verify() {
     return cheque.verify() && att.verify() && pok.verify() && SignatureUtility.verify(unsignedEncoding, signature, userPublicKey);
   }
@@ -113,4 +134,6 @@ public class RedeemCheque implements ASNEncodable {
   public byte[] getDerEncoding() {
     return encoding;
   }
+
+  // TODO override equals and hashcode
 }

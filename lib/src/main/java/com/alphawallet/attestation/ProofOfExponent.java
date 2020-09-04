@@ -35,7 +35,7 @@ public class ProofOfExponent implements ASNEncodable, Verifiable{
       this.base = AttestationCrypto.decodePoint(baseEnc.getOctets());
       ASN1OctetString riddleEnc = ASN1OctetString.getInstance(asn1.getObjectAt(1));
       this.riddle = AttestationCrypto.decodePoint(riddleEnc.getOctets());
-      ASN1OctetString challengeEnc = ASN1OctetString.getInstance(asn1.getObjectAt(20));
+      ASN1OctetString challengeEnc = ASN1OctetString.getInstance(asn1.getObjectAt(2));
       this.challenge = new BigInteger(challengeEnc.getOctets());
       ASN1OctetString tPointEnc = ASN1OctetString.getInstance(asn1.getObjectAt(3));
       this.tPoint = AttestationCrypto.decodePoint(tPointEnc.getOctets());

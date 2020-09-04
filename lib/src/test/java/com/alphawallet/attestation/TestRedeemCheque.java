@@ -1,0 +1,64 @@
+package com.alphawallet.attestation;
+
+import com.alphawallet.attestation.StandardAttestation.AttestationType;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.junit.Assert;
+
+public class TestRedeemCheque {
+  private static AsymmetricCipherKeyPair subjectKeys;
+  private static AsymmetricCipherKeyPair issuerKeys;
+  private static AsymmetricCipherKeyPair senderKeys;
+  private static SecureRandom rand;
+
+  @org.junit.BeforeClass
+  public static void setupKeys() throws Exception {
+    rand = SecureRandom.getInstance("SHA1PRNG");
+    rand.setSeed("seed".getBytes());
+
+    subjectKeys = TestHelper.constructBCKeys(rand);
+    issuerKeys = TestHelper.constructBCKeys(rand);
+    senderKeys = TestHelper.constructBCKeys(rand);
+  }
+
+  @org.junit.Test
+  public void testRedeem() {
+    BigInteger subjectSecret = new BigInteger("42");
+    BigInteger senderSecret = new BigInteger("112");
+    Attestation att = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), subjectSecret);
+    SignedAttestation signed = new SignedAttestation(att, issuerKeys);
+    Assert.assertTrue(signed.verify());
+    Cheque cheque = new Cheque("test@test.ts", AttestationType.EMAIL, 1000, 3600000, senderKeys, senderSecret);
+    Assert.assertTrue(cheque.verify());
+    RedeemCheque redeem = new RedeemCheque(cheque, signed, subjectKeys, subjectSecret, senderSecret);
+    Assert.assertTrue(redeem.verify());
+  }
+
+  @org.junit.Test
+  public void testDecoding() throws Exception {
+    BigInteger subjectSecret = new BigInteger("42424242");
+    BigInteger senderSecret = new BigInteger("112112112");
+    Attestation att = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), subjectSecret);
+    SignedAttestation signed = new SignedAttestation(att, issuerKeys);
+    Cheque cheque = new Cheque("test@test.ts", AttestationType.EMAIL, 1000, 3600000, senderKeys, senderSecret);
+    RedeemCheque redeem = new RedeemCheque(cheque, signed, subjectKeys, subjectSecret, senderSecret);
+    RedeemCheque newRedeem = new RedeemCheque(redeem.getDerEncoding(), issuerKeys.getPublic(),
+        subjectKeys.getPublic());
+    Assert.assertTrue(newRedeem.getCheque().verify());
+    Assert.assertTrue(newRedeem.getAtt().verify());
+    Assert.assertTrue(newRedeem.getPok().verify());
+
+    Assert.assertArrayEquals(redeem.getCheque().getDerEncoding(), newRedeem.getCheque().getDerEncoding());
+    Assert.assertArrayEquals(redeem.getAtt().getDerEncoding(), newRedeem.getAtt().getDerEncoding());
+    Assert.assertArrayEquals(redeem.getPok().getDerEncoding(), newRedeem.getPok().getDerEncoding());
+    Assert.assertArrayEquals(redeem.getSignature(), newRedeem.getSignature());
+    Assert.assertEquals(redeem.getUserPublicKey(), subjectKeys.getPublic());
+    Assert.assertArrayEquals(redeem.getDerEncoding(), redeem.getDerEncoding());
+
+    RedeemCheque newConstructor = new RedeemCheque(redeem.getCheque(), redeem.getAtt(), redeem.getPok(),
+        redeem.getSignature(), issuerKeys.getPublic(), subjectKeys.getPublic());
+
+    Assert.assertArrayEquals(redeem.getDerEncoding(), newConstructor.getDerEncoding());
+  }
+}

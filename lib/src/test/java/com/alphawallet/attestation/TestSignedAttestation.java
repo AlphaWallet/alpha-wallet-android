@@ -35,7 +35,6 @@ public class TestSignedAttestation {
     SignedAttestation signed = new SignedAttestation(att, issuerKeys);
     Assert.assertTrue(SignatureUtility.verify(att.getPrehash(), signed.getSignature(), issuerKeys.getPublic()));
     Assert.assertArrayEquals(att.getPrehash(), signed.getUnsignedAttestation().getPrehash());
-    System.out.println(TestHelper.printDER(signed.getDerEncoding()));
   }
 
   @org.junit.Test
@@ -50,7 +49,7 @@ public class TestSignedAttestation {
   }
 
   @org.junit.Test
-  public void testX509Comp() throws Exception {
+  public void testX509() throws Exception {
     Attestation att = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic());
     byte[] toSign = att.getPrehash();
     byte[] digestBytes = new byte[32];

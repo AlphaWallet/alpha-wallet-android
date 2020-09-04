@@ -22,9 +22,8 @@ public class TestStandardAttestation {
   @org.junit.Test
   public void testFullDecoding() throws Exception {
     StandardAttestation initial = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), BigInteger.ONE);
-    ProofOfExponent pok = initial.getPoK();
     byte[] encoding = initial.getDerEncoding();
-    Attestation newAtt = new StandardAttestation(encoding, pok);
+    Attestation newAtt = new StandardAttestation(encoding);
     Assert.assertArrayEquals(encoding, newAtt.getPrehash());
   }
 
@@ -33,7 +32,7 @@ public class TestStandardAttestation {
     Attestation initial = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic());
     byte[] encoding = initial.getPrehash();
     try {
-      new StandardAttestation(encoding, null);
+      new StandardAttestation(encoding);
       fail();
     } catch (IllegalArgumentException e) {
       // Expected

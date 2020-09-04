@@ -12,7 +12,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
-public class SignedAttestation implements ASNEncodable, Verifiable {
+public class SignedAttestation implements ASNEncodable, Verifiable, Validateable {
   private final Attestation att;
   private final byte[] signature;
   private final AsymmetricKeyParameter publicKey;
@@ -68,7 +68,14 @@ public class SignedAttestation implements ASNEncodable, Verifiable {
   }
 
   @Override
+  public boolean checkValidity() {
+    return getUnsignedAttestation().checkValidity();
+  }
+
+  @Override
   public boolean verify() {
     return SignatureUtility.verify(att.getDerEncoding(), signature, publicKey);
   }
+
+
 }

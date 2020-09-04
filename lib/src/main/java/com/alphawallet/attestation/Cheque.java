@@ -21,7 +21,7 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
-public class Cheque implements ASNEncodable, Verifiable {
+public class Cheque implements ASNEncodable, Verifiable, Validateable {
   private final byte[] riddle;
   private final long amount;
   private final long notValidBefore;
@@ -135,6 +135,16 @@ public class Cheque implements ASNEncodable, Verifiable {
   }
 
   @Override
+  public boolean checkValidity() {
+    long currentTime = System.currentTimeMillis();
+    if (!(currentTime >= getNotValidBefore() && currentTime < getNotValidAfter())) {
+      System.err.println("Cheque is no longer valid");
+      return false;
+    }
+    return true;
+  }
+
+  @Override
   public boolean verify() {
     try {
       ASN1Sequence cheque = makeCheque(this.riddle, this.amount, this.getNotValidBefore(),
@@ -173,5 +183,4 @@ public class Cheque implements ASNEncodable, Verifiable {
   public AsymmetricKeyParameter getPublicKey() {
     return this.publicKey;
   }
-
 }

@@ -3,25 +3,22 @@ package com.alphawallet.attestation;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
-public class StandardAttestation extends Attestation implements Verifiable {
+public class StandardAttestation extends Attestation implements Validateable {
   enum AttestationType {
     PHONE,
     EMAIL
   }
 
-  private final ProofOfExponent PoK;
   private final AttestationCrypto crypto;
 
   /**
@@ -41,58 +38,62 @@ public class StandardAttestation extends Attestation implements Verifiable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    // TODO I am not sure this actually belongs here
-    PoK = setRiddle(identity, type, secret);
+    setRiddle(identity, type, secret);
   }
 
-  public StandardAttestation(byte[] derEncoding, ProofOfExponent pok) throws IOException, IllegalArgumentException {
+  public StandardAttestation(byte[] derEncoding) throws IOException, IllegalArgumentException {
     super(derEncoding);
     this.crypto = new AttestationCrypto(new SecureRandom());
+    if (!checkValidity()) {
+      throw new IllegalArgumentException("The content is not valid for an identity attestation");
+    }
+  }
+
+  /**
+   * Verifies that the the attestation is in fact a valid identity attestation, in relation to field values.
+   * @return true if the field values reflect that this is a standard attestation
+   */
+  @Override
+  public boolean checkValidity() {
+    if (!super.checkValidity()) {
+      return false;
+    }
     if (getVersion() != 18) {
-      throw new IllegalArgumentException(
-          "The version number is " + getVersion() + ", it must be 18");
+      System.err.println("The version number is " + getVersion() + ", it must be 18");
+      return false;
     }
     if (getSubject() == null || getSubject().length() != 45 || !getSubject()
         .startsWith("CN=0x")) { // The address is 2*20+5 chars long because it starts with CN=0x
-        throw new IllegalArgumentException("The subject is supposed to only be an Ethereum address as the Common Name");
+      System.err.println("The subject is supposed to only be an Ethereum address as the Common Name");
     }
     if (!getSignature().equals(AttestationCrypto.OID_SIGNATURE_ALG)) {
-      throw new IllegalArgumentException("The signature algorithm is supposed to be " + AttestationCrypto.OID_SIGNATURE_ALG);
+      System.err.println("The signature algorithm is supposed to be " + AttestationCrypto.OID_SIGNATURE_ALG);
     }
-    if (!crypto.verifyProof(pok)) {
-      throw new IllegalArgumentException("The Proof Of Knowledge is not correct!");
+    // Verify that the subject public key matches the subject common name
+    try {
+      AsymmetricKeyParameter parsedSubjectKey = PublicKeyFactory
+          .createKey(getSubjectPublicKeyInfo());
+      String parsedSubject = "CN=" + crypto.addressFromKey(parsedSubjectKey);
+      if (!parsedSubject.equals(getSubject())) {
+        System.err.println("The subject public key does not match the Ethereum address attested to");
+      }
+    } catch (IOException e) {
+      System.err.println("Could not parse subject public key");
     }
-    // Verify consistency between the PoK and the riddle stored
-    ASN1Sequence seq = DERSequence.getInstance(getExtensions().getObjectAt(0));
-    ASN1OctetString string = DEROctetString.getInstance(seq.getObjectAt(2));
-    if (!Arrays.equals(pok.getRiddle().getEncoded(false), string.getOctets())) {
-      throw new IllegalArgumentException("The Proof Of Knowledge does not match the attestation");
-    }
-    this.PoK = pok;
+    return true;
   }
 
   /**
    * Picks a riddle and sets it as an Attribute on the Attestation/
    * @return A proof of knowledge of the riddle
    */
-  private ProofOfExponent setRiddle(String identity, AttestationType type, BigInteger secret) {
+  private void setRiddle(String identity, AttestationType type, BigInteger secret) {
     ASN1EncodableVector extensions = new ASN1EncodableVector();
     extensions.add(new ASN1ObjectIdentifier(Attestation.OID_OCTETSTRING));
     extensions.add(ASN1Boolean.TRUE);
-    ProofOfExponent proof = crypto.constructProof(identity, type, secret);
-    extensions.add(new DEROctetString(proof.getRiddle().getEncoded(false)));
+    extensions.add(new DEROctetString(AttestationCrypto.constructPointBytesFromIdentity(identity, type, secret)));
     // Double Sequence is needed to be compatible with X509V3
     this.setExtensions(new DERSequence(new DERSequence(extensions)));
-    return proof;
-  }
-
-  public ProofOfExponent getPoK() {
-    return PoK;
-  }
-
-  @Override
-  public boolean verify() {
-    return getPoK().verify();
   }
 
   @Override
@@ -102,10 +103,6 @@ public class StandardAttestation extends Attestation implements Verifiable {
 
   @Override
   public byte[] getPrehash() {
-    // Verify the riddle has been constructed correctly
-    if (!crypto.verifyProof(PoK)) {
-      throw new RuntimeException("Proof of Knowledge of identifier did not succeed.");
-    }
     return super.getPrehash();
   }
 

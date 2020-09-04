@@ -24,7 +24,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
 
-public class Attestation implements Signable, ASNEncodable {
+public class Attestation implements Signable, ASNEncodable, Validateable {
 
   public static final String OID_OCTETSTRING = "1.3.6.1.4.1.1466.115.121.1.40";
 
@@ -152,7 +152,7 @@ public class Attestation implements Signable, ASNEncodable {
 
   public Date getNotValidBefore() {
     try {
-      return notValidBefore.getDate();
+      return notValidBefore != null ? notValidBefore.getDate() : null;
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
@@ -164,7 +164,7 @@ public class Attestation implements Signable, ASNEncodable {
 
   public Date getNotValidAfter() {
     try {
-      return notValidAfter.getDate();
+      return notValidAfter != null ? notValidAfter.getDate() : null;
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
@@ -266,10 +266,22 @@ public class Attestation implements Signable, ASNEncodable {
     return true;
   }
 
-  public boolean isValid() {
+  @Override
+  public boolean checkValidity() {
     if (version == null || serialNumber == null || signature == null || (extensions == null
         && dataObject == null)) {
       return false;
+    }
+    if (getNotValidBefore() != null && getNotValidAfter() != null) {
+      long currentTime = System.currentTimeMillis();
+      Date attNotBefore = getNotValidBefore();
+      Date attNotAfter = getNotValidAfter();
+      if (attNotBefore != null && attNotAfter != null) {
+        if (!(currentTime >= attNotBefore.getTime() && currentTime < attNotAfter.getTime())) {
+          System.err.println("Attestation is no longer valid");
+          return false;
+        }
+      }
     }
     return true;
   }
@@ -285,7 +297,7 @@ public class Attestation implements Signable, ASNEncodable {
    */
   @Override
   public byte[] getPrehash() {
-    if (!isValid()) {
+    if (!checkValidity()) {
       return null;
     }
     ASN1EncodableVector res = new ASN1EncodableVector();

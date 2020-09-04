@@ -62,7 +62,7 @@ public class TestAttestation {
     public void testInvalid() {
         Attestation res = TestHelper.makeMinimalAtt();
         res.setDataObject(null);
-        Assert.assertFalse(res.isValid());
+        Assert.assertFalse(res.checkValidity());
     }
 
     @org.junit.Test

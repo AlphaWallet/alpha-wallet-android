@@ -54,7 +54,7 @@ public class TestHelper {
     att.setNotValidBefore(now);
     att.setNotValidAfter(new Date(System.currentTimeMillis() + 3600000)); // Valid for an hour
     att.setSmartcontracts(Arrays.asList(42L, 1337L));
-    Assert.assertTrue(att.isValid());
+    Assert.assertTrue(att.checkValidity());
     Assert.assertFalse(att.isValidX509()); // Since the version is wrong, and algorithm is non-standard
     return att;
   }
@@ -100,7 +100,7 @@ public class TestHelper {
     dataObject.add(new DEROctetString("hello world".getBytes()));
     dataObject.add(new ASN1Integer(42));
     att.setDataObject(new DERSequence(dataObject));
-    Assert.assertTrue(att.isValid());
+    Assert.assertTrue(att.checkValidity());
     return att;
   }
 
@@ -112,16 +112,16 @@ public class TestHelper {
     ASN1EncodableVector dataObject = new ASN1EncodableVector();
     dataObject.add(new DEROctetString("hello world".getBytes()));
     att.setDataObject(new DERSequence(dataObject));
-    Assert.assertTrue(att.isValid());
+    Assert.assertTrue(att.checkValidity());
     return att;
   }
 
-  public static String printDER(byte[] input) {
+  public static String printDER(byte[] input, String type) {
     byte[] encodedCert = Base64.getEncoder().encode(input);
     StringBuilder builder = new StringBuilder();
-    builder.append("-----BEGIN SIGNABLE-----\n");
+    builder.append("-----BEGIN "+ type +"-----\n");
     addBytes(builder, encodedCert);
-    builder.append("-----END SIGNABLE-----");
+    builder.append("-----END "+ type +"-----");
     return builder.toString();
   }
 

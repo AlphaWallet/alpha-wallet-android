@@ -10,8 +10,10 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.math.ec.ECPoint;
 
 public class RedeemCheque implements ASNEncodable, Verifiable {
@@ -110,6 +112,64 @@ public class RedeemCheque implements ASNEncodable, Verifiable {
     return userPublicKey;
   }
 
+  /**
+   * Verifies that the redeem request will be accepted by the smart contract
+   * @return true if the redeem request should be accepted by the smart contract
+   */
+  public boolean checkValidity() {
+    // CHECK: that it is an identity attestation otherwise not all the checks of validity needed gets carried out
+    try {
+      StandardAttestation std = new StandardAttestation(att.getUnsignedAttestation().getDerEncoding());
+      // CHECK: perform the needed checks of an identity attestation
+      if (!std.checkValidity()) {
+        System.err.println("The attestation is not a valid standard attestation");
+        return false;
+      }
+    } catch (IOException e) {
+      System.err.println("The attestation could not be parsed as a standard attestation");
+      return false;
+    }
+
+    // CHECK: that the cheque is still valid
+    if (!getCheque().checkValidity()) {
+      System.err.println("Cheque is not valid");
+      return false;
+    }
+
+    // CHECK: verify signature on RedeemCheque is from the same party that holds the attestation
+    SubjectPublicKeyInfo spki = getAtt().getUnsignedAttestation().getSubjectPublicKeyInfo();
+    try {
+      AsymmetricKeyParameter parsedSubjectKey = PublicKeyFactory.createKey(spki);
+      if (!SignatureUtility.verify(this.unsignedEncoding, getSignature(), parsedSubjectKey)) {
+        System.err.println("The signature on RedeemCheque is not valid");
+        return false;
+      }
+    } catch (IOException e) {
+      System.err.println("The attestation SubjectPublicKey cannot be parsed");
+      return false;
+    }
+
+    // CHECK: verify the identity of the proof and the attestation matcher
+    ASN1Sequence extensions = att.getUnsignedAttestation().getExtensions();
+    // Need to decode twice since the standard ASN1 encodes the octet string in an octet string
+    ASN1OctetString identityEnc = ASN1OctetString
+        .getInstance(ASN1Sequence.getInstance(extensions.getObjectAt(0)).getObjectAt(2));
+    if (!Arrays.equals(identityEnc.getOctets(), pok.getBase().getEncoded(false))) {
+      System.err.println("Identity used in proof and attestation does not match");
+      return false;
+    }
+
+    // CHECK: verify that the riddle of the proof and cheque matches
+    byte[] decodedRiddle = AttestationCrypto.decodePoint(getCheque().getRiddle()).getEncoded(false);
+    if (!Arrays.equals(decodedRiddle, getPok().getRiddle().getEncoded(false))) {
+      System.err.println("The riddle of the proof and cheque does not match");
+      return false;
+    }
+
+    // CHECK: the Ethereum address on the attestation matches receivers signing key
+    // TODO
+    return true;
+  }
 
   @Override
   public boolean verify() {

@@ -36,17 +36,14 @@ public class AttestationCrypto {
   public static final X9ECParameters curve = SECNamedCurves.getByName(AttestationCrypto.ECDSA_CURVE);
   public static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
   public static final ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec(ECDSA_CURVE);
-
-  public final BigInteger fieldSize;
-  public final BigInteger curveOrder;
+  public static final ECNamedCurveSpec params = new ECNamedCurveSpec(ECDSA_CURVE, spec.getCurve(), spec.getG(),
+      spec.getN());
+  public static final BigInteger fieldSize = ((ECFieldFp) params.getCurve().getField()).getP();
+  public static final BigInteger curveOrder = params.getOrder();
   private final SecureRandom rand;
 
   public AttestationCrypto(SecureRandom rand) {
     this.rand = rand;
-    ECNamedCurveSpec params = new ECNamedCurveSpec(ECDSA_CURVE, spec.getCurve(), spec.getG(),
-        spec.getN());
-    fieldSize = ((ECFieldFp) params.getCurve().getField()).getP();
-    curveOrder = params.getOrder();
   }
 
   /**
@@ -80,6 +77,12 @@ public class AttestationCrypto {
     ECPoint hashedIdentity = hashIdentifier(type.ordinal(), identity);
     ECPoint identifier = hashedIdentity.multiply(secret);
     return computeProof(hashedIdentity, identifier, secret);
+  }
+
+  static byte[] constructPointBytesFromIdentity(String identity, AttestationType type, BigInteger secret) {
+    ECPoint hashedIdentity = hashIdentifier(type.ordinal(), identity);
+    ECPoint identifierPoint = hashedIdentity.multiply(secret);
+    return identifierPoint.getEncoded(false);
   }
 
   public byte[] makeRiddle(String identity, AttestationType type, BigInteger secret) {
@@ -121,12 +124,12 @@ public class AttestationCrypto {
     }
   }
 
-  private ECPoint hashIdentifier(int type, String identifier) {
+  private static ECPoint hashIdentifier(int type, String identifier) {
     BigInteger idenNum = mapToInteger(type, identifier.getBytes(StandardCharsets.UTF_8));
     return computePoint(spec.getCurve(), fieldSize, idenNum);
   }
 
-  private BigInteger mapToInteger(byte[] value) {
+  private static BigInteger mapToInteger(byte[] value) {
     try {
       // We use HMAC to avoid issues with extension attacks, although SHA3 or double hashing should be sufficient on its own
       Mac mac = Mac.getInstance(MAC_ALGO);
@@ -143,7 +146,7 @@ public class AttestationCrypto {
     }
   }
 
-  private BigInteger mapToInteger(int type, byte[] identity) {
+  private static BigInteger mapToInteger(int type, byte[] identity) {
     ByteBuffer buf = ByteBuffer.allocate(4 + identity.length);
     buf.putInt(type);
     buf.put(identity);
@@ -157,7 +160,7 @@ public class AttestationCrypto {
    * @param x The x-coordiante for which we will compute y
    * @return A corresponding y coordinate for x
    */
-  private ECPoint computePoint(ECCurve params, BigInteger p, BigInteger x) {
+  private static ECPoint computePoint(ECCurve params, BigInteger p, BigInteger x) {
     x = x.mod(p);
     BigInteger y, expected, ySquare;
     do {

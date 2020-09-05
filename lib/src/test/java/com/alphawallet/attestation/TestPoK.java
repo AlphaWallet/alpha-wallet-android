@@ -1,6 +1,6 @@
 package com.alphawallet.attestation;
 
-import com.alphawallet.attestation.StandardAttestation.AttestationType;
+import com.alphawallet.attestation.IdentifierAttestation.AttestationType;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import org.junit.Assert;

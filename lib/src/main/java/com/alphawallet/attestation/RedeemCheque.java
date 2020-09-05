@@ -119,7 +119,7 @@ public class RedeemCheque implements ASNEncodable, Verifiable {
   public boolean checkValidity() {
     // CHECK: that it is an identity attestation otherwise not all the checks of validity needed gets carried out
     try {
-      StandardAttestation std = new StandardAttestation(att.getUnsignedAttestation().getDerEncoding());
+      IdentifierAttestation std = new IdentifierAttestation(att.getUnsignedAttestation().getDerEncoding());
       // CHECK: perform the needed checks of an identity attestation
       if (!std.checkValidity()) {
         System.err.println("The attestation is not a valid standard attestation");

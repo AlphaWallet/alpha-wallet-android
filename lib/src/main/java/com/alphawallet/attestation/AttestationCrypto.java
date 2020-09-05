@@ -1,6 +1,6 @@
 package com.alphawallet.attestation;
 
-import com.alphawallet.attestation.StandardAttestation.AttestationType;
+import com.alphawallet.attestation.IdentifierAttestation.AttestationType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;

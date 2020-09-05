@@ -13,7 +13,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
-public class StandardAttestation extends Attestation implements Validateable {
+public class IdentifierAttestation extends Attestation implements Validateable {
   enum AttestationType {
     PHONE,
     EMAIL
@@ -26,7 +26,7 @@ public class StandardAttestation extends Attestation implements Validateable {
    * You still need to set the optional fields, that is
    * issuer, notValidBefore, notValidAfter, smartcontracts
    */
-  public StandardAttestation(String identity, AttestationType type, AsymmetricKeyParameter key, BigInteger secret)  {
+  public IdentifierAttestation(String identity, AttestationType type, AsymmetricKeyParameter key, BigInteger secret)  {
     super();
     this.crypto = new AttestationCrypto(new SecureRandom());
     super.setVersion(18); // Our initial version
@@ -41,7 +41,7 @@ public class StandardAttestation extends Attestation implements Validateable {
     setRiddle(identity, type, secret);
   }
 
-  public StandardAttestation(byte[] derEncoding) throws IOException, IllegalArgumentException {
+  public IdentifierAttestation(byte[] derEncoding) throws IOException, IllegalArgumentException {
     super(derEncoding);
     this.crypto = new AttestationCrypto(new SecureRandom());
     if (!checkValidity()) {

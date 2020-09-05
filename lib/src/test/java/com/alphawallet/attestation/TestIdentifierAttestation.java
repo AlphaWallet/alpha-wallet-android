@@ -7,7 +7,7 @@ import java.security.SecureRandom;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.junit.Assert;
 
-public class TestStandardAttestation {
+public class TestIdentifierAttestation {
   private static AsymmetricCipherKeyPair subjectKeys;
   private static SecureRandom rand;
 
@@ -21,9 +21,9 @@ public class TestStandardAttestation {
 
   @org.junit.Test
   public void testFullDecoding() throws Exception {
-    StandardAttestation initial = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), BigInteger.ONE);
+    IdentifierAttestation initial = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), BigInteger.ONE);
     byte[] encoding = initial.getDerEncoding();
-    Attestation newAtt = new StandardAttestation(encoding);
+    Attestation newAtt = new IdentifierAttestation(encoding);
     Assert.assertArrayEquals(encoding, newAtt.getPrehash());
   }
 
@@ -32,7 +32,7 @@ public class TestStandardAttestation {
     Attestation initial = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic());
     byte[] encoding = initial.getPrehash();
     try {
-      new StandardAttestation(encoding);
+      new IdentifierAttestation(encoding);
       fail();
     } catch (IllegalArgumentException e) {
       // Expected

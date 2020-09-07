@@ -21,9 +21,9 @@ public class TestRedeemCheque {
     rand = SecureRandom.getInstance("SHA1PRNG");
     rand.setSeed("seed".getBytes());
 
-    subjectKeys = TestHelper.constructBCKeys(rand);
-    issuerKeys = TestHelper.constructBCKeys(rand);
-    senderKeys = TestHelper.constructBCKeys(rand);
+    subjectKeys = TestHelper.constructECKeys(rand);
+    issuerKeys = TestHelper.constructECKeys(rand);
+    senderKeys = TestHelper.constructECKeys(rand);
   }
 
   @org.junit.Test

@@ -15,7 +15,7 @@ public class TestCheque {
     rand = SecureRandom.getInstance("SHA1PRNG");
     rand.setSeed("seed".getBytes());
 
-    senderKeys = TestHelper.constructBCKeys(rand);
+    senderKeys = TestHelper.constructECKeys(rand);
   }
 
   @org.junit.Test

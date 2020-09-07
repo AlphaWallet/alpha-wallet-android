@@ -59,6 +59,7 @@ public class TestHelper {
     return att;
   }
 
+  /* the unsigned x509 attestation will have a subject of "CN=0x2042424242424564648" */
   public static Attestation makeUnsignedx509Att(AsymmetricKeyParameter key) throws IOException  {
     Attestation att = new Attestation();
     att.setVersion(2); // =v3 since counting starts from 0

@@ -1,6 +1,8 @@
 package com.alphawallet.attestation;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
@@ -56,6 +58,10 @@ public class TestAttestation {
     public void testMakeUnsignedX509Attestation() throws IOException {
         byte[] res = TestHelper.makeUnsignedx509Att(subjectKeys.getPublic()).getPrehash();
         Assert.assertTrue(res != null);
+        Path p = Files.createTempFile("unsigned_x509", ".der");
+        System.out.println("To check the unsigned X509 attestation, run this:");
+        System.out.println("$ openssl asn1parse -inform DER -in " + p.toString());
+        Files.write(p, res);
     }
 
     @org.junit.Test

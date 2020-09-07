@@ -39,7 +39,7 @@ public class TestHelper {
     return keyGen.generateKeyPair();
   }
 
-  public static AsymmetricCipherKeyPair constructBCKeys(SecureRandom rand) {
+  public static AsymmetricCipherKeyPair constructECKeys(SecureRandom rand) {
     ECKeyPairGenerator generator = new ECKeyPairGenerator();
     ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(AttestationCrypto.domain, rand);
     generator.init(keygenParams);

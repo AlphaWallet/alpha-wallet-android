@@ -25,8 +25,8 @@ public class TestSignedAttestation {
     rand = SecureRandom.getInstance("SHA1PRNG");
     rand.setSeed("seed".getBytes());
 
-    subjectKeys = TestHelper.constructBCKeys(rand);
-    issuerKeys = TestHelper.constructBCKeys(rand);
+    subjectKeys = TestHelper.constructECKeys(rand);
+    issuerKeys = TestHelper.constructECKeys(rand);
   }
 
   @org.junit.Test

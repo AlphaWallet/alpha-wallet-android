@@ -33,6 +33,8 @@ public class TestSignedAttestation {
   public void testSignAttestation() {
     Attestation att = TestHelper.makeUnsignedStandardAtt(subjectKeys.getPublic(), BigInteger.ONE);
     SignedAttestation signed = new SignedAttestation(att, issuerKeys);
+    Assert.assertTrue(signed.checkValidity());
+    Assert.assertTrue(signed.verify());
     Assert.assertTrue(SignatureUtility.verify(att.getPrehash(), signed.getSignature(), issuerKeys.getPublic()));
     Assert.assertArrayEquals(att.getPrehash(), signed.getUnsignedAttestation().getPrehash());
   }

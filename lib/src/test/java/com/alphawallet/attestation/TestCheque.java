@@ -23,6 +23,8 @@ public class TestCheque {
     Cheque cheque = new Cheque("test@test.ts", AttestationType.EMAIL, 1000, 3600000, senderKeys, BigInteger.TEN);
     byte[] encoded = cheque.getDerEncoding();
     Cheque newCheque = new Cheque(encoded);
+    Assert.assertTrue(cheque.verify());
+    Assert.assertTrue(cheque.checkValidity());
     Assert.assertArrayEquals(encoded, newCheque.getDerEncoding());
 
     Cheque otherConstructor = new Cheque(newCheque.getRiddle(), newCheque.getAmount(),

@@ -35,9 +35,11 @@ public class TestRedeemCheque {
     Assert.assertTrue(signed.verify());
     Cheque cheque = new Cheque("test@test.ts", AttestationType.EMAIL, 1000, 3600000, senderKeys, senderSecret);
     Assert.assertTrue(cheque.verify());
+    Assert.assertTrue(cheque.checkValidity());
     RedeemCheque redeem = new RedeemCheque(cheque, signed, subjectKeys, subjectSecret, senderSecret);
     Assert.assertTrue(redeem.verify());
     Assert.assertTrue(redeem.checkValidity());
+    // *** PRINT DER ENCODING OF OBJECTS ***
     try {
       PublicKey pk;
       System.out.println("Signed attestation:");

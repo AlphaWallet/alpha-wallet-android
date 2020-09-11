@@ -9,9 +9,11 @@ import android.util.Log;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
 import com.alphawallet.app.entity.TransferFromEventResponse;
+import com.alphawallet.app.entity.UnknownToken;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
@@ -96,6 +98,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private final Map<Integer, Web3j> web3jNodeServers;
     private AWEnsResolver ensResolver;
+    private KnownContract knownContract;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -379,11 +382,6 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<TokenInfo> update(String contractAddr, int chainId) {
         return setupTokensFromLocal(contractAddr, chainId);
-    }
-
-    @Override
-    public Single<TokenInfo> update(String contractAddr, int chainId, boolean isEnabled) {
-        return setupTokensFromLocal(contractAddr, chainId, isEnabled);
     }
 
     private Single<Boolean> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
@@ -1222,23 +1220,32 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-            return new TokenInfo(
-                    address,
-                    getName(address, network),
-                    getContractData(network, address, stringParam("symbol"), ""),
-                    getDecimals(address, network),
-                    true,
-                    chainId);
-        });
-    }
 
-    /*
-     * This method is introduced to set "Enabled" for popular tokens as can't enable all tokens.
-     */
-    private Single<TokenInfo> setupTokensFromLocal(String address, int chainId, boolean isEnabled) //pass exception up the chain
-    {
-        return Single.fromCallable(() -> {
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+            /*
+            Below code is used to identify which are popular tokens and which aren't.
+            This way, on first discovery, it will decide either to make it enable or disable.
+             */
+            if (knownContract == null)
+            {
+                knownContract = ethereumNetworkRepository.readContracts();
+            }
+
+            boolean isEnabled = false;
+            List<UnknownToken> unknownTokens = knownContract.getMainNet();
+            if (chainId == EthereumNetworkRepository.XDAI_ID)
+            {
+                unknownTokens = knownContract.getMainNet();
+            }
+
+            for (UnknownToken unknownToken : unknownTokens)
+            {
+                if (unknownToken.address.equalsIgnoreCase(address))
+                {
+                    isEnabled = !unknownToken.isPopular;
+                    break;
+                }
+            }
+
             return new TokenInfo(
                     address,
                     getName(address, network),

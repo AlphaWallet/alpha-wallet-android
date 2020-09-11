@@ -31,7 +31,6 @@ public interface TokenRepositoryType {
     Single<Token[]> checkInterface(Token[] tokens, Wallet wallet);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Single<TokenInfo> update(String address, int chainId);
-    Single<TokenInfo> update(String address, int chainId, boolean isEnabled);
     Disposable memPoolListener(int chainId, SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);

@@ -112,7 +112,7 @@ public class TokensService
 
             if (t != null && getToken(t.chainId, t.address) == null)
             {
-                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId, t.isEnabled).toObservable() //fetch tokenInfo
+                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId).toObservable() //fetch tokenInfo
                         .filter(tokenInfo -> tokenInfo.name != null)
                         .flatMap(tokenInfo -> tokenRepository.determineCommonType(tokenInfo).toObservable()
                                 .flatMap(contractType -> tokenRepository.addToken(new Wallet(currentAddress), tokenInfo, contractType).toObservable()))
@@ -232,6 +232,10 @@ public class TokensService
         focusToken = null;
     }
 
+    /**
+     * This method will add unknown token to the list and discover it
+     * @param cAddr Contract Address
+     */
     public void addUnknownTokenToCheck(ContractAddress cAddr)
     {
         for (ContractAddress check : unknownTokens)
@@ -338,7 +342,7 @@ public class TokensService
             {
                 if (getToken(cl.chainId, cl.address) == null)
                 {
-                    addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address, cl.isEnabled));
+                    addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
                 }
             }
         }

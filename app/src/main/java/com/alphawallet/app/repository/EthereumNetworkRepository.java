@@ -66,7 +66,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         {
             for (UnknownToken unknownToken: knownContract.getMainNet())
             {
-                knownContracts.add(new ContractLocator(unknownToken.address, EthereumNetworkRepository.MAINNET_ID, !unknownToken.isPopular));
+                knownContracts.add(new ContractLocator(unknownToken.address, EthereumNetworkRepository.MAINNET_ID));
             }
         }
         if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID))
@@ -79,7 +79,8 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         return knownContracts;
     }
 
-    private KnownContract readContracts()
+    @Override
+    public KnownContract readContracts()
     {
         String jsonString;
         try

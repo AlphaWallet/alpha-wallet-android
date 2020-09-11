@@ -53,7 +53,10 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     private ItemClickListener listener;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
-    private final int POPULAR_TOKEN_DISPLAY_COUNT = 5;
+    private final int POPULAR_TOKEN_DISPLAY_COUNT = 20;
+
+    int hiddenTokensCount = 0;
+    int popularTokensCount = 0;
 
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
@@ -135,10 +138,6 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     private void setupList(List<TokenCardMeta> tokens, boolean forFilter)
     {
-        int hiddenTokensCount = 0;
-        int popularTokensCount = 0;
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-
         items.clear();
         items.beginBatchedUpdates();
 
@@ -178,20 +177,19 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             }
         }
 
-        if (!forFilter)
-        {
-            TokenCardMeta tcmZero = new TokenCardMeta(0, "", context.getString(R.string.zero_balance_tokens_off), 0, 0, null);
-            tcmZero.isEnabled = pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false);
-            items.add(new TokenSortedItem(
-                    SHOW_ZERO_BALANCE,
-                    tcmZero, 0));
-        }
-
         items.add(new ManageTokensLabelSortedItem(
                 LABEL_DISPLAY_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.display_tokens)),
                 0));
 
+        addHiddenTokenLabel();
+        addPopularTokenLabel();
+
+        items.endBatchedUpdates();
+    }
+
+    private void addHiddenTokenLabel()
+    {
         //if there are no hidden tokens found no need to display label
         if (hiddenTokensCount > 0)
         {
@@ -200,7 +198,10 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
                     new ManageTokensLabelData(context.getString(R.string.hidden_tokens)),
                     0));
         }
+    }
 
+    private void addPopularTokenLabel()
+    {
         //if there are no popular tokens found no need to display label
         if (popularTokensCount > 0)
         {
@@ -209,8 +210,6 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
                     new ManageTokensLabelData(context.getString(R.string.popular_tokens)),
                     0));
         }
-
-        items.endBatchedUpdates();
     }
 
     private KnownContract readContracts()
@@ -355,5 +354,68 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     @Override
     public int getItemViewType(int position) {
         return items.get(position).viewType;
+    }
+
+    public boolean isTokenPresent(String tokenAddress)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta thisToken = tsi.value;
+
+                if (thisToken.getAddress().equalsIgnoreCase(tokenAddress))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void addToken(TokenCardMeta tokenCardMeta)
+    {
+        Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
+        tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
+        TokenSortedItem sortedItem = null;
+
+        if (token.tokenInfo.isEnabled)
+        {
+            sortedItem = new TokenSortedItem(
+                    DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+            );
+        }
+        else if(!isContractPopularToken(token.getAddress()))
+        {
+            hiddenTokensCount++;
+            sortedItem = new TokenSortedItem(
+                    HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+            );
+        }
+        else
+        {
+            popularTokensCount++;
+            if (popularTokensCount <= POPULAR_TOKEN_DISPLAY_COUNT)
+            {
+                sortedItem = new TokenSortedItem(
+                        POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                );
+            }
+        }
+
+        items.beginBatchedUpdates();
+
+        if (sortedItem != null)
+        {
+            items.add(sortedItem);
+        }
+
+        addHiddenTokenLabel();
+        addPopularTokenLabel();
+
+        items.endBatchedUpdates();
+        notifyDataSetChanged();
     }
 }

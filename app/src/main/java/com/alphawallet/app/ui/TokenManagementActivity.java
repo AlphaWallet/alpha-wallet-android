@@ -19,6 +19,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
@@ -27,6 +29,10 @@ import com.alphawallet.app.viewmodel.TokenManagementViewModelFactory;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.realm.Realm;
+import io.realm.RealmResults;
+
+import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.ItemClickListener {
     @Inject
@@ -40,6 +46,9 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private EditText search;
 
     private Wallet wallet;
+    private Realm realm;
+    private RealmResults<RealmToken> realmUpdates;
+    private String realmId;
 
     private boolean isDataChanged;
 
@@ -94,6 +103,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         {
             adapter = new TokenListAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), tokenArray, this);
             tokenList.setAdapter(adapter);
+
+            startRealmListener(wallet);
         }
     }
 
@@ -153,4 +164,38 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         }
         super.onBackPressed();
     }
+
+    private void startRealmListener(Wallet wallet)
+    {
+        if (realmId == null || !realmId.equals(wallet.address))
+        {
+            realmId = wallet.address;
+            realm = viewModel.getRealmInstance(wallet);
+            setRealmListener();
+        }
+    }
+
+    private void setRealmListener()
+    {
+        realmUpdates = realm.where(RealmToken.class)
+                .like("address", ADDRESS_FORMAT)
+                .findAllAsync();
+        realmUpdates.addChangeListener(realmTokens -> {
+            if (realmTokens.size() == 0) return;
+
+            //Insert when discover
+            for (RealmToken token : realmTokens)
+            {
+                if (adapter.isTokenPresent(token.getTokenAddress())) continue;
+
+                String balance = TokensRealmSource.convertStringBalance(token.getBalance(), token.getContractType());
+
+                TokenCardMeta meta = new TokenCardMeta(token.getChainId(), token.getTokenAddress(), balance,
+                        token.getUpdateTime(), viewModel.getAssetDefinitionService(), token.getName(), token.getSymbol(), token.getContractType());
+                meta.lastTxUpdate = token.getLastTxTime();
+                adapter.addToken(meta);
+            }
+        });
+    }
+
 }

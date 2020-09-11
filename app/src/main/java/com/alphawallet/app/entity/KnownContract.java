@@ -10,6 +10,7 @@ public class KnownContract {
     @SerializedName("MainNet")
     @Expose
     private List<UnknownToken> mainNet = null;
+
     @SerializedName("xDAI")
     @Expose
     private List<UnknownToken> xDAI = null;

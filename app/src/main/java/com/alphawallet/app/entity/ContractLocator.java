@@ -20,14 +20,12 @@ public class ContractLocator implements Parcelable
     public final String address;
     public final int chainId;
     private final ContractType type;
-    public final boolean isEnabled;
 
     public ContractLocator(String n, int chain)
     {
         address = n;
         chainId = chain;
         type = ContractType.NOT_SET;
-        isEnabled = true;
     }
 
     public ContractLocator(String n, int chain, ContractType t)
@@ -35,15 +33,6 @@ public class ContractLocator implements Parcelable
         address = n;
         chainId = chain;
         type = t;
-        isEnabled = true;
-    }
-
-    public ContractLocator(String n, int chain, boolean enable)
-    {
-        address = n;
-        chainId = chain;
-        type = ContractType.NOT_SET;
-        isEnabled = enable;
     }
 
     protected ContractLocator(Parcel in)
@@ -51,7 +40,6 @@ public class ContractLocator implements Parcelable
         this.address = in.readString();
         this.chainId = in.readInt();
         this.type = ContractType.values()[in.readInt()];
-        isEnabled = in.readBoolean();
     }
 
     public boolean equals(Token token)
@@ -112,6 +100,5 @@ public class ContractLocator implements Parcelable
         dest.writeString(address);
         dest.writeInt(chainId);
         dest.writeInt(type.ordinal());
-        dest.writeBoolean(isEnabled);
     }
 }

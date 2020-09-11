@@ -7,6 +7,7 @@ package com.alphawallet.app.entity;
 public class UnknownToken
 {
     public int chainId;
+    public String name;
     public String address;
     public boolean isPopular;
 

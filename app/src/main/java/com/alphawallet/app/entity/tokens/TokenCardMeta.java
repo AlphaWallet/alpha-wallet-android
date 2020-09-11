@@ -24,7 +24,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final ContractType type;
     public final String balance;
 
-    public boolean isEnabled;
+    /*
+    Initial value is False as Token considered to be Hidden
+     */
+    public boolean isEnabled = false;
 
     public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
     {

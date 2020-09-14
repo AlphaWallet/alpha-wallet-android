@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_scan"
         android:icon="@drawable/ic_camera_scan"
-        android:title="@string/scan_qr"
+        android:title="@string/title_wallet_connect"
         app:showAsAction="always"
         />
 </menu>

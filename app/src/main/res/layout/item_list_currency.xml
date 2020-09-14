@@ -4,6 +4,7 @@
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/white"
     android:paddingStart="15dp"
     android:paddingTop="15dp"
     android:paddingEnd="12dp"

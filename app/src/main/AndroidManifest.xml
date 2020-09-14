@@ -138,6 +138,11 @@
             android:name=".ui.WalletsActivity"
             android:label="@string/title_account_list" />
 
+        <service
+            android:name=".service.WalletConnectService"
+            android:enabled="true">
+        </service>
+
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
@@ -292,7 +297,16 @@
 
         <activity
             android:name=".ui.WalletConnectActivity"
+            android:launchMode="singleTop"
             android:label="WalletConnect" />
+
+        <activity
+            android:name=".ui.SignDetailActivity"
+            android:label="Sign Details" />
+
+        <activity
+            android:name=".ui.WalletConnectSessionActivity"
+            android:label="WalletConnect Sessions" />
     </application>
 
 </manifest>

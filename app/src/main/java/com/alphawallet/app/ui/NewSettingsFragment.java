@@ -396,9 +396,13 @@ public class NewSettingsFragment extends BaseFragment {
     }
 
     private void onWalletConnectSettingClicked() {
-        Intent intent = new Intent(getActivity(), QRScanningActivity.class);
+        Intent intent = new Intent(getActivity(), WalletConnectSessionActivity.class);
         intent.putExtra("wallet", wallet);
-        intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
-        startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
+        startActivity(intent);
+
+//        Intent intent = new Intent(getActivity(), QRScanningActivity.class);
+//        intent.putExtra("wallet", wallet);
+//        intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+//        startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 }

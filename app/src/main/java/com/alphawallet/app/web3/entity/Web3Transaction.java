@@ -67,12 +67,16 @@ public class Web3Transaction implements Parcelable {
      */
     public Web3Transaction(WCEthereumTransaction wcTx, long callbackId)
     {
+        String gasPrice = wcTx.getGasPrice() != null ? wcTx.getGasPrice() : "0";
+        String gasLimit = wcTx.getGasLimit() != null ? wcTx.getGasLimit() : "0";
+        String nonce = wcTx.getNonce() != null ? wcTx.getNonce() : "";
+
         this.recipient = TextUtils.isEmpty(wcTx.getTo()) ? Address.EMPTY : new Address(wcTx.getTo());
         this.contract = null;
         this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue());;
-        this.gasPrice = Hex.hexToBigInteger(wcTx.getGasPrice(), BigInteger.ZERO);
-        this.gasLimit = Hex.hexToBigInteger(wcTx.getGasLimit(), BigInteger.ZERO);
-        this.nonce = Hex.hexToLong(wcTx.getNonce(), -1);
+        this.gasPrice = Hex.hexToBigInteger(gasPrice, BigInteger.ZERO);
+        this.gasLimit = Hex.hexToBigInteger(gasLimit, BigInteger.ZERO);
+        this.nonce = Hex.hexToLong(nonce, -1);
         this.payload = wcTx.getData();
         this.leafPosition = callbackId;
     }

@@ -323,12 +323,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         String importPassData = WalletConnectActivity.WC_LOCAL_PREFIX + url;
         Intent intent = new Intent(context, WalletConnectActivity.class);
-        if (!url.contains(WalletConnectActivity.WC_SESSION_CREATE_ELEMENT))
-        {
-            //re-open the existing activity, when using walletconnect locally
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        }
-
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra("qrCode", importPassData);
         context.startActivity(intent);
     }

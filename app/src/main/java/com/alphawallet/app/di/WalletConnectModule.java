@@ -1,5 +1,7 @@
 package com.alphawallet.app.di;
 
+import android.content.Context;
+
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -7,6 +9,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 
 import dagger.Module;
@@ -19,12 +23,16 @@ class WalletConnectModule {
             KeyService keyService,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             CreateTransactionInteract createTransactionInteract,
-            GenericWalletInteract genericWalletInteract) {
+            GenericWalletInteract genericWalletInteract,
+            RealmManager realmManager,
+            Context context) {
         return new WalletConnectViewModelFactory(
                 keyService,
                 findDefaultNetworkInteract,
                 createTransactionInteract,
-                genericWalletInteract);
+                genericWalletInteract,
+                realmManager,
+                context);
     }
 
     @Provides

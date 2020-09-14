@@ -29,6 +29,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
+import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -186,14 +187,18 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             else if (importData != null && importData.startsWith("wc:"))
             {
                 importPassData = WalletConnectActivity.WC_INTENT + importData;
-                if (!importData.contains(WalletConnectActivity.WC_SESSION_CREATE_ELEMENT))
+                WCSession session = WCSession.Companion.from(importData);
+                if (session == null)
                 {
                     //this is a 'signing' intent, used with an existing, active connection
                     Intent intent = new Intent(this, WalletConnectActivity.class);
                     intent.putExtra("qrCode", importPassData);
                     //re-open the existing activity, when using WalletConnect locally (that is, with a browser app running on the same device)
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
+                    if (!startActivityIfNeeded(intent, 0))
+                    {
+                        //didn't need to start a new activity,
+                    }
                     setResult(RESULT_OK);
                     finish();
                 }

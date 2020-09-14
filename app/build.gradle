@@ -45,18 +45,31 @@ android {
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         def XInfuraAPI = "XInfuraAPI"
+//        def MixPanelAPI = "MixPanelAPI"
+
         //Put your Infura key here
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
+        def MIXPANEL_API_KEY = "\"3d1724375414474d7aa4cc3d8be074af\"";
 
         buildConfigField 'int', 'DB_VERSION', '12'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
-        buildConfigField "boolean", "USE_ANALYTICS", "true"
+//        buildConfigField "String", MixPanelAPI, MIXPANEL_API_KEY
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
     }
     flavorDimensions "targetting"
+
+    productFlavors {
+        analytics {
+            dimension "targetting"
+        }
+        noAnalytics {
+            dimension "targetting"
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -87,6 +100,27 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+    /*
+    Below code is used to include analytics only when Flavor is "No Analytics"
+    This is due to China release where Google services should not be included
+     */
+    def task = gradle.startParameter.taskNames[0] ?: ""
+
+    afterEvaluate { Project project ->
+        if (!task.toLowerCase().contains("noanalytics"))
+        {
+            apply plugin: 'com.google.gms.google-services'
+            dependencies {
+                //Firebase
+                implementation 'com.google.firebase:firebase-analytics:17.5.0'
+
+                //MixPanel
+//                implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
+            }
+        }
+    }
+
 }
 
 project.ext {

@@ -600,7 +600,7 @@
     <string name="message_version_support_warning">Starting Version 3.0, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
-    <string name="tokenscript_management">Tokenscript Management</string>
+    <string name="tokenscript_management">TokenScript Management</string>
     <string name="subtitle_network">Network</string>
 
     <!-- Gas Slider -->

@@ -584,7 +584,7 @@
     <string name="message_version_support_warning">从版本 3.0 开始，AlphaWallet 将不再支持在 Android 6.0 及以下设备上运行。</string>
     <string name="hide_notification">隐藏通知</string>
     <string name="card_view_not_found_error">未找到%1$s</string>
-    <string name="tokenscript_management">Tokenscript 管理</string>
+    <string name="tokenscript_management">TokenScript 管理</string>
     <string name="subtitle_network">网络</string>
     <!-- Gas Slider -->
     <string name="speed_gas">速度（燃料）</string>

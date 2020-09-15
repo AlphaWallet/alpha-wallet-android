@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?android:attr/actionBarSize"
-        android:background="@drawable/background_card"
+        android:background="@color/alabaster"
         android:orientation="vertical">
 
         <View

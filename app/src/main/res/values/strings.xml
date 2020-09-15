@@ -676,4 +676,14 @@
     <string name="testnet" translatable="false">Testnet</string>
     <string name="today">Today</string>
     <string name="go_to_token">Go to Token</string>
+    <string name="invalid_walletconnect_session">Invalid WalletConnect Session</string>
+    <string name="restart_walletconnect_session">Previous WalletConnect session not correctly terminated. Please return to webpage and disconnect, then start a new session.</string>
+    <string name="invalid_walletconnect_data">Invalid WalletConnect QR data</string>
+    <string name="label_nonce">Nonce</string>
+    <string name="payload">Payload</string>
+    <string name="signed_transactions">Signed Transactions</string>
+    <string name="delete_session">%1$s</string>
+    <string name="title_delete_session">Delete this session record?</string>
+    <string name="session_terminated">Session has been terminated. Switch back to Dapp and start a new WalletConnect session.</string>
+    <string name="message_transaction_not_sent">Transaction not sent</string>
 </resources>

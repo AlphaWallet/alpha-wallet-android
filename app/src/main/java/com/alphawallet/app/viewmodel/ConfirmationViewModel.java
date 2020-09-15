@@ -329,7 +329,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         if(estimateGas.getError() == null)
         {
-            if (!overrideDefaultGasLimit) gasService.setOverrideGasLimit(estimateGas.getAmountUsed()); //only set once, to allow user to override
+            if (!overrideDefaultGasLimit || gasService.getGasLimitOverride().equals(BigInteger.ZERO)) gasService.setOverrideGasLimit(estimateGas.getAmountUsed()); //only set once, to allow user to override
             overrideDefaultGasLimit = true;
             gasEstimate.postValue(estimateGas.getAmountUsed());
         }

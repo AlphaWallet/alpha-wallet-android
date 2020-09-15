@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -103,6 +104,40 @@
                 android:text="0xabcd1234"
                 android:textColor="@color/dove"
                 android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_sign"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/background_bottom_border"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/dp16"
+            android:paddingEnd="@dimen/dp16">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/signed_transactions"
+                android:textColor="@color/black"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/tx_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_semibold"
+                android:lines="1"
+                android:maxLines="1"
+                android:text="1"
+                android:textColor="@color/dove"
+                android:textSize="17sp" />
+
         </LinearLayout>
 
     </LinearLayout>

@@ -88,6 +88,30 @@ public class AWRealmMigration implements RealmMigration
             if (!realmToken.hasField("hasEvents")) realmToken.addField("hasEvents", boolean.class);
             oldVersion++;
         }
+
+        if (oldVersion == 12)
+        {
+            schema.create("RealmWCSession")
+                    .addField("sessionId", String.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("peerId", String.class)
+                    .addField("sessionData", String.class)
+                    .addField("remotePeerData", String.class)
+                    .addField("remotePeerId", String.class)
+                    .addField("usageCount", int.class)
+                    .addField("lastUsageTime", long.class)
+                    .addField("walletAccount", String.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 13)
+        {
+            schema.create("RealmWCSignElement")
+                    .addField("sessionId", String.class)
+                    .addField("signMessage", byte[].class)
+                    .addField("signType", String.class)
+                    .addField("signTime", long.class);
+            oldVersion++;
+        }
     }
 
     @Override

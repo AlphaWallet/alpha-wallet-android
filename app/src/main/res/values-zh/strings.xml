@@ -413,7 +413,7 @@
     <string name="dapp_address">签署人地址</string>
     <string name="search_or_type_web_address">搜索或键入网址</string>
     <string name="network">网络</string>
-    <string name="select_active_networks">Select Active Networks:</string>
+    <string name="select_active_networks">设置启用的区块链</string>
     <string name="collectibles">收藏品</string>
     <string name="token_function">通证功能</string>
     <string name="channel_description">Alphawallet 通知渠道</string>
@@ -434,9 +434,9 @@
     <string name="authentication_cancelled">已取消身份验证</string>
     <string name="authentication_failed">身份验证失败</string>
     <string name="backup_seed_phrase">通过助记词备份您的钱包</string>
-    <string name="backup_seed_phrase_detail">Making backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
+    <string name="backup_seed_phrase_detail">备份钱包是很容易安全的：只需要按顺序写下12个助记词，并离线包存在安全的地方。</string>
     <string name="action_back_up_my_wallet">备份我的钱包</string>
-    <string name="write_down_seed_phrase">Write down seed phrase on paper</string>
+    <string name="write_down_seed_phrase">请将助记词写在纸上</string>
     <string name="wrote_down_seed_phrase">好的，我记下来了</string>
     <string name="verify_seed_phrase">验证助记词</string>
     <string name="action_continue">继续</string>
@@ -658,4 +658,14 @@
     <string name="tokenscript_call">TokenScript调用:</string>
     <string name="today">今天</string>
     <string name="go_to_token">前往通证</string>
+    <string name="invalid_walletconnect_session">无效的WalletConnect会话</string>
+    <string name="restart_walletconnect_session">先前的WalletConnect会话未正确终止。请返回网页并断开连接，然后开始新的会话。</string>
+    <string name="invalid_walletconnect_data">无效的WalletConnect二维码数据</string>
+    <string name="label_nonce">Nonce</string>
+    <string name="payload">数据</string>
+    <string name="signed_transactions">签署的交易</string>
+    <string name="delete_session">%1$s</string>
+    <string name="title_delete_session">删除此会话记录？</string>
+    <string name="session_terminated">Session has been terminated. Switch back to Dapp and start a new WalletConnect session.</string>
+    <string name="message_transaction_not_sent">Transaction not sent</string>
 </resources>

@@ -6,8 +6,8 @@ import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
 
 import java.math.BigInteger;
@@ -67,5 +67,10 @@ public class CreateTransactionInteract
     public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
     {
         transactionRepository.removeOldTransaction(wallet, oldTxHash);
+    }
+
+    public Single<TransactionData> signTransaction(Wallet wallet, Web3Transaction w3tx, int chainId)
+    {
+        return transactionRepository.getSignatureForTransaction(wallet, w3tx, chainId);
     }
 }

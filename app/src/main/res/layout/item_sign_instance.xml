@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_list_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:minHeight="60dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp10"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dp10"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            tools:text="Dec 20 2020"/>
+
+        <TextView
+            android:id="@+id/sign_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/dp10"
+
+            android:gravity="end"
+            android:ellipsize="end"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            tools:text="Message"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp18"
+        android:layout_marginEnd="@dimen/dp18"
+        android:layout_marginTop="@dimen/dp14"
+        android:layout_marginBottom="@dimen/dp10"
+        android:fontFamily="@font/font_light"
+        android:textColor="@color/black"
+        android:textSize="14sp" />
+
+</LinearLayout>

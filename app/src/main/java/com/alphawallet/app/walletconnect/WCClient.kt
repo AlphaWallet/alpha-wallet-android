@@ -43,7 +43,18 @@ open class WCClient(
     var isConnected: Boolean = false
         private set
 
+    fun sessionId(): String?
+    {
+        if (session != null) return session!!.topic;
+        else return null;
+    }
+
     private var handshakeId: Long = -1
+
+    var accounts: List<String>? = null
+        private set
+    var chainId: Int? = null
+        private set
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
     var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
@@ -53,6 +64,8 @@ open class WCClient(
     var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> Unit }
     var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> Unit }
     var onGetAccounts: (id: Long) -> Unit = { _ -> Unit }
+    var onWCOpen: (peerId: String) -> Unit = { _ -> Unit }
+    var onPong: (peerId: String)-> Unit = { _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d(TAG, "<< websocket opened >>")
@@ -66,11 +79,19 @@ open class WCClient(
         subscribe(session.topic)
         // The peerId channel is used to listen to all messages sent to this httpClient.
         subscribe(peerId)
+
+        onWCOpen(peerId);
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
+            if (text.equals("ping"))
+            {
+                Log.d(TAG, "<== pong")
+                onPong(text);
+                return;
+            }
             Log.d(TAG, "<== message $text")
             decrypted = decryptMessage(text)
             Log.d(TAG, "<== decrypted $decrypted")
@@ -96,7 +117,7 @@ open class WCClient(
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        Log.d(TAG, "Received: $bytes")
+        Log.d(TAG, "<== Received: $bytes")
         listeners.forEach { it.onMessage(webSocket, bytes) }
     }
 
@@ -129,6 +150,9 @@ open class WCClient(
     fun approveSession(accounts: List<String>, chainId: Int): Boolean {
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
 
+        this.accounts = accounts;
+        this.chainId = chainId;
+
         val result = WCApproveSessionResponse(
                 chainId = chainId,
                 accounts = accounts,
@@ -141,6 +165,11 @@ open class WCClient(
         )
 
         return encryptAndSend(gson.toJson(response))
+    }
+
+    fun sendPing():Boolean {
+        Log.d(TAG,"==> ping")
+        return socket?.send("ping") ?: false
     }
 
     fun updateSession(accounts: List<String>? = null, chainId: Int? = null, approved: Boolean = true): Boolean {
@@ -281,13 +310,13 @@ open class WCClient(
                 payload = ""
         )
         val json = gson.toJson(message)
-        Log.d(TAG, "Subscribe: $json")
+        Log.d(TAG, "==> Subscribe: $json")
 
         return socket?.send(gson.toJson(message)) ?: false
     }
 
     private fun encryptAndSend(result: String): Boolean {
-        Log.d(TAG, "Sent: $result")
+        Log.d(TAG,"==> message $result")
         val session = this.session
                 ?: throw IllegalStateException("Session is null")
         val payload = gson.toJson(WCCipher.encrypt(result.toByteArray(Charsets.UTF_8), session.key.toByteArray()))
@@ -296,7 +325,12 @@ open class WCClient(
                 type = MessageType.PUB,
                 payload = payload
         )
+
+        val rpId = remotePeerId ?: session.topic
+        Log.d(TAG, "E&Send: $rpId")
+
         val json = gson.toJson(message)
+        Log.d(TAG,"==> encrypted $json")
         return socket?.send(json) ?: false
     }
 

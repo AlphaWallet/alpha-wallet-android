@@ -48,7 +48,7 @@ android {
         //Put your Infura key here
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
-        buildConfigField 'int', 'DB_VERSION', '12'
+        buildConfigField 'int', 'DB_VERSION', '14'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
         buildConfigField "boolean", "USE_ANALYTICS", "true"
 

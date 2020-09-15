@@ -248,7 +248,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             getIntent().getExtras();
             String startIntent = bundle.getString("startIntent");
-            if (!TextUtils.isEmpty(startIntent) && startIntent.startsWith("wcintent:"))
+            if (!TextUtils.isEmpty(startIntent) && startIntent.startsWith(WalletConnectActivity.WC_INTENT))
             {
                 intent = new Intent(this, WalletConnectActivity.class);
                 intent.putExtra("qrCode", startIntent);

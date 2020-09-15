@@ -2,9 +2,9 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 
-public class NoAnalyticsService<T> implements AnalyticsServiceType<T>{
+public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
-    public NoAnalyticsService(Context context)
+    public AnalyticsService(Context context)
     {
         //No code
     }

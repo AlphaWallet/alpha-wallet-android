@@ -19,7 +19,6 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'realm-android'
-//apply plugin: 'com.google.gms.google-services' //include when flavour refactor is done
 apply plugin: 'kotlin-android'
 
 repositories {
@@ -45,18 +44,27 @@ android {
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         def XInfuraAPI = "XInfuraAPI"
-        //Put your Infura key here
+        //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
         buildConfigField 'int', 'DB_VERSION', '14'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
-        buildConfigField "boolean", "USE_ANALYTICS", "true"
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
     }
     flavorDimensions "targetting"
+
+    productFlavors {
+        analytics {
+            dimension "targetting"
+        }
+        noAnalytics {
+            dimension "targetting"
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -87,6 +95,24 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+    /*
+    Below code is used to include analytics only when Flavor is "No Analytics"
+    This is due to China release where Google services should not be included
+     */
+    def task = gradle.startParameter.taskNames[0] ?: ""
+
+    afterEvaluate { Project project ->
+        if (!task.toLowerCase().contains("noanalytics"))
+        {
+            apply plugin: 'com.google.gms.google-services'
+            dependencies {
+                implementation 'com.google.firebase:firebase-analytics:17.5.0'
+                implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
+            }
+        }
+    }
+
 }
 
 project.ext {

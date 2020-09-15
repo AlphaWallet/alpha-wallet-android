@@ -52,3 +52,14 @@ Java_com_alphawallet_app_service_TickerService_getCMCKey( JNIEnv* env, jobject t
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_AnalyticsService_getAnalyticsKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, cmcKey);
+#else
+    const jstring key = "3d1724375414474d7aa4cc3d8be074af";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

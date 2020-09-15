@@ -262,4 +262,9 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     {
         return tokenId.hashCode();
     }
+
+    public boolean equals(TokenCardMeta other)
+    {
+        return (tokenId.equalsIgnoreCase(other.tokenId));
+    }
 }

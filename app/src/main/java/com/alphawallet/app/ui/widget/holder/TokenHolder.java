@@ -11,8 +11,6 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -158,7 +156,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private void populateTicker()
     {
         TokenTicker ticker = tokensService.getTokenTicker(token);
-        if (ticker != null)
+        if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
             handleTicker();
         }
@@ -167,14 +165,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
             setIssuerDetails();
-            if (!EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
-            {
-                showTestnet();
-            }
-            else
-            {
-                hideTestnet();
-            }
         }
     }
 
@@ -243,7 +233,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void setIssuerDetails()
     {
-        if (token.isEthereum())
+        if (token.isEthereum())     // If token is eth and we get here, it's a testnet chain, show testnet
         {
             issuer.setVisibility(View.VISIBLE);
             issuer.setText(R.string.testnet);

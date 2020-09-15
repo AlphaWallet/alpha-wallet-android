@@ -67,6 +67,9 @@
                 android:inputType="textUri"
                 android:padding="5dp"
                 android:paddingRight="35dp"
+                android:focusable="true"
+                android:clickable="true"
+                android:focusableInTouchMode="true"
                 android:textSize="18sp" />
 
             <ImageView

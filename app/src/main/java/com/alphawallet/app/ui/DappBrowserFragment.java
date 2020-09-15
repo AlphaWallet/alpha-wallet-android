@@ -26,7 +26,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -49,6 +48,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -57,7 +57,6 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -115,6 +114,7 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.realm.RealmResults;
 
 import static android.app.Activity.RESULT_OK;
@@ -209,6 +209,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private DAppFunction dAppFunction;
     private SignType signType;
     private volatile boolean canSign = true;
+
+    @Nullable
+    private Disposable disposable;
 
     private enum SignType
     {
@@ -460,6 +463,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         super.onDestroy();
         viewModel.onDestroy();
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
+        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
     private void setupMenu(View baseView)
@@ -595,11 +599,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             return handled;
         });
 
-        urlTv.setOnTouchListener((view, motionEvent) -> {
-            if (motionEvent.getAction() == MotionEvent.ACTION_UP)
-            {
-                beginSearchSession();
-            }
+        // Both these are required, the onFocus listener is required to respond to the first click.
+        urlTv.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) beginSearchSession();
+        });
+
+        urlTv.setOnClickListener(v -> {
+            beginSearchSession();
+        });
+
+        urlTv.setShowSoftInputOnFocus(true);
+
+        urlTv.setOnLongClickListener(v -> {
+            urlTv.dismissDropDown();
             return false;
         });
 
@@ -611,6 +623,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
             }
 
             @Override
@@ -624,18 +637,18 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         expandCollapseView(currentNetwork, true);
         expandCollapseView(layoutNavigation, true);
 
-        Observable.zip(
+        disposable = Observable.zip(
                 Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
                 Observable.fromArray(clear), (interval, item) -> item)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .doOnComplete(this::checkForPaste)
                 .subscribe(item -> postBeginSearchSession(item));
 
         urlTv.showDropDown();
     }
 
-    private void postBeginSearchSession(ImageView item) {
+    private void postBeginSearchSession(ImageView item)
+    {
         if (item.getVisibility() == View.GONE)
         {
             expandCollapseView(item, false);
@@ -648,24 +661,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             cancelSearchSession();
         });
         attachFragment(f, SEARCH);
-    }
-
-    private void checkForPaste() {
-        if (urlTv.getText().length() == 0)
-        {
-            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            try
-            {
-                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
-                if (textToPaste.length() > 0)
-                {
-                    urlTv.performLongClick();
-                }
-            }
-            catch (Exception e) {
-                //Do nothing
-            }
-        }
     }
 
     /**

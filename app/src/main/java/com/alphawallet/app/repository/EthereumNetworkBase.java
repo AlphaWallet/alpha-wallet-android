@@ -71,6 +71,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + getInfuraKey();
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
+    public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
+    public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
+    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
+    public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
 
     public static final int MAINNET_ID = 1;
     public static final int CLASSIC_ID = 61;
@@ -83,16 +87,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int GOERLI_ID = 5;
     public static final int ARTIS_SIGMA1_ID = 246529;
     public static final int ARTIS_TAU1_ID = 246785;
-
-    public static final String MAINNET_BLOCKSCOUT = "eth/mainnet";
-    public static final String CLASSIC_BLOCKSCOUT = "etc/mainnet";
-    public static final String XDAI_BLOCKSCOUT = "poa/dai";
-    public static final String POA_BLOCKSCOUT = "poa/core";
-    public static final String ROPSTEN_BLOCKSCOUT = "eth/ropsten";
-    public static final String RINKEBY_BLOCKSCOUT = "eth/rinkeby";
-    public static final String SOKOL_BLOCKSCOUT = "poa/sokol";
-    public static final String KOVAN_BLOCKSCOUT = "eth/kovan";
-    public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
+    public static final int BINANCE_TEST_ID = 97;
+    public static final int BINANCE_MAIN_ID = 56;
 
     final Map<Integer, NetworkInfo> networkMap;
 
@@ -102,12 +98,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     MAINNET_RPC_URL,
                     "https://cn.etherscan.com/tx/",MAINNET_ID, true,
                     MAINNET_FALLBACK_RPC_URL,
-                    "https://api-cn.etherscan.com/",
-                    C.ETHEREUM_TICKER_NAME,
-                    MAINNET_BLOCKSCOUT),
+                    "https://api-cn.etherscan.com/"),
             new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://blockscout.com/etc/mainnet/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/", C.CLASSIC_TICKER_NAME, CLASSIC_BLOCKSCOUT),
+                    "https://blockscout.com/etc/mainnet/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/"),
             new NetworkInfo(C.XDAI_NETWORK_NAME,
                     C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
@@ -115,38 +109,46 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     XDAI_ID,
                     false,
                     "https://dai.poa.network",
-                    "https://blockscout.com/poa/dai/", C.XDAI_TICKER_NAME, XDAI_BLOCKSCOUT),
+                    "https://blockscout.com/poa/dai/"),
             new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
-                    "https://blockscout.com/poa/core/tx/", POA_ID, false, POA_RPC_URL, "https://blockscout.com/poa/core/", C.ETHEREUM_TICKER_NAME, POA_BLOCKSCOUT),
+                    "https://blockscout.com/poa/core/tx/", POA_ID, false, POA_RPC_URL, "https://blockscout.com/poa/core/"),
             new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
                     "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID, false,
                     ARTIS_SIGMA1_RPC_URL,
-                    "https://explorer.sigma1.artis.network/", C.ARTIS_SIGMA_TICKER, ""),
+                    "https://explorer.sigma1.artis.network/"),
             new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
                     "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
                     "https://kovan.infura.io/v3/" + BACKUP_INFURA_KEY,
-                    "https://api-kovan.etherscan.io/", C.ETHEREUM_TICKER_NAME, KOVAN_BLOCKSCOUT),
+                    "https://api-kovan.etherscan.io/"),
             new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
                     ROPSTEN_RPC_URL,
                     "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
                     "https://ropsten.infura.io/v3/" + BACKUP_INFURA_KEY,
-                    "https://api-ropsten.etherscan.io/", C.ETHEREUM_TICKER_NAME, ROPSTEN_BLOCKSCOUT),
+                    "https://api-ropsten.etherscan.io/"),
             new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
                     SOKOL_RPC_URL,
-                    "https://blockscout.com/poa/sokol/tx/",SOKOL_ID, false, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/", C.ETHEREUM_TICKER_NAME, SOKOL_BLOCKSCOUT),
+                    "https://blockscout.com/poa/sokol/tx/",SOKOL_ID, false, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/"),
             new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
                     "https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
                     RINKEBY_FALLBACK_RPC_URL,
-                    "https://api-rinkeby.etherscan.io/", C.ETHEREUM_TICKER_NAME, RINKEBY_BLOCKSCOUT),
+                    "https://api-rinkeby.etherscan.io/"),
             new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/",GOERLI_ID, false,
                     GOERLI_RPC_URL,
-                    "https://api-goerli.etherscan.io/", C.ETHEREUM_TICKER_NAME, GOERLI_BLOCKSCOUT),
+                    "https://api-goerli.etherscan.io/"),
             new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
                     "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID, false,
                     ARTIS_TAU1_RPC_URL,
-                    "https://explorer.tau1.artis.network/", C.ARTIS_SIGMA_TICKER, ""),
+                    "https://explorer.tau1.artis.network/"),
+            new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
+                    "https://explorer.binance.org/smart-testnet/tx/", BINANCE_TEST_ID, false,
+                    BINANCE_TEST_FALLBACK_RPC_URL,
+                    "https://explorer.binance.org/smart-testnet/"),
+            new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
+                    "https://explorer.binance.org/smart/tx/", BINANCE_MAIN_ID, false,
+                    BINANCE_MAIN_FALLBACK_RPC_URL,
+                    "https://explorer.binance.org/smart"),
     };
 
     final PreferenceRepositoryType preferences;
@@ -293,6 +295,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case EthereumNetworkRepository.CLASSIC_ID:
             case EthereumNetworkRepository.XDAI_ID:
             case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
+            case EthereumNetworkRepository.BINANCE_MAIN_ID:
                 return true;
 
             default:
@@ -325,6 +328,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return ARTIS_SIGMA1_RPC_URL;
             case ARTIS_TAU1_ID:
                 return ARTIS_TAU1_RPC_URL;
+            case BINANCE_MAIN_ID:
+                return BINANCE_MAIN_FALLBACK_RPC_URL;
+            case BINANCE_TEST_ID:
+                return BINANCE_TEST_FALLBACK_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -355,6 +362,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return R.drawable.ic_artis_sigma_logo;
             case ARTIS_TAU1_ID:
                 return R.drawable.ic_artis_tau_logo;
+            case BINANCE_MAIN_ID:
+                return R.drawable.ic_binance_logo;
+            case BINANCE_TEST_ID:
+                return R.drawable.ic_binance_test_logo;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
@@ -385,6 +396,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return ARTIS_SIGMA1_RPC_URL;
             case ARTIS_TAU1_ID:
                 return ARTIS_TAU1_RPC_URL;
+            case BINANCE_MAIN_ID:
+                return BINANCE_MAIN_RPC_URL;
+            case BINANCE_TEST_ID:
+                return BINANCE_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }

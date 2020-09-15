@@ -23,11 +23,14 @@ public abstract class C {
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";
+    public static final String BINANCE_TEST_NETWORK = "Binance (Test)";
+    public static final String BINANCE_MAIN_NETWORK = "Binance";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
     public static final String XDAI_TICKER_NAME = "dai";
     public static final String ARTIS_SIGMA_TICKER = "artis";
+    public static final String BINANCE_TICKER = "binance";
 
     public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TICKER = "poa";
@@ -40,6 +43,7 @@ public abstract class C {
     public static final String GOERLI_SYMBOL = "GÖETH";
     public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
+    public static final String BINANCE_SYMBOL = "BNB";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

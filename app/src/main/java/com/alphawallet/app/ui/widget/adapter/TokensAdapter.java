@@ -224,6 +224,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (canDisplayToken(token))
         {
+            //does this token already exist with a different weight (ie name has changed)?
+            removeMatchingTokenDifferentWeight(token);
             int position = -1;
             if (gridFlag)
             {
@@ -244,6 +246,26 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
+    private void removeMatchingTokenDifferentWeight(TokenCardMeta token)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i) instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) items.get(i);
+                if (tsi.value.equals(token))
+                {
+                    if (tsi.value.nameWeight != token.nameWeight)
+                    {
+                        notifyItemChanged(i);
+                        items.removeItemAt(i);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     private TokenCardMeta getToken(int chainId, String tokenAddress)
     {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
@@ -251,9 +273,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem) {
                 TokenSortedItem tsi = (TokenSortedItem) si;
-                TokenCardMeta thisToken = tsi.value;
-                if (thisToken.tokenId.equalsIgnoreCase(id)) {
-                    return thisToken;
+                if (tsi.value.tokenId.equalsIgnoreCase(id)) {
+                    return tsi.value;
                 }
             }
         }

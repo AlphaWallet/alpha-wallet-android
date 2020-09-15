@@ -81,7 +81,7 @@
             android:fontFamily="@font/font_light"
             android:lines="1"
             android:maxLines="1"
-            android:text="Setting Subtitle"
+            tools:text="Setting Subtitle"
             android:textColor="@color/black"
             android:textSize="12sp" />
 

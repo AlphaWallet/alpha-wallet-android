@@ -26,6 +26,7 @@ import com.google.android.flexbox.FlexboxLayout;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.BackupState.ENTER_BACKUP_STATE_HD;
 import static com.alphawallet.app.entity.BackupState.ENTER_JSON_BACKUP;
+import static com.alphawallet.app.entity.BackupState.UPGRADE_KEY_SECURITY;
 
 public class BackupFlowActivity extends BaseActivity implements
         View.OnClickListener,
@@ -65,6 +66,9 @@ public class BackupFlowActivity extends BaseActivity implements
             case BACKUP_KEYSTORE_KEY:
                 state = ENTER_JSON_BACKUP;
                 setupJSONExport();
+                break;
+            case UPGRADE_KEY:
+                handleClick("", 0);
                 break;
         }
     }
@@ -227,7 +231,11 @@ public class BackupFlowActivity extends BaseActivity implements
             case BACKUP_KEYSTORE_KEY:
                 intent.putExtra("STATE", ENTER_JSON_BACKUP);
                 break;
+            case UPGRADE_KEY:
+                intent.putExtra("STATE", UPGRADE_KEY_SECURITY);
+                break;
         }
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+        finish();
     }
 }

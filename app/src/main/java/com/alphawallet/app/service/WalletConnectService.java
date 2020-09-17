@@ -27,6 +27,7 @@ import kotlin.Unit;
  */
 public class WalletConnectService extends Service
 {
+    private final long CONNECTION_TIMEOUT = 10*DateUtils.MINUTE_IN_MILLIS;
     private final ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
 
@@ -172,7 +173,7 @@ public class WalletConnectService extends Service
             long lastUsed = getLastUsed(c);
             long timeUntilTerminate = DateUtils.MINUTE_IN_MILLIS*5 - (System.currentTimeMillis() - lastUsed);
             Log.d(TAG, "Time until terminate: " + timeUntilTerminate/DateUtils.SECOND_IN_MILLIS + " (" + sessionKey + ")");
-            if ((System.currentTimeMillis() - lastUsed) > DateUtils.MINUTE_IN_MILLIS*5)
+            if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
             {
                 if (c.getSession() != null)
                 {

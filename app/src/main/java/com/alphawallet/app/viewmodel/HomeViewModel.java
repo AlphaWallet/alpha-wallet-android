@@ -8,9 +8,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -36,6 +38,8 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AnalyticsService;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
@@ -49,6 +53,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -77,6 +82,7 @@ public class HomeViewModel extends BaseViewModel {
     private final TickerService tickerService;
     private final Context context;
     private final MyAddressRouter myAddressRouter;
+    private final AnalyticsServiceType analyticsService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -98,7 +104,8 @@ public class HomeViewModel extends BaseViewModel {
             Context context,
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
-            TickerService tickerService) {
+            TickerService tickerService,
+            AnalyticsServiceType analyticsService) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -112,6 +119,7 @@ public class HomeViewModel extends BaseViewModel {
         this.myAddressRouter = myAddressRouter;
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
+        this.analyticsService = analyticsService;
     }
 
     @Override
@@ -422,5 +430,24 @@ public class HomeViewModel extends BaseViewModel {
     public void showMyAddress(Activity activity)
     {
         myAddressRouter.open(activity, defaultWallet.getValue());
+    }
+
+    /**
+     * This method will uniquely identify the device by creating an ID and store in preference.
+     * This will be changed if user reinstall application or clear the storage explicitly.
+     **/
+    public void identify(Context ctx)
+    {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+
+        String uuid = prefs.getString(C.PREF_UNIQUE_ID, "");
+
+        if (uuid.isEmpty())
+        {
+            uuid = UUID.randomUUID().toString();
+        }
+
+        analyticsService.identify(uuid);
+        prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
     }
 }

@@ -184,6 +184,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel = ViewModelProviders.of(this, homeViewModelFactory)
                 .get(HomeViewModel.class);
         viewModel.setLocale(this);
+        viewModel.identify(this);
 
         setContentView(R.layout.activity_home);
 

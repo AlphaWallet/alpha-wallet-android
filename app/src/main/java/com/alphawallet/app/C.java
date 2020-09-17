@@ -195,6 +195,7 @@ public abstract class C {
     public static final String ACTION_MY_ADDRESS_SCREEN = "my_address_screen";
 
     //Analytics
+    public static final String PREF_UNIQUE_ID = "unique_id";
     public static final String AN_IMPORT_WALLET = "Wallet Imported";
     public static final String AN_WALLET_TYPE = "Wallet Type";
     public static final String AN_SEED_PHRASE = "Seed Phrase";

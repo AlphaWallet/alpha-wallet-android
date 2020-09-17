@@ -9,6 +9,8 @@ package com.alphawallet.app.service;
  *
  */
 
+import com.google.gson.JsonParseException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.exceptions.ClientConnectionException;
@@ -85,6 +87,9 @@ public class AWHttpService extends HttpService
     public static final MediaType JSON_MEDIA_TYPE =
             MediaType.parse("application/json; charset=utf-8");
 
+    private static final MediaType MEDIA_TYPE_TEXT =
+            MediaType.parse("text/xml; charset=UTF-8");
+
     public static final String DEFAULT_URL = "http://localhost:8545/";
 
     private static final Logger log = LoggerFactory.getLogger(org.web3j.protocol.http.HttpService.class);
@@ -109,9 +114,17 @@ public class AWHttpService extends HttpService
     @Override
     protected InputStream performIO(String request) throws IOException
     {
-        RequestBody requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
-        Headers headers = buildHeaders();
+        RequestBody requestBody;
+        try
+        {
+            requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
+        }
+        catch (JsonParseException e)
+        {
+            requestBody = RequestBody.create("", MEDIA_TYPE_TEXT);
+        }
 
+        Headers headers = buildHeaders();
         okhttp3.Request httpRequest =
                 new okhttp3.Request.Builder().url(url).headers(headers).post(requestBody).build();
 

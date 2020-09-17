@@ -339,8 +339,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    private void attachFragment(Fragment fragment, String tag) {
-        if (tag != null && getHost() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+    private void attachFragment(Fragment fragment, String tag)
+    {
+        Fragment testFrag = getChildFragmentManager().findFragmentByTag(tag);
+        if (testFrag != null && testFrag.isVisible() && !testFrag.isDetached())
+        {
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.frame, fragment)
+                    .commitAllowingStateLoss();
+        }
+        else if (tag != null && getHost() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
         {
             showFragment(fragment, tag);
         }
@@ -398,8 +406,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         detachFragments(false);
         forwardFragmentStack.clear();
         backFragmentStack.clear();
+        if (!currentFragment.equals(BROWSER_HOME))
+        {
+            attachFragment(dappHomeFragment, BROWSER_HOME);
+        }
         currentFragment = BROWSER_HOME;
-        if (!BROWSER_HOME.equals(DAPP_BROWSER)) attachFragment(dappHomeFragment, BROWSER_HOME);
         if (urlTv != null)
             urlTv.getText().clear();
         if (web3 != null)

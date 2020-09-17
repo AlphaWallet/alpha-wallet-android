@@ -284,8 +284,10 @@ public class Token implements Parcelable, Comparable<Token>
     public BigDecimal getCorrectedBalance(int scale)
     {
         if (balance == null || balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
-        BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
-        return tokenInfo.decimals > 0
+        int decimals = 18;
+        if (tokenInfo != null) decimals = tokenInfo.decimals;
+        BigDecimal decimalDivisor = BigDecimal.valueOf(Math.pow(10, decimals));
+        return decimals > 0
                ? balance.divide(decimalDivisor, scale, RoundingMode.DOWN).stripTrailingZeros() : balance;
     }
 

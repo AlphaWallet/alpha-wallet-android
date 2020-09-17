@@ -92,16 +92,13 @@ public class Utils {
     {
         if (TextUtils.isEmpty(text)) return "";
         String firstWord = getFirstWord(text);
-        switch (firstWord.length()) {
-            case 0:
-                return "";
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                return firstWord.toUpperCase();
-            default:
-                return firstWord.substring(0, 4).toUpperCase();
+        if (!TextUtils.isEmpty(firstWord))
+        {
+            return firstWord.substring(0, Math.min(firstWord.length(), 4)).toUpperCase();
+        }
+        else
+        {
+            return "";
         }
     }
 

@@ -1,13 +1,13 @@
 {
 "MainNet":
   [
-    {"address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd", "isPopular": false, "network": 1},
-    {"address": "0x8e870d67f660d95d5be530380d0ec0bd388289e1", "isPopular": false, "network": 1},
-    {"address": "0x0000000000085d4780B73119b644AE5ecd22b376", "isPopular": false, "network": 1},
-    {"address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "isPopular": false, "network": 1},
-    {"address": "0xa74476443119A942dE498590Fe1f2454d7D4aC0d", "isPopular": false, "network": 1},
-    {"address": "0x98f2ab72198f2e64527bdb28931f60c0f77ac2fc", "isPopular": false, "network": 1},
-    {"address": "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", "isPopular": false, "network": 1},
+    {"address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd", "isPopular": true, "network": 1},
+    {"address": "0x8e870d67f660d95d5be530380d0ec0bd388289e1", "isPopular": true, "network": 1},
+    {"address": "0x0000000000085d4780B73119b644AE5ecd22b376", "isPopular": true, "network": 1},
+    {"address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "isPopular": true, "network": 1},
+    {"address": "0xa74476443119A942dE498590Fe1f2454d7D4aC0d", "isPopular": true, "network": 1},
+    {"address": "0x98f2ab72198f2e64527bdb28931f60c0f77ac2fc", "isPopular": true, "network": 1},
+    {"address": "0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359", "isPopular": true, "network": 1},
 
     {"address": "0xdAC17F958D2ee523a2206206994597C13D831ec7", "name": "USDT",   "isPopular": true, "network": 1},
     {"address": "0x514910771AF9Ca656af840dff83E8264EcF986CA", "name": "LINK",   "isPopular": true, "network": 1},

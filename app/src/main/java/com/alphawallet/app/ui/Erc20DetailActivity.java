@@ -151,7 +151,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        tokenMeta = new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), token.balance.toString(), token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec());
+        tokenMeta = new TokenCardMeta(token);
     }
 
     private void setTokenListener()

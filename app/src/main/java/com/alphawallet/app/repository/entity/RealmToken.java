@@ -26,6 +26,7 @@ public class RealmToken extends RealmObject {
     private long lastBlockRead;
     private int chainId;
     private long earliestTxBlock;
+    private boolean visibilityChanged;
 
     public int getDecimals() {
         return decimals;
@@ -172,5 +173,15 @@ public class RealmToken extends RealmObject {
     public void setEarliestTransactionBlock(long earliestTransactionBlock)
     {
         this.earliestTxBlock = earliestTransactionBlock;
+    }
+
+    public boolean isVisibilityChanged()
+    {
+        return visibilityChanged;
+    }
+
+    public void setVisibilityChanged(boolean visibilityChanged)
+    {
+        this.visibilityChanged = visibilityChanged;
     }
 }

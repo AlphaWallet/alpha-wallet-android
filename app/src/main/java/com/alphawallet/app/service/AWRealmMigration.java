@@ -112,6 +112,13 @@ public class AWRealmMigration implements RealmMigration
                     .addField("signTime", long.class);
             oldVersion++;
         }
+
+        if (oldVersion == 14)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmToken");
+            if (!realmToken.hasField("visibilityChanged")) realmToken.addField("visibilityChanged", boolean.class);
+            oldVersion++;
+        }
     }
 
     @Override

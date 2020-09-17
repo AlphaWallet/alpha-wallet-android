@@ -85,6 +85,8 @@ public class TokensService
     private Disposable queryUnknownTokensDisposable;
     @Nullable
     private Disposable balanceCheckDisposable;
+    @Nullable
+    private Disposable erc20CheckDisposable;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
@@ -114,8 +116,9 @@ public class TokensService
             {
                 queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId).toObservable() //fetch tokenInfo
                         .filter(tokenInfo -> tokenInfo.name != null)
+                        .map(tokenInfo -> { tokenInfo.isEnabled = false; return tokenInfo; }) //set default visibility to false
                         .flatMap(tokenInfo -> tokenRepository.determineCommonType(tokenInfo).toObservable()
-                                .flatMap(contractType -> tokenRepository.addToken(new Wallet(currentAddress), tokenInfo, contractType).toObservable()))
+                            .flatMap(contractType -> tokenRepository.addToken(new Wallet(currentAddress), tokenInfo, contractType).toObservable()))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::finishAddToken, Throwable::printStackTrace, this::finishTokenCheck);
@@ -257,7 +260,7 @@ public class TokensService
     {
         if (checkUnknownTokenCycle == null || checkUnknownTokenCycle.isDisposed())
         {
-            checkUnknownTokenCycle = Observable.interval(0, 1, TimeUnit.SECONDS)
+            checkUnknownTokenCycle = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkUnknownTokens()).subscribe();
         }
     }
@@ -298,6 +301,31 @@ public class TokensService
                 tokenUpdateList.add(t);
             }
         }
+
+        addPopularTokens();
+    }
+
+    private void addPopularTokens()
+    {
+        // strategy for favourites:
+        // 1. if enabled : always show
+        // 2. if disabled but visibility not adjusted: check balance, show if non-zero
+        // 3. if disabled and visibility adjusted: disable
+
+        //now add any relevant contracts
+        for (ContractLocator cl : ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()))
+        {
+            Token token = getToken(cl.chainId, cl.address);
+            if (token != null)
+            {
+                TokenCardMeta meta = new TokenCardMeta(token);
+                //if enabled or visibility not adjusted
+                if (tokenNotInList(meta) && (tokenRepository.isEnabled(token) || !tokenRepository.hasVisibilityBeenChanged(token)))
+                {
+                    tokenUpdateList.add(new TokenUpdateEntry(meta.getChain(), meta.getAddress(), meta.type));
+                }
+            }
+        }
     }
 
     private boolean tokenNotInList(TokenCardMeta tm)
@@ -327,6 +355,7 @@ public class TokensService
 
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) balanceCheckDisposable.dispose();
         if (tokenCheckDisposable != null && !tokenCheckDisposable.isDisposed()) tokenCheckDisposable.dispose();
+        if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) erc20CheckDisposable.dispose();
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
 
@@ -414,20 +443,24 @@ public class TokensService
 
     private void checkERC20(Token[] checkedERC721Tokens)
     {
-        //mark tokens as checked
-        updateCheckTime(checkedERC721Tokens);
-        final String walletAddress = currentAddress;
+        if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
+        {
+            //mark tokens as checked
+            updateCheckTime(checkedERC721Tokens);
+            final String walletAddress = currentAddress;
 
-        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
-        tokenCheckDisposable = tickerService.getTokensOnNetwork(info, walletAddress, this)
-                .flatMap(tokens -> tokenRepository.addERC20(new Wallet(walletAddress), tokens))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::finishCheckChain, this::onERC20Error);
+            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
+            erc20CheckDisposable = tickerService.getTokensOnNetwork(info, walletAddress, this)
+                    .flatMap(tokens -> tokenRepository.addERC20(new Wallet(walletAddress), tokens))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::finishCheckChain, this::onERC20Error);
+        }
     }
 
     private void finishCheckChain(Token[] updatedMarketTokens)
     {
+        erc20CheckDisposable = null;
         //mark tokens as checked
         updateCheckTime(updatedMarketTokens);
     }
@@ -457,6 +490,7 @@ public class TokensService
 
     private void onERC20Error(Throwable throwable)
     {
+        erc20CheckDisposable = null;
         if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
@@ -643,5 +677,23 @@ public class TokensService
     public Realm getTickerRealmInstance()
     {
         return tokenRepository.getTickerRealmInstance();
+    }
+
+    public boolean shouldDisplayPopularToken(TokenCardMeta tcm)
+    {
+        //Display popular token if
+        // - explicitly enabled
+        // - user has not altered the visibility and token has positive balance (user may not be aware of visibility controls).
+        if (ethereumNetworkRepository.getIsPopularToken(tcm.getChain(), tcm.getAddress()))
+        {
+            Token token = getToken(tcm.getChain(), tcm.getAddress());
+            return (token == null)
+                    || tokenRepository.isEnabled(token)
+                    || (!tokenRepository.hasVisibilityBeenChanged(token) && token.hasPositiveBalance());
+        }
+        else
+        {
+            return true;
+        }
     }
 }

@@ -12,6 +12,7 @@ import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.AssetDefinitionService;
 
+import io.reactivex.ObservableSource;
 import io.reactivex.disposables.Disposable;
 
 import java.math.BigDecimal;
@@ -30,6 +31,7 @@ public interface TokenRepositoryType {
     Single<ContractLocator> getTokenResponse(String address, int chainId, String method);
     Single<Token[]> checkInterface(Token[] tokens, Wallet wallet);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
+    Completable setVisibilityChanged(Wallet wallet, Token token);
     Single<TokenInfo> update(String address, int chainId);
     Disposable memPoolListener(int chainId, SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
@@ -62,4 +64,7 @@ public interface TokenRepositoryType {
 
     Single<BigDecimal> fetchChainBalance(String walletAddress, int chainId);
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
+    
+    boolean isEnabled(Token newToken);
+    boolean hasVisibilityBeenChanged(Token token);
 }

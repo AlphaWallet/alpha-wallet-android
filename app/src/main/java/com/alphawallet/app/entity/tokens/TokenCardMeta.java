@@ -48,6 +48,16 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.balance = balance;
     }
 
+    public TokenCardMeta(Token token)
+    {
+        this.tokenId = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
+        this.lastUpdate = token.updateBlancaTime;
+        this.lastTxUpdate = token.lastTxCheck;
+        this.type = token.getInterfaceSpec();
+        this.nameWeight = 1000;
+        this.balance = token.balance.toString();
+    }
+
     protected TokenCardMeta(Parcel in)
     {
         tokenId = in.readString();

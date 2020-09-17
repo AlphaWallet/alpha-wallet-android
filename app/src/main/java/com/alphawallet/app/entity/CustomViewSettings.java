@@ -23,13 +23,6 @@ public class CustomViewSettings
 
     public static boolean filterToken(TokenCardMeta token, boolean filterResult, Context context)
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean hideZeroBalanceTokens = pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false);
-
-        if (hideZeroBalanceTokens && !token.hasPositiveBalance()) {
-            filterResult = false;
-        }
-
         boolean badToken = (token.nameWeight == Integer.MAX_VALUE);
         //boolean badToken = token.isTerminated() || token.isBad();
         //if (!token.tokenInfo.isEnabled) filterResult = false;

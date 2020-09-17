@@ -53,7 +53,6 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     private ItemClickListener listener;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
-    private final int POPULAR_TOKEN_DISPLAY_COUNT = 20;
 
     int hiddenTokensCount = 0;
     int popularTokensCount = 0;
@@ -138,6 +137,9 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     private void setupList(List<TokenCardMeta> tokens, boolean forFilter)
     {
+        hiddenTokensCount = 0;
+        popularTokensCount = 0;
+
         items.clear();
         items.beginBatchedUpdates();
 
@@ -163,18 +165,12 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             else
             {
                 popularTokensCount++;
-                if (forFilter || popularTokensCount <= POPULAR_TOKEN_DISPLAY_COUNT)
-                {
-                    sortedItem = new TokenSortedItem(
-                            POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
-                    );
-                }
+                sortedItem = new TokenSortedItem(
+                        POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                );
             }
 
-            if (sortedItem != null)
-            {
-                items.add(sortedItem);
-            }
+            items.add(sortedItem);
         }
 
         items.add(new ManageTokensLabelSortedItem(
@@ -212,6 +208,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         }
     }
 
+    //TODO: Deduplicate
     private KnownContract readContracts()
     {
         String jsonString;
@@ -284,11 +281,11 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     {
         if (!(items.get(position).value instanceof TokenCardMeta)) return;
 
-        if (position == 0)
-        {
-            handleShowHideEmptyTokens(isChecked);
-            return;
-        }
+//        if (position == 0)
+//        {
+//            handleShowHideEmptyTokens(isChecked);
+//            return;
+//        }
 
         TokenCardMeta tcm = (TokenCardMeta)items.get(position).value;
 
@@ -315,11 +312,54 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
         items.removeItemAt(position);
         items.add(updateItem);
+
+        //need to allow for token click to keep track of quantities
+        updateLabels();
+
         items.endBatchedUpdates();
 
         notifyDataSetChanged();
 
         listener.onItemClick(token, isChecked);
+    }
+
+    private void updateLabels()
+    {
+        hiddenTokensCount = 0;
+        popularTokensCount = 0;
+
+        int popularTokenLabelIndex = -1;
+        int hiddenTokenLabelIndex = -1;
+
+        for (int i = 0; i < items.size(); i++)
+        {
+            switch (items.get(i).viewType)
+            {
+                case HIDDEN_TOKEN:
+                    hiddenTokensCount++;
+                    break;
+                case POPULAR_TOKEN:
+                    popularTokensCount++;
+                    break;
+                case LABEL_HIDDEN_TOKEN:
+                    hiddenTokenLabelIndex = i;
+                    break;
+                case LABEL_POPULAR_TOKEN:
+                    popularTokenLabelIndex = i;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (hiddenTokensCount == 0 && hiddenTokenLabelIndex >= 0)
+        {
+            items.removeItemAt(hiddenTokenLabelIndex);
+        }
+        if (popularTokensCount == 0 && popularTokenLabelIndex >= 0)
+        {
+            items.removeItemAt(popularTokenLabelIndex);
+        }
     }
 
     private void handleShowHideEmptyTokens(boolean isChecked)
@@ -387,7 +427,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
                     DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
             );
         }
-        else if(!isContractPopularToken(token.getAddress()))
+        else if (!isContractPopularToken(token.getAddress()))
         {
             hiddenTokensCount++;
             sortedItem = new TokenSortedItem(
@@ -397,20 +437,13 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         else
         {
             popularTokensCount++;
-            if (popularTokensCount <= POPULAR_TOKEN_DISPLAY_COUNT)
-            {
-                sortedItem = new TokenSortedItem(
-                        POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
-                );
-            }
+            sortedItem = new TokenSortedItem(
+                    POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+            );
         }
 
         items.beginBatchedUpdates();
-
-        if (sortedItem != null)
-        {
-            items.add(sortedItem);
-        }
+        items.add(sortedItem);
 
         addHiddenTokenLabel();
         addPopularTokenLabel();

@@ -9,11 +9,9 @@ import android.util.Log;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
 import com.alphawallet.app.entity.TransferFromEventResponse;
-import com.alphawallet.app.entity.UnknownToken;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
@@ -98,7 +96,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     private final Map<Integer, Web3j> web3jNodeServers;
     private AWEnsResolver ensResolver;
-    private KnownContract knownContract;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -305,8 +302,11 @@ public class TokenRepository implements TokenRepositoryType {
                 default:
                     break;
             }
+
             Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), contractType, network.getShortName(), 0);
             newToken.setTokenWallet(wallet.address);
+            if (!tokenInfo.isEnabled) updateTokenVisibility(newToken);
+
             return newToken;
         }).flatMap(nToken -> localSource.saveToken(wallet, nToken));
     }
@@ -353,9 +353,49 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Token[]> addERC20(Wallet wallet, Token[] tokens)
     {
+        List<Token> updateList = determineTokenTypes(wallet, tokens);
         return localSource.saveERC20Tokens(
                 wallet,
-                tokens);
+                updateList.toArray(new Token[0]));
+    }
+
+    /**
+     * Ensure all tokens received from AmberData have the correct interface.
+     * If not, determine the interface then store. This means there's no need to store again so filter out the tokens we store
+     *
+     * @param wallet
+     * @param tokens
+     * @return
+     */
+    private List<Token> determineTokenTypes(Wallet wallet, Token[] tokens)
+    {
+        List<String> removeList = new ArrayList<>();
+        //check interface spec before storing.
+        for (Token t : tokens)
+        {
+            if (ignoreToken(t))
+            {
+                removeList.add(t.tokenInfo.address);
+                continue;
+            }
+
+            Token st = localSource.fetchToken(t.tokenInfo.chainId, wallet, t.tokenInfo.address.toLowerCase());
+            if (st == null && t.getInterfaceSpec() == ContractType.OTHER)
+            {
+                t.setInterfaceSpec(determineCommonType(t.tokenInfo).blockingGet());
+                st = localSource.saveToken(wallet, t).blockingGet(); //store now so list is updated more quickly at startup
+                if (st != null) removeList.add(st.tokenInfo.address);
+            }
+        }
+
+        //only return tokens that already have their type checked
+        List<Token> updateList = new ArrayList<>();
+        for (Token t : tokens)
+        {
+            if (!removeList.contains(t.tokenInfo.address)) updateList.add(t);
+        }
+
+        return updateList;
     }
 
     @Override
@@ -376,6 +416,14 @@ public class TokenRepository implements TokenRepositoryType {
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         localSource.setEnable(network, wallet, token, isEnabled);
+        return Completable.fromAction(() -> {});
+    }
+
+    @Override
+    public Completable setVisibilityChanged(Wallet wallet, Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        localSource.setVisibilityChanged(wallet, token);
         return Completable.fromAction(() -> {});
     }
 
@@ -613,6 +661,21 @@ public class TokenRepository implements TokenRepositoryType {
     {
         t.walletUIUpdateRequired = true;
         TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec());
+    }
+
+    /**
+     * This is for popular tokens - the heuristic is to only show newly discovered popular tokens if they have balance
+     * Only at wallet init do we see this - when unknown token is added, we set isEnabled to false.
+     *
+     * @param newToken
+     */
+    private void updateTokenVisibility(Token newToken)
+    {
+        if (!localSource.hasVisibilityBeenChanged(newToken)
+                && newToken.hasPositiveBalance()) //only tokens on unknown discovery list have default isEnabled = false
+        {
+            newToken.tokenInfo.isEnabled = true;
+        }
     }
 
     /**
@@ -1220,40 +1283,25 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-
-            /*
-            Below code is used to identify which are popular tokens and which aren't.
-            This way, on first discovery, it will decide either to make it enable or disable.
-             */
-            if (knownContract == null)
-            {
-                knownContract = ethereumNetworkRepository.readContracts();
-            }
-
-            boolean isEnabled = false;
-            List<UnknownToken> unknownTokens = knownContract.getMainNet();
-            if (chainId == EthereumNetworkRepository.XDAI_ID)
-            {
-                unknownTokens = knownContract.getMainNet();
-            }
-
-            for (UnknownToken unknownToken : unknownTokens)
-            {
-                if (unknownToken.address.equalsIgnoreCase(address))
-                {
-                    isEnabled = !unknownToken.isPopular;
-                    break;
-                }
-            }
-
             return new TokenInfo(
                     address,
                     getName(address, network),
                     getContractData(network, address, stringParam("symbol"), ""),
                     getDecimals(address, network),
-                    isEnabled,
-                    chainId);
+                    true, chainId);
         });
+    }
+
+    @Override
+    public boolean isEnabled(Token token)
+    {
+        return localSource.getEnabled(token);
+    }
+
+    @Override
+    public boolean hasVisibilityBeenChanged(Token token)
+    {
+        return localSource.hasVisibilityBeenChanged(token);
     }
 
     @Override
@@ -1385,5 +1433,17 @@ public class TokenRepository implements TokenRepositoryType {
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
+    }
+
+    private boolean ignoreToken(Token t)
+    {
+        //Screen discovery token out
+        String[] ignoreContracts = { "0x8c0edb69ebf038ba0c7a4873e40fc09725064c2e" };
+        for (String addr : ignoreContracts)
+        {
+            if (t.tokenInfo.address.equalsIgnoreCase(addr)) return true;
+        }
+
+        return false;
     }
 }

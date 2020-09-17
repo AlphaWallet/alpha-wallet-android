@@ -37,4 +37,6 @@ public interface EthereumNetworkRepositoryType {
 	Token getBlankOverrideToken(NetworkInfo networkInfo);
 
 	KnownContract readContracts();
+
+    boolean getIsPopularToken(int chain, String address);
 }

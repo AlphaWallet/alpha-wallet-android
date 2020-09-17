@@ -13,13 +13,14 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
     private final Context context;
+    private final HashMap<String, ContractLocator> popularTokens = new HashMap<>();
 
     public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, Context ctx)
     {
@@ -51,6 +52,11 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         return EthereumNetworkBase.getEtherscanURLbyNetwork(networkId);
     }
 
+    public boolean getIsPopularToken(int chain, String address)
+    {
+        return popularTokens.containsKey(address.toLowerCase());
+    }
+
     /* can't turn this one into one-liners like every other function
      * in this file, without making either EthereumNetworkBase or
      * ContractResult import android (therefore preventing their use
@@ -58,25 +64,33 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
      * interface/class */
     public List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters)
     {
-        List<ContractLocator> knownContracts = new ArrayList<>();
+        if (popularTokens.size() == 0)
+        {
+            buildPopularTokenMap(networkFilters);
+        }
 
+        return new ArrayList<>(popularTokens.values());
+    }
+
+    //Note: There is an issue with this method - if a contract is the same address on XDAI and MAINNET_ID it needs to be refactored
+    private void buildPopularTokenMap(List<Integer> networkFilters)
+    {
         KnownContract knownContract = readContracts();
 
-        if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID))
+        if (networkFilters == null || networkFilters.contains(EthereumNetworkRepository.MAINNET_ID))
         {
             for (UnknownToken unknownToken: knownContract.getMainNet())
             {
-                knownContracts.add(new ContractLocator(unknownToken.address, EthereumNetworkRepository.MAINNET_ID));
+                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, EthereumNetworkRepository.MAINNET_ID));
             }
         }
-        if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID))
+        if (networkFilters == null || networkFilters.contains(EthereumNetworkRepository.XDAI_ID))
         {
             for (UnknownToken unknownToken: knownContract.getXDAI())
             {
-                knownContracts.add(new ContractLocator(unknownToken.address, EthereumNetworkRepository.XDAI_ID));
+                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, EthereumNetworkRepository.XDAI_ID));
             }
         }
-        return knownContracts;
     }
 
     @Override

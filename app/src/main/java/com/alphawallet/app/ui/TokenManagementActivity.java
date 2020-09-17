@@ -95,7 +95,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
             delayHandler.postDelayed(workRunnable, 500 /*delay*/);
         }
 
-        Runnable workRunnable = () -> adapter.filter(searchString);
+        Runnable workRunnable = () -> { if (adapter != null) adapter.filter(searchString); };
     };
 
     private void onTokens(TokenCardMeta[] tokenArray) {

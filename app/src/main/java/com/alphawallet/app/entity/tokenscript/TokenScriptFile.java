@@ -130,8 +130,15 @@ public class TokenScriptFile extends File
     public boolean isDebug()
     {
         //check for the private data area
-        String privateArea = context.getFilesDir().getAbsolutePath();
-        return !getAbsolutePath().startsWith(privateArea);
+        if (context != null)
+        {
+            String privateArea = context.getFilesDir().getAbsolutePath();
+            return !getAbsolutePath().startsWith(privateArea);
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void determineSignatureType(XMLDsigDescriptor sigDescriptor)

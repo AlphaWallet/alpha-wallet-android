@@ -171,6 +171,18 @@ public class SettingsItemView extends LinearLayout {
         }
     }
 
+    public String getSubtitle()
+    {
+        if (subtitle.getVisibility() == View.VISIBLE)
+        {
+            return subtitle.getText().toString();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     public void setToggleState(boolean toggled) {
         toggle.setChecked(toggled);
     }

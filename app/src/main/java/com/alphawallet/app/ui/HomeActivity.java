@@ -612,10 +612,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }, 500);
     }
 
-    private void backupWalletFail(String keyBackup)
+    private void backupWalletFail(String keyBackup, boolean hasNoLock)
     {
         //postpone backup until later
-        ((NewSettingsFragment)settingsFragment).backupSeedSuccess();
+        ((NewSettingsFragment)settingsFragment).backupSeedSuccess(hasNoLock);
         if (keyBackup != null)
         {
             ((WalletFragment)walletFragment).remindMeLater(new Wallet(keyBackup));
@@ -625,7 +625,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void backupWalletSuccess(String keyBackup)
     {
-        ((NewSettingsFragment)settingsFragment).backupSeedSuccess();
+        ((NewSettingsFragment)settingsFragment).backupSeedSuccess(false);
         ((WalletFragment)walletFragment).storeWalletBackupTime(keyBackup);
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
         if (successImage != null) successImage.setImageResource(R.drawable.big_green_tick);
@@ -965,9 +965,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             case C.REQUEST_BACKUP_WALLET:
                 String keyBackup = null;
+                boolean noLockScreen = false;
                 if (data != null) keyBackup = data.getStringExtra("Key");
+                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
                 if (resultCode == RESULT_OK) backupWalletSuccess(keyBackup);
-                else backupWalletFail(keyBackup);
+                else backupWalletFail(keyBackup, noLockScreen);
                 break;
             case C.REQUEST_TRANSACTION_CALLBACK:
                 ((DappBrowserFragment)dappBrowserFragment).handleTransactionCallback(resultCode, data);

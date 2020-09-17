@@ -8,11 +8,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.TokenManageType;
+import com.alphawallet.app.entity.UnknownToken;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -25,12 +25,14 @@ import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TokenLabelViewHolder;
 import com.alphawallet.app.ui.widget.holder.TokenListHolder;
+import com.google.gson.Gson;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -39,15 +41,21 @@ import static com.alphawallet.app.entity.TokenManageType.DISPLAY_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.HIDDEN_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_DISPLAY_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_HIDDEN_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.LABEL_POPULAR_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.POPULAR_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.SHOW_ZERO_BALANCE;
 import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 
 public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> implements OnTokenManageClickListener {
 
     private final Context context;
+    private final List<UnknownToken> unknownTokenList;
     private ItemClickListener listener;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+
+    int hiddenTokensCount = 0;
+    int popularTokensCount = 0;
 
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
@@ -106,7 +114,12 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
         List<TokenCardMeta> tokenList = filterTokens(Arrays.asList(tokens));
 
-        setupList(tokenList);
+        /*
+        This list to identify popular tokens
+         */
+        unknownTokenList = Objects.requireNonNull(readContracts()).getMainNet();
+
+        setupList(tokenList, false);
     }
 
     private List<TokenCardMeta> filterTokens(List<TokenCardMeta> tokens) {
@@ -122,17 +135,17 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         return filteredList;
     }
 
-    private void setupList(List<TokenCardMeta> tokens)
+    private void setupList(List<TokenCardMeta> tokens, boolean forFilter)
     {
-        int hiddenTokensCount = 0;
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        hiddenTokensCount = 0;
+        popularTokensCount = 0;
 
         items.clear();
         items.beginBatchedUpdates();
 
         for (TokenCardMeta tokenCardMeta : tokens)
         {
-            TokenSortedItem sortedItem;
+            TokenSortedItem sortedItem = null;
             Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
             tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
 
@@ -142,27 +155,37 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
                         DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
                 );
             }
-            else
+            else if(!isContractPopularToken(token.getAddress()))
             {
                 hiddenTokensCount++;
                 sortedItem = new TokenSortedItem(
                         HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
                 );
             }
+            else
+            {
+                popularTokensCount++;
+                sortedItem = new TokenSortedItem(
+                        POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                );
+            }
+
             items.add(sortedItem);
         }
-
-        TokenCardMeta tcmZero = new TokenCardMeta(0, "", context.getString(R.string.zero_balance_tokens_off), 0, 0, null);
-        tcmZero.isEnabled = pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false);
-        items.add(new TokenSortedItem(
-                SHOW_ZERO_BALANCE,
-                tcmZero, 0));
 
         items.add(new ManageTokensLabelSortedItem(
                 LABEL_DISPLAY_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.display_tokens)),
                 0));
 
+        addHiddenTokenLabel();
+        addPopularTokenLabel();
+
+        items.endBatchedUpdates();
+    }
+
+    private void addHiddenTokenLabel()
+    {
         //if there are no hidden tokens found no need to display label
         if (hiddenTokensCount > 0)
         {
@@ -171,8 +194,51 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
                     new ManageTokensLabelData(context.getString(R.string.hidden_tokens)),
                     0));
         }
+    }
 
-        items.endBatchedUpdates();
+    private void addPopularTokenLabel()
+    {
+        //if there are no popular tokens found no need to display label
+        if (popularTokensCount > 0)
+        {
+            items.add(new ManageTokensLabelSortedItem(
+                    LABEL_POPULAR_TOKEN,
+                    new ManageTokensLabelData(context.getString(R.string.popular_tokens)),
+                    0));
+        }
+    }
+
+    //TODO: Deduplicate
+    private KnownContract readContracts()
+    {
+        String jsonString;
+        try
+        {
+            InputStream is = context.getAssets().open("known_contract.json");
+
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            jsonString = new String(buffer, "UTF-8");
+        }
+        catch (IOException e) {
+            return null;
+        }
+
+        return new Gson().fromJson(jsonString, KnownContract.class);
+    }
+
+    public boolean isContractPopularToken(String address) {
+        for (UnknownToken unknownToken: unknownTokenList)
+        {
+            if(unknownToken.address.equalsIgnoreCase(address))
+            {
+                return unknownToken.isPopular;
+            }
+        }
+        return false;
     }
 
     @NonNull
@@ -185,9 +251,11 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
                 return showZeros;
             case LABEL_DISPLAY_TOKEN:
             case LABEL_HIDDEN_TOKEN:
+            case LABEL_POPULAR_TOKEN:
                 return new TokenLabelViewHolder(R.layout.layout_manage_tokens_label, viewGroup);
             case DISPLAY_TOKEN:
             case HIDDEN_TOKEN:
+            case POPULAR_TOKEN:
             default:
                 TokenListHolder tokenListHolder = new TokenListHolder(R.layout.item_manage_token, viewGroup, assetService, tokensService);
                 tokenListHolder.setOnTokenClickListener(this);
@@ -213,11 +281,11 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     {
         if (!(items.get(position).value instanceof TokenCardMeta)) return;
 
-        if (position == 0)
-        {
-            handleShowHideEmptyTokens(isChecked);
-            return;
-        }
+//        if (position == 0)
+//        {
+//            handleShowHideEmptyTokens(isChecked);
+//            return;
+//        }
 
         TokenCardMeta tcm = (TokenCardMeta)items.get(position).value;
 
@@ -244,11 +312,54 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
         items.removeItemAt(position);
         items.add(updateItem);
+
+        //need to allow for token click to keep track of quantities
+        updateLabels();
+
         items.endBatchedUpdates();
 
         notifyDataSetChanged();
 
         listener.onItemClick(token, isChecked);
+    }
+
+    private void updateLabels()
+    {
+        hiddenTokensCount = 0;
+        popularTokensCount = 0;
+
+        int popularTokenLabelIndex = -1;
+        int hiddenTokenLabelIndex = -1;
+
+        for (int i = 0; i < items.size(); i++)
+        {
+            switch (items.get(i).viewType)
+            {
+                case HIDDEN_TOKEN:
+                    hiddenTokensCount++;
+                    break;
+                case POPULAR_TOKEN:
+                    popularTokensCount++;
+                    break;
+                case LABEL_HIDDEN_TOKEN:
+                    hiddenTokenLabelIndex = i;
+                    break;
+                case LABEL_POPULAR_TOKEN:
+                    popularTokenLabelIndex = i;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (hiddenTokensCount == 0 && hiddenTokenLabelIndex >= 0)
+        {
+            items.removeItemAt(hiddenTokenLabelIndex);
+        }
+        if (popularTokensCount == 0 && popularTokenLabelIndex >= 0)
+        {
+            items.removeItemAt(popularTokenLabelIndex);
+        }
     }
 
     private void handleShowHideEmptyTokens(boolean isChecked)
@@ -262,13 +373,17 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         tokensService.getAllTokenMetas(searchString)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateList, error -> { })
+                .subscribe(metas -> updateList(metas, searchString), error -> { })
                 .isDisposed();
     }
 
-    private void updateList(TokenCardMeta[] metas)
+    private void updateList(TokenCardMeta[] metas, String searchString)
     {
-        setupList(Arrays.asList(metas));
+        /*
+        While setting up, when searchString is Empty, it is hard to identify whether it is from filter call or not.
+        So when searchString is empty, consider it as a regular update.
+         */
+        setupList(Arrays.asList(metas), !searchString.isEmpty());
         notifyDataSetChanged();
     }
 
@@ -279,5 +394,61 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     @Override
     public int getItemViewType(int position) {
         return items.get(position).viewType;
+    }
+
+    public boolean isTokenPresent(String tokenAddress)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta thisToken = tsi.value;
+
+                if (thisToken.getAddress().equalsIgnoreCase(tokenAddress))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void addToken(TokenCardMeta tokenCardMeta)
+    {
+        Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
+        tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
+        TokenSortedItem sortedItem = null;
+
+        if (token.tokenInfo.isEnabled)
+        {
+            sortedItem = new TokenSortedItem(
+                    DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+            );
+        }
+        else if (!isContractPopularToken(token.getAddress()))
+        {
+            hiddenTokensCount++;
+            sortedItem = new TokenSortedItem(
+                    HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+            );
+        }
+        else
+        {
+            popularTokensCount++;
+            sortedItem = new TokenSortedItem(
+                    POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+            );
+        }
+
+        items.beginBatchedUpdates();
+        items.add(sortedItem);
+
+        addHiddenTokenLabel();
+        addPopularTokenLabel();
+
+        items.endBatchedUpdates();
+        notifyDataSetChanged();
     }
 }

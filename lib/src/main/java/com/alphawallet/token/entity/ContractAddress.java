@@ -1,7 +1,5 @@
 package com.alphawallet.token.entity;
 
-import java.util.List;
-
 /**
  * Created by James on 15/05/2019.
  * Stormbird in Sydney

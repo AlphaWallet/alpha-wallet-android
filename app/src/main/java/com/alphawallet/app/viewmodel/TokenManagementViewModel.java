@@ -16,6 +16,7 @@ import com.alphawallet.app.service.TokensService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 public class TokenManagementViewModel extends BaseViewModel {
     private final TokenRepositoryType tokenRepository;
@@ -73,5 +74,10 @@ public class TokenManagementViewModel extends BaseViewModel {
     public TokensService getTokensService()
     {
         return tokensService;
+    }
+
+    public Realm getRealmInstance(Wallet wallet)
+    {
+        return tokensService.getRealmInstance(wallet);
     }
 }

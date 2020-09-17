@@ -24,7 +24,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final ContractType type;
     public final String balance;
 
-    public boolean isEnabled;
+    /*
+    Initial value is False as Token considered to be Hidden
+     */
+    public boolean isEnabled = false;
 
     public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
     {
@@ -43,6 +46,16 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.type = type;
         this.nameWeight = 1000;
         this.balance = balance;
+    }
+
+    public TokenCardMeta(Token token)
+    {
+        this.tokenId = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
+        this.lastUpdate = token.updateBlancaTime;
+        this.lastTxUpdate = token.lastTxCheck;
+        this.type = token.getInterfaceSpec();
+        this.nameWeight = 1000;
+        this.balance = token.balance.toString();
     }
 
     protected TokenCardMeta(Parcel in)

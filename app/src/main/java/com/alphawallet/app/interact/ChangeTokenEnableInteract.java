@@ -17,6 +17,7 @@ public class ChangeTokenEnableInteract {
 
     public Completable setEnable(Wallet wallet, Token token, boolean enabled) {
         return tokenRepository.setEnable(wallet, token, enabled)
+                .andThen(tokenRepository.setVisibilityChanged(wallet, token))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

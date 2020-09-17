@@ -25,7 +25,6 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
@@ -228,7 +227,8 @@ public class NewSettingsFragment extends BaseFragment {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
 
-        switch (wallet.type) {
+        switch (wallet.type)
+        {
             case HDKEY:
                 intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
                 break;
@@ -239,16 +239,21 @@ public class NewSettingsFragment extends BaseFragment {
         }
 
         //override if this is an upgrade
-        switch (wallet.authLevel) {
-            case NOT_SET:
-            case STRONGBOX_NO_AUTHENTICATION:
-            case TEE_NO_AUTHENTICATION:
-                if (wallet.lastBackupTime > 0) {
-                    intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.UPGRADE_KEY);
-                }
-                break;
-            default:
-                break;
+        if (!backUpWalletSetting.getSubtitle().equals(getString(R.string.not_locked)))
+        {
+            switch (wallet.authLevel)
+            {
+                case NOT_SET:
+                case STRONGBOX_NO_AUTHENTICATION:
+                case TEE_NO_AUTHENTICATION:
+                    if (wallet.lastBackupTime > 0)
+                    {
+                        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.UPGRADE_KEY);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -298,9 +303,13 @@ public class NewSettingsFragment extends BaseFragment {
         }
     }
 
-    public void backupSeedSuccess() {
+    public void backupSeedSuccess(boolean hasNoLock) {
         if (viewModel != null) viewModel.TestWalletBackup();
         if (layoutBackup != null) layoutBackup.setVisibility(View.GONE);
+        if (hasNoLock)
+        {
+            backUpWalletSetting.setSubtitle(getString(R.string.not_locked));
+        }
     }
 
     private void backupWarning(String s) {

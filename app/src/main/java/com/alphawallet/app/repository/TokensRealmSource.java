@@ -20,8 +20,6 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
-import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 
@@ -266,6 +264,69 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
+    @Override
+    public boolean getEnabled(Token token)
+    {
+        boolean isEnabled = false;
+        try (Realm realm = realmManager.getRealmInstance(new Wallet(token.getWallet())))
+        {
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", databaseKey(token))
+                    .equalTo("chainId", token.tokenInfo.chainId)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                isEnabled = realmToken.isEnabled();
+            }
+        }
+
+        return isEnabled;
+    }
+
+    @Override
+    public boolean hasVisibilityBeenChanged(Token token)
+    {
+        boolean hasBeenChanged = false;
+        try (Realm realm = realmManager.getRealmInstance(new Wallet(token.getWallet())))
+        {
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", databaseKey(token))
+                    .equalTo("chainId", token.tokenInfo.chainId)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                hasBeenChanged = realmToken.isVisibilityChanged();
+            }
+        }
+
+        return hasBeenChanged;
+    }
+
+    @Override
+    public void setVisibilityChanged(Wallet wallet, Token token)
+    {
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", databaseKey(token))
+                    .equalTo("chainId", token.tokenInfo.chainId)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                realm.executeTransaction(r -> {
+                    realmToken.setVisibilityChanged(true);
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            //
+        }
+    }
+
     public static String databaseKey(int chainId, String address)
     {
         return address + "-" + chainId;
@@ -446,7 +507,6 @@ public class TokensRealmSource implements TokenLocalSource {
         if (realmToken == null)
         {
             Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);
-
             realmToken = realm.createObject(RealmToken.class, databaseKey);
             realmToken.setName(token.tokenInfo.name);
             realmToken.setSymbol(token.tokenInfo.symbol);

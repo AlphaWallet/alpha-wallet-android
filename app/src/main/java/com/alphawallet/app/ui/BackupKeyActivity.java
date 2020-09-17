@@ -80,6 +80,8 @@ public class BackupKeyActivity extends BaseActivity implements
     private String keystorePassword;
     private FunctionButtonBar functionButtonBar;
 
+    private boolean hasNoLock = false;
+
     private int screenWidth;
 
     @Override
@@ -182,12 +184,14 @@ public class BackupKeyActivity extends BaseActivity implements
                     //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty. //Update - this should never happen - remove
                     break;
                 case NO_SCREENLOCK:
+                    hasNoLock = true;
                     DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
                     break;
                 case ALREADY_LOCKED:
                     finishBackupSuccess(false); // already upgraded to top level
                     break;
                 case ERROR:
+                    hasNoLock = true;
                     DisplayKeyFailureDialog("Unable to upgrade key: Unknown Error");
                     break;
                 case SUCCESSFULLY_UPGRADED:
@@ -665,6 +669,7 @@ public class BackupKeyActivity extends BaseActivity implements
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
         intent.putExtra("Key", wallet.address);
+        if (hasNoLock) intent.putExtra("nolock", true);
         finish();
     }
 

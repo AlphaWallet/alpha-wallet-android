@@ -59,6 +59,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
@@ -162,6 +163,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        LocaleUtils.setActiveLocale(this);
 
         Bundle bundle = null;
         Intent intent = getIntent();
@@ -183,7 +185,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel = ViewModelProviders.of(this, homeViewModelFactory)
                 .get(HomeViewModel.class);
-        viewModel.setLocale(this);
         viewModel.identify(this);
 
         setContentView(R.layout.activity_home);

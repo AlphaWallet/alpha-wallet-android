@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -24,26 +25,36 @@ public class LocaleRepository implements LocaleRepositoryType {
     }
 
     @Override
-    public void setDefaultLocale(Context context, String locale) {
-        preferences.setDefaultLocale(locale);
+    public void setLocale(Context context, String locale) {
         LocaleUtils.setLocale(context, locale);
     }
 
-    public String getDefaultLocale() {
-        return preferences.getDefaultLocale();
+    @Override
+    public String getUserPreferenceLocale()
+    {
+        return preferences.getUserPreferenceLocale();
     }
 
     @Override
-    public boolean hasOverridenLangSetting() { return preferences.getHasOverriden(); }
+    public void setUserPreferenceLocale(String locale)
+    {
+        preferences.setUserPreferenceLocale(locale);
+    }
+
     @Override
-    public void setOverridenLangSetting() { preferences.setHasOverriden(); }
+    public String getActiveLocale()
+    {
+        String useLocale = preferences.getUserPreferenceLocale();
+        if (TextUtils.isEmpty(useLocale)) useLocale = preferences.getDefaultLocale();
+        return useLocale;
+    }
 
     @Override
     public ArrayList<LocaleItem> getLocaleList(Context context) {
         ArrayList<LocaleItem> list = new ArrayList<>();
         for (String locale : LOCALES) {
             Locale l = new Locale(locale);
-            list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale, getDefaultLocale()), locale));
+            list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale, getActiveLocale()), locale));
         }
         return list;
     }

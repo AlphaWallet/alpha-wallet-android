@@ -13,9 +13,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";
     private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
     private static final String NETWORK_FILTER_KEY = "network_filters";
-    private static final String GAS_PRICE_KEY = "gas_price";
-    private static final String GAS_LIMIT_KEY = "gas_limit";
-    private static final String GAS_LIMIT_FOR_TOKENS_KEY = "gas_limit_for_tokens";
     private static final String NOTIFICATIONS_KEY = "notifications";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
@@ -23,7 +20,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String FIND_WALLET_ADDRESS_SHOWN = "find_wallet_address_shown";
     private static final String CURRENCY_CODE_KEY = "currency_locale";
     private static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
-    private static final String OVERRIDE_LANG_PREFS = "override_lang";
+    public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
 
     private final SharedPreferences pref;
@@ -126,14 +123,14 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean getHasOverriden()
+    public String getUserPreferenceLocale()
     {
-        return pref.getBoolean(OVERRIDE_LANG_PREFS, false);
+        return pref.getString(USER_LOCALE_PREF, "");
     }
 
     @Override
-    public void setHasOverriden()
+    public void setUserPreferenceLocale(String locale)
     {
-        pref.edit().putBoolean(OVERRIDE_LANG_PREFS, true).apply();
+        pref.edit().putString(USER_LOCALE_PREF, locale).apply();
     }
 }

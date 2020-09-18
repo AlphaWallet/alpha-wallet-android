@@ -7,12 +7,10 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.v4.content.FileProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -20,38 +18,28 @@ import com.alphawallet.app.entity.FileData;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.ui.SplashActivity;
-import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.KeyService;
+import com.alphawallet.token.tools.TokenDefinition;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.tools.TokenDefinition;
-import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
-import com.alphawallet.app.interact.FetchWalletsInteract;
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.KeyService;
-
-import org.xml.sax.SAXException;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
@@ -86,8 +74,9 @@ public class SplashViewModel extends ViewModel
         this.currencyRepository = currencyRepository;
     }
 
-    public void setLocale(Context context) {
-        localeRepository.setDefaultLocale(context, preferenceRepository.getDefaultLocale());
+    public void setLocale(Context context)
+    {
+        localeRepository.setLocale(context, localeRepository.getActiveLocale());
     }
 
     public void fetchWallets()

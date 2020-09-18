@@ -44,7 +44,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
         AnalyticsProperties analyticsProperties = (AnalyticsProperties) event;
 
         trackFirebase(analyticsProperties, eventName);
-        trackMixPanel(analyticsProperties, eventName);
+        trackMixpanel(analyticsProperties, eventName);
     }
 
     private void trackFirebase(AnalyticsProperties analyticsProperties, String eventName)
@@ -58,7 +58,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
         firebaseAnalytics.logEvent(eventName, props);
     }
 
-    private void trackMixPanel(AnalyticsProperties analyticsProperties, String eventName)
+    private void trackMixpanel(AnalyticsProperties analyticsProperties, String eventName)
     {
         try
         {

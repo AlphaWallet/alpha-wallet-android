@@ -36,6 +36,7 @@ import io.reactivex.Single;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
+    private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -488,7 +489,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static String defaultDapp()
     {
-        return null;
+        return DEFAULT_HOMEPAGE;
     }
 
     public Token getBlankOverrideToken(NetworkInfo networkInfo)

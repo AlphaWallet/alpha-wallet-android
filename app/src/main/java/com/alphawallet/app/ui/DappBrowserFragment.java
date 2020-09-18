@@ -23,6 +23,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -134,7 +135,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
-    private static final String DAPP_HOME = "DAPP_HOME";
     private static final String MY_DAPPS = "MY_DAPPS";
     private static final String DISCOVER_DAPPS = "DISCOVER_DAPPS";
     private static final String HISTORY = "HISTORY";
@@ -145,12 +145,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private Intent picker;
-    private final Deque<String> forwardFragmentStack = new LinkedList<>();
-    private final Deque<String> backFragmentStack = new LinkedList<>();
     private RealmResults<RealmToken> realmUpdate;
-
-    private final String BROWSER_HOME = EthereumNetworkRepository.defaultDapp() != null
-                                        ? DAPP_BROWSER : DAPP_HOME;
 
     private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
@@ -183,7 +178,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String loadOnInit;
     private boolean homePressed;
 
-    private final Fragment dappHomeFragment;
     private final Fragment myDappsFragment;
     private final Fragment discoverDappsFragment;
     private final Fragment browserHistoryFragment;
@@ -222,7 +216,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public DappBrowserFragment()
     {
-        dappHomeFragment = new DappHomeFragment();
         myDappsFragment = new MyDappsFragment();
         discoverDappsFragment = new DiscoverDappsFragment();
         browserHistoryFragment = new BrowserHistoryFragment();
@@ -236,10 +229,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
         homePressed = false;
-        if (currentFragment == null) currentFragment = BROWSER_HOME;
+        if (currentFragment == null) currentFragment = DAPP_BROWSER;
         attachFragment(currentFragment);
         if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
         {
@@ -269,51 +263,17 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             String url = getArguments().getString("url");
             loadOnInit = url;
         } else {
-            String initFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, "");
             String lastUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, "");
             if (savedInstanceState != null)
             {
-                initFragment = savedInstanceState.getString(CURRENT_FRAGMENT, "");
                 lastUrl = savedInstanceState.getString(CURRENT_URL, "");
             }
 
-            //Dapp Browser init priority order:
-            //1. Default DAPP: Load on startup or load last Dapp
-            //2. Last fragment DAPP_BROWSER + browsing URL: load Dapp + init HOME fragment backstack
-            //3. Last fragment not DAPP_BROWSER, load last fragment
-            //4. No previous activity: Load DAPP_HOME.
-
-            if (EthereumNetworkRepository.defaultDapp() != null)
-            {
-                attachFragment(DAPP_BROWSER);
-                if (!lastUrl.isEmpty()) loadOnInit = lastUrl;
-                else loadOnInit = EthereumNetworkRepository.defaultDapp();                          //1. Load last used dapp or default dapp
-            }
-            else if (!initFragment.isEmpty())
-            {
-                if (initFragment.equals(DAPP_BROWSER) && !lastUrl.isEmpty()) loadOnInit = lastUrl;  //2. load last dapp
-                else initFragment(initFragment);                                                    //3. load last fragment
-            }
-            else
-            {
-                attachFragment(DAPP_HOME);                                                          //4. default to DAPP_HOME
-            }
+            attachFragment(DAPP_BROWSER);
+            loadOnInit = TextUtils.isEmpty(lastUrl) ? EthereumNetworkRepository.defaultDapp() : lastUrl;
         }
 
         return view;
-    }
-
-    private void initFragment(String startingFragment)
-    {
-        if (!startingFragment.isEmpty())
-        {
-            addToBackStack(DAPP_HOME);
-            attachFragment(startingFragment);
-        }
-        else
-        {
-            attachFragment(DAPP_HOME);
-        }
     }
 
     @Override
@@ -322,9 +282,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             switch (fragment.getTag())
             {
-                case DAPP_HOME:
-                    ((DappHomeFragment) fragment).setCallbacks(this, this);
-                    break;
                 case DISCOVER_DAPPS:
                     ((DiscoverDappsFragment) fragment).setCallbacks(this);
                     break;
@@ -364,9 +321,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             Fragment f = null;
             switch (tag)
             {
-                case DAPP_HOME:
-                    f = dappHomeFragment;
-                    break;
                 case DISCOVER_DAPPS:
                     f = discoverDappsFragment;
                     break;
@@ -394,10 +348,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         setBackForwardButtons();
     }
 
-    private void detachFragments(boolean detachHome) {
-        if (detachHome) {
-            detachFragment(DAPP_HOME);
-        }
+    private void detachFragments()
+    {
         detachFragment(MY_DAPPS);
         detachFragment(DISCOVER_DAPPS);
         detachFragment(HISTORY);
@@ -407,14 +359,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void homePressed()
     {
         homePressed = true;
-        detachFragments(false);
-        forwardFragmentStack.clear();
-        backFragmentStack.clear();
-        if (!currentFragment.equals(BROWSER_HOME))
-        {
-            attachFragment(dappHomeFragment, BROWSER_HOME);
-        }
-        currentFragment = BROWSER_HOME;
+        detachFragments();
+        currentFragment = DAPP_BROWSER;
         if (urlTv != null)
             urlTv.getText().clear();
         if (web3 != null)
@@ -422,10 +368,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.clearHistory();
             web3.stopLoading();
 
-            if (EthereumNetworkRepository.defaultDapp() != null)
-            {
-                loadUrl(EthereumNetworkRepository.defaultDapp());
-            }
+            web3.loadUrl(EthereumNetworkRepository.defaultDapp(), getWeb3Headers());
+            urlTv.setText(EthereumNetworkRepository.defaultDapp());
         }
 
         //blank forward / backward arrows
@@ -434,22 +378,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     @Override
     public void onDappHomeNavClick(int position) {
-        detachFragments(true);
+        detachFragments();
         switch (position) {
             case 0: {
-                forwardFragmentStack.clear();
                 addToBackStack(MY_DAPPS);
                 attachFragment(myDappsFragment, MY_DAPPS);
                 break;
             }
             case 1: {
-                forwardFragmentStack.clear();
                 addToBackStack(DISCOVER_DAPPS);
                 attachFragment(discoverDappsFragment, DISCOVER_DAPPS);
                 break;
             }
             case 2: {
-                forwardFragmentStack.clear();
                 addToBackStack(HISTORY);
                 attachFragment(browserHistoryFragment, HISTORY);
                 break;
@@ -462,7 +403,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     @Override
     public void onDappClick(DApp dapp) {
-        forwardFragmentStack.clear();
         addToBackStack(DAPP_BROWSER);
         loadUrl(dapp.getUrl());
     }
@@ -488,6 +428,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         final MenuItem share = toolbar.getMenu().findItem(R.id.action_share);
         final MenuItem scan = toolbar.getMenu().findItem(R.id.action_scan);
         final MenuItem add = toolbar.getMenu().findItem(R.id.action_add_to_my_dapps);
+        final MenuItem history = toolbar.getMenu().findItem(R.id.action_history);
+        final MenuItem bookmarks = toolbar.getMenu().findItem(R.id.action_my_dapps);
 
         if (reload != null) reload.setOnMenuItemClickListener(menuItem -> {
             reloadPage();
@@ -511,6 +453,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             viewModel.addToMyDapps(getContext(), currentWebpageTitle, urlTv.getText().toString());
             return true;
         });
+        if (history != null) history.setOnMenuItemClickListener(menuItem -> {
+            addToBackStack(HISTORY);
+            attachFragment(browserHistoryFragment, HISTORY);
+            return true;
+        });
+        if (bookmarks != null) bookmarks.setOnMenuItemClickListener(menuItem -> {
+            addToBackStack(MY_DAPPS);
+            attachFragment(myDappsFragment, MY_DAPPS);
+            return true;
+        });
     }
 
     private void initView(View view) {
@@ -521,6 +473,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         swipeRefreshLayout.setRefreshInterface(this);
 
         toolbar = view.findViewById(R.id.address_bar);
+        layoutNavigation = view.findViewById(R.id.layout_navigator);
 
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
@@ -530,10 +483,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }
         else if (EthereumNetworkRepository.defaultDapp() != null)
-        {
-            inflater.inflate(R.menu.menu_defaultdapp, toolbar.getMenu());
-        }
-        else
         {
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
@@ -602,16 +551,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 viewModel.getDappsMasterList(getContext()),
                 this::onItemClick
         );
-        urlTv.setAdapter(adapter);
+        urlTv.setAdapter(null);
 
         urlTv.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_GO)
             {
                 String urlText = urlTv.getText().toString();
-                forwardFragmentStack.clear();
                 handled = loadUrl(urlText);
-                detachFragments(true);
+                detachFragments();
                 cancelSearchSession();
             }
             return handled;
@@ -652,6 +600,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void beginSearchSession() {
+        urlTv.setAdapter(null);
         expandCollapseView(currentNetwork, true);
         expandCollapseView(layoutNavigation, true);
 
@@ -667,6 +616,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void postBeginSearchSession(ImageView item)
     {
+        urlTv.setAdapter(adapter);
         if (item.getVisibility() == View.GONE)
         {
             expandCollapseView(item, false);
@@ -747,13 +697,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void addToBackStack(String nextFragment)
     {
-        if (currentFragment != null && !currentFragment.equals(nextFragment)) backFragmentStack.add(currentFragment);
         currentFragment = nextFragment;
     }
 
     private void addToForwardStack(String prevFragment)
     {
-        if (currentFragment != null && !currentFragment.equals(prevFragment)) forwardFragmentStack.add(currentFragment);
         currentFragment = prevFragment;
     }
 
@@ -922,9 +870,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
         if (loadOnInit != null)
         {
-            addToBackStack(BROWSER_HOME);
-            loadUrl(loadOnInit);
-            loadOnInit = null;
+            addToBackStack(DAPP_BROWSER);
+            web3.loadUrl(Utils.formatUrl(loadOnInit), getWeb3Headers());
+            urlTv.setText(Utils.formatUrl(loadOnInit));
         }
     }
 
@@ -1228,45 +1176,39 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         resultDialog.show();
     }
 
-    private void goToPreviousPage() {
-        if (web3.canGoBack()) {
+    private void goToPreviousPage()
+    {
+        if (back.getAlpha() == 0.3f) return;
+        if (!currentFragment.equals(DAPP_BROWSER))
+        {
+            //switch to dapp browser
+            detachFragments();
+            addToBackStack(DAPP_BROWSER);
+            setBackForwardButtons();
+        }
+        else if (web3.canGoBack())
+        {
             checkBackClickArrowVisibility(); //to make arrows function correctly - don't want to wait for web page to load to check back/forwards - this looks clunky
             web3.goBack();
-            detachFragments(true);
+            detachFragments();
             loadSessionUrl(-1);
         }
-        else if (backFragmentStack.peekLast() != null)
+        else
         {
-            String lastPage = backFragmentStack.pollLast();
-            if (!lastPage.equals(currentFragment))
-            {
-                addToForwardStack(lastPage);
-                detachFragments(true);
-                attachFragment(lastPage);
-            }
-            setBackForwardButtons();
+            //load homepage
+            web3.loadUrl(EthereumNetworkBase.defaultDapp(), getWeb3Headers());
+            urlTv.setText(EthereumNetworkBase.defaultDapp());
         }
     }
 
-    private void goToNextPage() {
+    private void goToNextPage()
+    {
+        if (next.getAlpha() == 0.3f) return;
         if (currentFragment.equals(DAPP_BROWSER) && web3.canGoForward())
         {
             checkForwardClickArrowVisibility();
             web3.goForward();
             loadSessionUrl(1);
-        }
-        else if (forwardFragmentStack.peekLast() != null)
-        {
-            String nextPage = forwardFragmentStack.pollLast();
-
-            if (!nextPage.equals(currentFragment))
-            {
-                addToBackStack(nextPage);
-                detachFragments(true);
-                attachFragment(nextPage);
-            }
-
-            setBackForwardButtons();
         }
     }
 
@@ -1278,10 +1220,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         //will this be last item?
         WebBackForwardList sessionHistory = web3.copyBackForwardList();
         int nextIndex = sessionHistory.getCurrentIndex() - 1;
-        if (backFragmentStack.peekLast() == null && nextIndex <= 0) back.setAlpha(0.3f);
+        if (nextIndex <= 0) back.setAlpha(0.3f);
         else back.setAlpha(1.0f);
-
-        next.setAlpha(1.0f); //if we clicked back then we would have a next available
     }
 
     /**
@@ -1294,8 +1234,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         int nextIndex = sessionHistory.getCurrentIndex() + 1;
         if (nextIndex >= sessionHistory.getSize() - 1) next.setAlpha(0.3f);
         else next.setAlpha(1.0f);
-
-        back.setAlpha(1.0f);
     }
 
     /**
@@ -1323,7 +1261,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (homePressed)
         {
             homePressed = false;
-            if (BROWSER_HOME.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp()))
+            if (currentFragment.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp()))
             {
                 web3.clearHistory();
             }
@@ -1343,14 +1281,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void setBackForwardButtons()
     {
         WebBackForwardList sessionHistory = null;
-        if (web3 != null) sessionHistory = web3.copyBackForwardList();
+        boolean canBrowseBack = false;
+        boolean canBrowseForward = false;
 
-        String nextFrag = forwardFragmentStack.peekLast();
-        String backFrag = backFragmentStack.peekLast();
+        if (web3 != null)
+        {
+            sessionHistory = web3.copyBackForwardList();
+            canBrowseBack = !currentFragment.equals(DAPP_BROWSER) || web3.canGoBack();
+            canBrowseForward = (currentFragment.equals(DAPP_BROWSER) && sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1);
+        }
 
         if (back != null)
         {
-            if (backFrag != null || (currentFragment.equals(DAPP_BROWSER) && (web3 != null && web3.canGoBack())))
+            if (canBrowseBack)
             {
                 back.setAlpha(1.0f);
             }
@@ -1362,7 +1305,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
         if (next != null)
         {
-            if (nextFrag != null || (currentFragment.equals(DAPP_BROWSER) && (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1)))
+            if (canBrowseForward)
             {
                 next.setAlpha(1.0f);
             }
@@ -1375,7 +1318,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private boolean loadUrl(String urlText)
     {
-        detachFragments(true);
+        detachFragments();
         addToBackStack(DAPP_BROWSER);
         cancelSearchSession();
         if (checkForMagicLink(urlText)) return true;
@@ -1417,7 +1360,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onItemClick(String url)
     {
-        forwardFragmentStack.clear();
         addToBackStack(DAPP_BROWSER);
         loadUrl(url);
     }

@@ -13,14 +13,14 @@
         <item
             android:id="@+id/action_my_dapps"
             android:icon="@drawable/ic_my_dapps"
-            android:orderInCategory="25"
+            android:orderInCategory="16"
             android:title="@string/my_dapps"
             app:showAsAction="withText" />
 
         <item
             android:id="@+id/action_reload"
             android:icon="@drawable/ic_dapp_reload"
-            android:orderInCategory="15"
+            android:orderInCategory="17"
             android:title="@string/action_reload"
             app:showAsAction="withText" />
 
@@ -34,7 +34,7 @@
         <item
             android:id="@+id/action_scan"
             android:icon="@drawable/ic_camera_scan"
-            android:orderInCategory="25"
+            android:orderInCategory="22"
             android:title="@string/action_scan_dapp"
             app:showAsAction="withText" />
 
@@ -43,6 +43,13 @@
             android:icon="@drawable/ic_dapp_history"
             android:orderInCategory="25"
             android:title="@string/history"
+            app:showAsAction="withText" />
+
+        <item
+            android:id="@+id/action_clear_cache"
+            android:icon="@drawable/ic_settings_cache"
+            android:orderInCategory="30"
+            android:title="@string/title_clear_browser_cache"
             app:showAsAction="withText" />
     </group>
 </menu>

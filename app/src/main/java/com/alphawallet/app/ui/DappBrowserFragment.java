@@ -430,6 +430,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         final MenuItem add = toolbar.getMenu().findItem(R.id.action_add_to_my_dapps);
         final MenuItem history = toolbar.getMenu().findItem(R.id.action_history);
         final MenuItem bookmarks = toolbar.getMenu().findItem(R.id.action_my_dapps);
+        final MenuItem clearCache = toolbar.getMenu().findItem(R.id.action_clear_cache);
 
         if (reload != null) reload.setOnMenuItemClickListener(menuItem -> {
             reloadPage();
@@ -461,6 +462,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (bookmarks != null) bookmarks.setOnMenuItemClickListener(menuItem -> {
             addToBackStack(MY_DAPPS);
             attachFragment(myDappsFragment, MY_DAPPS);
+            return true;
+        });
+        if (clearCache != null) clearCache.setOnMenuItemClickListener(menuItem -> {
+            viewModel.onClearBrowserCacheClicked(getContext());
             return true;
         });
     }
@@ -601,8 +606,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void beginSearchSession() {
         urlTv.setAdapter(null);
-        expandCollapseView(currentNetwork, true);
-        expandCollapseView(layoutNavigation, true);
+        expandCollapseView(currentNetwork, false);
+        expandCollapseView(layoutNavigation, false);
 
         disposable = Observable.zip(
                 Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
@@ -619,7 +624,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         urlTv.setAdapter(adapter);
         if (item.getVisibility() == View.GONE)
         {
-            expandCollapseView(item, false);
+            expandCollapseView(item, true);
             KeyboardUtils.showKeyboard(urlTv);
         }
 
@@ -634,10 +639,13 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     /**
      * Used to expand or collapse the view
      */
-    private synchronized void expandCollapseView(View view, boolean isViewExpanded)
+    private synchronized void expandCollapseView(View view, boolean expandView)
     {
+        //detect if view is expanded or collapsed
+        boolean isViewExpanded = view.getVisibility() == View.VISIBLE;
+
         //Collapse view
-        if(isViewExpanded)
+        if (isViewExpanded && !expandView)
         {
             int finalWidth = view.getWidth();
             ValueAnimator valueAnimator = slideAnimator(finalWidth, 0, view);
@@ -665,7 +673,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             valueAnimator.start();
         }
         //Expand view
-        else
+        else if (!isViewExpanded && expandView)
         {
             view.setVisibility(View.VISIBLE);
 
@@ -710,8 +718,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (toolbar != null)
         {
             toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
-            expandCollapseView(currentNetwork, false);
-            expandCollapseView(layoutNavigation, false);
+            expandCollapseView(currentNetwork, true);
+            expandCollapseView(layoutNavigation, true);
             clear.setVisibility(View.GONE);
             urlTv.dismissDropDown();
         }
@@ -1196,8 +1204,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         else
         {
             //load homepage
+            homePressed = true;
             web3.loadUrl(EthereumNetworkBase.defaultDapp(), getWeb3Headers());
             urlTv.setText(EthereumNetworkBase.defaultDapp());
+            web3.clearHistory();
         }
     }
 
@@ -1287,7 +1297,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (web3 != null)
         {
             sessionHistory = web3.copyBackForwardList();
-            canBrowseBack = !currentFragment.equals(DAPP_BROWSER) || web3.canGoBack();
+            String url = web3.getUrl();
+            canBrowseBack = !currentFragment.equals(DAPP_BROWSER) || web3.canGoBack() || (!TextUtils.isEmpty(url) && !url.equals(EthereumNetworkBase.defaultDapp()));
             canBrowseForward = (currentFragment.equals(DAPP_BROWSER) && sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1);
         }
 

@@ -8,8 +8,10 @@ import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.webkit.WebViewClient;
+import android.webkit.WebView;
+import android.widget.Toast;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.service.RealmManager;
@@ -211,6 +213,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
             intent.putExtra(Intent.EXTRA_TEXT, url);
             intent.setType("text/plain");
             context.startActivity(intent);
+    }
+
+    public void onClearBrowserCacheClicked(Context context) {
+        WebView webView = new WebView(context);
+        webView.clearCache(true);
+        Toast.makeText(context, context.getString(R.string.toast_browser_cache_cleared),
+                Toast.LENGTH_SHORT).show();
     }
 
     public void startScan(Activity activity) {

@@ -33,7 +33,7 @@ public class TokenScriptCallbackInterface {
 
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
-        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId)));
+        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId, true)));
     }
 
     private String getUrl() {

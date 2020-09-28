@@ -81,7 +81,7 @@ public class AWalletBottomNavigationView extends LinearLayout {
         selectedItem = index;
         switch (index) {
             case DAPP_BROWSER:
-                dappBrowser.setImageResource(R.drawable.ic_tab_browser_active);
+                dappBrowser.setImageResource(R.drawable.ic_tab_symblox_active);
                 dappBrowserLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
                 break;
             case WALLET:
@@ -104,7 +104,7 @@ public class AWalletBottomNavigationView extends LinearLayout {
     }
 
     private void deselectAll() {
-        dappBrowser.setImageResource(R.drawable.ic_tab_browser);
+        dappBrowser.setImageResource(R.drawable.ic_tab_symblox);
         wallet.setImageResource(R.drawable.ic_tab_wallet);
         settings.setImageResource(R.drawable.ic_tab_settings);
         activity.setImageResource(R.drawable.ic_tab_activity);

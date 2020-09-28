@@ -197,6 +197,7 @@
     <string name="eth_per_ticket">%1s/ticket</string>
     <string name="ethereum">Ethereum</string>
     <string name="ethereum_blockchain">Cadena de bloques de Ethereum</string>
+    <string name="velas">Velas</string>
     <string name="issuer">Emisor:</string>
     <string name="root_title">SEGURIDAD DEL DISPOSITIVO COMPROMETIDA</string>
     <string name="root_body">Tu teléfono está rooteado, pero las claves siguen estando protegidas por el cifrado \"secure enclave\" de Android. El vector de ataque vendría de una aplicación de teclado o un visor del portapapeles que obtendría tu clave mientras la introduces. AlphaWallet hace todo lo posible para mitigar este riesgo desactivando las sugerencias automáticas del teclado. Si ejecutas el root, te recomendamos que solo utilices aplicaciones de teclado convencionales, que uses una aplicación de antivirus de buena calidad y que emplees una herramienta de root de código abierto respetable como Magisk o SuperSU para limitar el acceso a los privilegios de root. En última instancia, la seguridad de las claves es tu responsabilidad.</string>
@@ -216,7 +217,7 @@
     <string name="dialog_ok">OK</string>
     <string name="wallet_label">Monedero</string>
     <string name="tx_label">Transacciones</string>
-    <string name="browser_label">Navegador</string>
+    <string name="browser_label">Symblox</string>
     <string name="settings_label">Ajustes</string>
     <string name="activity_label">Actividad</string>
     <string name="toolbar_header_importing_tickets">Importación de tokens</string>

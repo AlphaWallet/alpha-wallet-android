@@ -197,6 +197,7 @@
     <string name="eth_per_ticket">%1s/门票</string>
     <string name="ethereum">以太坊</string>
     <string name="ethereum_blockchain">基于以太坊智能合约</string>
+    <string name="velas">Velas</string>
     <string name="issuer">发行方:</string>
     <string name="root_title">设备安全性受损</string>
     <string name="root_body">你的手机有root权限，但私钥仍受Android安全区域加密保护。 第三方键盘或剪贴板查看器是个攻击媒介，当您输入密钥时便可读取您的密钥。 AlphaWallet尽最大努力通过关闭键盘自动更正来减少这种情况。 如果您以root身份运行，建议您仅使用主流键盘应用程序，运行高质量的防病毒应用程序，并使用广受认可和好评的开源根管理器，例如Magisk或SuperSU。 最终，私钥安全还是您的责任。</string>
@@ -216,7 +217,7 @@
     <string name="dialog_ok">完成</string>
     <string name="wallet_label">钱包</string>
     <string name="tx_label">交易</string>
-    <string name="browser_label">浏览器</string>
+    <string name="browser_label">Symblox</string>
     <string name="settings_label">设置</string>
     <string name="activity_label">活动</string>
     <string name="toolbar_header_importing_tickets">导入门票</string>

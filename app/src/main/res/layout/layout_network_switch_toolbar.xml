@@ -61,7 +61,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_semibold"
             android:singleLine="true"
-            android:text="@string/ethereum"
+            android:text="@string/velas"
             android:textAllCaps="true"
             android:textColor="@color/text_dark_gray"
             android:textSize="15sp" />

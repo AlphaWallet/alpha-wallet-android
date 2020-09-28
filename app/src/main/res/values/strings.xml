@@ -211,6 +211,7 @@
     <string name="eth_per_ticket">%1s/Ticket</string>
     <string name="ethereum">Ethereum</string>
     <string name="ethereum_blockchain">Ethereum Blockchain</string>
+    <string name="velas">Velas</string>
     <string name="issuer">Issuer:</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Your phone is rooted but the keys are still protected by Android secure enclave encryption. The attack vector would be from a keyboard app or clipboard viewer learning your key when you enter it. AlphaWallet does its best to mitigate this risk by switching off keyboard auto-suggest. If you run root, recommend you only use mainstream keyboard apps, run a good quality anti-virus app and use a respected open source root manager such as Magisk or SuperSU to limit access to root privileges. Ultimately key safety is your responsibility.</string>
@@ -230,7 +231,7 @@
     <string name="dialog_ok">OK</string>
     <string name="wallet_label">Wallet</string>
     <string name="tx_label">Transactions</string>
-    <string name="browser_label">Browser</string>
+    <string name="browser_label">Symblox</string>
     <string name="settings_label">Settings</string>
     <string name="activity_label">Activity</string>
     <string name="toolbar_header_importing_tickets">Importing Tokens</string>

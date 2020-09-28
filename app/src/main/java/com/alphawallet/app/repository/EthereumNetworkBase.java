@@ -36,7 +36,7 @@ import io.reactivex.Single;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
-    private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
+    private static final String DEFAULT_HOMEPAGE = "https://app.symblox.io";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -76,6 +76,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
+    public static final String VELAS_TEST_RPC_URL = "https://tn.yopta.net";
+    public static final String VELAS_MAIN_RPC_URL = "https://explorer.velas.com/rpc";
 
     public static final int MAINNET_ID = 1;
     public static final int CLASSIC_ID = 61;
@@ -90,11 +92,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int ARTIS_TAU1_ID = 246785;
     public static final int BINANCE_TEST_ID = 97;
     public static final int BINANCE_MAIN_ID = 56;
+    public static final int VELAS_TEST_ID = 111;
+    public static final int VELAS_MAIN_ID = 106;
 
     final Map<Integer, NetworkInfo> networkMap;
 
     final NetworkInfo[] NETWORKS;
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
+            new NetworkInfo(C.VELAS_MAIN_NETWORK, C.VELAS_SYMBOL, VELAS_MAIN_RPC_URL,
+                    "https://explorer.velas.com/tx/", VELAS_MAIN_ID, true,
+                    VELAS_MAIN_RPC_URL,
+                    "https://explorer.velas.com"),
             new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
                     "https://cn.etherscan.com/tx/",MAINNET_ID, true,
@@ -150,6 +158,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.binance.org/smart/tx/", BINANCE_MAIN_ID, false,
                     BINANCE_MAIN_FALLBACK_RPC_URL,
                     "https://explorer.binance.org/smart"),
+            new NetworkInfo(C.VELAS_TEST_NETWORK, C.VELAS_SYMBOL, VELAS_TEST_RPC_URL,
+                    "https://xtn.yopta.net/tx/", VELAS_TEST_ID, false,
+                    VELAS_TEST_RPC_URL,
+                    "https://xtn.yopta.net"),
     };
 
     final PreferenceRepositoryType preferences;
@@ -297,6 +309,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case EthereumNetworkRepository.XDAI_ID:
             case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
             case EthereumNetworkRepository.BINANCE_MAIN_ID:
+            case EthereumNetworkRepository.VELAS_MAIN_ID:
                 return true;
 
             default:
@@ -333,6 +346,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return BINANCE_MAIN_FALLBACK_RPC_URL;
             case BINANCE_TEST_ID:
                 return BINANCE_TEST_FALLBACK_RPC_URL;
+            case VELAS_MAIN_ID:
+                return VELAS_MAIN_RPC_URL;
+            case VELAS_TEST_ID:
+                return VELAS_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -367,6 +384,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return R.drawable.ic_binance_logo;
             case BINANCE_TEST_ID:
                 return R.drawable.ic_binance_test_logo;
+            case VELAS_TEST_ID:
+            case VELAS_MAIN_ID:
+                return R.drawable.velas_logo;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
@@ -401,6 +421,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return BINANCE_MAIN_RPC_URL;
             case BINANCE_TEST_ID:
                 return BINANCE_TEST_RPC_URL;
+            case VELAS_TEST_ID:
+                return VELAS_TEST_RPC_URL;
+            case VELAS_MAIN_ID:
+                return VELAS_MAIN_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -461,7 +485,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
+        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.VELAS_MAIN_ID));
     }
 
     public static ContractLocator getOverrideToken()

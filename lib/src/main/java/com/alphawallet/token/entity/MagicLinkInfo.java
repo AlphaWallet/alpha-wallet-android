@@ -20,6 +20,7 @@ public class MagicLinkInfo
     private static final String goerliMagicLinkDomain = "goerli.aw.app";
     private static final String artisSigma1MagicLinkDomain = "artissigma1.aw.app";
     private static final String artisTau1MagicLinkDomain = "artistau1.aw.app";
+    private static final String velasMagicLinkDomain = "velas.aw.app";
     private static final String customMagicLinkDomain = "custom.aw.app";
 
     //Etherscan domains
@@ -35,6 +36,8 @@ public class MagicLinkInfo
     private static final String goerliEtherscan = "https://goerli.etherscan.io/";
     private static final String artisSigma1Etherscan = "https://explorer.sigma1.artis.network/";
     private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
+    private static final String velasTestEtherscan = "https://xtn.yopta.net/";
+    private static final String velasMainEtherscan = "https://explorer.velas.com/";
 
     //network ids
     public static final int LEGACY_VALUE = 0;
@@ -49,6 +52,8 @@ public class MagicLinkInfo
     public static final int GOERLI_NETWORK_ID = 5;
     public static final int ARTIS_SIGMA1_NETWORK_ID = 246529;
     public static final int ARTIS_TAU1_NETWORK_ID = 246785;
+    public static final int VELAS_TEST_NETWORK_ID = 111;
+    public static final int VELAS_MAIN_NETWORK_ID = 106;
 
     //network names
     private static final String ETHEREUM_NETWORK = "Ethereum";
@@ -62,6 +67,8 @@ public class MagicLinkInfo
     private static final String GOERLI_NETWORK = "Görli";
     private static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     private static final String ARTIS_TAU1_NETWORK = "ARTIS tau1";
+    private static final String VELAS_TEST_NETWORK = "VELA (Test)";
+    private static final String VELAS_MAIN_NETWORK = "VELAS";
 
     public static String getNetworkNameById(int networkId) {
         switch (networkId) {
@@ -87,6 +94,10 @@ public class MagicLinkInfo
                 return ARTIS_SIGMA1_NETWORK;
             case ARTIS_TAU1_NETWORK_ID:
                 return ARTIS_TAU1_NETWORK;
+            case VELAS_TEST_NETWORK_ID:
+                return VELAS_TEST_NETWORK;
+            case VELAS_MAIN_NETWORK_ID:
+                return VELAS_MAIN_NETWORK;
             default:
                 return ETHEREUM_NETWORK;
         }
@@ -119,6 +130,9 @@ public class MagicLinkInfo
                 return artisSigma1MagicLinkDomain;
             case ARTIS_TAU1_NETWORK_ID:
                 return artisTau1MagicLinkDomain;
+            case VELAS_TEST_NETWORK_ID:
+            case VELAS_MAIN_NETWORK_ID:
+                return velasMagicLinkDomain;
         }
     }
 
@@ -151,6 +165,8 @@ public class MagicLinkInfo
                 return ARTIS_SIGMA1_NETWORK_ID;
             case artisTau1MagicLinkDomain:
                 return ARTIS_TAU1_NETWORK_ID;
+            case velasMagicLinkDomain:
+                return VELAS_MAIN_NETWORK_ID;
         }
     }
 
@@ -179,6 +195,10 @@ public class MagicLinkInfo
                 return artisSigma1Etherscan;
             case ARTIS_TAU1_NETWORK_ID:
                 return artisTau1Etherscan;
+            case VELAS_TEST_NETWORK_ID:
+                return velasTestEtherscan;
+            case VELAS_MAIN_NETWORK_ID:
+                return velasMainEtherscan;
         }
     }
 

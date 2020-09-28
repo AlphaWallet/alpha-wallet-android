@@ -134,6 +134,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
     private final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
     private final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/alphawallet/iconassets/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private final String VELAS_ICON_REPO = "https://raw.githubusercontent.com/symblox/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
     private static final String ASSET_DEFINITION_DB = "ASSET-db.realm";
     private static final String BUNDLED_SCRIPT = "bundled";
     private static final long CHECK_TX_LOGS_INTERVAL = 20;
@@ -2596,6 +2597,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     tURL = ALPHAWALLET_ICON_REPO;
                     repoChain = "";
                     break;
+                    case EthereumNetworkBase.VELAS_MAIN_ID:
+                        tURL = VELAS_ICON_REPO;
+                        repoChain = "velas-main";
+                        break;
+                    case EthereumNetworkBase.VELAS_TEST_ID:
+                        tURL = VELAS_ICON_REPO;
+                        repoChain = "velas-test";
+                        break;
                 default:
                     repoChain = "ethereum";
                     break;

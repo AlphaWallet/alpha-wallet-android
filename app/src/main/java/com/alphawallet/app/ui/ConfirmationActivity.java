@@ -276,7 +276,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
                 BigDecimal ethAmount = Convert.fromWei(transaction.value.toString(10), Convert.Unit.ETHER);
                 amountString = getEthString(ethAmount.doubleValue());
-                symbolText.setText(ETH_SYMBOL);
+                symbolText.setText(symbol);
                 break;
             case ERC721:
                 String contractName = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);

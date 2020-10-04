@@ -24,7 +24,10 @@ import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
 
+import org.jetbrains.annotations.NotNull;
+
 import static android.content.Context.KEYGUARD_SERVICE;
+import static android.hardware.biometrics.BiometricPrompt.BIOMETRIC_ERROR_TIMEOUT;
 import static android.hardware.fingerprint.FingerprintManager.*;
 
 /**
@@ -42,7 +45,8 @@ public class SignTransactionDialog extends BottomSheetDialog
     private final TextView usePin;
     private final TextView fingerprintError;
     private final String unlockTitle;
-    private final String unlockDetail;
+    @NotNull
+    private String unlockDetail;
     private AuthenticationCallback authCallback;
     private BiometricPrompt biometricPrompt;
     private CancellationSignal cancellationSignal;
@@ -274,12 +278,14 @@ public class SignTransactionDialog extends BottomSheetDialog
                     case BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
                     case BiometricPrompt.BIOMETRIC_ERROR_UNABLE_TO_PROCESS:
                     case BiometricPrompt.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL:
+                    case BiometricPrompt.BIOMETRIC_ERROR_TIMEOUT:
+                    case BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS: //on each of these errors, default to the OS authentication screen.
+                    case BiometricPrompt.BIOMETRIC_ACQUIRED_PARTIAL:
+                    case BiometricPrompt.BIOMETRIC_ACQUIRED_TOO_FAST:
+                    case BiometricPrompt.BIOMETRIC_ACQUIRED_TOO_SLOW:
+                        unlockDetail = context.getString(R.string.unable_to_get_biometrics);
                         cancellationSignal.cancel();
                         showAuthenticationScreen();
-                        break;
-                    case BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS:
-                        //display legacy screen
-                        authCallback.legacyAuthRequired(callBackId, unlockTitle, unlockDetail);
                         break;
                     default:
                         authCallback.authenticateFail(context.getString(R.string.authentication_failed), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);

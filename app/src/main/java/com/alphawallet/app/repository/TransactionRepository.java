@@ -19,6 +19,7 @@ import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.EthTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
@@ -327,8 +328,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+	public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
 	{
-		return inDiskCache.storeRawTx(wallet, rawTx, timeStamp);
+		//detect if transaction is success
+		return Single.fromCallable(() -> {
+			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getTransaction().orElseThrow();
+			Web3j web3j = getWeb3jService(fetchedTx.getChainId().intValue());
+			TransactionReceipt txr = web3j.ethGetTransactionReceipt(fetchedTx.getHash()).send().getResult();
+			return inDiskCache.storeRawTx(wallet, rawTx, timeStamp, txr.isStatusOK());
+		});
 	}
 }

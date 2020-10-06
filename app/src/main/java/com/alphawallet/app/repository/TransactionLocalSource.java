@@ -22,10 +22,10 @@ public interface TransactionLocalSource {
 	Realm getRealmInstance(Wallet wallet);
 	Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount);
 	Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters);
-	void markTransactionDropped(String walletAddress, String hash);
+	void markTransactionBlock(String walletAddress, String hash, long blockValue);
 	Transaction[] fetchPendingTransactions(String currentAddress);
 
 	RealmAuxData fetchEvent(String walletAddress, String eventKey);
 
-	Transaction storeRawTx(Wallet wallet, EthTransaction object, long timeStamp);
+	Transaction storeRawTx(Wallet wallet, EthTransaction object, long timeStamp, boolean isSuccessful);
 }

@@ -208,8 +208,8 @@ public class RepositoriesModule {
 	@Provides
     AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager,
 														 EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService,
-														 TokenLocalSource tls, TransactionLocalSource trs, AlphaWalletService alphaService) {
-		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, trs, alphaService);
+														 TokenLocalSource tls, TransactionRepositoryType trt, AlphaWalletService alphaService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, trt, alphaService);
 	}
 
 	@Singleton

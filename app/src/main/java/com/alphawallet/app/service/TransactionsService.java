@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.alphawallet.app.C;
@@ -17,19 +18,25 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
+import com.alphawallet.token.entity.EventDefinition;
 
+import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 8/07/2020.
@@ -44,6 +51,9 @@ public class TransactionsService
     private final TransactionLocalSource transactionsCache;
     private final Context context;
     private String currentAddress;
+
+    private final static int TRANSACTION_DROPPED = -1;
+    private final static int TRANSACTION_SEEN = -2;
 
     @Nullable
     private Disposable fetchTransactionDisposable;
@@ -204,22 +214,44 @@ public class TransactionsService
                 web3j.ethGetTransactionByHash(tx.hash).sendAsync().thenAccept(txDetails -> {
                     org.web3j.protocol.core.methods.response.Transaction fetchedTx = txDetails.getTransaction().orElseThrow(); //try to read the transaction data
                     //if transaction is complete; record it here
-                    if (fetchedTx.getBlockNumber() != null && fetchedTx.getBlockNumber().compareTo(BigInteger.ZERO) > 0)
+                    BigInteger blockNumber;
+                    try
                     {
-                        //get timestamp and write tx
-                        EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
-                                .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), txDetails, ethBlock.getBlock().getTimestamp().longValue()))
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe().isDisposed();
+                        blockNumber = fetchedTx.getBlockNumber();
+                    }
+                    catch (MessageDecodingException e)
+                    {
+                        blockNumber = BigInteger.valueOf(-1);
+                    }
+
+                    if (blockNumber.compareTo(BigInteger.ZERO) > 0)
+                    {
+                        //detect error and write to database
+                        web3j.ethGetTransactionReceipt(tx.hash).sendAsync().thenAccept(receipt -> {
+                            //get timestamp and write tx
+                            EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
+                                    .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe().isDisposed();
+
+                            }).exceptionally(throwable -> {
+                                throwable.printStackTrace();
+                                return null;
+                        });
+                    }
+                    else if (!tx.blockNumber.equals(String.valueOf(TRANSACTION_SEEN)))
+                    {
+                        //detected the tx in the pool, mark as seen
+                        transactionsCache.markTransactionBlock(currentAddress, tx.hash, TRANSACTION_SEEN);
                     }
                 }).exceptionally(throwable -> {
                     String c1 = throwable.getMessage(); //java.util.NoSuchElementException: No value present
-                    if (!TextUtils.isEmpty(c1) && c1.contains(NO_TRANSACTION_EXCEPTION))
+                    if (!TextUtils.isEmpty(c1) && c1.contains(NO_TRANSACTION_EXCEPTION) && tx.blockNumber.equals(String.valueOf(TRANSACTION_SEEN))) //we sighted this tx in the pool, now it's gone
                     {
                         //transaction is no longer in pool or on chain. Cause: dropped from mining pool
                         //mark transaction as dropped
-                        transactionsCache.markTransactionDropped(currentAddress, tx.hash);
+                        transactionsCache.markTransactionBlock(currentAddress, tx.hash, TRANSACTION_DROPPED);
                     }
                     return null;
                 });

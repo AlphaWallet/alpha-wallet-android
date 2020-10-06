@@ -191,7 +191,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+            public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
             {
                 return null;
             }

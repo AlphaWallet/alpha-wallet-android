@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,10 +14,9 @@
         android:layout_weight="1"
         android:fontFamily="@font/font_regular"
         android:gravity="center"
-        android:maxWidth="180dp"
         android:maxLines="2"
         android:lineHeight="12pt"
-        android:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"
+        tools:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"
         android:textSize="@dimen/sp17" />
 
     <ImageView

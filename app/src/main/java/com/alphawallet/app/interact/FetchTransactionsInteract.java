@@ -75,7 +75,7 @@ public class FetchTransactionsInteract {
                 .fetchCachedEvent(walletAddress, eventKey);
     }
 
-    public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+    public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
     {
         return transactionRepository.storeRawTx(wallet, rawTx, timeStamp);
     }

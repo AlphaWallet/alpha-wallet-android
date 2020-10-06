@@ -91,7 +91,7 @@ public class ActivityHistoryList extends LinearLayout
             //make list
             for (RealmTransaction item : realmTransactions)
             {
-                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber().equals("0"));
+                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                 metas.add(tm);
             }
 

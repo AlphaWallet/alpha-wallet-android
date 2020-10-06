@@ -121,8 +121,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                 {
                     if (viewModel.getTokensService().getNetworkFilters().contains(item.getChainId()))
                     {
-                        boolean pendingTx = item.getBlockNumber().equals("0");
-                        TransactionMeta newMeta = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), pendingTx);
+                        TransactionMeta newMeta = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                         metas.add(newMeta);
                     }
                 }

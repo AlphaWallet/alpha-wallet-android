@@ -74,7 +74,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
         {
             RealmResults<RealmTransaction> pendingTxs = instance.where(RealmTransaction.class)
-                    .equalTo("blockNumber", "0")
+                    .equalTo("blockNumber", "-2")
+                    .or().equalTo("blockNumber", "0")
                     .findAll();
 
             pendingTransactions = new Transaction[pendingTxs.size()];
@@ -109,7 +110,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     Transaction tx = convert(item);
                     if (tx.isRelated(tokenAddress, wallet.address))
                     {
-                        TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber().equals("0"));
+                        TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                         metas.add(tm);
                         if (metas.size() >= historyCount) break;
                     }
@@ -176,12 +177,13 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 }
 
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
+                fixBadTXValues(instance, txs);
 
                 for (RealmTransaction item : txs)
                 {
                     if (networkFilters.contains(item.getChainId()))
                     {
-                        TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber().equals("0"));
+                        TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                         metas.add(tm);
                     }
                 }
@@ -193,6 +195,25 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
             return metas.toArray(new ActivityMeta[0]);
         });
+    }
+
+    //Correct any bad value that was previously recorded in a way that wrote the wrong time value
+    //TODO: Remove this after a couple more releases, but it's harmless
+    private void fixBadTXValues(Realm instance, RealmResults<RealmTransaction> txs) throws Exception
+    {
+        long currentTime = System.currentTimeMillis()/1000L;
+        for (RealmTransaction item : txs)
+        {
+            if ((currentTime - item.getTimeStamp()) < -3000*24*60*60 && (item.getBlockNumber().equals("-1") || item.getBlockNumber().equals("0")))
+            {
+                // potentially incorrectly recorded tx, change to pending to re-scan
+                instance.executeTransaction(realm -> {
+                    item.setBlockNumber("0");
+                    item.setError("0");
+                    item.setTimeStamp(currentTime);
+                });
+            }
+        }
     }
 
     @Override
@@ -250,11 +271,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
+    public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
     {
         if (rawTx.getResult() == null) return null;
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
-        final Transaction tx = new Transaction(ethTx.getHash(), "0", ethTx.getBlockNumber().toString(), timeStamp, ethTx.getNonce().intValue(), ethTx.getFrom(),
+        final Transaction tx = new Transaction(ethTx.getHash(), isSuccessful ? "0" : "1", ethTx.getBlockNumber().toString(), timeStamp, ethTx.getNonce().intValue(), ethTx.getFrom(),
                 ethTx.getTo(), ethTx.getValue().toString(), ethTx.getGas().toString(), ethTx.getGasPrice().toString(), ethTx.getInput(), ethTx.getGas().toString(), ethTx.getChainId().intValue(), "");
         tx.completeSetup(wallet.address);
 
@@ -453,7 +474,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public void markTransactionDropped(String walletAddress, String hash)
+    public void markTransactionBlock(String walletAddress, String hash, long blockValue)
     {
         try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
         {
@@ -464,8 +485,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             if (realmTx != null)
             {
                 instance.executeTransaction(realm -> {
-                    realmTx.setBlockNumber("-1");
-                    realmTx.setTimeStamp(System.currentTimeMillis()); //update timestamp so it's updated on the UI
+                    realmTx.setBlockNumber(String.valueOf(blockValue));
+                    realmTx.setTimeStamp(System.currentTimeMillis()/1000); //update timestamp so it's updated on the UI
                 });
             }
         }

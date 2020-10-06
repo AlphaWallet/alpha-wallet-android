@@ -429,7 +429,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             for (RealmTransaction item : txs)
             {
-                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber().equals("0"));
+                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                 metas.add(tm);
             }
         }

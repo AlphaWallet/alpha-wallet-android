@@ -59,7 +59,7 @@ public class GasSettingsActivity extends BaseActivity implements StandardFunctio
 
         BigDecimal gasPrice = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
         BigInteger gasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
-        int chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, EthereumNetworkRepository.MAINNET_ID);
+        int chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, EthereumNetworkRepository.VELAS_MAINNET_ID);
         boolean openWithLimitSlider = getIntent().getBooleanExtra(C.EXTRA_STATE, false);
 
         gasSliderView.initGasLimit(gasLimit);

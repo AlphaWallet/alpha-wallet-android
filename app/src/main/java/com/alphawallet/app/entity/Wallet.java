@@ -2,10 +2,13 @@ package com.alphawallet.app.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Hex;
+import com.alphawallet.app.util.VelasUtils;
 
 import java.math.BigDecimal;
 
@@ -85,6 +88,13 @@ public class Wallet implements Parcelable {
 		parcel.writeInt(authLevel.ordinal());
 		parcel.writeLong(walletCreationTime);
 		parcel.writeString(balanceSymbol);
+	}
+
+	public String vlxAddress() {
+		if (!TextUtils.isEmpty(address) && Hex.containsHexPrefix(address)) {
+			return VelasUtils.ethToVlx(address);
+		}
+		return address;
 	}
 
 	public boolean setWalletBalance(Token token)

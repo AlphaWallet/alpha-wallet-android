@@ -10,7 +10,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 
 /**
  * Created by JB on 12/07/2020.
@@ -111,7 +111,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
         else
         {
-            return MAINNET_ID;
+            return VELAS_MAINNET_ID;
         }
     }
 

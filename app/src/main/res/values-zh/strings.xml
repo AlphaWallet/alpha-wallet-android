@@ -91,7 +91,7 @@
     <string name="error_export">无法导出钱包</string>
     <string name="error_fail_load_tokens">无法加载通证列表</string>
     <string name="error_create_wallet">无法创建钱包</string>
-    <string name="app_name">AlphaWallet</string>
+    <string name="app_name">Velas Defi Wallet</string>
     <string name="all">全部</string>
     <string name="currency">币类</string>
     <string name="advanced">高级设置</string>
@@ -408,6 +408,7 @@
     <string name="history">历史记录</string>
     <string name="discover_dapps">发现 DApp</string>
     <string name="action_add">添加</string>
+    <string name="browser_bookmark_go_to_homepage">Goto Homepage</string>
     <string name="add_to_my_dapps">添加到“我的 DApp”</string>
     <string name="edit_dapp">编辑 DApp</string>
     <string name="dapp_title">标题</string>
@@ -507,7 +508,7 @@
     <string name="provide_authentication">提供身份验证以创建密钥</string>
     <string name="import_error">导入错误，请再次尝试重新导入。</string>
     <string name="watch_exists">你为什么想看道现有的钱包 %1$s？</string>
-    <string name="welcome_to_alphawallet">欢迎使用 AlphaWallet</string>
+    <string name="welcome_to_alphawallet">欢迎使用 Velas Defi Wallet</string>
     <string name="lock_seed_phrase">锁定助记词</string>
     <string name="no_key">未找到密钥</string>
     <string name="pending_transaction">交易待定……</string>

@@ -407,7 +407,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<String> resolveENS(int chainId, String ensName)
     {
-        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
+        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.VELAS_MAINNET_ID), context);
         return ensResolver.resolveENSAddress(ensName);
     }
 
@@ -981,7 +981,6 @@ public class TokenRepository implements TokenRepositoryType {
         Function function = nameOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network ,temp);
-
         if (TextUtils.isEmpty(responseValue)) return null;
 
         List<Type> response = FunctionReturnDecoder.decode(

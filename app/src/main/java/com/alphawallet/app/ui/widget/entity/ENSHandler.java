@@ -20,7 +20,9 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.VelasUtils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -73,7 +75,7 @@ public class ENSHandler implements Runnable
         this.adapterUrl = adapter;
         this.host = host;
         this.ensCallback = ensCallback;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getApplicationContext());
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.VELAS_MAINNET_ID), host.getApplicationContext());
         this.ensSpinner.setVisibility(View.GONE);
         createWatcher();
         getENSHistoryFromPrefs();
@@ -129,6 +131,13 @@ public class ENSHandler implements Runnable
         ensName = null;
         toAddressError.setVisibility(View.GONE);
         String to = toAddressEditText.getText().toString();
+        if (VelasUtils.isValidVlxAddress(to)) {
+            try {
+                to = VelasUtils.vlxToEth(to);
+            } catch (Error error) {
+                to = toAddressEditText.getText().toString();
+            }
+        }
         if (!isValidAddress(to))
         {
             String ens = to;

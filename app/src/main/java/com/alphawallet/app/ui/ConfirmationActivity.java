@@ -31,7 +31,9 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.VelasUtils;
 import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModelFactory;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
@@ -162,7 +164,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, EthereumNetworkBase.VELAS_MAINNET_ID);
         String functionDetails = getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
 
         if (Utils.isAddressValid(contractAddress))
@@ -332,7 +334,11 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
         else
         {
-            toAddressText.setText(to);
+            if (Hex.containsHexPrefix(to)) {
+                toAddressText.setText(VelasUtils.ethToVlx(to));
+            } else {
+                toAddressText.setText(to);
+            }
         }
 
         valueText.setText(amountString);
@@ -523,7 +529,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        fromAddressText.setText(wallet.address);
+        fromAddressText.setText(wallet.vlxAddress());
         sendingWallet = wallet;
 
         progressGasEstimate.setVisibility(View.VISIBLE);

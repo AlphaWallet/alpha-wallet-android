@@ -63,7 +63,7 @@ import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.GOERLI_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.KOVAN_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.VELAS_MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.POA_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.RINKEBY_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.ROPSTEN_ID;
@@ -227,7 +227,7 @@ public class TickerService
                     JSONObject stateData = new JSONObject(result);
                     JSONObject data = stateData.getJSONObject("result");
                     TokenTicker tt = decodeEtherscanTicker(data);
-                    ethTickers.put(MAINNET_ID, tt);
+                    ethTickers.put(VELAS_MAINNET_ID, tt);
                     newTickers = 5;
                 }
             }
@@ -304,7 +304,7 @@ public class TickerService
     {
         //TODO: find tokens on other networks
         String netName = "ethereum-mainnet";
-        if (info.chainId != MAINNET_ID) return Single.fromCallable(() -> { return new Token[0]; });
+        if (info.chainId != VELAS_MAINNET_ID) return Single.fromCallable(() -> { return new Token[0]; });
         List<Token> tokenList = new ArrayList<>();
         final String keyAPI = getAmberDataKey();
         return Single.fromCallable(() -> {
@@ -552,7 +552,7 @@ public class TickerService
     }
 
     private double getUSDPrice() throws Exception {
-        Web3j web3j = TokenRepository.getWeb3jService(MAINNET_ID);
+        Web3j web3j = TokenRepository.getWeb3jService(VELAS_MAINNET_ID);
         Function function = read();
         String responseValue = callSmartContractFunction(web3j, function, MEDIANIZER);
 

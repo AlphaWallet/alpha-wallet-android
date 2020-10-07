@@ -46,7 +46,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
                           GasService gasService, AnalyticsServiceType analyticsService) {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), keyService.getContext());
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.VELAS_MAINNET_ID), keyService.getContext());
         this.analyticsService = analyticsService;
     }
 

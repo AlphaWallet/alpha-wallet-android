@@ -57,6 +57,11 @@ public class QRParser {
         String address;
         try
         {
+            if (VelasUtils.isValidVlxAddress(str)) {
+                try {
+                    return VelasUtils.vlxToEth(str);
+                } catch (Error error){}
+            }
             if (isValidAddress(str))
             {
                 return str;
@@ -66,8 +71,17 @@ public class QRParser {
             address = split.length > 0 ? split[0] : null;
 
             //is it a valid ethereum Address?
-            if (address == null || isValidAddress(address))
+            if (address == null) {
                 return address;
+            }
+            if (VelasUtils.isValidVlxAddress(address)) {
+                try {
+                    return VelasUtils.vlxToEth(address);
+                } catch (Error error){}
+            }
+            if (isValidAddress(address)) {
+                return address;
+            }
 
             if (couldBeENS(address))
             {

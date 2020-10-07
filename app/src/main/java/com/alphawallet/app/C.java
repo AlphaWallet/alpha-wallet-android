@@ -12,6 +12,8 @@ public abstract class C {
     public static final int UPDATE_CURRENCY = 1014;
     public static final int REQUEST_UNIVERSAL_SCAN = 1015;
 
+    public static final String VELAS_MAINNET_NETWORK_NAME = "Velas";
+    public static final String VELAS_TESTNET_NETWORK_NAME = "Velas Testnet";
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
     public static final String POA_NETWORK_NAME = "POA";
@@ -38,6 +40,7 @@ public abstract class C {
     public static final String POA_TICKER = "poa";
 
     public static final String USD_SYMBOL = "$";
+    public static final String VELAS_SYMBOL = "VLX";
     public static final String ETH_SYMBOL = "ETH";
     public static final String xDAI_SYMBOL = "xDai";
     public static final String POA_SYMBOL = "POA";
@@ -46,7 +49,6 @@ public abstract class C {
     public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
     public static final String BINANCE_SYMBOL = "BNB";
-    public static final String VELAS_SYMBOL = "VLX";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -143,7 +145,7 @@ public abstract class C {
     //FOR DEMOS ETC
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
 
-    public static final String DEFAULT_NETWORK = ETHEREUM_NETWORK_NAME;
+    public static final String DEFAULT_NETWORK = VELAS_MAINNET_NETWORK_NAME;
 
     public static final String TELEGRAM_PACKAGE_NAME = "org.telegram.messenger";
     public static final String TWITTER_PACKAGE_NAME = "com.twitter.android";

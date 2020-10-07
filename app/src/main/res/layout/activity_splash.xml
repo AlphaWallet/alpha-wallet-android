@@ -17,7 +17,7 @@
             android:id="@+id/splash_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/ic_logo"
+            android:background="@drawable/ic_launcher_foreground"
             android:gravity="center_horizontal"/>
 
         <TextView

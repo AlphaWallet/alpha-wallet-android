@@ -32,11 +32,14 @@ import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 
 import dagger.android.AndroidInjection;
+
+import com.alphawallet.app.util.VelasUtils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -109,7 +112,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
-        currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+        currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, EthereumNetworkBase.VELAS_MAINNET_ID);
         myAddress = wallet.address;
 
         if (!checkTokenValidity()) { return; }
@@ -266,7 +269,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                             switch (result.getProtocol())
                             {
                                 case "address":
-                                    toAddressEditText.setText(extracted_address);
+                                    toAddressEditText.setText(vlxAddress(extracted_address));
                                     break;
                                 case "ethereum":
                                     //EIP681 protocol
@@ -371,7 +374,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         switch (result.type)
         {
             case ADDRESS:
-                toAddressEditText.setText(result.getAddress());
+                toAddressEditText.setText(vlxAddress(result.getAddress()));
                 break;
 
             case PAYMENT:
@@ -380,7 +383,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                 sendText.setVisibility(View.VISIBLE);
                 sendText.setText(R.string.transfer_request);
                 token = viewModel.getToken(result.chainId, wallet.address);
-                toAddressEditText.setText(result.getAddress());
+                toAddressEditText.setText(vlxAddress(result.getAddress()));
                 amountInput = new AmountEntryItem(this, tokenRepository, token);
                 amountInput.setAmountText(ethAmount);
                 amountInput.setAmount(ethAmount);
@@ -404,7 +407,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                     String convertedAmount = Convert.getConvertedValue(result.tokenAmount, token.tokenInfo.decimals);
                     amountInput = new AmountEntryItem(this, tokenRepository, resultToken);
                     amountInput.setAmountText(convertedAmount);
-                    toAddressEditText.setText(result.functionToAddress);
+                    toAddressEditText.setText(vlxAddress(result.functionToAddress));
                     sendText.setVisibility(View.VISIBLE);
                     sendText.setText(getString(R.string.token_transfer_request, resultToken.getFullName()));
                 }
@@ -415,7 +418,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                 displayScanError(R.string.toast_qr_code_no_address, getString(R.string.no_tokens));
                 //amountInput = new AmountEntryItem(this, tokenRepository, null);
                 //amountInput.setAmountText(result.functionDetail);
-                if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
+                if (result.functionToAddress != null) toAddressEditText.setText(vlxAddress(result.functionToAddress));
                 break;
 
             default:
@@ -558,5 +561,16 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         currentChain = chainId;
         amountInput.onClear();
         viewModel.setChainId(chainId);
+    }
+
+    private String vlxAddress(String address) {
+        if (VelasUtils.isValidVlxAddress(address)) {
+            return address;
+        } else if (Hex.containsHexPrefix(address)) {
+            try {
+                return VelasUtils.ethToVlx(address);
+            } catch (Error error) {}
+        }
+        return address;
     }
 }

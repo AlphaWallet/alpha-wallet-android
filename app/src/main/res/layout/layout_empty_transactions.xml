@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:src="@mipmap/ic_launcher_round"
+        android:src="@mipmap/ic_launcher_foreground"
         android:layout_gravity="center_horizontal"
         android:layout_width="120dp"
         android:layout_height="120dp"

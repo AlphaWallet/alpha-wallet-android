@@ -2597,11 +2597,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     tURL = ALPHAWALLET_ICON_REPO;
                     repoChain = "";
                     break;
-                    case EthereumNetworkBase.VELAS_MAIN_ID:
+                    case EthereumNetworkBase.VELAS_MAINNET_ID:
                         tURL = VELAS_ICON_REPO;
                         repoChain = "velas-main";
                         break;
-                    case EthereumNetworkBase.VELAS_TEST_ID:
+                    case EthereumNetworkBase.VELAS_TESTNET_ID:
                         tURL = VELAS_ICON_REPO;
                         repoChain = "velas-test";
                         break;

@@ -40,7 +40,7 @@ public class JsInjectorClient {
     private int chainId = 1;
     private Address walletAddress;
     //Note: this default RPC is overriden before injection
-    private String rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(EthereumNetworkBase.MAINNET_ID);
+    private String rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(EthereumNetworkBase.VELAS_MAINNET_ID);
 
     public JsInjectorClient(Context context) {
         this.context = context;

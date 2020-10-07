@@ -47,7 +47,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.RINKEBY_ID;
 
 public class TokensService
@@ -429,7 +429,7 @@ public class TokensService
         openSeaCount++;
         nextOpenSeaCheck = System.currentTimeMillis() + OPENSEA_CHECK_INTERVAL;
         final Wallet wallet = new Wallet(currentAddress);
-        NetworkInfo info = openSeaCount != OPENSEA_RINKEBY_CHECK ? ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+        NetworkInfo info = openSeaCount != OPENSEA_RINKEBY_CHECK ? ethereumNetworkRepository.getNetworkByChain(VELAS_MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
         if (BuildConfig.DEBUG) Log.d("OPENSEA", "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
         tokenCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                 .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
@@ -449,7 +449,7 @@ public class TokensService
             updateCheckTime(checkedERC721Tokens);
             final String walletAddress = currentAddress;
 
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
+            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(VELAS_MAINNET_ID);
             erc20CheckDisposable = tickerService.getTokensOnNetwork(info, walletAddress, this)
                     .flatMap(tokens -> tokenRepository.addERC20(new Wallet(walletAddress), tokens))
                     .subscribeOn(Schedulers.io())

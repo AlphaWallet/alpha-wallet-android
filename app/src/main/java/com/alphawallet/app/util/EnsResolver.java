@@ -92,10 +92,10 @@ public class EnsResolver {
                 {
                     byte[] nameHash = NameHash.nameHashAsBytes(contractId);
                     BigInteger nameId = new BigInteger(nameHash);
-                    String resolverAddress = getContractData(EthereumNetworkBase.MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId));
+                    String resolverAddress = getContractData(EthereumNetworkBase.VELAS_MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId));
                     if (!TextUtils.isEmpty(resolverAddress))
                     {
-                        contractAddress = getContractData(EthereumNetworkBase.MAINNET_ID, resolverAddress, get(nameId));
+                        contractAddress = getContractData(EthereumNetworkBase.VELAS_MAINNET_ID, resolverAddress, get(nameId));
                     }
                 }
                 else
@@ -105,7 +105,7 @@ public class EnsResolver {
                     {
                         byte[] nameHash = NameHash.nameHashAsBytes(contractId);
                         //now attempt to get the address of this ENS
-                        contractAddress = getContractData(EthereumNetworkBase.MAINNET_ID, resolverAddress, getAddr(nameHash));
+                        contractAddress = getContractData(EthereumNetworkBase.VELAS_MAINNET_ID, resolverAddress, getAddr(nameHash));
                     }
                 }
             }
@@ -146,7 +146,7 @@ public class EnsResolver {
             {
                 String resolverAddress = lookupResolver(reverseName);
                 byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
-                name = getContractData(EthereumNetworkBase.MAINNET_ID, resolverAddress, getName(nameHash));
+                name = getContractData(EthereumNetworkBase.VELAS_MAINNET_ID, resolverAddress, getName(nameHash));
             }
             catch (Exception e)
             {
@@ -174,7 +174,7 @@ public class EnsResolver {
         String registryContract = Contracts.resolveRegistryContract(netVersion.getNetVersion());
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
         Function resolver = getResolver(nameHash);
-        return getContractData(EthereumNetworkBase.MAINNET_ID, registryContract, resolver);
+        return getContractData(EthereumNetworkBase.VELAS_MAINNET_ID, registryContract, resolver);
     }
 
     private Function getResolver(byte[] nameHash)

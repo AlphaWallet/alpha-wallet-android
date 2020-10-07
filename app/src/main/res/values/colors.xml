@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<color name="velasTheme">#18093F</color>
 	<color name="colorPrimary">#FFFFFF</color>
 	<color name="colorPrimaryDark">#707070</color>
 	<color name="colorAccent">#54C1E3</color>

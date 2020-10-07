@@ -62,7 +62,7 @@ import kotlin.Unit;
 import okhttp3.OkHttpClient;
 import wallet.core.jni.Hash;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 
 public class WalletConnectActivity extends BaseActivity
 {
@@ -567,7 +567,7 @@ public class WalletConnectActivity extends BaseActivity
         Web3Transaction w3Tx = new Web3Transaction(transaction, id);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog = builder.setTitle(R.string.dialog_title_sign_transaction)
-                .setMessage(w3Tx.getFormattedTransaction(this, MAINNET_ID))
+                .setMessage(w3Tx.getFormattedTransaction(this, VELAS_MAINNET_ID))
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> {
                     signTransaction(id, transaction);
                 })
@@ -654,7 +654,7 @@ public class WalletConnectActivity extends BaseActivity
                     || (!transaction.getTo().equals(Address.EMPTY) && (transaction.getData() != null || transaction.getValue() != null))) // Raw or Function TX
             {
                 signable = new EthereumMessage(transaction.toString(), peerUrl.getText().toString(), id);
-                viewModel.confirmTransaction(this, transaction, peerUrl.getText().toString(), MAINNET_ID, id);
+                viewModel.confirmTransaction(this, transaction, peerUrl.getText().toString(), VELAS_MAINNET_ID, id);
             }
             else
             {
@@ -687,7 +687,7 @@ public class WalletConnectActivity extends BaseActivity
             @Override
             public void DAppReturn(byte[] data, Signable message)
             {
-                viewModel.recordSignTransaction(getApplicationContext(), w3Tx, MAINNET_ID, getSessionId());
+                viewModel.recordSignTransaction(getApplicationContext(), w3Tx, VELAS_MAINNET_ID, getSessionId());
                 updateSignCount();
                 viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 if (fromDappBrowser) switchToDappBrowser();
@@ -701,7 +701,7 @@ public class WalletConnectActivity extends BaseActivity
             {
                 //sign the transaction
                 signCallback = null;
-                viewModel.signTransaction(getBaseContext(), w3Tx, dappFunction, peerUrl.getText().toString(), MAINNET_ID);
+                viewModel.signTransaction(getBaseContext(), w3Tx, dappFunction, peerUrl.getText().toString(), VELAS_MAINNET_ID);
                 if (fromDappBrowser) switchToDappBrowser();
             }
 
@@ -873,7 +873,7 @@ public class WalletConnectActivity extends BaseActivity
         if (resultCode == RESULT_OK && web3Tx != null)
         {
             String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
-            viewModel.recordSignTransaction(getApplicationContext(), web3Tx, MAINNET_ID, getSessionId());
+            viewModel.recordSignTransaction(getApplicationContext(), web3Tx, VELAS_MAINNET_ID, getSessionId());
             viewModel.approveRequest(getSessionId(), lastId, hashData);
         }
         else if (web3Tx != null)

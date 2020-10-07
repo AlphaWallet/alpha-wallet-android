@@ -11,7 +11,7 @@ import java.util.Map;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 
 /**
  * Created by JB on 17/08/2020.
@@ -30,7 +30,7 @@ public class RealmTokenScriptData extends RealmObject
     {
         String chainId = instanceKey.split("-")[1];
         if (Character.isDigit(chainId.charAt(0))) return Integer.parseInt(chainId);
-        else return MAINNET_ID;
+        else return VELAS_MAINNET_ID;
     }
 
     public String getOriginTokenAddress()

@@ -18,8 +18,8 @@ import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZER
 
 public class CustomViewSettings
 {
-    private static int primaryChain = EthereumNetworkRepository.VELAS_MAIN_ID;
-    private static String primaryChainName = C.VELAS_MAIN_NETWORK;
+    private static int primaryChain = EthereumNetworkRepository.VELAS_MAINNET_ID;
+    private static String primaryChainName = C.VELAS_MAINNET_NETWORK_NAME;
 
     public static boolean filterToken(TokenCardMeta token, boolean filterResult, Context context)
     {
@@ -74,7 +74,7 @@ public class CustomViewSettings
     //Hides the filter tab bar at the top of the wallet screen (ALL/CURRENCY/COLLECTIBLES)
     public static boolean hideTabBar()
     {
-        return true;
+        return false;
     }
 
     //Use to switch off direct transfer, only use magiclink transfer

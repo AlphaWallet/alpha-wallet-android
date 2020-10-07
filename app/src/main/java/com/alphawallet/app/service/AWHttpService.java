@@ -9,6 +9,7 @@ package com.alphawallet.app.service;
  *
  */
 
+import com.google.android.gms.common.util.IOUtils;
 import com.google.gson.JsonParseException;
 
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.grpc.internal.IoUtils;
 import okhttp3.CipherSuite;
 import okhttp3.ConnectionSpec;
 import okhttp3.Headers;
@@ -199,7 +201,6 @@ public class AWHttpService extends HttpService
         {
             int code = response.code();
             String text = responseBody == null ? "N/A" : responseBody.string();
-
             throw new SocketTimeoutException("Invalid response received: " + code + "; " + text);
         }
     }

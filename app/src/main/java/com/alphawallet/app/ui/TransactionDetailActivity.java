@@ -41,7 +41,7 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TRANSACTION;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface
 {
@@ -68,7 +68,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         viewModel.onTransaction().observe(this, this::onTransaction);
 
         String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, VELAS_MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
         viewModel.fetchTransaction(wallet, txHash, chainId);
     }
@@ -112,8 +112,8 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         CopyTextView fromValue = findViewById(R.id.from);
         CopyTextView txHashView = findViewById(R.id.txn_hash);
 
-        fromValue.setText(transaction.from != null ? transaction.from : "");
-        toValue.setText(transaction.to != null ? transaction.to : "");
+        fromValue.setText(transaction.from != null ? transaction.vlxFromAddress() : "");
+        toValue.setText(transaction.to != null ? transaction.vlxToAddress() : "");
         txHashView.setText(transaction.hash != null ? transaction.hash : "");
         ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 

@@ -81,6 +81,7 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.VelasUtils;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
 import com.alphawallet.app.web3.OnSignMessageListener;
@@ -424,6 +425,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void setupMenu(View baseView)
     {
         refresh = baseView.findViewById(R.id.refresh);
+        final MenuItem gotoHomepage = toolbar.getMenu().findItem(R.id.action_goto_homepage);
         final MenuItem reload = toolbar.getMenu().findItem(R.id.action_reload);
         final MenuItem share = toolbar.getMenu().findItem(R.id.action_share);
         final MenuItem scan = toolbar.getMenu().findItem(R.id.action_scan);
@@ -431,6 +433,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         final MenuItem history = toolbar.getMenu().findItem(R.id.action_history);
         final MenuItem bookmarks = toolbar.getMenu().findItem(R.id.action_my_dapps);
         final MenuItem clearCache = toolbar.getMenu().findItem(R.id.action_clear_cache);
+
+        if (gotoHomepage != null) gotoHomepage.setOnMenuItemClickListener(menuItem -> {
+            homePressed();
+            return true;
+        });
 
         if (reload != null) reload.setOnMenuItemClickListener(menuItem -> {
             reloadPage();
@@ -760,7 +767,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             symbol.setVisibility(View.VISIBLE);
             String newBalanceStr = BalanceUtils.getScaledValueFixed(new BigDecimal(realmToken.getBalance()), ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
             balance.setText(newBalanceStr);
-            symbol.setText(networkInfo.getShortName());
+            symbol.setText(networkInfo.getSymbol());
         });
     }
 

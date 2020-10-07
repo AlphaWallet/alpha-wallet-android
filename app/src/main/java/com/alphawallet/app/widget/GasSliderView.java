@@ -40,7 +40,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 
 public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
@@ -555,7 +555,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     public void setChainId(int chainId)
     {
         //TODO: Add tx fee in FIAT for network transactions. Requires token or ticker.
-        if (chainId != MAINNET_ID)
+        if (chainId != VELAS_MAINNET_ID)
         {
             isMainNet = false;
             estimatedTimeTitle.setVisibility(View.INVISIBLE);

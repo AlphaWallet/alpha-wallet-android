@@ -3,6 +3,8 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.repository.EthereumNetworkBase;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -49,7 +51,7 @@ public class QRResult implements Parcelable
 
     private void defaultParams()
     {
-        chainId = 1;
+        chainId = EthereumNetworkBase.VELAS_MAINNET_ID;
         type = EIP681Type.ADDRESS;
         functionStr = "";
         functionDetail = "";

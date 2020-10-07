@@ -32,7 +32,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.VELAS_MAINNET_ID;
 
 public class SelectNetworkActivity extends BaseActivity {
     @Inject
@@ -85,13 +85,13 @@ public class SelectNetworkActivity extends BaseActivity {
         //Ensure that there's always a network selected in single network mode
         if (singleItem && (intList.size() < 1 || !activeNetworks.contains(intList.get(0)))) {
             intList.clear();
-            intList.add(MAINNET_ID);
+            intList.add(VELAS_MAINNET_ID);
         }
 
         //if active networks is empty ensure mainnet is displayed
         if (activeNetworks.size() == 0) {
-            activeNetworks.add(MAINNET_ID);
-            intList.add(MAINNET_ID);
+            activeNetworks.add(VELAS_MAINNET_ID);
+            intList.add(VELAS_MAINNET_ID);
         }
 
         for (NetworkInfo info : viewModel.getNetworkList()) {

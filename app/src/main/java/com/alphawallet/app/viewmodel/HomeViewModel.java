@@ -274,7 +274,7 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         //check for ENS name (could have changed)
-        new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
+        new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.VELAS_MAINNET_ID), context)
                 .resolveEnsName(wallet.address)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())

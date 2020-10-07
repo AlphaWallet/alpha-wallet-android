@@ -42,7 +42,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.VELAS_MAINNET_ID;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
@@ -879,7 +879,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         TransactionsRealmCache.addRealm();
                         for (String tokenAddress : erc20Tickers.keySet())
                         {
-                            writeTickerToRealm(realm, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);
+                            writeTickerToRealm(realm, erc20Tickers.get(tokenAddress), VELAS_MAINNET_ID, tokenAddress);
                         }
                     }
 

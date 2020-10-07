@@ -11,6 +11,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.util.Hex;
+import com.alphawallet.app.util.VelasUtils;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
 
@@ -358,6 +360,19 @@ public class Transaction implements Parcelable {
 				|| operations.length == 0 ? null : operations[0].contract;
     }
 
+	public String vlxFromAddress() {
+		if (!TextUtils.isEmpty(from) && Hex.containsHexPrefix(from)) {
+			return VelasUtils.ethToVlx(from);
+		}
+		return from;
+	}
+
+	public String vlxToAddress() {
+		if (!TextUtils.isEmpty(to) && Hex.containsHexPrefix(to)) {
+			return VelasUtils.ethToVlx(to);
+		}
+		return to;
+	}
 
 	private TransactionOperation[] generateERC20Op()
 	{

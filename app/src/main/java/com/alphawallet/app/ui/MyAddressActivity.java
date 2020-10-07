@@ -35,6 +35,7 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.VelasUtils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
@@ -232,7 +233,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
         titleView.setVisibility(View.VISIBLE);
-        displayAddress = Keys.toChecksumAddress(wallet.address);
+        displayAddress = vlxAddress(wallet.address);
         networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
         if (token == null) token = viewModel.getEthereumNetworkRepository().getBlankOverrideToken(networkInfo);
         currentMode = MODE_POS;
@@ -253,6 +254,13 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         }
     }
 
+    private String vlxAddress(String address) {
+        if (!TextUtils.isEmpty(address)) {
+            return VelasUtils.ethToVlx(Keys.toChecksumAddress(address));
+        }
+        return Keys.toChecksumAddress(address);
+    }
+
     private void showAddress()
     {
         getInfo();
@@ -269,7 +277,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
             amountInput = null;
         }
 
-        displayAddress = Keys.toChecksumAddress(wallet.address);
+        displayAddress = vlxAddress(wallet.address);
         setTitle(getString(R.string.my_wallet_address));
         copyAddress.setText(displayAddress);
         currentMode = MODE_ADDRESS;
@@ -284,7 +292,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
         {
-            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), getApplicationContext())
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.VELAS_MAINNET_ID), getApplicationContext())
                     .resolveEnsName(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
@@ -316,7 +324,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         copyAddress.setVisibility(View.VISIBLE);
 
         currentMode = MODE_CONTRACT;
-        displayAddress = Keys.toChecksumAddress(token.getAddress());
+        displayAddress = vlxAddress(token.getAddress());
         setTitle(getString(R.string.contract_address));
         copyAddress.setText(displayAddress);
         onWindowFocusChanged(true);
@@ -393,7 +401,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
     {
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        int fallBackChainId = token != null ? token.tokenInfo.chainId : EthereumNetworkBase.MAINNET_ID;
+        int fallBackChainId = token != null ? token.tokenInfo.chainId : EthereumNetworkBase.VELAS_MAINNET_ID;
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
 
         if (wallet == null)

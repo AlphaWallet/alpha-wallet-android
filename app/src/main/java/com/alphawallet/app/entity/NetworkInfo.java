@@ -25,4 +25,8 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
         else if (this.name.length() > 10) return this.symbol;
         else return this.name;
     }
+
+    public String getSymbol() {
+        return symbol;
+    }
 }

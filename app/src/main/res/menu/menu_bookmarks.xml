@@ -4,6 +4,12 @@
 
     <group android:id="@+id/dapp_browser_menu">
         <item
+            android:id="@+id/action_goto_homepage"
+            android:icon="@drawable/ic_browser_home"
+            android:orderInCategory="15"
+            android:title="@string/browser_bookmark_go_to_homepage"
+            app:showAsAction="withText" />
+        <item
             android:id="@+id/action_add_to_my_dapps"
             android:icon="@drawable/ic_plus"
             android:orderInCategory="15"

@@ -67,9 +67,9 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             String address;
 
             //sweep to see if there's a mainnet holding contract
-            if (originContract.addresses.get(EthereumNetworkBase.MAINNET_ID) != null)
+            if (originContract.addresses.get(EthereumNetworkBase.VELAS_MAINNET_ID) != null)
             {
-                chainId = EthereumNetworkBase.MAINNET_ID;
+                chainId = EthereumNetworkBase.VELAS_MAINNET_ID;
                 address = originContract.addresses.get(chainId).get(0);
             }
             else

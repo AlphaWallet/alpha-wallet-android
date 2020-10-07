@@ -100,7 +100,7 @@
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
 
-    <string name="app_name">AlphaWallet</string>
+    <string name="app_name">Velas Defi Wallet</string>
     <string name="all">All</string>
     <string name="currency">Currencies</string>
     <string name="advanced">Advanced Options</string>
@@ -423,6 +423,7 @@
     <string name="history">History</string>
     <string name="discover_dapps">Discover DApps</string>
     <string name="action_add">Add</string>
+    <string name="browser_bookmark_go_to_homepage">Goto Homepage</string>
     <string name="add_to_my_dapps">Add to My DApps</string>
     <string name="edit_dapp">Edit DApp</string>
     <string name="dapp_title">Title</string>
@@ -522,7 +523,7 @@
     <string name="provide_authentication">Provide authentication to create key</string>
     <string name="import_error">Import Error, Try re-import again.</string>
     <string name="watch_exists">Wallet %1$s already full wallet - no need to watch</string>
-    <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
+    <string name="welcome_to_alphawallet">Welcome to Velas Defi Wallet</string>
     <string name="lock_seed_phrase">Lock Seed Phrase</string>
     <string name="no_key">No Key found</string>
     <string name="pending_transaction">Pending Transaction ...</string>

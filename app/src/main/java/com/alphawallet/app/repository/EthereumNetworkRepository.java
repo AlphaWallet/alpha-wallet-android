@@ -40,7 +40,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.VELAS_MAIN_ID));
+        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.VELAS_MAINNET_ID));
     }
 
     public static String getNodeURLByNetworkId(int networkId) {
@@ -76,6 +76,14 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     private void buildPopularTokenMap(List<Integer> networkFilters)
     {
         KnownContract knownContract = readContracts();
+
+        if (networkFilters == null || networkFilters.contains(EthereumNetworkRepository.VELAS_MAINNET_ID))
+        {
+            for (UnknownToken unknownToken: knownContract.getMainNet())
+            {
+                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, EthereumNetworkRepository.VELAS_MAINNET_ID));
+            }
+        }
 
         if (networkFilters == null || networkFilters.contains(EthereumNetworkRepository.MAINNET_ID))
         {

@@ -22,7 +22,7 @@
             android:layout_height="36dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/dp16"
-            android:src="@mipmap/ic_alpha" />
+            android:src="@mipmap/ic_launcher_foreground" />
 
         <TextView
             android:id="@+id/peer_name"

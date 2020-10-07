@@ -91,7 +91,7 @@
     <string name="error_export">Error al exportar el monedero</string>
     <string name="error_fail_load_tokens">Error al cargar la lista de tokens</string>
     <string name="error_create_wallet">Error al crear un monedero</string>
-    <string name="app_name">AlphaWallet</string>
+    <string name="app_name">Velas Defi Wallet</string>
     <string name="all">Todo</string>
     <string name="currency">Monedas</string>
     <string name="advanced">Opciones avanzadas</string>
@@ -195,7 +195,7 @@
     <string name="twenty_four_hours">24 horas</string>
     <string name="appreciation">Valoración</string>
     <string name="eth_per_ticket">%1s/ticket</string>
-    <string name="ethereum">Ethereum</string>
+    <string name="ethereum">Ethereum DDD</string>
     <string name="ethereum_blockchain">Cadena de bloques de Ethereum</string>
     <string name="velas">Velas</string>
     <string name="issuer">Emisor:</string>
@@ -408,6 +408,7 @@
     <string name="history">Historial</string>
     <string name="discover_dapps">Descubrir DApps</string>
     <string name="action_add">Añadir</string>
+    <string name="browser_bookmark_go_to_homepage">Goto Homepage</string>
     <string name="add_to_my_dapps">Añadir a Mis DApps</string>
     <string name="edit_dapp">Editar DApp</string>
     <string name="dapp_title">Título</string>
@@ -507,7 +508,7 @@
     <string name="provide_authentication">Proporcionar autenticación para crear la clave</string>
     <string name="import_error">Error de importación. Intenta importarlo de nuevo.</string>
     <string name="watch_exists">El monedero %1$s ya está completo - no es necesario observarlo</string>
-    <string name="welcome_to_alphawallet">Bienvenido a AlphaWallet</string>
+    <string name="welcome_to_alphawallet">Bienvenido a Velas Defi Wallet</string>
     <string name="lock_seed_phrase">Bloquear frase semilla</string>
     <string name="no_key">No se ha encontrado ninguna clave</string>
     <string name="pending_transaction">Transacción pendiente...</string>

@@ -90,7 +90,7 @@ public class WalletsViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.assetService = assetService;
 
-        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
+        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.VELAS_MAINNET_ID), context);
     }
 
     public LiveData<Wallet[]> wallets()

@@ -49,12 +49,12 @@ public class ProofOfExponent implements ASNEncodable, Verifiable{
 
   private byte[] makeEncoding(ECPoint base, ECPoint riddle, ECPoint tPoint, BigInteger challenge) {
     try {
-    ASN1EncodableVector res = new ASN1EncodableVector();
-    res.add(new DEROctetString(base.getEncoded(false)));
-    res.add(new DEROctetString(riddle.getEncoded(false)));
-    res.add(new DEROctetString(challenge.toByteArray()));
-    res.add(new DEROctetString(tPoint.getEncoded(false)));
-    return new DERSequence(res).getEncoded();
+      ASN1EncodableVector res = new ASN1EncodableVector();
+      res.add(new DEROctetString(base.getEncoded(false)));
+      res.add(new DEROctetString(riddle.getEncoded(false)));
+      res.add(new DEROctetString(challenge.toByteArray()));
+      res.add(new DEROctetString(tPoint.getEncoded(false)));
+      return new DERSequence(res).getEncoded();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

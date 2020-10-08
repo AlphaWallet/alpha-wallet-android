@@ -849,7 +849,8 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, TokenInfo tokenInfo) {
+    private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, TokenInfo tokenInfo)
+    {
         List<BigInteger> result = new ArrayList<>();
         result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         try

@@ -37,7 +37,7 @@ public class AttestationCrypto {
   public static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
   public static final ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec(ECDSA_CURVE);
   public static final ECNamedCurveSpec params = new ECNamedCurveSpec(ECDSA_CURVE, spec.getCurve(), spec.getG(),
-      spec.getN());
+          spec.getN());
   public static final BigInteger fieldSize = ((ECFieldFp) params.getCurve().getField()).getP();
   public static final BigInteger curveOrder = params.getOrder();
   private final SecureRandom rand;
@@ -131,15 +131,9 @@ public class AttestationCrypto {
 
   private static BigInteger mapToInteger(byte[] value) {
     try {
-      // We use HMAC to avoid issues with extension attacks, although SHA3 or double hashing should be sufficient on its own
-      Mac mac = Mac.getInstance(MAC_ALGO);
-      SecretKeySpec keySpec = new SecretKeySpec("static_key".getBytes((StandardCharsets.UTF_8)), MAC_ALGO);
-      mac.init(keySpec);
-      mac.update(value);
-      byte[] macData = mac.doFinal();
-
-      BigInteger idenNum = new BigInteger(macData);
-      idenNum.abs();
+      Keccak.DigestKeccak kecc = new Keccak.Digest256();
+      kecc.update(value, 0, value.length);
+      BigInteger idenNum = new BigInteger(kecc.digest());
       return idenNum.mod(fieldSize);
     } catch (Exception e) {
       throw new RuntimeException(e);

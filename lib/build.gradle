@@ -15,6 +15,7 @@ dependencies {
     implementation('com.amazonaws:aws-lambda-java-events:2.2.6')
     testImplementation 'junit:junit:4.12'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.62'
+    implementation "org.web3j:core:4.6.0"
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple
     implementation group: 'com.github.cliftonlabs', name: 'json-simple', version: '3.1.0'
     // https://mvnrepository.com/artifact/com.google.code.gson/gson

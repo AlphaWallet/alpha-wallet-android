@@ -101,7 +101,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
             new NetworkInfo(C.VELAS_MAINNET_NETWORK_NAME, C.VELAS_SYMBOL,
                     VELAS_RPC_URL,
-                    "https://explorer.velas.com/",VELAS_MAINNET_ID, true,
+                    "https://explorer.velas.com/tx/",VELAS_MAINNET_ID, true,
                     VELAS_RPC_URL,
                     "https://explorer.velas.com/"),
             new NetworkInfo(C.VELAS_TESTNET_NETWORK_NAME, C.VELAS_SYMBOL,

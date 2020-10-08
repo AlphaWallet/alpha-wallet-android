@@ -91,7 +91,7 @@
     <string name="error_export">无法导出钱包</string>
     <string name="error_fail_load_tokens">无法加载通证列表</string>
     <string name="error_create_wallet">无法创建钱包</string>
-    <string name="app_name">Velas Defi Wallet</string>
+    <string name="app_name">Velas DeFi Wallet</string>
     <string name="all">全部</string>
     <string name="currency">币类</string>
     <string name="advanced">高级设置</string>

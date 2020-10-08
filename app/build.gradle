@@ -39,7 +39,7 @@ android {
         versionCode 130
         versionName "3.20.2"
 
-        applicationId "io.stormbird.wallet"
+        applicationId "com.velas.defiwallet"
         minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

@@ -91,7 +91,7 @@
     <string name="error_export">Error al exportar el monedero</string>
     <string name="error_fail_load_tokens">Error al cargar la lista de tokens</string>
     <string name="error_create_wallet">Error al crear un monedero</string>
-    <string name="app_name">Velas Defi Wallet</string>
+    <string name="app_name">Velas DeFi Wallet</string>
     <string name="all">Todo</string>
     <string name="currency">Monedas</string>
     <string name="advanced">Opciones avanzadas</string>

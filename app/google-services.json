@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:409922468441:android:4695da910af3c1e8",
         "android_client_info": {
-          "package_name": "io.stormbird.wallet"
+          "package_name": "com.velas.defiwallet"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "409922468441-ob3b2hpr9ftopgcki00s5mvr0cmtut1m.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "io.stormbird.wallet",
+            "package_name": "com.velas.defiwallet",
             "certificate_hash": "a0f71d66080a0678f7a9ae27aa781aaeb8e1b911"
           }
         },

@@ -146,7 +146,7 @@ public class AWHttpService extends HttpService
                 throw new SocketTimeoutException();
             }
         }
-        catch (InterruptedIOException e)
+        catch (Exception e)
         {
             return buildNullInputStream();
         }

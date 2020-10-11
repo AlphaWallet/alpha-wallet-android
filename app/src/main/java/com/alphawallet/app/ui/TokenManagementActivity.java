@@ -69,6 +69,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
                 .get(TokenManagementViewModel.class);
         viewModel.tokens().observe(this, this::onTokens);
 
+        wallet = new Wallet(viewModel.getTokensService().getCurrentAddress());
         tokenList = findViewById(R.id.token_list);
         saveButton = findViewById(R.id.btn_apply);
         search = findViewById(R.id.edit_search);
@@ -142,6 +143,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         if (getIntent() != null)
         {
             String walletAddr = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+            if (walletAddr == null) walletAddr = viewModel.getTokensService().getCurrentAddress();
             wallet = new Wallet(walletAddr);
             viewModel.fetchTokens(wallet);
         }

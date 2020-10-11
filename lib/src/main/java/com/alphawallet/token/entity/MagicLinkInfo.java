@@ -184,6 +184,8 @@ public class MagicLinkInfo
 
     public static int identifyChainId(String link)
     {
+        if (link == null || link.length() == 0) return 0;
+
         int chainId = 0;
         //split out the chainId from the magiclink
         int index = link.indexOf(mainnetMagicLinkDomain);

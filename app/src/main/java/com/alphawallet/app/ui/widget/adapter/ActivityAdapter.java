@@ -100,14 +100,12 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         this.dataInteract = dataInteract;
         this.assetService = svs;
         tokensService = service;
-        //setHasStableIds(true);
     }
 
     public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs, int layoutResId)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         tokensService = service;
-        setHasStableIds(true);
         this.layoutResId = layoutResId;
         this.dataInteract = null;
         this.assetService = svs;

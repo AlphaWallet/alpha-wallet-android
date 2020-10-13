@@ -135,7 +135,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             tokenIcon.setStatusIcon(StatusType.REJECTED);
             address.setText(R.string.tx_rejected);
         }
-        else if (transaction.blockNumber.equals("0"))
+        else if (transaction.isPending())
         {
             tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);

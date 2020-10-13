@@ -19,10 +19,10 @@ public class TransactionMeta extends ActivityMeta
     public final String contractAddress;
     public final int chainId;
 
-    public TransactionMeta(String hash, long timeStamp, String contractAddress, int chainId, boolean pending)
+    public TransactionMeta(String hash, long timeStamp, String contractAddress, int chainId, String blockNumber)
     {
         super(timeStamp, hash);
-        this.isPending = pending;
+        this.isPending = blockNumber.equals("0") || blockNumber.equals("-2");
         this.contractAddress = contractAddress;
         this.chainId = chainId;
     }

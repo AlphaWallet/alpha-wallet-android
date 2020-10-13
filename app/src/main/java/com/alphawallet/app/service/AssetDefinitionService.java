@@ -33,6 +33,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionLocalSource;
+import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
@@ -150,7 +151,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final TokensService tokensService;
     private final TokenLocalSource tokenLocalSource;
     private final AlphaWalletService alphaWalletService;
-    private final TransactionLocalSource transactionsCache;
+    private final TransactionRepositoryType transactionRespository;
     private TokenDefinition cachedDefinition = null;
     private final ConcurrentHashMap<String, EventDefinition> eventList = new ConcurrentHashMap<>(); //List of events built during file load
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
@@ -171,7 +172,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
                                   RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService,
-                                  TokenLocalSource trs, TransactionLocalSource tls,
+                                  TokenLocalSource trs, TransactionRepositoryType trt,
                                   AlphaWalletService alphaService)
     {
         context = ctx;
@@ -184,7 +185,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions
         tokenLocalSource = trs;
-        transactionsCache = tls;
+        transactionRespository = trt;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
         //deleteAllEventData();
@@ -1355,15 +1356,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
                 storeActivityValue(walletAddress, ev, ethLog, blockTime, ev.activityName);
 
-                //do we need to fetch transaction from chain or do we have it already
-                com.alphawallet.app.entity.Transaction tx = transactionsCache.fetchTransaction(new Wallet(walletAddress), txHash);
+                //do we need to fetch transaction from chain or do we have it already?
+                com.alphawallet.app.entity.Transaction tx = transactionRespository.fetchCachedTransaction(walletAddress, txHash);
+
                 if (tx == null)
                 {
-                    //fetchTx & store, we will need the transaction info for the view data
                     EventUtils.getTransactionDetails(txHash, web3j)
+                            .flatMap(ethTx -> transactionRespository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
                             .subscribeOn(Schedulers.io())
-                            .observeOn(Schedulers.computation())
-                            .subscribe(ethTx -> transactionsCache.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(System.out::println, this::onError)
                             .isDisposed();
                 }
             }

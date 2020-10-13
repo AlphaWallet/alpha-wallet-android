@@ -38,5 +38,5 @@ public interface TransactionRepositoryType {
 	Realm getRealmInstance(Wallet wallet);
 
 	RealmAuxData fetchCachedEvent(String walletAddress, String eventKey);
-	Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp);
+	Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp);
 }

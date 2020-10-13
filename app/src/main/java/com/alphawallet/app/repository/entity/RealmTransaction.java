@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository.entity;
 
+import android.text.TextUtils;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -140,5 +142,10 @@ public class RealmTransaction extends RealmObject {
     public void setToken(String token)
     {
         this.token = token;
+    }
+
+    public boolean isPending()
+    {
+        return blockNumber == null || blockNumber.length() == 0 || (blockNumber.equals("0") || blockNumber.equals("-2"));
     }
 }

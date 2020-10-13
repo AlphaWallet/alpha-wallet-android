@@ -67,6 +67,29 @@
                 android:layout_marginBottom="10dp"
                 android:textSize="@dimen/sp24" />
 
+            <LinearLayout
+                android:id="@+id/pending_time_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="@dimen/dp14"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="@dimen/dp14"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="@string/empty"/>
+
+                <TextView
+                    android:id="@+id/pending_time"
+                    style="@style/TransactionDetailsStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="@string/transaction_pending_for" />
+
+            </LinearLayout>
+
             <include layout="@layout/item_ticket" />
 
         </LinearLayout>

@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.BuildConfig;
@@ -29,6 +30,7 @@ import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSetValuesListener;
@@ -54,11 +56,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -93,6 +98,9 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     private RealmResults<RealmTransaction> realmTransactionUpdates;
     private final Handler handler = new Handler();
     private boolean isFromTokenHistory = false;
+    private long pendingStart = 0;
+    @Nullable
+    private Disposable pendingTxUpdate;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -162,6 +170,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         super.onDestroy();
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
+        stopPendingUpdate();
     }
 
     private void onWallet(Wallet wallet)
@@ -224,6 +233,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         {
             //listen for token completion
             setupPendingListener(wallet, transaction.hash);
+            pendingStart = transaction.timeStamp;
         }
     }
 
@@ -238,17 +248,44 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             if (realmTransactions.size() > 0)
             {
                 RealmTransaction rTx = realmTransactions.first();
-                String blockNumber = rTx.getBlockNumber();
-                if (!TextUtils.isEmpty(blockNumber) && !blockNumber.equals("0"))
+                if (rTx != null && !rTx.isPending())
                 {
                     Transaction tx = TransactionsRealmCache.convert(rTx);
                     //tx written, update icon
                     handler.post(() -> {
                         icon.setStatusIcon(token.getTxStatus(tx));
                     });
+                    stopPendingUpdate();
                 }
             }
         });
+
+        startPendingUpdate();
+    }
+
+    private void startPendingUpdate()
+    {
+        //now set up the transaction pending time
+        LinearLayout txPending = findViewById(R.id.pending_time_layout);
+        txPending.setVisibility(View.VISIBLE);
+
+        pendingTxUpdate = Observable.interval(0, 1, TimeUnit.SECONDS)
+                .doOnNext(l -> {
+                    runOnUiThread(() -> {
+                        long pendingTimeInSeconds = (System.currentTimeMillis() / 1000) - pendingStart;
+                        TextView pendingText = findViewById(R.id.pending_time);
+                        if (pendingText != null) pendingText.setText(getString(R.string.transaction_pending_for, Utils.convertTimePeriodInSeconds(pendingTimeInSeconds, this)));
+                    });
+                }).subscribe();
+    }
+
+    private void stopPendingUpdate()
+    {
+        //now set up the transaction pending time
+        LinearLayout txPending = findViewById(R.id.pending_time_layout);
+        if (txPending != null) txPending.setVisibility(View.GONE);
+
+        if (pendingTxUpdate != null && !pendingTxUpdate.isDisposed()) pendingTxUpdate.dispose();
     }
 
     private Token getOperationToken(Transaction tx)

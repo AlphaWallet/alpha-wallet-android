@@ -76,6 +76,26 @@
                         android:layout_height="wrap_content"
                         tools:text="4238793"  />
 
+                    <TextView
+                        android:id="@+id/failed"
+                        android:layout_marginStart="@dimen/dp16"
+                        style="@style/TransactionDetailsStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/warning_red"
+                        android:text="@string/failed"
+                        android:visibility="gone"/>
+
+                    <TextView
+                        android:id="@+id/failedFace"
+                        style="@style/TransactionDetailsStyle"
+                        android:layout_marginStart="@dimen/dp5"
+                        android:textColor="@color/warning_red"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="☹"
+                        android:visibility="gone"/>
+
                 </LinearLayout>
 
             </RelativeLayout>

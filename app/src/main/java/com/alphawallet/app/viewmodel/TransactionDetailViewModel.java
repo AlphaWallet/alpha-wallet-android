@@ -76,7 +76,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public void prepare(final int chainId, final String walletAddr)
     {
         walletAddress = walletAddr;
-        currentBlockUpdateDisposable = Observable.interval(0, 10, TimeUnit.SECONDS)
+        currentBlockUpdateDisposable = Observable.interval(0, 6, TimeUnit.SECONDS)
                 .doOnNext(l -> {
                     disposable = tokenRepository.fetchLatestBlockNumber(chainId)
                             .subscribeOn(Schedulers.io())
@@ -106,7 +106,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         if (tx != null)
         {
             lastestTx.postValue(tx);
-            if (!tx.blockNumber.equals("0"))
+            if (!tx.isPending())
             {
                 if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed())
                     pendingUpdateDisposable.dispose();

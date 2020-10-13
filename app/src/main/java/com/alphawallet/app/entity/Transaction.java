@@ -55,6 +55,11 @@ public class Transaction implements Parcelable {
 	private static TransactionDecoder decoder = null;
 	private static ParseMagicLink parser = null;
 
+	public boolean isPending()
+	{
+		return TextUtils.isEmpty(blockNumber) || blockNumber.equals("0") || blockNumber.equals("-2");
+	}
+
     public Transaction(
             String hash,
             String error,
@@ -481,7 +486,7 @@ public class Transaction implements Parcelable {
 		String txName = null;
 		try
 		{
-			if (blockNumber != null && blockNumber.equals("0"))
+			if (isPending())
 			{
 				txName = ctx.getString(R.string.status_pending);
 			}
@@ -586,7 +591,7 @@ public class Transaction implements Parcelable {
 		{
 			return StatusType.REJECTED;
 		}
-		else if (blockNumber.equals("0"))
+		else if (isPending())
 		{
 			return StatusType.PENDING;
 		}

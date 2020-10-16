@@ -17,7 +17,6 @@ buildscript {
 // DON'T add any plugins that is Google Play Service or uses Google Play Service
 // Search China in this file for the reason
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
 
@@ -30,6 +29,7 @@ repositories {
 android {
     compileSdkVersion 29
     buildToolsVersion '29.0.3'
+    ndkVersion '21.0.6113669'
     sourceSets {
         main {
 
@@ -106,8 +106,9 @@ android {
         if (!task.toLowerCase().contains("noanalytics"))
         {
             apply plugin: 'com.google.gms.google-services'
+            apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
-                implementation 'com.google.firebase:firebase-analytics:17.5.0'
+                implementation 'com.google.firebase:firebase-analytics:17.6.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
         }
@@ -138,8 +139,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
@@ -149,7 +150,7 @@ dependencies {
     implementation 'com.google.zxing:core:3.3.2'
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
 
@@ -165,7 +166,7 @@ dependencies {
     // Dagger 2
 
     // Dagger core
-    implementation "com.google.dagger:dagger:2.22"
+    implementation "com.google.dagger:dagger:2.27"
     annotationProcessor "com.google.dagger:dagger-compiler:2.22"
 
     // Dagger Android
@@ -193,14 +194,14 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
 
     implementation 'com.trustwallet.walletcore:walletcore:0.12.8'
 
     implementation 'com.github.florent37:tutoshowcase:1.0.1'
 
     // Do not upgrade unless we have migrated to AndroidX
-    implementation 'com.google.android:flexbox:1.0.0'
+    implementation 'com.google.android:flexbox:2.0.1'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

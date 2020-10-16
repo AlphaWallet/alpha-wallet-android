@@ -1,14 +1,9 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
-<<<<<<< HEAD
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
-=======
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.view.ViewGroup;
 import android.widget.TextView;
 

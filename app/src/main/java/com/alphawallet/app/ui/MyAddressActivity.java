@@ -1,12 +1,10 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
-<<<<<<< HEAD
-import android.arch.lifecycle.ViewModelProviders;
-=======
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -28,11 +26,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
-<<<<<<< HEAD
+
 import com.alphawallet.app.entity.CustomViewSettings;
-=======
-import com.alphawallet.app.entity.VisibilityFilter;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
+
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -44,6 +40,7 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.ImportWalletViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
@@ -145,7 +142,8 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this, myAddressViewModelFactory).get(MyAddressViewModel.class);
+        viewModel = new ViewModelProvider(this, myAddressViewModelFactory)
+                .get(MyAddressViewModel.class);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
     }
 

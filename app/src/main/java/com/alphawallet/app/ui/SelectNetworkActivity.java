@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModel;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
 
@@ -51,7 +53,7 @@ public class SelectNetworkActivity extends BaseActivity {
         toolbar();
         setTitle(getString(R.string.select_active_networks));
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(SelectNetworkViewModel.class);
 
         if (getIntent() != null) {

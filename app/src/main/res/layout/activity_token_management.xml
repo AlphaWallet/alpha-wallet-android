@@ -22,13 +22,13 @@
         android:background="@drawable/background_round_search"
         android:layout_marginTop="?actionBarSize">
 
-        <android.support.v7.widget.AppCompatImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="@dimen/dp24"
             android:layout_height="@dimen/dp24"
             android:layout_marginStart="@dimen/dp12"
             android:src="@drawable/ic_search_small"/>
 
-        <android.support.v7.widget.AppCompatEditText
+        <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edit_search"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

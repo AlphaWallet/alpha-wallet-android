@@ -14,13 +14,10 @@ import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
-<<<<<<< HEAD
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
-=======
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;

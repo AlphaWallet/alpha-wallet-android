@@ -12,15 +12,11 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.CancellationSignal;
-<<<<<<< HEAD
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomSheetDialog;
-import android.support.v4.app.ActivityCompat;
-=======
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.PermissionChecker;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -31,6 +27,7 @@ import com.alphawallet.app.entity.Operation;
 
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.hardware.fingerprint.FingerprintManager.*;
+import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 /**
  * Created by James on 7/06/2019.
@@ -237,8 +234,8 @@ public class SignTransactionDialog extends BottomSheetDialog
      * @return true if there are any available biometric sensors and biometrics are enrolled on the device, if not, return false
      */
     private Boolean checkBiometricSupport() {
-        if (ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.USE_BIOMETRIC) != PackageManager.PERMISSION_GRANTED)
+        if (checkSelfPermission(context,
+                Manifest.permission.USE_BIOMETRIC) != PermissionChecker.PERMISSION_GRANTED)
         {
             authCallback.authenticateFail(context.getString(R.string.authentication_failed), AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
             return false;

@@ -1,10 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;

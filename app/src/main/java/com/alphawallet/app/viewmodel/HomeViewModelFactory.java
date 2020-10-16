@@ -1,15 +1,10 @@
 package com.alphawallet.app.viewmodel;
 
-<<<<<<< HEAD
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
-import android.support.annotation.NonNull;
-=======
+
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;

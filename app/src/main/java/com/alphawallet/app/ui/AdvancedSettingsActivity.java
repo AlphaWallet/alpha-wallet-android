@@ -1,20 +1,16 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-<<<<<<< HEAD
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
-=======
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.util.Log;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
@@ -26,6 +22,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
+import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
@@ -56,7 +53,8 @@ public class AdvancedSettingsActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidInjection.inject(this);
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AdvancedSettingsViewModel.class);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(AdvancedSettingsViewModel.class);
 
         setContentView(R.layout.activity_generic_settings);
         toolbar();

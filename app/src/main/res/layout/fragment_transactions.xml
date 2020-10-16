@@ -19,13 +19,7 @@
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-<<<<<<< HEAD
-
-    </android.support.v4.widget.SwipeRefreshLayout>
-=======
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
-
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"

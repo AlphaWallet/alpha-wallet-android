@@ -2,12 +2,9 @@ package com.alphawallet.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-<<<<<<< HEAD
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
-=======
 import androidx.annotation.Nullable;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
+
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;

@@ -1,13 +1,10 @@
 package com.alphawallet.app.ui;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-<<<<<<< HEAD
-import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
-=======
 import androidx.annotation.Nullable;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -96,7 +93,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
 
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);

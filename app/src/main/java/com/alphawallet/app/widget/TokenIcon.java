@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
@@ -32,8 +32,10 @@ import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TokenIcon extends ConstraintLayout {
+import static androidx.core.content.ContextCompat.getColorStateList;
 
+public class TokenIcon extends ConstraintLayout
+{
     private final ImageView icon;
     private final TextView textIcon;
     private final ImageView statusIcon;
@@ -220,7 +222,7 @@ public class TokenIcon extends ConstraintLayout {
     {
         icon.setVisibility(View.GONE);
         textIcon.setVisibility(View.VISIBLE);
-        textIcon.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
+        textIcon.setBackgroundTintList(getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
         textIcon.setText(Utils.getIconisedText(tokenName));
     }
 

@@ -3,24 +3,21 @@ package com.alphawallet.app.ui;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-<<<<<<< HEAD
-import android.support.annotation.Nullable;
-import android.support.v7.widget.AppCompatRadioButton;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-=======
+
 import android.os.Handler;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -58,6 +55,7 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
+import com.alphawallet.app.viewmodel.TransferTicketViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -166,7 +164,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
 
         toAddressEditText = findViewById(R.id.edit_to_address);
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
         viewModel.setWallet(wallet);
         viewModel.progress().observe(this, systemView::showProgress);

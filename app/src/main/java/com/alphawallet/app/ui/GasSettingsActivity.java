@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.GasSliderView;
 import com.alphawallet.token.tools.Convert;
@@ -49,7 +51,7 @@ public class GasSettingsActivity extends BaseActivity implements StandardFunctio
 
         gasSliderView = findViewById(R.id.gasSliderView);
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(GasSettingsViewModel.class);
 
         FunctionButtonBar saveButton = findViewById(R.id.layoutButtons);

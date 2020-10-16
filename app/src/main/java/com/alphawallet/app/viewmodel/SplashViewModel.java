@@ -11,10 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-<<<<<<< HEAD
-=======
 import androidx.core.content.FileProvider;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -26,15 +23,11 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-<<<<<<< HEAD
-=======
-
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.app.interact.FetchWalletsInteract;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.token.tools.TokenDefinition;

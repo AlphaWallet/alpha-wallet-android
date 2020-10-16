@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
@@ -26,6 +27,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
@@ -73,9 +75,10 @@ public class NewSettingsFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
-        viewModel = ViewModelProviders.of(this, newSettingsViewModelFactory).get(NewSettingsViewModel.class);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.backUpMessage().observe(this, this::backupWarning);
+        viewModel = new ViewModelProvider(this, newSettingsViewModelFactory)
+                .get(NewSettingsViewModel.class);
+        viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        viewModel.backUpMessage().observe(getViewLifecycleOwner(), this::backupWarning);
         LocaleUtils.setActiveLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);

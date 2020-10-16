@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
@@ -68,7 +70,7 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(TransferTicketViewModel.class);
 
         viewModel.progress().observe(this, systemView::showProgress);

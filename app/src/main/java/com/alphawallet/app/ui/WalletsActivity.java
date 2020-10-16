@@ -2,12 +2,16 @@ package com.alphawallet.app.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
+
+import com.alphawallet.app.viewmodel.ActivityViewModel;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
@@ -88,7 +92,7 @@ public class WalletsActivity extends BaseActivity implements
         if (viewModel == null)
         {
             systemView = findViewById(R.id.system_view);
-            viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
+            viewModel = new ViewModelProvider(this, walletsViewModelFactory)
                     .get(WalletsViewModel.class);
             viewModel.error().observe(this, this::onError);
             viewModel.progress().observe(this, systemView::showProgress);

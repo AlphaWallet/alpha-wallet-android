@@ -4,9 +4,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;

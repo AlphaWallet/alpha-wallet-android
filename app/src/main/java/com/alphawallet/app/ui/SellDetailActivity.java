@@ -2,6 +2,8 @@ package com.alphawallet.app.ui;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +33,7 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
 
+import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
@@ -124,7 +127,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         sellPriceValue = getIntent().getDoubleExtra(EXTRA_PRICE, 0.0);
         selection = token.stringHexToBigIntegerList(ticketIds);
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(SellDetailViewModel.class);
         viewModel.prepare(token, wallet);
         viewModel.pushToast().observe(this, this::displayToast);

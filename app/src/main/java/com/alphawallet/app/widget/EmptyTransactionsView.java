@@ -9,11 +9,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-<<<<<<< HEAD
 import com.alphawallet.app.entity.CustomViewSettings;
-=======
-import com.alphawallet.app.entity.VisibilityFilter;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.ui.HomeActivity;
 
 public class EmptyTransactionsView extends FrameLayout {

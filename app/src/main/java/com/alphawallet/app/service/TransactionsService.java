@@ -2,9 +2,10 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.NetworkInfo;

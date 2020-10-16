@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.alphawallet.app.viewmodel.ActivityViewModel;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import androidx.core.content.ContextCompat;
@@ -149,13 +152,13 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this, walletViewModelFactory)
+        viewModel = new ViewModelProvider(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
-        viewModel.progress().observe(this, systemView::showProgress);
-        viewModel.error().observe(this, this::onError);
-        viewModel.tokens().observe(this, this::onTokens);
-        viewModel.backupEvent().observe(this, this::backupEvent);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.progress().observe(getViewLifecycleOwner(), systemView::showProgress);
+        viewModel.error().observe(getViewLifecycleOwner(), this::onError);
+        viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);
+        viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
+        viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
     }
 
     private void initViews(View view) {

@@ -3,29 +3,20 @@ package com.alphawallet.app.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
-<<<<<<< HEAD
-=======
-import androidx.annotation.Nullable;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
+
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Wallet;
-<<<<<<< HEAD
 import com.alphawallet.app.entity.tokens.Token;
-=======
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-<<<<<<< HEAD
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
-=======
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;

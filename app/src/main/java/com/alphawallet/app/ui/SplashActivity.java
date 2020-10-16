@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui;
 
 import android.app.Activity;
+
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
 import com.alphawallet.app.walletconnect.WCSession;
@@ -93,7 +96,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             importData = importTokenActivity.getMagiclinkFromClipboard(this);
         }
 
-        splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)
+        splashViewModel = new ViewModelProvider(this, splashViewModelFactory)
                 .get(SplashViewModel.class);
         splashViewModel.wallets().observe(this, this::onWallets);
         splashViewModel.createWallet().observe(this, this::onWalletCreate);

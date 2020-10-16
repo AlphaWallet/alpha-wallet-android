@@ -2,8 +2,9 @@ package com.alphawallet.app.entity.tokens;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;

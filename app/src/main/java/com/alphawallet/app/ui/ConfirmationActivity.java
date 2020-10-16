@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -32,6 +33,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModelFactory;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
@@ -177,7 +179,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String amountString;
         int nonceId;
 
-        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
+        viewModel = new ViewModelProvider(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
 
         setupViewListeners();

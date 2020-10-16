@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -26,6 +27,7 @@ import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -117,9 +119,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Button cancel = findViewById(R.id.cancel_button);
         cancel.setOnClickListener(this);
 
-        viewModel = ViewModelProviders.of(this, importTokenViewModelFactory)
+        viewModel = new ViewModelProvider(this, importTokenViewModelFactory)
                 .get(ImportTokenViewModel.class);
-
         viewModel.importRange().observe(this, this::onImportRange);
         viewModel.invalidRange().observe(this, this::invalidTicket);
         viewModel.invalidTime().observe(this, this::invalidTime);

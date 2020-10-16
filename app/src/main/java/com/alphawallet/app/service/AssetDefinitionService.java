@@ -8,12 +8,10 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
-<<<<<<< HEAD
-=======
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.text.TextUtils;
 
 import androidx.annotation.Keep;

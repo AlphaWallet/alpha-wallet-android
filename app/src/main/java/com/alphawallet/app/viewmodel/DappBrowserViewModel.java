@@ -1,25 +1,22 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Operation;
-<<<<<<< HEAD
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
-=======
-import com.alphawallet.app.entity.QrUrlResult;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
@@ -61,11 +58,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-<<<<<<< HEAD
 import io.realm.Realm;
-=======
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
-
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;

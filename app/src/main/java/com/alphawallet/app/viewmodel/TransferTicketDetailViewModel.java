@@ -11,11 +11,8 @@ import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-<<<<<<< HEAD
-=======
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
->>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.opensea.Asset;

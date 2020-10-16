@@ -108,7 +108,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             lines = a.getInt(R.styleable.InputView_lines, 1);
             inputType = a.getString(R.styleable.InputView_inputType);
             imeOptions = a.getString(R.styleable.InputView_imeOptions);
-            minHeight = a.getInteger(R.styleable.InputView_minHeight, 0);
+            minHeight = a.getInteger(R.styleable.InputView_minHeightValue, 0);
             innerPadding = a.getInteger(R.styleable.InputView_innerPadding, 0);
         } finally {
             a.recycle();

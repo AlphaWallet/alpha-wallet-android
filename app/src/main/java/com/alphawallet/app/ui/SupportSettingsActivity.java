@@ -12,7 +12,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.router.HelpRouter;
 import com.alphawallet.app.widget.SettingsItemView;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 public class SupportSettingsActivity extends BaseActivity {
 
@@ -105,7 +105,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
     }
@@ -119,7 +119,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
     }
@@ -136,7 +136,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
     }
@@ -152,7 +152,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
     }
@@ -169,7 +169,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
     }

@@ -1,9 +1,6 @@
 package com.alphawallet.app.ui;
 
 import android.app.Activity;
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,12 +13,13 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.View;
 
-import com.alphawallet.app.BuildConfig;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
@@ -29,7 +27,6 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.LocaleUtils;
-import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
 import com.alphawallet.app.walletconnect.WCSession;
@@ -37,13 +34,10 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.fabric.sdk.android.Fabric;
 
 import static com.alphawallet.app.C.IMPORT_REQUEST_CODE;
 
@@ -69,11 +63,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         AndroidInjection.inject(this);
         setContentView(R.layout.activity_splash);
         super.onCreate(savedInstanceState);
-        if (!BuildConfig.DEBUG)
-        {
-            CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-            Fabric.with(this, new Crashlytics.Builder().core(core).build());
-        }
 
         LocaleUtils.setDeviceLocale(getBaseContext());
 

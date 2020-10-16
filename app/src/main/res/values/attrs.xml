@@ -33,7 +33,7 @@
         <attr name="imeOptions" format="string" />
         <attr name="lines" format="integer" />
         <attr name="inputType" format="string" />
-        <attr name="minHeight" format="integer" />
+        <attr name="minHeightValue" format="integer" />
         <attr name="innerPadding" format="integer" />
     </declare-styleable>
     <declare-styleable name="CopyTextView">

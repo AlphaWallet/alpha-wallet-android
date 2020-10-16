@@ -24,7 +24,7 @@
             custom:inputType="textNoSuggestions"
             custom:label="@string/enter_seed_phrase"
             custom:lines="6"
-            custom:minHeight="170" />
+            custom:minHeightValue="170" />
 
     </LinearLayout>
 

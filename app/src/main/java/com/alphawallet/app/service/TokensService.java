@@ -49,6 +49,7 @@ import io.realm.Realm;
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.hasRealValue;
 
 public class TokensService
 {
@@ -624,8 +625,9 @@ public class TokensService
 
         for (TokenUpdateEntry check : tokenUpdateList)
         {
-            if (!check.isEthereum() || !check.needsTransactionCheck() || !walletInFocus) continue;
+            if (!check.needsTransactionCheck() || !walletInFocus) continue;
             long timeIntervalCheck = getTokenTimeInterval(check, pendingTxChains);
+            if (timeIntervalCheck == 0) continue;
 
             if (focusToken != null && check.chainId == focusToken.chainId)
             {
@@ -662,13 +664,23 @@ public class TokensService
     {
         long nextTimeCheck;
 
-        if (pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
+        Token token = getToken(t.chainId, t.tokenAddress);
+
+        if (t.isEthereum() && pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
         {
             nextTimeCheck = 10*DateUtils.SECOND_IN_MILLIS;
         }
-        else
+        else if (t.isEthereum())
         {
             nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds when not pending
+        }
+        else if (token != null)
+        {
+            nextTimeCheck = token.getTransactionCheckInterval();
+        }
+        else
+        {
+            nextTimeCheck = 0;
         }
 
         return nextTimeCheck;

@@ -34,9 +34,9 @@ public class TokenUpdateEntry
             case ERC875_LEGACY:
             case ERC875:
             case ETHEREUM:
-                return true;
             case ERC20:
             case ERC721_TICKET:
+                return true;
             case CURRENCY:
             case DELETED_ACCOUNT:
             case OTHER:

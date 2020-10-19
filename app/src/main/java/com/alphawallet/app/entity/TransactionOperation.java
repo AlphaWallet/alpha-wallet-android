@@ -78,7 +78,8 @@ public class TransactionOperation implements Parcelable {
     {
         if (contract != null)
         {
-            return contract.checkAddress(address);
+            if ((from != null && from.equalsIgnoreCase(address)) || (to != null && to.equalsIgnoreCase(address))) return true;
+            else return contract.checkAddress(address);
         }
         else
         {

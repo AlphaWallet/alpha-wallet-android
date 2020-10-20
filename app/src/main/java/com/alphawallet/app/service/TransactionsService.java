@@ -2,10 +2,11 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -101,7 +102,7 @@ public class TransactionsService
                 if (t.isEthereum()) System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
-                        transactionsClient.storeNewTransactions(currentAddress, network, t.lastBlockCheck)
+                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);

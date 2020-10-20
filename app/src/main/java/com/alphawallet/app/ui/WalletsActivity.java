@@ -2,18 +2,22 @@ package com.alphawallet.app.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.arch.lifecycle.ViewModelProviders;
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.BottomSheetDialog;
-import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+
+import com.alphawallet.app.viewmodel.ActivityViewModel;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -88,7 +92,7 @@ public class WalletsActivity extends BaseActivity implements
         if (viewModel == null)
         {
             systemView = findViewById(R.id.system_view);
-            viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
+            viewModel = new ViewModelProvider(this, walletsViewModelFactory)
                     .get(WalletsViewModel.class);
             viewModel.error().observe(this, this::onError);
             viewModel.progress().observe(this, systemView::showProgress);

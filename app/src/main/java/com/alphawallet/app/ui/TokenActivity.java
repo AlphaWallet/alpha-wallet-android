@@ -1,9 +1,7 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Base64;
@@ -13,6 +11,9 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -125,7 +126,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void setupViewModel()
     {
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
         viewModel.walletUpdate().observe(this, this::onWallet);
     }

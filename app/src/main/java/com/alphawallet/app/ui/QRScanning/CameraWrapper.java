@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.QRScanning;
 
 import android.hardware.Camera;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class CameraWrapper
 {

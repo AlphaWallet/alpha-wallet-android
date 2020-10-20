@@ -37,7 +37,15 @@ public class EtherscanTransaction
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
                                          gasUsed, chainId, contractAddress);
 
-        if (walletAddress != null) tx.completeSetup(walletAddress);
+        if (walletAddress != null)
+        {
+            tx.completeSetup(walletAddress);
+            if (!walletInvolvedInTransaction(tx, walletAddress))
+            {
+                tx = null;
+            }
+        }
+
         return tx;
     }
 

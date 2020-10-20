@@ -8,14 +8,13 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.security.keystore.*;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
-import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 
 import com.alphawallet.app.R;
@@ -32,6 +31,8 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
@@ -390,7 +391,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) Crashlytics.logException(e);
+            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
         catch (KeyServiceException e)
@@ -579,7 +580,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) Crashlytics.logException(e);
+            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
             return UpgradeKeyResult.ERROR;
         }
@@ -1096,7 +1097,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) Crashlytics.logException(e);
+            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
             returnSig.failMessage = e.getMessage();
             e.printStackTrace();
         }

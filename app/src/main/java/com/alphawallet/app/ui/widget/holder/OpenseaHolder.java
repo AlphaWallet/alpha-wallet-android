@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.AppCompatRadioButton;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,7 +17,6 @@ import com.alphawallet.token.entity.TicketRange;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.util.KittyUtils;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.TokenDetailActivity;
@@ -29,8 +28,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by James on 3/10/2018.

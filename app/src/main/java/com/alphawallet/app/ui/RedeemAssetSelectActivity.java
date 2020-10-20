@@ -1,10 +1,11 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
+import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
@@ -90,9 +92,8 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(RedeemAssetSelectViewModel.class);
-
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);

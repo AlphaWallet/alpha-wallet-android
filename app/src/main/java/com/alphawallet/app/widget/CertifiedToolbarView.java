@@ -2,17 +2,16 @@ package com.alphawallet.app.widget;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.app.R;
 
-public class CertifiedToolbarView extends android.support.v7.widget.Toolbar
+public class CertifiedToolbarView extends androidx.appcompat.widget.Toolbar
 {
     private final Context context;
     private Activity activity;

@@ -2,19 +2,19 @@ package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.Toast;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -38,7 +38,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
@@ -46,13 +45,11 @@ import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
-import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;

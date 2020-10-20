@@ -2,7 +2,7 @@ package com.alphawallet.app;
 
 import android.app.Activity;
 import android.app.Application;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import com.alphawallet.app.di.DaggerAppComponent;
 import javax.inject.Inject;
 import dagger.android.AndroidInjector;

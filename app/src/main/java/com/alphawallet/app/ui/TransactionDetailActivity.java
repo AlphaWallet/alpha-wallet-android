@@ -1,14 +1,17 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -18,10 +21,12 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.TokenScriptManagementViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
@@ -39,7 +44,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.alphawallet.app.C.Key.TRANSACTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
@@ -62,7 +66,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_detail);
 
-        viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
+        viewModel = new ViewModelProvider(this, transactionDetailViewModelFactory)
                 .get(TransactionDetailViewModel.class);
         viewModel.latestBlock().observe(this, this::onLatestBlock);
         viewModel.onTransaction().observe(this, this::onTransaction);
@@ -127,6 +131,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         chainName = viewModel.getNetworkName(transaction.chainId);
         ((TextView) findViewById(R.id.network)).setText(chainName);
+        ((ImageView) findViewById(R.id.network_icon)).setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
         TextView chainLabel = findViewById(R.id.text_chain_name);

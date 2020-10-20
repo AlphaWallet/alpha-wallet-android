@@ -1,15 +1,17 @@
 package com.alphawallet.app.ui;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.ViewModelProviders;
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v4.content.res.ResourcesCompat;
+import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -34,6 +36,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.viewmodel.BackupKeyViewModelFactory;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.LayoutCallbackListener;
@@ -674,7 +677,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this, backupKeyViewModelFactory)
+        viewModel = new ViewModelProvider(this, backupKeyViewModelFactory)
                 .get(BackupKeyViewModel.class);
         viewModel.exportedStore().observe(this, this::onExportKeystore);
     }

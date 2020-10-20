@@ -1,6 +1,6 @@
 package com.alphawallet.app.entity;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
 

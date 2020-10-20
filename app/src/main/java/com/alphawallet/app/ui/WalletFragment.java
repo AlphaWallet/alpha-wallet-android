@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -10,17 +11,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SimpleItemAnimator;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.alphawallet.app.viewmodel.ActivityViewModel;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -149,13 +152,13 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this, walletViewModelFactory)
+        viewModel = new ViewModelProvider(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
-        viewModel.progress().observe(this, systemView::showProgress);
-        viewModel.error().observe(this, this::onError);
-        viewModel.tokens().observe(this, this::onTokens);
-        viewModel.backupEvent().observe(this, this::backupEvent);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.progress().observe(getViewLifecycleOwner(), systemView::showProgress);
+        viewModel.error().observe(getViewLifecycleOwner(), this::onError);
+        viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);
+        viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
+        viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
     }
 
     private void initViews(View view) {

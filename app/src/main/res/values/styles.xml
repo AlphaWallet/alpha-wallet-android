@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
@@ -82,7 +82,7 @@
 
     <style name="TransactionDetailsCopyTextStyle">
         <item name="android:paddingTop">@dimen/dp5</item>
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@color/transparent</item>
         <item name="android:paddingEnd">@dimen/dp16</item>
         <item name="android:paddingBottom">@dimen/dp5</item>
     </style>

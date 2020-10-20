@@ -2,15 +2,13 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.ui.widget.OnDepositClickListener;
 
 import com.alphawallet.app.R;

@@ -2,7 +2,7 @@ package com.alphawallet.app.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import androidx.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;

@@ -1,13 +1,14 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -87,7 +89,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this, walletActionsViewModelFactory)
+        viewModel = new ViewModelProvider(this, walletActionsViewModelFactory)
                 .get(WalletActionsViewModel.class);
 
         viewModel.saved().observe(this, this::onSaved);

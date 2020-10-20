@@ -1,8 +1,6 @@
 package com.alphawallet.app.web3;
 
-import android.support.annotation.NonNull;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;

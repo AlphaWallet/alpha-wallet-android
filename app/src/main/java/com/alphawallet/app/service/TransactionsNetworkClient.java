@@ -26,7 +26,9 @@ import org.json.JSONObject;
 import java.io.InterruptedIOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -91,23 +93,27 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @return
      */
     @Override
-    public Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, long lastBlock)
+    public Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String tokenAddress, long lastBlock)
     {
-        long lastBlockNumber = lastBlock + 1;
-
         return Single.fromCallable(() -> {
-            List<Transaction> updates = new ArrayList<>();
+            long lastBlockNumber = lastBlock + 1;
+            Map<String, Transaction> updates = new HashMap<>();
             EtherscanTransaction lastTransaction = null;
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
                 //deleteAllChainTransactions(instance, networkInfo.chainId, walletAddress);
                 if (lastBlockNumber == 1) //first read of account. Read first 2 pages
                 {
-                    lastTransaction = syncDownwards(instance, walletAddress, networkInfo, 9999999999L);
+                    lastTransaction = syncDownwards(updates, instance, walletAddress, networkInfo, tokenAddress, 9999999999L);
                 }
                 else // try to sync upwards from the last read
                 {
-                    lastTransaction = syncUpwards(instance, walletAddress, networkInfo, lastBlockNumber);
+                    lastTransaction = syncUpwards(updates, instance, walletAddress, networkInfo, tokenAddress, lastBlockNumber);
+                }
+
+                if (lastTransaction != null)
+                {
+                    storeLatestBlockRead(instance, networkInfo.chainId, tokenAddress, lastTransaction.blockNumber);
                 }
             }
             catch (JSONException e)
@@ -119,13 +125,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 e.printStackTrace();
             }
 
-            //Add last transaction as the final result to update block scan
-            if (lastTransaction != null)
-            {
-                updates.add(lastTransaction.createTransaction(null, networkInfo.chainId));
-            }
-
-            return updates.toArray(new Transaction[0]);
+            return updates.values().toArray(new Transaction[0]);
         }).subscribeOn(Schedulers.io());
     }
 
@@ -134,7 +134,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      *
      * Note that this call is the only place that the 'earliest transaction' block can be written from.
      */
-    private EtherscanTransaction syncDownwards(Realm instance, String walletAddress, NetworkInfo networkInfo, long startingBlockNumber) throws Exception
+    private EtherscanTransaction syncDownwards(Map<String, Transaction> updates, Realm instance, String walletAddress, NetworkInfo networkInfo, String tokenAddress, long startingBlockNumber) throws Exception
     {
         int page = 1;
         List<Transaction> txList = new ArrayList<>();
@@ -144,11 +144,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         while (continueReading) // only SYNC_PAGECOUNT pages at a time for each check, to avoid congestion
         {
-            String response = readTransactions(networkInfo, walletAddress, String.valueOf(startingBlockNumber), false, page++, PAGESIZE);
+            String response = readTransactions(networkInfo, tokenAddress, String.valueOf(startingBlockNumber), false, page++, PAGESIZE);
             if (response == null) break;
             if (response.equals("0"))
             {
-                storeEarliestBlockRead(instance, networkInfo.chainId, walletAddress, startingBlockNumber);
+                storeEarliestBlockRead(instance, networkInfo.chainId, tokenAddress, startingBlockNumber);
                 break;
             }
             EtherscanTransaction[] myTxs = getEtherscanTransactions(response);
@@ -163,6 +163,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
 
             writeTransactions(instance, txList); //record transactions here
+            writeUpdates(updates, txList);
 
             if (page > SYNC_PAGECOUNT) continueReading = false;
 
@@ -170,21 +171,32 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 continueReading = false;
                 //store earliest transaction
-                if (lastTransaction != null) storeEarliestBlockRead(instance, networkInfo.chainId, walletAddress, Long.parseLong(lastTransaction.blockNumber));
+                if (lastTransaction != null) storeEarliestBlockRead(instance, networkInfo.chainId, tokenAddress, Long.parseLong(lastTransaction.blockNumber));
             }
         }
 
         return firstTransaction;
     }
 
-    private EtherscanTransaction syncUpwards(Realm instance, String walletAddress, NetworkInfo networkInfo, long lastBlockNumber) throws Exception
+    private void writeUpdates(Map<String, Transaction> updates, List<Transaction> txList)
+    {
+        if (updates != null)
+        {
+            for (Transaction tx : txList)
+            {
+                updates.put(tx.hash, tx);
+            }
+        }
+    }
+
+    private EtherscanTransaction syncUpwards(Map<String, Transaction> updates, Realm instance, String walletAddress, NetworkInfo networkInfo, String tokenAddress, long lastBlockNumber) throws Exception
     {
         int page = 1;
         List<Transaction> txList = new ArrayList<>();
         EtherscanTransaction lastTransaction;
 
         //only sync upwards by 1 page. If not sufficient then reset; delete DB and start again
-        String response = readTransactions(networkInfo, walletAddress, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
+        String response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
         if (response == null || response.equals("0")) return null;
         EtherscanTransaction[] myTxs = getEtherscanTransactions(response);
 
@@ -192,7 +204,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             //too big, erase transaction list and start from top
             deleteAllChainTransactions(instance, networkInfo.chainId, walletAddress);
-            lastTransaction = syncDownwards(instance, walletAddress, networkInfo, 999999999L); //re-sync downwards from top
+            lastTransaction = syncDownwards(updates, instance, walletAddress, networkInfo, tokenAddress, 999999999L); //re-sync downwards from top
             lastTransaction.nonce = -1; //signal to refresh list - this doesn't get written to DB
             return lastTransaction;
         }
@@ -200,6 +212,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             getRelatedTransactionList(txList, myTxs, walletAddress, networkInfo.chainId);
             writeTransactions(instance, txList); //record transactions here
+            writeUpdates(updates, txList);
             lastTransaction = myTxs[myTxs.length-1];
             return lastTransaction;
         }
@@ -349,7 +362,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
                     {
-                        syncDownwards(instance, walletAddress, network, oldestBlockRead);
+                        syncDownwards(null, instance, walletAddress, network, walletAddress, oldestBlockRead);
                     }
 
                     //now re-read last blocks from DB
@@ -451,23 +464,22 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return walletAddress.toLowerCase() + "-" + chainId;
     }
 
-    @Override
-    public void storeBlockRead(Token token, String walletAddress)
+    private void storeLatestBlockRead(Realm instance, int chainId, String tokenAddress, String lastBlockRead)
     {
-        try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
+        try
         {
-            instance.executeTransactionAsync(realm -> {
-                RealmToken realmToken = realm.where(RealmToken.class)
-                        .equalTo("address", databaseKey(token))
-                        .equalTo("chainId", token.tokenInfo.chainId)
-                        .findFirst();
+            RealmToken realmToken = instance.where(RealmToken.class)
+                    .equalTo("address", databaseKey(chainId, tokenAddress))
+                    .equalTo("chainId", chainId)
+                    .findFirst();
 
-                if (realmToken != null)
-                {
-                    token.setRealmLastBlock(realmToken);
-                    realm.insertOrUpdate(realmToken);
-                }
-            });
+            if (realmToken != null)
+            {
+                instance.executeTransaction(realm -> {
+                    realmToken.setLastBlock(Long.parseLong(lastBlockRead));
+                    realmToken.setLastTxTime(System.currentTimeMillis());
+                });
+            }
         }
         catch (Exception e)
         {

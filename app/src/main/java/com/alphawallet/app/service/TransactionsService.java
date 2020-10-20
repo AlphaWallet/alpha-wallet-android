@@ -19,6 +19,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
+import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.EventDefinition;
 
 import org.web3j.exceptions.MessageDecodingException;
@@ -36,6 +38,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.RealmResults;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
@@ -102,7 +105,7 @@ public class TransactionsService
                 if (t.isEthereum()) System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
-                        transactionsClient.storeNewTransactions(currentAddress, network, t.lastBlockCheck)
+                        transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
@@ -149,27 +152,31 @@ public class TransactionsService
     {
         //got a new transaction
         fetchTransactionDisposable = null;
+        if (transactions.length == 0) return;
+
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
-        token.lastTxCheck = System.currentTimeMillis();
+        checkPendingTransactions(token.tokenInfo.chainId);
 
-        Transaction placeHolder = transactions.length > 0 ? transactions[transactions.length - 1] : null;
+        //now check for unknown tokens
+        checkTokens(transactions);
+    }
 
-        //The final transaction is the last transaction read, and will have the highest block number we read
-        if (placeHolder != null)
+    /**
+     * Check new tokens for any unknowns, then find the unknowns
+     * @param txList
+     */
+    private void checkTokens(Transaction[] txList)
+    {
+        for (int i = 0; i < txList.length - 1; i++)
         {
-            token.lastBlockCheck = Long.parseLong(placeHolder.blockNumber);
-            token.lastTxTime = placeHolder.timeStamp * 1000; //update last transaction received time
-
-            if (placeHolder.nonce == -1)
+            Transaction tx = txList[i];
+            if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
             {
-                context.sendBroadcast(new Intent(C.RESET_TRANSACTIONS));
+                Token token = tokensService.getToken(tx.chainId, tx.to);
+                if (token == null) tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
             }
         }
-
-        //update token details
-        transactionsClient.storeBlockRead(token, currentAddress);
-        checkPendingTransactions(token.tokenInfo.chainId);
     }
 
     public void changeWallet(Wallet newWallet)

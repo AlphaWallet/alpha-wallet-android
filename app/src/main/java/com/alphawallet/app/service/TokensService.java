@@ -35,13 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -71,7 +70,7 @@ public class TokensService
     private final OpenseaService openseaService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
-    private final ConcurrentLinkedQueue<ContractAddress> unknownTokens;
+    private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private long nextOpenSeaCheck;
     private int openSeaCount;
     private boolean walletInFocus = true;
@@ -104,14 +103,14 @@ public class TokensService
         setupFilter();
         focusToken = null;
         setCurrentAddress(preferenceRepository.getCurrentWalletAddress()); //set current wallet address at service startup
-        this.unknownTokens = new ConcurrentLinkedQueue<>();
+        this.unknownTokens = new ConcurrentLinkedDeque<>();
     }
 
     private void checkUnknownTokens()
     {
         if (queryUnknownTokensDisposable == null || queryUnknownTokensDisposable.isDisposed())
         {
-            ContractAddress t = unknownTokens.poll();
+            ContractAddress t = unknownTokens.pollFirst();
 
             if (t != null && getToken(t.chainId, t.address) == null)
             {
@@ -146,6 +145,11 @@ public class TokensService
             Intent intent = new Intent(ADDED_TOKEN);
             intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, new ArrayList<>(Collections.singletonList(new ContractLocator(token.getAddress(), token.tokenInfo.chainId, token.getInterfaceSpec()))));
             context.sendBroadcast(intent);
+            //now add to the balance update list if has balance
+            if (token.hasPositiveBalance())
+            {
+                addToUpdateList(Collections.singletonList(new TokenCardMeta(token)).toArray(new TokenCardMeta[0]));
+            }
         }
     }
 
@@ -252,7 +256,24 @@ public class TokensService
 
         if (getToken(cAddr.chainId, cAddr.address) == null)
         {
-            unknownTokens.add(cAddr);
+            unknownTokens.addLast(cAddr);
+            startUnknownCheck();
+        }
+    }
+
+    public void addUnknownTokenToCheckPriority(ContractAddress cAddr)
+    {
+        for (ContractAddress check : unknownTokens)
+        {
+            if (check.chainId == cAddr.chainId && check.address.equalsIgnoreCase(cAddr.address))
+            {
+                return;
+            }
+        }
+
+        if (getToken(cAddr.chainId, cAddr.address) == null)
+        {
+            unknownTokens.addFirst(cAddr);
             startUnknownCheck();
         }
     }
@@ -625,8 +646,9 @@ public class TokensService
 
         for (TokenUpdateEntry check : tokenUpdateList)
         {
-            if (!check.isEthereum() || !check.needsTransactionCheck() || !walletInFocus) continue;
+            if (!check.needsTransactionCheck() || !walletInFocus) continue;
             long timeIntervalCheck = getTokenTimeInterval(check, pendingTxChains);
+            if (timeIntervalCheck == 0) continue;
 
             if (focusToken != null && check.chainId == focusToken.chainId)
             {
@@ -663,13 +685,23 @@ public class TokensService
     {
         long nextTimeCheck;
 
-        if (pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
+        Token token = getToken(t.chainId, t.tokenAddress);
+
+        if (t.isEthereum() && pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
         {
             nextTimeCheck = 10*DateUtils.SECOND_IN_MILLIS;
         }
-        else
+        else if (t.isEthereum())
         {
             nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds when not pending
+        }
+        else if (token != null)
+        {
+            nextTimeCheck = token.getTransactionCheckInterval();
+        }
+        else
+        {
+            nextTimeCheck = 0;
         }
 
         return nextTimeCheck;

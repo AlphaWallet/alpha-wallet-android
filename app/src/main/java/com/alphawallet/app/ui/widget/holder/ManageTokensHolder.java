@@ -2,23 +2,16 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.view.LayoutInflater;
-import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
-import com.alphawallet.app.ui.widget.entity.WarningData;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
 

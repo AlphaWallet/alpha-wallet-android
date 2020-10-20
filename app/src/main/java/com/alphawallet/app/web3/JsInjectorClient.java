@@ -1,8 +1,8 @@
 package com.alphawallet.app.web3;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
+import androidx.annotation.Nullable;
+import androidx.annotation.RawRes;
 import android.text.TextUtils;
 import android.util.Log;
 

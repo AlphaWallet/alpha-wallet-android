@@ -3,7 +3,8 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;

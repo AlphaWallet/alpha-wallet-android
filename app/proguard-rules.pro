@@ -36,6 +36,4 @@
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
 #---------------Begin: proguard configuration for support library  ----------
--keep class android.support.v4.app.** { *; }
--keep interface android.support.v4.app.** { *; }
 -keep class wallet.core {*;}

@@ -1,12 +1,13 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayout;
+import androidx.annotation.Nullable;
+import androidx.gridlayout.widget.GridLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -96,7 +97,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_detail);
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
 
         if (getIntent() != null && getIntent().getExtras() != null) {

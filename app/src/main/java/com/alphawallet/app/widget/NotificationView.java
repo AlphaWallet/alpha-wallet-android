@@ -2,17 +2,15 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.util.Utils;
 
 public class NotificationView extends LinearLayout {
     private RelativeLayout layout;
@@ -150,7 +148,7 @@ public class NotificationView extends LinearLayout {
         );
 
         try {
-            backgroundColorRes = a.getResourceId(R.styleable.NotificationView_backgroundColor, -1);
+            backgroundColorRes = a.getResourceId(R.styleable.NotificationView_backgroundColour, -1);
             textColorRes = a.getResourceId(R.styleable.NotificationView_textColor, -1);
         } finally {
             a.recycle();

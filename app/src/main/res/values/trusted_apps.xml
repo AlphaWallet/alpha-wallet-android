@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="TrustedApps">
-        <item>org.telegram.messenger,tg:join?invite=</item>
+        <item>org.telegram.messenger\,tg:join?invite=</item>
     </string-array>
 
     <string-array name="TrustedExtensions">
-        <item>application/pdf,pdf</item>
+        <item>application/pdf\,pdf</item>
     </string-array>
 </resources>

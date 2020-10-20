@@ -1,11 +1,12 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -32,6 +33,7 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.ActivityViewModel;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.viewmodel.AddTokenViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -123,7 +125,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         findViewById(R.id.save).setOnClickListener(this);
 
-        viewModel = ViewModelProviders.of(this, addTokenViewModelFactory)
+        viewModel = new ViewModelProvider(this, addTokenViewModelFactory)
                 .get(AddTokenViewModel.class);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);

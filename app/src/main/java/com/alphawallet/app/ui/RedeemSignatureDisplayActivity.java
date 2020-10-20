@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -8,7 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.google.zxing.BarcodeFormat;
@@ -85,7 +87,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         webWrapper = findViewById(R.id.layout_webwrapper);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
-        viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
+        viewModel = new ViewModelProvider(this, redeemSignatureDisplayModelFactory)
                 .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.selection().observe(this, this::onSelected);

@@ -70,6 +70,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
@@ -213,7 +214,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         String sym = token != null ? token.tokenInfo.symbol : ETH_SYMBOL;
         icon.bindData(token, viewModel.getAssetDefinitionService());
         //status
-        icon.setStatusIcon(token.getTxStatus(transaction));
+        if (token != null) icon.setStatusIcon(token.getTxStatus(transaction));
 
         String operationName = token.getOperationName(transaction, this);
 
@@ -230,12 +231,14 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             eventAmount.setText(transactionValue);
         }
 
-        if (token.getTxStatus(transaction) == StatusType.PENDING)
+        if (token != null && token.getTxStatus(transaction) == StatusType.PENDING)
         {
             //listen for token completion
             setupPendingListener(wallet, transaction.hash);
             pendingStart = transaction.timeStamp;
         }
+
+        setChainName(transaction);
     }
 
     private void setupPendingListener(Wallet wallet, String hash)
@@ -319,6 +322,11 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             token = viewModel.getToken(item.getChainId(), item.getTokenAddress());
             tokenId = determineTokenId(item);
 
+            if (transaction == null || token == null)
+            {
+                return; //shouldn't get here.
+            }
+
             String sym = token != null ? token.tokenInfo.symbol : ETH_SYMBOL;
             icon.bindData(token, viewModel.getAssetDefinitionService());
             //status
@@ -341,6 +349,8 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             {
                 populateActivityInfo(item);
             }
+
+            setChainName(transaction);
         }
     }
 
@@ -501,6 +511,21 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     {
         findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
         tokenView.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
+    }
+
+    private void setChainName(Transaction transaction)
+    {
+        TextView chainName = findViewById(R.id.text_chain_name);
+        if (transaction.chainId != MAINNET_ID && token != null && !token.isEthereum())
+        {
+            chainName.setVisibility(View.VISIBLE);
+            Utils.setChainColour(chainName, token.tokenInfo.chainId);
+            chainName.setText(token.getNetworkName());
+        }
+        else
+        {
+            chainName.setVisibility(View.GONE);
+        }
     }
 
     @Override

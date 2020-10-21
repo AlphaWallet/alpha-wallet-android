@@ -36,6 +36,8 @@ import java.math.RoundingMode;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
@@ -167,6 +169,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             layoutAppreciation.setVisibility(View.GONE);
             setIssuerDetails();
         }
+
+        if (!token.isEthereum() && token.tokenInfo.chainId != MAINNET_ID)
+        {
+            showNetworkLabel();
+        }
+        else
+        {
+            hideNetworkLabel();
+        }
     }
 
     private void handleTicker()
@@ -175,17 +186,16 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         hideIssuerViews();
         layoutAppreciation.setVisibility(View.VISIBLE);
         balanceCurrency.setVisibility(View.VISIBLE);
-        hideTestnet();
         startTickerRealmListener();
     }
 
-    private void showTestnet() {
+    private void showNetworkLabel() {
         testnet.setVisibility(View.VISIBLE);
         Utils.setChainColour(testnet, token.tokenInfo.chainId);
         testnet.setText(token.getNetworkName());
     }
 
-    private void hideTestnet() {
+    private void hideNetworkLabel() {
         testnet.setVisibility(View.GONE);
     }
 

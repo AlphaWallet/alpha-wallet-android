@@ -64,13 +64,28 @@
                 tools:text="+ 1.234 ETH"
                 android:textColor="@color/black"
                 android:layout_marginTop="@dimen/dp16"
-                android:layout_marginBottom="10dp"
                 android:textSize="@dimen/sp24" />
+
+            <TextView
+                android:id="@+id/text_chain_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp5"
+                android:layout_marginEnd="@dimen/dp8"
+                android:layout_marginStart="@dimen/dp5"
+                android:background="@drawable/background_status_pending"
+                android:fontFamily="@font/font_bold"
+                android:padding="2dp"
+                android:text="@string/action_clear"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/pending_time_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp5"
                 android:orientation="horizontal"
                 android:visibility="gone">
 
@@ -89,6 +104,11 @@
                     tools:text="@string/transaction_pending_for" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dp5"
+                android:orientation="horizontal"/>
 
             <include layout="@layout/item_ticket" />
 

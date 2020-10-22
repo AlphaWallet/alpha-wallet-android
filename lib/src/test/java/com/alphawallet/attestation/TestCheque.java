@@ -14,8 +14,8 @@ public class TestCheque {
   public static void setupKeys() throws Exception {
     rand = SecureRandom.getInstance("SHA1PRNG");
     rand.setSeed("seed".getBytes());
-
-    senderKeys = TestHelper.constructECKeys(rand);
+    AttestationCrypto crypto = new AttestationCrypto(rand);
+    senderKeys = crypto.constructECKeys();
   }
 
   @org.junit.Test

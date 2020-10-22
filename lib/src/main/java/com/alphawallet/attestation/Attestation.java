@@ -123,6 +123,7 @@ public class Attestation implements Signable, ASNEncodable, Validateable {
     return serialNumber.getValue().intValueExact();
   }
 
+  // TODO change to up-to 20 byte array
   public void setSerialNumber(long serialNumber) {
     this.serialNumber = new ASN1Integer(serialNumber);
   }
@@ -202,6 +203,7 @@ public class Attestation implements Signable, ASNEncodable, Validateable {
     return res;
   }
 
+  // TODO change to list of arrays of 20 bytes
   public void setSmartcontracts(List<Long> smartcontracts) {
     ASN1EncodableVector seq = new ASN1EncodableVector();
     for (long current : smartcontracts) {

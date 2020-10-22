@@ -14,7 +14,7 @@ import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
 public class IdentifierAttestation extends Attestation implements Validateable {
-  enum AttestationType {
+  public enum AttestationType {
     PHONE,
     EMAIL
   }
@@ -22,7 +22,7 @@ public class IdentifierAttestation extends Attestation implements Validateable {
   private final AttestationCrypto crypto;
 
   /**
-   * Sets up the attestation.
+   * Constructs a new identifier attestation based on a secret.
    * You still need to set the optional fields, that is
    * issuer, notValidBefore, notValidAfter, smartcontracts
    */
@@ -38,8 +38,29 @@ public class IdentifierAttestation extends Attestation implements Validateable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    setRiddle(identity, type, secret);
+    setRiddle(AttestationCrypto.constructPointBytesFromIdentity(identity, type, secret));
   }
+
+  /**
+   * Restores an attestation based on an already existing riddle
+   * You still need to set the optional fields, that is
+   * issuer, notValidBefore, notValidAfter, smartcontracts
+   */
+  public IdentifierAttestation(String identity, AttestationType type, byte[] riddle, AsymmetricKeyParameter key)  {
+    super();
+    this.crypto = new AttestationCrypto(new SecureRandom());
+    super.setVersion(18); // Our initial version
+    super.setSubject("CN=" + crypto.addressFromKey(key));
+    super.setSignature(AttestationCrypto.OID_SIGNATURE_ALG);
+    try {
+      SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(key);
+      super.setSubjectPublicKeyInfo(spki);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    setRiddle(riddle);
+  }
+
 
   public IdentifierAttestation(byte[] derEncoding) throws IOException, IllegalArgumentException {
     super(derEncoding);
@@ -84,14 +105,14 @@ public class IdentifierAttestation extends Attestation implements Validateable {
   }
 
   /**
-   * Picks a riddle and sets it as an Attribute on the Attestation/
+   * Set a riddle and sets it as an Attribute on the Attestation/
    * @return A proof of knowledge of the riddle
    */
-  private void setRiddle(String identity, AttestationType type, BigInteger secret) {
+  private void setRiddle(byte[] encodedRiddle) {
     ASN1EncodableVector extensions = new ASN1EncodableVector();
     extensions.add(new ASN1ObjectIdentifier(Attestation.OID_OCTETSTRING));
     extensions.add(ASN1Boolean.TRUE);
-    extensions.add(new DEROctetString(AttestationCrypto.constructPointBytesFromIdentity(identity, type, secret)));
+    extensions.add(new DEROctetString(encodedRiddle));
     // Double Sequence is needed to be compatible with X509V3
     this.setExtensions(new DERSequence(new DERSequence(extensions)));
   }

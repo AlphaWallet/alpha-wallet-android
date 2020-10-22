@@ -11,13 +11,14 @@ import java.security.SecureRandom;
 import java.security.spec.ECFieldFp;
 import java.util.Arrays;
 import java.util.List;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.bouncycastle.jce.ECNamedCurveTable;
@@ -70,6 +71,13 @@ public class AttestationCrypto {
     return "0x" + Hex.toHexString(Arrays.copyOfRange(hash,hash.length-20,hash.length)).toUpperCase();
   }
 
+  public AsymmetricCipherKeyPair constructECKeys() {
+    ECKeyPairGenerator generator = new ECKeyPairGenerator();
+    ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(domain, rand);
+    generator.init(keygenParams);
+    return generator.generateKeyPair();
+  }
+
   /**
    * Constructs a riddle based on a secret and returns a proof of knowledge of this
    */
@@ -99,7 +107,7 @@ public class AttestationCrypto {
     return new ProofOfExponent(base, riddle, t, d);
   }
 
-  public boolean verifyProof(ProofOfExponent pok)  {
+  public static boolean verifyProof(ProofOfExponent pok)  {
     BigInteger c = mapToInteger(makeArray(Arrays.asList(pok.getBase(), pok.getRiddle(), pok.getPoint()))).mod(curveOrder);
     ECPoint lhs = pok.getBase().multiply(pok.getChallenge());
     ECPoint rhs = pok.getRiddle().multiply(c).add(pok.getPoint());
@@ -110,7 +118,7 @@ public class AttestationCrypto {
     return new BigInteger(256, rand).mod(curveOrder);
   }
 
-  private byte[] makeArray(List<ECPoint> points ) {
+  private static byte[] makeArray(List<ECPoint> points ) {
     try {
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       for (ECPoint current : points) {
@@ -124,8 +132,9 @@ public class AttestationCrypto {
     }
   }
 
-  private static ECPoint hashIdentifier(int type, String identifier) {
-    BigInteger idenNum = mapToInteger(type, identifier.getBytes(StandardCharsets.UTF_8));
+   protected static ECPoint hashIdentifier(int type, String identifier) {
+    // TODO check that identifier is legal in other ways
+    BigInteger idenNum = mapToInteger(type, identifier.trim().toLowerCase().getBytes(StandardCharsets.UTF_8));
     return computePoint(spec.getCurve(), fieldSize, idenNum);
   }
 

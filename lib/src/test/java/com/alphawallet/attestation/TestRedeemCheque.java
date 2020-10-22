@@ -21,9 +21,10 @@ public class TestRedeemCheque {
     rand = SecureRandom.getInstance("SHA1PRNG");
     rand.setSeed("seed".getBytes());
 
-    subjectKeys = TestHelper.constructECKeys(rand);
-    issuerKeys = TestHelper.constructECKeys(rand);
-    senderKeys = TestHelper.constructECKeys(rand);
+    AttestationCrypto crypto = new AttestationCrypto(rand);
+    subjectKeys = crypto.constructECKeys();
+    issuerKeys = crypto.constructECKeys();
+    senderKeys = crypto.constructECKeys();
   }
 
   @org.junit.Test
@@ -43,25 +44,25 @@ public class TestRedeemCheque {
     try {
       PublicKey pk;
       System.out.println("Signed attestation:");
-      System.out.println(TestHelper.printDER(signed.getDerEncoding(), "SIGNABLE"));
+      System.out.println(DERUtility.printDER(signed.getDerEncoding(), "SIGNABLE"));
       pk = new EC().generatePublic(
           SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(issuerKeys.getPublic()));
       System.out.println("Attestation verification key:");
-      System.out.println(TestHelper.printDER(pk.getEncoded(),"PUBLIC KEY"));
+      System.out.println(DERUtility.printDER(pk.getEncoded(),"PUBLIC KEY"));
 
       System.out.println("Cheque:");
-      System.out.println(TestHelper.printDER(cheque.getDerEncoding(), "CHEQUE"));
+      System.out.println(DERUtility.printDER(cheque.getDerEncoding(), "CHEQUE"));
       System.out.println("Signed cheque verification key:");
       pk = new EC().generatePublic(
           SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(senderKeys.getPublic()));
-      System.out.println(TestHelper.printDER(pk.getEncoded(),"PUBLIC KEY"));
+      System.out.println(DERUtility.printDER(pk.getEncoded(),"PUBLIC KEY"));
 
       System.out.println("Redeem Cheque:");
-      System.out.println(TestHelper.printDER(redeem.getDerEncoding(), "REDEEM"));
+      System.out.println(DERUtility.printDER(redeem.getDerEncoding(), "REDEEM"));
       System.out.println("Signed user public key (for redeem verification):");
       pk = new EC().generatePublic(
           SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(subjectKeys.getPublic()));
-      System.out.println(TestHelper.printDER(pk.getEncoded(),"PUBLIC KEY"));
+      System.out.println(DERUtility.printDER(pk.getEncoded(),"PUBLIC KEY"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

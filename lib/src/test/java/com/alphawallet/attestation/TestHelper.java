@@ -3,13 +3,7 @@ package com.alphawallet.attestation;
 import com.alphawallet.attestation.IdentifierAttestation.AttestationType;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -19,32 +13,21 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 
 public class TestHelper {
   public static final int CHARS_IN_LINE = 65;
 
 
-  public static KeyPair constructKeys(SecureRandom rand) throws Exception {
-    Security.addProvider(new BouncyCastleProvider());
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance(AttestationCrypto.SIGNATURE_ALG, "BC");
-    ECGenParameterSpec ecSpec = new ECGenParameterSpec(AttestationCrypto.ECDSA_CURVE);
-    keyGen.initialize(ecSpec, rand);
-    return keyGen.generateKeyPair();
-  }
-
-  public static AsymmetricCipherKeyPair constructECKeys(SecureRandom rand) {
-    ECKeyPairGenerator generator = new ECKeyPairGenerator();
-    ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(AttestationCrypto.domain, rand);
-    generator.init(keygenParams);
-    return generator.generateKeyPair();
-  }
+//  public static KeyPair constructKeys(SecureRandom rand) throws Exception {
+//    Security.addProvider(new BouncyCastleProvider());
+//    KeyPairGenerator keyGen = KeyPairGenerator.getInstance(AttestationCrypto.SIGNATURE_ALG, "BC");
+//    ECGenParameterSpec ecSpec = new ECGenParameterSpec(AttestationCrypto.ECDSA_CURVE);
+//    keyGen.initialize(ecSpec, rand);
+//    return keyGen.generateKeyPair();
+//  }
 
   public static IdentifierAttestation makeUnsignedStandardAtt(AsymmetricKeyParameter key, BigInteger secret) {
     IdentifierAttestation att = new IdentifierAttestation("test@test.ts", AttestationType.EMAIL, key, secret);
@@ -115,25 +98,5 @@ public class TestHelper {
     att.setDataObject(new DERSequence(dataObject));
     Assert.assertTrue(att.checkValidity());
     return att;
-  }
-
-  public static String printDER(byte[] input, String type) {
-    byte[] encodedCert = Base64.getEncoder().encode(input);
-    StringBuilder builder = new StringBuilder();
-    builder.append("-----BEGIN "+ type +"-----\n");
-    addBytes(builder, encodedCert);
-    builder.append("-----END "+ type +"-----");
-    return builder.toString();
-  }
-
-  private static void addBytes(StringBuilder builder, byte[] encoding) {
-    int start = 0;
-    while (start < encoding.length) {
-      int end = encoding.length - (start + CHARS_IN_LINE) > 0 ?
-          start + CHARS_IN_LINE : encoding.length;
-      builder.append(new String(Arrays.copyOfRange(encoding, start, end)));
-      builder.append('\n');
-      start += CHARS_IN_LINE;
-    }
   }
 }

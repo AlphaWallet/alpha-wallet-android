@@ -33,6 +33,7 @@ public class SignedAttestation implements ASNEncodable, Verifiable, Validateable
     this.att = new Attestation(attestationEnc.getEncoded());
     DERBitString signatureEnc = DERBitString.getInstance(asn1.getObjectAt(2));
     this.signature = signatureEnc.getBytes();
+    // TODO use key from the attestation
     this.publicKey = signingPublicKey;
     if (!verify()) {
       throw new IllegalArgumentException("The signature is not valid");

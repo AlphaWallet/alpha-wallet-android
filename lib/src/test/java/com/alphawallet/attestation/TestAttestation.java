@@ -21,7 +21,8 @@ public class TestAttestation {
     public static void setupKeys() throws Exception {
         rand = SecureRandom.getInstance("SHA1PRNG");
         rand.setSeed("seed".getBytes());
-        subjectKeys = TestHelper.constructECKeys(rand);
+        AttestationCrypto crypto = new AttestationCrypto(rand);
+        subjectKeys = crypto.constructECKeys();
     }
 
     @org.junit.Test

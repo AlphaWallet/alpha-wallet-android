@@ -89,6 +89,7 @@ public class AttestationRequest implements ASNEncodable, Validateable, Verifiabl
       byte[] rawData = getUnsignedEncoding();
       ASN1EncodableVector res = new ASN1EncodableVector();
       res.add(ASN1Primitive.fromByteArray(rawData));
+      res.add(SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(publicKey));
       res.add(new DERBitString(signature));
       return new DERSequence(res).getEncoded();
     } catch (Exception e) {

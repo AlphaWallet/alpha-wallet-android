@@ -187,7 +187,11 @@ public class RedeemCheque implements ASNEncodable, Verifiable {
     ASN1OctetString identifierEnc = ASN1OctetString.getInstance(extensions.getObjectAt(2));
     // It now holds that identifier.multiply(x) = riddle
     ECPoint identifier = crypto.decodePoint(identifierEnc.getOctets());
-    return crypto.computeProof(identifier, decodedRiddle, x);
+    ProofOfExponent ex = crypto.computeProof(identifier, decodedRiddle, x);
+    if (!ex.verify()) {
+      throw new RuntimeException("dsfdsaf");
+    }
+    return ex;
   }
 
   @Override

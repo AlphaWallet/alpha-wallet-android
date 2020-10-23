@@ -23,262 +23,246 @@ import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
 public class Demo {
-  public static void main(String args[]) {
-    System.out.println("starting...");
+  public static void main(String args[])  {
     CommandLineParser parser = new DefaultParser();
-    Options options = new Options();
-    Option role = new Option( "r", "role", true,
-        "The role which to run. Must be either \"keys\", \"send\", \"receive\", "
-            + "\"request-attest\" or \"construct-attest\"." );
-    role.isRequired();
-    options.addOption(role);
     CommandLine line;
     try {
-      line = parser.parse( options, args );
-      if(!line.hasOption( "role" ) ) {
-        System.err.println("You must call with a role. Either \"keys\", \"send\", \"receive\", "
-            + "\"request-attest\" or \"construct-attest\"");
-        throw new RuntimeException("Could not parse role.");
+      try {
+        line = parser.parse(new Options(), args);
+      } catch (ParseException e) {
+        System.err.println("Could not parse commandline arguments");
+        throw e;
+      }
+
+      SecureRandom rand = new SecureRandom();
+      AttestationCrypto crypto = new AttestationCrypto(rand);
+      List<String> arguments = line.getArgList();
+      switch (arguments.get(0).toLowerCase()) {
+        case "keys":
+          System.out.println("Constructing key pair...");
+          try {
+            AsymmetricCipherKeyPair keys = crypto.constructECKeys();
+            SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory
+                .createSubjectPublicKeyInfo(keys.getPublic());
+            byte[] pub = spki.getEncoded();
+            if (!writeFile(arguments.get(1), DERUtility.printDER(pub, "PUBLIC KEY"))) {
+              System.err.println("Could not write public key");
+              throw new IOException("Failed to write file");
+            }
+
+            PrivateKeyInfo privInfo = PrivateKeyInfoFactory.createPrivateKeyInfo(keys.getPrivate());
+            byte[] priv = privInfo.getEncoded();
+            if (!writeFile(arguments.get(2), DERUtility.printDER(priv, "PRIVATE KEY"))) {
+              System.err.println("Could not write private key");
+              throw new IOException("Failed to write file");
+            }
+
+          } catch (Exception e) {
+            System.err.println("Was expecting: <output dir to public key> <output dir to private key>.");
+            throw e;
+          }
+          System.out.println("Constructed keys");
+          break;
+        case "send":
+          System.out.println("Constructing a cheque...");
+          try {
+            int amount = Integer.parseInt(arguments.get(1));
+            String receiverId = arguments.get(2);
+            AttestationType type;
+            switch (arguments.get(3).toLowerCase()) {
+              case "mail":
+                type = AttestationType.EMAIL;
+                break;
+              case "phone":
+                type = AttestationType.PHONE;
+                break;
+              default:
+                System.err.println("Could not parse identifier type, must be either \"mail\" or \"phone\"");
+                throw new IllegalArgumentException("Wrong type of identifier");
+            }
+            int validity = 1000*Integer.parseInt(arguments.get(4)); // Validity in milliseconds
+            AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(arguments.get(5)));
+            String outputDirCheque = arguments.get(6);
+            String outputDirSecret = arguments.get(7);
+
+            BigInteger secret = crypto.makeSecret();
+            Cheque cheque = new Cheque(receiverId, type, amount, validity, keys, secret);
+            byte[] encoding = cheque.getDerEncoding();
+
+            if (!writeFile(outputDirCheque, DERUtility.printDER(encoding, "CHEQUE"))) {
+              System.err.println("Could not write cheque to disc");
+              throw new IOException("Could not write file");
+            }
+
+            if (!writeFile(outputDirSecret, DERUtility.printDER(DERUtility.encodeSecret(secret), "CHEQUE SECRET"))) {
+              System.err.println("Could not write cheque secret to disc");
+              throw new IOException("Could not write file");
+            }
+          } catch (Exception e) {
+            System.err.println("Was expecting: <integer amount to send> <identifier of the receiver> "
+                + "<type of ID, Either \"mail\" or \"phone\"> <validity in seconds> <signing key input dir>"
+                + " <output dir for cheque> <output dir for secret>");
+            throw e;
+          }
+          System.out.println("Constructed the cheque");
+          break;
+        case "receive":
+          System.out.println("Making cheque redeem request...");
+          try {
+            AsymmetricCipherKeyPair userKeys = DERUtility.restoreBase64Keys(readFile(arguments.get(1)));
+            byte[] chequeSecretBytes = DERUtility.restoreBytes(readFile(arguments.get(2)));
+            BigInteger chequeSecret = DERUtility.decodeSecret(chequeSecretBytes);
+            byte[] attestationSecretBytes = DERUtility.restoreBytes(readFile(arguments.get(3)));
+            BigInteger attestationSecret = DERUtility.decodeSecret(attestationSecretBytes);
+            byte[] chequeBytes = DERUtility.restoreBytes(readFile(arguments.get(4)));
+            Cheque cheque = new Cheque(chequeBytes);
+            byte[] attestationBytes = DERUtility.restoreBytes(readFile(arguments.get(5)));
+            AsymmetricKeyParameter attestationProviderKey = PublicKeyFactory.createKey(
+                DERUtility.restoreBytes(readFile(arguments.get(6))));
+            SignedAttestation att = new SignedAttestation(attestationBytes, attestationProviderKey);
+
+            if (!cheque.checkValidity()) {
+              System.err.println("Could not validate cheque");
+              throw new RuntimeException("Validation failed");
+            }
+            if (!cheque.verify()) {
+              System.err.println("Could not verify cheque");
+              throw new RuntimeException("Verification failed");
+            }
+            if (!att.checkValidity()) {
+              System.err.println("Could not validate attestation");
+              throw new RuntimeException("Validation failed");
+            }
+            if (!att.verify()) {
+              System.err.println("Could not verify attestation");
+              throw new RuntimeException("Verification failed");
+            }
+
+            RedeemCheque redeem = new RedeemCheque(cheque, att, userKeys, attestationSecret, chequeSecret);
+            if (!redeem.checkValidity()) {
+              System.err.println("Could not validate redeem request");
+              throw new RuntimeException("Validation failed");
+            }
+            if (!redeem.verify()) {
+              System.err.println("Could not verify redeem request");
+              throw new RuntimeException("Verification failed");
+            }
+            // TODO how should this actually be?
+            SmartContract sc = new SmartContract();
+            if (!sc.testEncoding(redeem.getPok())) {
+              System.err.println("Could not submit proof of knowledge to the chain");
+              throw new RuntimeException("Chain submission failed");
+            }
+          } catch (Exception e) {
+            System.err.println("Was expecting: <signing key input dir> <cheque secret input dir> "
+                + "<attestation secret input dir> <cheque input dir> <attestation input dir> "
+                + "<attestation signing key input dir>");
+            throw e;
+          }
+          System.out.println("Finished redeeming cheque");
+          break;
+        case "request-attest":
+          System.out.println("Constructing attestation request");
+          try {
+            AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(arguments.get(1)));
+            String receiverId = arguments.get(2);
+            AttestationType type;
+            switch (arguments.get(3).toLowerCase()) {
+              case "mail":
+                type = AttestationType.EMAIL;
+                break;
+              case "phone":
+                type = AttestationType.PHONE;
+                break;
+              default:
+                System.err.println("Could not parse identifier type, must be either \"mail\" or \"phone\"");
+                throw new IllegalArgumentException("Wrong type of identifier");
+            }
+            String outputDirRequest = arguments.get(4);
+            String outputDirSecret = arguments.get(5);
+
+            BigInteger secret = crypto.makeSecret();
+            ProofOfExponent pok = crypto.constructProof(receiverId, type, secret);
+            AttestationRequest request = new AttestationRequest(receiverId, type, pok, keys);
+
+            if (!writeFile(outputDirRequest, DERUtility.printDER(request.getDerEncoding(), "ATTESTATION REQUEST"))) {
+              System.err.println("Could not write attestation request to disc");
+              throw new IOException("Could not write file");
+            }
+
+            if (!writeFile(outputDirSecret, DERUtility.printDER(DERUtility.encodeSecret(secret), "SECRET"))) {
+              System.err.println("Could not write attestation secret to disc");
+              throw new IOException("Could not write file");
+            }
+          } catch (Exception e) {
+            System.err.println("Was expecting: <signing key input dir> <identifier> "
+                + "<type of ID, Either \"mail\" or \"phone\"> <attestation request output dir> <secret output dir>");
+            throw e;
+          }
+          System.out.println("Finished constructing attestation request");
+          break;
+        case "construct-attest":
+          // TODO very limited functionality.
+          // Should use a configuration file and have a certificate to its signing key
+          System.out.println("Signing attestation...");
+          try {
+            AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(arguments.get(1)));
+            String issuerName = arguments.get(2);
+            long validity = 1000*Integer.parseInt(arguments.get(3)); // Validity in milliseconds
+            byte[] requestBytes = DERUtility.restoreBytes(readFile(arguments.get(4)));
+            AttestationRequest request = new AttestationRequest(requestBytes);
+            String attestationDir = arguments.get(5);
+
+            if (!request.checkValidity()) {
+              System.err.println("Could not validate attestation signing request");
+              throw new RuntimeException("Validation failed");
+            }
+            if (!request.verify()) {
+              System.err.println("Could not verify attestation signing request");
+              throw new RuntimeException("Validation failed");
+            }
+            Attestation att = new IdentifierAttestation(request.getIdentity(), request.getType(),
+                request.getPok().getRiddle().getEncoded(false), request.getPublicKey());
+            att.setIssuer("CN=" + issuerName);
+            att.setSerialNumber(new Random().nextLong());
+            Date now = new Date();
+            att.setNotValidBefore(now);
+            att.setNotValidAfter(new Date(System.currentTimeMillis() + validity));
+            SignedAttestation signed = new SignedAttestation(att, keys);
+            if (!writeFile(attestationDir, DERUtility.printDER(signed.getDerEncoding(), "ATTESTATION"))) {
+              System.err.println("Could not write attestation to disc");
+              throw new IOException("Could not write file");
+            }
+          } catch (Exception e) {
+            System.err.println("Was expecting: <signing key input dir> <issuer name> "
+                + "<validity in seconds> <attestation request input dir> "
+                + "<signed attestation output dir>");
+            throw e;
+          }
+          System.out.println("Finished signing attestation");
+          break;
+        default:
+          System.err.println("First argument must be either \"keys\", \"send\", \"receive\", "
+              + "\"request-attest\" or \"construct-attest\".");
+          throw new IllegalArgumentException("Unknown role");
       }
     }
-    catch( ParseException e) {
-      System.err.println( "Could not parse input");
-      throw new RuntimeException(e);
+    catch( Exception e) {
+      System.err.println("FAILURE!");
+      return;
     }
-
-    SecureRandom rand = new SecureRandom();
-    AttestationCrypto crypto = new AttestationCrypto(rand);
-    List<String> arguments = line.getArgList();
-    switch (arguments.get(0).toLowerCase()) {
-      case "keys":
-        try {
-          AsymmetricCipherKeyPair keys = crypto.constructECKeys();
-          SubjectPublicKeyInfo spki = SubjectPublicKeyInfoFactory
-              .createSubjectPublicKeyInfo(keys.getPublic());
-          byte[] pub = spki.getPublicKeyData().getEncoded();
-          if (!writeFile(role.getValue(1), DERUtility.printDER(pub, "PUBLIC KEY"))) {
-            throw new RuntimeException("Could not write public key");
-          }
-
-          PrivateKeyInfo privInfo = PrivateKeyInfoFactory.createPrivateKeyInfo(keys.getPrivate());
-          byte[] priv = privInfo.getEncoded();
-          if (!writeFile(role.getValue(2), DERUtility.printDER(priv, "PRIVATE KEY"))) {
-            throw new RuntimeException("Could not write private key");
-          }
-
-        } catch (Exception e) {
-          System.err.println("Was expecting: <output dir to public key> <output dir to private key>.");
-          throw new RuntimeException(e);
-        }
-        break;
-      case "send":
-        try {
-          int amount = Integer.parseInt(role.getValue(1));
-          String receiverId = role.getValue(2);
-          AttestationType type;
-          switch (role.getValue(3).toLowerCase()) {
-            case "mail":
-              type = AttestationType.EMAIL;
-              break;
-            case "phone":
-              type = AttestationType.PHONE;
-              break;
-            default:
-              throw new IllegalArgumentException("Wrong type of identifier");
-          }
-          int validity = Integer.parseInt(role.getValue(4));
-          AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(role.getValue(5)));
-          String outputDirCheque = role.getValue(6);
-          if (outputDirCheque.isEmpty()) {
-            throw new RuntimeException("Output directory is empty");
-          }
-          String outputDirSecret = role.getValue(7);
-          if (outputDirSecret.isEmpty()) {
-            throw new RuntimeException("Output directory is empty");
-          }
-
-          BigInteger secret = crypto.makeSecret();
-          Cheque cheque = new Cheque(receiverId, type, amount, validity, keys, secret);
-          byte[] encoding = cheque.getDerEncoding();
-
-          if (!writeFile(outputDirCheque, DERUtility.printDER(encoding, "CHEQUE"))) {
-            throw new RuntimeException("Could not write cheque to disc");
-          }
-
-          if (!writeFile(outputDirSecret, DERUtility.printDER(DERUtility.encodeSecret(secret), "CHEQUE SECRET"))) {
-            throw new RuntimeException("Could not write cheque to disc");
-          }
-//        Option amount = new Option("a", "amount", true, "The amount to send");
-//        amount.isRequired();
-//        options.addOption(amount);
-//        Option id = new Option("d", "id", true, "The identifier of the receiver");
-//        id.isRequired();
-//        options.addOption(id);
-//        Option type = new Option("t", "type", true, "The type of ID. Either \"mail\" or \"phone\"");
-//        type.isRequired();
-//        options.addOption(type);
-        } catch (Exception e) {
-          System.err.println("Was expecting: <integer amount to send> <identifier of the receiver> "
-              + "<type of ID, Either \"mail\" or \"phone\"> <validity in seconds> <signing key input dir>"
-              + " <output dir for cheque> <output dir for secret>");
-          throw new RuntimeException(e);
-        }
-        break;
-      case "receive":
-        try {
-          AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(role.getValue(1)));
-          byte[] chequeSecretBytes = DERUtility.restoreBytes(readFile(role.getValue(2)));
-          BigInteger chequeSecret = new BigInteger(chequeSecretBytes);
-          byte[] attestationSecretBytes = DERUtility.restoreBytes(readFile(role.getValue(3)));
-          BigInteger attestationSecret = new BigInteger(attestationSecretBytes);
-          byte[] chequeBytes = DERUtility.restoreBytes(readFile(role.getValue(4)));
-          Cheque cheque = new Cheque(chequeBytes);
-          byte[] attestationBytes = DERUtility.restoreBytes(readFile(role.getValue(5)));
-          SignedAttestation att = new SignedAttestation(attestationBytes, keys.getPublic());
-
-          if (!cheque.checkValidity()) {
-            throw new RuntimeException("Could not validate cheque");
-          }
-          if (!cheque.verify()) {
-            throw new RuntimeException("Could not verify cheque");
-          }
-          if (!att.checkValidity()) {
-            throw new RuntimeException("Could not validate attestation");
-          }
-          if (!att.verify()) {
-            throw new RuntimeException("Could not verify attestation");
-          }
-
-          RedeemCheque redeem = new RedeemCheque(cheque, att, keys, attestationSecret, chequeSecret);
-          if (!redeem.checkValidity()) {
-            throw new RuntimeException("Could not validate redeem request");
-          }
-          if (!redeem.verify()) {
-            throw new RuntimeException("Could not verify redeem request");
-          }
-          // TODO how should this actually be?
-          SmartContract sc = new SmartContract();
-          if (!sc.testEncoding(redeem.getPok())) {
-            throw new RuntimeException("Could not submit proof of knowledge to chain");
-          }
-        } catch (Exception e) {
-          System.err.println("Was expecting: <signing key input dir> <cheque secret input dir> "
-              + "<attestation secret input dir> <cheque input dir> <attestation input dir>");
-          throw new RuntimeException(e);
-        }
-        break;
-      case "request-attest":
-        try {
-          AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(role.getValue(1)));
-          String receiverId = role.getValue(2);
-          AttestationType type;
-          switch (role.getValue(3).toLowerCase()) {
-            case "mail":
-              type = AttestationType.EMAIL;
-              break;
-            case "phone":
-              type = AttestationType.PHONE;
-              break;
-            default:
-              throw new IllegalArgumentException("Wrong type of identifier");
-          }
-          String outputDirRequest = role.getValue(4);
-          if (outputDirRequest.isEmpty()) {
-            throw new RuntimeException("Output request directory is empty");
-          }
-
-          String outputDirSecret = role.getValue(5);
-          if (outputDirSecret.isEmpty()) {
-            throw new RuntimeException("Output secret directory is empty");
-          }
-
-          BigInteger secret = crypto.makeSecret();
-          ProofOfExponent pok = crypto.constructProof(receiverId, type, secret);
-          AttestationRequest request = new AttestationRequest(receiverId, type, pok, keys);
-
-          if (!writeFile(outputDirRequest, DERUtility.printDER(request.getDerEncoding(), "ATTESTATION REQUEST"))) {
-            throw new RuntimeException("Could not write request");
-          }
-
-          if (!writeFile(outputDirSecret, DERUtility.printDER(secret.toByteArray(), "SECRET"))) {
-            throw new RuntimeException("Could not write secret");
-          }
-        } catch (Exception e) {
-          System.err.println("Was expecting: <signing key input dir> <identifier> "
-              + "<type of ID, Either \"mail\" or \"phone\"> <attestation request output dir> <secret output dir>");
-          throw new RuntimeException(e);
-        }
-        break;
-      case "construct-attest":
-        // TODO very limited functionality.
-        // Should use a configuration file and have a certificate to its signing key
-        try {
-          AsymmetricCipherKeyPair keys = DERUtility.restoreBase64Keys(readFile(role.getValue(1)));
-          String issuerName = role.getValue(2);
-          long validity = Integer.parseInt(role.getValue(3));
-          byte[] requestBytes = DERUtility.restoreBytes(readFile(role.getValue(3)));
-          AttestationRequest request = new AttestationRequest(requestBytes);
-          String outputDirSecret = role.getValue(4);
-          if (outputDirSecret.isEmpty()) {
-            throw new RuntimeException("Output directory is empty");
-          }
-
-          if (!request.checkValidity()) {
-            throw new RuntimeException("Request is not valid");
-          }
-          if (!request.verify()) {
-            throw new RuntimeException("Request could not be verified");
-          }
-          Attestation att = new IdentifierAttestation(request.getIdentity(), request.getType(),
-              request.getPok().getRiddle().getEncoded(false), request.getPublicKey());
-          att.setIssuer("CN=" + issuerName);
-          att.setSerialNumber(new Random().nextLong());
-          Date now = new Date();
-          att.setNotValidBefore(now);
-          att.setNotValidAfter(new Date(System.currentTimeMillis() + 1000*validity));
-          SignedAttestation signed = new SignedAttestation(att, keys);
-          if (!writeFile(outputDirSecret, DERUtility.printDER(signed.getDerEncoding(), "ATTESTATION"))) {
-            throw new RuntimeException("Could not write attestation");
-          }
-        } catch (Exception e) {
-          System.err.println("Was expecting: <signing key input dir> <issuer name> "
-              + "<validity in seconds> <attestation request input dir> "
-              + "<signed attestation output dir>");
-          throw new RuntimeException(e);
-        }
-        break;
-      default:
-        System.err.println("Unknown option. The role which to run. Must be either \"keys\", \"send\", \"receive\", "
-            + "\"request-attest\" or \"construct-attest\".");
-    }
-//    Option input = new Option("i", "input", true, "The DER encoded input file.");
-//
-//    options.addOption(
-//    options.addOption( "o", "output", true, "The path for the DER encoded output file.");
-//
-//    try {
-//      CommandLine line = parser.parse( options, args );
-//
-//      // validate options have been added
-//      if( line.hasOption( "block-size" ) ) {
-//        // print the value of block-size
-//        System.out.println( line.getOptionValue( "block-size" ) );
-//      }
-//    }
-//    catch( ParseException exp ) {
-//      System.out.println( "Unexpected exception:" + exp.getMessage() );
-//    }
-    System.out.println("SUCCESS!!!");
+    System.out.println("SUCCESS!");
   }
 
 
@@ -288,6 +272,7 @@ public class Demo {
       StringBuffer buf = new StringBuffer();
       while (reader.hasNextLine()) {
         buf.append(reader.nextLine());
+        buf.append(System.lineSeparator());
       }
       reader.close();
       return buf.toString();
@@ -297,11 +282,12 @@ public class Demo {
     try {
       File file = new File(dir);
       if (!file.createNewFile()) {
-        System.out.println("The output file \"" + data + "\" already exists");
+        System.out.println("The output file \"" + dir + "\" already exists");
         return false;
       }
       FileWriter writer = new FileWriter(file);
       writer.write(data);
+      writer.close();
       return true;
     } catch (IOException e) {
       return false;

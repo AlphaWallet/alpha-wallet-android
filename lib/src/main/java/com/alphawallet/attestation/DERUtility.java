@@ -6,6 +6,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -41,6 +44,17 @@ public class DERUtility {
       ASN1EncodableVector asn1 = new ASN1EncodableVector();
       asn1.add(new DEROctetString(secret.toByteArray()));
       return new DERSequence(asn1).getEncoded();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static BigInteger decodeSecret(byte[] secretBytes) {
+    try {
+      ASN1InputStream input = new ASN1InputStream(secretBytes);
+      ASN1Sequence asn1 = ASN1Sequence.getInstance(input.readObject());
+      ASN1OctetString secret = ASN1OctetString.getInstance(asn1.getObjectAt(0));
+      return new BigInteger(secret.getOctets());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

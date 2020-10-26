@@ -2,26 +2,10 @@ buildscript {
     repositories {
         jcenter()
     }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
-    }
 }
-//
-//plugins {
-//    id "application"
-//}
 
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java-library'
-//apply plugin : "java"
-//
-//ext {
-//    javaMainClass = "com.alphawallet.attestation.demo.Demo"
-//}
 
-//application {
-//    mainClassName = javaMainClass
-//}
 dependencies {
     implementation('com.amazonaws:aws-lambda-java-core:1.2.0')
     implementation('com.amazonaws:aws-lambda-java-events:2.2.6')
@@ -32,35 +16,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     testImplementation 'org.web3j:core:4.6.0'
-    implementation 'org.web3j:core:4.6.0'
-    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
-
-//task demo(type: Jar) {
-//    manifest {
-//        attributes 'Main-Class': 'com.alphawallet.attestation.demo.Demo'
-//    }
-//    baseName = 'demo-jar'
-//    configurations.runtime.collect {
-//        it.isDirectory() ? it : zipTree(it)
-//    }
-//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-//    with jar
-//}
-
-shadowJar {
-    manifest {
-        attributes 'Main-Class': 'com.alphawallet.attestation.demo.Demo'
-    }
-}
-
-//
-//task runWithExec(type: Exec) {
-//    dependsOn build
-//    group = "Execution"
-//    description = "Run the main class with ExecTask"
-//    commandLine "java", "-classpath", sourceSets.main.runtimeClasspath.getAsPath(), javaMainClass
-//}
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"

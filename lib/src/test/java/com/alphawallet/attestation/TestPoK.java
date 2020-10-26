@@ -1,7 +1,6 @@
 package com.alphawallet.attestation;
 
 import com.alphawallet.attestation.IdentifierAttestation.AttestationType;
-import com.alphawallet.attestation.demo.SmartContract;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import org.junit.Assert;

@@ -1,8 +1,7 @@
-package com.alphawallet.attestation.demo;
+package com.alphawallet.attestation;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
-import com.alphawallet.attestation.ProofOfExponent;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

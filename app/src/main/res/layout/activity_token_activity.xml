@@ -62,6 +62,8 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
                 tools:text="+ 1.234 ETH"
+				android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
                 android:textColor="@color/black"
                 android:layout_marginTop="@dimen/dp16"
                 android:layout_marginBottom="10dp"

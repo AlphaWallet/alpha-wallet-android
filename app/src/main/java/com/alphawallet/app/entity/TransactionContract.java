@@ -176,8 +176,10 @@ public class TransactionContract implements Parcelable {
             if (!token.isNonFungible() && (operation.value == null || operation.value.length() > 0 && Character.isDigit(operation.value.charAt(0))))
             {
                 BigDecimal value = new BigDecimal(operation.value);
+                String balanceValue = BalanceUtils.getScaledValueFixed(value, token.tokenInfo.decimals, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
+                if (getOperationId() == TransactionType.APPROVE.ordinal() && balanceValue.length() > 10) return "All";
                 //appears to be a number; try to produce number with prefix
-                return tx.getPrefix(token) + BalanceUtils.getScaledValueFixed(value, token.tokenInfo.decimals, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
+                else return tx.getPrefix(token) + balanceValue;
             }
             else
             {

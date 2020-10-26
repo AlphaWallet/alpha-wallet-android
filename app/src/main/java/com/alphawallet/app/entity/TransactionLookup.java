@@ -12,7 +12,8 @@ public class TransactionLookup
     public static int typeToName(TransactionType type)
     {
         setupTypes();
-        return typeMapping.get(type);
+        if (type.ordinal() > typeMapping.size()) return typeMapping.get(TransactionType.UNKNOWN);
+        else return typeMapping.get(type);
     }
 
     private static void setupTypes()

@@ -397,7 +397,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return retrievedTransactions.toArray(new Transaction[0]);
     }
 
-    private void deleteOperations(RealmTransaction rawItem)
+    public static void deleteOperations(RealmTransaction rawItem)
     {
         int len = rawItem.getOperations().size();
         for (int i = 0; i < len; i++)

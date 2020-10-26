@@ -21,5 +21,6 @@ public enum TransactionType
     TRANSFER_FROM,
     ALLOCATE_TO,
     APPROVE,
+    RECEIVED,
     ILLEGAL_VALUE
 }

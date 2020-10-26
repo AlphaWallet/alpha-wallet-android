@@ -1,14 +1,11 @@
 package com.alphawallet.app.service;
 
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -19,28 +16,21 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
-import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.token.entity.ContractAddress;
-import com.alphawallet.token.entity.EventDefinition;
 
 import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.RealmResults;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 8/07/2020.
@@ -55,6 +45,8 @@ public class TransactionsService
     private final TransactionLocalSource transactionsCache;
     private final Context context;
     private String currentAddress;
+    private int currentChainIndex;
+    private boolean nftCheck;
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
@@ -63,6 +55,8 @@ public class TransactionsService
     private Disposable fetchTransactionDisposable;
     @Nullable
     private Disposable eventTimer;
+    @Nullable
+    private Disposable erc20EventCheckCycle;
 
     public TransactionsService(TokensService tokensService,
                                PreferenceRepositoryType preferenceRepositoryType,
@@ -83,6 +77,9 @@ public class TransactionsService
 
     private void fetchTransactions()
     {
+        currentChainIndex = 0;
+        nftCheck = false;
+
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed()) fetchTransactionDisposable.dispose();
         fetchTransactionDisposable = null;
         //reset transaction timers
@@ -90,6 +87,38 @@ public class TransactionsService
         {
             eventTimer = Observable.interval(0, 1, TimeUnit.SECONDS)
                     .doOnNext(l -> checkTransactionQueue()).subscribe();
+        }
+
+        if (erc20EventCheckCycle == null || erc20EventCheckCycle.isDisposed())
+        {
+            erc20EventCheckCycle = Observable.interval(2, 10, TimeUnit.SECONDS)
+                    .doOnNext(l -> checkTransactions()).subscribe();
+        }
+    }
+
+    /**
+     * Start the token transaction checker
+     * This uses the Etherscan API routes returning ERC20 and ERC721 token transfers, both incoming and outgoing.
+     */
+    private void checkTransactions()
+    {
+        List<Integer> filters = tokensService.getNetworkFilters();
+        if (currentChainIndex >= filters.size()) currentChainIndex = 0;
+        int chainId = filters.get(currentChainIndex);
+
+        transactionsClient.readTransactions(currentAddress, ethereumNetworkRepository.getNetworkByChain(chainId), tokensService, nftCheck)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(count -> { System.out.println("Received: " + count); }).isDisposed();
+
+        if (!nftCheck)
+        {
+            nftCheck = true;
+        }
+        else
+        {
+            nftCheck = false;
+            currentChainIndex++;
         }
     }
 

@@ -135,11 +135,11 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             else
             {
-                realm.beginTransaction();
-                realmToken.setInterfaceSpec(type.ordinal());
-                realmToken.setName(token.tokenInfo.name);
-                realmToken.setSymbol(token.tokenInfo.symbol);
-                realm.commitTransaction();
+                realm.executeTransaction(instance -> {
+                    realmToken.setInterfaceSpec(type.ordinal());
+                    realmToken.setName(token.tokenInfo.name);
+                    realmToken.setSymbol(token.tokenInfo.symbol);
+                });
             }
 
             return fetchToken(token.tokenInfo.chainId, wallet, token.getAddress());
@@ -547,11 +547,9 @@ public class TokensRealmSource implements TokenLocalSource {
         if (!WalletUtils.isValidAddress(wallet.address)) return;
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            TransactionsRealmCache.addRealm();
-            realm.beginTransaction();
-            saveToken(realm, token);
-            realm.commitTransaction();
-            TransactionsRealmCache.subRealm();
+            realm.executeTransaction(instance -> {
+                saveToken(realm, token);
+            });
         }
         catch (Exception ex)
         {

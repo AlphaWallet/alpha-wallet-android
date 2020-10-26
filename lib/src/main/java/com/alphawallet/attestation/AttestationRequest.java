@@ -42,18 +42,23 @@ public class AttestationRequest implements ASNEncodable, Validateable, Verifiabl
     }
   }
 
-  public AttestationRequest(byte[] derEncoding) throws IOException {
-    ASN1InputStream input = new ASN1InputStream(derEncoding);
-    ASN1Sequence asn1 = ASN1Sequence.getInstance(input.readObject());
-    ASN1Sequence unsigned = ASN1Sequence.getInstance(asn1.getObjectAt(0));
-    this.identity = DERVisibleString.getInstance(unsigned.getObjectAt(0)).getString();
-    this.type = AttestationType.values()[
-        ASN1Integer.getInstance(unsigned.getObjectAt(1)).getValue().intValueExact()];
-    this.pok = new ProofOfExponent(ASN1Sequence.getInstance(unsigned.getObjectAt(2)).getEncoded());
-    this.publicKey =  PublicKeyFactory
-        .createKey(SubjectPublicKeyInfo.getInstance(asn1.getObjectAt(1)));
-    DERBitString signatureEnc = DERBitString.getInstance(asn1.getObjectAt(2));
-    this.signature = signatureEnc.getBytes();
+  public AttestationRequest(byte[] derEncoding) {
+    try {
+      ASN1InputStream input = new ASN1InputStream(derEncoding);
+      ASN1Sequence asn1 = ASN1Sequence.getInstance(input.readObject());
+      ASN1Sequence unsigned = ASN1Sequence.getInstance(asn1.getObjectAt(0));
+      this.identity = DERVisibleString.getInstance(unsigned.getObjectAt(0)).getString();
+      this.type = AttestationType.values()[
+          ASN1Integer.getInstance(unsigned.getObjectAt(1)).getValue().intValueExact()];
+      this.pok = new ProofOfExponent(
+          ASN1Sequence.getInstance(unsigned.getObjectAt(2)).getEncoded());
+      this.publicKey = PublicKeyFactory
+          .createKey(SubjectPublicKeyInfo.getInstance(asn1.getObjectAt(1)));
+      DERBitString signatureEnc = DERBitString.getInstance(asn1.getObjectAt(2));
+      this.signature = signatureEnc.getBytes();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     if (!verify()) {
       throw new IllegalArgumentException("The signature is not valid");
     }

@@ -18,7 +18,7 @@ public class TestDemo {
   }
 
   @Test
-  public void  testSunshine() {
+  public void executeFlow() {
     String[] args;
     // Keys
     args = new String[]{"keys", "sender-pub.pem", "sender-priv.pem"};
@@ -28,7 +28,7 @@ public class TestDemo {
     args = new String[]{"keys", "attestor-pub.pem", "attestor-priv.pem"};
     Demo.main(args);
     // Send
-    args = new String[]{"send", "42", "test@test.ts", "mail", "3600", "sender-priv.pem", "cheque.pem", "cheque-secret.pem"};
+    args = new String[]{"create-cheque", "42", "test@test.ts", "mail", "3600", "sender-priv.pem", "cheque.pem", "cheque-secret.pem"};
     Demo.main(args);
     // Request attestation
     args = new String[]{"request-attest", "receiver-priv.pem", "test@test.ts", "mail", "attestation-request.pem", "attestation-secret.pem"};
@@ -37,7 +37,7 @@ public class TestDemo {
     args = new String[]{"construct-attest", "attestor-priv.pem", "AlphaWallet", "3600", "attestation-request.pem", "attestation.pem"};
     Demo.main(args);
     // Redeem
-    args = new String[]{"receive", "receiver-priv.pem", "cheque-secret.pem", "attestation-secret.pem", "cheque.pem", "attestation.pem", "attestor-pub.pem"};
+    args = new String[]{"receive-cheque", "receiver-priv.pem", "cheque-secret.pem", "attestation-secret.pem", "cheque.pem", "attestation.pem", "attestor-pub.pem"};
     Demo.main(args);
   }
 }

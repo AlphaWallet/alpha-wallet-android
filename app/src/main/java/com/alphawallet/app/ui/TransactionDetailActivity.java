@@ -300,7 +300,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void checkFailed()
     {
-        if (transaction.error != null && transaction.error.equals("1"))
+        if (transaction.hasError())
         {
             TextView failed = findViewById(R.id.failed);
             TextView failedF = findViewById(R.id.failedFace);

@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 
 import androidx.annotation.NonNull;
 
@@ -36,6 +37,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.alphawallet.app.repository.EthereumNetworkBase.hasRealValue;
 
 public class Token implements Parcelable, Comparable<Token>
 {
@@ -638,7 +641,7 @@ public class Token implements Parcelable, Comparable<Token>
      */
     public String getTransactionValue(Transaction transaction, int precision)
     {
-        if (transaction.error.equals("1")) return "";
+        if (transaction.hasError()) return "";
         else if (transaction.value.equals("0")) return "0";
         return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
     }
@@ -923,5 +926,21 @@ public class Token implements Parcelable, Comparable<Token>
     public void setNameWeight(int weight)
     {
         nameWeight = weight;
+    }
+
+    public long getTransactionCheckInterval()
+    {
+        if (hasRealValue() && hasPositiveBalance())
+        {
+            return 1* DateUtils.MINUTE_IN_MILLIS;
+        }
+        else if (hasPositiveBalance())
+        {
+            return 150* DateUtils.SECOND_IN_MILLIS;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }

@@ -907,6 +907,11 @@ public class TokenRepository implements TokenRepositoryType {
             }
         }
 
+        //Check for raw bytes return value; need to do this before we try to parse the function return
+        //as raw bytes returns now cause a throw from the encoder
+        String rawBytesValue = checkRawBytesValue(responseValue);
+        if (rawBytesValue != null) return (T)rawBytesValue;
+
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
         if (response.size() == 1)
@@ -934,6 +939,26 @@ public class TokenRepository implements TokenRepositoryType {
                 return null;
             }
         }
+    }
+
+    //some token contracts break the ERC20 guidance and directly return bytes for strings
+    //These returns break the web3j ABI decoder
+    //TODO: Push another fix to Web3j
+    private String checkRawBytesValue(String responseValue) throws Exception
+    {
+        String value = null;
+        int firstValueEndIndex = Math.min(responseValue.length(), 64);
+        if (firstValueEndIndex > 2)
+        {
+            BigInteger firstValue = new BigInteger(Numeric.cleanHexPrefix(responseValue.substring(0, firstValueEndIndex)), 16);
+
+            if (firstValue.compareTo(BigInteger.valueOf(0xFF)) > 0)
+            {
+                value = checkBytesString(responseValue);
+            }
+        }
+
+        return value;
     }
 
     private String checkBytesString(String responseValue) throws Exception
@@ -968,7 +993,10 @@ public class TokenRepository implements TokenRepositoryType {
         StringBuilder sb = new StringBuilder();
         for (char ch : name.toCharArray())
         {
-            if (ch >= 0x20 && ch <= 0x7E) //valid ASCII character
+            if (Character.isIdeographic(ch) ||
+                    Character.isLetterOrDigit(ch) ||
+                    Character.isWhitespace(ch) ||
+                    (ch >= 0x20 && ch <= 0x7E)) //some other common ASCII
             {
                 sb.append(ch);
             }
@@ -980,9 +1008,13 @@ public class TokenRepository implements TokenRepositoryType {
     private String getName(String address, NetworkInfo network) throws Exception {
         Function function = nameOf();
         Wallet temp = new Wallet(null);
+
         String responseValue = callSmartContractFunction(function, address, network ,temp);
 
-        if (TextUtils.isEmpty(responseValue)) return null;
+        if (TextUtils.isEmpty(responseValue) || responseValue.length() == 2) return null;
+
+        String rawBytesValue = checkRawBytesValue(responseValue);
+        if (rawBytesValue != null) return rawBytesValue;
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());

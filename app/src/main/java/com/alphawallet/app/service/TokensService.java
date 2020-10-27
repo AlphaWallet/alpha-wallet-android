@@ -62,6 +62,7 @@ public class TokensService
     private final ConcurrentLinkedQueue<TokenUpdateEntry> tokenUpdateList = new ConcurrentLinkedQueue<>();
     private static final Map<Integer, Long> pendingChainMap = new ConcurrentHashMap<>();
     private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
+    private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>();
     private String currentAddress = null;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
@@ -87,6 +88,8 @@ public class TokensService
     private Disposable balanceCheckDisposable;
     @Nullable
     private Disposable erc20CheckDisposable;
+    @Nullable
+    private Disposable storeErc20Tokens;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
@@ -157,6 +160,47 @@ public class TokensService
     {
         if (TextUtils.isEmpty(currentAddress) || TextUtils.isEmpty(addr)) return null;
         else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
+    }
+
+    public void storeToken(Token token)
+    {
+        if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
+
+        //store token to database, update balance
+        tokenStoreList.add(token);
+        if (storeErc20Tokens == null)
+        {
+            storeErc20Tokens = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+                    .doOnNext(l -> storeNextToken()).subscribe();
+        }
+    }
+
+    private void storeNextToken()
+    {
+        Token t = tokenStoreList.poll();
+        if (t != null)
+        {
+            Wallet wallet = new Wallet(t.getWallet());
+            tokenRepository.addToken(wallet, t.tokenInfo, t.getInterfaceSpec())
+                    .flatMap(token -> tokenRepository.checkInterface(new Token[]{token}, wallet)) //if ERC721 determine the specific contract type
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::storedToken, Throwable::printStackTrace)
+                    .isDisposed();
+        }
+        else if (storeErc20Tokens != null && !storeErc20Tokens.isDisposed())
+        {
+            storeErc20Tokens.dispose();
+            storeErc20Tokens = null;
+        }
+    }
+
+    private void storedToken(Token[] tokens)
+    {
+        if (tokens.length > 0)
+        {
+            System.out.println("Stored Token: " + tokens[0].getFullName());
+        }
     }
 
     public TokenTicker getTokenTicker(Token token)
@@ -368,7 +412,7 @@ public class TokensService
     public void startBalanceUpdate()
     {
         nextOpenSeaCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
-        openSeaCount = 0;
+        openSeaCount = 2;
 
         if (eventTimer != null && !eventTimer.isDisposed())
         {
@@ -381,7 +425,7 @@ public class TokensService
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
 
-        eventTimer = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+        eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkTokensBalance()).subscribe();
     }
 
@@ -401,16 +445,15 @@ public class TokensService
 
     private void checkTokensBalance()
     {
-        TokenUpdateEntry t = getNextInBalanceUpdateQueue();
+        Token t = getNextInBalanceUpdateQueue();
 
         if (t != null)
         {
-            if (BuildConfig.DEBUG) Log.d("TOKEN", "Updating: " + t.chainId + (t.isEthereum()? " (Base Chain) ":"") + " : " + t.tokenAddress + " [" + t.balanceUpdateWeight + "]");
-            if (t.balanceUpdateWeight > 2.0f) t.balanceUpdateWeight -= 2.0f; //reduce back to calculated amount
-            balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t.chainId, t.tokenAddress, t.type)
+            if (BuildConfig.DEBUG) Log.d("TOKEN", "Updating: " + t.tokenInfo.chainId + (t.isEthereum()? " (Base Chain) ":"") + " : " + t.getAddress());
+            balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(balanceChange -> onBalanceChange(balanceChange, t.chainId), this::onError);
+                    .subscribe(balanceChange -> onBalanceChange(balanceChange, t.tokenInfo.chainId), this::onError);
         }
 
         if (System.currentTimeMillis() > nextOpenSeaCheck && focusToken == null && walletInFocus) checkOpenSea();
@@ -579,19 +622,22 @@ public class TokensService
      * Token update heuristic - calculates which token should be updated next
      * @return
      */
-    public TokenUpdateEntry getNextInBalanceUpdateQueue()
+    public Token getNextInBalanceUpdateQueue()
     {
         //calculate update based on last update time & importance
         float highestWeighting = 0;
         long currentTime = System.currentTimeMillis();
-        TokenUpdateEntry highestToken = null;
+        Token highestToken = null;
+        TokenUpdateEntry highestUpdateToken = null;
 
         for (TokenUpdateEntry check : tokenUpdateList)
         {
+            Token token = getToken(check.chainId, check.tokenAddress);
+            if (token == null) continue;
             long lastUpdateDiff = currentTime - check.lastUpdateTime;
             float weighting = check.balanceUpdateWeight;
 
-            if (!walletInFocus && !check.isEthereum()) continue; //only check chains when wallet out of focus
+            if (!walletInFocus && !token.isEthereum()) continue; //only check chains when wallet out of focus
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
@@ -620,13 +666,15 @@ public class TokensService
             if (updateFactor > highestWeighting && (lastUpdateDiff > (float)cutoffCheck))
             {
                 highestWeighting = updateFactor;
-                highestToken = check;
+                highestToken = token;
+                highestUpdateToken = check;
             }
         }
 
-        if (highestToken != null)
+        if (highestUpdateToken != null)
         {
-            highestToken.lastUpdateTime = System.currentTimeMillis();
+            highestUpdateToken.lastUpdateTime = System.currentTimeMillis();
+            if (highestUpdateToken.balanceUpdateWeight > 2.0f) highestUpdateToken.balanceUpdateWeight -= 2.0f; //reduce back to calculated amount
         }
 
         return highestToken;
@@ -641,13 +689,16 @@ public class TokensService
     {
         //calculate update based on last update time & importance
         long currentTime = System.currentTimeMillis();
-        TokenUpdateEntry highestToken = null;
+        Token highestToken = null;
+        TokenUpdateEntry highestUpdateToken = null;
         long highestDiff = 0;
 
         for (TokenUpdateEntry check : tokenUpdateList)
         {
-            if (!check.needsTransactionCheck() || !walletInFocus) continue;
-            long timeIntervalCheck = getTokenTimeInterval(check, pendingTxChains);
+            Token token = getToken(check.chainId, check.tokenAddress);
+            if (token == null) continue;
+            if (!check.needsTransactionCheck(token.getInterfaceSpec()) || !walletInFocus) continue;
+            long timeIntervalCheck = getTokenTimeInterval(token, pendingTxChains);
             if (timeIntervalCheck == 0) continue;
 
             if (focusToken != null && check.chainId == focusToken.chainId)
@@ -661,18 +712,18 @@ public class TokensService
                 if (diff > highestDiff)
                 {
                     highestDiff = diff;
-                    highestToken = check;
+                    highestToken = token;
+                    highestUpdateToken = check;
                 }
             }
         }
 
-        if (highestToken != null)
+        if (highestUpdateToken != null)
         {
-            highestToken.lastTxCheck = currentTime;
-            return getToken(highestToken.chainId, highestToken.tokenAddress);
+            highestUpdateToken.lastTxCheck = currentTime;
         }
 
-        return null;
+        return highestToken;
     }
 
     /**
@@ -681,13 +732,11 @@ public class TokensService
      * @param pending
      * @return
      */
-    private long getTokenTimeInterval(TokenUpdateEntry t, Collection<Integer> pending)
+    private long getTokenTimeInterval(Token t, Collection<Integer> pending)
     {
         long nextTimeCheck;
 
-        Token token = getToken(t.chainId, t.tokenAddress);
-
-        if (t.isEthereum() && pending != null && pending.contains(t.chainId)) //check chain every 10 seconds while transaction is pending
+        if (t.isEthereum() && pending != null && pending.contains(t.tokenInfo.chainId)) //check chain every 10 seconds while transaction is pending
         {
             nextTimeCheck = 10*DateUtils.SECOND_IN_MILLIS;
         }
@@ -695,9 +744,9 @@ public class TokensService
         {
             nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds when not pending
         }
-        else if (token != null)
+        else if (t != null)
         {
-            nextTimeCheck = token.getTransactionCheckInterval();
+            nextTimeCheck = t.getTransactionCheckInterval();
         }
         else
         {

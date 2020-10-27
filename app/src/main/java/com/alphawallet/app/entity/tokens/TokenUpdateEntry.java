@@ -10,31 +10,30 @@ public class TokenUpdateEntry
 {
     public final int chainId;
     public final String tokenAddress;
-    public ContractType type;
     public long lastUpdateTime;
     public long lastTxCheck;
     public float balanceUpdateWeight;
+    public boolean isEthereum;
 
     public TokenUpdateEntry(int chainId, String tokenAddress, ContractType type)
     {
         this.chainId = chainId;
         this.tokenAddress = tokenAddress;
-        this.type = type;
+        this.isEthereum = type == ContractType.ETHEREUM;
     }
 
     public boolean isEthereum()
     {
-        return type == ContractType.ETHEREUM;
+        return isEthereum;
     }
 
-    public boolean needsTransactionCheck()
+    public boolean needsTransactionCheck(ContractType type)
     {
         switch (type)
         {
             case ERC875_LEGACY:
             case ERC875:
             case ETHEREUM:
-            case ERC20:
             case ERC721_TICKET:
                 return true;
             case CURRENCY:
@@ -45,6 +44,7 @@ public class TokenUpdateEntry
             case ERC721_LEGACY:
             case ERC721_UNDETERMINED:
             case CREATION:
+            case ERC20:
             default:
                 return false;
         }

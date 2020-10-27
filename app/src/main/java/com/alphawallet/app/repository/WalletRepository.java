@@ -26,19 +26,15 @@ public class WalletRepository implements WalletRepositoryType
 	private final PreferenceRepositoryType preferenceRepositoryType;
 	private final AccountKeystoreService accountKeystoreService;
 	private final EthereumNetworkRepositoryType networkRepository;
-	private final TransactionsNetworkClientType blockExplorerClient;
 	private final WalletDataRealmSource walletDataRealmSource;
-	private final OkHttpClient httpClient;
 	private final KeyService keyService;
 
-	public WalletRepository(PreferenceRepositoryType preferenceRepositoryType, AccountKeystoreService accountKeystoreService, EthereumNetworkRepositoryType networkRepository, TransactionsNetworkClientType blockExplorerClient, WalletDataRealmSource walletDataRealmSource, OkHttpClient httpClient, KeyService keyService)
+	public WalletRepository(PreferenceRepositoryType preferenceRepositoryType, AccountKeystoreService accountKeystoreService, EthereumNetworkRepositoryType networkRepository, WalletDataRealmSource walletDataRealmSource, KeyService keyService)
 	{
 		this.preferenceRepositoryType = preferenceRepositoryType;
 		this.accountKeystoreService = accountKeystoreService;
 		this.networkRepository = networkRepository;
-		this.blockExplorerClient = blockExplorerClient;
 		this.walletDataRealmSource = walletDataRealmSource;
-		this.httpClient = httpClient;
 		this.keyService = keyService;
 	}
 

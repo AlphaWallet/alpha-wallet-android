@@ -128,9 +128,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                     adapter.updateActivityItems(metas.toArray(new TransactionMeta[0]));
                     systemView.hide();
                 }
-
-                //Check for new unknown tokens
-                viewModel.checkTokens(realmTransactions);
             });
 
             auxRealmUpdates = realm.where(RealmAuxData.class)

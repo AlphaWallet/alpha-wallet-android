@@ -82,7 +82,7 @@
 
     <style name="TransactionDetailsCopyTextStyle">
         <item name="android:paddingTop">@dimen/dp5</item>
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@color/transparent</item>
         <item name="android:paddingEnd">@dimen/dp16</item>
         <item name="android:paddingBottom">@dimen/dp5</item>
     </style>

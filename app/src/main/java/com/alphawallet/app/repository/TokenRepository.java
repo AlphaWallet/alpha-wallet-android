@@ -909,7 +909,7 @@ public class TokenRepository implements TokenRepositoryType {
 
         //Check for raw bytes return value; need to do this before we try to parse the function return
         //as raw bytes returns now cause a throw from the encoder
-        String rawBytesValue = checkRawBytesValue(responseValue);
+        String rawBytesValue = checkRawBytesValue(responseValue, type);
         if (rawBytesValue != null) return (T)rawBytesValue;
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -943,18 +943,28 @@ public class TokenRepository implements TokenRepositoryType {
 
     //some token contracts break the ERC20 guidance and directly return bytes for strings
     //These returns break the web3j ABI decoder
-    //TODO: Push another fix to Web3j
-    private String checkRawBytesValue(String responseValue) throws Exception
+    //Note that for a correct 'String' return type, it will be encoded like this:
+    //0000000000000000000000000000000000000000000000000000000000000020 : offset to dynamic type
+    //0000000000000000000000000000000000000000000000000000000000000003 : length 3
+    //4449500000000000000000000000000000000000000000000000000000000000 : 'DIP'
+    // However some contracts - presumably to save bandwidth - would encode this a bytes32:
+    //4449500000000000000000000000000000000000000000000000000000000000
+    //This routine will find the string in a bytes32 if the return type was expecting a string.
+    private <T> String checkRawBytesValue(String responseValue, T type) throws Exception
     {
         String value = null;
-        int firstValueEndIndex = Math.min(responseValue.length(), 64);
-        if (firstValueEndIndex > 2)
+        if ((type instanceof String))
         {
-            BigInteger firstValue = new BigInteger(Numeric.cleanHexPrefix(responseValue.substring(0, firstValueEndIndex)), 16);
-
-            if (firstValue.compareTo(BigInteger.valueOf(0xFF)) > 0)
+            responseValue = Numeric.cleanHexPrefix(responseValue);
+            int firstValueEndIndex = Math.min(responseValue.length(), 64);
+            if (firstValueEndIndex > 0)
             {
-                value = checkBytesString(responseValue);
+                BigInteger firstValue = new BigInteger(responseValue.substring(0, firstValueEndIndex), 16);
+
+                if (firstValue.compareTo(BigInteger.valueOf(0x20)) != 0)
+                {
+                    value = checkBytesString(responseValue);
+                }
             }
         }
 
@@ -1013,7 +1023,8 @@ public class TokenRepository implements TokenRepositoryType {
 
         if (TextUtils.isEmpty(responseValue) || responseValue.length() == 2) return null;
 
-        String rawBytesValue = checkRawBytesValue(responseValue);
+        //Detect a raw bytes return from a getName call for contracts that don't follow the ABI
+        String rawBytesValue = checkRawBytesValue(responseValue, String.class);
         if (rawBytesValue != null) return rawBytesValue;
 
         List<Type> response = FunctionReturnDecoder.decode(

@@ -8,4 +8,5 @@ package com.alphawallet.app.entity;
 public interface ENSCallback
 {
     void ENSComplete();
+    void displayCheckingDialog(boolean shouldShow);
 }

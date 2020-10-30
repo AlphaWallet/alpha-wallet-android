@@ -327,6 +327,8 @@
     <string name="action_contract_info">Contract Info</string>
     <string name="contract_address">Contract Address</string>
     <string name="input_address">Ethereum address or ENS name</string>
+    <string name="ens_name">ENS name</string>
+    <string name="enter_ens">Your ENS name</string>
     <string name="ticket_range_expired">Magiclink Expired</string>
     <string name="ticket_not_valid">Invalid Token</string>
     <string name="ticket_not_valid_body">No valid contract at this address on this network. The contract could have been terminated or it may be on a different network. Try changing to \'Ropsten (Test)\'.</string>

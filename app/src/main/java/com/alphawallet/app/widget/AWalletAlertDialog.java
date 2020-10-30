@@ -41,9 +41,9 @@ public class AWalletAlertDialog extends Dialog {
     private final RelativeLayout viewContainer;
     private final RelativeLayout dialogLayout;
 
-    public AWalletAlertDialog(@NonNull Activity activity) {
-        super(activity);
-        this.context = activity;
+    public AWalletAlertDialog(@NonNull Context context) {
+        super(context);
+        this.context = context;
 
         setContentView(R.layout.dialog_awallet_alert);
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

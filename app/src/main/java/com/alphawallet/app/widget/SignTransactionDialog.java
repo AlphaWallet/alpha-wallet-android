@@ -44,7 +44,8 @@ public class SignTransactionDialog extends BottomSheetDialog
     private final TextView usePin;
     private final TextView fingerprintError;
     private final String unlockTitle;
-    private final String unlockDetail;
+    @NonNull
+    private String unlockDetail;
     private AuthenticationCallback authCallback;
     private BiometricPrompt biometricPrompt;
     private CancellationSignal cancellationSignal;
@@ -74,41 +75,63 @@ public class SignTransactionDialog extends BottomSheetDialog
     }
 
     //get fingerprint or PIN
+    //TODO: Final strategy:
+    // 1. allow user to supply locking authentication using face/iris unlock. If user supplies this authentication, keep key unlocked but always ask the user for face unlock - ie soft lock - when using teh key
+    // 2. if user supplies fingerprint or PIN then use existing behaviour - ie setup key to require a hard unlock event to unlock the key.
+
+    // Android 11 will finally give the fine control we need for implementing the Biometric class correctly.
+    // Currently the support in Android OS is a mess. Some manufacturers mark some biometrics (eg face unlock) as not sufficient for unlocking a protected key
+    // But, Android 10 doesn't allow you to specify 'fingerprint only' for biometrics.
+    // Therefore, we are constrained for now.
+
     public void getFingerprintAuthorisation(AuthenticationCallback authCallback) {
         this.authCallback = authCallback;
         // Create the Confirm Credentials screen. You can customize the title and description. Or
         // we will provide a generic one for you if you leave it null
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P)
+
+        if (hasPINLockSetup())
         {
-            /*
-            Dismiss current dialog and let OS prompt for its own
-             */
-            dismiss();
-
-            /*
-            Check if Biometric authentication is possible for the device or not
-             */
-            if (!hasPINLockSetup() && !checkBiometricSupport())
-            {
-                authCallback.authenticateFail(context.getString(R.string.device_not_secure_warning), AuthenticationFailType.BIOMETRIC_AUTHENTICATION_NOT_AVAILABLE, callBackId);
-                return;
-            }
-
-            biometricPrompt = new BiometricPrompt.Builder(context)
-                    .setTitle(unlockTitle)
-                    .setSubtitle(unlockDetail)
-                    .setNegativeButton(context.getString(R.string.action_cancel), context.getMainExecutor(),
-                            (dialogInterface, i) ->
-                                    authCallback.authenticateFail(context.getString(R.string.authentication_cancelled),
-                                            AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callBackId))
-                    .build();
-            biometricPrompt.authenticate(getCancellationSignal(), context.getMainExecutor(), getAuthenticationCallback());
+            showAuthenticationScreen();
         }
         else
         {
-            getLegacyAuthentication(authCallback);
+            authCallback.authenticateFail("Device unlocked", AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
         }
     }
+
+//    //get fingerprint or PIN
+//    public void getFingerprintAuthorisation(AuthenticationCallback authCallback)
+//    {
+//        this.authCallback = authCallback;
+//        // Create the Confirm Credentials screen. You can customize the title and description. Or
+//        // we will provide a generic one for you if you leave it null
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P)
+//        {
+//            // Dismiss current dialog and let OS prompt for its own
+//            dismiss();
+//
+//            //Check if Biometric authentication is possible for the device or not
+//            if (!hasPINLockSetup() && !checkBiometricSupport())
+//            {
+//                authCallback.authenticateFail(context.getString(R.string.device_not_secure_warning), AuthenticationFailType.BIOMETRIC_AUTHENTICATION_NOT_AVAILABLE, callBackId);
+//                return;
+//            }
+//
+//            biometricPrompt = new BiometricPrompt.Builder(context)
+//                    .setTitle(unlockTitle)
+//                    .setSubtitle(unlockDetail)
+//                    .setNegativeButton(context.getString(R.string.action_cancel), context.getMainExecutor(),
+//                            (dialogInterface, i) ->
+//                                    authCallback.authenticateFail(context.getString(R.string.authentication_cancelled),
+//                                            AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callBackId))
+//                    .build();
+//            biometricPrompt.authenticate(getCancellationSignal(), context.getMainExecutor(), getAuthenticationCallback());
+//        } else
+//        {
+//            getLegacyAuthentication(authCallback);
+//        }
+//    }
+
 
     public void getLegacyAuthentication(AuthenticationCallback authCallback)
     {
@@ -139,7 +162,8 @@ public class SignTransactionDialog extends BottomSheetDialog
         fingerPrintText.setVisibility(View.GONE);
     }
 
-    private void showAuthenticationScreen()
+    // Continue to use legacy auth screen
+    public void showAuthenticationScreen()
     {
         KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
         Intent intent = mKeyguardManager.createConfirmDeviceCredentialIntent(unlockTitle, unlockDetail);
@@ -276,12 +300,14 @@ public class SignTransactionDialog extends BottomSheetDialog
                     case BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
                     case BiometricPrompt.BIOMETRIC_ERROR_UNABLE_TO_PROCESS:
                     case BiometricPrompt.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL:
+                    case BiometricPrompt.BIOMETRIC_ERROR_TIMEOUT:
+                    case BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS: //on each of these errors, default to the OS authentication screen.
+                    case BiometricPrompt.BIOMETRIC_ACQUIRED_PARTIAL:
+                    case BiometricPrompt.BIOMETRIC_ACQUIRED_TOO_FAST:
+                    case BiometricPrompt.BIOMETRIC_ACQUIRED_TOO_SLOW:
+                        unlockDetail = context.getString(R.string.unable_to_get_biometrics);
                         cancellationSignal.cancel();
                         showAuthenticationScreen();
-                        break;
-                    case BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS:
-                        //display legacy screen
-                        authCallback.legacyAuthRequired(callBackId, unlockTitle, unlockDetail);
                         break;
                     default:
                         authCallback.authenticateFail(context.getString(R.string.authentication_failed), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);

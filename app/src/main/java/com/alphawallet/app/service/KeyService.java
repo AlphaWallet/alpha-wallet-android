@@ -617,10 +617,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             boolean success = writeBytesToFile(ivPath, iv);
             if (!success)
             {
-                deleteKey(fileName);
+                //deleteKey(fileName);
                 throw new ServiceErrorException(
                         ServiceErrorException.ServiceErrorCode.FAIL_TO_SAVE_IV_FILE,
-                        "Failed to saveTokens the iv file for: " + fileName + "iv");
+                        "Failed to create the iv file for: " + fileName + "iv");
             }
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
@@ -631,10 +631,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             }
             catch (Exception ex)
             {
-                deleteKey(fileName);
+                //deleteKey(fileName);
                 throw new ServiceErrorException(
                         ServiceErrorException.ServiceErrorCode.KEY_STORE_ERROR,
-                        "Failed to saveTokens the file for: " + fileName);
+                        "Failed to create the file for: " + fileName);
             }
 
             return true;
@@ -797,13 +797,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
-        signDialog.setCancelListener(v -> {
-            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
-        });
-        signDialog.setOnDismissListener(v -> {
-            signDialog = null;
-        });
-        signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
         requireAuthentication = false;
     }
@@ -849,7 +842,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 importHDKey();
                 break;
             case CHECK_AUTHENTICATION:
-                getAuthenticationForSignature();
+                signCallback.gotAuthorisation(true);
                 break;
             case UPGRADE_HD_KEY:
             case UPGRADE_KEYSTORE_KEY:

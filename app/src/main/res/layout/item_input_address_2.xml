@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/box_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:background="@drawable/background_password_entry"
+        android:layout_marginTop="@dimen/dp8">
+
+        <AutoCompleteTextView
+            android:id="@+id/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:background="@color/transparent"
+            android:fontFamily="@font/font_regular"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:paddingStart="@dimen/dp8"
+            android:paddingTop="@dimen/dp12"
+            android:paddingEnd="@dimen/dp8"
+            android:paddingBottom="@dimen/dp12"
+            android:textColor="@color/black"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17"
+            android:layout_toStartOf="@id/img_scan_qr"
+            android:hint=""
+            tools:text="0x12345678...abcd1234" />
+
+        <ImageButton
+            android:id="@+id/img_scan_qr"
+            android:src="@drawable/ic_camera_scan"
+            android:contentDescription="@string/scan_qr"
+            android:background="?android:selectableItemBackground"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/dp8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="31dp"
+        android:layout_marginBottom="5dp"
+        android:background="@color/white"
+        android:fontFamily="@font/font_semibold"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textColor="@color/dove"
+        android:textSize="@dimen/sp13"
+        tools:text="ENS Name"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/text_paste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/font_semibold"
+        android:textColor="@color/azure"
+        android:textSize="@dimen/sp17"
+        android:text="@string/paste"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/dp10"
+        android:layout_toStartOf="@id/text_paste"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/font_regular"
+        android:textColor="@color/green"
+        android:textSize="@dimen/sp12"
+        android:visibility="gone"
+        tools:text="0x123456789abcdef12345" />
+
+    <TextView
+        android:id="@+id/error_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/dp10"
+        android:layout_toStartOf="@id/text_paste"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/font_regular"
+        android:textColor="@color/danger"
+        android:textSize="@dimen/sp12"
+        android:visibility="gone"
+        tools:text="That address already exists" />
+
+    <ProgressBar
+        android:id="@+id/ens_fetch_progress"
+        android:layout_width="@dimen/dp12"
+        android:layout_height="@dimen/dp12"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/dp10"
+        android:layout_marginTop="2dp"
+        android:visibility="gone"
+        android:indeterminateTint="@color/green"
+        android:indeterminate="true"/>
+
+</RelativeLayout>

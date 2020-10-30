@@ -485,7 +485,7 @@ public class WalletConnectActivity extends BaseActivity
                 .setTitle(peer.getName())
                 .setMessage(peer.getUrl())
                 .setPositiveButton(R.string.dialog_approve, (d, w) -> {
-                    client.approveSession(Arrays.asList(accounts), 1);
+                    client.approveSession(Arrays.asList(accounts), MAINNET_ID);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(), new Gson().toJson(session), new Gson().toJson(peer));
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);

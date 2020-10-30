@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.tokens.Token;
@@ -59,7 +60,7 @@ import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
-public class SendActivity extends BaseActivity implements ItemClickListener, AmountUpdateCallback
+public class SendActivity extends BaseActivity implements ItemClickListener, AmountUpdateCallback, ENSCallback
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -178,9 +179,9 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
     }
 
     private void setupAddressEditField() {
-        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY_PAIR);
         adapterUrl.setListener(this);
-        ensHandler = new ENSHandler(this, adapterUrl, this::onNext);
+        ensHandler = new ENSHandler(this, adapterUrl);
         viewModel.tokenFinalised().observe(this, this::resumeEIP681);
     }
 
@@ -561,5 +562,30 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         currentChain = chainId;
         amountInput.onClear();
         viewModel.setChainId(chainId);
+    }
+
+    @Override
+    public void ENSComplete()
+    {
+        onNext();
+    }
+
+    @Override
+    public void displayCheckingDialog(boolean shouldShow)
+    {
+        if (shouldShow)
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setIcon(AWalletAlertDialog.NONE);
+            dialog.setTitle(R.string.title_dialog_check_ens);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
+            dialog.show();
+        }
+        else if (dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
     }
 }

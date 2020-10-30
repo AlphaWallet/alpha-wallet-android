@@ -312,6 +312,8 @@
     <string name="action_contract_info">Información del contrato</string>
     <string name="contract_address">Dirección del contrato</string>
     <string name="input_address">Dirección de Ethereum o nombre ENS</string>
+    <string name="ens_name">Nombre ENS</string>
+    <string name="enter_ens">Tu Nombre de ENS</string>
     <string name="ticket_range_expired">MagicLink expirado</string>
     <string name="ticket_not_valid">Token no válido</string>
     <string name="ticket_not_valid_body">No hay ningún contrato válido en esta dirección en esta red. El contrato podría haber sido rescindido o puede que se encuentre en una red diferente. Prueba a cambiar a \"Ropsten (Test)\".</string>

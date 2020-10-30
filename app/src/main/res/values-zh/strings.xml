@@ -312,6 +312,8 @@
     <string name="action_contract_info">智能合约信息</string>
     <string name="contract_address">智能合约地址</string>
     <string name="input_address">以太坊地址或ENS名称</string>
+    <string name="ens_name">ENS名称</string>
+    <string name="enter_ens">您的ENS的名称</string>
     <string name="ticket_range_expired">MagicLink已经过期</string>
     <string name="ticket_not_valid">无效的Token</string>
     <string name="ticket_not_valid_body">在当前网络上此地址没有有效智能合约： 合约可能已经被终止，或者它可能位于不同的网络上。 可以尝试将网络改为“Ropsten（测试网络）”。</string>

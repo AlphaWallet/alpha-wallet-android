@@ -1,13 +1,20 @@
 package com.alphawallet.app.ui.widget.entity;
 
+/**
+ * Created by JB on 28/10/2020.
+ */
+
 import android.app.Activity;
+import android.content.Context;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,6 +30,7 @@ import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.InputAddress;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,42 +46,32 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  * Created by James on 4/12/2018.
  * Stormbird in Singapore
  */
-public class ENSHandler implements Runnable
+public class ENSHandler2 implements Runnable
 {
     public  static final int ENS_RESOLVE_DELAY = 750; //In milliseconds
-
-    private final LinearLayout layoutENSResolve;
-    private final AutoCompleteTextView toAddressEditText;
-    private final TextView textENS;
+    private final InputAddress host;
     private TextWatcher ensTextWatcher;
-    private String ensName;
     private final Handler handler;
     private final AutoCompleteAddressAdapter adapterUrl;
-    private final TextView toAddressError;
-    private final Activity host;
-    private final ProgressBar ensSpinner;
-    private final ENSCallback ensCallback;
     private final AWEnsResolver ensResolver;
+    private final AutoCompleteTextView toAddressEditText;
+    private final float standardTextSize;
 
     @Nullable
     private Disposable disposable;
-
     public volatile boolean waitingForENS = false;
     public boolean transferAfterENS = false;
 
-    public ENSHandler(Activity host, AutoCompleteAddressAdapter adapter)
+    public ENSHandler2(InputAddress host, AutoCompleteAddressAdapter adapter)
     {
-        this.layoutENSResolve = host.findViewById(R.id.layout_ens);
-        this.toAddressEditText = host.findViewById(R.id.edit_to_address);
-        this.textENS = host.findViewById(R.id.text_ens_resolve);
-        this.toAddressError = host.findViewById(R.id.to_address_error);
-        this.ensSpinner = host.findViewById(R.id.ens_fetch_progres);
         this.handler = new Handler();
         this.adapterUrl = adapter;
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getContext());
         this.host = host;
-        this.ensCallback = (ENSCallback)host;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getApplicationContext());
-        this.ensSpinner.setVisibility(View.GONE);
+        this.toAddressEditText = host.getEditText();
+
+        standardTextSize = toAddressEditText.getTextSize();
+
         createWatcher();
         getENSHistoryFromPrefs();
     }
@@ -96,13 +94,23 @@ public class ENSHandler implements Runnable
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
-                toAddressError.setVisibility(View.GONE);
+                host.setStatus(null);
+                float ts = toAddressEditText.getTextSize();
+                int amount = toAddressEditText.getText().length();
+                if (amount > 30 && ts == standardTextSize)
+                {
+                    toAddressEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
+                }
+                else if (amount <= 30 && ts < standardTextSize)
+                {
+                    toAddressEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize);
+                }
             }
 
             @Override
             public void afterTextChanged(Editable s)
             {
-                textENS.setText("");
+                host.setStatus(null);
                 checkAddress();
             }
         };
@@ -112,54 +120,29 @@ public class ENSHandler implements Runnable
 
     private void checkAddress()
     {
-        if (!transferAfterENS)
-        {
-            waitingForENS = true;
-            handler.removeCallbacks(this);
-            handler.postDelayed(this, ENS_RESOLVE_DELAY);
-            if (disposable != null && !disposable.isDisposed()) disposable.dispose();
-            ensSpinner.setVisibility(View.GONE);
-        }
+        waitingForENS = true;
+        handler.removeCallbacks(this);
+        handler.postDelayed(this, ENS_RESOLVE_DELAY);
+        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
+        host.setWaitingSpinner(false);
     }
 
-    public String getAddressFromEditView()
+    public void getAddress()
     {
-        //check send address
-        ensName = null;
-        toAddressError.setVisibility(View.GONE);
-        String to = toAddressEditText.getText().toString();
-        if (!isValidAddress(to))
+        if (waitingForENS)
         {
-            String ens = to;
-            to = textENS.getText().toString();
-            ensName = "@" + ens + " (" + to + ")";
+            host.displayCheckingDialog(true);
+            transferAfterENS = true;
         }
-
-        if (!isValidAddress(to))
+        else
         {
-            to = null;
-            if (waitingForENS)
-            {
-                transferAfterENS = true;
-                ensCallback.displayCheckingDialog(true);
-            }
-            else
-            {
-                toAddressError.setVisibility(View.VISIBLE);
-                toAddressError.setText(host.getString(R.string.error_invalid_address));
-            }
+            host.ENSComplete();
         }
-        else if (ensName != null)
-        {
-            adapterUrl.add(toAddressEditText.getText().toString());
-        }
-
-        return to;
     }
 
     public void handleHistoryItemClick(String ensName)
     {
-        KeyboardUtils.hideKeyboard(host.getCurrentFocus());
+        host.hideKeyboard();
         toAddressEditText.removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
         toAddressEditText.setText(ensName);
         toAddressEditText.addTextChangedListener(ensTextWatcher);
@@ -171,77 +154,83 @@ public class ENSHandler implements Runnable
 
     public void onENSSuccess(String resolvedAddress, String ensDomain)
     {
-        if (TextUtils.isEmpty(resolvedAddress) || resolvedAddress.equals("0"))
+        waitingForENS = false;
+        if (!TextUtils.isEmpty(resolvedAddress) && isValidAddress(resolvedAddress) && canBeENSName(ensDomain))
         {
-            hideENS(resolvedAddress);
-        }
-        else
-        {
-            waitingForENS = false;
             toAddressEditText.dismissDropDown();
-            layoutENSResolve.setVisibility(View.VISIBLE);
-            textENS.setText(resolvedAddress);
-            if (toAddressEditText.hasFocus())
-                KeyboardUtils.hideKeyboard(host.getCurrentFocus()); //user was waiting for ENS, not in the middle of typing a value etc
-            checkIfWaitingForENS();
-            toAddressError.setVisibility(View.GONE);
+            host.setStatus(resolvedAddress);
+            if (toAddressEditText.hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(resolvedAddress, ensDomain);
         }
-    }
+        else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && isValidAddress(ensDomain)) //in case user typed an address and hit an ENS name
+        {
+            toAddressEditText.dismissDropDown();
+            host.setStatus(resolvedAddress);
+            if (toAddressEditText.hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
-    public void hideENS(String name)
-    {
-        waitingForENS = false;
-        layoutENSResolve.setVisibility(View.GONE);
+            storeItem(ensDomain, resolvedAddress);
+        }
+        else
+        {
+            host.setStatus(null);
+        }
+
         checkIfWaitingForENS();
     }
 
     private void checkIfWaitingForENS()
     {
-        ensSpinner.setVisibility(View.GONE);
-        ensCallback.displayCheckingDialog(false);
+        host.setWaitingSpinner(false);
         if (transferAfterENS)
         {
             transferAfterENS = false;
-            ensCallback.ENSComplete();
+            host.ENSComplete();
         }
-    }
-
-    public String getEnsName()
-    {
-        return ensName;
-    }
-
-    public void checkENS()
-    {
-        //address update delay check
-        final String to = toAddressEditText.getText().toString();
-
-        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
-
-        ensSpinner.setVisibility(View.VISIBLE);
-
-        disposable = ensResolver.resolveENSAddress(to)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
     }
 
     private void onENSError(Throwable throwable)
     {
-        hideENS("");
+        host.setStatus(null);
+        checkIfWaitingForENS();
     }
 
     public static boolean canBeENSName(String address)
     {
-        return address.length() > 5 && !address.startsWith("0x") && address.contains(".");
+        return !TextUtils.isEmpty(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
     }
 
     @Override
     public void run()
     {
-        checkENS();
+        //address update delay check
+        final String to = toAddressEditText.getText().toString().trim();
+
+        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
+
+        //is this an address? If so, attempt reverse lookup or resolve from known ENS addresses
+        if (!TextUtils.isEmpty(to) && isValidAddress(to))
+        {
+            host.setWaitingSpinner(true);
+
+            disposable = ensResolver.resolveEnsName(to)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
+        }
+        else if (canBeENSName(to))
+        {
+            host.setWaitingSpinner(true);
+
+            disposable = ensResolver.resolveENSAddress(to)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
+        }
+        else
+        {
+            host.setWaitingSpinner(false);
+        }
     }
 
     /**
@@ -251,7 +240,7 @@ public class ENSHandler implements Runnable
     private HashMap<String, String> getENSHistoryFromPrefs()
     {
         HashMap<String, String> history;
-        String historyJson = PreferenceManager.getDefaultSharedPreferences(host).getString(C.ENS_HISTORY_PAIR, "");
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(host.getContext()).getString(C.ENS_HISTORY_PAIR, "");
         if (!historyJson.isEmpty())
         {
             history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>(){}.getType());
@@ -260,6 +249,7 @@ public class ENSHandler implements Runnable
         {
             history = new HashMap<>();
         }
+
         return history;
     }
 
@@ -277,6 +267,8 @@ public class ENSHandler implements Runnable
             history.put(address.toLowerCase(), ensName);
             storeHistory(history);
         }
+
+        adapterUrl.add(ensName);
     }
 
     /**
@@ -286,6 +278,7 @@ public class ENSHandler implements Runnable
     private void storeHistory(HashMap<String, String> history)
     {
         String historyJson = new Gson().toJson(history);
-        PreferenceManager.getDefaultSharedPreferences(host).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
+        //historyJson = "{\"0xc067a53c91258ba513059919e03b81cf93f57ac7\":\"jsbrown.eth\",\"0xfcabe3451ac8edfb8fb6b9274c2e095d9ccc8082\":\"suniltomjose.eth\"}";
+        PreferenceManager.getDefaultSharedPreferences(host.getContext()).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
     }
 }

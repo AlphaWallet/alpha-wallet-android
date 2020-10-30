@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DisplayState;
+import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -91,7 +92,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements ItemClickListener, OnTokenClickListener, StandardFunctionInterface
+public class TransferTicketDetailActivity extends BaseActivity implements ItemClickListener, OnTokenClickListener, StandardFunctionInterface, ENSCallback
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -256,7 +257,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     {
         AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        ensHandler = new ENSHandler(this, adapterUrl, this::confirmTransfer);
+        ensHandler = new ENSHandler(this, adapterUrl);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -824,6 +825,31 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     public void handleClick(String action, int id)
     {
         viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
+    }
+
+    @Override
+    public void ENSComplete()
+    {
+        confirmTransfer();
+    }
+
+    @Override
+    public void displayCheckingDialog(boolean shouldShow)
+    {
+        if (shouldShow)
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setIcon(AWalletAlertDialog.NONE);
+            dialog.setTitle(R.string.title_dialog_check_ens);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
+            dialog.show();
+        }
+        else if (dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
     }
 }
 

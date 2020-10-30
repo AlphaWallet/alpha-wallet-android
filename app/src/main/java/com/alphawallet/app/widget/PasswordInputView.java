@@ -7,6 +7,7 @@ import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import androidx.core.content.ContextCompat;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
@@ -34,6 +35,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
 
     private final TextView label;
     private final TextView error;
+    private final TextView status;
     private final EditText editText;
     private final CheckBox togglePassword;
     private final TextView instruction;
@@ -44,6 +46,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private int minHeight;
     private int innerPadding;
     private String imeOptions;
+    private String hintTxt;
     private Activity activity;
     private LayoutCallbackListener callbackListener;
 
@@ -57,6 +60,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         label = findViewById(R.id.label);
         error = findViewById(R.id.error);
         editText = findViewById(R.id.edit_text);
+        status = findViewById(R.id.status_text);
         instruction = findViewById(R.id.instruction);
         togglePassword = findViewById(R.id.toggle_password);
         findViewById(R.id.text_word_count).setVisibility(View.GONE);
@@ -110,6 +114,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             imeOptions = a.getString(R.styleable.InputView_imeOptions);
             minHeight = a.getInteger(R.styleable.InputView_minHeightValue, 0);
             innerPadding = a.getInteger(R.styleable.InputView_innerPadding, 0);
+            hintTxt = a.getString(R.styleable.InputView_hint);
         } finally {
             a.recycle();
         }
@@ -153,6 +158,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             }
         }
         editText.setTypeface(Typeface.DEFAULT);
+        if (!TextUtils.isEmpty(hintTxt)) editText.setHint(hintTxt);
     }
 
     private void setImeOptions() {
@@ -203,7 +209,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             error.setText(resId);
             error.setVisibility(View.GONE);
             editText.setBackgroundResource(R.drawable.background_password_entry);
-            label.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.silver));
         } else {
             error.setText(resId);
             error.setVisibility(View.VISIBLE);
@@ -212,16 +218,26 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         }
     }
 
+    public void setStatus(CharSequence statusTxt)
+    {
+        if (TextUtils.isEmpty(statusTxt)) {
+            status.setVisibility(View.GONE);
+        } else {
+            status.setText(statusTxt);
+            status.setVisibility(View.VISIBLE);
+        }
+    }
+
     public void setError(CharSequence message) {
         if (message == null) {
             error.setVisibility(View.GONE);
             editText.setBackgroundResource(R.drawable.background_password_entry);
-            label.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.silver));
         } else if (message.toString().isEmpty()) {
             error.setText(message);
             error.setVisibility(View.GONE);
             editText.setBackgroundResource(R.drawable.background_password_entry);
-            label.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.silver));
         } else {
             error.setText(message);
             error.setVisibility(View.VISIBLE);

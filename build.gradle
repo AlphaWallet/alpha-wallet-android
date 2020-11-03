@@ -9,6 +9,9 @@ buildscript {
         mavenCentral()
         maven { url 'https://jitpack.io' }
         google()
+        flatDir {
+            dirs 'lib'
+        }
 	// WARNING WARNING WARNING
 	// you are about to add here a repository which provides some library for the Android app
 	// don't do that. add that repository to app/build.gradle
@@ -21,6 +24,8 @@ buildscript {
 	// don't do that. add that dependency to app/build.gradle
         classpath 'com.google.gms:google-services:4.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // Verifies that the attestation jar file exist
+        classpath 'com.alphawallet.attestation:blockchain-attestation'
     }
 }
 

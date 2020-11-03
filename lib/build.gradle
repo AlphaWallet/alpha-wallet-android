@@ -16,6 +16,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     testImplementation 'org.web3j:core:4.6.0'
+    implementation files('blockchain-attestation.jar')
 }
 
 sourceCompatibility = "1.8"

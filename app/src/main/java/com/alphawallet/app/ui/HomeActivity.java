@@ -4,12 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
-import androidx.lifecycle.ProcessLifecycleOwner;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -22,20 +16,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-
-import androidx.annotation.Nullable;
-
-import com.alphawallet.app.viewmodel.GasSettingsViewModel;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,11 +26,26 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -58,7 +53,6 @@ import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -75,6 +69,7 @@ import com.alphawallet.app.widget.DepositView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -94,7 +89,8 @@ import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.WalletPage.SETTINGS;
 import static com.alphawallet.app.entity.WalletPage.WALLET;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface, FragmentMessenger, Runnable, SignAuthenticationCallback
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
+        FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -113,7 +109,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final Fragment walletFragment;
     private final Fragment activityFragment;
     private String walletTitle;
-    private final LifecycleObserver lifeCycle;
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private PinAuthenticationCallbackInterface authInterface;
@@ -133,30 +128,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
         activityFragment = new ActivityFragment();
-        lifeCycle = new LifecycleObserver()
-        {
-            @OnLifecycleEvent(Lifecycle.Event.ON_START)
-            private void onMoveToForeground()
-            {
-                Log.d("LIFE", "AlphaWallet into foreground");
-                ((WalletFragment)walletFragment).walletInFocus();
-            }
+    }
 
-            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-            private void onMoveToBackground()
-            {
-                Log.d("LIFE", "AlphaWallet into background");
-                ((WalletFragment)walletFragment).walletOutOfFocus();
-            }
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private void onMoveToForeground()
+    {
+        Log.d("LIFE", "AlphaWallet into foreground");
+        ((WalletFragment)walletFragment).walletInFocus();
+    }
 
-            @Override
-            public int hashCode()
-            {
-                return super.hashCode();
-            }
-        };
-
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(lifeCycle);
+    @Override
+    public void onTrimMemory(int level)
+    {
+        super.onTrimMemory(level);
+        Log.d("LIFE","AlphaWallet into background");
+        ((WalletFragment)walletFragment).walletOutOfFocus();
     }
 
     @Override
@@ -169,6 +155,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         LocaleUtils.setActiveLocale(this);
+        getLifecycle().addObserver(this);
 
         Bundle bundle = null;
         Intent intent = getIntent();

@@ -135,6 +135,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         Log.d("LIFE", "AlphaWallet into foreground");
         ((WalletFragment)walletFragment).walletInFocus();
+        if (viewModel != null) viewModel.startTransactionUpdate();
     }
 
     @Override
@@ -143,6 +144,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onTrimMemory(level);
         Log.d("LIFE","AlphaWallet into background");
         ((WalletFragment)walletFragment).walletOutOfFocus();
+        if (viewModel != null) viewModel.stopTransactionUpdate();
     }
 
     @Override

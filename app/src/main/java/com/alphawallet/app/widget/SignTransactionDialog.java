@@ -67,15 +67,14 @@ public class SignTransactionDialog extends BottomSheetDialog
         setCanceledOnTouchOutside(true);
 
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        usePin.setOnClickListener(v -> { showAuthenticationScreen(); });
+        usePin.setOnClickListener(v -> {
+            showAuthenticationScreen();
+        });
     }
 
     //get fingerprint or PIN
     public void getFingerprintAuthorisation(AuthenticationCallback authCallback) {
         this.authCallback = authCallback;
-        // Create the Confirm Credentials screen. You can customize the title and description. Or
-        // we will provide a generic one for you if you leave it null
-        KeyguardManager km = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
         FingerprintManager fpManager = fingerprintUnlockSupported(context);
 
         if (fpManager != null)
@@ -103,6 +102,7 @@ public class SignTransactionDialog extends BottomSheetDialog
 
     private void showAuthenticationScreen()
     {
+        if (isShowing()) dismiss();
         KeyguardManager km = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
         if (km != null)
         {
@@ -204,38 +204,5 @@ public class SignTransactionDialog extends BottomSheetDialog
     {
         super.onDetachedFromWindow();
         if (isShowing()) dismiss();
-    }
-
-    public static final String EXTRA_TITLE = "android.app.extra.TITLE";
-    public static final String EXTRA_DESCRIPTION = "android.app.extra.DESCRIPTION";
-    public static final String ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER =
-            "android.app.action.CONFIRM_DEVICE_CREDENTIAL_WITH_USER";
-    public static final String EXTRA_USER_ID = "android.intent.extra.USER_ID";
-    public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
-
-    private Intent createConfirmDeviceCredentialIntent(
-            CharSequence title, CharSequence description, int userId)
-    {
-        Intent intent = new Intent(ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER);
-        intent.putExtra(EXTRA_TITLE, title);
-        intent.putExtra(EXTRA_DESCRIPTION, description);
-        intent.putExtra(EXTRA_USER_ID, userId);
-        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
-                true);
-
-        // explicitly set the package for security
-        intent.setPackage(getSettingsPackageForIntent(intent));
-
-        return intent;
-    }
-
-    private String getSettingsPackageForIntent(Intent intent) {
-        List<ResolveInfo> resolveInfos = context.getPackageManager()
-                .queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
-        for (int i = 0; i < resolveInfos.size(); i++) {
-            return resolveInfos.get(i).activityInfo.packageName;
-        }
-
-        return "com.android.settings";
     }
 }

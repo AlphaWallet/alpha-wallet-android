@@ -96,6 +96,14 @@ public class TransactionsService
         }
     }
 
+    public void startUpdateCycle()
+    {
+        if (eventTimer == null || eventTimer.isDisposed())
+        {
+            fetchTransactions();
+        }
+    }
+
     /**
      * Start the token transaction checker
      * This uses the Etherscan API routes returning ERC20 and ERC721 token transfers, both incoming and outgoing.

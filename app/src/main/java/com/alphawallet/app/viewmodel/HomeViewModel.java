@@ -403,4 +403,14 @@ public class HomeViewModel extends BaseViewModel {
         analyticsService.identify(uuid);
         prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
     }
+
+    public void stopTransactionUpdate()
+    {
+        transactionsService.onDestroy();
+    }
+
+    public void startTransactionUpdate()
+    {
+        transactionsService.startUpdateCycle();
+    }
 }

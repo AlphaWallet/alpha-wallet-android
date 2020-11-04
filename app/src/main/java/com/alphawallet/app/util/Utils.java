@@ -68,7 +68,7 @@ public class Utils {
             for (int i = 0; i < testStr.length(); i++)
             {
                 char c = testStr.charAt(i);
-                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !(c == '+') && !(c == ',') && !(c == ';'))
+                if (!Character.isIdeographic(c) && !Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && (c < 32 || c > 126))
                 {
                     result = false;
                     break;

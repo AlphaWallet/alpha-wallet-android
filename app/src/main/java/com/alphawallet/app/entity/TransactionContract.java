@@ -13,6 +13,7 @@ import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.List;
 
 import static com.alphawallet.app.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
@@ -24,6 +25,9 @@ public class TransactionContract implements Parcelable {
     public int decimals;
     public String symbol;
     public boolean badTransaction;
+
+    private static final BigDecimal ALL_CUTOFF_VALUE = BigDecimal.valueOf(99999999999L); //Arbitrary value beyond which we show an Approve value as 'All'
+    private static final int MAX_DIGITS = 16; // Maximum amount of digits in numeric transaction value before we switch to Engineering string
 
     public TransactionContract() {
         badTransaction = false;
@@ -175,9 +179,16 @@ public class TransactionContract implements Parcelable {
         {
             if (!token.isNonFungible() && (operation.value == null || operation.value.length() > 0 && Character.isDigit(operation.value.charAt(0))))
             {
-                BigDecimal value = new BigDecimal(operation.value);
-                if (getOperationId() == TransactionType.APPROVE.ordinal() && value.abs().compareTo(token.balance.multiply(BigDecimal.TEN)) > 0) return "All";
-                else return tx.getPrefix(token) + BalanceUtils.getScaledValueFixed(value, token.tokenInfo.decimals, TransactionHolder.TRANSACTION_BALANCE_PRECISION); //appears to be a number; try to produce number with prefix
+                BigDecimal value = new BigDecimal(operation.value).abs();
+                String strValue = BalanceUtils.getScaledValueFixed(value, token.tokenInfo.decimals, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
+                if (strValue.length() > MAX_DIGITS)
+                {
+                    strValue = new BigDecimal(operation.value, new MathContext(3)).toString(); //express in engineering notation if value too long
+                }
+                if (getOperationId() == TransactionType.APPROVE.ordinal() &&
+                        value.compareTo(ALL_CUTOFF_VALUE) > 0 &&
+                        value.compareTo(token.balance) > 0) return "All"; //Heuristic which shows 'all' if approve amount is higher than the cut-off and at least greater than the balance
+                else return tx.getPrefix(token) + strValue; //appears to be a number; try to produce number with prefix
             }
             else
             {

@@ -34,7 +34,6 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.app.widget.SignTransactionDialog2;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.web3j.crypto.Credentials;

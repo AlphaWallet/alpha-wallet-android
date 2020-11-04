@@ -74,7 +74,6 @@ public class TokensService
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private long nextOpenSeaCheck;
     private int openSeaCount;
-    private boolean walletInFocus = true;
 
     @Nullable
     private Disposable tokenCheckDisposable;
@@ -233,11 +232,16 @@ public class TokensService
             tokenValueMap.clear();
             tokenUpdateList.clear();
             pendingChainMap.clear();
-            if (eventTimer != null && !eventTimer.isDisposed())
-            {
-                eventTimer.dispose();
-                eventTimer = null;
-            }
+            stopUpdateCycle();
+        }
+    }
+
+    private void stopUpdateCycle()
+    {
+        if (eventTimer != null && !eventTimer.isDisposed())
+        {
+            eventTimer.dispose();
+            eventTimer = null;
         }
     }
 
@@ -411,6 +415,8 @@ public class TokensService
 
     public void startBalanceUpdate()
     {
+        if (currentAddress == null) return;
+
         nextOpenSeaCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
         openSeaCount = 2;
 
@@ -456,7 +462,7 @@ public class TokensService
                     .subscribe(balanceChange -> onBalanceChange(balanceChange, t.tokenInfo.chainId), this::onError);
         }
 
-        if (System.currentTimeMillis() > nextOpenSeaCheck && focusToken == null && walletInFocus) checkOpenSea();
+        if (System.currentTimeMillis() > nextOpenSeaCheck && focusToken == null) checkOpenSea();
         checkPendingChains();
     }
 
@@ -606,12 +612,14 @@ public class TokensService
 
     public void walletHidden()
     {
-        walletInFocus = false;
+        //stop updates (note that for notifications we'll use a background service)
+        stopUpdateCycle();
     }
 
     public void walletShowing()
     {
-        walletInFocus = true;
+        //restart the event cycle
+        startBalanceUpdate();
     }
 
     ///////////////////////////////////////////
@@ -637,7 +645,7 @@ public class TokensService
             long lastUpdateDiff = currentTime - check.lastUpdateTime;
             float weighting = check.balanceUpdateWeight;
 
-            if (!walletInFocus && !token.isEthereum()) continue; //only check chains when wallet out of focus
+            if (!token.isEthereum()) continue; //only check chains when wallet out of focus
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
@@ -697,7 +705,7 @@ public class TokensService
         {
             Token token = getToken(check.chainId, check.tokenAddress);
             if (token == null) continue;
-            if (!check.needsTransactionCheck(token.getInterfaceSpec()) || !walletInFocus) continue;
+            if (!check.needsTransactionCheck(token.getInterfaceSpec())) continue;
             long timeIntervalCheck = getTokenTimeInterval(token, pendingTxChains);
             if (timeIntervalCheck == 0) continue;
 

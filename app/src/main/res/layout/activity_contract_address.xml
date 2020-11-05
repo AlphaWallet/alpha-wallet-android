@@ -17,20 +17,6 @@
         android:paddingLeft="@dimen/dp22"
         android:paddingRight="@dimen/dp22">
 
-        <TextView
-            android:id="@+id/text_scan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp25"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingTop="@dimen/dp20"
-            android:text="@string/scan_qr_label"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <LinearLayout
             android:id="@+id/contract_info"
             android:layout_width="wrap_content"
@@ -58,15 +44,27 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/text_scan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp25"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:paddingTop="@dimen/dp20"
+            android:text="@string/scan_qr_label"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/qr_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="200dp"
             android:scaleType="center"
             android:src="@drawable/ic_ethereum"
             app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
-            app:layout_constraintHeight_max="200dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/contract_info" />
 

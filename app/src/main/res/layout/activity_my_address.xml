@@ -17,6 +17,16 @@
         android:paddingLeft="@dimen/dp22"
         android:paddingRight="@dimen/dp22">
 
+        <ImageView
+            android:id="@+id/qr_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="center"
+            android:src="@drawable/ic_ethereum"
+            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_scan" />
+
         <TextView
             android:id="@+id/text_scan"
             android:layout_width="match_parent"
@@ -30,18 +40,6 @@
             android:textSize="@dimen/sp17"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/qr_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="200dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_ethereum"
-            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
-            app:layout_constraintHeight_max="200dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_scan" />
 
         <LinearLayout
             android:id="@+id/copy_address_layout"

@@ -1,10 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.alphawallet.app.C;

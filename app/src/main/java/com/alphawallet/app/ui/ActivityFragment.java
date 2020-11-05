@@ -1,23 +1,23 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.EventMeta;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -38,8 +38,6 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmModel;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
@@ -63,7 +61,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private long eventTimeFilter;
     private final Handler handler = new Handler();
     private boolean checkTimer;
-    private int lastPos;
 
     @Nullable
     @Override
@@ -81,10 +78,10 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         if (viewModel == null)
         {
-            viewModel = ViewModelProviders.of(this, activityViewModelFactory)
+            viewModel = new ViewModelProvider(this, activityViewModelFactory)
                     .get(ActivityViewModel.class);
-            viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-            viewModel.activityItems().observe(this, this::onItemsLoaded);
+            viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+            viewModel.activityItems().observe(getViewLifecycleOwner(), this::onItemsLoaded);
         }
     }
 
@@ -131,9 +128,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                     adapter.updateActivityItems(metas.toArray(new TransactionMeta[0]));
                     systemView.hide();
                 }
-
-                //Check for new unknown tokens
-                viewModel.checkTokens(realmTransactions);
             });
 
             auxRealmUpdates = realm.where(RealmAuxData.class)
@@ -245,7 +239,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         }
 
         checkTimer = true;
-        lastPos = 0;
     }
 
     @Override

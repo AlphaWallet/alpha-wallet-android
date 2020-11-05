@@ -1,17 +1,17 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.alphawallet.app.R;
@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -118,9 +119,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         list = findViewById(R.id.listTickets);
         toolbarView = findViewById(R.id.toolbar);
 
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
-
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.sig().observe(this, this::onSigData);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);

@@ -1,9 +1,10 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
+import androidx.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -92,7 +93,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
 
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);

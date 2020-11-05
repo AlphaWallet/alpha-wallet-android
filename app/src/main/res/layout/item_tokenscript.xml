@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <android.support.v7.widget.AppCompatRadioButton
+        <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/radioBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

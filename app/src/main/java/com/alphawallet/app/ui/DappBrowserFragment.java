@@ -5,7 +5,9 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.arch.lifecycle.ViewModelProviders;
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -16,12 +18,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.BuildConfig;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -47,6 +48,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -81,6 +83,7 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
 import com.alphawallet.app.web3.OnSignMessageListener;
@@ -731,10 +734,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void initViewModel() {
-        viewModel = ViewModelProviders.of(this, dappBrowserViewModelFactory)
+        viewModel = new ViewModelProvider(this, dappBrowserViewModelFactory)
                 .get(DappBrowserViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.defaultNetwork().observe(getViewLifecycleOwner(), this::onDefaultNetwork);
+        viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
     }
 
     private void startBalanceListener()

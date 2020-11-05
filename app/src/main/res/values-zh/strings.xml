@@ -178,7 +178,7 @@
     <string name="quantity_of_tickets">门票数量</string>
     <string name="total_cost_label">总价:</string>
     <string name="equivalent_in_usd">相当于USD</string>
-    <string name="total_cost">%1s %2s</string>
+    <string name="total_cost">%1$s %2$s</string>
     <string name="select_quantity_tickets">选择%1$s数量</string>
     <string name="ticket_redeemed">你的门票已经被兑换</string>
     <string name="search_for">搜索:</string>
@@ -194,7 +194,7 @@
     <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24小时</string>
     <string name="appreciation">升值</string>
-    <string name="eth_per_ticket">%1s/门票</string>
+    <string name="eth_per_ticket">%1$s/门票</string>
     <string name="ethereum">以太坊</string>
     <string name="ethereum_blockchain">基于以太坊智能合约</string>
     <string name="issuer">发行方:</string>
@@ -223,7 +223,7 @@
     <string name="ticket">门票</string>
     <string name="tickets">门票</string>
     <string name="failed">失效</string>
-    <string name="total_cost_for_x_tickets">成本价t for %1d %2s:</string>
+    <string name="total_cost_for_x_tickets">成本价t for %1d %2$s:</string>
     <string name="title_import_token">导入门票</string>
     <string name="action_cancel">取消</string>
     <string name="confirm_purchase">确认购买</string>
@@ -250,8 +250,8 @@
     <string name="universal_link_expiry_on">MagicLink链接过期时间:</string>
     <string name="confirm_sale_total">总共: %s</string>
     <string name="set_universal_link_expiry">设置MagicLink链接过期时间:</string>
-    <string name="tickets_selected">%1s %2s 选中</string>
-    <string name="eth_per_ticket_w_value">%1s %2s/门票</string>
+    <string name="tickets_selected">%1$s %2$s 选中</string>
+    <string name="eth_per_ticket_w_value">%1$s %2$s/门票</string>
     <string name="universal_link_info">创建一个MagicLink链接让卖家来购买你的门票.</string>
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">在MagicLink链接过期之前，任何人都可以通过点击此链接来买到你的门票.</string>
@@ -394,7 +394,7 @@
     <string name="welcome_to_the_decentralized_web">欢迎访问去中心化网络</string>
     <string name="action_remove">移除</string>
     <string name="title_remove_dapp">移除 DApp</string>
-    <string name="remove_from_my_dapps">是否要从我的 DApp 中移除%1s？</string>
+    <string name="remove_from_my_dapps">是否要从我的 DApp 中移除%1$s？</string>
     <string name="dialog_title_clear">清除历史记录</string>
     <string name="action_clear">清除</string>
     <string name="dialog_message_clear">是否确定要清除浏览器历史记录？</string>
@@ -669,4 +669,5 @@
     <string name="session_terminated">Session has been terminated. Switch back to Dapp and start a new WalletConnect session.</string>
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">热门通证</string>
+    <string name="unable_to_get_biometrics">无法获得生物识别解锁</string>
 </resources>

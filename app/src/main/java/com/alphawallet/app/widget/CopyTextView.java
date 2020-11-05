@@ -52,8 +52,8 @@ public class CopyTextView extends LinearLayout {
 
         try {
             textResId = a.getResourceId(R.styleable.CopyTextView_text, R.string.action_add_wallet);
-            textColor = a.getColor(R.styleable.CopyTextView_textColor, -1);
-            gravity = a.getInt(R.styleable.CopyTextView_gravity, Gravity.NO_GRAVITY);
+            textColor = a.getColor(R.styleable.CopyTextView_textColour, context.getColor(R.color.mine));
+            gravity = a.getInt(R.styleable.CopyTextView_grav, Gravity.NO_GRAVITY);
             showToast = a.getBoolean(R.styleable.CopyTextView_showToast, true);
             boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
             removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);

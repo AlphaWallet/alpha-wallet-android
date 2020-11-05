@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui;
 
 import android.app.AlertDialog;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -16,6 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
@@ -24,6 +26,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.util.MessageUtils;
+import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -137,6 +140,7 @@ public class WalletConnectActivity extends BaseActivity
     @Override
     protected void onNewIntent(Intent intent)
     {
+        super.onNewIntent(intent);
         Bundle data = intent.getExtras();
         if (data != null)
         {
@@ -202,7 +206,7 @@ public class WalletConnectActivity extends BaseActivity
 
     private void initViewModel()
     {
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(WalletConnectViewModel.class);
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
@@ -481,7 +485,7 @@ public class WalletConnectActivity extends BaseActivity
                 .setTitle(peer.getName())
                 .setMessage(peer.getUrl())
                 .setPositiveButton(R.string.dialog_approve, (d, w) -> {
-                    client.approveSession(Arrays.asList(accounts), 1);
+                    client.approveSession(Arrays.asList(accounts), MAINNET_ID);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(), new Gson().toJson(session), new Gson().toJson(peer));
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);

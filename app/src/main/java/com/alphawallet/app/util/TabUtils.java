@@ -3,8 +3,8 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.support.design.widget.TabLayout;
-import android.support.v4.content.res.ResourcesCompat;
+import com.google.android.material.tabs.TabLayout;
+import androidx.core.content.res.ResourcesCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;

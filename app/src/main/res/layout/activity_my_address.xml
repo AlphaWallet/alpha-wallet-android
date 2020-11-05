@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -8,13 +9,23 @@
 
     <include layout="@layout/layout_network_switch_toolbar" />
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:paddingLeft="@dimen/dp22"
         android:paddingRight="@dimen/dp22">
+
+        <ImageView
+            android:id="@+id/qr_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="center"
+            android:src="@drawable/ic_ethereum"
+            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_scan" />
 
         <TextView
             android:id="@+id/text_scan"
@@ -29,18 +40,6 @@
             android:textSize="@dimen/sp17"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/qr_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="200dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_ethereum"
-            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
-            app:layout_constraintHeight_max="200dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_scan" />
 
         <LinearLayout
             android:id="@+id/copy_address_layout"
@@ -71,11 +70,11 @@
                 android:layout_marginBottom="@dimen/dp24"
                 android:gravity="center"
                 android:visibility="gone"
-                app:gravity="center_vertical"
-                app:text="@string/ethereum"
-                app:bold="true"
-                app:removePadding="true"
-                app:textColor="@color/black" />
+                custom:gravity="center_vertical"
+                custom:text="@string/ethereum"
+                custom:bold="true"
+                custom:removePadding="true"
+                custom:textColor="@color/black" />
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/copy_address"
@@ -83,11 +82,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                app:gravity="center"
-                app:bold="true"
-                app:textColor="@color/black" />
+                custom:gravity="center"
+                custom:bold="true"
+                custom:textColor="@color/black" />
 
         </LinearLayout>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

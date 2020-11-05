@@ -1,11 +1,12 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -37,6 +38,8 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 
 import dagger.android.AndroidInjection;
+
+import com.alphawallet.app.viewmodel.SellDetailViewModel;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -97,7 +100,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         toolbar();
         setTitle("");
 
-        viewModel = ViewModelProviders.of(this, sendViewModelFactory)
+        viewModel = new ViewModelProvider(this, sendViewModelFactory)
                 .get(SendViewModel.class);
         handler = new Handler();
 

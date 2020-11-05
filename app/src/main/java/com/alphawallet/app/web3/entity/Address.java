@@ -2,7 +2,7 @@ package com.alphawallet.app.web3.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.alphawallet.app.util.Hex;

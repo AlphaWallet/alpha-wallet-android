@@ -2,13 +2,9 @@ package com.alphawallet.app.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +13,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -78,9 +80,8 @@ public class WalletConnectSessionActivity extends BaseActivity
     {
         if (viewModel == null)
         {
-            viewModel = ViewModelProviders.of(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(WalletConnectViewModel.class);
-
             viewModel.serviceReady().observe(this, this::onServiceReady);
         }
     }

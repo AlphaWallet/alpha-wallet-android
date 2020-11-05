@@ -141,9 +141,9 @@
     <string name="set_a_price">Set a Price:</string>
     <string name="learn_more_about_ethereum">Learn more about Ethereum</string>
     <string name="price_per_ticket">Price Per Ticket</string>
-    <string name="set_price_subtext_abr">Set price in %1s (%2s)</string>
+    <string name="set_price_subtext_abr">Set price in %1$s (%2$s)</string>
     <string name="transfer_tickets">Transfer Tickets</string>
-    <string name="link_valid_until">The MagicLink will be valid until %1s %2s</string>
+    <string name="link_valid_until">The MagicLink will be valid until %1$s %2$s</string>
     <string name="generate_pick_up_link">Generate a MagicLink</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
@@ -188,7 +188,7 @@
     <string name="quantity_of_tickets">Quantity of Tickets</string>
     <string name="total_cost_label">Total Cost:</string>
     <string name="equivalent_in_usd">Equivalent in USD</string>
-    <string name="total_cost">%1s %2s</string>
+    <string name="total_cost">%1$s %2$s</string>
     <string name="select_quantity_tickets">Select Quantity of %1$s</string>
     <string name="ticket_redeemed">Your ticket has been redeemed</string>
     <string name="search_for">Search for:</string>
@@ -208,7 +208,7 @@
     <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>
-    <string name="eth_per_ticket">%1s/Ticket</string>
+    <string name="eth_per_ticket">%1$s/Ticket</string>
     <string name="ethereum">Ethereum</string>
     <string name="ethereum_blockchain">Ethereum Blockchain</string>
     <string name="issuer">Issuer:</string>
@@ -237,7 +237,7 @@
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
     <string name="failed">Failed</string>
-    <string name="total_cost_for_x_tickets">Total cost for %1d %2s:</string>
+    <string name="total_cost_for_x_tickets">Total cost for %1$d %2$s:</string>
     <string name="title_import_token">Import Tickets</string>
     <string name="action_cancel">Cancel</string>
     <string name="confirm_purchase">Confirm Purchase</string>
@@ -264,8 +264,8 @@
     <string name="universal_link_expiry_on">MagicLink expiry on:</string>
     <string name="confirm_sale_total">Total: %s</string>
     <string name="set_universal_link_expiry">Set MagicLink Expiry:</string>
-    <string name="tickets_selected">%1s %2s Selected</string>
-    <string name="eth_per_ticket_w_value">%1s %2s/Ticket</string>
+    <string name="tickets_selected">%1$s %2$s Selected</string>
+    <string name="eth_per_ticket_w_value">%1$s %2$s/Ticket</string>
     <string name="universal_link_info">A MagicLink will be created to allow buyers to purchase your tickets.</string>
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">Before the link expires, anyone with the MagicLink can purchase your tickets with one click.</string>
@@ -409,7 +409,7 @@
     <string name="welcome_to_the_decentralized_web">Welcome to the Decentralized web</string>
     <string name="action_remove">Remove</string>
     <string name="title_remove_dapp">Remove DApp</string>
-    <string name="remove_from_my_dapps">Remove %1s from My DApps?</string>
+    <string name="remove_from_my_dapps">Remove %1$s from My DApps?</string>
     <string name="dialog_title_clear">Clear History</string>
     <string name="action_clear">Clear</string>
     <string name="dialog_message_clear">Are you sure you clear your browser history?</string>
@@ -687,4 +687,5 @@
     <string name="session_terminated">Session has been terminated. Switch back to Dapp and start a new WalletConnect session.</string>
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">Popular Tokens</string>
+    <string name="unable_to_get_biometrics">Unable to obtain Biometric unlock</string>
 </resources>

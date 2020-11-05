@@ -1,9 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.os.Handler;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Wallet;
@@ -131,23 +130,6 @@ public class ActivityViewModel extends BaseViewModel
     public Realm getRealmInstance()
     {
         return fetchTransactionsInteract.getRealmInstance(wallet.getValue());
-    }
-
-    /**
-     * Check new tokens for any unknowns, then find the unknowns
-     * @param rawTxList
-     */
-    public void checkTokens(RealmResults<RealmTransaction> rawTxList)
-    {
-        for (RealmTransaction tx : rawTxList)
-        {
-            if (tx.getError() != null && tx.getError().equals("0") &&
-                    tx.getInput() != null && tx.getInput().length() > 2) //is this a successful contract transaction?
-            {
-                Token token = tokensService.getToken(tx.getChainId(), tx.getTo());
-                if (token == null) tokensService.addUnknownTokenToCheck(new ContractAddress(tx.getChainId(), tx.getTo()));
-            }
-        }
     }
 
     public AssetDefinitionService getAssetDefinitionService()

@@ -3,9 +3,9 @@ package com.alphawallet.app.ui.widget.holder;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -19,6 +19,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -34,6 +35,8 @@ import java.math.RoundingMode;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -166,6 +169,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             layoutAppreciation.setVisibility(View.GONE);
             setIssuerDetails();
         }
+
+        if (!token.isEthereum() && token.tokenInfo.chainId != MAINNET_ID)
+        {
+            showNetworkLabel();
+        }
+        else
+        {
+            hideNetworkLabel();
+        }
     }
 
     private void handleTicker()
@@ -174,17 +186,16 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         hideIssuerViews();
         layoutAppreciation.setVisibility(View.VISIBLE);
         balanceCurrency.setVisibility(View.VISIBLE);
-        hideTestnet();
         startTickerRealmListener();
     }
 
-    private void showTestnet() {
+    private void showNetworkLabel() {
         testnet.setVisibility(View.VISIBLE);
         Utils.setChainColour(testnet, token.tokenInfo.chainId);
         testnet.setText(token.getNetworkName());
     }
 
-    private void hideTestnet() {
+    private void hideNetworkLabel() {
         testnet.setVisibility(View.GONE);
     }
 

@@ -7,50 +7,79 @@ import android.content.Context;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.security.keystore.*;
-import android.support.annotation.RequiresApi;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.KeyProperties;
+import android.security.keystore.StrongBoxUnavailableException;
+import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
-import com.crashlytics.android.Crashlytics;
+import androidx.annotation.RequiresApi;
+
 import com.alphawallet.app.BuildConfig;
-
 import com.alphawallet.app.R;
-
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ImportWalletCallback;
-import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
-import io.reactivex.Completable;
-import wallet.core.jni.PrivateKey;
-import wallet.core.jni.*;
-
-import javax.crypto.*;
-import javax.crypto.spec.GCMParameterSpec;
-import java.io.*;
-import java.security.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+
+import wallet.core.jni.CoinType;
+import wallet.core.jni.Curve;
+import wallet.core.jni.HDWallet;
+import wallet.core.jni.Hash;
+import wallet.core.jni.PrivateKey;
+
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
-import static com.alphawallet.app.entity.Operation.*;
+import static com.alphawallet.app.entity.Operation.CREATE_KEYSTORE_KEY;
+import static com.alphawallet.app.entity.Operation.CREATE_PRIVATE_KEY;
+import static com.alphawallet.app.entity.Operation.FETCH_MNEMONIC;
+import static com.alphawallet.app.entity.Operation.IMPORT_HD_KEY;
+import static com.alphawallet.app.entity.Operation.UPGRADE_HD_KEY;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
@@ -218,6 +247,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         activity = callingActivity;
         currentWallet = wallet;
         callbackInterface = callback;
+
+        //unlock key
 
         try
         {
@@ -390,7 +421,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) Crashlytics.logException(e);
+            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
         catch (KeyServiceException e)
@@ -579,7 +610,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) Crashlytics.logException(e);
+            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
             return UpgradeKeyResult.ERROR;
         }
@@ -616,10 +647,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             boolean success = writeBytesToFile(ivPath, iv);
             if (!success)
             {
-                deleteKey(fileName);
+                //deleteKey(fileName);
                 throw new ServiceErrorException(
                         ServiceErrorException.ServiceErrorCode.FAIL_TO_SAVE_IV_FILE,
-                        "Failed to saveTokens the iv file for: " + fileName + "iv");
+                        "Failed to create the iv file for: " + fileName + "iv");
             }
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
@@ -630,10 +661,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             }
             catch (Exception ex)
             {
-                deleteKey(fileName);
+                //deleteKey(fileName);
                 throw new ServiceErrorException(
                         ServiceErrorException.ServiceErrorCode.KEY_STORE_ERROR,
-                        "Failed to saveTokens the file for: " + fileName);
+                        "Failed to create the file for: " + fileName);
             }
 
             return true;
@@ -796,12 +827,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
-        signDialog.setCancelListener(v -> {
-            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
-        });
-        signDialog.setOnDismissListener(v -> {
-            signDialog = null;
-        });
         signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
         requireAuthentication = false;
@@ -848,7 +873,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 importHDKey();
                 break;
             case CHECK_AUTHENTICATION:
-                getAuthenticationForSignature();
+                signCallback.gotAuthorisation(true);
                 break;
             case UPGRADE_HD_KEY:
             case UPGRADE_KEYSTORE_KEY:
@@ -901,17 +926,17 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     @Override
     public void legacyAuthRequired(Operation callbackId, String dialogTitle, String desc)
     {
-        signDialog = new SignTransactionDialog(activity, callbackId, dialogTitle, desc);
-        signDialog.setCanceledOnTouchOutside(false);
-        signDialog.setCancelListener(v -> {
-            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
-        });
-        signDialog.setOnDismissListener(v -> {
-            signDialog = null;
-        });
-        signDialog.show();
-        signDialog.getLegacyAuthentication(this);
-        requireAuthentication = false;
+//        signDialog = new SignTransactionDialog2(activity, callbackId, dialogTitle, desc);
+//        signDialog.setCanceledOnTouchOutside(false);
+//        signDialog.setCancelListener(v -> {
+//            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
+//        });
+//        signDialog.setOnDismissListener(v -> {
+//            signDialog = null;
+//        });
+//        signDialog.show();
+//        signDialog.getLegacyAuthentication(this);
+//        requireAuthentication = false;
     }
 
     private void keyFailure(String message)
@@ -1096,7 +1121,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) Crashlytics.logException(e);
+            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
             returnSig.failMessage = e.getMessage();
             e.printStackTrace();
         }

@@ -1,13 +1,14 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -58,7 +59,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;

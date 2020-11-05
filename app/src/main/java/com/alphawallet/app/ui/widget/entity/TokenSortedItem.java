@@ -29,7 +29,7 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
             //if (!oldToken.tokenId.equalsIgnoreCase(newToken.tokenId)) return false;
             if (debugging) System.out.println("DEBUG: Contents: " + weight + " " + newItem.weight + " Balance: " + value.balance + " " + newToken.balance);
             if (weight != newItem.weight) return false;
-            else return value.balance.equals(newToken.balance);
+            else return value.balance.equals(newToken.balance) && value.type.ordinal() == newToken.type.ordinal();
         }
         else
         {

@@ -8,20 +8,18 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="?actionBarSize"
         android:background="@color/alabaster">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"

@@ -1,12 +1,12 @@
 package com.alphawallet.app.repository;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.alphawallet.app.BuildConfig;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -25,7 +25,6 @@ import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -82,7 +81,6 @@ public class TokenRepository implements TokenRepositoryType {
     private final OkHttpClient okClient;
     private final Context context;
     private final TickerService tickerService;
-    private final TransactionsNetworkClientType transactionClient;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -102,15 +100,13 @@ public class TokenRepository implements TokenRepositoryType {
             TokenLocalSource localSource,
             OkHttpClient okClient,
             Context context,
-            TickerService tickerService,
-            TransactionsNetworkClientType networkClientType) {
+            TickerService tickerService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.okClient = okClient;
         this.context = context;
         this.tickerService = tickerService;
-        this.transactionClient = networkClientType;
 
         web3jNodeServers = new ConcurrentHashMap<>();
     }
@@ -850,29 +846,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, TokenInfo tokenInfo) {
-        List<BigInteger> result = new ArrayList<>();
-        result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
-        try
-        {
-            Function function = erc721TicketBalanceArray(wallet.address);
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-            List<Type> tokenIds = callSmartContractFunctionArray(function, tokenInfo.address, network, wallet);
-            if (tokenIds != null)
-            {
-                result.clear();
-                for (Type val : tokenIds)
-                {
-                    result.add((BigInteger)val.getValue());
-                }
-            }
-        }
-        catch (StringIndexOutOfBoundsException e)
-        {
-            //contract call error
-            result.clear();
-            result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
-        }
-        return result;
+        return getBalanceArray721Ticket(wallet, tokenInfo.chainId, tokenInfo.address);
     }
 
     public Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
@@ -907,6 +881,11 @@ public class TokenRepository implements TokenRepositoryType {
             }
         }
 
+        //Check for raw bytes return value; need to do this before we try to parse the function return
+        //as raw bytes returns now cause a throw from the encoder
+        String rawBytesValue = checkRawBytesValue(responseValue, type);
+        if (rawBytesValue != null) return (T)rawBytesValue;
+
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
         if (response.size() == 1)
@@ -934,6 +913,36 @@ public class TokenRepository implements TokenRepositoryType {
                 return null;
             }
         }
+    }
+
+    //some token contracts break the ERC20 guidance and directly return bytes for strings
+    //These returns break the web3j ABI decoder
+    //Note that for a correct 'String' return type, it will be encoded like this:
+    //0000000000000000000000000000000000000000000000000000000000000020 : offset to dynamic type
+    //0000000000000000000000000000000000000000000000000000000000000003 : length 3
+    //4449500000000000000000000000000000000000000000000000000000000000 : 'DIP'
+    // However some contracts - presumably to save bandwidth - would encode this a bytes32:
+    //4449500000000000000000000000000000000000000000000000000000000000
+    //This routine will find the string in a bytes32 if the return type was expecting a string.
+    private <T> String checkRawBytesValue(String responseValue, T type) throws Exception
+    {
+        String value = null;
+        if ((type instanceof String))
+        {
+            responseValue = Numeric.cleanHexPrefix(responseValue);
+            int firstValueEndIndex = Math.min(responseValue.length(), 64);
+            if (firstValueEndIndex > 0)
+            {
+                BigInteger firstValue = new BigInteger(responseValue.substring(0, firstValueEndIndex), 16);
+
+                if (firstValue.compareTo(BigInteger.valueOf(0x20)) != 0)
+                {
+                    value = checkBytesString(responseValue);
+                }
+            }
+        }
+
+        return value;
     }
 
     private String checkBytesString(String responseValue) throws Exception
@@ -968,34 +977,16 @@ public class TokenRepository implements TokenRepositoryType {
         StringBuilder sb = new StringBuilder();
         for (char ch : name.toCharArray())
         {
-            if (ch >= 0x20 && ch <= 0x7E) //valid ASCII character
+            if (Character.isIdeographic(ch) ||
+                    Character.isLetterOrDigit(ch) ||
+                    Character.isWhitespace(ch) ||
+                    (ch >= 0x20 && ch <= 0x7E)) //some other common ASCII
             {
                 sb.append(ch);
             }
         }
 
         return sb.toString();
-    }
-
-    private String getName(String address, NetworkInfo network) throws Exception {
-        Function function = nameOf();
-        Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, network ,temp);
-
-        if (TextUtils.isEmpty(responseValue)) return null;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            String name = (String)response.get(0).getValue();
-            if (responseValue.length() > 2 && name.length() == 0)
-            {
-                name = checkBytesString(responseValue);
-            }
-            return name;
-        } else {
-            return null;
-        }
     }
 
     private int getDecimals(String address, NetworkInfo network) throws Exception {
@@ -1128,16 +1119,15 @@ public class TokenRepository implements TokenRepositoryType {
             Object o;
             if (values.isEmpty())
             {
-                values = new ArrayList<Type>();
-                values.add((Type)new Int256(CONTRACT_BALANCE_NULL));
-                o = (List)values;
+                values = new ArrayList<>();
+                values.add(new Int256(CONTRACT_BALANCE_NULL));
+                o = values;
             }
             else
             {
-                Type T = values.get(0);
-                o = T.getValue();
+                o = values.get(0).getValue();
             }
-            return (List) o;
+            return (List)o;
         }
         catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
         {
@@ -1285,8 +1275,8 @@ public class TokenRepository implements TokenRepositoryType {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
             return new TokenInfo(
                     address,
-                    getName(address, network),
-                    getContractData(network, address, stringParam("symbol"), ""),
+                    getContractData(network, address, nameOf(), ""),
+                    getContractData(network, address, symbolOf(), ""),
                     getDecimals(address, network),
                     true, chainId);
         });

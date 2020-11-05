@@ -20,99 +20,101 @@
             android:gravity="center"
             android:layout_above="@id/layoutButtons">
 
-        <LinearLayout
-            android:id="@id/token_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/event_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_light"
-                tools:text="10:57 PM | July 22, 2020"
-                android:textColor="@color/black"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="@dimen/dp18"
-                android:textSize="@dimen/sp14" />
-
-            <com.alphawallet.app.widget.TokenIcon
-                android:id="@+id/token_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:showStatus="true"
-                app:largeIcon="true" />
-
-            <TextView
-                android:id="@+id/event_action"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                tools:text="Sent ETH"
-                android:textColor="@color/black"
-                android:layout_marginTop="@dimen/dp6"
-                android:layout_marginBottom="10dp"
-                android:textSize="@dimen/sp17" />
-
-            <TextView
-                android:id="@+id/event_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                tools:text="+ 1.234 ETH"
-                android:textColor="@color/black"
-                android:layout_marginTop="@dimen/dp16"
-                android:textSize="@dimen/sp24" />
-
-            <TextView
-                android:id="@+id/text_chain_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp5"
-                android:layout_marginEnd="@dimen/dp8"
-                android:layout_marginStart="@dimen/dp5"
-                android:background="@drawable/background_status_pending"
-                android:fontFamily="@font/font_bold"
-                android:padding="2dp"
-                android:text="@string/action_clear"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                android:visibility="gone" />
-
             <LinearLayout
-                android:id="@+id/pending_time_layout"
-                android:layout_width="wrap_content"
+                android:id="@id/token_view"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp5"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <ProgressBar
-                    android:layout_width="@dimen/dp14"
-                    android:layout_gravity="center_vertical"
-                    android:layout_height="@dimen/dp14"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="@string/empty"/>
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/pending_time"
-                    style="@style/TransactionDetailsStyle"
+                    android:id="@+id/event_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="@string/transaction_pending_for" />
+                    android:fontFamily="@font/font_light"
+                    tools:text="10:57 PM | July 22, 2020"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="@dimen/dp18"
+                    android:textSize="@dimen/sp14" />
+
+                <com.alphawallet.app.widget.TokenIcon
+                    android:id="@+id/token_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:showStatus="true"
+                    app:largeIcon="true" />
+
+                <TextView
+                    android:id="@+id/event_action"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_semibold"
+                    tools:text="Sent ETH"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="@dimen/dp6"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="@dimen/sp17" />
+
+                <TextView
+                    android:id="@+id/event_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_semibold"
+                    tools:text="+ 1.234 ETH"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="@dimen/dp16"
+                    android:textSize="@dimen/sp24" />
+
+                <TextView
+                    android:id="@+id/text_chain_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp5"
+                    android:layout_marginEnd="@dimen/dp8"
+                    android:layout_marginStart="@dimen/dp5"
+                    android:background="@drawable/background_status_pending"
+                    android:fontFamily="@font/font_bold"
+                    android:padding="2dp"
+                    android:text="@string/action_clear"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/pending_time_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp5"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:layout_width="@dimen/dp14"
+                        android:layout_gravity="center_vertical"
+                        android:layout_height="@dimen/dp14"
+                        android:layout_marginEnd="6dp"
+                        android:contentDescription="@string/empty"/>
+
+                    <TextView
+                        android:id="@+id/pending_time"
+                        style="@style/TransactionDetailsStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="@string/transaction_pending_for" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dp5"
+                    android:orientation="horizontal"/>
+
+                <include layout="@layout/item_ticket" />
 
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/dp5"
-                android:orientation="horizontal"/>
-
-            <include layout="@layout/item_ticket" />
-
-        </LinearLayout>
         </ScrollView>
 
         <com.alphawallet.app.widget.FunctionButtonBar

@@ -846,29 +846,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, TokenInfo tokenInfo) {
-        List<BigInteger> result = new ArrayList<>();
-        result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
-        try
-        {
-            Function function = erc721TicketBalanceArray(wallet.address);
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-            List<Type> tokenIds = callSmartContractFunctionArray(function, tokenInfo.address, network, wallet);
-            if (tokenIds != null)
-            {
-                result.clear();
-                for (Type val : tokenIds)
-                {
-                    result.add((BigInteger)val.getValue());
-                }
-            }
-        }
-        catch (StringIndexOutOfBoundsException e)
-        {
-            //contract call error
-            result.clear();
-            result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
-        }
-        return result;
+        return getBalanceArray721Ticket(wallet, tokenInfo.chainId, tokenInfo.address);
     }
 
     public Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
@@ -1011,32 +989,6 @@ public class TokenRepository implements TokenRepositoryType {
         return sb.toString();
     }
 
-    private String getName(String address, NetworkInfo network) throws Exception {
-        Function function = nameOf();
-        Wallet temp = new Wallet(null);
-
-        String responseValue = callSmartContractFunction(function, address, network ,temp);
-
-        if (TextUtils.isEmpty(responseValue) || responseValue.length() == 2) return null;
-
-        //Detect a raw bytes return from a getName call for contracts that don't follow the ABI
-        String rawBytesValue = checkRawBytesValue(responseValue, String.class);
-        if (rawBytesValue != null) return rawBytesValue;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            String name = (String)response.get(0).getValue();
-            if (responseValue.length() > 2 && name.length() == 0)
-            {
-                name = checkBytesString(responseValue);
-            }
-            return name;
-        } else {
-            return null;
-        }
-    }
-
     private int getDecimals(String address, NetworkInfo network) throws Exception {
         if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
         Function function = decimalsOf();
@@ -1167,16 +1119,15 @@ public class TokenRepository implements TokenRepositoryType {
             Object o;
             if (values.isEmpty())
             {
-                values = new ArrayList<Type>();
-                values.add((Type)new Int256(CONTRACT_BALANCE_NULL));
-                o = (List)values;
+                values = new ArrayList<>();
+                values.add(new Int256(CONTRACT_BALANCE_NULL));
+                o = values;
             }
             else
             {
-                Type T = values.get(0);
-                o = T.getValue();
+                o = values.get(0).getValue();
             }
-            return (List) o;
+            return (List)o;
         }
         catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
         {
@@ -1324,8 +1275,8 @@ public class TokenRepository implements TokenRepositoryType {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
             return new TokenInfo(
                     address,
-                    getName(address, network),
-                    getContractData(network, address, stringParam("symbol"), ""),
+                    getContractData(network, address, nameOf(), ""),
+                    getContractData(network, address, symbolOf(), ""),
                     getDecimals(address, network),
                     true, chainId);
         });

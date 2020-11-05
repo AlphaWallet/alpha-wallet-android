@@ -132,23 +132,6 @@ public class ActivityViewModel extends BaseViewModel
         return fetchTransactionsInteract.getRealmInstance(wallet.getValue());
     }
 
-    /**
-     * Check new tokens for any unknowns, then find the unknowns
-     * @param rawTxList
-     */
-    public void checkTokens(RealmResults<RealmTransaction> rawTxList)
-    {
-        for (RealmTransaction tx : rawTxList)
-        {
-            if (tx.getError() != null && tx.getError().equals("0") &&
-                    tx.getInput() != null && tx.getInput().length() > 2) //is this a successful contract transaction?
-            {
-                Token token = tokensService.getToken(tx.getChainId(), tx.getTo());
-                if (token == null) tokensService.addUnknownTokenToCheck(new ContractAddress(tx.getChainId(), tx.getTo()));
-            }
-        }
-    }
-
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;

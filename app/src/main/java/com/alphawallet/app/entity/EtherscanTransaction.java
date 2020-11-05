@@ -37,7 +37,15 @@ public class EtherscanTransaction
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
                                          gasUsed, chainId, contractAddress);
 
-        if (walletAddress != null) tx.completeSetup(walletAddress);
+        if (walletAddress != null)
+        {
+            tx.completeSetup(walletAddress);
+            if (!walletInvolvedInTransaction(tx, walletAddress))
+            {
+                tx = null;
+            }
+        }
+
         return tx;
     }
 
@@ -49,7 +57,7 @@ public class EtherscanTransaction
         if ((data != null && data.functionData != null) && data.containsAddress(walletAddr)) return true;
         if (trans.from.equalsIgnoreCase(walletAddr)) return true;
         if (trans.to.equalsIgnoreCase(walletAddr)) return true;
-        if (input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr))) return true;
+        if (input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr.toLowerCase()))) return true;
         if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(walletAddr))
             involved = true;
         return involved;

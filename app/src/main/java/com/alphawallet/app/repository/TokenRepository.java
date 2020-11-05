@@ -1,12 +1,12 @@
 package com.alphawallet.app.repository;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.alphawallet.app.BuildConfig;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -25,7 +25,6 @@ import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -82,7 +81,6 @@ public class TokenRepository implements TokenRepositoryType {
     private final OkHttpClient okClient;
     private final Context context;
     private final TickerService tickerService;
-    private final TransactionsNetworkClientType transactionClient;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -102,15 +100,13 @@ public class TokenRepository implements TokenRepositoryType {
             TokenLocalSource localSource,
             OkHttpClient okClient,
             Context context,
-            TickerService tickerService,
-            TransactionsNetworkClientType networkClientType) {
+            TickerService tickerService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.okClient = okClient;
         this.context = context;
         this.tickerService = tickerService;
-        this.transactionClient = networkClientType;
 
         web3jNodeServers = new ConcurrentHashMap<>();
     }

@@ -687,4 +687,5 @@
     <string name="session_terminated">Session has been terminated. Switch back to Dapp and start a new WalletConnect session.</string>
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">Popular Tokens</string>
+    <string name="unable_to_get_biometrics">Unable to obtain Biometric unlock</string>
 </resources>

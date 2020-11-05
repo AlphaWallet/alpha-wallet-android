@@ -5,12 +5,12 @@ import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -20,11 +20,11 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.TokenScriptManagementViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
@@ -129,6 +129,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         chainName = viewModel.getNetworkName(transaction.chainId);
         ((TextView) findViewById(R.id.network)).setText(chainName);
+        ((ImageView) findViewById(R.id.network_icon)).setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
         TextView chainLabel = findViewById(R.id.text_chain_name);
@@ -300,7 +301,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void checkFailed()
     {
-        if (transaction.error != null && transaction.error.equals("1"))
+        if (transaction.hasError())
         {
             TextView failed = findViewById(R.id.failed);
             TextView failedF = findViewById(R.id.failedFace);

@@ -1,9 +1,9 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.R;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.alphawallet.app.R;
 
 public class TransactionLookup
 {
@@ -37,6 +37,7 @@ public class TransactionLookup
             typeMapping.put(TransactionType.TRANSFER_FROM, R.string.ticket_transfer_from);
             typeMapping.put(TransactionType.ALLOCATE_TO, R.string.allocate_to);
             typeMapping.put(TransactionType.APPROVE, R.string.approve);
+            typeMapping.put(TransactionType.RECEIVED, R.string.received);
             typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.ticket_invalid_op);
         }
     }

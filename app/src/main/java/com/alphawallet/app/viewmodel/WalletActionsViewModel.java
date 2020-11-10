@@ -107,6 +107,14 @@ public class WalletActionsViewModel extends BaseViewModel {
                 .subscribe(this::onStored, this::onError);
     }
 
+    public void updateWallet(Wallet wallet) {
+        isTaskRunning.postValue(true);
+        disposable = fetchWalletsInteract.updateWalletData(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onStored, this::onError);
+    }
+
     private void onStored(Wallet wallet) {
         isTaskRunning.postValue(false);
         Log.d(TAG, "Stored " + wallet.address);

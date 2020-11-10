@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private TextView walletAddressSeparator;
     private TextView walletAddressText;
     private ImageView walletSelectedIcon;
+    private EditText walletNameEdit;
     private SettingsItemView deleteWalletSetting;
     private SettingsItemView backUpSetting;
     private LinearLayout successOverlay;
@@ -166,6 +168,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         backUpSetting = findViewById(R.id.setting_backup);
         walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
         walletSelectedIcon.setOnClickListener(this);
+        walletNameEdit = findViewById(R.id.edit_wallet_name);
 
         walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
@@ -196,6 +199,15 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         }
 
         walletSelectedIcon.setImageResource(R.drawable.ic_copy);
+
+        if (wallet.name.isEmpty())
+        {
+            walletNameEdit.setText(getString(R.string.wallet_name_template, walletCount));
+        }
+        else
+        {
+            walletNameEdit.setText(wallet.name);
+        }
     }
 
     private void onDeleteWalletSettingClicked() {
@@ -207,12 +219,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     private void saveWalletName() {
-//        wallet.name = walletNameText.getText().toString();
-        viewModel.storeWallet(wallet);
-        if (isNewWallet) {
-            viewModel.showHome(this);
-            finish(); //drop back to home screen, no need to recreate everything
-        }
+        wallet.name = walletNameEdit.getText().toString();
+        viewModel.updateWallet(wallet);
     }
 
     private void doBackUp() {
@@ -314,6 +322,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     @Override
     public void onBackPressed() {
+        saveWalletName();
         if (isNewWallet) {
             viewModel.showHome(this);
         } else {

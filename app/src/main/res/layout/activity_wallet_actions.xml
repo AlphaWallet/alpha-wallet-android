@@ -27,6 +27,27 @@
             android:layout_height="50dp"
             android:background="@color/alabaster" />
 
+        <EditText
+            android:id="@+id/edit_wallet_name"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="10sp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/background_round_blue_9dp"
+            android:completionThreshold="1"
+            android:fontFamily="@font/font_regular"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLength="30"
+            android:maxLines="1"
+            android:paddingEnd="60dp"
+            android:paddingStart="15dp"
+            android:textColor="@color/text_dark_gray"
+            android:textColorHint="@color/light_gray"
+            android:textSize="14sp" />
+
         <LinearLayout
             android:id="@+id/layout_backup_method"
             android:layout_width="wrap_content"

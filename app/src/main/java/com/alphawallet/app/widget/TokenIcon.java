@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,6 +32,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.Keys;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
 
@@ -47,6 +49,7 @@ public class TokenIcon extends ConstraintLayout
     private AssetDefinitionService assetDefinition;
     private boolean showStatus = false;
     private boolean largeIcon = false;
+    private boolean smallIcon = false;
 
     public TokenIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -150,7 +153,7 @@ public class TokenIcon extends ConstraintLayout
         else
         {
             setupTextIcon(token);
-            IconItem iconItem = assetDefinition.fetchIconForToken(token);
+            IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
 
             Glide.with(getContext().getApplicationContext())
                     .load(iconItem.getUrl())
@@ -161,6 +164,13 @@ public class TokenIcon extends ConstraintLayout
                     .listener(requestListener)
                     .into(viewTarget);
         }
+    }
+
+    private IconItem getIconUrl(Token token)
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        String tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
+        return new IconItem(tURL, false, correctedAddr, token.tokenInfo.chainId);
     }
 
     /**
@@ -242,7 +252,7 @@ public class TokenIcon extends ConstraintLayout
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             return false;

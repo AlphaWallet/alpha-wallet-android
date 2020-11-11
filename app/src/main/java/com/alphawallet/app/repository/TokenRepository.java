@@ -432,7 +432,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenInfo> update(String contractAddr, int chainId) {
+    public Single<TokenInfo> update(String contractAddr, int chainId)
+    {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 

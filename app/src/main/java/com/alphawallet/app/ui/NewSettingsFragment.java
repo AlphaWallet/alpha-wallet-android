@@ -87,7 +87,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         setToolbarTitle(R.string.toolbar_header_settings);
 
-        initializeSettinngs(view);
+        initializeSettings(view);
 
         addSettingsToLayout();
 
@@ -122,7 +122,7 @@ public class NewSettingsFragment extends BaseFragment {
         warningSeparator = view.findViewById(R.id.warning_separator);
     }
 
-    private void initializeSettinngs(View view) {
+    private void initializeSettings(View view) {
         walletSettingsLayout = view.findViewById(R.id.layout_settings_wallet);
         systemSettingsLayout = view.findViewById(R.id.layout_settings_system);
         supportSettingsLayout = view.findViewById(R.id.layout_settings_support);

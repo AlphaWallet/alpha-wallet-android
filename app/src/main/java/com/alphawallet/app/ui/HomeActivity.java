@@ -159,6 +159,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
 
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (getSupportActionBar() != null) getSupportActionBar().hide();
+
         Bundle bundle = null;
         Intent intent = getIntent();
         if (intent != null)

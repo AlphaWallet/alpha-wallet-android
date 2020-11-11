@@ -7,6 +7,7 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
@@ -24,14 +25,16 @@ class SendModule {
                                                      TokensService tokensService,
                                                      FetchTransactionsInteract fetchTransactionsInteract,
                                                      AddTokenInteract addTokenInteract,
-                                                     GasService gasService) {
+                                                     GasService gasService,
+                                                     AssetDefinitionService assetDefinitionService) {
         return new SendViewModelFactory(confirmationRouter,
                 myAddressRouter,
                 networkRepositoryType,
                 tokensService,
                 fetchTransactionsInteract,
                 addTokenInteract,
-                gasService);
+                gasService,
+                assetDefinitionService);
     }
 
     @Provides

@@ -1,13 +1,8 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,46 +12,42 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
-import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
-
-import dagger.android.AndroidInjection;
-
-import com.alphawallet.app.viewmodel.SellDetailViewModel;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Convert;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.viewmodel.SendViewModel;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.InputAmount;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.Convert;
+import com.alphawallet.token.tools.ParseMagicLink;
+
+import java.math.BigDecimal;
 
 import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 
-import static com.alphawallet.token.tools.Convert.getEthString;
+import dagger.android.AndroidInjection;
+
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -91,7 +82,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
     private String currentAmount;
     private QRResult currentResult;
 
-    private AmountEntryItem amountInput;
+    private InputAmount amountInput;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,7 +90,6 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         toolbar();
-        setTitle("");
 
         viewModel = new ViewModelProvider(this, sendViewModelFactory)
                 .get(SendViewModel.class);
@@ -118,13 +108,14 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
 
         if (!checkTokenValidity()) { return; }
 
+        setTitle(getString(R.string.action_send_tkn, token.getShortName()));
         setupTokenContent();
-        initViews();
-        setupAddressEditField();
+        //initViews();
+        //setupAddressEditField();
 
         if (token != null)
         {
-            amountInput = new AmountEntryItem(this, tokenRepository, token); //ticker is used automatically now
+            //amountInput = new AmountEntryItem(this, tokenRepository, token); //ticker is used automatically now
         }
 
         if (result != null)
@@ -151,7 +142,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         return (token != null);
     }
 
-    private void initViews() {
+    /*private void initViews() {
 
         toAddressEditText = findViewById(R.id.edit_to_address);
 
@@ -215,7 +206,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
             boolean sendingTokens = !token.isEthereum();
             viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.getSymbol(), sendingTokens, ensHandler.getEnsName(), currentChain);
         }
-    }
+    }*/
 
     private void onBack() {
         finish();
@@ -385,9 +376,9 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                 sendText.setText(R.string.transfer_request);
                 token = viewModel.getToken(result.chainId, wallet.address);
                 toAddressEditText.setText(result.getAddress());
-                amountInput = new AmountEntryItem(this, tokenRepository, token);
-                amountInput.setAmountText(ethAmount);
-                amountInput.setAmount(ethAmount);
+                //amountInput = new AmountEntryItem(this, tokenRepository, token);
+                //amountInput.setAmountText(ethAmount);
+                //amountInput.setAmount(ethAmount);
                 setupTokenContent();
                 break;
 
@@ -406,8 +397,8 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                     setupTokenContent();
                     //convert token amount into scaled value
                     String convertedAmount = Convert.getConvertedValue(result.tokenAmount, token.tokenInfo.decimals);
-                    amountInput = new AmountEntryItem(this, tokenRepository, resultToken);
-                    amountInput.setAmountText(convertedAmount);
+                    // = new AmountEntryItem(this, tokenRepository, resultToken);
+                    //amountInput.setAmountText(convertedAmount);
                     toAddressEditText.setText(result.functionToAddress);
                     sendText.setVisibility(View.VISIBLE);
                     sendText.setText(getString(R.string.token_transfer_request, resultToken.getFullName()));
@@ -477,7 +468,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         }
         super.onDestroy();
         if (handler != null) handler.removeCallbacksAndMessages(null);
-        if (amountInput != null) amountInput.onClear();
+        //if (amountInput != null) amountInput.onClear();
     }
 
 
@@ -515,7 +506,9 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
     }
 
     private void setupTokenContent() {
-        tokenBalanceText = findViewById(R.id.balance_eth);
+        amountInput = findViewById(R.id.input_amount);
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), viewModel.getRealmInstance(wallet));
+        /*tokenBalanceText = findViewById(R.id.balance_eth);
         tokenSymbolText = findViewById(R.id.symbol);
         chainName = findViewById(R.id.text_chain_name);
 
@@ -539,7 +532,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
             chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
             viewModel.setChainId(token.tokenInfo.chainId);
-        }
+        }*/
     }
 
     @Override
@@ -560,14 +553,14 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         Utils.setChainColour(chainName, chainId);
         chainName.setText(info.name);
         currentChain = chainId;
-        amountInput.onClear();
+        //amountInput.onClear();
         viewModel.setChainId(chainId);
     }
 
     @Override
     public void ENSComplete()
     {
-        onNext();
+        //onNext();
     }
 
     @Override

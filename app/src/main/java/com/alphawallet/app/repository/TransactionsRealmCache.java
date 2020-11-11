@@ -402,12 +402,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         int len = rawItem.getOperations().size();
         for (int i = 0; i < len; i++)
         {
-            RealmTransactionOperation rawOperation = rawItem.getOperations().get(i);
-            if (rawOperation == null)
+            try
             {
-                continue;
+                RealmTransactionOperation rawOperation = rawItem.getOperations().get(i);
+                if (rawOperation != null) rawOperation.deleteFromRealm();
             }
-            rawOperation.deleteFromRealm();
+            catch (Exception e)
+            {
+                // continue
+            }
         }
     }
 

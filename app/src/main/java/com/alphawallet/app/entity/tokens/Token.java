@@ -114,18 +114,20 @@ public class Token implements Parcelable, Comparable<Token>
     {
         String value;
         BigDecimal ethBalance = getCorrectedBalance(18);
+        final NumberFormat formatter = new DecimalFormat("0.####E0");
+        formatter.setRoundingMode(RoundingMode.DOWN);
         if (ethBalance.equals(BigDecimal.ZERO)) //zero balance
         {
             value = "0";
         }
         else if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
         {
-            value = "~0.00";
+            value = formatter.format(ethBalance);
+            value = value.replace("E", "e-");
         }
         else if (balance.compareTo(Convert.toWei(BigDecimal.TEN, Convert.Unit.GETHER)) > 0) //too big
         {
-            NumberFormat sci_formate = new DecimalFormat("0.#####E0");
-            value = sci_formate.format(ethBalance);
+            value = formatter.format(ethBalance);
             value = value.replace("E", "e+");
         }
         else //otherwise display in standard pattern to 4 dp

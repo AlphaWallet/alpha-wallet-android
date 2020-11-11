@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginStart="@dimen/dp8"
+    android:layout_marginEnd="@dimen/dp8"
+    android:layout_marginTop="@dimen/dp8"
+    android:layout_marginBottom="@dimen/dp8">
+
+    <TextView
+        android:id="@+id/text_chain_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_status_pending"
+        android:fontFamily="@font/font_bold"
+        android:layout_marginStart="5dp"
+        android:layout_gravity="center_horizontal"
+        android:padding="2dp"
+        android:text="@string/action_clear"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/layout_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <com.alphawallet.app.widget.TokenIcon
+        android:id="@+id/token_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginStart="2dp"
+        android:layout_gravity="center"
+        app:showStatus="false" />
+
+        <TextView
+            android:id="@+id/text_token_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAllCaps="true"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp32"
+            tools:text="ETH"/>
+
+        <LinearLayout
+            android:id="@+id/layout_more_click"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp5"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:background="@color/transparent">
+
+            <ImageView
+                android:id="@+id/expand_more"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_expand_more"/>
+
+        </LinearLayout>
+
+        <AutoCompleteTextView
+            android:id="@+id/amount_entry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:gravity="end"
+            android:completionThreshold="1"
+            android:fontFamily="@font/font_semibold"
+            android:hint="0"
+            android:imeOptions="actionDone"
+            android:inputType="numberDecimal"
+            android:lines="1"
+            android:maxLines="1"
+            android:paddingEnd="15dp"
+            android:paddingStart="15dp"
+            android:textColor="@color/text_dark_gray"
+            android:textColorHint="@color/light_gray"
+            android:textSize="36sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp6"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/dove"
+            android:text="@string/available" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/dove"
+            android:text=":" />
+
+        <TextView
+            android:id="@+id/text_available"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:textSize="12sp"
+            android:textColor="@color/dove"
+            tools:text="4.4328"/>
+
+        <TextView
+            android:id="@+id/text_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:textSize="12sp"
+            android:textColor="@color/dove"
+            tools:text="ETH"/>
+
+        <TextView
+            android:id="@+id/text_all_funds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:fontFamily="@font/font_semibold"
+            android:textColor="@color/azure"
+            android:textSize="@dimen/sp17"
+            android:text="@string/all_funds"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

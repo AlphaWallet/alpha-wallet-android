@@ -15,6 +15,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -23,6 +24,7 @@ import java.math.BigInteger;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 public class SendViewModel extends BaseViewModel {
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
@@ -34,6 +36,7 @@ public class SendViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
     private final GasService gasService;
+    private final AssetDefinitionService assetDefinitionService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          MyAddressRouter myAddressRouter,
@@ -41,7 +44,8 @@ public class SendViewModel extends BaseViewModel {
                          TokensService tokensService,
                          FetchTransactionsInteract fetchTransactionsInteract,
                          AddTokenInteract addTokenInteract,
-                         GasService gasService) {
+                         GasService gasService,
+                         AssetDefinitionService assetDefinitionService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = ethereumNetworkRepositoryType;
@@ -49,6 +53,7 @@ public class SendViewModel extends BaseViewModel {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.addTokenInteract = addTokenInteract;
         this.gasService = gasService;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
@@ -102,5 +107,20 @@ public class SendViewModel extends BaseViewModel {
     public void setChainId(int chainId)
     {
         gasService.fetchGasPriceForChain(chainId);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
+    }
+
+    public Realm getRealmInstance(Wallet wallet)
+    {
+        return tokensService.getRealmInstance(wallet);
+    }
+
+    public TokensService getTokenService()
+    {
+        return tokensService;
     }
 }

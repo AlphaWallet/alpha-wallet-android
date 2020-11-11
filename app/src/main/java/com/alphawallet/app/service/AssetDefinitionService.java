@@ -135,10 +135,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
     public static final String ASSET_SUMMARY_VIEW_NAME = "item-view";
     public static final String ASSET_DETAIL_VIEW_NAME = "view";
-    private final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
-    private final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
-    private final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/alphawallet/iconassets/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
     private static final String ASSET_DEFINITION_DB = "ASSET-db.realm";
     private static final String BUNDLED_SCRIPT = "bundled";
     private static final long CHECK_TX_LOGS_INTERVAL = 20;
@@ -2583,31 +2579,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = TRUST_ICON_REPO;
-            String repoChain;
-            switch (token.tokenInfo.chainId)
-            {
-                case EthereumNetworkRepository.CLASSIC_ID:
-                    repoChain = "classic";
-                    break;
-                case EthereumNetworkRepository.XDAI_ID:
-                    repoChain = "xdai";
-                    break;
-                case EthereumNetworkRepository.POA_ID:
-                    repoChain = "poa";
-                    break;
-                case EthereumNetworkBase.KOVAN_ID:
-                case EthereumNetworkBase.RINKEBY_ID:
-                case EthereumNetworkBase.SOKOL_ID:
-                case EthereumNetworkBase.ROPSTEN_ID:
-                    tURL = ALPHAWALLET_ICON_REPO;
-                    repoChain = "";
-                    break;
-                default:
-                    repoChain = "ethereum";
-                    break;
-            }
-            tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
+            tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
         }
 
         boolean onlyTryCache = iconCheck.containsKey(correctedAddr);

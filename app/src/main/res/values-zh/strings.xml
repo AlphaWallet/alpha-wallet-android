@@ -2,6 +2,8 @@
 <resources>
     <!-- String related to sending -->
     <string name="action_send">发送</string>
+    <string name="action_send_tkn">发送%1$s</string>
+    <string name="recipient">接收人</string>
     <string name="error_field_required">此为必填字段</string>
     <string name="action_settings">设置</string>
     <string name="title_account_list">钱包</string>
@@ -672,4 +674,6 @@
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">热门通证</string>
     <string name="unable_to_get_biometrics">无法获得生物识别解锁</string>
+    <string name="all_funds">所有基金</string>
+    <string name="recipient_address">接收者的地址</string>
 </resources>

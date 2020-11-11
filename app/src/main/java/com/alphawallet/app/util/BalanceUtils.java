@@ -70,7 +70,8 @@ public class BalanceUtils {
      * @param decimals - decimal places used to convert subunits to base
      * @return amount in base units
      */
-    public static BigDecimal subunitToBase(BigInteger subunitAmount, int decimals) {
+    public static BigDecimal subunitToBase(BigInteger subunitAmount, int decimals)
+    {
         assert(decimals >= 0);
         return new BigDecimal(subunitAmount).divide(BigDecimal.valueOf(10).pow(decimals));
     }
@@ -145,5 +146,4 @@ public class BalanceUtils {
             return "0";
         }
     }
-
 }

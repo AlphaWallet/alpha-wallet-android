@@ -8,6 +8,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TokensService;
 
@@ -22,6 +23,7 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
     private final GasService gasService;
+    private final AssetDefinitionService assetDefinitionService;
 
     public SendViewModelFactory(ConfirmationRouter confirmationRouter,
                                 MyAddressRouter myAddressRouter,
@@ -29,7 +31,8 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
                                 TokensService tokensService,
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AddTokenInteract addTokenInteract,
-                                GasService gasService) {
+                                GasService gasService,
+                                AssetDefinitionService assetDefinitionService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = networkRepository;
@@ -37,11 +40,13 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
         this.gasService = gasService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.addTokenInteract = addTokenInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SendViewModel(confirmationRouter, myAddressRouter, networkRepository, tokensService, fetchTransactionsInteract, addTokenInteract, gasService);
+        return (T) new SendViewModel(confirmationRouter, myAddressRouter, networkRepository, tokensService,
+                fetchTransactionsInteract, addTokenInteract, gasService, assetDefinitionService);
     }
 }

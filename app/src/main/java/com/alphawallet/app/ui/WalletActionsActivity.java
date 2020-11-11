@@ -1,14 +1,11 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +13,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -25,7 +25,6 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.ui.widget.entity.AddressReady;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;

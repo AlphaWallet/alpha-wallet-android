@@ -2,6 +2,8 @@
 <resources>
     <!-- String related to sending -->
     <string name="action_send">Enviar</string>
+    <string name="action_send_tkn">Enviar %1$s</string>
+    <string name="recipient">Destinatario</string>
     <string name="error_field_required">Este campo es obligatorio</string>
     <string name="action_settings">Ajustes</string>
     <string name="title_account_list">Monederos</string>
@@ -672,4 +674,6 @@
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">Tokens Populares</string>
     <string name="unable_to_get_biometrics">No se puede obtener el desbloqueo Biométrico</string>
+    <string name="all_funds">Todos los fondos</string>
+    <string name="recipient_address">Dirección del destinatario</string>
 </resources>

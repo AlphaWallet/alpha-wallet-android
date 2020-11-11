@@ -491,10 +491,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     .equalTo("chainId", networkInfo.chainId)
                     .findFirst();
 
-            if (realmItem == null || realmItem.getInterfaceSpec() != ContractType.ERC20.ordinal())
+            int tokenDecimal = (!TextUtils.isEmpty(ev.tokenDecimal) && Character.isDigit(ev.tokenDecimal.charAt(0))) ? Integer.parseInt(ev.tokenDecimal) : -1;
+
+            if (realmItem == null || realmItem.getInterfaceSpec() != ContractType.ERC20.ordinal()
+                    || (tokenDecimal > 0 && tokenDecimal != realmItem.getDecimals())
+                    || !ev.tokenName.equals(realmItem.getName()) //trust etherscan's name
+            )
             {
                 // write token to DB - note this also fetches the balance
-                int tokenDecimal = (!TextUtils.isEmpty(ev.tokenDecimal) && Character.isDigit(ev.tokenDecimal.charAt(0))) ? Integer.parseInt(ev.tokenDecimal) : -1;
                 if (tokenDecimal >= 0)
                 {
                     TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, tokenDecimal, true, networkInfo.chainId);

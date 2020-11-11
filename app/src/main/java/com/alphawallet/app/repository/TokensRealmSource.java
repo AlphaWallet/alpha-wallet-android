@@ -419,12 +419,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 token.setRealmBalance(realmToken);
-                if (token.tokenInfo.name.length() > 0)
-                {
-                    realmToken.setName(token.tokenInfo.name);
-                    realmToken.setSymbol(token.tokenInfo.symbol);
-                    realmToken.setDecimals(token.tokenInfo.decimals);
-                }
+                realmToken.updateTokenInfoIfRequired(token.tokenInfo);
                 token.setRealmInterfaceSpec(realmToken);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
@@ -525,13 +520,12 @@ public class TokensRealmSource implements TokenLocalSource {
         else
         {
             Log.d(TAG, "Update Token: " + token.getFullName());
+            realmToken.updateTokenInfoIfRequired(token.tokenInfo);
+
             if (token.checkRealmBalanceChange(realmToken))
             {
                 //has token changed?
-                realmToken.setName(token.tokenInfo.name);
-                realmToken.setSymbol(token.tokenInfo.symbol);
                 realmToken.setUpdateTime(token.updateBlancaTime);
-                realmToken.setDecimals(token.tokenInfo.decimals);
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmBalance(realmToken);
                 token.setRealmLastBlock(realmToken);

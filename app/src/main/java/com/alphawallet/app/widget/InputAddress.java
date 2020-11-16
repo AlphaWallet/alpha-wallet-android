@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -22,14 +21,14 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
-import com.alphawallet.app.ui.widget.entity.AddressReady;
-import com.alphawallet.app.ui.widget.entity.ENSHandler2;
+import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
+import com.alphawallet.app.ui.widget.entity.BoxStatus;
+import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
-import static com.alphawallet.app.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -37,7 +36,7 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  */
 public class InputAddress extends RelativeLayout implements ItemClickListener, ENSCallback
 {
-    private final EditText editText;
+    private final AutoCompleteTextView editText;
     private final TextView labelText;
     private final TextView pasteItem;
     private final TextView statusText;
@@ -51,16 +50,16 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private boolean noCam;
     private String imeOptions;
     private boolean handleENS = false;
-    private final ENSHandler2 ensHandler;
+    private final ENSHandler ensHandler;
     private AWalletAlertDialog dialog;
-    private AddressReady addressReadyCallback = null;
+    private AddressReadyCallback addressReadyCallback = null;
 
     public InputAddress(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        inflate(context, R.layout.item_input_address, this);
         getAttrs(context, attrs);
         this.context = context;
-        inflate(context, R.layout.item_input_address_2, this);
 
         labelText = findViewById(R.id.label);
         editText = findViewById(R.id.edit_text);
@@ -75,7 +74,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(context, C.ENS_HISTORY);
             adapterUrl.setListener(this);
-            ensHandler = new ENSHandler2(this, adapterUrl);
+            ensHandler = new ENSHandler(this, adapterUrl);
         }
         else
         {
@@ -112,6 +111,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             handleENS = a.getBoolean(R.styleable.InputView_ens, false);
             imeOptions = a.getString(R.styleable.InputView_imeOptions);
             noCam = a.getBoolean(R.styleable.InputView_nocam, false);
+            boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, true);
+            int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.recipient);
+            findViewById(R.id.layout_header).setVisibility(showHeader ? View.VISIBLE : View.GONE);
+            TextView headerText = findViewById(R.id.text_header);
+            headerText.setText(headerTextId);
         }
         finally
         {
@@ -153,7 +157,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             //QR Scanner
             scanQrIcon.setOnClickListener(v -> {
                 Intent intent = new Intent(context, QRScanningActivity.class);
-                ((Activity) context).startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+                ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
             });
         }
     }
@@ -197,7 +201,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
     }
 
-    public void setErrorStatus(CharSequence errorTxt)
+    public void setError(CharSequence errorTxt)
     {
         statusText.setVisibility(View.GONE);
         setBoxColour(BoxStatus.ERROR);
@@ -271,13 +275,15 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             }
         }
 
+        displayCheckingDialog(false);
         if (addressReadyCallback != null)
         {
             addressReadyCallback.addressReady(address, ensName);
         }
         else
         {
-            throw new RuntimeException("Need to implement AddressReady in your class which implements InputAddress");
+            throw new RuntimeException("Need to implement AddressReady in your class which implements " +
+                    "InputAddress, and set the AddressReady callback: 'inputAddress.setAddressCallback(this);'");
         }
     }
 
@@ -291,7 +297,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             ensHandler.getAddress();
         }
-        else if (!ensHandler.waitingForENS)
+        else if (ensHandler == null || !ensHandler.waitingForENS)
         {
             ENSComplete();
         }
@@ -321,7 +327,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
     public AutoCompleteTextView getEditText()
     {
-        return findViewById(R.id.edit_text);
+        return editText;
     }
 
     public String getStatusText()
@@ -334,7 +340,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         KeyboardUtils.hideKeyboard(this);
     }
 
-    public void setText(String text)
+    public void setAddress(String text)
     {
         if (!TextUtils.isEmpty(text))
         {
@@ -342,15 +348,13 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
     }
 
-    public void setAddressCallback(AddressReady addressReadyCallback)
+    public String getInputText()
     {
-        this.addressReadyCallback = addressReadyCallback;
+        return editText.getText().toString();
     }
 
-    private enum BoxStatus
+    public void setAddressCallback(AddressReadyCallback addressReadyCallback)
     {
-        UNSELECTED,
-        SELECTED,
-        ERROR
+        this.addressReadyCallback = addressReadyCallback;
     }
 }

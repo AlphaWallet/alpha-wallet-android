@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -12,9 +13,7 @@
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_card"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp">
+        android:background="@drawable/background_card">
 
         <LinearLayout
             android:id="@+id/holding_view"
@@ -25,6 +24,8 @@
 
             <LinearLayout
                 android:id="@+id/layout_select_address"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -58,30 +59,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="20dp"
-                    android:fontFamily="@font/font_light"
-                    android:gravity="center"
-                    android:text="@string/generate_payment_request"
-                    android:textColor="@color/text_black"
-                    android:textSize="25sp" />
-
-                <TextView
+                <com.alphawallet.app.widget.InputAmount
+                    android:id="@+id/input_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_light"
-                    android:gravity="center"
-                    android:text="@string/enter_the_requested_amount"
-                    android:textColor="@color/text_black"
-                    android:textSize="16sp" />
-
-                <include layout="@layout/item_input_amount" />
+                    android:layout_marginBottom="@dimen/dp5"
+                    custom:show_header="true"
+                    custom:show_allFunds="false"
+                    custom:label="@string/generate_payment_request"
+                    android:visibility="visible"/>
 
             </LinearLayout>
 

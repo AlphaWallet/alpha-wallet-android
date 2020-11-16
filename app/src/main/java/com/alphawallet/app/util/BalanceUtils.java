@@ -96,6 +96,36 @@ public class BalanceUtils {
         return scaledValue(value, pattern, decimals);
     }
 
+    public static String getScaledValueScientific(BigDecimal value, long decimals)
+    {
+        String returnValue;
+        value = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
+        final NumberFormat formatter = new DecimalFormat("0.####E0");
+        formatter.setRoundingMode(RoundingMode.DOWN);
+        if (value.equals(BigDecimal.ZERO)) //zero balance
+        {
+            returnValue = "0";
+        }
+        else if (value.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
+        {
+            returnValue = formatter.format(value);
+            returnValue = returnValue.replace("E", "e-");
+        }
+        else if (value.compareTo(com.alphawallet.token.tools.Convert.toWei(BigDecimal.TEN, com.alphawallet.token.tools.Convert.Unit.GETHER)) > 0) //too big
+        {
+            returnValue = formatter.format(value);
+            returnValue = returnValue.replace("E", "e+");
+        }
+        else //otherwise display in standard pattern to 4 dp
+        {
+            DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
+            df.setRoundingMode(RoundingMode.DOWN);
+            returnValue = df.format(value);
+        }
+
+        return returnValue;
+    }
+
     public static String getScaledValue(BigDecimal value, long decimals, int precision)
     {
         //form precision

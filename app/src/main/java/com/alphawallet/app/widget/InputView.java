@@ -1,29 +1,44 @@
 package com.alphawallet.app.widget;
 
+import android.app.Activity;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.ui.widget.entity.BoxStatus;
+import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
 public class InputView extends LinearLayout {
     private Context context;
 
-    private TextView label;
-    private TextView error;
-    private EditText editText;
-    private CheckBox togglePassword;
+    private final TextView labelText;
+    private final TextView errorText;
+    private final TextView statusText;
+    private final TextView pasteItem;
+    private final EditText editText;
+    private final RelativeLayout boxLayout;
+    private final ImageButton scanQrIcon;
 
     private int labelResId;
     private int lines;
@@ -34,6 +49,15 @@ public class InputView extends LinearLayout {
     public InputView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
+        inflate(context, R.layout.item_input_view, this);
+
+        labelText = findViewById(R.id.label);
+        errorText = findViewById(R.id.error);
+        editText = findViewById(R.id.edit_text);
+        statusText = findViewById(R.id.status_text);
+        boxLayout = findViewById(R.id.box_layout);
+        scanQrIcon = findViewById(R.id.img_scan_qr);
+        pasteItem = findViewById(R.id.text_paste);
 
         getAttrs(context, attrs);
 
@@ -47,20 +71,20 @@ public class InputView extends LinearLayout {
     }
 
     private void bindViews() {
-        inflate(context, R.layout.layout_input_view, this);
-
-        label = findViewById(R.id.label);
-        label.setText(labelResId);
-        error = findViewById(R.id.error);
-        editText = findViewById(R.id.edit_text);
-        togglePassword = findViewById(R.id.toggle_password);
-        togglePassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                editText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-            } else {
-                editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+        labelText.setText(labelResId);
+        //Paste
+        pasteItem.setOnClickListener(v -> {
+            //from clipboard
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+            try
+            {
+                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
+                editText.setText(textToPaste);
             }
-            editText.setSelection(editText.getText().length());
+            catch (Exception e)
+            {
+                Log.e(getClass().getSimpleName(), e.getMessage(), e);
+            }
         });
     }
 
@@ -76,6 +100,23 @@ public class InputView extends LinearLayout {
             lines = a.getInt(R.styleable.InputView_lines, 1);
             inputType = a.getString(R.styleable.InputView_inputType);
             imeOptions = a.getString(R.styleable.InputView_imeOptions);
+            boolean noCam = a.getBoolean(R.styleable.InputView_nocam, true);
+            boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, false);
+            boolean showPaste = a.getBoolean(R.styleable.InputView_show_paste, false);
+            int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.token_name);
+            findViewById(R.id.layout_header).setVisibility(showHeader ? View.VISIBLE : View.GONE);
+            TextView headerText = findViewById(R.id.text_header);
+            headerText.setText(headerTextId);
+            scanQrIcon.setVisibility(noCam ? View.GONE : View.VISIBLE);
+            pasteItem.setVisibility(showPaste ? View.VISIBLE : View.GONE);
+
+            if (!noCam)
+            {
+                scanQrIcon.setOnClickListener(v -> {
+                    Intent intent = new Intent(context, QRScanningActivity.class);
+                    ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
+                });
+            }
         } finally {
             a.recycle();
         }
@@ -84,18 +125,6 @@ public class InputView extends LinearLayout {
     private void setInputType() {
         if (inputType != null) {
             switch (inputType) {
-                case "textPassword": {
-                    editText.setInputType(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
-                    togglePassword.setVisibility(View.VISIBLE);
-                    editText.setPadding(
-                            Utils.dp2px(context, 15),
-                            Utils.dp2px(context, 5),
-                            Utils.dp2px(context, 50),
-                            Utils.dp2px(context, 5)
-                    );
-                    editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    break;
-                }
                 case "number": {
                     editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
                     break;
@@ -143,23 +172,62 @@ public class InputView extends LinearLayout {
 
     public void setError(int resId) {
         if (resId == R.string.empty) {
-            error.setText(resId);
-            error.setVisibility(View.GONE);
+            errorText.setText(resId);
+            errorText.setVisibility(View.GONE);
         } else {
-            error.setText(resId);
-            error.setVisibility(View.VISIBLE);
+            errorText.setText(resId);
+            errorText.setVisibility(View.VISIBLE);
         }
     }
 
     public void setError(CharSequence message) {
         if (message == null) {
-            error.setVisibility(View.GONE);
+            errorText.setVisibility(View.GONE);
         } else if (message.toString().isEmpty()) {
-            error.setText(message);
-            error.setVisibility(View.GONE);
+            errorText.setText(message);
+            errorText.setVisibility(View.GONE);
         } else {
-            error.setText(message);
-            error.setVisibility(View.VISIBLE);
+            errorText.setText(message);
+            errorText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void setStatus(CharSequence statusTxt)
+    {
+        if (TextUtils.isEmpty(statusTxt))
+        {
+            statusText.setVisibility(View.GONE);
+            statusText.setText(R.string.empty);
+            if (errorText.getVisibility() == View.VISIBLE) //cancel error
+            {
+                setBoxColour(BoxStatus.SELECTED);
+            }
+        }
+        else
+        {
+            statusText.setText(statusTxt);
+            statusText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setBoxColour(BoxStatus status)
+    {
+        switch (status)
+        {
+            case ERROR:
+                boxLayout.setBackgroundResource(R.drawable.background_input_error);
+                labelText.setTextColor(context.getColor(R.color.danger));
+                break;
+            case UNSELECTED:
+                boxLayout.setBackgroundResource(R.drawable.background_password_entry);
+                labelText.setTextColor(context.getColor(R.color.dove));
+                errorText.setVisibility(View.GONE);
+                break;
+            case SELECTED:
+                boxLayout.setBackgroundResource(R.drawable.background_input_selected);
+                labelText.setTextColor(context.getColor(R.color.azure));
+                errorText.setVisibility(View.GONE);
+                break;
         }
     }
 }

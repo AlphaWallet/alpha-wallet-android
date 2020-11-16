@@ -1,16 +1,11 @@
 package com.alphawallet.app.util;
 
-import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.token.entity.ChainSpec;
-import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MagicLinkInfo;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.net.URL;
 import java.util.ArrayList;

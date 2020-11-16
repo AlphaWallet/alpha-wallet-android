@@ -22,7 +22,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.ui.widget.entity.AddressReady;
+import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
@@ -39,7 +39,7 @@ import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
-public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReady
+public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback
 {
     @Inject
     WalletActionsViewModelFactory walletActionsViewModelFactory;
@@ -200,7 +200,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         walletSelectedIcon.setImageResource(R.drawable.ic_copy);
 
-        inputAddress.setText(wallet.ENSname);
+        inputAddress.setAddress(wallet.ENSname);
         inputAddress.setAddressCallback(this);
     }
 

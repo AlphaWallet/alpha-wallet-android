@@ -6,25 +6,26 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.service.TokensService;
 
 public class MyAddressViewModel extends BaseViewModel {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final TokenRepositoryType tokenRepository;
+    private final TokensService tokenService;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
 
     MyAddressViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            TokenRepositoryType tokenRepository) {
+            TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.tokenRepository = tokenRepository;
+        this.tokenService = tokensService;
     }
 
-    public TokenRepositoryType getTokenRepository() {
-        return tokenRepository;
+    public TokensService getTokenService() {
+        return tokenService;
     }
 
     public EthereumNetworkRepositoryType getEthereumNetworkRepository() {

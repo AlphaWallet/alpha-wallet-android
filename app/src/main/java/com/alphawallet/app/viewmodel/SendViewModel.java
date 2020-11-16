@@ -2,6 +2,8 @@ package com.alphawallet.app.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -19,6 +21,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
 
@@ -58,18 +61,13 @@ public class SendViewModel extends BaseViewModel {
 
     public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
 
-    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails, int chainId) {
-        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails, chainId);
+    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, BigInteger gasPrice, String ensDetails, int chainId) {
+        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, gasPrice, ensDetails, chainId);
     }
 
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
     {
         myAddressRouter.open(ctx, wallet, token);
-    }
-
-    public String getChainName(int chainId)
-    {
-        return networkRepository.getNameById(chainId);
     }
 
     public NetworkInfo getNetworkInfo(int chainId)
@@ -104,19 +102,9 @@ public class SendViewModel extends BaseViewModel {
                 .subscribe(finalisedToken::postValue, this::onError);
     }
 
-    public void setChainId(int chainId)
-    {
-        gasService.fetchGasPriceForChain(chainId);
-    }
-
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
-    }
-
-    public Realm getRealmInstance(Wallet wallet)
-    {
-        return tokensService.getRealmInstance(wallet);
     }
 
     public TokensService getTokenService()

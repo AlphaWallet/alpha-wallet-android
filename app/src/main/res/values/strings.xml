@@ -693,4 +693,7 @@
     <string name="unable_to_get_biometrics">Unable to obtain Biometric unlock</string>
     <string name="all_funds">All Funds</string>
     <string name="recipient_address">Recipient\'s Address</string>
+
+    <string name="bracketed" translatable="false">(%1$s)</string>
+    <string name="ens_resolved" translatable="false">ENS: %1$s</string>
 </resources>

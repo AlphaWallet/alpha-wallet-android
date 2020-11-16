@@ -36,10 +36,14 @@
                 android:textColor="@color/text_black"
                 android:textSize="25sp" />
 
-            <com.alphawallet.app.widget.InputAddressView
+            <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_address_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                custom:hint="@string/contract_address"
+                custom:label="@string/contract_address"
+                custom:show_header="false"
+                custom:ens="false"
                 android:layout_marginBottom="15dp" />
 
             <com.alphawallet.app.widget.InputView
@@ -47,7 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
-                custom:label="@string/hint_contract_symbol" />
+                custom:label="@string/hint_contract_symbol"/>
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_decimal"
@@ -121,18 +125,11 @@
         </LinearLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/save"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/selector_button"
-        android:fontFamily="@font/font_regular"
-        android:text="@string/action_save"
-        android:textAllCaps="false"
-        android:textColor="@color/button_text_color"
-        android:textSize="20sp" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
 
     <LinearLayout
         android:id="@+id/layout_progress"

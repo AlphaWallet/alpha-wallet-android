@@ -3,13 +3,11 @@ package com.alphawallet.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -17,32 +15,35 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.ui.widget.entity.ENSHandler;
-import com.alphawallet.app.ui.widget.entity.ItemClickListener;
+import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
+import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
-import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SendViewModel;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputAmount;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -50,39 +51,29 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
-public class SendActivity extends BaseActivity implements ItemClickListener, AmountUpdateCallback, ENSCallback
+public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback
 {
-    private static final int BARCODE_READER_REQUEST_CODE = 1;
+    private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
     @Inject
     SendViewModelFactory sendViewModelFactory;
     SendViewModel viewModel;
-    @Inject
-    protected TokenRepositoryType tokenRepository;
 
-    private String myAddress;
-    private int decimals;
-    private String symbol;
     private Wallet wallet;
     private Token token;
-    private String contractAddress;
-    private ENSHandler ensHandler;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private AWalletAlertDialog dialog;
-    private TextView chainName;
-    private int currentChain;
 
-    private ImageButton scanQrImageView;
-    private TextView tokenBalanceText;
-    private TextView tokenSymbolText;
-    private AutoCompleteTextView toAddressEditText;
-    private TextView pasteText;
-    private Button nextBtn;
-    private String currentAmount;
     private QRResult currentResult;
 
     private InputAmount amountInput;
+    private InputAddress addressInput;
+    private String sendAddress;
+    private String ensAddress;
+    private BigDecimal sendAmount;
+    private BigDecimal sendGasPrice;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,30 +84,21 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
 
         viewModel = new ViewModelProvider(this, sendViewModelFactory)
                 .get(SendViewModel.class);
-        handler = new Handler();
 
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-
-        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
-        symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
-        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
+        String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
-        currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
-        myAddress = wallet.address;
+        int currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
 
-        if (!checkTokenValidity()) { return; }
+        sendAddress = null;
+        sendGasPrice = BigDecimal.ZERO;
+        sendAmount = NEGATIVE;
+
+        if (!checkTokenValidity(currentChain, contractAddress)) { return; }
 
         setTitle(getString(R.string.action_send_tkn, token.getShortName()));
         setupTokenContent();
-        //initViews();
-        //setupAddressEditField();
-
-        if (token != null)
-        {
-            //amountInput = new AmountEntryItem(this, tokenRepository, token); //ticker is used automatically now
-        }
 
         if (result != null)
         {
@@ -125,7 +107,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         }
     }
 
-    private boolean checkTokenValidity()
+    private boolean checkTokenValidity(int currentChain, String contractAddress)
     {
         if (token == null || token.tokenInfo == null)
         {
@@ -142,72 +124,6 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         return (token != null);
     }
 
-    /*private void initViews() {
-
-        toAddressEditText = findViewById(R.id.edit_to_address);
-
-        pasteText = findViewById(R.id.paste);
-        pasteText.setOnClickListener(v -> {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            try {
-                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
-                toAddressEditText.setText(textToPaste);
-            } catch (Exception e) {
-                Log.e(SendActivity.class.getSimpleName(), e.getMessage(), e);
-            }
-        });
-
-        nextBtn = findViewById(R.id.button_next);
-        nextBtn.setOnClickListener(v -> {
-            onNext();
-        });
-
-        scanQrImageView = findViewById(R.id.img_scan_qr);
-        scanQrImageView.setOnClickListener(v -> {
-            Intent intent = new Intent(this, QRScanningActivity.class);
-            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-        });
-    }
-
-    private void setupAddressEditField() {
-        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY_PAIR);
-        adapterUrl.setListener(this);
-        ensHandler = new ENSHandler(this, adapterUrl);
-        viewModel.tokenFinalised().observe(this, this::resumeEIP681);
-    }
-
-    private void resumeEIP681(Token t)
-    {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        token = t;
-        setupTokenContent();
-        validateEIP681Request(currentResult, false);
-        currentResult = null;
-    }
-
-    private void onNext() {
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
-        boolean isValid = amountInput.checkValidAmount();
-
-        if (isBalanceZero(currentAmount)) {
-            amountInput.setError(R.string.error_zero_balance);
-            isValid = false;
-        }
-        if (!isBalanceEnough(currentAmount)) {
-            amountInput.setError(R.string.error_insufficient_funds);
-            isValid = false;
-        }
-
-        String to = ensHandler.getAddressFromEditView();
-        if (to == null) return;
-
-        if (isValid) {
-            BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
-            boolean sendingTokens = !token.isEthereum();
-            viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.getSymbol(), sendingTokens, ensHandler.getEnsName(), currentChain);
-        }
-    }*/
-
     private void onBack() {
         finish();
     }
@@ -218,16 +134,17 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                onBack();
-                break;
-            }
-            case R.id.action_qr:
-                viewModel.showContractInfo(this, wallet, token);
-                break;
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            onBack();
         }
+        else if (item.getItemId() == R.id.action_qr)
+        {
+            viewModel.showContractInfo(this, wallet, token);
+        }
+
         return false;
     }
 
@@ -238,7 +155,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BARCODE_READER_REQUEST_CODE) {
+        if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
                 case FullScannerFragment.SUCCESS:
@@ -261,7 +178,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                             switch (result.getProtocol())
                             {
                                 case "address":
-                                    toAddressEditText.setText(extracted_address);
+                                    addressInput.setAddress(extracted_address);
                                     break;
                                 case "ethereum":
                                     //EIP681 protocol
@@ -345,20 +262,12 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
             displayScanError();
             return;
         }
-        else
+        else if (result.type != EIP681Type.ADDRESS && result.chainId != token.tokenInfo.chainId && token.isEthereum())
         {
-            //change chain if this is a scan from outside send page
-            if (overrideNetwork)
-            {
-                changeChain(result.chainId);
-            }
-            else if (info.chainId != currentChain)
-            {
-                //Display chain change warning
-                currentResult = result;
-                showChainChangeDialog(result.chainId);
-                return;
-            }
+            //Display chain change warning
+            currentResult = result;
+            showChainChangeDialog(result.chainId);
+            return;
         }
 
         TextView sendText = findViewById(R.id.text_payment_request);
@@ -366,7 +275,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         switch (result.type)
         {
             case ADDRESS:
-                toAddressEditText.setText(result.getAddress());
+                addressInput.setAddress(result.getAddress());
                 break;
 
             case PAYMENT:
@@ -375,10 +284,9 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                 sendText.setVisibility(View.VISIBLE);
                 sendText.setText(R.string.transfer_request);
                 token = viewModel.getToken(result.chainId, wallet.address);
-                toAddressEditText.setText(result.getAddress());
-                //amountInput = new AmountEntryItem(this, tokenRepository, token);
-                //amountInput.setAmountText(ethAmount);
-                //amountInput.setAmount(ethAmount);
+                addressInput.setAddress(result.getAddress());
+                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+                amountInput.setAmount(ethAmount);
                 setupTokenContent();
                 break;
 
@@ -395,22 +303,21 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                     //ERC20 send request
                     token = resultToken;
                     setupTokenContent();
+                    amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
                     //convert token amount into scaled value
                     String convertedAmount = Convert.getConvertedValue(result.tokenAmount, token.tokenInfo.decimals);
-                    // = new AmountEntryItem(this, tokenRepository, resultToken);
-                    //amountInput.setAmountText(convertedAmount);
-                    toAddressEditText.setText(result.functionToAddress);
+                    amountInput.setAmount(convertedAmount);
+                    addressInput.setAddress(result.functionToAddress);
                     sendText.setVisibility(View.VISIBLE);
                     sendText.setText(getString(R.string.token_transfer_request, resultToken.getFullName()));
                 }
+                //TODO: Handle NFT eg ERC721
                 break;
 
             case FUNCTION_CALL:
                 //Generic function call, not handled yet
                 displayScanError(R.string.toast_qr_code_no_address, getString(R.string.no_tokens));
-                //amountInput = new AmountEntryItem(this, tokenRepository, null);
-                //amountInput.setAmountText(result.functionDetail);
-                if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
+                if (result.functionToAddress != null) addressInput.setAddress(result.functionToAddress);
                 break;
 
             default:
@@ -427,13 +334,18 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         dialog.setMessage(R.string.change_chain_message);
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> {
-            changeChain(chainId);
+            //we should change the chain.
+            token = viewModel.getToken(chainId, token.getAddress());
+            amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
             dialog.dismiss();
             validateEIP681Request(currentResult, false);
         });
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setSecondaryButtonListener(v -> {
             dialog.dismiss();
+            //proceed without changing the chain
+            currentResult.chainId = token.tokenInfo.chainId;
+            validateEIP681Request(currentResult, false);
         });
         dialog.show();
     }
@@ -468,117 +380,80 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         }
         super.onDestroy();
         if (handler != null) handler.removeCallbacksAndMessages(null);
-        //if (amountInput != null) amountInput.onClear();
-    }
-
-
-    private boolean isBalanceZero(String balance)
-    {
-        try
-        {
-            /*
-            While checking 0.00 value which is passed while using Fiat currency,
-            BigDecimal.ZERO fails to send accurate value.
-            Using .doubleValue(), converts to actual amount and compare without scale.
-             */
-            BigDecimal amount = new BigDecimal(balance);
-            return BigDecimal.ZERO.doubleValue() == amount.doubleValue();
-        }
-        catch (Exception e)
-        {
-            return true;
-        }
-    }
-
-    private boolean isBalanceEnough(String eth)
-    {
-        try
-        {
-            //Needs to take into account decimal of token
-            int decimals = (token != null && token.tokenInfo != null) ? token.tokenInfo.decimals : 18;
-            BigDecimal amount = new BigDecimal(BalanceUtils.baseToSubunit(eth, decimals));
-            return (token.balance.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
+        if (amountInput != null) amountInput.onDestroy();
     }
 
     private void setupTokenContent() {
         amountInput = findViewById(R.id.input_amount);
-        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), viewModel.getRealmInstance(wallet));
-        /*tokenBalanceText = findViewById(R.id.balance_eth);
-        tokenSymbolText = findViewById(R.id.symbol);
-        chainName = findViewById(R.id.text_chain_name);
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        addressInput = findViewById(R.id.input_address);
+        addressInput.setAddressCallback(this);
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        functionBar.revealButtons();
+        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
+        functionBar.setupFunctions(this, functions);
+    }
 
-        String symbol = token.getSymbol();
-
-        tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
-                ? symbol
-                : symbol.length() > 0 ? getString(R.string.token_name, token.tokenInfo.name, symbol)
-                    : token.tokenInfo.name);
-
-        TokenInfo tokenInfo = token.tokenInfo;
-        BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
-        BigDecimal ethBalance = tokenInfo.decimals > 0
-                ? token.balance.divide(decimalDivisor, Token.TOKEN_BALANCE_PRECISION, RoundingMode.DOWN).stripTrailingZeros() : token.balance;
-        String value = getEthString(ethBalance.doubleValue());
-        tokenBalanceText.setText(value);
-
-        tokenBalanceText.setVisibility(View.VISIBLE);
-        if (token != null)
+    @Override
+    public void amountReady(BigDecimal value, BigDecimal gasPrice)
+    {
+        //validate that we have sufficient balance
+        if (token.balance.subtract(value).compareTo(BigDecimal.ZERO) >= 0)
         {
-            Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
-            viewModel.setChainId(token.tokenInfo.chainId);
-        }*/
-    }
-
-    @Override
-    public void onItemClick(String url) {
-        ensHandler.handleHistoryItemClick(url);
-    }
-
-    @Override
-    public void amountChanged(String newAmount)
-    {
-        currentAmount = newAmount;
-    }
-
-    private void changeChain(int chainId)
-    {
-        NetworkInfo info = viewModel.getNetworkInfo(chainId);
-        if (info == null) return;
-        Utils.setChainColour(chainName, chainId);
-        chainName.setText(info.name);
-        currentChain = chainId;
-        //amountInput.onClear();
-        viewModel.setChainId(chainId);
-    }
-
-    @Override
-    public void ENSComplete()
-    {
-        //onNext();
-    }
-
-    @Override
-    public void displayCheckingDialog(boolean shouldShow)
-    {
-        if (shouldShow)
-        {
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.NONE);
-            dialog.setTitle(R.string.title_dialog_check_ens);
-            dialog.setProgressMode();
-            dialog.setCancelable(false);
-            dialog.show();
+            sendAmount = value;
+            sendGasPrice = gasPrice;
+            checkConfirm();
         }
-        else if (dialog != null && dialog.isShowing())
+        else
         {
-            dialog.dismiss();
+            sendAmount = NEGATIVE;
+            //insufficient balance
+            amountInput.showError(true, R.string.error_insufficient_funds);
+        }
+    }
+
+    @Override
+    public void handleClick(String action, int actionId)
+    {
+        //clicked the next button
+        if (actionId == R.string.action_next)
+        {
+            KeyboardUtils.hideKeyboard(getCurrentFocus());
+            amountInput.getInputAmount();
+            addressInput.getAddress(true);
+        }
+    }
+
+    @Override
+    public void addressReady(String address, String ensName)
+    {
+        sendAddress = address;
+        ensAddress = ensName;
+        if (TextUtils.isEmpty(address) || !isValidAddress(address))
+        {
+            //show address error
+            addressInput.setError(getString(R.string.error_invalid_address));
+        }
+        else
+        {
+            checkConfirm();
+        }
+    }
+
+    /**
+     * Called to check if we're ready to send user to confirm screen / activity sheet popup
+     *
+     */
+    private void checkConfirm()
+    {
+        if (sendAmount.compareTo(NEGATIVE) > 0 && sendAddress != null && isValidAddress(sendAddress))
+        {
+            //ready to go to the next screen
+            boolean sendingTokens = !token.isEthereum();
+            viewModel.openConfirmation(this, sendAddress, sendAmount.toBigInteger(), token.getAddress(), token.tokenInfo.decimals, token.getSymbol(),
+                    sendingTokens, sendGasPrice.toBigInteger(), ensAddress, token.tokenInfo.chainId);
+            sendAddress = null;
+            sendAmount = NEGATIVE;
         }
     }
 }

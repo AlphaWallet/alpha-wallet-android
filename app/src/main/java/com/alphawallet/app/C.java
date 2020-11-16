@@ -12,6 +12,8 @@ public abstract class C {
     public static final int UPDATE_CURRENCY = 1014;
     public static final int REQUEST_UNIVERSAL_SCAN = 1015;
 
+    public static final int BARCODE_READER_REQUEST_CODE = 1;
+
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
     public static final String POA_NETWORK_NAME = "POA";

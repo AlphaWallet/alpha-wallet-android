@@ -77,12 +77,5 @@ public class TokenInfo implements Parcelable {
         layout.decimalsInputView.setText(String.valueOf(decimals));
         layout.nameInputview.setText(name);
         layout.ticketLayout.setVisibility(View.GONE);
-
-        if (layout.chainName != null)
-        {
-            layout.chainName.setVisibility(View.VISIBLE);
-            layout.chainName.setText(chainName);
-            Utils.setChainColour(layout.chainName, chainId);
-        }
     }
 }

@@ -155,9 +155,8 @@ public class WalletDataRealmSource {
     {
         if (d != null)
         {
-            wallet.ENSname = d.getENSName();
+            wallet.name = d.getENSName();
             wallet.balance = balance(d);
-            wallet.name = d.getName();
         }
     }
 
@@ -185,9 +184,8 @@ public class WalletDataRealmSource {
 
     private Wallet convertWallet(RealmWalletData data) {
         Wallet wallet = new Wallet(data.getAddress());
-        wallet.ENSname = data.getENSName();
+        wallet.name = data.getENSName();
         wallet.balance = data.getBalance();
-        wallet.name = data.getName();
         return wallet;
     }
 
@@ -203,15 +201,13 @@ public class WalletDataRealmSource {
 
                     if (realmWallet == null) {
                         realmWallet = realm.createObject(RealmWalletData.class, wallet.address);
-                        realmWallet.setENSName(wallet.ENSname);
+                        realmWallet.setENSName(wallet.name);
                         realmWallet.setBalance(wallet.balance);
-                        realmWallet.setName(wallet.name);
                     } else {
                         if (realmWallet.getBalance() == null || !wallet.balance.equals(realmWallet.getENSName()))
                             realmWallet.setBalance(wallet.balance);
-                        if (wallet.ENSname != null && (realmWallet.getENSName() == null || !wallet.ENSname.equals(realmWallet.getENSName())))
-                            realmWallet.setENSName(wallet.ENSname);
-                        realmWallet.setName(wallet.name);
+                        if (wallet.name != null && (realmWallet.getENSName() == null || !wallet.name.equals(realmWallet.getENSName())))
+                            realmWallet.setENSName(wallet.name);
                     }
                 }
                 realm.commitTransaction();
@@ -245,7 +241,7 @@ public class WalletDataRealmSource {
                 RealmWalletData realmWallet = realm.where(RealmWalletData.class)
                         .equalTo("address", address)
                         .findFirst();
-                if (realmWallet != null) name = realmWallet.getName();
+                if (realmWallet != null) name = realmWallet.getENSName();
             } catch (Exception e) {
                 Log.e(TAG, "getName: " + e.getMessage(), e);
             }
@@ -425,8 +421,7 @@ public class WalletDataRealmSource {
                         .equalTo("address", wallet.address)
                         .findFirst();
                 if (item == null) item = realm.createObject(RealmWalletData.class, wallet.address);
-                item.setName(wallet.name);
-                item.setENSName(wallet.ENSname);
+                item.setENSName(wallet.name);
                 item.setBalance(wallet.balance);
                 realm.insertOrUpdate(item);
             });

@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 public class Wallet implements Parcelable {
     public final String address;
     public String balance;
-    public String ENSname;
     public String name;
     public WalletType type;
     public long lastBackupTime;
@@ -23,7 +22,6 @@ public class Wallet implements Parcelable {
 	public Wallet(String address) {
 		this.address = address;
 		this.balance = "-";
-		this.ENSname = "";
 		this.name = "";
 		this.type = WalletType.NOT_DEFINED;
 		this.lastBackupTime = 0;
@@ -36,7 +34,6 @@ public class Wallet implements Parcelable {
 	{
 		address = in.readString();
 		balance = in.readString();
-		ENSname = in.readString();
 		name = in.readString();
 		int t = in.readInt();
 		type = WalletType.values()[t];
@@ -78,7 +75,6 @@ public class Wallet implements Parcelable {
 	{
 		parcel.writeString(address);
 		parcel.writeString(balance);
-		parcel.writeString(ENSname);
 		parcel.writeString(name);
 		parcel.writeInt(type.ordinal());
 		parcel.writeLong(lastBackupTime);

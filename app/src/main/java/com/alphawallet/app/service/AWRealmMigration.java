@@ -119,6 +119,13 @@ public class AWRealmMigration implements RealmMigration
             if (!realmToken.hasField("visibilityChanged")) realmToken.addField("visibilityChanged", boolean.class);
             oldVersion++;
         }
+
+        if (oldVersion == 15)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmWalletData");
+            if (realmToken.hasField("name")) realmToken.removeField("name");
+            oldVersion++;
+        }
     }
 
     @Override

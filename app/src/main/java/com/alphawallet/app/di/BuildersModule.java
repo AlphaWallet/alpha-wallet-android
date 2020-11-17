@@ -18,6 +18,7 @@ import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.NewSettingsFragment;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.RedeemSignatureDisplayActivity;
+import com.alphawallet.app.ui.RenameWalletActivity;
 import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
@@ -177,4 +178,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletConnectModule.class)
 	abstract WalletConnectSessionActivity bindWalletConnectSessionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletActionsModule.class)
+	abstract RenameWalletActivity bindRenameWalletActivity();
 }

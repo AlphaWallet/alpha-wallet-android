@@ -676,4 +676,5 @@
     <string name="unable_to_get_biometrics">No se puede obtener el desbloqueo Biométrico</string>
     <string name="all_funds">Todos los fondos</string>
     <string name="recipient_address">Dirección del destinatario</string>
+    <string name="title_rename_wallet">Rename This Wallet</string>
 </resources>

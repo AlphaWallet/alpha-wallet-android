@@ -348,6 +348,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
     }
 
+    public void setCursorAtLast()
+    {
+        editText.setSelection(editText.getText().length());
+    }
+
     public String getInputText()
     {
         return editText.getText().toString();

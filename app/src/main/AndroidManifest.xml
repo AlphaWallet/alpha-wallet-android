@@ -307,6 +307,10 @@
         <activity
             android:name=".ui.WalletConnectSessionActivity"
             android:label="WalletConnect Sessions" />
+
+        <activity
+            android:name=".ui.RenameWalletActivity"
+            android:label="@string/title_rename_wallet" />
     </application>
 
 </manifest>

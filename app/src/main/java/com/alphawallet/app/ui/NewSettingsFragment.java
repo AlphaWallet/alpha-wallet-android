@@ -59,6 +59,7 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView advancedSetting;
     private SettingsItemView supportSetting;
     private SettingsItemView walletConnectSetting;
+    private SettingsItemView nameWallet;
 
     private LinearLayout layoutBackup;
     private View warningSeparator;
@@ -191,6 +192,13 @@ public class NewSettingsFragment extends BaseFragment {
                         .withTitle(R.string.title_support)
                         .withListener(this::onSupportSettingClicked)
                         .build();
+
+        nameWallet =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_name_wallet)
+                        .withTitle(R.string.title_rename_wallet)
+                        .withListener(this::onRenameWalletSettingClicked)
+                        .build();
     }
 
     private void addSettingsToLayout() {
@@ -202,6 +210,8 @@ public class NewSettingsFragment extends BaseFragment {
 
         if (CustomViewSettings.canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
+
+        walletSettingsLayout.addView(nameWallet, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
 
@@ -406,6 +416,14 @@ public class NewSettingsFragment extends BaseFragment {
 
     private void onSupportSettingClicked() {
         Intent intent = new Intent(getActivity(), SupportSettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void onRenameWalletSettingClicked() {
+        Intent intent = new Intent(getActivity(), RenameWalletActivity.class);
+        intent.putExtra("wallet", wallet);
+        intent.putExtra("walletCount", 0);
+        intent.putExtra("isNewWallet", true);
         startActivity(intent);
     }
 

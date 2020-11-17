@@ -22,13 +22,11 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.SettingsItemView;
 
 import javax.inject.Inject;
@@ -39,7 +37,7 @@ import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
-public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback
+public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener
 {
     @Inject
     WalletActionsViewModelFactory walletActionsViewModelFactory;
@@ -54,7 +52,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private ImageView walletSelectedIcon;
     private SettingsItemView deleteWalletSetting;
     private SettingsItemView backUpSetting;
-    private InputAddress inputAddress;
     private LinearLayout successOverlay;
     private AWalletAlertDialog aDialog;
     private final Handler handler = new Handler();
@@ -167,7 +164,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         deleteWalletSetting = findViewById(R.id.delete);
         backUpSetting = findViewById(R.id.setting_backup);
         walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
-        inputAddress = findViewById(R.id.input_ens);
         walletSelectedIcon.setOnClickListener(this);
 
         walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
@@ -175,8 +171,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         walletBalance.setText(wallet.balance);
         walletBalanceCurrency.setText(wallet.balanceSymbol);
 
-        if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
-            walletNameText.setText(wallet.ENSname);
+        if (wallet.name != null && !wallet.name.isEmpty()) {
+            walletNameText.setText(wallet.name);
             walletNameText.setVisibility(View.VISIBLE);
             walletAddressSeparator.setVisibility(View.VISIBLE);
         } else {
@@ -199,9 +195,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         }
 
         walletSelectedIcon.setImageResource(R.drawable.ic_copy);
-
-        inputAddress.setAddress(wallet.ENSname);
-        inputAddress.setAddressCallback(this);
     }
 
     private void onDeleteWalletSettingClicked() {
@@ -319,18 +312,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     @Override
-    public void onBackPressed() {
-        if (inputAddress == null)
-        {
-            addressReady(null, null);
-        }
-        else
-        {
-            inputAddress.getAddress(false); //fetch the address and ENS name from the input view. Note - if ENS is still finishing this skips the waiting
-        }
-    }
-
-    @Override
     public void run() {
         if (successOverlay.getAlpha() > 0) {
             successOverlay.animate().alpha(0.0f).setDuration(500);
@@ -356,27 +337,5 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         clipboard.setPrimaryClip(clip);
 
         Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void addressReady(String address, String ensName)
-    {
-        //update ENS name if address matches and either there's no ENS name or it's a different ENS name
-        //(user could have multiple ENS names and wants their wallet to be labelled with a different one)
-        if (!TextUtils.isEmpty(address)
-                && wallet.address.equalsIgnoreCase(address)
-                && !TextUtils.isEmpty(ensName)
-                && (TextUtils.isEmpty(wallet.ENSname) || !ensName.equalsIgnoreCase(wallet.ENSname))) //Wallet ENS currently empty or new ENS name is different
-        {
-            wallet.ENSname = ensName;
-            //update database
-            viewModel.storeWallet(wallet);
-        }
-
-        if (isNewWallet) {
-            viewModel.showHome(this);
-        } else {
-            finish();
-        }
     }
 }

@@ -696,4 +696,5 @@
 
     <string name="bracketed" translatable="false">(%1$s)</string>
     <string name="ens_resolved" translatable="false">ENS: %1$s</string>
+    <string name="title_rename_wallet">Rename This Wallet</string>
 </resources>

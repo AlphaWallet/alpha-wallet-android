@@ -676,4 +676,5 @@
     <string name="unable_to_get_biometrics">无法获得生物识别解锁</string>
     <string name="all_funds">所有基金</string>
     <string name="recipient_address">接收者的地址</string>
+    <string name="title_rename_wallet">Rename This Wallet</string>
 </resources>

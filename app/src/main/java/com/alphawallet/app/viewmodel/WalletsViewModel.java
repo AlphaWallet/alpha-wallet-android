@@ -175,7 +175,7 @@ public class WalletsViewModel extends BaseViewModel
         disposable = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensResolver.resolveEnsName(wallet.address)
-                        .map(ensName -> { wallet.ENSname = ensName; return wallet;})
+                        .map(ensName -> { wallet.name = ensName; return wallet;})
                         .flatMap(fetchWalletsInteract::updateWalletData)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())

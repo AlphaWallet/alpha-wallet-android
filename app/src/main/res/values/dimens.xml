@@ -49,6 +49,7 @@
     <dimen name="dp23">21dp</dimen>
     <dimen name="dp24">22dp</dimen>
     <dimen name="dp25">23dp</dimen>
+    <dimen name="dp30">28dp</dimen>
 
     <!-- Collectible Grid Item -->
     <dimen name="grid_icon_height">70dp</dimen>

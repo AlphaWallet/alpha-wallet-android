@@ -676,4 +676,10 @@
     <string name="unable_to_get_biometrics">No se puede obtener el desbloqueo Biométrico</string>
     <string name="all_funds">Todos los fondos</string>
     <string name="recipient_address">Dirección del destinatario</string>
+    <string name="confirm_transaction">Confirmar Transacción</string>
+    <string name="balance">Saldo</string>
+    <string name="speed_average">Velocidad media</string>
+    <string name="speed_rapid">velocidad rápida</string>
+    <string name="speed_fast">rápida velocidad</string>
+    <string name="speed_slow">Velocidad lenta</string>
 </resources>

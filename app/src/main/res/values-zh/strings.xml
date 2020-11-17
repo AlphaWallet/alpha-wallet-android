@@ -676,4 +676,10 @@
     <string name="unable_to_get_biometrics">无法获得生物识别解锁</string>
     <string name="all_funds">所有基金</string>
     <string name="recipient_address">接收者的地址</string>
+    <string name="confirm_transaction">确认交易</string>
+    <string name="balance">余额</string>
+    <string name="speed_average">平均速度</string>
+    <string name="speed_rapid">快速的速度</string>
+    <string name="speed_fast">速度快</string>
+    <string name="speed_slow">速度慢</string>
 </resources>

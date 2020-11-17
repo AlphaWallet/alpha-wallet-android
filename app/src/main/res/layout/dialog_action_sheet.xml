@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/background_card">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:contentDescription="@string/action_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp16"
+            android:padding="5dp"
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:src="@drawable/ic_close" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/image_close"
+            android:layout_toStartOf="@id/logo"
+            android:text="@string/confirm_transaction"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_semibold"
+            android:layout_centerVertical="true"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="@dimen/dp8"
+            android:layout_marginBottom="@dimen/dp8"
+            android:textSize="@dimen/sp20"/>
+
+        <ImageView
+            android:id="@+id/logo"
+            android:contentDescription="@string/app_name"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:layout_marginEnd="10dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.1"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/balance"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp17"/>
+
+        <TextView
+            android:id="@+id/text_balance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.2"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            tools:text="35.4236 ETH"
+            android:textSize="@dimen/sp20"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="@dimen/dp16">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1.1"/>
+
+        <TextView
+            android:id="@+id/text_new_balance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.2"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            tools:text="(New: 31.1818 ETH)"
+            android:textSize="@dimen/sp17"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.1"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/speed_gas"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:lines="1"
+            android:gravity="start"
+            android:textSize="@dimen/sp17"/>
+
+        <TextView
+            android:id="@+id/text_speed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.2"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_regular"
+            android:text="@string/speed_average"
+            android:gravity="start"
+            android:textSize="@dimen/sp20"/>
+
+        <LinearLayout
+            android:id="@+id/edit_click_layer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="0.6"
+            android:background="@color/transparent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:textColor="@color/azure"
+                android:lines="1"
+                android:textSize="@dimen/sp17"
+                android:text="@string/edit"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="@dimen/dp16">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/text_time_estimate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.4"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            tools:text="< 0.003 ETH ($0.55 USD)≈2 minutes"
+            android:textSize="@dimen/sp17"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:layout_marginBottom="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.1"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/recipient"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp17"/>
+
+        <TextView
+            android:id="@+id/text_recipient"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.2"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            tools:text="pablo.eth | 0x123456...0421"
+            android:textSize="@dimen/sp20"/>
+
+        <ImageView
+            android:id="@+id/image_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:src="@drawable/ic_expand_more"
+            android:padding="3dp"
+            android:layout_gravity="start"
+            android:background="@color/transparent"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:layout_marginBottom="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.1"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/amount"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp17"/>
+
+        <TextView
+            android:id="@+id/text_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.2"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            tools:text="1.234 ETH ≈ 500.23 USD"
+            android:textSize="@dimen/sp20"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

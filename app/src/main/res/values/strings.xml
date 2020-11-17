@@ -696,4 +696,10 @@
 
     <string name="bracketed" translatable="false">(%1$s)</string>
     <string name="ens_resolved" translatable="false">ENS: %1$s</string>
+    <string name="confirm_transaction">Confirm Transaction</string>
+    <string name="balance">Balance</string>
+    <string name="speed_average">Average</string>
+    <string name="speed_rapid">Rapid</string>
+    <string name="speed_fast">Fast</string>
+    <string name="speed_slow">Slow</string>
 </resources>

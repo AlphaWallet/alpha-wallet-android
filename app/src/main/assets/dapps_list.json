@@ -34,6 +34,7 @@
   {"name": "NFT Token Factory", "description": "Create an ERC875 NFT contract at the click of a button", "url": "https://tf.alphawallet.com/", "category": "Tool"},
   {"name": "SmartDrops", "description": "A platform that lets people earn crypto by joining new token projects.", "url": "https://www.smartdrops.io/", "category": "Tool"},
   {"name": "xDai Bridge", "description": "xDai/Ethereum bridge for self transfers of Dai to xDai", "url": "https://dai-bridge.poa.network/", "category": "Tool"},
+  {"name": "Alfacash", "description": "Trade crypto instantly. ETH, BTC, XRP and 30+ other coins and tokens", "url": "https://www.alfa.cash/", "category": "Exchange"},
   {"name": "0x Instant", "description": "A free and flexible way to offer simple crypto purchasing", "url": "http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/", "category": "Exchange"},
   {"name": "KyberSwap", "description": "Instant and Secure Token to Token Swaps", "url": "https://kyber.network/swap/eth_knc", "category": "Exchange"},
   {"name": "localethereum", "description": "Peer-to-peer marketplace allowing to trade eth to fiat", "url": "https://localethereum.com/", "category": "Exchange"},

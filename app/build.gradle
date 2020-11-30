@@ -35,7 +35,7 @@ android {
         }
     }
     defaultConfig {
-        versionCode 133
+        versionCode 135
         versionName "3.20.5"
 
         applicationId "io.stormbird.wallet"
@@ -107,7 +107,7 @@ android {
             apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
-                implementation 'com.google.firebase:firebase-analytics:17.6.0'
+                implementation 'com.google.firebase:firebase-analytics:18.0.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
         }
@@ -149,7 +149,7 @@ dependencies {
     implementation 'com.google.zxing:core:3.3.2'
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
 
@@ -193,7 +193,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 
     implementation "com.trustwallet:wallet-core:0.12.31"
 

@@ -151,8 +151,9 @@ public class RepositoriesModule {
 									   PreferenceRepositoryType preferenceRepository,
 									   Context context,
 									   TickerService tickerService,
-									   OpenseaService openseaService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, preferenceRepository, context, tickerService, openseaService);
+									   OpenseaService openseaService,
+									   AnalyticsServiceType analyticsServiceType) {
+		return new TokensService(ethereumNetworkRepository, tokenRepository, preferenceRepository, context, tickerService, openseaService, analyticsServiceType);
 	}
 
 	@Singleton

@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -69,6 +70,7 @@ public class TokensService
     private final Context context;
     private final TickerService tickerService;
     private final OpenseaService openseaService;
+    private final AnalyticsServiceType analyticsService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
@@ -95,12 +97,14 @@ public class TokensService
                          PreferenceRepositoryType preferenceRepository,
                          Context context,
                          TickerService tickerService,
-                         OpenseaService openseaService) {
+                         OpenseaService openseaService,
+                         AnalyticsServiceType analyticsService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.context = context;
         this.tickerService = tickerService;
         this.openseaService = openseaService;
+        this.analyticsService = analyticsService;
         networkFilter = new ArrayList<>();
         setupFilter();
         focusToken = null;
@@ -785,5 +789,13 @@ public class TokensService
         {
             return true;
         }
+    }
+
+    public void track(String eventType, String gasSpeed)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(gasSpeed);
+
+        analyticsService.track(eventType, analyticsProperties);
     }
 }

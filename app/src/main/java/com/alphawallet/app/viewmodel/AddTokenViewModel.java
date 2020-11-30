@@ -93,6 +93,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public void save(int chainId, String address)
     {
+        tokensService.track(C.AN_ADD_CUSTOM, address);
         tokensService.addUnknownTokenToCheck(new ContractAddress(chainId, address));
     }
 

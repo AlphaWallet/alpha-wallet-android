@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
@@ -50,9 +51,14 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     private void trackFirebase(AnalyticsProperties analyticsProperties, String eventName)
     {
         Bundle props = new Bundle();
-        if(!analyticsProperties.getWalletType().isEmpty())
+        if(!TextUtils.isEmpty(analyticsProperties.getWalletType()))
         {
             props.putString(C.AN_WALLET_TYPE, analyticsProperties.getWalletType());
+        }
+
+        if(!TextUtils.isEmpty(analyticsProperties.getData()))
+        {
+            props.putString(C.AN_USE_GAS, analyticsProperties.getData());
         }
 
         firebaseAnalytics.logEvent(eventName, props);
@@ -64,9 +70,14 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
         {
             JSONObject props = new JSONObject();
 
-            if(analyticsProperties.getWalletType() != null)
+            if (!TextUtils.isEmpty(analyticsProperties.getWalletType()))
             {
                 props.put(C.AN_WALLET_TYPE, analyticsProperties.getWalletType());
+            }
+
+            if (!TextUtils.isEmpty(analyticsProperties.getData()))
+            {
+                props.put(C.AN_USE_GAS, analyticsProperties.getData());
             }
 
             mixpanelAPI.track(eventName, props);

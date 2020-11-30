@@ -93,7 +93,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @return
      */
     @Override
-    public Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String tokenAddress, long lastBlock)
+    public Single<Transaction[]> storeNewTransactions(String walletAddress, NetworkInfo networkInfo, String tokenAddress, final long lastBlock)
     {
         return Single.fromCallable(() -> {
             long lastBlockNumber = lastBlock + 1;
@@ -111,10 +111,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     lastTransaction = syncUpwards(updates, instance, walletAddress, networkInfo, tokenAddress, lastBlockNumber);
                 }
 
-                if (lastTransaction != null)
-                {
-                    storeLatestBlockRead(instance, networkInfo.chainId, tokenAddress, lastTransaction.blockNumber);
-                }
+                String lastBlockRead = (lastTransaction != null) ? lastTransaction.blockNumber : String.valueOf(lastBlock);
+                storeLatestBlockRead(instance, networkInfo.chainId, tokenAddress, lastBlockRead);
             }
             catch (JSONException e)
             {

@@ -102,6 +102,7 @@ public class TransactionsService
         {
             fetchTransactions();
         }
+        tokensService.appInFocus();
     }
 
     /**
@@ -220,13 +221,19 @@ public class TransactionsService
     {
         if (!newWallet.address.equalsIgnoreCase(currentAddress))
         {
-            onDestroy();
+            stopUpdate();
             currentAddress = newWallet.address;
             fetchTransactions();
         }
     }
 
-    public void onDestroy()
+    public void lostFocus()
+    {
+        tokensService.appOutOfFocus();
+        stopUpdate();
+    }
+
+    public void stopUpdate()
     {
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {

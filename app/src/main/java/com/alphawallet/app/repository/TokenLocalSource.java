@@ -23,6 +23,7 @@ public interface TokenLocalSource {
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
     void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
     boolean updateTokenBalance(Wallet wallet, int chainId, String tokenAddress, BigDecimal balance, List<BigInteger> balanceArray, ContractType type);
+    void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress);
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled);
 
@@ -37,6 +38,8 @@ public interface TokenLocalSource {
 
     Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                              String seachTerm);
+
+    TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters);
 
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 

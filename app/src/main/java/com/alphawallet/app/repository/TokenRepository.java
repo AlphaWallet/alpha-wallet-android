@@ -173,6 +173,13 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters)
+    {
+        if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
+        return localSource.fetchTokenMetasForUpdate(wallet, networkFilters);
+    }
+
+    @Override
     public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                                    AssetDefinitionService svs)
     {
@@ -263,6 +270,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Boolean> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
     {
         Wallet wallet = new Wallet(walletAddress);
+        localSource.markBalanceChecked(wallet, chainId, tokenAddress);
         return updateBalance(wallet, chainId, tokenAddress, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());

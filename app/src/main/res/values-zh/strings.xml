@@ -46,6 +46,7 @@
     <string name="label_to">接收地址</string>
     <string name="label_gas_limit">燃料限制</string>
     <string name="label_gas_price">燃料价格</string>
+    <string name="label_gas_price_gwei">燃料价格 (GWEI)</string>
     <string name="label_old_gas_price">先前的燃油价格</string>
     <string name="label_network_fee">交易手续费</string>
     <string name="button_ok">确定</string>
@@ -623,6 +624,7 @@
     <string name="minute_plural">%s分钟</string>
     <string name="second_single">1秒</string>
     <string name="second_plural">%s秒</string>
+    <string name="never">不明</string>
     <string name="transaction_pending_for">交易待定时间：%s</string>
     <string name="speedup_tx_description">以更高的燃料价格提交替换交易。</string>
     <string name="cancel_tx_description">通过将未确认的交易替换为零值交易以取消交易。</string>
@@ -682,4 +684,12 @@
     <string name="speed_rapid">快速的速度</string>
     <string name="speed_fast">速度快</string>
     <string name="speed_slow">速度慢</string>
+    <string name="speed_custom">自定义</string>
+    <string name="new_balance">(待确认: %1$s %2$s)</string>
+    <string name="set_speed_title">设定交易确认速度</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="set_your_speed">自己设定</string>
+    <string name="nonce_optional">Nonce (可选的)</string>
+    <string name="calc_gas_limit">正在计算燃料限制</string>
+    <string name="wallet_address">钱包地址</string>
 </resources>

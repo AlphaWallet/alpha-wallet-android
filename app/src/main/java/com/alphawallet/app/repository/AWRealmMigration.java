@@ -1,9 +1,6 @@
-package com.alphawallet.app.service;
-
-import com.alphawallet.app.repository.entity.RealmAuxData;
+package com.alphawallet.app.repository;
 
 import io.realm.DynamicRealm;
-import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
@@ -117,6 +114,18 @@ public class AWRealmMigration implements RealmMigration
         {
             RealmObjectSchema realmToken = schema.get("RealmToken");
             if (!realmToken.hasField("visibilityChanged")) realmToken.addField("visibilityChanged", boolean.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 15)
+        {
+            schema.create("RealmGasSpread")
+                    .addField("timeStamp", long.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("chainId", int.class)
+                    .addField("rapid", String.class)
+                    .addField("fast", String.class)
+                    .addField("standard", String.class)
+                    .addField("slow", String.class);
             oldVersion++;
         }
     }

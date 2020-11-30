@@ -62,141 +62,50 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.1"
+            android:layout_marginTop="4dp"
             android:layout_marginStart="@dimen/dp16"
             android:text="@string/balance"
             android:textColor="@color/dove"
             android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textSize="@dimen/sp17"/>
+            android:textSize="@dimen/sp13"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.1"
+            android:layout_marginBottom="@dimen/dp14"
+            android:orientation="vertical">
 
         <TextView
             android:id="@+id/text_balance"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="3.2"
             android:textColor="@color/black"
-            android:fontFamily="@font/font_regular"
+            android:fontFamily="@font/font_semibold"
             android:gravity="start"
             tools:text="35.4236 ETH"
-            android:textSize="@dimen/sp20"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.6"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="@dimen/dp16">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1.1"/>
-
-        <TextView
-            android:id="@+id/text_new_balance"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3.2"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginTop="3dp"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
-            android:gravity="start"
-            tools:text="(New: 31.1818 ETH)"
-            android:textSize="@dimen/sp17"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.6"/>
-
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp20"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.1"
-            android:layout_marginStart="@dimen/dp16"
-            android:text="@string/speed_gas"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
-            android:lines="1"
-            android:gravity="start"
-            android:textSize="@dimen/sp17"/>
-
-        <TextView
-            android:id="@+id/text_speed"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3.2"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/speed_average"
-            android:gravity="start"
-            android:textSize="@dimen/sp20"/>
-
-        <LinearLayout
-            android:id="@+id/edit_click_layer"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_weight="0.6"
-            android:background="@color/transparent">
+            android:textSize="@dimen/sp16"/>
 
             <TextView
+                android:id="@+id/text_new_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:textColor="@color/azure"
-                android:lines="1"
-                android:textSize="@dimen/sp17"
-                android:text="@string/edit"
-                android:visibility="visible" />
+                android:layout_marginTop="3dp"
+                android:textColor="@color/dove"
+                android:fontFamily="@font/font_regular"
+                android:gravity="start"
+                tools:text="(New: 31.1818 ETH)"
+                android:textSize="@dimen/sp15"/>
 
         </LinearLayout>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="@dimen/dp16">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
-
-        <TextView
-            android:id="@+id/text_time_estimate"
+        <com.alphawallet.app.widget.TokenIcon
+            android:id="@+id/token_icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.4"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginTop="3dp"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
-            android:gravity="start"
-            tools:text="< 0.003 ETH ($0.55 USD)≈2 minutes"
-            android:textSize="@dimen/sp17"/>
+            android:layout_weight="0.6"
+            android:layout_marginEnd="@dimen/dp5"/>
 
     </LinearLayout>
 
@@ -205,46 +114,21 @@
         android:layout_height="1dp"
         android:background="@color/mercury" />
 
-    <LinearLayout
+    <com.alphawallet.app.widget.GasWidget
+        android:id="@+id/gas_widgetx"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp20"
-        android:layout_marginBottom="@dimen/dp20"
-        android:orientation="horizontal">
+        android:layout_marginTop="@dimen/dp20"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.1"
-            android:layout_marginStart="@dimen/dp16"
-            android:text="@string/recipient"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
-            android:gravity="start"
-            android:textSize="@dimen/sp17"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
 
-        <TextView
-            android:id="@+id/text_recipient"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3.2"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_regular"
-            android:gravity="start"
-            tools:text="pablo.eth | 0x123456...0421"
-            android:textSize="@dimen/sp20"/>
-
-        <ImageView
-            android:id="@+id/image_more"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:src="@drawable/ic_expand_more"
-            android:padding="3dp"
-            android:layout_gravity="start"
-            android:background="@color/transparent"/>
-
-    </LinearLayout>
+    <com.alphawallet.app.widget.AddressDetailView
+        android:id="@+id/recipient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <View
         android:layout_width="match_parent"
@@ -267,18 +151,18 @@
             android:textColor="@color/dove"
             android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textSize="@dimen/sp17"/>
+            android:textSize="@dimen/sp13"/>
 
         <TextView
             android:id="@+id/text_amount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.2"
+            android:layout_weight="3.1"
             android:textColor="@color/black"
-            android:fontFamily="@font/font_regular"
+            android:fontFamily="@font/font_semibold"
             android:gravity="start"
             tools:text="1.234 ETH ≈ 500.23 USD"
-            android:textSize="@dimen/sp20"/>
+            android:textSize="@dimen/sp16"/>
 
         <View
             android:layout_width="0dp"
@@ -291,6 +175,11 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/mercury" />
+
+    <com.alphawallet.app.widget.ConfirmationWidget
+        android:id="@+id/confirmation_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

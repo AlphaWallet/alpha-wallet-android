@@ -8,20 +8,29 @@
 
     <include layout="@layout/layout_app_bar" />
 
-    <RelativeLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.GasSliderView
-            android:id="@+id/gasSliderView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/text_notice"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_dove_bar"
+        android:paddingTop="@dimen/dp16"
+        android:paddingStart="@dimen/dp11"
+        android:paddingEnd="@dimen/dp11"
+        android:lineSpacingExtra="@dimen/dp5"
+        android:textSize="@dimen/sp13"
+        android:gravity="center_horizontal"
+        android:autoLink="web"
+        android:text="@string/gas_message"/>
 
-        <com.alphawallet.app.widget.FunctionButtonBar
-            android:layout_alignParentBottom="true"
-            android:id="@+id/layoutButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <com.alphawallet.app.widget.GasSliderView
+        android:visibility="gone"
+        android:id="@+id/gasSliderView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-    </RelativeLayout>
 </LinearLayout>

@@ -307,6 +307,7 @@
         <activity
             android:name=".ui.WalletConnectSessionActivity"
             android:label="WalletConnect Sessions" />
+
     </application>
 
 </manifest>

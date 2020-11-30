@@ -20,7 +20,9 @@
     <dimen name="sp13">11sp</dimen>
     <dimen name="sp14">12sp</dimen>
     <dimen name="sp15">13sp</dimen>
+    <dimen name="sp16">14sp</dimen>
     <dimen name="sp17">15sp</dimen>
+    <dimen name="sp18">16sp</dimen>
     <dimen name="sp20">17sp</dimen>
     <dimen name="sp24">20sp</dimen>
     <dimen name="sp28">24sp</dimen>

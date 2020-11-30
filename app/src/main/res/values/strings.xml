@@ -51,6 +51,7 @@
     <string name="label_to">To</string>
     <string name="label_gas_limit">Gas Limit</string>
     <string name="label_gas_price">Gas Price</string>
+    <string name="label_gas_price_gwei">Gas Price (GWEI)</string>
     <string name="label_old_gas_price">Old Gas Price</string>
     <string name="label_network_fee">Network Fee (Maximum)</string>
     <string name="button_ok">OK</string>
@@ -639,6 +640,7 @@
     <string name="minute_plural">%s minutes</string>
     <string name="second_single">1 second</string>
     <string name="second_plural">%s seconds</string>
+    <string name="never">Unknown</string>
     <string name="transaction_pending_for">Transaction Pending for %s</string>
     <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
     <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
@@ -696,10 +698,22 @@
 
     <string name="bracketed" translatable="false">(%1$s)</string>
     <string name="ens_resolved" translatable="false">ENS: %1$s</string>
+    <string name="fiat_format" translatable="false">%1$s %2$s ≈ %3$s %4$s</string>
+    <string name="gas_amount" translatable="false">&lt; %1$s %2$s</string>
+    <string name="gas_fiat_suffix" translatable="false"> (%1$s %2$s)</string>
+    <string name="gas_time_suffix" translatable="false"> ≈ %1$s</string>
     <string name="confirm_transaction">Confirm Transaction</string>
     <string name="balance">Balance</string>
     <string name="speed_average">Average</string>
     <string name="speed_rapid">Rapid</string>
     <string name="speed_fast">Fast</string>
     <string name="speed_slow">Slow</string>
+    <string name="speed_custom">Custom</string>
+    <string name="new_balance">(New: %1$s %2$s)</string>
+    <string name="set_speed_title">Set Speed</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="set_your_speed">Set Your Own</string>
+    <string name="nonce_optional">Nonce (optional)</string>
+    <string name="calc_gas_limit">Calculating Gas Limit</string>
+    <string name="wallet_address">Wallet Address</string>
 </resources>

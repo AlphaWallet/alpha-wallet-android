@@ -41,6 +41,10 @@ public class BalanceUtils {
         return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).toPlainString();
     }
 
+    public static String weiToGwei(BigInteger wei, int decimals) {
+        return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).setScale(decimals, RoundingMode.HALF_DOWN).toString(); //to 2 dp
+    }
+
     public static BigInteger gweiToWei(BigDecimal gwei) {
         return Convert.toWei(gwei, Convert.Unit.GWEI).toBigInteger();
     }
@@ -96,31 +100,31 @@ public class BalanceUtils {
         return scaledValue(value, pattern, decimals);
     }
 
-    public static String getScaledValueScientific(BigDecimal value, long decimals)
+    public static String getScaledValueScientific(final BigDecimal value, long decimals)
     {
         String returnValue;
-        value = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
+        BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
         final NumberFormat formatter = new DecimalFormat("0.####E0");
         formatter.setRoundingMode(RoundingMode.DOWN);
         if (value.equals(BigDecimal.ZERO)) //zero balance
         {
             returnValue = "0";
         }
-        else if (value.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
+        else if (correctedValue.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
         {
-            returnValue = formatter.format(value);
-            returnValue = returnValue.replace("E", "e-");
+            returnValue = formatter.format(correctedValue);
+            returnValue = returnValue.replace("E", "e");
         }
-        else if (value.compareTo(com.alphawallet.token.tools.Convert.toWei(BigDecimal.TEN, com.alphawallet.token.tools.Convert.Unit.GETHER)) > 0) //too big
+        else if (correctedValue.compareTo(BigDecimal.valueOf(Math.pow(10, 14))) > 0) //too big
         {
-            returnValue = formatter.format(value);
+            returnValue = formatter.format(correctedValue);
             returnValue = returnValue.replace("E", "e+");
         }
         else //otherwise display in standard pattern to 4 dp
         {
             DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
             df.setRoundingMode(RoundingMode.DOWN);
-            returnValue = df.format(value);
+            returnValue = df.format(correctedValue);
         }
 
         return returnValue;

@@ -46,6 +46,7 @@
     <string name="label_to">A</string>
     <string name="label_gas_limit">Límite de gas</string>
     <string name="label_gas_price">Precio del gas</string>
+    <string name="label_gas_price_gwei">Precio del gas (GWEI)</string>
     <string name="label_old_gas_price">Precio antiguo del gas</string>
     <string name="label_network_fee">Tarifa de red (máximo)</string>
     <string name="button_ok">OK</string>
@@ -623,6 +624,7 @@
     <string name="minute_plural">%s minutos</string>
     <string name="second_single">1 segundo</string>
     <string name="second_plural">%s segundos</string>
+    <string name="never">Desconocido</string>
     <string name="transaction_pending_for">Transacción pendiente para %s</string>
     <string name="speedup_tx_description">Enviar una transacción de reemplazo con un precio del gas más alto.</string>
     <string name="cancel_tx_description">Cancelar la transacción sustituyendo la pendiente por una transacción de valor cero.</string>
@@ -682,4 +684,12 @@
     <string name="speed_rapid">velocidad rápida</string>
     <string name="speed_fast">rápida velocidad</string>
     <string name="speed_slow">Velocidad lenta</string>
+    <string name="speed_custom">Personalizar</string>
+    <string name="new_balance">(Nuevo: %1$s %2$s)</string>
+    <string name="set_speed_title">Velocidad de la Transacción</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="set_your_speed">Establece tu propio</string>
+    <string name="nonce_optional">Nonce (opcional)</string>
+    <string name="calc_gas_limit">Calcular el Límite de gas</string>
+    <string name="wallet_address">Dirección del Monedero</string>
 </resources>

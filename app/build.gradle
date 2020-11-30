@@ -46,7 +46,7 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
-        buildConfigField 'int', 'DB_VERSION', '15'
+        buildConfigField 'int', 'DB_VERSION', '16'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {

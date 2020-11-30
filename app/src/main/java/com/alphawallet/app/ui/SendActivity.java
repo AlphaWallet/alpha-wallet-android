@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,11 +20,14 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
@@ -32,15 +36,22 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.SendViewModel;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputAmount;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
+
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,12 +59,17 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
-public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback
+public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
@@ -74,6 +90,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private String ensAddress;
     private BigDecimal sendAmount;
     private BigDecimal sendGasPrice;
+    private ActionSheetDialog confirmationDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -89,7 +106,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
-        int currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+        int currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
 
         sendAddress = null;
         sendGasPrice = BigDecimal.ZERO;
@@ -155,7 +173,20 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
+        if (requestCode == C.SET_GAS_SETTINGS)
+        {
+            //will either be an index, or if using custom then it will contain a price and limit
+            if (data != null)
+            {
+                int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+                long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+                BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
+                BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+                long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+                confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+            }
+        }
+        else if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
                 case FullScannerFragment.SUCCESS:
@@ -246,6 +277,17 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.searching_for_token);
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private void calculateEstimateDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.calc_gas_limit));
         dialog.setIcon(AWalletAlertDialog.NONE);
         dialog.setProgressMode();
         dialog.setCancelable(false);
@@ -379,8 +421,10 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             dialog.dismiss();
         }
         super.onDestroy();
+        if (viewModel != null) viewModel.onDestroy();
         if (handler != null) handler.removeCallbacksAndMessages(null);
         if (amountInput != null) amountInput.onDestroy();
+        if (confirmationDialog != null) confirmationDialog.onDestroy();
     }
 
     private void setupTokenContent() {
@@ -392,6 +436,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         functionBar.revealButtons();
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
         functionBar.setupFunctions(this, functions);
+        viewModel.startGasCycle(token.tokenInfo.chainId);
     }
 
     @Override
@@ -402,7 +447,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
-            checkConfirm();
+            calculateTransactionCost();
         }
         else
         {
@@ -436,24 +481,119 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
         else
         {
-            checkConfirm();
+            calculateTransactionCost();
         }
+    }
+
+    private void calculateTransactionCost()
+    {
+        if (sendAmount.compareTo(NEGATIVE) > 0 && sendAddress != null && isValidAddress(sendAddress))
+        {
+            final String txSendAddress = sendAddress;
+            sendAddress = null;
+            //either sending base chain or ERC20 tokens.
+            final byte[] transactionBytes = viewModel.getTransactionBytes(token, txSendAddress, sendAmount);
+
+            if (token.isEthereum())
+            {
+                checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress);
+            }
+            else
+            {
+                calculateEstimateDialog();
+                //form payload and calculate tx cost
+                viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, txSendAddress, sendAmount)
+                        .map(this::convertToGasLimit)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(estimate -> checkConfirm(estimate, transactionBytes, txSendAddress),
+                                error -> handleError(error, transactionBytes, txSendAddress))
+                        .isDisposed();
+            }
+        }
+    }
+
+    private BigInteger convertToGasLimit(EthEstimateGas estimate)
+    {
+        if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0 && !estimate.hasError())
+        {
+            return estimate.getAmountUsed();
+        }
+        else
+        {
+            return guessLimit();
+        }
+    }
+
+    private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress)
+    {
+        Log.w(this.getLocalClassName(), throwable.getMessage());
+        checkConfirm(guessLimit(), transactionBytes, txSendAddress);
     }
 
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      *
      */
-    private void checkConfirm()
+    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress)
     {
-        if (sendAmount.compareTo(NEGATIVE) > 0 && sendAddress != null && isValidAddress(sendAddress))
+        BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
+        Web3Transaction w3tx = new Web3Transaction(
+                new Address(txSendAddress),
+                new Address(token.getAddress()),
+                ethValue,
+                sendGasPrice.toBigInteger(),
+                sendGasLimit,
+                -1,
+                Numeric.toHexString(transactionBytes),
+                -1);
+
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress, sendAmount.toBigInteger(), viewModel.getTokenService());
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
+        sendAmount = NEGATIVE;
+    }
+
+    private BigInteger guessLimit()
+    {
+        if (token.isEthereum())
         {
-            //ready to go to the next screen
-            boolean sendingTokens = !token.isEthereum();
-            viewModel.openConfirmation(this, sendAddress, sendAmount.toBigInteger(), token.getAddress(), token.tokenInfo.decimals, token.getSymbol(),
-                    sendingTokens, sendGasPrice.toBigInteger(), ensAddress, token.tokenInfo.chainId);
-            sendAddress = null;
-            sendAmount = NEGATIVE;
+            return BigInteger.valueOf(GAS_LIMIT_MIN);
         }
+        else
+        {
+            return BigInteger.valueOf(GAS_LIMIT_DEFAULT);
+        }
+    }
+
+    /**
+     * ActionSheetCallback, comms hooks for the ActionSheetDialog to trigger authentication & send transactions
+     *
+     * @param callback
+     */
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, wallet, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void dismissed(boolean shouldDismiss)
+    {
+        //ActionSheet was dismissed
+        confirmationDialog.onDestroy();
+        if (shouldDismiss) finish();
+    }
+
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash);
     }
 }

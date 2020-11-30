@@ -13,6 +13,7 @@ public abstract class C {
     public static final int REQUEST_UNIVERSAL_SCAN = 1015;
 
     public static final int BARCODE_READER_REQUEST_CODE = 1;
+    public static final int SET_GAS_SETTINGS = 2;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -134,9 +135,7 @@ public abstract class C {
     public static final long GAS_PER_BYTE = 310; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_DEFAULT = 90000L;
-    public static final long GAS_LIMIT_MAX = 900000L;
-    public static final long GAS_PRICE_MIN = 1000000000L;
-    public static final long NETWORK_FEE_MAX = 90000000000000000L;
+    public static final long GAS_LIMIT_MAX = 1300000L;
     public static final int ETHER_DECIMALS = 18;
 
     //FOR DEMOS ETC

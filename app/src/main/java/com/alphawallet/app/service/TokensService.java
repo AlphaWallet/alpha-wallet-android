@@ -77,7 +77,7 @@ public class TokensService
     private Disposable tokenCheckDisposable;
     @Nullable
     private Disposable eventTimer;
-    @Nullablest
+    @Nullable
     private Disposable checkUnknownTokenCycle;
     @Nullable
     private Disposable queryUnknownTokensDisposable;

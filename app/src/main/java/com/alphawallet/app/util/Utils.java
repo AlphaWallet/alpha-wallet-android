@@ -10,6 +10,7 @@ import android.webkit.URLUtil;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 
 import org.web3j.crypto.WalletUtils;
@@ -31,6 +32,10 @@ import java.util.regex.Pattern;
 public class Utils {
 
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
+    private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
+    private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
+    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/alphawallet/iconassets/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -481,5 +486,36 @@ public class Utils {
         {
             return url != null ? url : "";
         }
+    }
+
+    public static String getTokenImageUrl(int chainId, String address)
+    {
+        String tURL = TRUST_ICON_REPO;
+        String repoChain;
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.CLASSIC_ID:
+                repoChain = "classic";
+                break;
+            case EthereumNetworkRepository.XDAI_ID:
+                repoChain = "xdai";
+                break;
+            case EthereumNetworkRepository.POA_ID:
+                repoChain = "poa";
+                break;
+            case EthereumNetworkBase.KOVAN_ID:
+            case EthereumNetworkBase.RINKEBY_ID:
+            case EthereumNetworkBase.SOKOL_ID:
+            case EthereumNetworkBase.ROPSTEN_ID:
+                tURL = ALPHAWALLET_ICON_REPO;
+                repoChain = "";
+                break;
+            default:
+                repoChain = "ethereum";
+                break;
+        }
+        tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
+
+        return tURL;
     }
 }

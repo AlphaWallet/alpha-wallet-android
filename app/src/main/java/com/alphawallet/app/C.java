@@ -202,4 +202,5 @@ public abstract class C {
     public static final String AN_SEED_PHRASE = "Seed Phrase";
     public static final String AN_KEYSTORE = "Keystore";
     public static final String AN_PRIVATE_KEY = "Private Key";
+    public static final String AN_USE_GAS = "Gas Settings";
 }

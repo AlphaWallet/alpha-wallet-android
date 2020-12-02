@@ -47,6 +47,7 @@
         android:src="@drawable/ic_correct"
         android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal"
+        android:background="@color/white"
         android:visibility="gone"/>
 
 </RelativeLayout>

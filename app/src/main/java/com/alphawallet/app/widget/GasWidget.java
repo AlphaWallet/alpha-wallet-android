@@ -123,6 +123,8 @@ public class GasWidget extends LinearLayout implements Runnable
         {
             gasLimit = baseGasLimit;
         }
+
+        tokensService.track(gs.speed);
     }
 
     private void startGasListener()

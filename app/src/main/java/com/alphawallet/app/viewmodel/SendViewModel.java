@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -39,6 +41,7 @@ import io.reactivex.schedulers.Schedulers;
 public class SendViewModel extends BaseViewModel {
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final EthereumNetworkRepositoryType networkRepository;
@@ -75,6 +78,7 @@ public class SendViewModel extends BaseViewModel {
     {
         return transactionFinalised;
     }
+    public MutableLiveData<Throwable> transactionError() { return transactionError; }
 
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
     {
@@ -164,11 +168,6 @@ public class SendViewModel extends BaseViewModel {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
                 .subscribe(transactionFinalised::postValue,
-                        this::onTxError);
-    }
-
-    private void onTxError(Throwable throwable)
-    {
-
+                        transactionError::postValue);
     }
 }

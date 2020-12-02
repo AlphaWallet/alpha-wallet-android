@@ -64,20 +64,20 @@ public class ConfirmationWidget extends RelativeLayout
                 RealmTransaction rTx = realmTransactions.first();
                 if (rTx != null && !rTx.isPending())
                 {
-                    Transaction tx = TransactionsRealmCache.convert(rTx);
+                    final Transaction tx = TransactionsRealmCache.convert(rTx);
                     //tx written, update icon
-                    handler.post(this::completeProgressSuccess);
+                    handler.post(() -> completeProgressSuccess(!tx.hasError()));
                 }
             }
         });
     }
 
-    private void completeProgressSuccess()
+    private void completeProgressSuccess(boolean success)
     {
         realmTransactionUpdates.removeAllChangeListeners();
         progress.setVisibility(View.VISIBLE);
         progressLayout.setVisibility(View.VISIBLE);
-        progress.setComplete();
+        progress.setComplete(success);
     }
 
     public void showAnimate()

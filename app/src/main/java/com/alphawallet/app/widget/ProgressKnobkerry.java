@@ -67,11 +67,20 @@ public class ProgressKnobkerry extends RelativeLayout
         indeterminate.startAnimation(rotation);
     }
 
-    public void setComplete()
+    public void setComplete(boolean succeeded)
     {
         indeterminate.clearAnimation();
         spinnerKnob.clearAnimation();
         spinner.clearAnimation();
+
+        if (succeeded)
+        {
+            progressComplete.setImageResource(R.drawable.ic_correct);
+        }
+        else
+        {
+            progressComplete.setImageResource(R.drawable.ic_tx_fail);
+        }
 
         progressComplete.setAlpha(0.0f);
         progressComplete.animate().alpha(1.0f).setDuration(500).setListener(new Animator.AnimatorListener()

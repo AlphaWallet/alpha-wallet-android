@@ -943,4 +943,27 @@ public class Token implements Parcelable, Comparable<Token>
             return 0;
         }
     }
+
+    public boolean needsTransactionCheck()
+    {
+        switch (getInterfaceSpec())
+        {
+            case ERC875_LEGACY:
+            case ERC875:
+            case ETHEREUM:
+            case ERC721_TICKET:
+                return true;
+            case CURRENCY:
+            case DELETED_ACCOUNT:
+            case OTHER:
+            case NOT_SET:
+            case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_UNDETERMINED:
+            case CREATION:
+            case ERC20:
+            default:
+                return false;
+        }
+    }
 }

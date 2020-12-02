@@ -109,7 +109,6 @@ public class WalletViewModel extends BaseViewModel
     {
         tokens.postValue(metaTokens);
         tokensService.updateTickers();
-        tokensService.addToUpdateList(metaTokens);
         tokensService.startBalanceUpdate();
     }
 

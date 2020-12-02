@@ -406,7 +406,7 @@ public class HomeViewModel extends BaseViewModel {
 
     public void stopTransactionUpdate()
     {
-        transactionsService.onDestroy();
+        transactionsService.lostFocus();
     }
 
     public void startTransactionUpdate()

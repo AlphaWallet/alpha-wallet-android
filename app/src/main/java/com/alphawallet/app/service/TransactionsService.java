@@ -102,6 +102,7 @@ public class TransactionsService
         {
             fetchTransactions();
         }
+        tokensService.appInFocus();
     }
 
     /**
@@ -189,11 +190,10 @@ public class TransactionsService
     {
         //got a new transaction
         fetchTransactionDisposable = null;
+        checkPendingTransactions(token.tokenInfo.chainId);
         if (transactions.length == 0) return;
 
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
-
-        checkPendingTransactions(token.tokenInfo.chainId);
 
         //now check for unknown tokens
         checkTokens(transactions);
@@ -220,13 +220,19 @@ public class TransactionsService
     {
         if (!newWallet.address.equalsIgnoreCase(currentAddress))
         {
-            onDestroy();
+            stopUpdate();
             currentAddress = newWallet.address;
             fetchTransactions();
         }
     }
 
-    public void onDestroy()
+    public void lostFocus()
+    {
+        tokensService.appOutOfFocus();
+        stopUpdate();
+    }
+
+    public void stopUpdate()
     {
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {

@@ -143,13 +143,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     ARTIS_TAU1_RPC_URL,
                     "https://explorer.tau1.artis.network/"),
             new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
-                    "https://explorer.binance.org/smart-testnet/tx/", BINANCE_TEST_ID, false,
+                    "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID, false,
                     BINANCE_TEST_FALLBACK_RPC_URL,
-                    "https://explorer.binance.org/smart-testnet/"),
+                    "https://api-testnet.bscscan.com/"),
             new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
-                    "https://explorer.binance.org/smart/tx/", BINANCE_MAIN_ID, false,
+                    "https://bscscan.com/tx/", BINANCE_MAIN_ID, false,
                     BINANCE_MAIN_FALLBACK_RPC_URL,
-                    "https://explorer.binance.org/smart"),
+                    "https://api.bscscan.com/"),
     };
 
     final PreferenceRepositoryType preferences;

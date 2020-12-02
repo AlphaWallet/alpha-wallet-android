@@ -190,11 +190,10 @@ public class TransactionsService
     {
         //got a new transaction
         fetchTransactionDisposable = null;
+        checkPendingTransactions(token.tokenInfo.chainId);
         if (transactions.length == 0) return;
 
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
-
-        checkPendingTransactions(token.tokenInfo.chainId);
 
         //now check for unknown tokens
         checkTokens(transactions);

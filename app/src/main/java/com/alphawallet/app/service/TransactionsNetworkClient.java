@@ -99,9 +99,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             long lastBlockNumber = lastBlock + 1;
             Map<String, Transaction> updates = new HashMap<>();
             EtherscanTransaction lastTransaction = null;
-            try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
+            try (Realm instance = realmManager.getRealmInstance(walletAddress))
             {
-                //deleteAllChainTransactions(instance, networkInfo.chainId, walletAddress);
                 if (lastBlockNumber == 1) //first read of account. Read first 2 pages
                 {
                     lastTransaction = syncDownwards(updates, instance, walletAddress, networkInfo, tokenAddress, 9999999999L);
@@ -110,9 +109,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     lastTransaction = syncUpwards(updates, instance, walletAddress, networkInfo, tokenAddress, lastBlockNumber);
                 }
-
-                String lastBlockRead = (lastTransaction != null) ? lastTransaction.blockNumber : String.valueOf(lastBlock);
-                storeLatestBlockRead(instance, networkInfo.chainId, tokenAddress, lastBlockRead);
             }
             catch (JSONException e)
             {
@@ -121,6 +117,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             catch (Exception e)
             {
                 e.printStackTrace();
+            }
+            finally
+            {
+                //ensure transaction check time is always written
+                String lastBlockRead = (lastTransaction != null) ? lastTransaction.blockNumber : String.valueOf(lastBlock);
+                storeLatestBlockRead(walletAddress, networkInfo.chainId, tokenAddress, lastBlockRead);
             }
 
             return updates.values().toArray(new Transaction[0]);
@@ -287,6 +289,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             StringBuilder sb = new StringBuilder();
             sb.append(networkInfo.etherscanTxUrl);
+            if (!networkInfo.etherscanTxUrl.endsWith("/"))
+            {
+                sb.append("/");
+            }
+
             sb.append("api?module=account&action=txlist&address=");
             sb.append(address);
             if (ascending)
@@ -311,7 +318,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 sb.append("&offset=");
                 sb.append(pageSize);
             }
-            sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+
+            if (networkInfo.etherscanTxUrl.contains("etherscan"))
+            {
+                sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+            }
+
             fullUrl = sb.toString();
 
             try
@@ -513,7 +525,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             else
             {
                 //update token block read so we don't check events on this contract
-                storeLatestBlockRead(instance, networkInfo.chainId, ev.contractAddress, ev.blockNumber);
+                storeLatestBlockRead(walletAddress, networkInfo.chainId, ev.contractAddress, ev.blockNumber);
             }
         }
     }
@@ -543,7 +555,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             else
             {
                 //update token block read so we don't check events on this contract
-                storeLatestBlockRead(instance, networkInfo.chainId, ev.contractAddress, ev.blockNumber);
+                storeLatestBlockRead(walletAddress, networkInfo.chainId, ev.contractAddress, ev.blockNumber);
             }
         }
     }
@@ -728,19 +740,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return metas;
     }
 
-    private String databaseKey(Token token)
-    {
-        return token.tokenInfo.address.toLowerCase() + "-" + token.tokenInfo.chainId;
-    }
-
     private String databaseKey(int chainId, String walletAddress)
     {
         return walletAddress.toLowerCase() + "-" + chainId;
     }
 
-    private void storeLatestBlockRead(Realm instance, int chainId, String tokenAddress, String lastBlockRead)
+    private void storeLatestBlockRead(String walletAddress, int chainId, String tokenAddress, String lastBlockRead)
     {
-        try
+        try (Realm instance = realmManager.getRealmInstance(walletAddress))
         {
             RealmToken realmToken = instance.where(RealmToken.class)
                     .equalTo("address", databaseKey(chainId, tokenAddress))

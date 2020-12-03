@@ -771,7 +771,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
 
-        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS)
+        if (requestCode == C.SET_GAS_SETTINGS)
         {
             if (resultCode == RESULT_OK)
             {

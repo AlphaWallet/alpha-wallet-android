@@ -43,7 +43,7 @@ public class ENSHandler implements Runnable
     private TextWatcher ensTextWatcher;
     private final Handler handler;
     private final AutoCompleteAddressAdapter adapterUrl;
-    private final AWEnsResolver ensResolver;
+    private AWEnsResolver ensResolver;
     private final AutoCompleteTextView toAddressEditText;
     private final float standardTextSize;
 
@@ -56,9 +56,9 @@ public class ENSHandler implements Runnable
     {
         this.handler = new Handler();
         this.adapterUrl = adapter;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getContext());
         this.host = host;
         this.toAddressEditText = host.getEditText();
+        this.ensResolver = null;
 
         standardTextSize = toAddressEditText.getTextSize();
 
@@ -201,6 +201,7 @@ public class ENSHandler implements Runnable
         //is this an address? If so, attempt reverse lookup or resolve from known ENS addresses
         if (!TextUtils.isEmpty(to) && isValidAddress(to))
         {
+            initENSHandler();
             host.setWaitingSpinner(true);
 
             disposable = ensResolver.resolveEnsName(to)
@@ -210,6 +211,7 @@ public class ENSHandler implements Runnable
         }
         else if (canBeENSName(to))
         {
+            initENSHandler();
             host.setWaitingSpinner(true);
 
             disposable = ensResolver.resolveENSAddress(to)
@@ -269,5 +271,13 @@ public class ENSHandler implements Runnable
     {
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(host.getContext()).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
+    }
+
+    private void initENSHandler()
+    {
+        if (ensResolver == null)
+        {
+            this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getContext());
+        }
     }
 }

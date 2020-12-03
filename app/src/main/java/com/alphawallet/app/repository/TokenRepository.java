@@ -1392,15 +1392,18 @@ public class TokenRepository implements TokenRepositoryType {
     {
         ContractType returnType = ContractType.OTHER;
 
-        int responseLength = balanceResponse.length();
+        if (balanceResponse != null)
+        {
+            int responseLength = balanceResponse.length();
 
-        if (isERC875 || (responseLength > 66))
-        {
-            returnType = ContractType.ERC875;
-        }
-        else if (balanceResponse.length() == 66) //expected biginteger size in hex + 0x
-        {
-            returnType = ContractType.ERC20;
+            if (isERC875 || (responseLength > 66))
+            {
+                returnType = ContractType.ERC875;
+            }
+            else if (balanceResponse.length() == 66) //expected biginteger size in hex + 0x
+            {
+                returnType = ContractType.ERC20;
+            }
         }
 
         return returnType;

@@ -12,6 +12,8 @@ public class AnalyticsProperties {
 
     private String walletType;
 
+    private String data;
+
     public String getWalletAddress() {
         return walletAddress;
     }
@@ -50,5 +52,13 @@ public class AnalyticsProperties {
 
     public void setWalletType(String type) {
         this.walletType = type;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 }

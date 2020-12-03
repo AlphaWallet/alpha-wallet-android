@@ -1,212 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:background="@color/white"
+    android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/layout_title"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/dp16"
-        android:paddingTop="@dimen/dp16"
-        android:paddingEnd="@dimen/dp16"
-        android:paddingBottom="@dimen/dp8">
+        android:background="@drawable/background_dove_bar"
+        android:fontFamily="@font/font_semibold"
+        android:text="@string/label_gas_price_gwei"
+        android:paddingStart="@dimen/dp14"
+        android:paddingTop="@dimen/dp10"
+        android:paddingBottom="@dimen/dp10"
+        android:layout_marginBottom="@dimen/dp14"
+        android:gravity="center_vertical"
+        android:textAllCaps="true"
+        android:textColor="@color/dove"
+        android:textSize="@dimen/sp16" />
 
-        <TextView
-            android:id="@+id/speed_gas"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/speed_gas"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp13" />
-
-        <ImageView
-            android:id="@+id/img_expand_collapse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:clickable="true"
-            android:contentDescription="@string/action_copy"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_expand_less_black" />
-
-    </FrameLayout>
-
-    <androidx.appcompat.widget.AppCompatSeekBar
-        android:id="@+id/gas_price_slider1"
-        style="?android:attr/progressBarStyleHorizontal"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/layout_title"
         android:layout_marginStart="@dimen/dp8"
         android:layout_marginEnd="@dimen/dp8"
-        android:max="90"
-        android:paddingTop="@dimen/dp8"
-        android:paddingBottom="@dimen/dp8"
-        android:progress="10"
-        android:progressTint="@color/azure"
-        android:thumbTint="@color/azure" />
-
-    <LinearLayout
-        android:id="@+id/layout_gas_fee"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/gas_price_slider1"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/dp16"
-        android:paddingEnd="@dimen/dp16">
-
-        <TextView
-            android:id="@+id/slow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/slow"
-            android:textColor="@color/azure"
-            android:textSize="@dimen/sp13" />
-
-        <TextView
-            android:id="@+id/network_fee_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp13"
-            tools:text="@string/eth_00" />
-
-        <TextView
-            android:id="@+id/fast"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/fast"
-            android:textColor="@color/azure"
-            android:textSize="@dimen/sp13" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_value_details"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/layout_gas_fee"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/dp24"
-        android:layout_marginTop="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp24"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/estimated_time_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/label_estimated_transaction_time"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp13" />
-
-        <TextView
-            android:id="@+id/estimated_time_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/mine"
-            android:textSize="@dimen/sp17"
-            android:text="@string/minutes_0" />
+        android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatSeekBar
-            android:id="@+id/gas_limit_slider"
-            android:visibility="gone"
+            android:id="@+id/gas_price_slider"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp8"
-            android:layout_marginEnd="@dimen/dp8"
+            android:layout_weight="4"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:max="90"
             android:paddingTop="@dimen/dp8"
             android:paddingBottom="@dimen/dp8"
             android:progress="10"
             android:progressTint="@color/azure"
             android:thumbTint="@color/azure" />
 
-        <View
-            android:id="@+id/spacing_view"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/dp16"/>
+        <EditText
+            android:id="@+id/gas_price_entry"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/background_password_entry"
+            android:gravity="end|center_vertical"
+            android:textSize="@dimen/sp14"
+            android:paddingEnd="10dp"
+            android:inputType="number"
+            tools:text="20"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:id="@+id/layout_click_holder"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/gas_limit_text1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/label_gas_limit"
-                    android:textColor="@color/dove"
-                    android:textSize="@dimen/sp13" />
-
-                <TextView
-                    android:id="@+id/gas_limit_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_bold"
-                    android:textColor="@color/azure"
-                    android:textSize="@dimen/sp17"
-                    android:text="90000" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/gas_price_text1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/label_gas_price"
-                    android:textColor="@color/dove"
-                    android:textSize="@dimen/sp13" />
-
-                <TextView
-                    android:id="@+id/gas_price_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:textColor="@color/mine"
-                    android:textSize="@dimen/sp17"
-                    android:text="@string/currency_00" />
-
-            </LinearLayout>
-
-        </LinearLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_dove_bar"
+        android:fontFamily="@font/font_semibold"
+        android:text="@string/label_gas_limit"
+        android:paddingStart="@dimen/dp14"
+        android:paddingTop="@dimen/dp10"
+        android:paddingBottom="@dimen/dp10"
+        android:layout_marginTop="@dimen/dp14"
+        android:layout_marginBottom="@dimen/dp14"
+        android:gravity="center_vertical"
+        android:textAllCaps="true"
+        android:textColor="@color/dove"
+        android:textSize="@dimen/sp16" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/gas_limit_slider"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_weight="4"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:max="90"
+            android:paddingTop="@dimen/dp8"
+            android:paddingBottom="@dimen/dp8"
+            android:progress="10"
+            android:progressTint="@color/azure"
+            android:thumbTint="@color/azure" />
+
+        <EditText
+            android:id="@+id/gas_limit_entry"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/background_password_entry"
+            android:gravity="end|center_vertical"
+            android:textSize="@dimen/sp14"
+            android:inputType="number"
+            android:paddingEnd="10dp"
+            tools:text="420000"/>
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/nonce_entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="@dimen/dp14"
+        android:background="@drawable/background_password_entry"
+        android:gravity="start|center_vertical"
+        android:textSize="@dimen/sp17"
+        android:padding="10dp"
+        android:textColorHint="@color/dove"
+        android:inputType="number"
+        android:hint="@string/nonce_optional"/>
+
+
+</LinearLayout>

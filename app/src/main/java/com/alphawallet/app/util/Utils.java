@@ -19,7 +19,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
@@ -468,6 +470,66 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static String shortConvertTimePeriodInSeconds(long pendingTimeInSeconds, Context ctx)
+    {
+        long days = pendingTimeInSeconds/(60*60*24);
+        pendingTimeInSeconds -= (days*60*60*24);
+        long hours = pendingTimeInSeconds/(60*60);
+        pendingTimeInSeconds -= (hours*60*60);
+        long minutes = pendingTimeInSeconds/60;
+        long seconds = pendingTimeInSeconds%60;
+
+        String timeStr;
+
+        if (pendingTimeInSeconds == -1)
+        {
+            timeStr = ctx.getString(R.string.never);
+        }
+        else if (days > 0)
+        {
+            timeStr = ctx.getString(R.string.day_single);
+        }
+        else if (hours > 0)
+        {
+            if (hours == 1 && minutes == 0)
+            {
+                timeStr = ctx.getString(R.string.hour_single);
+            }
+            else
+            {
+                BigDecimal hourStr = BigDecimal.valueOf(hours + (double)minutes/60.0)
+                        .setScale(1, RoundingMode.HALF_DOWN); //to 1 dp
+                timeStr = ctx.getString(R.string.hour_plural, hourStr.toString());
+            }
+        }
+        else if (minutes > 0)
+        {
+            if (minutes == 1 && seconds == 0)
+            {
+                timeStr = ctx.getString(R.string.minute_single);
+            }
+            else
+            {
+                BigDecimal minsStr = BigDecimal.valueOf(minutes + (double)seconds/60.0)
+                        .setScale(1, RoundingMode.HALF_DOWN); //to 1 dp
+                timeStr = ctx.getString(R.string.minute_plural, minsStr.toString());
+            }
+        }
+        else
+        {
+            if (seconds == 1)
+            {
+                timeStr = ctx.getString(R.string.second_single);
+            }
+            else
+            {
+                timeStr = ctx.getString(R.string.second_plural, String.valueOf(seconds));
+            }
+        }
+
+        return timeStr;
     }
 
     public static long randomId() {

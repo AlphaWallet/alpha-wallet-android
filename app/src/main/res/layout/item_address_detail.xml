@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/dp20"
+    android:layout_marginBottom="@dimen/dp20"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.1"
+        android:layout_marginStart="@dimen/dp16"
+        android:text="@string/recipient"
+        android:textColor="@color/dove"
+        android:fontFamily="@font/font_regular"
+        android:gravity="start"
+        android:textSize="@dimen/sp13"/>
+
+    <TextView
+        android:id="@+id/text_recipient"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3.1"
+        android:textColor="@color/black"
+        android:fontFamily="@font/font_semibold"
+        android:gravity="start"
+        tools:text="pablo.eth | 0x123456...0421"
+        android:textSize="@dimen/sp16"/>
+
+    <ImageView
+        android:id="@+id/image_more"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.6"
+        android:src="@drawable/ic_expand_more"
+        android:padding="3dp"
+        android:layout_gravity="start"
+        android:background="@color/transparent"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/wallet_address"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp13"/>
+
+        <TextView
+            android:id="@+id/text_recipient_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp5"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginEnd="40dp"
+            android:textColor="@color/black"
+            android:gravity="start"
+            android:fontFamily="@font/font_regular"
+            tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a"
+            android:textSize="@dimen/sp18"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginTop="@dimen/dp10"
+            android:layout_marginBottom="@dimen/dp10"
+            android:text="@string/ens_name"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp13"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginEnd="@dimen/dp16"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/blockie"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/big_green_tick"/>
+
+        <TextView
+            android:id="@+id/text_ens_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp16"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_regular"
+            tools:text="pablo.eth"
+            android:textSize="@dimen/sp18"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

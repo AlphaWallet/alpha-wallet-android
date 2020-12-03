@@ -20,7 +20,9 @@
     <dimen name="sp13">13sp</dimen>
     <dimen name="sp14">14sp</dimen>
     <dimen name="sp15">15sp</dimen>
+    <dimen name="sp16">16sp</dimen>
     <dimen name="sp17">17sp</dimen>
+    <dimen name="sp18">18sp</dimen>
     <dimen name="sp20">20sp</dimen>
     <dimen name="sp24">24sp</dimen>
     <dimen name="sp28">28sp</dimen>
@@ -49,6 +51,7 @@
     <dimen name="dp23">23dp</dimen>
     <dimen name="dp24">24dp</dimen>
     <dimen name="dp25">25dp</dimen>
+    <dimen name="dp30">32dp</dimen>
 
     <!-- Collectible Grid Item -->
     <dimen name="grid_icon_height">100dp</dimen>

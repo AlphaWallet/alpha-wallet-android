@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/background_card">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.1"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/speed_gas"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:lines="1"
+            android:gravity="start"
+            android:textSize="@dimen/sp13"/>
+
+        <TextView
+            android:id="@+id/text_speed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.1"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_semibold"
+            android:text="@string/speed_average"
+            android:gravity="start"
+            android:textSize="@dimen/sp16"/>
+
+        <LinearLayout
+            android:id="@+id/edit_click_layer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="0.6"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:textColor="@color/azure"
+                android:lines="1"
+                android:textSize="@dimen/sp17"
+                android:text="@string/edit"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="@dimen/dp16">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/text_time_estimate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.4"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            tools:text="&lt; 0.003 ETH ($0.55 USD)≈2 minutes"
+            android:textSize="@dimen/sp15"/>
+
+    </LinearLayout>
+
+</LinearLayout>

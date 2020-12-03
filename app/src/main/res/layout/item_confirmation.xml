@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_confirmation"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/dp14"
+    android:paddingBottom="@dimen/dp14"
+    android:background="@drawable/background_card"
+    android:visibility="gone">
+
+    <com.alphawallet.app.widget.ProgressKnobkerry
+        android:id="@+id/progress_knob"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_centerInParent="true"
+        android:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/hash_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="@dimen/dp16"
+        android:layout_marginEnd="@dimen/dp16"
+        android:fontFamily="@font/font_regular"
+        android:shadowColor="@color/white"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:textSize="@dimen/sp16"
+        android:visibility="gone"
+        tools:text="0x123456789" />
+
+</RelativeLayout>

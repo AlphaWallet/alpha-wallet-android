@@ -112,32 +112,9 @@ public class Token implements Parcelable, Comparable<Token>
 
     public String getStringBalance()
     {
-        String value;
-        BigDecimal ethBalance = getCorrectedBalance(18);
-        final NumberFormat formatter = new DecimalFormat("0.####E0");
-        formatter.setRoundingMode(RoundingMode.DOWN);
-        if (ethBalance.equals(BigDecimal.ZERO)) //zero balance
-        {
-            value = "0";
-        }
-        else if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
-        {
-            value = formatter.format(ethBalance);
-            value = value.replace("E", "e-");
-        }
-        else if (balance.compareTo(Convert.toWei(BigDecimal.TEN, Convert.Unit.GETHER)) > 0) //too big
-        {
-            value = formatter.format(ethBalance);
-            value = value.replace("E", "e+");
-        }
-        else //otherwise display in standard pattern to 4 dp
-        {
-            DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
-            df.setRoundingMode(RoundingMode.DOWN);
-            value = df.format(ethBalance);
-        }
-
-        return value;
+        int decimals = 18;
+        if (tokenInfo != null) decimals = tokenInfo.decimals;
+        return BalanceUtils.getScaledValueScientific(balance, decimals);
     }
 
     public boolean hasPositiveBalance() {

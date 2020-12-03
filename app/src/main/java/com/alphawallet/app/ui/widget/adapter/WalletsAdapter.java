@@ -99,7 +99,8 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         notifyDataSetChanged();
     }
 
-    public void setWallets(Wallet[] wallets) {
+    public void setWallets(Wallet[] wallets)
+    {
         this.wallets.clear();
         boolean hasLegacyWallet = false;
         boolean hasWatchWallet = false;

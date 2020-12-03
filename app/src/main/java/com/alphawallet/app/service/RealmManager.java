@@ -1,8 +1,8 @@
 package com.alphawallet.app.service;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.AWRealmMigration;
 
 import java.util.HashMap;
 import java.util.Map;

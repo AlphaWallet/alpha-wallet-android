@@ -16,8 +16,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
@@ -266,4 +268,10 @@ public class TokenIcon extends ConstraintLayout
             return true;
         }
     };
+
+    public void showLocalCurrency()
+    {
+        String isoCode = TickerService.getCurrencySymbolTxt();
+        icon.setImageResource(CurrencyRepository.getFlagByISO(isoCode));
+    }
 }

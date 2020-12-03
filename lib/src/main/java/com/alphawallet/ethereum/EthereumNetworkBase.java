@@ -70,4 +70,20 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static NetworkInfo getNetworkByChain(int chainId) {
         return networkMap.get(chainId);
     }
+
+
+    public static String getShortChainName(int chainId)
+    {
+        NetworkInfo info = networkMap.get(chainId);
+        if (info != null)
+        {
+            int index = info.name.indexOf(" (Test)");
+            if (index > 0) return info.name.substring(0, index);
+            return info.name;
+        }
+        else
+        {
+            return networkMap.get(1).name;
+        }
+    }
 }

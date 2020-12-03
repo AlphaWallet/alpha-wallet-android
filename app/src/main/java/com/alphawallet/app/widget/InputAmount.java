@@ -53,7 +53,7 @@ public class InputAmount extends LinearLayout
     private final AutoCompleteTextView editText;
     private final TextView symbolText;
     private final TokenIcon icon;
-    private final TextView chainName;
+    private final ChainName chainName;
     private final TextView availableSymbol;
     private final TextView availableAmount;
     private final TextView allFunds;
@@ -62,6 +62,7 @@ public class InputAmount extends LinearLayout
     private Realm realm;
     private Realm tickerRealm;
     private TokensService tokensService;
+    private AssetDefinitionService assetService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
     private final Handler handler = new Handler();
@@ -83,7 +84,7 @@ public class InputAmount extends LinearLayout
         editText = findViewById(R.id.amount_entry);
         symbolText = findViewById(R.id.text_token_symbol);
         icon = findViewById(R.id.token_icon);
-        chainName = findViewById(R.id.text_chain_name);
+        chainName = findViewById(R.id.chain_name);
         availableSymbol = findViewById(R.id.text_symbol);
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
@@ -109,10 +110,10 @@ public class InputAmount extends LinearLayout
     {
         this.token = token;
         this.tokensService = svs;
+        this.assetService = assetDefinitionService;
         this.amountReadyCallback = amountCallback;
-        icon.bindData(token, assetDefinitionService);
-        Utils.setChainColour(chainName, token.tokenInfo.chainId);
-        chainName.setText(token.getNetworkName());
+        icon.bindData(token, assetService);
+        chainName.setChainID(token.tokenInfo.chainId);
         updateAvailableBalance();
 
         if (tokensService != null)
@@ -223,11 +224,13 @@ public class InputAmount extends LinearLayout
             {
                 showingCrypto = false;
                 startTickerListener();
+                icon.showLocalCurrency();
             }
             else
             {
                 showingCrypto = true;
                 if (tickerRealm != null) tickerRealm.removeAllChangeListeners(); //stop ticker listener
+                icon.bindData(token, assetService);
             }
 
             updateAvailableBalance();

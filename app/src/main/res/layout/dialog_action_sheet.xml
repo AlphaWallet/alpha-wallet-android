@@ -3,12 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/background_card">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:minHeight="60dp">
 
         <ImageView
             android:id="@+id/image_close"
@@ -61,7 +63,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.1"
+            android:layout_weight="1"
             android:layout_marginTop="4dp"
             android:layout_marginStart="@dimen/dp16"
             android:text="@string/balance"
@@ -70,10 +72,10 @@
             android:gravity="start"
             android:textSize="@dimen/sp13"/>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_weight="3.4"
             android:layout_marginBottom="@dimen/dp14"
             android:orientation="vertical">
 
@@ -92,20 +94,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
+                android:layout_below="@id/text_balance"
                 android:textColor="@color/dove"
                 android:fontFamily="@font/font_regular"
                 android:gravity="start"
                 tools:text="(New: 31.1818 ETH)"
                 android:textSize="@dimen/sp15"/>
 
-        </LinearLayout>
+            <com.alphawallet.app.widget.ChainName
+                android:id="@+id/chain_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp5"
+                custom:font_size="10"
+                android:visibility="visible"/>
 
-        <com.alphawallet.app.widget.TokenIcon
-            android:id="@+id/token_icon"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:layout_marginEnd="@dimen/dp5"/>
+        </RelativeLayout>
 
     </LinearLayout>
 
@@ -145,7 +151,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.1"
+            android:layout_weight="1"
             android:layout_marginStart="@dimen/dp16"
             android:text="@string/amount"
             android:textColor="@color/dove"
@@ -157,17 +163,12 @@
             android:id="@+id/text_amount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_weight="3.5"
             android:textColor="@color/black"
             android:fontFamily="@font/font_semibold"
             android:gravity="start"
             tools:text="1.234 ETH ≈ 500.23 USD"
             android:textSize="@dimen/sp16"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.6"/>
 
     </LinearLayout>
 

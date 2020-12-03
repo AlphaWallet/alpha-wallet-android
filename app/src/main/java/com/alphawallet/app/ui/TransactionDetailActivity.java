@@ -27,6 +27,7 @@ import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
@@ -132,10 +133,9 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         ((ImageView) findViewById(R.id.network_icon)).setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
-        TextView chainLabel = findViewById(R.id.text_chain_name);
 
-        Utils.setChainColour(chainLabel, transaction.chainId);
-        chainLabel.setText(chainName);
+        ChainName chainName = findViewById(R.id.chain_name);
+        chainName.setChainID(transaction.chainId);
 
         setOperationName();
 

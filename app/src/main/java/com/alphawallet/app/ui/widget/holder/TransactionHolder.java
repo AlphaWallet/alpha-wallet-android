@@ -25,6 +25,7 @@ import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 
 import java.util.Calendar;
@@ -44,7 +45,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView type;
     private final TextView address;
     private final TextView value;
-    private final TextView chainName;
+    private final ChainName chainName;
     private final TextView supplemental;
     private final TokensService tokensService;
     private final ProgressBar pendingSpinner;
@@ -69,7 +70,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        chainName = findViewById(R.id.text_chain_name);
+        chainName = findViewById(R.id.chain_name);
         supplemental = findViewById(R.id.supplimental);
         pendingSpinner = findViewById(R.id.pending_spinner);
         transactionBackground = findViewById(R.id.layout_background);
@@ -175,17 +176,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         if (chainName != null)
         {
-            Utils.setChainColour(chainName, transaction.chainId);
-            String chainNameStr = tokensService.getNetworkName(transaction.chainId);
-            if (!TextUtils.isEmpty(chainNameStr))
-            {
-                chainName.setText(chainNameStr);
-                chainName.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                chainName.setVisibility(View.GONE);
-            }
+            chainName.setChainID(transaction.chainId);
         }
     }
 

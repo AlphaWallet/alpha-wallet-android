@@ -206,7 +206,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
             @Override
             public void onPageSelected(int position) {
-                //showPage(WalletPage.values()[position]);
+
             }
 
             @Override

@@ -28,6 +28,7 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigDecimal;
@@ -58,7 +59,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
-    private final TextView testnet;
+    private final ChainName testnet;
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private String tokenName;
     private boolean primaryElement;
@@ -86,7 +87,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
-        testnet = findViewById(R.id.text_chain_name);
+        testnet = findViewById(R.id.chain_name);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -191,8 +192,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void showNetworkLabel() {
         testnet.setVisibility(View.VISIBLE);
-        Utils.setChainColour(testnet, token.tokenInfo.chainId);
-        testnet.setText(token.getNetworkName());
+        testnet.setChainID(token.tokenInfo.chainId);
     }
 
     private void hideNetworkLabel() {

@@ -38,6 +38,7 @@ import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.TokenIcon;
@@ -515,12 +516,11 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void setChainName(Transaction transaction)
     {
-        TextView chainName = findViewById(R.id.text_chain_name);
-        if (transaction.chainId != MAINNET_ID && token != null && !token.isEthereum())
+        ChainName chainName = findViewById(R.id.chain_name);
+        if (transaction.chainId != MAINNET_ID)
         {
             chainName.setVisibility(View.VISIBLE);
-            Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            chainName.setText(token.getNetworkName());
+            chainName.setChainID(transaction.chainId);
         }
         else
         {

@@ -33,6 +33,8 @@ import java.util.Collections;
 
 import io.realm.Realm;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+
 /**
  * Created by JB on 17/11/2020.
  */
@@ -45,7 +47,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final ImageView cancelButton;
     private final GasWidget gasWidget;
     private final ConfirmationWidget confirmationWidget;
-    private final TokenIcon tokenIcon;
+    private final ChainName chainName;
     private final AddressDetailView addressDetail;
     private final FunctionButtonBar functionBar;
 
@@ -70,7 +72,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         gasWidget = findViewById(R.id.gas_widgetx);
         cancelButton = findViewById(R.id.image_close);
-        tokenIcon = findViewById(R.id.token_icon);
+        chainName = findViewById(R.id.chain_name);
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.recipient);
         functionBar = findViewById(R.id.layoutButtons);
@@ -87,8 +89,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = tx;
         wroteTransaction = false;
 
-        Token baseCurrency = tokensService.getToken(t.tokenInfo.chainId, t.getWallet());
-
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
         setNewBalanceText();
         setAmount();
@@ -97,7 +97,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.revealButtons();
 
         gasWidget.setupWidget(ts, token, candidateTransaction, activity);
-        tokenIcon.bindData(baseCurrency, null); //show chain
+        if (token.tokenInfo.chainId == MAINNET_ID)
+        {
+            chainName.setVisibility(View.GONE);
+        }
+        else
+        {
+            chainName.setVisibility(View.VISIBLE);
+            chainName.setChainID(token.tokenInfo.chainId);
+        }
 
         addressDetail.setupAddress(tx.recipient.toString(), destName);
 

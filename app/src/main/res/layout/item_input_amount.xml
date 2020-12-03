@@ -31,21 +31,15 @@
             android:textColor="@color/dove"
             android:textSize="15sp" />
 
-        <TextView
-            android:id="@+id/text_chain_name"
+
+        <com.alphawallet.app.widget.ChainName
+            android:id="@+id/chain_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/dp10"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/background_status_pending"
-            android:fontFamily="@font/font_bold"
-            android:padding="2dp"
-            android:text="@string/action_clear"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:visibility="visible" />
+            android:layout_centerVertical="true"/>
 
     </RelativeLayout>
 
@@ -69,6 +63,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <LinearLayout
+                android:id="@+id/layout_more_click"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
             <com.alphawallet.app.widget.TokenIcon
                 android:id="@+id/token_icon"
                 android:layout_width="wrap_content"
@@ -88,19 +88,13 @@
                 android:textSize="@dimen/sp32"
                 tools:text="ETH"/>
 
-            <LinearLayout
-                android:id="@+id/layout_more_click"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/dp5"
-                android:orientation="horizontal"
-                android:layout_gravity="center_vertical"
-                android:background="@color/transparent">
-
                 <ImageView
                     android:id="@+id/expand_more"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="@dimen/dp5"
+                    android:layout_gravity="center_vertical"
                     android:src="@drawable/ic_expand_more"/>
 
             </LinearLayout>

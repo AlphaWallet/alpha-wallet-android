@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -82,18 +83,13 @@
             android:text="..."
             android:textColor="@color/colorAccent" />
 
-        <TextView
-            android:id="@+id/text_chain_name"
+        <com.alphawallet.app.widget.ChainName
+            android:id="@+id/chain_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:background="@drawable/background_status_pending"
-            android:fontFamily="@font/font_bold"
-            android:padding="2dp"
-            android:text="@string/action_clear"
-            android:textColor="@color/white"
-            android:textSize="10sp"
-            android:visibility="visible" />
+            android:visibility="visible"
+            custom:font_size="10"/>
 
     </LinearLayout>
 

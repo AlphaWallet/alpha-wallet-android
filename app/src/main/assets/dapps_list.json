@@ -60,5 +60,6 @@
   {"name": "1inch.exchange", "description": "DEX Aggregator with the best prices on the market. Achieving best rates by splitting orders among multiple DEXes in one single transaction.", "url": "https://1inch.exchange", "category": "Exchange"},
   {"name": "SpiderDEX", "description": "Decentralized exchange for crypto collectibles.", "url": "https://www.spiderdex.com", "category": "Exchange"},
   {"name": "DeFi Money Market (DMM)", "description": "Earn interest on your crypto through tokenized real world assets", "url": "https://app.defimoneymarket.com", "category": "Finance"},
-  {"name": "Idle Finance", "description": "DeFi Yield Aggregator and Rebalancing Protocol", "url": "https://idle.finance", "category": "Finance"}
+  {"name": "Idle Finance", "description": "DeFi Yield Aggregator and Rebalancing Protocol", "url": "https://idle.finance", "category": "Finance"},
+  {"name": "GG Copyright EX", "description": "GeekGit Copyright Exchange for Music & Web Literature", "url": "https://crex.geekgit.com", "category": "Exchange"}
 ]

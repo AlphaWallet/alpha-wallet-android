@@ -52,8 +52,49 @@ public class AWRealmMigration implements RealmMigration
         if (oldVersion == 7)
         {
             RealmObjectSchema realmData = schema.get("RealmAuxData");
-            if (!realmData.hasField("tokenAddress")) realmData.addField("tokenAddress", String.class);
-            if (!realmData.hasField("resultReceivedTime")) realmData.addField("resultReceivedTime", long.class);
+            if (realmData == null)
+            {
+                schema.create("RealmAuxData")
+                        .addField("instanceKey", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("chainId", int.class)
+                        .addField("tokenAddress", String.class)
+                        .addField("tokenId", String.class)
+                        .addField("functionId", String.class)
+                        .addField("result", String.class)
+                        .addField("resultTime", long.class)
+                        .addField("resultReceivedTime", long.class);
+            }
+            else
+            {
+                if (!realmData.hasField("tokenAddress"))
+                    realmData.addField("tokenAddress", String.class);
+                if (!realmData.hasField("resultReceivedTime"))
+                    realmData.addField("resultReceivedTime", long.class);
+            }
+
+            realmData = schema.get("RealmKeyType");
+            if (realmData == null)
+            {
+                schema.create("RealmKeyType")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("type", byte.class)
+                        .addField("authLevel", String.class)
+                        .addField("lastBackup", long.class)
+                        .addField("dateAdded", long.class)
+                        .addField("modulus", String.class);
+            }
+
+            realmData = schema.get("RealmWalletData");
+            if (realmData == null)
+            {
+                schema.create("RealmWalletData")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("ENSName", String.class)
+                        .addField("balance", String.class)
+                        .addField("name", String.class)
+                        .addField("lastWarning", long.class);
+            }
+
             oldVersion += 2;
         }
         else if (oldVersion == 8)

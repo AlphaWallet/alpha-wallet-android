@@ -61,5 +61,7 @@
   {"name": "SpiderDEX", "description": "Decentralized exchange for crypto collectibles.", "url": "https://www.spiderdex.com", "category": "Exchange"},
   {"name": "DeFi Money Market (DMM)", "description": "Earn interest on your crypto through tokenized real world assets", "url": "https://app.defimoneymarket.com", "category": "Finance"},
   {"name": "Idle Finance", "description": "DeFi Yield Aggregator and Rebalancing Protocol", "url": "https://idle.finance", "category": "Finance"},
-  {"name": "GG Copyright EX", "description": "GeekGit Copyright Exchange for Music & Web Literature", "url": "https://crex.geekgit.com", "category": "Exchange"}
+  {"name": "GG Copyright EX", "description": "GeekGit Copyright Exchange for Music & Web Literature", "url": "https://crex.geekgit.com", "category": "Exchange"},
+  {"name": "DerivaDEX | Insurance Fund", "description": "DerivaDEX is the next generation of crypto derivatives. Begin earning DDX by bootstrapping the insurance fund.", "url": "https://insurance.derivadex.com", "category": "Finance"}
 ]
+

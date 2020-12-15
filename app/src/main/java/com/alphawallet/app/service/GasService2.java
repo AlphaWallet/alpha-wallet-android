@@ -47,7 +47,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 public class GasService2 implements ContractGasProvider
 {
     private final static String GAS_NOW_API = "https://www.gasnow.org/api/v3/gas/price?utm_source=AlphaWallet";
-    private final static long FETCH_GAS_PRICE_INTERVAL_SECONDS = 15;
+    public final static long FETCH_GAS_PRICE_INTERVAL_SECONDS = 15;
     private final static long TWELVE_HOURS = 12 * DateUtils.HOUR_IN_MILLIS;
 
     private final EthereumNetworkRepositoryType networkRepository;

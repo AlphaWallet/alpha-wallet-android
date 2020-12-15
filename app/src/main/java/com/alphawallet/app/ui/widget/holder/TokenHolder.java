@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,18 +62,17 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final RelativeLayout tokenLayout;
     private final ChainName testnet;
     private RealmResults<RealmTokenTicker> realmUpdate = null;
-    private String tokenName;
     private boolean primaryElement;
     private final Realm realm;
 
-    private Handler handler;
+    private final Handler handler = new Handler();
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
+    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
-        super(resId, parent);
+        super(R.layout.item_token, parent);
 
         tokenIcon = findViewById(R.id.token_icon);
         balanceEth = findViewById(R.id.eth_data);
@@ -120,11 +120,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
-            tokenName = token.getFullName(assetDefinition, token.getTicketCount());
             contractSeparator.setVisibility(View.GONE);
 
             //setup name and value (put these together on a single string to make wrap-around text appear better).
-            String nameValue = token.getStringBalance() + " " + tokenName;
+            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
             balanceEth.setText(nameValue);
 
             primaryElement = false;
@@ -140,6 +139,16 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
         } catch (Exception ex) {
             fillEmpty();
+        }
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        if (realmUpdate != null)
+        {
+            realmUpdate.removeAllChangeListeners();
+            realmUpdate = null;
         }
     }
 
@@ -210,7 +219,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         public void run()
         {
             tokenLayout.setElevation(0.0f);
-            handler = null;
         }
     };
 
@@ -219,7 +227,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         if (onTokenClickListener != null) {
             tokenLayout.setElevation(-10.0f);
             onTokenClickListener.onTokenClick(v, token, null, true);
-            handler = new Handler();
             handler.postDelayed(clearElevation, 800);
         }
     }
@@ -308,14 +315,18 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             RealmTokenTicker rawTicker = realmTicker.first();
             if (rawTicker == null) return;
             //update ticker info
-            TokenTicker tt = new TokenTicker(rawTicker.getPrice(), rawTicker.getPercentChange24h(), rawTicker.getCurrencySymbol(),
+            final TokenTicker tt = new TokenTicker(rawTicker.getPrice(), rawTicker.getPercentChange24h(), rawTicker.getCurrencySymbol(),
                     rawTicker.getImage(), rawTicker.getUpdatedTime());
-            setTickerInfo(tt);
+            handler.post(() -> {
+                setTickerInfo(tt);
+            });
         });
     }
 
     private void setTickerInfo(TokenTicker ticker)
     {
+        if (((Activity)getContext()).isFinishing()) { return; }
+
         //Set the fiat equivalent (leftmost value)
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
         BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);

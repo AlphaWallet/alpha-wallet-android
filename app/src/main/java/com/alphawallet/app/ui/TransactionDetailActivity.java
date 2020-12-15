@@ -118,7 +118,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         fromValue.setText(transaction.from != null ? transaction.from : "");
         toValue.setText(transaction.to != null ? transaction.to : "");
         txHashView.setText(transaction.hash != null ? transaction.hash : "");
-        ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
+        ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixTime(getApplicationContext(), transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
 
@@ -156,7 +156,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             transaction = latestTx;
             ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
             findViewById(R.id.pending_spinner).setVisibility(View.GONE);
-            ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
+            ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixTime(getApplicationContext(), transaction.timeStamp));
             //update function bar
             functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
             checkFailed();
@@ -247,14 +247,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         amount.setText(rawValue);
     }
 
-    private String localiseUnixTime(long timeStampInSec)
-    {
-        Date date = new java.util.Date(timeStampInSec*DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
-        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
-        return timeFormat.format(date) + " | " + dateFormat.format(date);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_share, menu);
@@ -267,6 +259,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             viewModel.shareTransactionDetail(this, transaction);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        viewModel.restartServices();
     }
 
     @Override

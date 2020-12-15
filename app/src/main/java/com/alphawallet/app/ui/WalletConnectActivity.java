@@ -318,12 +318,12 @@ public class WalletConnectActivity extends BaseActivity
                     break;
                 case SIGN_TX:
                     runOnUiThread(() -> {
-                        onEthSignTransaction(rq.id, rq.tx);
+                        onEthSignTransaction(rq.id, rq.tx, client.getChainId());
                     });
                     break;
                 case SEND_TX:
                     runOnUiThread(() -> {
-                        onEthSendTransaction(rq.id, rq.tx);
+                        onEthSendTransaction(rq.id, rq.tx, client.getChainId());
                     });
                     break;
                 case FAILURE:
@@ -566,12 +566,12 @@ public class WalletConnectActivity extends BaseActivity
         signDialog.show();
     }
 
-    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction)
+    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, int chainId)
     {
         Web3Transaction w3Tx = new Web3Transaction(transaction, id);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog = builder.setTitle(R.string.dialog_title_sign_transaction)
-                .setMessage(w3Tx.getFormattedTransaction(this, MAINNET_ID))
+                .setMessage(w3Tx.getFormattedTransaction(this, chainId))
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> {
                     signTransaction(id, transaction);
                 })
@@ -648,7 +648,7 @@ public class WalletConnectActivity extends BaseActivity
         viewModel.getAuthenticationForSignature(wallet, this, signCallback);
     }
 
-    private void onEthSendTransaction(Long id, WCEthereumTransaction transaction)
+    private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, int chainId)
     {
         lastId = id;
         try
@@ -658,7 +658,7 @@ public class WalletConnectActivity extends BaseActivity
                     || (!transaction.getTo().equals(Address.EMPTY) && (transaction.getData() != null || transaction.getValue() != null))) // Raw or Function TX
             {
                 signable = new EthereumMessage(transaction.toString(), peerUrl.getText().toString(), id);
-                viewModel.confirmTransaction(this, transaction, peerUrl.getText().toString(), MAINNET_ID, id);
+                viewModel.confirmTransaction(this, transaction, peerUrl.getText().toString(), chainId, id);
             }
             else
             {

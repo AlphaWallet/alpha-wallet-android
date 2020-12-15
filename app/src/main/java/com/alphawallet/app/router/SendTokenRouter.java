@@ -1,6 +1,7 @@
 package com.alphawallet.app.router;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -11,7 +12,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 
 public class SendTokenRouter {
-    public void open(Context context, String address, String symbol, int decimals, Wallet wallet, Token token, int chainId) {
+    public void open(Activity context, String address, String symbol, int decimals, Wallet wallet, Token token, int chainId) {
         Intent intent = new Intent(context, SendActivity.class);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
@@ -21,6 +22,6 @@ public class SendTokenRouter {
         intent.putExtra(C.EXTRA_TOKEN_ID, token);
         intent.putExtra(C.EXTRA_AMOUNT, (QRResult)null);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        context.startActivity(intent);
+        context.startActivityForResult(intent, C.COMPLETED_TRANSACTION);
     }
 }

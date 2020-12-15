@@ -3,7 +3,6 @@ package com.alphawallet.app.ui.widget.entity;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.entity.EventMeta;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;

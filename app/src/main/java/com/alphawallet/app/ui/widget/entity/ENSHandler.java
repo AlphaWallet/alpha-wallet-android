@@ -4,6 +4,7 @@ package com.alphawallet.app.ui.widget.entity;
  * Created by JB on 28/10/2020.
  */
 
+import android.content.Context;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -20,6 +21,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.InputAddress;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -63,7 +65,7 @@ public class ENSHandler implements Runnable
         standardTextSize = toAddressEditText.getTextSize();
 
         createWatcher();
-        getENSHistoryFromPrefs();
+        getENSHistoryFromPrefs(host.getContext());
     }
 
     private void createWatcher()
@@ -229,10 +231,10 @@ public class ENSHandler implements Runnable
      * This method will fetch stored ENS cached history of Reverse lookup
      * @return Key Value pair of Address vs ENS name
      */
-    private HashMap<String, String> getENSHistoryFromPrefs()
+    private static HashMap<String, String> getENSHistoryFromPrefs(Context ctx)
     {
         HashMap<String, String> history;
-        String historyJson = PreferenceManager.getDefaultSharedPreferences(host.getContext()).getString(C.ENS_HISTORY_PAIR, "");
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(ctx).getString(C.ENS_HISTORY_PAIR, "");
         if (!historyJson.isEmpty())
         {
             history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>(){}.getType());
@@ -245,6 +247,33 @@ public class ENSHandler implements Runnable
         return history;
     }
 
+    public static String findMatchingENS(Context ctx, String ethAddress)
+    {
+        if (!TextUtils.isEmpty(ethAddress) && Utils.isAddressValid(ethAddress))
+        {
+            HashMap<String, String> ensMap = getENSHistoryFromPrefs(ctx);
+            String ensName = ensMap.get(ethAddress);
+            return ensName != null ? ensName : ethAddress;
+        }
+        else
+        {
+            return ethAddress;
+        }
+    }
+
+    public static String displayAddressOrENS(Context ctx, String ethAddress)
+    {
+        String returnAddress = Utils.formatAddress(ethAddress);
+        if (!TextUtils.isEmpty(ethAddress) && Utils.isAddressValid(ethAddress))
+        {
+            HashMap<String, String> ensMap = getENSHistoryFromPrefs(ctx);
+            String ensName = ensMap.get(ethAddress);
+            returnAddress = ensName != null ? ensName : returnAddress;
+        }
+
+        return returnAddress;
+    }
+
     /**
      * This method will store Address vs ENS name key value pair in preference.
      * @param address Wallet Address
@@ -252,7 +281,7 @@ public class ENSHandler implements Runnable
      */
     private void storeItem(String address, String ensName)
     {
-        HashMap<String, String> history = getENSHistoryFromPrefs();
+        HashMap<String, String> history = getENSHistoryFromPrefs(host.getContext());
 
         if (!history.containsKey(address.toLowerCase()))
         {

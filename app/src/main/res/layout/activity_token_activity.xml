@@ -43,19 +43,37 @@
                     android:id="@+id/token_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     app:showStatus="true"
                     app:largeIcon="true" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp6"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/event_action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    tools:text="Sent ETH"
+                    android:fontFamily="@font/font_regular"
+                    tools:text="Sent"
                     android:textColor="@color/black"
-                    android:layout_marginTop="@dimen/dp6"
-                    android:layout_marginBottom="10dp"
                     android:textSize="@dimen/sp17" />
+
+                <TextView
+                    android:id="@+id/event_action_symbol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_semibold"
+                    android:layout_marginStart="4dp"
+                    tools:text="ETH"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/sp20" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/event_amount"
@@ -109,6 +127,11 @@
                     android:orientation="horizontal"/>
 
                 <include layout="@layout/item_ticket" />
+
+                <com.alphawallet.app.widget.EventDetailWidget
+                    android:id="@+id/event_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
         </ScrollView>

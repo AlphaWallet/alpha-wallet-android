@@ -668,15 +668,16 @@
     <string name="message_authentication_failed">Authentication failed</string>
     <string name="tx_rejected">Transaction rejected (try using more gas)</string>
     <string name="from">from: %1$s</string>
+    <string name="from_op">from</string>
     <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">to: %1$s</string>
     <string name="approval_granted_to">approved to transfer tokens: %1$s</string>
     <string name="approval_obtained_from">to spend on behalf of: %1$s</string>
     <string name="unknown_event">Unknown event</string>
-    <string name="activity_sent">Sent %1$s</string>
-    <string name="activity_received">Received %1$s</string>
-    <string name="activity_approved">Approved %1$s</string>
-    <string name="activity_approval_granted">Approval granted %1$s</string>
+    <string name="activity_sent">Sent</string>
+    <string name="activity_received">Received</string>
+    <string name="activity_approved">Approved</string>
+    <string name="activity_approval_granted">Approval granted</string>
     <string name="tokenscript_call">TokenScript call:</string>
     <string name="testnet" translatable="false">Testnet</string>
     <string name="today">Today</string>
@@ -696,11 +697,12 @@
     <string name="all_funds">All Funds</string>
     <string name="recipient_address">Recipient\'s Address</string>
 
+    <string name="address_separator" translatable="false">%1$s | %2$s</string>
     <string name="bracketed" translatable="false">(%1$s)</string>
     <string name="ens_resolved" translatable="false">ENS: %1$s</string>
     <string name="fiat_format" translatable="false">%1$s %2$s ≈ %3$s %4$s</string>
     <string name="gas_amount" translatable="false">&lt; %1$s %2$s</string>
-    <string name="gas_fiat_suffix" translatable="false"> (%1$s %2$s)</string>
+    <string name="gas_fiat_suffix" translatable="false">(%1$s %2$s)</string>
     <string name="gas_time_suffix" translatable="false"> ≈ %1$s</string>
     <string name="confirm_transaction">Confirm Transaction</string>
     <string name="balance">Balance</string>
@@ -711,9 +713,18 @@
     <string name="speed_custom">Custom</string>
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">Set Speed</string>
+    <string name="gas_price_widget">Gas Price: %1$s</string>
     <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">Set Your Own</string>
     <string name="nonce_optional">Nonce (optional)</string>
     <string name="calc_gas_limit">Calculating Gas Limit</string>
     <string name="wallet_address">Wallet Address</string>
+    <string name="transaction_in_progress">Transaction in Progress</string>
+    <string name="transaction_progress_detail">The transaction is sent to the Ethereum blockchain. It might take few minutes to be confirmed by miners.</string>
+    <string name="action_show_tx_details">Show Transaction Details</string>
+    <string name="default_to">Sent %1$s %2$s to %3$s</string>
+    <string name="default_from">Received %1$s %2$s from %3$s</string>
+    <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
+    <string name="default_approve">You approved %3$s to move %1$s %2$s</string>
+    <string name="contract_call">Contract call</string>
 </resources>

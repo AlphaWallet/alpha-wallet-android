@@ -21,7 +21,7 @@ public class RealmTransaction extends RealmObject {
     private String input;
     private String error;
     private int chainId;
-    private String token;
+    private long expectedCompletion;
     private RealmList<RealmTransactionOperation> operations;
 
     public String getHash() {
@@ -134,18 +134,18 @@ public class RealmTransaction extends RealmObject {
         this.chainId = chainId;
     }
 
-    public String getToken()
-    {
-        return token;
-    }
-
-    public void setToken(String token)
-    {
-        this.token = token;
-    }
-
     public boolean isPending()
     {
         return blockNumber == null || blockNumber.length() == 0 || (blockNumber.equals("0") || blockNumber.equals("-2"));
+    }
+
+    public long getExpectedCompletion()
+    {
+        return expectedCompletion;
+    }
+
+    public void setExpectedCompletion(long expectedCompletion)
+    {
+        this.expectedCompletion = expectedCompletion;
     }
 }

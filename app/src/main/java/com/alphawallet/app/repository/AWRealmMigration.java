@@ -128,6 +128,14 @@ public class AWRealmMigration implements RealmMigration
                     .addField("slow", String.class);
             oldVersion++;
         }
+
+        if (oldVersion == 16)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmTransaction");
+            if (!realmToken.hasField("expectedCompletion")) realmToken.addField("expectedCompletion", long.class);
+            if (realmToken.hasField("token")) realmToken.removeField("token");
+            oldVersion++;
+        }
     }
 
     @Override

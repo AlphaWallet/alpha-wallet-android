@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,8 @@ import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.TSTokenView;
@@ -39,6 +42,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static com.alphawallet.app.C.Key.TICKET;
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL;
 
@@ -49,11 +53,17 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 {
     public static final int VIEW_TYPE = 2016;
 
-    private final TokenIcon icon;
-    private final TextView title;
+    private final TokenIcon tokenIcon;
+    private final TextView date;
+    private final TextView type;
+    private final TextView address;
     private final TextView value;
-    private final TextView detail;
-    private final TextView timeStamp;
+    private final ChainName chainName;
+    private final TextView supplemental;
+    private final TextView symbol;
+    private final TextView toOrFrom;
+    private final LinearLayout transactionBackground;
+
     private final AssetDefinitionService assetDefinition;
     private final AdapterCallback refreshSignaller;
     private Token token;
@@ -64,21 +74,27 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private String eventKey;
     private boolean fromTokenView;
 
-    public EventHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
+    public EventHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
                        AssetDefinitionService svs, AdapterCallback signaller)
     {
-        super(resId, parent);
-        icon = findViewById(R.id.token_icon);
-        title = findViewById(R.id.title);
+        super(R.layout.item_transaction, parent);
+        date = findViewById(R.id.text_tx_time);
+        tokenIcon = findViewById(R.id.token_icon);
+        address = findViewById(R.id.address);
+        type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        detail = findViewById(R.id.detail);
-        timeStamp = findViewById(R.id.time_stamp);
+        chainName = findViewById(R.id.chain_name);
+        toOrFrom = findViewById(R.id.text_to_from);
+        supplemental = findViewById(R.id.supplimental);
+        transactionBackground = findViewById(R.id.layout_background);
+        symbol = findViewById(R.id.symbol);
+        tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
 
         fetchTransactionsInteract = interact;
-        tokensService = service;
         refreshSignaller = signaller;
+        transactionBackground.setBackgroundResource(R.color.white);
     }
 
     @Override
@@ -101,8 +117,8 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         }
 
         token = tokensService.getToken(eventData.getChainId(), eventData.getTokenAddress());
-        String sym = token != null ? token.getSymbol() : getContext().getString(R.string.eth);
-        icon.bindData(token, assetDefinition);
+        String sym = token != null ? token.getShortSymbol() : getContext().getString(R.string.eth);
+        tokenIcon.bindData(token, assetDefinition);
         String itemView = null;
 
         TokenDefinition td = assetDefinition.getAssetDefinition(eventData.getChainId(), eventData.getTokenAddress());
@@ -123,12 +139,24 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        title.setText(getTitle(eventData, sym));
-        detail.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
-        icon.setStatusIcon(eventData.getEventStatusType());
+        type.setText(getTitle(eventData));
+        symbol.setText(sym);
+        address.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
+        tokenIcon.setStatusIcon(eventData.getEventStatusType());
 
         //timestamp
-        timeStamp.setText(localiseUnixTime(eventData.getResultTime()));
+        date.setText(Utils.localiseUnixTime(getContext(), eventData.getResultTime()));
+        date.setVisibility(View.VISIBLE);
+
+        if (token.tokenInfo.chainId == MAINNET_ID)
+        {
+            chainName.setVisibility(View.GONE);
+        }
+        else
+        {
+            chainName.setVisibility(View.VISIBLE);
+            chainName.setChainID(token.tokenInfo.chainId);
+        }
     }
 
     @Override
@@ -171,10 +199,10 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         return value;
     }
 
-    private String getTitle(RealmAuxData eventData, String sym)
+    private String getTitle(RealmAuxData eventData)
     {
         //TODO: pick up item-view
-        return eventData.getTitle(getContext(), sym);
+        return eventData.getTitle(getContext());
     }
 
     private BigInteger getTokenId(TokenDefinition td, RealmAuxData eventData)
@@ -208,12 +236,5 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         intent.putExtra(C.EXTRA_STATE, fromTokenView);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
-    }
-
-    private String localiseUnixTime(long timeStampInSec)
-    {
-        Date date = new java.util.Date(timeStampInSec* DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(getContext()));
-        return timeFormat.format(date);
     }
 }

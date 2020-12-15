@@ -1,10 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
+import android.app.Activity;
+import android.content.Context;
+import android.text.TextUtils;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.content.Context;
-
-import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Wallet;
@@ -67,11 +68,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return this.assetDefinitionService;
     }
 
-    public void showSendToken(Context ctx, Wallet wallet, Token token)
+    public void showSendToken(Activity act, Wallet wallet, Token token)
     {
         if (token != null)
         {
-            new SendTokenRouter().open(ctx, wallet.address, token.getSymbol(), token.tokenInfo.decimals,
+            new SendTokenRouter().open(act, wallet.address, token.getSymbol(), token.tokenInfo.decimals,
                     wallet, token, token.tokenInfo.chainId);
         }
     }
@@ -111,5 +112,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private void handleFilename(TokenDefinition td)
     {
         if (!TextUtils.isEmpty(td.holdingToken)) newScriptFound.postValue(true);
+    }
+
+    public void restartServices()
+    {
+        fetchTransactionsInteract.restartTransactionService();
     }
 }

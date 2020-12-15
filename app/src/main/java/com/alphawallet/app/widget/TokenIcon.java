@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.BitmapDrawable;
@@ -43,6 +44,7 @@ public class TokenIcon extends ConstraintLayout
     private final ImageView icon;
     private final TextView textIcon;
     private final ImageView statusIcon;
+    private final ProgressKnobkerry pendingProgress;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -52,8 +54,10 @@ public class TokenIcon extends ConstraintLayout
     private boolean showStatus = false;
     private boolean largeIcon = false;
     private boolean smallIcon = false;
+    private StatusType currentStatus;
 
-    public TokenIcon(Context context, AttributeSet attrs) {
+    public TokenIcon(Context context, AttributeSet attrs)
+    {
         super(context, attrs);
 
         getAttrs(context, attrs);
@@ -70,7 +74,9 @@ public class TokenIcon extends ConstraintLayout
         icon = findViewById(R.id.icon);
         textIcon = findViewById(R.id.text_icon);
         statusIcon = findViewById(R.id.status_icon);
-        statusIcon.setVisibility(View.GONE);
+        pendingProgress = findViewById(R.id.pending_progress);
+        statusIcon.setVisibility(isInEditMode() ? View.VISIBLE : View.GONE);
+        currentStatus = StatusType.NONE;
 
         bindViews();
     }
@@ -186,7 +192,9 @@ public class TokenIcon extends ConstraintLayout
 
     public void setStatusIcon(StatusType type)
     {
+        boolean requireAnimation = statusIcon.getVisibility() == View.VISIBLE && type != currentStatus;
         statusIcon.setVisibility(View.VISIBLE);
+        pendingProgress.setVisibility(View.GONE);
         switch (type)
         {
             case SENT:
@@ -197,6 +205,7 @@ public class TokenIcon extends ConstraintLayout
                 break;
             case PENDING:
                 statusIcon.setImageResource(R.drawable.ic_timer_small);
+                pendingProgress.setVisibility(View.VISIBLE);
                 break;
             case FAILED:
                 statusIcon.setImageResource(R.drawable.ic_rejected_small);
@@ -214,6 +223,19 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setVisibility(View.GONE);
                 break;
         }
+
+        currentStatus = type;
+
+        if (requireAnimation)
+        {
+            statusIcon.setAlpha(0.0f);
+            statusIcon.animate().alpha(1.0f).setDuration(500);
+        }
+    }
+
+    public void startPendingSpinner(long startTime, long completionTime)
+    {
+        pendingProgress.startAnimation(startTime, completionTime);
     }
 
     /**

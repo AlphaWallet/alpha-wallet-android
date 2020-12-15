@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -43,9 +44,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback {
-    private int layoutResId = -1;
-
+public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback
+{
     private final ActivitySortedList<SortedItem> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem left, SortedItem right)
@@ -103,49 +103,35 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         tokensService = service;
     }
 
-    public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs, int layoutResId)
+    public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         tokensService = service;
-        this.layoutResId = layoutResId;
         this.dataInteract = null;
         this.assetService = svs;
     }
 
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
-        BinderViewHolder holder = null;
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE:
-                holder = new TransactionHolder(getTxLayoutId(), parent, tokensService, fetchTransactionsInteract,
+                return new TransactionHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService);
-                break;
             case EventHolder.VIEW_TYPE:
-                holder = new EventHolder(R.layout.item_event, parent, tokensService, fetchTransactionsInteract,
+                return new EventHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService, this);
-                break;
             case TransactionDateHolder.VIEW_TYPE:
-                holder = new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
-                break;
+                return new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
             case LabelSortedItem.VIEW_TYPE:
-                holder = new LabelHolder(R.layout.item_activity_label, parent);
-                break;
+                return new LabelHolder(R.layout.item_activity_label, parent);
         }
-        return holder;
-    }
 
-    private int getTxLayoutId()
-    {
-        if (this.layoutResId != -1) {
-            //return R.layout.item_recent_transaction;
-            return R.layout.item_transaction;
-        } else {
-            return R.layout.item_transaction;
-        }
+        return null;
     }
 
     @Override
-    public void onBindViewHolder(BinderViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(BinderViewHolder holder, @SuppressLint("RecyclerView") int position)
+    {
         Bundle addition = new Bundle();
         addition.putString(TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL, wallet.address);
         holder.bind(items.get(position).value, addition);
@@ -159,6 +145,13 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
             handler.post(checkData);
         }
         lastItemPos = position;
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull BinderViewHolder holder)
+    {
+        super.onViewRecycled(holder);
+        holder.onDestroyView();
     }
 
     private void fetchData(long earliestDate)

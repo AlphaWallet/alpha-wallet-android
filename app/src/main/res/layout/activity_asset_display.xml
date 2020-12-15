@@ -41,10 +41,23 @@
                 android:background="@color/greyffive"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/listTickets"
+                    android:id="@+id/token_view"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="wrap_content" />
+
+                    <com.alphawallet.app.widget.ActivityHistoryList
+                        android:id="@+id/history_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                </LinearLayout>
+
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         </RelativeLayout>

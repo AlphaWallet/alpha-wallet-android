@@ -118,7 +118,7 @@ public class InputAmount extends LinearLayout
 
         if (tokensService != null)
         {
-            this.realm = tokensService.getRealmInstance(new Wallet(token.getWallet()));
+            this.realm = tokensService.getWalletRealmInstance();
             this.tickerRealm = tokensService.getTickerRealmInstance();
             bindDataSource();
         }
@@ -326,7 +326,7 @@ public class InputAmount extends LinearLayout
     {
         String strValue = editText.getText().toString();
         //get wei value
-        if (!TextUtils.isEmpty(strValue))
+        if (!TextUtils.isEmpty(strValue) && checkNumericValidity(strValue))
         {
             if (showingCrypto)
             {
@@ -341,6 +341,12 @@ public class InputAmount extends LinearLayout
         {
             return BigDecimal.ZERO;
         }
+    }
+
+    private boolean checkNumericValidity(String strValue)
+    {
+        return strValue != null && (strValue.length() > 1
+                || (strValue.length() == 1 && Character.isDigit(strValue.charAt(0))));
     }
 
     /**

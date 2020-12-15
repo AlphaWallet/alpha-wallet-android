@@ -1,6 +1,8 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -8,7 +10,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -16,9 +23,12 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.ui.widget.entity.ProgressCompleteCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
@@ -58,7 +68,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final Web3Transaction candidateTransaction;
     private final ActionSheetCallback actionSheetCallback;
 
-    boolean wroteTransaction;
+    private String txHash = null;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, BigInteger tAmount, TokensService ts)
@@ -87,7 +97,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         token = t;
         tokensService = ts;
         candidateTransaction = tx;
-        wroteTransaction = false;
 
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
         setNewBalanceText();
@@ -113,8 +122,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
            dismiss();
         });
 
-        setOnDismissListener(v ->{
-            actionSheetCallback.dismissed(wroteTransaction);
+        setOnDismissListener(v -> {
+            actionSheetCallback.dismissed(txHash);
         });
     }
 
@@ -130,7 +139,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private void setNewBalanceText()
     {
-        //Token baseCurrency = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
         BigInteger networkFee = candidateTransaction.gasPrice.multiply(candidateTransaction.gasLimit);
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(tokenAmount);
         if (token.isEthereum())
@@ -144,7 +152,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private void setAmount()
     {
-        Token baseCurrency = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
         String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(tokenAmount), token.tokenInfo.decimals);
         String displayStr = getContext().getString(R.string.total_cost, amountVal, token.getSymbol());
 
@@ -201,7 +208,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
-                confirmationWidget.showAnimate();
+                confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.sendTransaction(finalTx);
             }
@@ -211,15 +218,47 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             {
                 functionBar.setVisibility(View.VISIBLE);
                 confirmationWidget.hide();
+                functionBar.setVisibility(View.VISIBLE);
             }
         };
 
         actionSheetCallback.getAuthorisation(signCallback);
     }
 
-    public void transactionWritten(String txHash)
+    public void transactionWritten(String tx)
     {
-        confirmationWidget.startAnimate(gasWidget.getExpectedTransactionTime(), tokensService.getRealmInstance(new Wallet(token.getWallet())), txHash);
-        wroteTransaction = true;
+        txHash = tx;
+        //dismiss on message completion
+        confirmationWidget.completeProgressMessage(txHash, this::showTransactionSuccess);
+        if (!TextUtils.isEmpty(tx))
+        {
+            updateRealmTransactionFinishEstimate(tx);
+        }
+    }
+
+    public void showTransactionSuccess()
+    {
+        Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, txHash);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getContext().startActivity(intent);
+        dismiss();
+    }
+
+    private void updateRealmTransactionFinishEstimate(String txHash)
+    {
+        try (Realm realm = tokensService.getWalletRealmInstance())
+        {
+            RealmTransaction rt = realm.where(RealmTransaction.class)
+                    .equalTo("hash", txHash)
+                    .findFirst();
+
+            if (rt != null)
+            {
+                realm.executeTransaction(instance -> {
+                    rt.setExpectedCompletion(System.currentTimeMillis() + gasWidget.getExpectedTransactionTime() * 1000);
+                });
+            }
+        }
     }
 }

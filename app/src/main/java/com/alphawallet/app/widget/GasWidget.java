@@ -8,6 +8,11 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.GasPriceSpread;
@@ -23,6 +28,7 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.google.android.gms.common.api.internal.LifecycleCallback;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -50,7 +56,6 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private final TextView speedText;
     private final TextView timeEstimate;
-    private final LinearLayout editClick;
     private final Context context;
 
     private final List<GasSpeed> gasSpeeds;
@@ -65,11 +70,10 @@ public class GasWidget extends LinearLayout implements Runnable
         context = ctx;
         speedText = findViewById(R.id.text_speed);
         timeEstimate = findViewById(R.id.text_time_estimate);
-        editClick = findViewById(R.id.edit_click_layer);
 
         gasSpeeds = new ArrayList<>();
 
-        editClick.setOnClickListener(v -> {
+        setOnClickListener(v -> {
             Intent intent = new Intent(context, GasSettingsActivity.class);
             intent.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex);
             intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);

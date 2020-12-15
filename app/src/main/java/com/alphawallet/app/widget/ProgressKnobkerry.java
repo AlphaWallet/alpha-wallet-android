@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -44,6 +45,7 @@ public class ProgressKnobkerry extends RelativeLayout
         spinner.setVisibility(View.VISIBLE);
         spinnerKnob.setVisibility(View.VISIBLE);
         indeterminate.setVisibility(View.GONE);
+
         ObjectAnimator animation = ObjectAnimator.ofInt(spinner, "progress", 0, 500);
         animation.setDuration(secondsToComplete * DateUtils.SECOND_IN_MILLIS);
         animation.setInterpolator(new LinearInterpolator());
@@ -53,6 +55,57 @@ public class ProgressKnobkerry extends RelativeLayout
         rotation.setDuration(secondsToComplete * DateUtils.SECOND_IN_MILLIS);
         rotation.setRepeatCount(INFINITE);
         spinnerKnob.startAnimation(rotation);
+    }
+
+    public void startAnimation(long startSeconds, long endSeconds)
+    {
+        spinner.setVisibility(View.VISIBLE);
+        spinnerKnob.setVisibility(View.VISIBLE);
+        indeterminate.setVisibility(View.GONE);
+
+        if (endSeconds < startSeconds) endSeconds = startSeconds + 60; //hack to avoid crashes
+
+        final long currentSeconds = System.currentTimeMillis() / 1000;
+        final long spinnerCycleTime = endSeconds - startSeconds;
+
+        float fractionComplete = (float) (currentSeconds - startSeconds) / (float) (spinnerCycleTime);
+        if (fractionComplete > 1.0)
+            fractionComplete = 1.0f;
+        final int completionDuration = currentSeconds < endSeconds ?
+                (int) (endSeconds - currentSeconds) : 1;
+
+        ObjectAnimator animation = ObjectAnimator.ofInt(spinner, "progress", (int) (fractionComplete * 500), 500);
+        animation.setDuration(completionDuration * DateUtils.SECOND_IN_MILLIS);
+        animation.setInterpolator(new LinearInterpolator());
+        animation.start();
+
+        float startDegrees = 360.0f * fractionComplete;
+
+        //rotate the knob to completion, then continue spinning at the same rate
+        rotateKnob(startDegrees, completionDuration, false).setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation) { }
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                rotateKnob(0, spinnerCycleTime, true);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) { }
+        });
+    }
+
+    private RotateAnimation rotateKnob(float startDegrees, long completionDuration, boolean infinite)
+    {
+        RotateAnimation rotate = new RotateAnimation(startDegrees, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        rotate.setDuration((completionDuration) * 1000);
+        rotate.setInterpolator(new LinearInterpolator());
+        rotate.setRepeatCount(infinite ? INFINITE : 0);
+        spinnerKnob.startAnimation(rotate);
+        return rotate;
     }
 
     public void waitCycle()

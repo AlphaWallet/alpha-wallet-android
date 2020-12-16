@@ -56,6 +56,11 @@ public class FetchTransactionsInteract {
         return transactionRepository.fetchCachedTransaction(walletAddress, hash);
     }
 
+    public long fetchTxCompletionTime(String walletAddr, String hash)
+    {
+        return transactionRepository.fetchTxCompletionTime(walletAddr, hash);
+    }
+
     public Realm getRealmInstance(Wallet wallet)
     {
         return transactionRepository.getRealmInstance(wallet);
@@ -78,5 +83,10 @@ public class FetchTransactionsInteract {
     public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
     {
         return transactionRepository.storeRawTx(wallet, rawTx, timeStamp);
+    }
+
+    public void restartTransactionService()
+    {
+        transactionRepository.restartService();
     }
 }

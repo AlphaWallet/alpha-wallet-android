@@ -26,6 +26,8 @@ public class TransactionContract implements Parcelable {
     public String symbol;
     public boolean badTransaction;
 
+    protected static TransactionDecoder decoder = new TransactionDecoder();
+
     private static final BigDecimal ALL_CUTOFF_VALUE = BigDecimal.valueOf(99999999999L); //Arbitrary value beyond which we show an Approve value as 'All'
     private static final int MAX_DIGITS = 16; // Maximum amount of digits in numeric transaction value before we switch to Engineering string
 
@@ -150,7 +152,13 @@ public class TransactionContract implements Parcelable {
         }
     }
 
-    private int getOperationId()
+    public String getOperationString()
+    {
+        int operationId = getOperationId();
+        return TransactionLookup.typeToEvent(TransactionType.values()[operationId]);
+    }
+
+    protected int getOperationId()
     {
         int operationId = -1;
         if (name != null && name.length() > 0 && name.charAt(0) == '*')
@@ -228,5 +236,78 @@ public class TransactionContract implements Parcelable {
         }
 
         return supplimentalTxt;
+    }
+
+    public String getOperationToFrom(Context ctx)
+    {
+        int operationId = getOperationId();
+        if (operationId > -1)
+        {
+            int toFromId = TransactionLookup.toFromText(TransactionType.values()[operationId]);
+            return ctx.getString(toFromId);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public String getOperationAddress(Transaction tx, Token t, TransactionOperation tOp)
+    {
+        TransactionType operationId = TransactionType.values()[Math.max(getOperationId(), 0)];
+        String address = tx.to;
+        TransactionInput ip;
+
+        switch (operationId)
+        {
+            case MAGICLINK_TRANSFER:
+                break;
+            case MAGICLINK_PICKUP:
+                break;
+            case MAGICLINK_SALE:
+                break;
+            case MAGICLINK_PURCHASE:
+                break;
+            case PASS_TO:
+                break;
+            case PASS_FROM:
+                break;
+            case TRANSFER_TO:
+                address = tOp.to;
+                break;
+
+            case RECEIVE_FROM:
+            case RECEIVED:
+                address = tOp.from;
+                break;
+            case REDEEM:
+                break;
+            case ADMIN_REDEEM:
+                break;
+
+            case TRANSFER_FROM:
+                break;
+            case ALLOCATE_TO:
+                break;
+            case APPROVE:
+                //need to pull the approve details out
+                ip = decoder.decodeInput(tx.input);
+                address = ip.getFirstAddress();
+                break;
+
+            case LOAD_NEW_TOKENS:
+            case CONSTRUCTOR:
+            case TERMINATE_CONTRACT:
+                address = t.getAddress();
+                break;
+            case UNKNOWN_FUNCTION:
+            case INVALID_OPERATION:
+            case UNKNOWN:
+            case ILLEGAL_VALUE:
+                address = this.address;
+                break;
+        }
+
+        return address;
     }
 }

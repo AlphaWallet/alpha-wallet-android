@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -251,6 +253,11 @@ public class Token implements Parcelable, Comparable<Token>
         }
 
         return sb.toString();
+    }
+
+    public String getShortSymbol()
+    {
+        return Utils.getShortSymbol(getSymbol());
     }
 
     public String getSymbol()
@@ -542,7 +549,11 @@ public class Token implements Parcelable, Comparable<Token>
         String name;
         if (isEthereum())
         {
-            if (transaction.from.equalsIgnoreCase(tokenWallet))
+            if (transaction.value.equals("0") && transaction.hasInput())
+            {
+                name = ctx.getString(R.string.contract_call);
+            }
+            else if (transaction.from.equalsIgnoreCase(tokenWallet))
             {
                 name = ctx.getString(R.string.sent);
             }
@@ -812,8 +823,21 @@ public class Token implements Parcelable, Comparable<Token>
 
     public String getTransactionDestination(Transaction transaction)
     {
-        if (isEthereum()) return transaction.to;
-        else return transaction.getContract(this);
+        if (isEthereum())
+        {
+            if (transaction.from.equalsIgnoreCase(tokenWallet))
+            {
+                return transaction.to;
+            }
+            else
+            {
+                return transaction.from;
+            }
+        }
+        else
+        {
+            return transaction.getContract(this);
+        }
     }
 
     public StatusType ethereumTxImage(Transaction tx)
@@ -943,6 +967,25 @@ public class Token implements Parcelable, Comparable<Token>
             case ERC20:
             default:
                 return false;
+        }
+    }
+
+    public String getToFromText(Context context, Transaction transaction)
+    {
+        if (isEthereum())
+        {
+            if (getIsSent(transaction))
+            {
+                return context.getString(R.string.to);
+            }
+            else
+            {
+                return context.getString(R.string.from_op);
+            }
+        }
+        else
+        {
+            return transaction.getOperationToFrom(context);
         }
     }
 }

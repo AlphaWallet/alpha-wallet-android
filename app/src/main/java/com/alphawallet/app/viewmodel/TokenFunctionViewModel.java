@@ -487,6 +487,11 @@ public class TokenFunctionViewModel extends BaseViewModel
         return fetchTransactionsInteract.fetchCached(wallet.address, txHash);
     }
 
+    public long fetchExpectedTxTime(String txHash)
+    {
+        return fetchTransactionsInteract.fetchTxCompletionTime(wallet.address, txHash);
+    }
+
     @Override
     public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
@@ -511,5 +516,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.Key.WALLET, wallet);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
+    }
+
+    public void restartServices()
+    {
+        fetchTransactionsInteract.restartTransactionService();
     }
 }

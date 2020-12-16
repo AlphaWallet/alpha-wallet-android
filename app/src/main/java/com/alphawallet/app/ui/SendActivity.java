@@ -589,11 +589,16 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    public void dismissed(boolean shouldDismiss)
+    public void dismissed(String txHash)
     {
         //ActionSheet was dismissed
-        confirmationDialog.onDestroy();
-        if (shouldDismiss) finish();
+        if (!TextUtils.isEmpty(txHash))
+        {
+            Intent intent = new Intent();
+            intent.putExtra("tx_hash", txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
     }
 
     private void txWritten(TransactionData transactionData)

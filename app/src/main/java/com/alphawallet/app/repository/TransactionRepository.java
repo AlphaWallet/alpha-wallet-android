@@ -63,6 +63,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public long fetchTxCompletionTime(String walletAddr, String hash)
+	{
+		Wallet wallet = new Wallet(walletAddr);
+		return inDiskCache.fetchTxCompletionTime(wallet, hash);
+	}
+
+	@Override
 	public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
 	{
 		final Web3j web3j = getWeb3jService(chainId);
@@ -337,5 +344,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 			TransactionReceipt txr = web3j.ethGetTransactionReceipt(fetchedTx.getHash()).send().getResult();
 			return inDiskCache.storeRawTx(wallet, rawTx, timeStamp, txr.isStatusOK());
 		});
+	}
+
+	@Override
+	public void restartService()
+	{
+		transactionsService.startUpdateCycle();
 	}
 }

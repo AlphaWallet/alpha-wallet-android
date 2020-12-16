@@ -52,6 +52,8 @@ import static com.alphawallet.app.repository.EthereumNetworkBase.POA_ID;
 
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
+    private static final int GAS_PRECISION = 5; //5 dp for gas
+
     @Inject
     GasSettingsViewModelFactory viewModelFactory;
     GasSettingsViewModel viewModel;
@@ -196,7 +198,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             final ImageView checkbox;
             final TextView speedName;
             final TextView speedGwei;
-            final TextView speedCost;
+            final TextView speedCostEth;
+            final TextView speedCostFiat;
             final TextView speedTime;
             final View itemLayout;
 
@@ -205,7 +208,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 super(view);
                 checkbox = view.findViewById(R.id.checkbox);
                 speedName = view.findViewById(R.id.text_speed);
-                speedCost = view.findViewById(R.id.text_speed_cost);
+                speedCostFiat = view.findViewById(R.id.text_speed_cost);
+                speedCostEth = view.findViewById(R.id.text_speed_cost_eth);
                 speedTime = view.findViewById(R.id.text_speed_time);
                 itemLayout = view.findViewById(R.id.layout_list_item);
                 speedGwei = view.findViewById(R.id.text_gwei);
@@ -235,7 +239,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 notifyDataSetChanged();
             });
 
-            String speedGwei = context.getString(R.string.bracketed, BalanceUtils.weiToGweiBI(gs.gasPrice).toBigInteger().toString());
+            String speedGwei = BalanceUtils.weiToGweiBI(gs.gasPrice).toBigInteger().toString();
 
             if (gs.speed.equals(context.getString(R.string.speed_custom)))
             {
@@ -255,16 +259,26 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 }
             }
 
-            String gasAmountInBase = BalanceUtils.getScaledValueScientific(new BigDecimal(gs.gasPrice).multiply(useGasLimit), baseCurrency.tokenInfo.decimals);
-            if (gasAmountInBase.equals("0")) gasAmountInBase = "0.0001";
+            String gasAmountInBase = BalanceUtils.getScaledValueScientific(new BigDecimal(gs.gasPrice).multiply(useGasLimit), baseCurrency.tokenInfo.decimals, GAS_PRECISION);
+            if (gasAmountInBase.equals("0")) gasAmountInBase = "0.00001"; //NB no need to allow for zero gas chains; this activity wouldn't appear
             String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
             String displayTime = context.getString(R.string.gas_time_suffix,
                     Utils.shortConvertTimePeriodInSeconds(gs.seconds, context));
-            displayStr += getGasCost(gasAmountInBase);
+            String fiatStr = getGasCost(gasAmountInBase);
 
-            holder.speedGwei.setText(speedGwei);
-            holder.speedCost.setText(displayStr);
+            holder.speedGwei.setText(context.getString(R.string.gas_price_widget, speedGwei));
+            holder.speedCostEth.setText(context.getString(R.string.gas_fiat_suffix, gasAmountInBase, baseCurrency.getSymbol()));
             holder.speedTime.setText(displayTime);
+
+            if (fiatStr.length() > 0)
+            {
+                holder.speedCostFiat.setVisibility(View.VISIBLE);
+                holder.speedCostFiat.setText(fiatStr);
+            }
+            else
+            {
+                holder.speedCostFiat.setVisibility(View.GONE);
+            }
 
             setCustomGasDetails(position);
         }
@@ -272,7 +286,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         private void blankCustomHolder(CustomViewHolder holder)
         {
             holder.speedGwei.setText(context.getString(R.string.bracketed, context.getString(R.string.set_your_speed)));
-            holder.speedCost.setText("");
+            holder.speedCostEth.setText("");
+            holder.speedCostFiat.setText("");
             holder.speedTime.setText("");
         }
 
@@ -290,9 +305,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     //calculate equivalent fiat
                     double cryptoRate = Double.parseDouble(rtt.getPrice());
                     double cryptoAmount = Double.parseDouble(gasAmountInBase);
-                    costStr = context.getString(R.string.gas_fiat_suffix,
-                            TickerService.getCurrencyString(cryptoAmount * cryptoRate),
-                            rtt.getCurrencySymbol());
+                    costStr = TickerService.getCurrencyString(cryptoAmount * cryptoRate);
                 }
             }
             catch (Exception e)

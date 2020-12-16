@@ -5,6 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -52,8 +54,8 @@ public class Transaction implements Parcelable {
 
     public boolean isConstructor = false;
 
-	private static TransactionDecoder decoder = null;
-	private static ParseMagicLink parser = null;
+	public static final TransactionDecoder decoder = new TransactionDecoder();
+	public static ParseMagicLink parser = null;
 
 	public boolean isPending()
 	{
@@ -109,7 +111,6 @@ public class Transaction implements Parcelable {
 
 		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
 		{
-			if (decoder == null) decoder = new TransactionDecoder(); //initialise decoder on demand
 			to = contractAddress;
 			//add a constructor here
 			operations = generateERC875Op();
@@ -129,12 +130,10 @@ public class Transaction implements Parcelable {
 			TransactionOperation[] o = new TransactionOperation[0];
 
 			//TODO: Handle transaction with multiple operations
-			if (input != null && input.length() >= 10)
+			if (hasInput())
 			{
 				TransactionOperation op = null;
 				TransactionContract ct;
-
-				if (decoder == null) decoder = new TransactionDecoder(); //initialise decoder on demand
 
 				f = decoder.decodeInput(input);
 				//is this a trade?
@@ -483,7 +482,14 @@ public class Transaction implements Parcelable {
 
 		if (operation == null || operation.contract == null)
 		{
-			return "";
+			if (hasInput())
+			{
+				return to;
+			}
+			else
+			{
+				return "";
+			}
 		}
 		else
 		{
@@ -494,24 +500,47 @@ public class Transaction implements Parcelable {
 	public String getOperationName(Context ctx)
 	{
 		String txName = null;
-		try
+		if (isPending())
 		{
-			if (isPending())
-			{
-				txName = ctx.getString(R.string.status_pending);
-			}
-			else if (operations != null && operations.length > 0)
-			{
-				TransactionOperation operation = operations[0];
-				txName = operation.getOperationName(ctx);
-			}
+			txName = ctx.getString(R.string.status_pending);
 		}
-		catch (NumberFormatException e)
+		else if (operations != null && operations.length > 0)
 		{
-			//Silent fail, number was invalid just display default
+			TransactionOperation operation = operations[0];
+			txName = operation.getOperationName(ctx);
+		}
+		else if (hasInput())
+		{
+			TransactionInput ti = decoder.decodeInput(input);
+			if (!ti.functionData.functionName.equals("N/A"))
+			{
+				txName = ti.functionData.functionName;
+			}
+			else
+			{
+				txName = ctx.getString(R.string.contract_call);
+			}
 		}
 
 		return txName;
+	}
+
+	public boolean hasInput()
+	{
+		return input != null && input.length() >= 10;
+	}
+
+	public String getOperationToFrom(Context ctx)
+	{
+		if (operations != null && operations.length > 0)
+		{
+			TransactionOperation operation = operations[0];
+			return operation.getOperationToFrom(ctx);
+		}
+		else
+		{
+			return ctx.getString(R.string.empty);
+		}
 	}
 
 	public String getContract(Token token)
@@ -525,7 +554,7 @@ public class Transaction implements Parcelable {
 		}
 		else
 		{
-			return token.getFullName();
+			return operation.getOperationAddress(this, token);
 		}
 	}
 
@@ -628,4 +657,35 @@ public class Transaction implements Parcelable {
 		resultMap.put("__value", new RealmAuxData.EventResult("", value));
 		resultMap.put("__chainId", new RealmAuxData.EventResult("", String.valueOf(chainId)));
     }
+
+	public String getEventName()
+	{
+		if (operations != null && operations.length > 0)
+		{
+			TransactionOperation operation = operations[0];
+			return operation.getOperationString();
+		}
+		else
+		{
+			return "";
+		}
+	}
+
+	public int getSupplementalColour(String supplementalTxt)
+	{
+		if (!TextUtils.isEmpty(supplementalTxt))
+		{
+			switch (supplementalTxt.charAt(0))
+			{
+				case '-':
+					return R.color.red;
+				case '+':
+					return R.color.green;
+				default:
+					break;
+			}
+		}
+
+		return R.color.black;
+	}
 }

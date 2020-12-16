@@ -20,6 +20,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.entity.SigReturnType;
@@ -99,9 +100,8 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             Token t = assetDefinitionService.getTokenFromService(chainId, address);
             if (t != null)
             {
+                tokenSciptCardHolder.chainName.setChainID(t.tokenInfo.chainId);
                 tokenSciptCardHolder.chainName.setVisibility(View.VISIBLE);
-                tokenSciptCardHolder.chainName.setText(t.getNetworkName());
-                Utils.setChainColour(tokenSciptCardHolder.chainName, t.tokenInfo.chainId);
                 String tokenSpec = context.getString(R.string.token_spec, address, originContract.contractInterface);
                 tokenSciptCardHolder.txtTokenAddress.setText(tokenSpec);
                 tokenSciptCardHolder.tokenFullName.setText(t.getFullName());
@@ -248,7 +248,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         final TextView txtTokenFile;
         final TextView txtTokenAddress;
         final TextView tokenFullName;
-        final TextView chainName;
+        final ChainName chainName;
         final LinearLayout overrideLayer;
         final ImageView imgLock;
         final LinearLayout clickHolder;
@@ -260,7 +260,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             txtTokenFile = itemView.findViewById(R.id.token_file);
             txtTokenAddress = itemView.findViewById(R.id.token_address);
             tokenFullName = itemView.findViewById(R.id.token_name);
-            chainName = itemView.findViewById(R.id.text_chain_name);
+            chainName = itemView.findViewById(R.id.chain_name);
             imgLock = itemView.findViewById(R.id.image_lock);
             overrideLayer = itemView.findViewById(R.id.layout_override);
             clickHolder = itemView.findViewById(R.id.layout_click_holder);

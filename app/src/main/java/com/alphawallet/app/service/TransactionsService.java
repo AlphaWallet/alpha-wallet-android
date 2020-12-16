@@ -72,7 +72,17 @@ public class TransactionsService
         this.currentAddress = preferenceRepository.getCurrentWalletAddress();
         this.context = ctx;
 
+        checkTransactionReset();
         fetchTransactions();
+    }
+
+    private void checkTransactionReset()
+    {
+        if (currentAddress == null) return;
+        //checks to see if we need a tx fetch reset
+        transactionsClient.checkTransactionsForEmptyFunctions(currentAddress)
+                .subscribeOn(Schedulers.computation())
+                .subscribe();
     }
 
     private void fetchTransactions()
@@ -111,6 +121,7 @@ public class TransactionsService
      */
     private void checkTransactions()
     {
+        if (currentAddress == null) return;
         List<Integer> filters = tokensService.getNetworkFilters();
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
         int chainId = filters.get(currentChainIndex);
@@ -133,6 +144,7 @@ public class TransactionsService
 
     private void checkTransactionQueue()
     {
+        if (currentAddress == null) return;
         if (fetchTransactionDisposable == null)
         {
             Token t = tokensService.getRequiresTransactionUpdate(getPendingChains());
@@ -223,6 +235,7 @@ public class TransactionsService
             stopUpdate();
             currentAddress = newWallet.address;
             fetchTransactions();
+            checkTransactionReset();
         }
     }
 
@@ -279,14 +292,20 @@ public class TransactionsService
                     {
                         //detect error and write to database
                         web3j.ethGetTransactionReceipt(tx.hash).sendAsync().thenAccept(receipt -> {
-                            //get timestamp and write tx
-                            EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
-                                    .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe().isDisposed();
-
-                            }).exceptionally(throwable -> {
+                            if (receipt != null)
+                            {
+                                //get timestamp and write tx
+                                EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
+                                        .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe().isDisposed();
+                            }
+                            else
+                            {
+                                System.out.println("YOLESS");
+                            }
+                        }).exceptionally(throwable -> {
                                 throwable.printStackTrace();
                                 return null;
                         });

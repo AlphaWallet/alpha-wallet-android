@@ -41,18 +41,12 @@
                     android:layout_marginTop="@dimen/dp16"
                     android:text="@string/value" />
 
-                <TextView
-                    android:id="@+id/text_chain_name"
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/chain_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
-                    android:background="@drawable/background_status_pending"
-                    android:fontFamily="@font/font_bold"
-                    android:padding="2dp"
-                    android:text="@string/action_clear"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
                     android:visibility="gone" />
 
                 <LinearLayout

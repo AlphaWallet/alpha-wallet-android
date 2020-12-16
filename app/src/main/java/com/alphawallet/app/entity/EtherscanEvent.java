@@ -2,6 +2,13 @@ package com.alphawallet.app.entity;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.token.tools.Numeric;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.math.BigInteger;
+
 /**
  * Created by JB on 21/10/2020.
  */
@@ -12,11 +19,11 @@ public class EtherscanEvent
     public String hash;
     public int nonce;
     String blockHash;
-    String from;
+    public String from;
     public String contractAddress;
-    String to;
+    public String to;
     String tokenID;
-    String value;
+    public String value;
     public String tokenName;
     public String tokenSymbol;
     public String tokenDecimal;
@@ -24,11 +31,13 @@ public class EtherscanEvent
     String gasPrice;
     String gasUsed;
 
-    public Transaction createTransaction(String walletAddress, NetworkInfo networkInfo)
+    public Transaction createTransaction(String walletAddress, @NotNull NetworkInfo networkInfo)
     {
         TransactionOperation[] operations = createOperation(walletAddress);
 
-        return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, "0x",
+        String input = Numeric.toHexString(TokenRepository.createTokenTransferData(to, new BigInteger(value))); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
+
+        return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, input,
                 gasUsed, networkInfo.chainId, operations);
     }
 

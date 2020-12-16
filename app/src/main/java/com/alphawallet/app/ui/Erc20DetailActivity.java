@@ -12,7 +12,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,7 +26,6 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
-import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
@@ -70,7 +68,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private RealmResults<RealmToken> realmTokenUpdates;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
@@ -106,11 +105,10 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (activityHistoryList != null) return;
         activityHistoryList = findViewById(R.id.history_list);
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
+                viewModel.getAssetDefinitionService());
 
         adapter.setDefaultWallet(wallet);
 
-        String tokenAddress = token.isEthereum() ? "eth" : token.getAddress();
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
                 token, BigInteger.ZERO, HISTORY_LENGTH);
@@ -146,7 +144,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void getIntentData() {
+    private void getIntentData()
+    {
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
@@ -193,21 +192,22 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-                break;
-            }
-            case R.id.action_qr:
-                viewModel.showContractInfo(this, wallet, token);
-                break;
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            finish();
+        }
+        else if (item.getItemId() == R.id.action_qr)
+        {
+            viewModel.showContractInfo(this, wallet, token);
         }
         return false;
     }
@@ -236,6 +236,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             setUpRecentTransactionsView();
         }
         viewModel.getTokensService().setFocusToken(token);
+        viewModel.restartServices();
     }
 
     @Override
@@ -260,5 +261,25 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     public void showReceive()
     {
         viewModel.showMyAddress(this, wallet, token);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        String transactionHash = null;
+
+        switch (requestCode)
+        {
+            case C.COMPLETED_TRANSACTION: //completed a transaction send and got with either a hash or a null
+                if (data != null) transactionHash = data.getStringExtra("tx_hash");
+                if (transactionHash != null)
+                {
+                    //display transaction complete message
+
+                }
+                break;
+        }
     }
 }

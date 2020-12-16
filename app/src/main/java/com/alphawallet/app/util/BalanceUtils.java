@@ -102,6 +102,11 @@ public class BalanceUtils {
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals)
     {
+        return getScaledValueScientific(value, decimals, 4);
+    }
+
+    public static String getScaledValueScientific(final BigDecimal value, long decimals, int dPlaces)
+    {
         String returnValue;
         BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
         final NumberFormat formatter = new DecimalFormat("0.####E0");
@@ -120,9 +125,12 @@ public class BalanceUtils {
             returnValue = formatter.format(correctedValue);
             returnValue = returnValue.replace("E", "e+");
         }
-        else //otherwise display in standard pattern to 4 dp
+        else //otherwise display in standard pattern to dPlaces dp
         {
-            DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
+            StringBuilder sb = new StringBuilder();
+            sb.append("###,###,###,##0.");
+            for (int i = 0; i < dPlaces; i++) { sb.append("#"); }
+            DecimalFormat df = new DecimalFormat(sb.toString());
             df.setRoundingMode(RoundingMode.DOWN);
             returnValue = df.format(correctedValue);
         }

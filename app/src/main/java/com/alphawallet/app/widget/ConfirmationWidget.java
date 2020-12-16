@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -12,6 +13,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.ui.widget.entity.ProgressCompleteCallback;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -34,6 +36,7 @@ public class ConfirmationWidget extends RelativeLayout
         progress = findViewById(R.id.progress_knob);
         progressLayout = findViewById(R.id.layout_confirmation);
         hashText = findViewById(R.id.hash_text);
+        realmTransactionUpdates = null;
     }
 
     public void startAnimate(long expectedTransactionTime, Realm transactionRealm, String txHash)
@@ -48,6 +51,53 @@ public class ConfirmationWidget extends RelativeLayout
             hashText.setAlpha(1.0f);
             hashText.setText(txHash);
             hashText.animate().setStartDelay(2000).alpha(0.0f).setDuration(1500);
+        }
+    }
+
+    public void startProgressCycle(int cycleTime)
+    {
+        progress.setVisibility(View.VISIBLE);
+        progressLayout.setVisibility(View.VISIBLE);
+        progress.startAnimation(cycleTime);
+    }
+
+    public void completeProgressMessage(String message, final ProgressCompleteCallback callback)
+    {
+        Animator.AnimatorListener animatorListener = new Animator.AnimatorListener()
+        {
+            @Override
+            public void onAnimationStart(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator animation) { callback.progressComplete(); }
+
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+        };
+
+        if (!TextUtils.isEmpty(message))
+        {
+            completeProgressSuccess(true);
+            hashText.setVisibility(View.VISIBLE);
+            hashText.setAlpha(1.0f);
+            hashText.setText(message);
+
+            hashText.animate()
+                    .alpha(0.0f)
+                    .setDuration(1500)
+                    .setListener(animatorListener);
+        }
+        else
+        {
+            completeProgressSuccess(false);
+            hashText.setVisibility(View.GONE);
+            hashText.animate()
+                    .alpha(0.0f)
+                    .setDuration(1500)
+                    .setListener(animatorListener);
         }
     }
 
@@ -74,7 +124,7 @@ public class ConfirmationWidget extends RelativeLayout
 
     private void completeProgressSuccess(boolean success)
     {
-        realmTransactionUpdates.removeAllChangeListeners();
+        if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         progress.setVisibility(View.VISIBLE);
         progressLayout.setVisibility(View.VISIBLE);
         progress.setComplete(success);

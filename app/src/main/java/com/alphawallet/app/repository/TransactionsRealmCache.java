@@ -68,6 +68,28 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
+    public long fetchTxCompletionTime(Wallet wallet, String hash)
+    {
+        try (Realm instance = realmManager.getRealmInstance(wallet))
+        {
+            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                    .equalTo("hash", hash)
+                    .findFirst();
+
+            if (realmTx != null)
+            {
+                return realmTx.getExpectedCompletion();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return System.currentTimeMillis() + 60*1000;
+    }
+
+    @Override
     public Transaction[] fetchPendingTransactions(String currentAddress)
     {
         Transaction[] pendingTransactions;

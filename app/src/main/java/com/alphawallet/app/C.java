@@ -14,6 +14,7 @@ public abstract class C {
 
     public static final int BARCODE_READER_REQUEST_CODE = 1;
     public static final int SET_GAS_SETTINGS = 2;
+    public static final int COMPLETED_TRANSACTION = 3;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -26,7 +27,7 @@ public abstract class C {
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";
-    public static final String BINANCE_TEST_NETWORK = "Binance (Test)";
+    public static final String BINANCE_TEST_NETWORK = "BSC TestNet";
     public static final String BINANCE_MAIN_NETWORK = "Binance";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";

@@ -56,8 +56,8 @@
                     android:layout_marginTop="@dimen/dp12"
                     android:layout_marginBottom="15dp"
                     android:visibility="visible"
-                    custom:hint="@string/recipient"
-                    custom:label="@string/recipient_address"
+                    custom:label="@string/recipient"
+                    custom:hint="@string/recipient_address"
                     custom:show_header="true"
                     custom:ens="true"/>
 

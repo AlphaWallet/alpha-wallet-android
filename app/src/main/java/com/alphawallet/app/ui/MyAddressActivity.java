@@ -206,17 +206,17 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch (item.getItemId())
+        if (item.getItemId() == R.id.action_receive_payment)
         {
-            case R.id.action_receive_payment:
-                showPointOfSaleMode();
-                break;
-            case R.id.action_show_contract:
-                showContract();
-                break;
-            case R.id.action_my_address:
-                showAddress();
-                break;
+            showPointOfSaleMode();
+        }
+        else if (item.getItemId() == R.id.action_show_contract)
+        {
+            showContract();
+        }
+        else if (item.getItemId() == R.id.action_my_address)
+        {
+            showAddress();
         }
 
         return super.onOptionsItemSelected(item);

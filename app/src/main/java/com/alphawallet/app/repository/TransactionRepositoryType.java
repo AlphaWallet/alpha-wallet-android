@@ -26,6 +26,7 @@ public interface TransactionRepositoryType {
 	Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, int chainId);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);
+	long fetchTxCompletionTime(String walletAddr, String hash);
 
 	Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
 
@@ -39,4 +40,6 @@ public interface TransactionRepositoryType {
 
 	RealmAuxData fetchCachedEvent(String walletAddress, String eventKey);
 	Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp);
+
+    void restartService();
 }

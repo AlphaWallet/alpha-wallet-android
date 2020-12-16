@@ -26,9 +26,13 @@ import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.realm.Case;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
@@ -41,7 +45,9 @@ public class ActivityHistoryList extends LinearLayout
     private ActivityAdapter activityAdapter;
     private Realm realm;
     private RealmResults<RealmTransaction> realmTransactionUpdates;
+    private RealmQuery<RealmTransaction> realmUpdateQuery;
     private RealmResults<RealmAuxData> auxRealmUpdates;
+    @Nullable private Disposable updateCheck; //performs a background check to ensure we get completion
     private final RecyclerView recentTransactionsView;
     private final LinearLayout noTxNotice;
     private final ProgressBar loadingTransactions;
@@ -78,26 +84,19 @@ public class ActivityHistoryList extends LinearLayout
 
         if (token.isEthereum())
         {
-            realmTransactionUpdates = getEthListener(token.tokenInfo.chainId, wallet, historyCount);
+            realmUpdateQuery = getEthListener(token.tokenInfo.chainId, wallet, historyCount);
             initViews(true);
         }
         else
         {
-            realmTransactionUpdates = getContractListener(token.tokenInfo.chainId, wallet, token.getAddress(), historyCount);
+            realmUpdateQuery = getContractListener(token.tokenInfo.chainId, token.getAddress(), historyCount);
             initViews(false);
         }
 
-        realmTransactionUpdates.addChangeListener(realmTransactions -> {
-            List<ActivityMeta> metas = new ArrayList<>();
-            //make list
-            for (RealmTransaction item : realmTransactions)
-            {
-                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
-                metas.add(tm);
-            }
+        realmTransactionUpdates = realmUpdateQuery.findAllAsync();
 
-            addItems(metas);
-        });
+        //handle updated realm transactions
+        realmTransactionUpdates.addChangeListener(this::handleRealmTransactions);
 
         auxRealmUpdates = RealmAuxData.getEventListener(realm, token, tokenId, historyCount, 0);
         auxRealmUpdates.addChangeListener(realmEvents -> {
@@ -110,6 +109,29 @@ public class ActivityHistoryList extends LinearLayout
 
             addItems(metas);
         });
+    }
+
+    private void handleRealmTransactions(RealmResults<RealmTransaction> realmTransactions)
+    {
+        boolean hasPending = false;
+        List<ActivityMeta> metas = new ArrayList<>();
+        for (RealmTransaction item : realmTransactions)
+        {
+            TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
+            metas.add(tm);
+            if (tm.isPending) hasPending = true;
+        }
+
+        addItems(metas);
+
+        if (hasPending)
+        {
+            startUpdateCheck();
+        }
+        else if (!hasPending)
+        {
+            stopUpdateCheck();
+        }
     }
 
     private void initViews(boolean isEth)
@@ -128,24 +150,27 @@ public class ActivityHistoryList extends LinearLayout
         }
     }
 
-    private RealmResults<RealmTransaction> getContractListener(int chainId, Wallet wallet, String tokenAddress, int count)
+    private RealmQuery<RealmTransaction> getContractListener(int chainId, String tokenAddress, int count)
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)
                 .beginGroup().not().equalTo("input", "0x").and().equalTo("to", tokenAddress, Case.INSENSITIVE).endGroup()
                 .equalTo("chainId", chainId)
-                .limit(count)
-                .findAllAsync();
+                .limit(count);
     }
 
-    private RealmResults<RealmTransaction> getEthListener(int chainId, Wallet wallet, int count)
+    private RealmQuery<RealmTransaction> getEthListener(int chainId, Wallet wallet, int count)
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)
-                .beginGroup().equalTo("input", "0x").or().equalTo("from", wallet.address, Case.INSENSITIVE).endGroup()
+                .equalTo("input", "0x")
+                .beginGroup()
+                .equalTo("to", wallet.address, Case.INSENSITIVE)
+                .or()
+                .equalTo("from", wallet.address, Case.INSENSITIVE)
+                .endGroup()
                 .equalTo("chainId", chainId)
-                .limit(count)
-                .findAllAsync();
+                .limit(count);
     }
 
     private void addItems(List<ActivityMeta> metas)
@@ -171,5 +196,33 @@ public class ActivityHistoryList extends LinearLayout
         if (auxRealmUpdates != null) auxRealmUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
         handler.removeCallbacksAndMessages(null);
+        stopUpdateCheck();
+    }
+
+    //Start update check on the database if anything is pending. Sometimes the listener doesn't pick up the change.
+    private void startUpdateCheck()
+    {
+        if (updateCheck == null || updateCheck.isDisposed())
+        {
+            updateCheck = Observable.interval(0, 10, TimeUnit.SECONDS)
+                    .doOnNext(l -> checkTransactions()).subscribe();
+        }
+    }
+
+    private void stopUpdateCheck()
+    {
+        if (updateCheck != null && !updateCheck.isDisposed()) updateCheck.dispose();
+        updateCheck = null;
+    }
+
+    private void checkTransactions()
+    {
+        if (realmUpdateQuery != null)
+        {
+            handler.post(() -> {
+                RealmResults<RealmTransaction> rTx = realmUpdateQuery.findAll();
+                handleRealmTransactions(rTx);
+            });
+        }
     }
 }

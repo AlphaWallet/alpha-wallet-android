@@ -28,4 +28,6 @@ public interface TransactionLocalSource {
 	RealmAuxData fetchEvent(String walletAddress, String eventKey);
 
 	Transaction storeRawTx(Wallet wallet, EthTransaction object, long timeStamp, boolean isSuccessful);
+
+    long fetchTxCompletionTime(Wallet wallet, String hash);
 }

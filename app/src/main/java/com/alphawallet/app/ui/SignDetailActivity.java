@@ -14,6 +14,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.Utils;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class SignDetailActivity extends BaseActivity
         {
             SignRecord record = signRecords.get(position);
 
-            holder.date.setText(localiseUnixTime(record.date));
+            holder.date.setText(Utils.localiseUnixTime(getApplicationContext(), record.date/1000));
             holder.type.setText(record.type);
             holder.detail.setText(record.message);
         }
@@ -85,14 +86,6 @@ public class SignDetailActivity extends BaseActivity
         public int getItemCount()
         {
             return signRecords.size();
-        }
-
-        private String localiseUnixTime(long timeStamp)
-        {
-            Date date = new java.util.Date(timeStamp);
-            DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(getApplication()));
-            DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(getApplication()));
-            return timeFormat.format(date) + " | " + dateFormat.format(date);
         }
     }
 }

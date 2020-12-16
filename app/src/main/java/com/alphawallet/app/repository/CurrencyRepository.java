@@ -58,4 +58,13 @@ public class CurrencyRepository implements CurrencyRepositoryType {
         }
         return null;
     }
+
+    public static int getFlagByISO(String currencyIsoCode) {
+        for (CurrencyItem c : CURRENCIES) {
+            if (currencyIsoCode.equals(c.getCode())) {
+                return c.getFlag();
+            }
+        }
+        return 0;
+    }
 }

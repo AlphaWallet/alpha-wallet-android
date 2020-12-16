@@ -1,16 +1,15 @@
 package com.alphawallet.app.ui;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.widget.AWalletAlertDialog;
-
 
 public abstract class BaseActivity extends AppCompatActivity {
 
@@ -93,30 +92,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (message != null) {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             BaseViewModel.onPushToast(null);
-        }
-    }
-
-    public void displayMarketQueueSuccessDialog(Integer resId) {
-        if (resId != null) {
-            AWalletAlertDialog dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.SUCCESS);
-            dialog.setTitle(resId);
-            dialog.setButtonText(R.string.dialog_go_to_listings);
-            dialog.setButtonListener(v -> dialog.dismiss());
-            dialog.show();
-            BaseViewModel.onMarketQueueSuccess(null);
-        }
-    }
-
-    public void displayMarketQueueErrorDialog(Integer resId) {
-        if (resId != null) {
-            AWalletAlertDialog dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.NONE);
-            dialog.setTitle(resId);
-            dialog.setButtonText(R.string.dialog_ok);
-            dialog.setButtonListener(v -> dialog.dismiss());
-            dialog.show();
-            BaseViewModel.onMarketQueueError(null);
         }
     }
 }

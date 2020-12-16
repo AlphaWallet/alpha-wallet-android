@@ -12,5 +12,5 @@ public interface ActionSheetCallback
 {
     void getAuthorisation(SignAuthenticationCallback callback);
     void sendTransaction(Web3Transaction finalTx);
-    void dismissed(boolean shouldDismissingCallingActivity);
+    void dismissed(String txHash);
 }

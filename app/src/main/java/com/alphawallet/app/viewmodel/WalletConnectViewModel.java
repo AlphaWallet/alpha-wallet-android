@@ -22,6 +22,7 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
@@ -171,7 +172,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {
         resetSignDialog();
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, 1)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, EthereumNetworkBase.MAINNET_ID)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),

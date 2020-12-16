@@ -42,10 +42,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/layout_header"
-        android:layout_marginStart="@dimen/dp8"
-        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginStart="@dimen/dp12"
+        android:layout_marginEnd="@dimen/dp12"
         android:background="@drawable/background_password_entry"
-        android:layout_marginTop="@dimen/dp16">
+        android:layout_marginTop="@dimen/dp22">
 
         <AutoCompleteTextView
             android:id="@+id/edit_text"

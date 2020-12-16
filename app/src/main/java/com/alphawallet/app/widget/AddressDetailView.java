@@ -25,6 +25,7 @@ public class AddressDetailView extends LinearLayout
     private final ImageView recipientDetails;
     private final ImageView addressBlockie;
     private final LinearLayout layoutDetails;
+    private final LinearLayout layoutHolder;
 
     public AddressDetailView(Context context, @Nullable AttributeSet attrs)
     {
@@ -36,6 +37,7 @@ public class AddressDetailView extends LinearLayout
         recipientDetails = findViewById(R.id.image_more);
         addressBlockie = findViewById(R.id.blockie);
         layoutDetails = findViewById(R.id.layout_detail);
+        layoutHolder = findViewById(R.id.layout_holder);
     }
 
     public void setupAddress(String address, String ensName)
@@ -46,7 +48,7 @@ public class AddressDetailView extends LinearLayout
         textFullAddress.setText(address);
         textEnsName.setText(ensName);
 
-        recipientDetails.setOnClickListener(v -> {
+        layoutHolder.setOnClickListener(v -> {
             if (layoutDetails.getVisibility() == View.GONE)
             {
                 layoutDetails.setVisibility(View.VISIBLE);

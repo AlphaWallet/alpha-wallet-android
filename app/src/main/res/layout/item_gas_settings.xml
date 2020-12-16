@@ -34,25 +34,18 @@
             android:gravity="start"
             android:textSize="@dimen/sp16"/>
 
-        <LinearLayout
-            android:id="@+id/edit_click_layer"
+        <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_weight="0.6"
-            android:background="@color/white">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:textColor="@color/azure"
-                android:lines="1"
-                android:textSize="@dimen/sp17"
-                android:text="@string/edit"
-                android:visibility="visible" />
-
-        </LinearLayout>
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center_horizontal"
+            android:textColor="@color/azure"
+            android:lines="1"
+            android:textSize="@dimen/sp17"
+            android:text="@string/edit"
+            android:visibility="visible" />
 
     </LinearLayout>
 

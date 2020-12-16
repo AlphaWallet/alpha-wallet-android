@@ -496,6 +496,18 @@ public class TokensService
         return tokenRepository.getRealmInstance(wallet);
     }
 
+    public Realm getWalletRealmInstance()
+    {
+        if (currentAddress != null)
+        {
+            return tokenRepository.getRealmInstance(new Wallet(currentAddress));
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /**
      * Called when we create a transaction
      * @param chainId

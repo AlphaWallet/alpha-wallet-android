@@ -3,6 +3,7 @@ package com.alphawallet.app.util;
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
@@ -13,6 +14,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 
 import java.io.FileInputStream;
@@ -25,6 +27,7 @@ import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,12 +89,33 @@ public class Utils {
         return result;
     }
 
+    public static boolean isValidValue(String testStr)
+    {
+        boolean result = false;
+        if (testStr != null && testStr.length() > 0)
+        {
+            result = true;
+            for (int i = 0; i < testStr.length(); i++)
+            {
+                char c = testStr.charAt(i);
+                if (!Character.isDigit(c) && !(c == '.' || c == ','))
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
     private static String getFirstWord(String text) {
+        text = text.trim();
         int index = text.indexOf(' ');
         if (index > -1) {
             return text.substring(0, index).trim();
         } else {
-            return text;
+            return text.trim();
         }
     }
 
@@ -102,6 +126,20 @@ public class Utils {
         if (!TextUtils.isEmpty(firstWord))
         {
             return firstWord.substring(0, Math.min(firstWord.length(), 4)).toUpperCase();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public static String getShortSymbol(String text)
+    {
+        if (TextUtils.isEmpty(text)) return "";
+        String firstWord = getFirstWord(text);
+        if (!TextUtils.isEmpty(firstWord))
+        {
+            return firstWord.substring(0, Math.min(firstWord.length(), 5)).toUpperCase();
         }
         else
         {
@@ -353,6 +391,7 @@ public class Utils {
     }
 
     public static String formatAddress(String address) {
+        address = Keys.toChecksumAddress(address);
         String result = "";
         String firstSix = address.substring(0, 6);
         String lastSix = address.substring(address.length()-4);
@@ -532,6 +571,21 @@ public class Utils {
         return timeStr;
     }
 
+    public static String localiseUnixTime(Context ctx, long timeStampInSec)
+    {
+        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        return timeFormat.format(date);
+    }
+
+    public static String localiseUnixDate(Context ctx, long timeStampInSec)
+    {
+        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
+        return timeFormat.format(date) + " | " + dateFormat.format(date);
+    }
+
     public static long randomId() {
         return new Date().getTime();
     }
@@ -579,5 +633,10 @@ public class Utils {
         tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
 
         return tURL;
+    }
+
+    public static boolean isContractCall(Context context, String operationName)
+    {
+        return !TextUtils.isEmpty(operationName) && context.getString(R.string.contract_call).equals(operationName);
     }
 }

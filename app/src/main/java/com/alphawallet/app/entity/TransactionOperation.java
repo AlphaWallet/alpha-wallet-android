@@ -99,6 +99,30 @@ public class TransactionOperation implements Parcelable {
         }
     }
 
+    public String getOperationToFrom(Context ctx)
+    {
+        if (contract != null)
+        {
+            return contract.getOperationToFrom(ctx);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public String getOperationString()
+    {
+        if (contract != null)
+        {
+            return contract.getOperationString();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     public String getValue(int decimals)
     {
         try
@@ -126,5 +150,10 @@ public class TransactionOperation implements Parcelable {
     public BigDecimal getRawValue() throws Exception
     {
         return new BigDecimal(value);
+    }
+
+    public String getOperationAddress(Transaction tx, Token t)
+    {
+        return contract.getOperationAddress(tx, t, this);
     }
 }

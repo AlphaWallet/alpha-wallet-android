@@ -220,4 +220,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(transaction::postValue, this::onError);
     }
+
+    public void restartServices()
+    {
+        fetchTransactionsInteract.restartTransactionService();
+    }
 }

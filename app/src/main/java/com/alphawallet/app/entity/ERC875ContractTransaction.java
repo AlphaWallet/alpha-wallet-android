@@ -311,6 +311,10 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     @Override
     public String getOperationName(Context ctx)
     {
+        if (operation == TransactionType.LOAD_NEW_TOKENS)
+        {
+            System.out.println("YOLESS");
+        }
         return ctx.getString(TransactionLookup.typeToName(operation));
     }
 
@@ -352,6 +356,70 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     }
 
     @Override
+    public String getOperationAddress(Transaction tx, Token t, TransactionOperation tOp)
+    {
+        String address = tx.to;
+        TransactionInput ip = null;
+
+        switch (operation)
+        {
+            case MAGICLINK_TRANSFER:
+            case MAGICLINK_SALE:
+                address = t.getAddress();
+                break;
+            case MAGICLINK_PURCHASE:
+                address = t.getWallet();
+                break;
+            case MAGICLINK_PICKUP:
+                address = tx.from; // magiclink pickup, collected
+                break;
+            case PASS_TO:
+            case PASS_FROM:
+                address = t.getAddress();
+                break;
+
+            case REDEEM:
+            case ADMIN_REDEEM:
+            case TRANSFER_TO:
+            case RECEIVE_FROM:
+            case TRANSFER_FROM:
+                address = otherParty;
+                break;
+            case ALLOCATE_TO:
+                break;
+            case APPROVE:
+                break;
+            case RECEIVED:
+                break;
+
+            case LOAD_NEW_TOKENS:
+            case CONSTRUCTOR:
+            case TERMINATE_CONTRACT:
+                address = t.getAddress();
+                break;
+            case UNKNOWN_FUNCTION:
+            case INVALID_OPERATION:
+            case ILLEGAL_VALUE:
+                address = this.address;
+                break;
+
+            case UNKNOWN:
+                ip = decoder.decodeInput(tx.input);
+                if (ip != null)
+                {
+                    address = ip.getFirstAddress();
+                }
+                else
+                {
+                    address = this.address;
+                }
+                break;
+        }
+
+        return address;
+    }
+
+    @Override
     String getSupplimentalInfo(Transaction tx, String walletAddress, String networkName)
     {
         String supplimentalTxt = "";
@@ -368,5 +436,25 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         }
 
         return supplimentalTxt;
+    }
+
+    @Override
+    public String getOperationToFrom(Context ctx)
+    {
+        switch (operation)
+        {
+            case MAGICLINK_PICKUP:
+            case MAGICLINK_SALE:
+            case MAGICLINK_TRANSFER:
+            case MAGICLINK_PURCHASE:
+            case RECEIVE_FROM:
+                return ctx.getString(R.string.to);
+            case TRANSFER_TO:
+                return ctx.getString(R.string.to);
+            case RECEIVED:
+                return ctx.getString(R.string.from_op);
+            default:
+                return ctx.getString(R.string.empty);
+        }
     }
 }

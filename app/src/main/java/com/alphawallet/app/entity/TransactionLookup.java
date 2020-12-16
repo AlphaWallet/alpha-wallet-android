@@ -16,6 +16,40 @@ public class TransactionLookup
         else return typeMapping.get(type);
     }
 
+    public static String typeToEvent(TransactionType type)
+    {
+        switch (type)
+        {
+            case TRANSFER_TO:
+                return "sent";
+            case RECEIVE_FROM:
+                return "received";
+            case RECEIVED:
+                return "received";
+            case APPROVE:
+                return "ownerApproved";
+            default:
+                return "";
+        }
+    }
+
+    public static int toFromText(TransactionType type)
+    {
+        switch (type)
+        {
+            case MAGICLINK_PURCHASE:
+            case TRANSFER_TO:
+                return R.string.to;
+            case RECEIVED:
+            case RECEIVE_FROM:
+                return R.string.from_op;
+            case APPROVE:
+                return R.string.approve;
+            default:
+                return R.string.empty;
+        }
+    }
+
     private static void setupTypes()
     {
         if (typeMapping.size() == 0)

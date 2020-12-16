@@ -1,10 +1,14 @@
 package com.alphawallet.app.service;
 
+import android.content.Context;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EtherscanEvent;
 import com.alphawallet.app.entity.EtherscanTransaction;
+import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -12,6 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -19,17 +24,21 @@ import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.protocol.core.methods.response.Log;
 
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
@@ -47,6 +56,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
+    private final String DB_RESET = BLOCK_ENTRY + "2";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -411,6 +421,38 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
+    //See if we require a refresh of transaction checks
+    @Override
+    public Completable checkTransactionsForEmptyFunctions(String currentAddress)
+    {
+        return Completable.fromAction(() -> {
+            try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
+            {
+                RealmResults<RealmAuxData> checkMarkers = instance.where(RealmAuxData.class)
+                        .like("instanceKey", BLOCK_ENTRY + "*")
+                        .findAll();
+
+                for (RealmAuxData aux : checkMarkers)
+                {
+                    if (TextUtils.isEmpty(aux.getResult()) || !aux.getResult().equals(DB_RESET))
+                    {
+                        String chainIdStr = aux.getInstanceKey().substring(BLOCK_ENTRY.length());
+                        int chainId = Integer.parseInt(chainIdStr);
+                        writeNFTokenBlockRead(instance, chainId, 0); //check from start
+                        writeTokenBlockRead(instance, chainId, 0); //check from start
+                        instance.executeTransaction(r -> {
+                            aux.setResult(DB_RESET);
+                        });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //
+            }
+        });
+    }
+
     /**
      * Fetch the ERC20 transactions relevant to this wallet - ie deposits to and transfers from
      * @param walletAddress
@@ -436,7 +478,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     EtherscanEvent[] events = getEtherscanEvents(fetchTransactions);
                     //we know all these events are relevant to the wallet, and they are all ERC20 events
                     //TODO: fetch transaction details from Infura to find base currency input. For now mark as zero
-                    writeTransactions(instance, convertToTxList(events, walletAddress, networkInfo));
+                    //writeTransactions(instance, convertToTxList(events, walletAddress, networkInfo));
+                    writeEvents(instance, events, walletAddress, networkInfo);
 
                     //Now update tokens if we don't already know this token
                     writeERC20Tokens(instance, walletAddress, networkInfo, events, svs);
@@ -456,7 +499,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }).observeOn(Schedulers.io());
     }
 
-    public Single<Integer> readNFTTransactions(String walletAddress, NetworkInfo networkInfo, TokensService svs)
+    public Single<Integer> readNFTTransactions(String walletAddress, @NonNull NetworkInfo networkInfo, TokensService svs)
     {
         return Single.fromCallable(() -> {
             //get latest block read
@@ -835,5 +878,58 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             //
         }
+    }
+
+    private void writeEvents(Realm instance, EtherscanEvent[] events, String walletAddress, @NonNull NetworkInfo networkInfo) throws Exception
+    {
+        String TO_TOKEN = "[TO_ADDRESS]";
+        String FROM_TOKEN = "[FROM_ADDRESS]";
+        String AMOUNT_TOKEN = "[AMOUNT_TOKEN]";
+        String VALUES = "from,address," + FROM_TOKEN + ",to,address," + TO_TOKEN + ",amount,uint256," + AMOUNT_TOKEN;
+
+        //write event list
+        for (EtherscanEvent ev : events)
+        {
+            Transaction tx = ev.createTransaction(walletAddress, networkInfo);
+            //find tx name
+            String activityName = tx.getEventName();
+            String key = TokensRealmSource.eventActivityKey(tx.hash, activityName);
+            ContractAddress contractAddress = new ContractAddress(networkInfo.chainId, ev.contractAddress);
+            String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, ev.value);
+            storeAuxData(instance, key, BigInteger.ZERO, valueList, activityName, contractAddress, tx.timeStamp); //store the event itself
+        }
+    }
+
+    /*
+    {instanceKey:0x8f53a666112f94bab8726f38d664234d638c853271a3e3828893396bd67d6a4a-Transfer-eventName},
+    {chainId:77},{tokenAddress:0xe52ecd3d16e7b194ad16a8c338b1805fe3f66644},{tokenId:0},
+    {functionId:received},
+    {result:from,address,0xfcabe3451ac8edfb8fb6b9274c2e095d9ccc8082,to,address,0xfcabe3451ac8edfb8fb6b9274c2e095d9ccc8082,amount,uint256,100},
+    {resultTime:1600389790},{resultReceivedTime:1607382936134}]
+     */
+
+    /*
+    {instanceKey:0xd62647de7703956824656b3666dde9b3fb4381cfa871fabb7b1f09c0181ca6ce-Transfer-eventName}
+    ,{chainId:77},{tokenAddress:0xe52ecd3d16e7b194ad16a8c338b1805fe3f66644},{tokenId:0},
+    {functionId:sent},
+    {result:from,address,0xc067a53c91258ba513059919e03b81cf93f57ac7,to,address,0x901dbb9771d30124bd25b2f86ef4d8c6c135d948,amount,uint256,1000},
+    {resultTime:1606736945},{resultReceivedTime:1607383206400}]
+     */
+
+    private void storeAuxData(Realm instance, String databaseKey, BigInteger tokenId, String eventData, String activityName, @NonNull ContractAddress cAddr, long blockTime) throws Exception
+    {
+        instance.executeTransaction(r -> {
+            RealmAuxData realmToken = r.where(RealmAuxData.class)
+                    .equalTo("instanceKey", databaseKey)
+                    .findFirst();
+            if (realmToken == null) realmToken = r.createObject(RealmAuxData.class, databaseKey);
+            realmToken.setResultTime(blockTime);
+            realmToken.setResult(eventData);
+            realmToken.setFunctionId(activityName);
+            realmToken.setChainId(cAddr.chainId);
+            realmToken.setTokenId(tokenId.toString(16));
+            realmToken.setTokenAddress(cAddr.address);
+            realmToken.setResultReceivedTime(System.currentTimeMillis());
+        });
     }
 }

@@ -1,7 +1,10 @@
 package com.alphawallet.app.walletconnect.entity
 
+import androidx.annotation.Keep
+
 private const val JSONRPC_VERSION = "2.0"
 
+@Keep
 data class JsonRpcRequest<T>(
         val id: Long,
         val jsonrpc: String = JSONRPC_VERSION,
@@ -9,18 +12,21 @@ data class JsonRpcRequest<T>(
         val params: T
 )
 
+@Keep
 data class JsonRpcResponse<T>(
         val jsonrpc: String = JSONRPC_VERSION,
         val id: Long,
         val result: T
 )
 
+@Keep
 data class JsonRpcErrorResponse(
         val jsonrpc: String = JSONRPC_VERSION,
         val id: Long,
         val error: JsonRpcError
 )
 
+@Keep
 data class JsonRpcError(
         val code: Int,
         val message: String

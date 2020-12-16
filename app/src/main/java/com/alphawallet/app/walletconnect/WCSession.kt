@@ -1,7 +1,9 @@
 package com.alphawallet.app.walletconnect
 
 import android.net.Uri
+import androidx.annotation.Keep
 
+@Keep
 data class WCSession(
         val topic: String,
         val version: String,

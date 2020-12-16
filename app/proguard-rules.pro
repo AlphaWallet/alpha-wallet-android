@@ -19,6 +19,7 @@
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
+-keepattributes Signature
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -35,5 +36,28 @@
 -printmapping mapping.txt
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
-#---------------Begin: proguard configuration for support library  ----------
--keep class wallet.core {*;}
+#Wallet core
+-keep class wallet.core.jni.** {*;}
+
+#Realm
+-keepnames public class * extends io.realm.RealmObject
+-keep @io.realm.annotations.RealmModule class *
+-keep class io.realm.** { *; }
+-dontwarn javax.**
+-dontwarn io.realm.**
+-dontwarn rx.**
+-dontwarn okio.**
+-dontwarn retrofit.**
+-dontwarn retrofit.appengine.UrlFetchClient
+
+#Analytics
+-keep class com.google.firebase.** { *; }
+
+-keepclassmembers class com.alphawallet.** { *; }
+
+-keepclassmembers class io.stormbird.wallet.** { *; }
+
+-keep class com.squareup.okhttp.** { *; }
+-keep interface com.squareup.okhttp.** { *; }
+
+-keep class !com.alphawallet.** { *; }

@@ -1,7 +1,10 @@
 package com.alphawallet.app.walletconnect.entity
 
+import androidx.annotation.Keep
+
 //TODO: Integrate the EthereumMessage here
 
+@Keep
 data class WCEthereumSignMessage(
         val raw: List<String>,
         val type: WCSignType
@@ -18,6 +21,7 @@ data class WCEthereumSignMessage(
         }
 }
 
+@Keep
 data class WCEthereumTransaction(
         val from: String,
         val to: String?,

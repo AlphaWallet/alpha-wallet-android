@@ -81,11 +81,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         //fetch data from database
         transaction = transactionsInteract.fetchCached(defaultAddress, data.hash);
 
-        if (transaction.hash.startsWith("0x27b7a"))
-        {
-            System.out.println("YOLESS");
-        }
-
         if (this.transaction == null) {
             return;
         }

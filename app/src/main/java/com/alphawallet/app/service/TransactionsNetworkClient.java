@@ -485,11 +485,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         return Single.fromCallable(() -> {
             //get latest block read
-            if (networkInfo.chainId == 1)
-            {
-                System.out.println("YOLESS");
-            }
-
             int eventCount = 0;
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
@@ -914,10 +909,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         //write event list
         for (EtherscanEvent ev : events)
         {
-            if (isNFT)
-            {
-                System.out.println("YOLESS");
-            }
             Transaction tx = isNFT ? ev.createNFTTransaction(walletAddress, networkInfo) : ev.createTransaction(walletAddress, networkInfo);
             //find tx name
             String activityName = tx.getEventName(walletAddress);

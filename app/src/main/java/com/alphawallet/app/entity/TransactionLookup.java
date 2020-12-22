@@ -12,10 +12,6 @@ public class TransactionLookup
     public static int typeToName(TransactionType type)
     {
         setupTypes();
-        if (type == TransactionType.UNKNOWN || type == TransactionType.UNKNOWN_FUNCTION)
-        {
-            System.out.println("YOLESS");
-        }
         if (type.ordinal() > typeMapping.size()) return typeMapping.get(TransactionType.UNKNOWN);
         else return typeMapping.get(type);
     }

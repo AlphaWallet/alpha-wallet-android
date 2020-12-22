@@ -173,10 +173,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
         for (ActivityMeta am : activityItems)
         {
-            if (am.hash.equals("0xd62647de7703956824656b3666dde9b3fb4381cfa871fabb7b1f09c0181ca6ce"))
-            {
-                System.out.println("YOLESS");
-            }
             if (am instanceof TransactionMeta)
             {
                 List<TokenTransferData> tokenTransfers = getTokenTransfersForHash((TransactionMeta)am);

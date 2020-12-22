@@ -106,11 +106,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         tokenIcon.bindData(token, assetDefinition);
         String itemView = null;
 
-        if (sym.equals("KITTY"))
-        {
-            System.out.println("YOLESS");
-        }
-
         if (data.getTimeStamp() % 1000 != 0)
         {
             findViewById(R.id.layout_background).setLabelFor(VIEW_TYPE);

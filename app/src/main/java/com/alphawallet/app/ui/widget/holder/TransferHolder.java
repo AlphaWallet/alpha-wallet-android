@@ -3,7 +3,6 @@ package com.alphawallet.app.ui.widget.holder;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -11,48 +10,42 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AdapterCallback;
-import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EventResult;
-import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
-import com.alphawallet.app.ui.TokenFunctionActivity;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.TSTokenView;
-import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.Map;
 
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
 /**
- * Created by JB on 28/07/2020.
+ * Created by JB on 17/12/2020.
  */
-public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnClickListener
+public class TransferHolder extends BinderViewHolder<TokenTransferData> implements View.OnClickListener
 {
-    public static final int VIEW_TYPE = 2016;
+    public static final int VIEW_TYPE = 2017;
 
     private final TokenIcon tokenIcon;
     private final TextView date;
@@ -60,22 +53,18 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private final TextView address;
     private final TextView value;
     private final ChainName chainName;
-    private final TextView supplemental;
     private final TextView symbol;
-    private final LinearLayout transactionBackground;
 
     private final AssetDefinitionService assetDefinition;
-    private final AdapterCallback refreshSignaller;
     private Token token;
-    private BigInteger tokenId = BigInteger.ZERO;
 
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
-    private String eventKey;
+    private String hashKey;
     private boolean fromTokenView;
 
-    public EventHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
-                       AssetDefinitionService svs, AdapterCallback signaller)
+    public TransferHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
+                          AssetDefinitionService svs)
     {
         super(R.layout.item_transaction, parent);
         date = findViewById(R.id.text_tx_time);
@@ -84,51 +73,56 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
         chainName = findViewById(R.id.chain_name);
-        supplemental = findViewById(R.id.supplimental);
-        transactionBackground = findViewById(R.id.layout_background);
         symbol = findViewById(R.id.symbol);
         tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
 
         fetchTransactionsInteract = interact;
-        refreshSignaller = signaller;
-        transactionBackground.setBackgroundResource(R.color.white);
+
+        findViewById(R.id.layout_background).setBackgroundResource(R.color.white);
     }
 
     @Override
-    public void bind(@Nullable EventMeta data, @NonNull Bundle addition)
+    public void bind(@Nullable TokenTransferData data, @NonNull Bundle addition)
     {
         fromTokenView = false;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         //pull event details from DB
-        eventKey = TokensRealmSource.eventActivityKey(data.hash, data.eventName);
-        tokenId = BigInteger.ZERO;
-
-        RealmAuxData eventData = fetchTransactionsInteract.fetchEvent(walletAddress, eventKey);
         Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
+        token = tokensService.getToken(data.chainId, data.tokenAddress);
 
-        if (eventData == null || tx == null)
+        if (tx == null)
         {
-            // probably caused by a new script detected. Signal to holder we need a reset
-            refreshSignaller.resetRequired();
             return;
         }
-        token = tokensService.getToken(eventData.getChainId(), eventData.getTokenAddress());
 
-        if (token == null) token = tokensService.getToken(data.chainId, walletAddress);
-        String sym = token.getShortSymbol();
+        if (token == null)
+        {
+            token = tokensService.getToken(data.chainId, walletAddress);
+        }
+
+        String sym = token != null ? token.getShortSymbol() : getContext().getString(R.string.eth);
         tokenIcon.bindData(token, assetDefinition);
         String itemView = null;
 
-        TokenDefinition td = assetDefinition.getAssetDefinition(eventData.getChainId(), eventData.getTokenAddress());
-        if (td != null && td.getActivityCards().containsKey(eventData.getFunctionId()))
+        if (data.getTimeStamp() % 1000 != 0)
         {
-            TSTokenView view = td.getActivityCards().get(eventData.getFunctionId()).getView(ASSET_SUMMARY_VIEW_NAME);
+            findViewById(R.id.layout_background).setLabelFor(VIEW_TYPE);
+        }
+        else
+        {
+            findViewById(R.id.layout_background).setLabelFor(0);
+        }
+
+        TokenDefinition td = assetDefinition.getAssetDefinition(data.chainId, data.tokenAddress);
+        if (td != null && td.getActivityCards().containsKey(data.eventName))
+        {
+            TSTokenView view = td.getActivityCards().get(data.eventName).getView(ASSET_SUMMARY_VIEW_NAME);
             if (view != null) itemView = view.tokenView;
         }
 
-        String transactionValue = getEventAmount(eventData, tx);
+        String transactionValue = getEventAmount(data, tx);
 
         if (TextUtils.isEmpty(transactionValue))
         {
@@ -139,13 +133,13 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        type.setText(getTitle(eventData));
+        type.setText(getTitle(data));
         symbol.setText(sym);
-        address.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
-        tokenIcon.setStatusIcon(eventData.getEventStatusType());
+        address.setText(data.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
+        tokenIcon.setStatusIcon(data.getEventStatusType());
 
         //timestamp
-        date.setText(Utils.localiseUnixTime(getContext(), eventData.getResultTime()));
+        date.setText(Utils.localiseUnixTime(getContext(), data.getTimeStampSeconds()));
         date.setVisibility(View.VISIBLE);
 
         if (token.tokenInfo.chainId == MAINNET_ID)
@@ -157,6 +151,8 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             chainName.setVisibility(View.VISIBLE);
             chainName.setChainID(token.tokenInfo.chainId);
         }
+
+        hashKey = data.hash;
     }
 
     @Override
@@ -165,34 +161,31 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         fromTokenView = true;
     }
 
-    private String getEventAmount(RealmAuxData eventData, Transaction tx)
+    private String getEventAmount(TokenTransferData eventData, Transaction tx)
     {
         Map<String, EventResult> resultMap = eventData.getEventResultMap();
-        int decimals = token != null ? token.tokenInfo.decimals : C.ETHER_DECIMALS;
         String value = "";
-        switch (eventData.getFunctionId())
+        switch (eventData.eventName)
         {
             case "received":
             case "sent":
                 if (resultMap.get("amount") != null)
                 {
-                    value = eventData.getFunctionId().equals("sent") ? "- " : "+ ";
-                    value += BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("amount").value),
-                            decimals, 4);
+                    value = eventData.eventName.equals("sent") ? "- " : "+ ";
+                    value += token.convertValue(resultMap.get("amount").value, TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
             case "approvalObtained":
             case "ownerApproved":
                 if (resultMap.get("value") != null)
                 {
-                    value = BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("value").value),
-                            decimals, 4);
+                    value = token.convertValue(resultMap.get("value").value, TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
             default:
                 if (token != null && tx != null)
                 {
-                    value = token.isEthereum() ? token.getTransactionValue(tx, 4) : tx.getOperationResult(token, 4);
+                    value = token.isEthereum() ? token.getTransactionValue(tx, TRANSACTION_BALANCE_PRECISION) : tx.getOperationResult(token, TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
         }
@@ -200,7 +193,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         return value;
     }
 
-    private String getTitle(RealmAuxData eventData)
+    private String getTitle(TokenTransferData eventData)
     {
         //TODO: pick up item-view
         return eventData.getTitle(getContext());
@@ -232,8 +225,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     public void onClick(View view)
     {
         Intent intent = new Intent(getContext(), TokenActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, Numeric.toHexStringNoPrefix(tokenId)); //pass tokenId if event concerns tokenId
-        intent.putExtra(C.EXTRA_ACTION_NAME, eventKey);
+        intent.putExtra(C.EXTRA_TXHASH, hashKey);
         intent.putExtra(C.EXTRA_STATE, fromTokenView);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);

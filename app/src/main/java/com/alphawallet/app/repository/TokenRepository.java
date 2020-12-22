@@ -282,7 +282,6 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             TokenFactory tf      = new TokenFactory();
             NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-
             //check balance before we store it
             List<BigInteger> balanceArray = null;
             BigDecimal       balance      = BigDecimal.ZERO;
@@ -1217,6 +1216,16 @@ public class TokenRepository implements TokenRepositoryType {
     public static byte[] createERC721TransferFunction(String to, Token token, List<BigInteger> tokenId)
     {
         Function function = token.getTransferFunction(to, tokenId);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    public static byte[] createERC721TransferFunction(String from, String to, String token, BigInteger tokenId)
+    {
+        List<TypeReference<?>> returnTypes = Collections.emptyList();
+        List<Type> params = Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId));
+        Function function = new Function("safeTransferFrom", params, returnTypes);
+
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }

@@ -671,6 +671,7 @@
     <string name="from_op">from</string>
     <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">to: %1$s</string>
+    <string name="operation_definition" translatable="false">%1$s: %2$s</string>
     <string name="approval_granted_to">approved to transfer tokens: %1$s</string>
     <string name="approval_obtained_from">to spend on behalf of: %1$s</string>
     <string name="unknown_event">Unknown event</string>
@@ -725,6 +726,6 @@
     <string name="default_to">Sent %1$s %2$s to %3$s</string>
     <string name="default_from">Received %1$s %2$s from %3$s</string>
     <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
-    <string name="default_approve">You approved %3$s to move %1$s %2$s</string>
+    <string name="default_approve">Approved %3$s to move %1$s %2$s</string>
     <string name="contract_call">Contract call</string>
 </resources>

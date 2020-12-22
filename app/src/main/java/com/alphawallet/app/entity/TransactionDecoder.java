@@ -83,6 +83,14 @@ public class TransactionDecoder
             e.printStackTrace();
         }
 
+        thisData.setOperationType(null, null); //works for most cases; for magiclink requires tx and wallet data - but we don't see many of these now
+        return thisData;
+    }
+
+    public TransactionInput decodeInput(Transaction tx, String walletAddress)
+    {
+        TransactionInput thisData = decodeInput(tx.input);
+        thisData.setOperationType(tx, walletAddress);
         return thisData;
     }
 
@@ -93,7 +101,7 @@ public class TransactionDecoder
         if (data != null)
         {
             thisData.functionData = data;
-            thisData.paramValues.clear();
+            thisData.arrayValues.clear();
             thisData.addresses.clear();
             thisData.sigData.clear();
             thisData.miscData.clear();
@@ -155,7 +163,7 @@ public class TransactionDecoder
                         count = new BigInteger(argData, 16);
                         for (int i = 0; i < count.intValue(); i++) {
                             String inputData = read256bits(input);
-                            thisData.paramValues.add(new BigInteger(inputData, 16));
+                            thisData.arrayValues.add(new BigInteger(inputData, 16));
                             if (inputData.equals("0")) break;
                         }
                         break;
@@ -396,12 +404,12 @@ public class TransactionDecoder
     public int[] getIndices(TransactionInput data)
     {
         int[] indices = null;
-        if (data != null && data.paramValues != null)
+        if (data != null && data.arrayValues != null)
         {
-            indices = new int[data.paramValues.size()];
-            for (int i = 0; i < data.paramValues.size() ; i++)
+            indices = new int[data.arrayValues.size()];
+            for (int i = 0; i < data.arrayValues.size() ; i++)
             {
-                indices[i] = data.paramValues.get(i).intValue();
+                indices[i] = data.arrayValues.get(i).intValue();
             }
         }
 

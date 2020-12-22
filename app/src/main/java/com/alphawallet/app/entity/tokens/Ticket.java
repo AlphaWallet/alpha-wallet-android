@@ -6,12 +6,11 @@ import android.os.Parcelable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
@@ -377,16 +376,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public boolean getIsSent(Transaction transaction)
     {
-        boolean isSent = true;
-        TransactionOperation operation = transaction.operations == null
-                || transaction.operations.length == 0 ? null : transaction.operations[0];
-
-        if (operation != null && operation.contract instanceof ERC875ContractTransaction)
-        {
-            ERC875ContractTransaction ct = (ERC875ContractTransaction) operation.contract;
-            if (ct.type > 0) isSent = false;
-        }
-        return isSent;
+        return transaction.isNFTSent(getWallet());
     }
 
     @Override
@@ -427,5 +417,25 @@ public class Ticket extends Token implements Parcelable
     public List<BigInteger> getTransferListFormat(List<BigInteger> tokenIds)
     {
         return tokenIdsToTokenIndices(tokenIds);
+    }
+
+    @Override
+    public String convertValue(String value, int precision)
+    {
+        return value;
+    }
+
+    @Override
+    public String getTransferValue(Transaction transaction, int precision)
+    {
+        //get the count of tickets in this transaction
+        if (transaction.transactionInput != null)
+        {
+            return String.valueOf(transaction.transactionInput.arrayValues.size());
+        }
+        else
+        {
+            return "1";
+        }
     }
 }

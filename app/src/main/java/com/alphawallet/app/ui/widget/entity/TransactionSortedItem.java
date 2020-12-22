@@ -1,11 +1,8 @@
 package com.alphawallet.app.ui.widget.entity;
 
-import android.text.format.DateUtils;
-
-import com.alphawallet.app.entity.EventMeta;
+import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
-import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -23,26 +20,18 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
         if (other.tags.contains(IS_TIMESTAMP_TAG))
         {
             TimestampSortedItem otherTimestamp = (TimestampSortedItem) other;
-            String otherHash = null;
-            if (other.viewType == TransactionHolder.VIEW_TYPE)
-            {
-                otherHash = ((TransactionMeta) other.value).hash;
-            }
-            else if (other.viewType == EventHolder.VIEW_TYPE)
-            {
-                otherHash = ((EventMeta) other.value).hash;
-            }
 
-            if (otherHash != null)
+            if (other.value instanceof ActivityMeta)
             {
+                ActivityMeta otherMeta = (ActivityMeta) other.value;
                 // Check if this is a written block replacing a pending block
-                if (value.hash.equals(otherHash)) return 0; // match
+                if (value.hash.equals(otherMeta.hash) && otherMeta.getTimeStamp() == value.getTimeStamp()) return 0; // match
 
                 //we were getting an instance where two transactions went through on the same
                 //block - so the timestamp was the same. The display flickered between the two transactions.
                 if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
                 {
-                    return value.hash.compareTo(otherHash);
+                    return value.hash.compareTo(otherMeta.hash);
                 }
                 else
                 {
@@ -116,7 +105,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     @Override
     public Date getTimestamp() {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(value.timeStamp * DateUtils.SECOND_IN_MILLIS);
+        calendar.setTimeInMillis(value.getTimeStamp());
         return calendar.getTime();
     }
 }

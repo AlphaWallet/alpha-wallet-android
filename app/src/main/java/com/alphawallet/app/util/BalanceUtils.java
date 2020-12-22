@@ -100,6 +100,14 @@ public class BalanceUtils {
         return scaledValue(value, pattern, decimals);
     }
 
+    public static String getScaledValueMinimal(BigDecimal value, long decimals, int max_precision)
+    {
+        //form precision
+        String pattern = "###,###,###,##0.";
+        for (int i = 0; i < max_precision; i++) pattern += "#";
+        return scaledValue(value, pattern, decimals);
+    }
+
     public static String getScaledValueScientific(final BigDecimal value, long decimals)
     {
         return getScaledValueScientific(value, decimals, 4);
@@ -149,7 +157,7 @@ public class BalanceUtils {
     private static String scaledValue(BigDecimal value, String pattern, long decimals)
     {
         DecimalFormat df = new DecimalFormat(pattern);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
+        value = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
         df.setRoundingMode(RoundingMode.DOWN);
         return df.format(value);
     }

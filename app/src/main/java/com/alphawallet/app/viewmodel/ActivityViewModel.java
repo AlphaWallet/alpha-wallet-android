@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -126,6 +127,11 @@ public class ActivityViewModel extends BaseViewModel
     public Realm getRealmInstance()
     {
         return fetchTransactionsInteract.getRealmInstance(wallet.getValue());
+    }
+
+    public Transaction getTransaction(String hash)
+    {
+        return fetchTransactionsInteract.fetchCached(wallet.getValue().address, hash);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

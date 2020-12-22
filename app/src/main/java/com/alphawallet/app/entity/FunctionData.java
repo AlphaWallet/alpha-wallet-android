@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class FunctionData
     public final boolean hasSig;
     public final List<ContractType> contractType;
 
-    public FunctionData(String fName, ContractType type)
+    public FunctionData(String fName, ContractType t)
     {
         functionName = fName;
         functionFullName = fName;
@@ -30,7 +31,7 @@ public class FunctionData
         contractType = new ArrayList<>();
     }
 
-    public FunctionData(String methodSig, ContractType type, boolean hasSignature)
+    public FunctionData(String methodSig, ContractType t, boolean hasSignature)
     {
         int b1Index = methodSig.indexOf("(");
         int b2Index = methodSig.lastIndexOf(")");
@@ -43,7 +44,7 @@ public class FunctionData
         this.args.addAll(temp);
         functionFullName = methodSig;
         contractType = new ArrayList<>();
-        contractType.add(type);
+        contractType.add(t);
         hasSig  = hasSignature;
 
         for (int i = 0; i < temp.size(); i++)//String arg : data.args)

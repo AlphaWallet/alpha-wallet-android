@@ -185,7 +185,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void startRealmListener(Wallet wallet)
     {
-        if (realmId == null || !realmId.equals(wallet.address))
+        if (realmId == null || !realmId.equalsIgnoreCase(wallet.address))
         {
             realmId = wallet.address;
             realm = viewModel.getRealmInstance(wallet);

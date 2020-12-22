@@ -246,7 +246,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     .equalTo("chainId", token.tokenInfo.chainId)
                     .findFirst();
 
-            TransactionsRealmCache.addRealm();
             realm.beginTransaction();
             if (realmToken != null) {
                 realmToken.setEnabled(isEnabled);
@@ -259,7 +258,6 @@ public class TokensRealmSource implements TokenLocalSource {
         } finally {
             if (realm != null) {
                 realm.close();
-                TransactionsRealmCache.subRealm();
             }
         }
     }
@@ -340,6 +338,11 @@ public class TokensRealmSource implements TokenLocalSource {
     public static String eventActivityKey(String txHash, String activityName)
     {
         return txHash + "-" + activityName + EVENT_CARDS;
+    }
+
+    public static String eventActivityKey(String txHash, String activityName, int extendedId)
+    {
+        return txHash + "-" + activityName + EVENT_CARDS + "-" + extendedId;
     }
 
     public static String eventBlockKey(int chainId, String eventAddress, String namedType, String filter)
@@ -444,13 +447,11 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             else if (realmToken != null && token.checkRealmBalanceChange(realmToken))
             {
-                TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 token.setRealmBalance(realmToken);
                 realmToken.updateTokenInfoIfRequired(token.tokenInfo);
                 token.setRealmInterfaceSpec(realmToken);
                 realm.commitTransaction();
-                TransactionsRealmCache.subRealm();
             }
         }
         catch (Exception ex)
@@ -475,7 +476,6 @@ public class TokensRealmSource implements TokenLocalSource {
                                 .equalTo("instanceKey", instanceKey)
                                 .findFirst();
 
-                        TransactionsRealmCache.addRealm();
                         realm.beginTransaction();
                         if (instance == null)
                         {
@@ -490,7 +490,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     public void onComplete()
                     {
                         if (realm.isInTransaction()) realm.commitTransaction();
-                        TransactionsRealmCache.subRealm();
                         realm.close();
                     }
 
@@ -874,7 +873,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     {
                         realm = realmManager.getRealmInstance(TICKER_DB);
                         realm.beginTransaction();
-                        TransactionsRealmCache.addRealm();
                         for (int chainId : ethTickers.keySet())
                         {
                             writeTickerToRealm(realm, ethTickers.get(chainId), chainId, "eth");
@@ -885,7 +883,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     public void onComplete()
                     {
                         if (realm.isInTransaction()) realm.commitTransaction();
-                        TransactionsRealmCache.subRealm();
                         realm.close();
                     }
 
@@ -913,7 +910,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     {
                         realm = realmManager.getRealmInstance(TICKER_DB);
                         realm.beginTransaction();
-                        TransactionsRealmCache.addRealm();
                         for (String tokenAddress : erc20Tickers.keySet())
                         {
                             writeTickerToRealm(realm, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);
@@ -924,7 +920,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     public void onComplete()
                     {
                         if (realm.isInTransaction()) realm.commitTransaction();
-                        TransactionsRealmCache.subRealm();
                         realm.close();
                     }
 
@@ -972,7 +967,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     {
                         realm = realmManager.getRealmInstance(TICKER_DB);
                         realm.beginTransaction();
-                        TransactionsRealmCache.addRealm();
                         //get all tickers
                         RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
                                 .lessThan("updatedTime", System.currentTimeMillis() - TICKER_TIMEOUT)
@@ -988,7 +982,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     public void onComplete()
                     {
                         if (realm.isInTransaction()) realm.commitTransaction();
-                        TransactionsRealmCache.subRealm();
                         realm.close();
                     }
 

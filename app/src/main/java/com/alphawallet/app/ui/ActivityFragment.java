@@ -18,21 +18,26 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.EventMeta;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.viewmodel.ActivityViewModel;
 import com.alphawallet.app.viewmodel.ActivityViewModelFactory;
 import com.alphawallet.app.widget.EmptyTransactionsView;
 import com.alphawallet.app.widget.SystemView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -87,13 +92,14 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void onItemsLoaded(ActivityMeta[] activityItems)
     {
-        adapter.updateActivityItems(activityItems);
+        realm = viewModel.getRealmInstance();
+        adapter.updateActivityItems(buildTransactionList(activityItems).toArray(new ActivityMeta[0]));
         showEmptyTx();
         long lastUpdateTime = 0;
 
         for (ActivityMeta am : activityItems)
         {
-            if (am instanceof TransactionMeta && am.timeStamp > lastUpdateTime) lastUpdateTime = am.timeStamp;
+            if (am instanceof TransactionMeta && am.getTimeStampSeconds() > lastUpdateTime) lastUpdateTime = am.getTimeStampSeconds();
         }
 
         startTxListener(lastUpdateTime - 60*10); //adjust for timestamp delay
@@ -103,12 +109,11 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         String walletAddress = viewModel.defaultWallet().getValue() != null ? viewModel.defaultWallet().getValue().address : "";
         eventTimeFilter = lastUpdateTime;
-        if (realmId == null || !realmId.equals(walletAddress))
+        if (realmId == null || !realmId.equalsIgnoreCase(walletAddress))
         {
             if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
 
             realmId = walletAddress;
-            realm = viewModel.getRealmInstance();
             realmUpdates = realm.where(RealmTransaction.class).greaterThan("timeStamp", lastUpdateTime).findAllAsync();
             realmUpdates.addChangeListener(realmTransactions -> {
                 List<TransactionMeta> metas = new ArrayList<>();
@@ -125,7 +130,8 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
                 if (metas.size() > 0)
                 {
-                    adapter.updateActivityItems(metas.toArray(new TransactionMeta[0]));
+                    TransactionMeta[] metaArray = metas.toArray(new TransactionMeta[0]);
+                    adapter.updateActivityItems(buildTransactionList(metaArray).toArray(new ActivityMeta[0]));
                     systemView.hide();
                 }
             });
@@ -155,6 +161,56 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                 }
             });
         }
+    }
+
+    private List<ActivityMeta> buildTransactionList(ActivityMeta[] activityItems)
+    {
+        //selectively filter the items with the following rules:
+        // - allow through all normal transactions with no token transfer consequences
+        // - for any transaction with token transfers; if there's only one token transfer, only show the transfer
+        // - for any transaction with more than one token transfer, show the transaction and show the child transfer consequences
+        List<ActivityMeta> filteredList = new ArrayList<>();
+
+        for (ActivityMeta am : activityItems)
+        {
+            if (am.hash.equals("0xd62647de7703956824656b3666dde9b3fb4381cfa871fabb7b1f09c0181ca6ce"))
+            {
+                System.out.println("YOLESS");
+            }
+            if (am instanceof TransactionMeta)
+            {
+                List<TokenTransferData> tokenTransfers = getTokenTransfersForHash((TransactionMeta)am);
+                if (tokenTransfers.size() != 1) { filteredList.add(am); } //only 1 token transfer ? No need to show the underlying transaction
+                filteredList.addAll(tokenTransfers);
+            }
+        }
+
+        return filteredList;
+    }
+
+    private List<TokenTransferData> getTokenTransfersForHash(TransactionMeta tm)
+    {
+        List<TokenTransferData> transferData = new ArrayList<>();
+        //summon realm items
+        //get matching entries for this transaction
+        RealmResults<RealmTransfer> transfers = realm.where(RealmTransfer.class)
+                .equalTo("hash", tm.hash)
+                .findAll();
+
+        if (transfers != null && transfers.size() > 0)
+        {
+            //list of transfers, descending in time to give ordered list
+            long nextTransferTime = transfers.size() == 1 ? tm.getTimeStamp() : tm.getTimeStamp() - 1; // if there's only 1 transfer, keep the transaction timestamp
+            for (RealmTransfer rt : transfers)
+            {
+                TokenTransferData ttd = new TokenTransferData(rt.getHash(), tm.chainId,
+                        rt.getTokenAddress(), rt.getEventName(), rt.getTransferDetail(), nextTransferTime);
+                transferData.add(ttd);
+                nextTransferTime--;
+            }
+        }
+
+        return transferData;
     }
 
     private void initViews(View view)

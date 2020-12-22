@@ -24,6 +24,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -432,7 +433,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private String getEventAmount(RealmAuxData eventData, Transaction tx, boolean addSign)
     {
-        Map<String, RealmAuxData.EventResult> resultMap = eventData.getEventResultMap();
+        Map<String, EventResult> resultMap = eventData.getEventResultMap();
         int decimals = token != null ? token.tokenInfo.decimals : C.ETHER_DECIMALS;
         String value = "";
         switch (eventData.getFunctionId())
@@ -482,7 +483,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             //add result map values
             if (eventData != null)
             {
-                Map<String, RealmAuxData.EventResult> resultMap = eventData.getEventResultMap();
+                Map<String, EventResult> resultMap = eventData.getEventResultMap();
                 for (String resultKey : resultMap.keySet())
                 {
                     TokenScriptResult.addPair(attrs, resultKey, resultMap.get(resultKey).value);

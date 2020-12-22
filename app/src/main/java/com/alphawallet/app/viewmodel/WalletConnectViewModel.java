@@ -98,7 +98,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                 for (String sessionId : clientBuffer.keySet())
                 {
                     Log.d(TAG, "put from buffer: " + sessionId);
-                    WCClient c  = clientBuffer.get(sessionId);
+                    WCClient c = clientBuffer.get(sessionId);
                     walletConnectService.putClient(sessionId, c);
                 }
                 clientBuffer.clear();

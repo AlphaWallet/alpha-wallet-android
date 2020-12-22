@@ -26,6 +26,8 @@ import com.alphawallet.app.widget.InputAddress;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.web3j.crypto.Keys;
+
 import java.util.HashMap;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -247,17 +249,19 @@ public class ENSHandler implements Runnable
         return history;
     }
 
-    public static String findMatchingENS(Context ctx, String ethAddress)
+    public static String matchENSOrFormat(Context ctx, String ethAddress)
     {
+        String checkSumAddr = Keys.toChecksumAddress(ethAddress);
         if (!TextUtils.isEmpty(ethAddress) && Utils.isAddressValid(ethAddress))
         {
             HashMap<String, String> ensMap = getENSHistoryFromPrefs(ctx);
-            String ensName = ensMap.get(ethAddress);
-            return ensName != null ? ensName : ethAddress;
+            String ensName = ensMap.get(ethAddress.toLowerCase());
+            if (ensName == null) ensName = ensMap.get(checkSumAddr);
+            return ensName != null ? ensName : Utils.formatAddress(ethAddress);
         }
         else
         {
-            return ethAddress;
+            return Utils.formatAddress(ethAddress);
         }
     }
 

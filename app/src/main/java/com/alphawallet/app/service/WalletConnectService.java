@@ -123,6 +123,7 @@ public class WalletConnectService extends Service
         });
 
         client.setOnFailure(throwable -> {
+            //alert UI
             if (client.sessionId() == null) return Unit.INSTANCE;
             signRequests.add(new WCRequest(client.sessionId(), throwable, client.getChainId()));
             return Unit.INSTANCE;

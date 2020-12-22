@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -26,7 +25,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.util.MessageUtils;
-import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -64,8 +62,6 @@ import io.reactivex.disposables.Disposable;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
 import wallet.core.jni.Hash;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 public class WalletConnectActivity extends BaseActivity
 {
@@ -485,7 +481,7 @@ public class WalletConnectActivity extends BaseActivity
                 .setTitle(peer.getName())
                 .setMessage(peer.getUrl())
                 .setPositiveButton(R.string.dialog_approve, (d, w) -> {
-                    client.approveSession(Arrays.asList(accounts), MAINNET_ID);
+                    client.approveSession(Arrays.asList(accounts), 100);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(), new Gson().toJson(session), new Gson().toJson(peer));
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);
@@ -691,7 +687,7 @@ public class WalletConnectActivity extends BaseActivity
             @Override
             public void DAppReturn(byte[] data, Signable message)
             {
-                viewModel.recordSignTransaction(getApplicationContext(), w3Tx, MAINNET_ID, getSessionId());
+                viewModel.recordSignTransaction(getApplicationContext(), w3Tx, client.getChainId(), getSessionId());
                 updateSignCount();
                 viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 if (fromDappBrowser) switchToDappBrowser();
@@ -705,7 +701,7 @@ public class WalletConnectActivity extends BaseActivity
             {
                 //sign the transaction
                 signCallback = null;
-                viewModel.signTransaction(getBaseContext(), w3Tx, dappFunction, peerUrl.getText().toString(), MAINNET_ID);
+                viewModel.signTransaction(getBaseContext(), w3Tx, dappFunction, peerUrl.getText().toString(), client.getChainId());
                 if (fromDappBrowser) switchToDappBrowser();
             }
 
@@ -877,7 +873,7 @@ public class WalletConnectActivity extends BaseActivity
         if (resultCode == RESULT_OK && web3Tx != null)
         {
             String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
-            viewModel.recordSignTransaction(getApplicationContext(), web3Tx, MAINNET_ID, getSessionId());
+            viewModel.recordSignTransaction(getApplicationContext(), web3Tx, client.getChainId(), getSessionId());
             viewModel.approveRequest(getSessionId(), lastId, hashData);
         }
         else if (web3Tx != null)

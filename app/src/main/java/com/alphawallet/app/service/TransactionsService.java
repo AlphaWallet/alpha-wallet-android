@@ -301,10 +301,6 @@ public class TransactionsService
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe().isDisposed();
                             }
-                            else
-                            {
-                                System.out.println("YOLESS");
-                            }
                         }).exceptionally(throwable -> {
                                 throwable.printStackTrace();
                                 return null;

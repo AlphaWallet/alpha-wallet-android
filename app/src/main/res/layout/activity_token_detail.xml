@@ -183,7 +183,7 @@
                     android:layout_below="@id/grid"
                     android:layout_marginTop="20dp"
                     android:drawablePadding="5dp"
-                    android:drawableRight="@drawable/ic_forward"
+                    app:drawableRightCompat="@drawable/ic_forward"
                     android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
                     android:paddingLeft="15dp"

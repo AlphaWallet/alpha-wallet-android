@@ -34,15 +34,19 @@ import com.alphawallet.app.ui.widget.entity.EventSortedItem;
 import com.alphawallet.app.ui.widget.entity.LabelSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TimestampSortedItem;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.ui.widget.entity.TransactionSortedItem;
+import com.alphawallet.app.ui.widget.entity.TransferSortedItem;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionDateHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
+import com.alphawallet.app.ui.widget.holder.TransferHolder;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback
 {
@@ -124,6 +128,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
                 return new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
             case LabelSortedItem.VIEW_TYPE:
                 return new LabelHolder(R.layout.item_activity_label, parent);
+            case TransferHolder.VIEW_TYPE:
+                return new TransferHolder(parent, tokensService, fetchTransactionsInteract,
+                        assetService);
         }
 
         return null;
@@ -163,17 +170,10 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         //get final position time
         SortedItem item = items.get(items.size() - 1);
         long earliestDate = 0;
-        if (item instanceof TransactionSortedItem)
+        if (item instanceof TimestampSortedItem)
         {
-            earliestDate = ((TransactionSortedItem)item).value.timeStamp;
-        }
-        else if (item instanceof DateSortedItem)
-        {
-            earliestDate = ((DateSortedItem)item).value.getTime();
-        }
-        else if (item instanceof EventSortedItem)
-        {
-            earliestDate = ((EventSortedItem)item).value.timeStamp;
+            Date itemDate = ((TimestampSortedItem)item).getTimestamp();
+            earliestDate = itemDate.getTime();
         }
 
         fetchData(earliestDate);
@@ -212,6 +212,10 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         {
             return ((DateSortedItem)obj).getUID();
         }
+        else if (obj instanceof TransferSortedItem)
+        {
+            return ((TransferSortedItem)obj).getUID();
+        }
         else
         {
             //Not unique and may error
@@ -243,7 +247,12 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
                 EventSortedItem sortedItem = new EventSortedItem(EventHolder.VIEW_TYPE, (EventMeta)item, TimestampSortedItem.DESC);
                 items.add(sortedItem);
             }
-            items.add(DateSortedItem.round(item.timeStamp));
+            else if (item instanceof TokenTransferData)
+            {
+                TransferSortedItem sortedItem = new TransferSortedItem(TransferHolder.VIEW_TYPE, (TokenTransferData)item, TimestampSortedItem.DESC);
+                items.add(sortedItem);
+            }
+            items.add(DateSortedItem.round(item.getTimeStampSeconds()));
         }
 
         applyItemLimit();

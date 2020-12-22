@@ -20,8 +20,11 @@ public class TransactionLookup
     {
         switch (type)
         {
-            case TRANSFER_TO:
+            case TRANSFER_FROM:
+            case SEND:
                 return "sent";
+            case TRANSFER_TO:
+                return "received";
             case RECEIVE_FROM:
                 return "received";
             case RECEIVED:
@@ -72,7 +75,8 @@ public class TransactionLookup
             typeMapping.put(TransactionType.ALLOCATE_TO, R.string.allocate_to);
             typeMapping.put(TransactionType.APPROVE, R.string.approve);
             typeMapping.put(TransactionType.RECEIVED, R.string.received);
-            typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.ticket_invalid_op);
+            typeMapping.put(TransactionType.SEND, R.string.action_send);
+            typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
         }
     }
 }

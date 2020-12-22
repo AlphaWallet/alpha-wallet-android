@@ -1,20 +1,19 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.EventMeta;
-import com.alphawallet.app.ui.widget.holder.TransactionHolder;
-import com.alphawallet.app.ui.widget.holder.TransferHolder;
+import com.alphawallet.app.ui.widget.holder.EventHolder;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 
 /**
- * Created by JB on 7/07/2020.
+ * Created by JB on 18/12/2020.
  */
-public class EventSortedItem extends TimestampSortedItem<EventMeta>
-{
-    public EventSortedItem(int viewType, EventMeta value, int order) {
+public class TransferSortedItem extends TimestampSortedItem<TokenTransferData> {
+
+    public TransferSortedItem(int viewType, TokenTransferData value, int order) {
         super(viewType, value, 0, order);
     }
 
@@ -35,8 +34,6 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
                 //block - so the timestamp was the same. The display flickered between the two transactions.
                 if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
                 {
-                    if (other.viewType == TransactionHolder.VIEW_TYPE) return 0;
-                    if (other.viewType == TransferHolder.VIEW_TYPE) return 0;
                     return value.hash.compareTo(otherMeta.hash);
                 }
                 else
@@ -60,21 +57,15 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
     {
         if (viewType == other.viewType)
         {
-            EventMeta oldTx = value;
-            EventMeta newTx = (EventMeta) other.value;
-            return oldTx.hash.equals(newTx.hash) && oldTx.activityCardName.equals(newTx.activityCardName);
-        }
-        else if (other.viewType == TransactionHolder.VIEW_TYPE)
-        {
             return true;
         }
-        else if (other.viewType == TransferHolder.VIEW_TYPE)
+        else if (other.viewType == EventHolder.VIEW_TYPE)
         {
-            return true;
+            return false;
         }
         else
         {
-            return false;
+            return true;
         }
     }
 
@@ -83,16 +74,10 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
     {
         if (viewType == other.viewType)
         {
-            EventMeta oldTx = value;
-            EventMeta newTx = (EventMeta) other.value;
-
-            return oldTx.hash.equals(newTx.hash) && oldTx.activityCardName.equals(newTx.activityCardName);
+            TokenTransferData newTx = (TokenTransferData) other.value;
+            return value.hash.equals(newTx.hash);
         }
-        else if (other.viewType == TransactionHolder.VIEW_TYPE)
-        {
-            return true;
-        }
-        else if (other.viewType == TransferHolder.VIEW_TYPE)
+        else if (other.viewType == EventHolder.VIEW_TYPE)
         {
             return true;
         }
@@ -107,5 +92,10 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(value.getTimeStamp());
         return calendar.getTime();
+    }
+
+    public long getUID()
+    {
+        return UUID.nameUUIDFromBytes((value.hash + value.getTimeStamp() + value.transferDetail).getBytes()).getMostSignificantBits();
     }
 }

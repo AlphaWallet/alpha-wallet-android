@@ -8,10 +8,6 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
-
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 
 import androidx.annotation.Keep;
@@ -31,12 +27,9 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
@@ -1585,17 +1578,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     .equalTo("instanceKey", hash)
                     .findFirst();
 
-            TransactionsRealmCache.addRealm();
             realm.beginTransaction();
             if (realmData == null) realmData = realm.createObject(RealmCertificateData.class, hash);
             realmData.setFromSig(sig);
             realm.commitTransaction();
             realm.close();
-            TransactionsRealmCache.subRealm();
         }
         catch (Exception e)
         {
-            TransactionsRealmCache.subRealm();
             e.printStackTrace();
         }
     }
@@ -2505,7 +2495,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     @Override
                     public void onStart()
                     {
-                        TransactionsRealmCache.addRealm();
                         realm = realmManager.getRealmInstance(tokensService.getCurrentAddress());
                         //determine hash
                         TokenScriptFile tsf = getTokenScriptFile(chainId, address);
@@ -2533,14 +2522,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     public void onComplete()
                     {
                         if (realm.isInTransaction()) realm.commitTransaction();
-                        TransactionsRealmCache.subRealm();
                         realm.close();
                     }
 
                     @Override
                     public void onError(Throwable e)
                     {
-                        TransactionsRealmCache.subRealm();
                         if (realm != null && !realm.isClosed())
                         {
                             realm.close();

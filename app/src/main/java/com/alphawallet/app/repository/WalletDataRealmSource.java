@@ -9,7 +9,7 @@ import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmKeyType;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.repository.entity.RealmTransactionOperation;
+import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
@@ -333,16 +333,16 @@ public class WalletDataRealmSource {
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
                 RealmWalletData realmWallet = realm.where(RealmWalletData.class).equalTo("address", wallet.address).findFirst();
-                realm.beginTransaction();
-                if (realmWallet != null) realmWallet.deleteFromRealm();
-                realm.commitTransaction();
+                realm.executeTransaction(r -> {
+                    if (realmWallet != null) realmWallet.deleteFromRealm();
+                });
             }
             try (Realm realm = realmManager.getWalletTypeRealmInstance())
             {
                 RealmKeyType realmKey = realm.where(RealmKeyType.class).equalTo("address", wallet.address).findFirst();
-                realm.beginTransaction();
-                if (realmKey != null) realmKey.deleteFromRealm();
-                realm.commitTransaction();
+                realm.executeTransaction(r -> {
+                    if (realmKey != null) realmKey.deleteFromRealm();
+                });
             }
             //now delete the token and transaction data
             try (Realm realm = realmManager.getRealmInstance(wallet))
@@ -350,21 +350,16 @@ public class WalletDataRealmSource {
                 RealmResults<RealmToken>       tokens = realm.where(RealmToken.class).findAll();
                 RealmResults<RealmERC721Asset> assets = realm.where(RealmERC721Asset.class).findAll();
                 RealmResults<RealmTransaction> transactions = realm.where(RealmTransaction.class).findAll();
-                RealmResults<RealmTransactionOperation> transactionOps = realm.where(RealmTransactionOperation.class).findAll();
+                RealmResults<RealmAuxData>     auxData = realm.where(RealmAuxData.class).findAll();
+                RealmResults<RealmTransfer>    transfers = realm.where(RealmTransfer.class).findAll();
 
-                realm.beginTransaction();
-                tokens.deleteAllFromRealm();
-                assets.deleteAllFromRealm();
-                transactions.deleteAllFromRealm();
-                transactionOps.deleteAllFromRealm();
-                realm.commitTransaction();
-            }
-            try (Realm realm = realmManager.getRealmInstance(wallet.address))
-            {
-                RealmResults<RealmAuxData> allResults = realm.where(RealmAuxData.class).findAll();
-                realm.beginTransaction();
-                allResults.deleteAllFromRealm();
-                realm.commitTransaction();
+                realm.executeTransaction(r -> {
+                    tokens.deleteAllFromRealm();
+                    assets.deleteAllFromRealm();
+                    transactions.deleteAllFromRealm();
+                    auxData.deleteAllFromRealm();
+                    transfers.deleteAllFromRealm();
+                });
             }
             return wallet;
         });

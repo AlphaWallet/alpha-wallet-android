@@ -9,7 +9,7 @@
     android:background="@color/white"
     android:orientation="horizontal"
     android:padding="@dimen/dp8"
-    android:minHeight="60dp">
+    android:minHeight="80dp">
 
     <com.alphawallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
@@ -22,14 +22,15 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="40dp"
             android:layout_toStartOf="@id/value"
+            android:maxHeight="40dp"
             android:orientation="horizontal">
 
             <TextView
@@ -38,9 +39,9 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:maxLines="1"
+                android:textAppearance="?attr/textAppearanceListItem"
                 android:textSize="@dimen/sp17"
-                tools:text="Sent"
-                android:textAppearance="?attr/textAppearanceListItem" />
+                tools:text="Sent" />
 
             <TextView
                 android:id="@+id/symbol"
@@ -48,9 +49,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="3dp"
                 android:fontFamily="@font/font_semibold"
+                android:textAppearance="?attr/textAppearanceListItem"
                 android:textSize="@dimen/sp17"
-                tools:text="ETH"
-                android:textAppearance="?attr/textAppearanceListItem" />
+                tools:text="ETH" />
 
             <com.alphawallet.app.widget.ChainName
                 android:id="@+id/chain_name"
@@ -59,7 +60,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="3dp"
                 android:visibility="visible"
-                custom:font_size="10"/>
+                custom:font_size="10" />
 
         </LinearLayout>
 
@@ -72,67 +73,52 @@
             android:fontFamily="@font/font_semibold"
             android:layout_centerVertical="true"
             android:textColor="@color/black"
-            android:textSize="@dimen/sp14"
+            android:textSize="17sp"
             tools:text="+ 673.345 ETH" />
 
         <TextView
             android:id="@+id/supplimental"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/value"
-            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@id/address"
+            android:layout_toStartOf="@id/text_tx_time"
+            android:fontFamily="@font/font_regular"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceListItem"
+            android:layout_marginEnd="2dp"
+            android:layout_marginStart="2dp"
             android:textSize="12sp"
+            android:visibility="visible"
             tools:text="+1.0 ETH" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/details"
-            android:layout_alignStart="@id/details"
-            android:layout_marginTop="@dimen/dp8"
-            android:layout_toStartOf="@id/text_tx_time">
-
-            <TextView
-                android:id="@+id/text_to_from"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:fontFamily="@font/font_light"
-                android:layout_marginEnd="3dp"
-                android:maxLines="1"
-                android:visibility="gone"
-                tools:text="to"
-                android:textColor="@color/black"
-                android:textSize="14sp"/>
 
             <TextView
                 android:id="@+id/address"
+                android:layout_marginTop="@dimen/dp10"
+                android:layout_toStartOf="@id/supplimental"
+                android:layout_below="@id/details"
+                android:layout_alignStart="@id/details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:fontFamily="@font/font_light"
                 tools:text="0x123456778 ... 3434"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
-
-        </LinearLayout>
+                android:textColor="@color/dove"
+                android:textSize="@dimen/sp12" />
 
         <TextView
             android:id="@+id/text_tx_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/supplimental"
+            android:layout_alignBottom="@id/address"
             android:layout_alignParentEnd="true"
             android:visibility="visible"
             android:fontFamily="@font/font_regular"
-            android:textColor="@color/black"
+            android:textColor="@color/dove"
             android:layout_gravity="center_vertical"
             android:maxLines="1"
             tools:text="11:53 pm"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textSize="14sp" />
+            android:textSize="12sp" />
 
     </RelativeLayout>
 </LinearLayout>

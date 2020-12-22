@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
@@ -63,6 +64,21 @@ public class RealmAuxData extends RealmObject
         String[] split = instanceKey.split("-");
         if (split.length > 1) return split[1];
         else return "";
+    }
+
+    public int getExtendId()
+    {
+        String[] split = instanceKey.split("-");
+        if (split.length > 3)
+        {
+            String extendId = split[3];
+            if (extendId != null && extendId.length() > 0 && Character.isDigit(extendId.charAt(0)))
+            {
+                return Integer.parseInt(extendId);
+            }
+        }
+
+        return 0;
     }
 
     public void setChainId(int chainId)
@@ -256,18 +272,6 @@ public class RealmAuxData extends RealmObject
         NAME,
         TYPE,
         RESULT
-    }
-
-    public static class EventResult
-    {
-        public final String type;
-        public final String value;
-
-        public EventResult(String t, String v)
-        {
-            type = t;
-            value = v;
-        }
     }
 
     public Map<String, EventResult> getEventResultMap()

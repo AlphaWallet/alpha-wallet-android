@@ -2,8 +2,6 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -22,18 +20,11 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
-import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
-import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
-
-import org.web3j.crypto.Keys;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
@@ -53,7 +44,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final ChainName chainName;
     private final TextView supplemental;
     private final TextView symbol;
-    private final TextView toOrFrom;
     private final TokensService tokensService;
     private final LinearLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
@@ -72,7 +62,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
         chainName = findViewById(R.id.chain_name);
-        toOrFrom = findViewById(R.id.text_to_from);
         supplemental = findViewById(R.id.supplimental);
         transactionBackground = findViewById(R.id.layout_background);
         symbol = findViewById(R.id.symbol);
@@ -107,22 +96,20 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
         value.setText(Utils.isContractCall(getContext(), operationName) ? "" : transactionOperation);
-        value.setTextColor(getValueColour(token));
 
         type.setText(operationName);
         symbol.setText(Utils.isContractCall(getContext(), operationName) ? "" : token.getShortSymbol());
 
         //set address or contract name
-        setupAddressField(token);
-        setupToFromText(token);
+        setupTransactionDetail(token);
 
         //set colours and up/down arrow
         tokenIcon.bindData(token, assetService);
         tokenIcon.setStatusIcon(token.getTxStatus(transaction));
 
-        String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), tokensService.getNetworkName(token.tokenInfo.chainId));
+        String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), EthereumNetworkBase.getChainSymbol(token.tokenInfo.chainId));
         supplemental.setText(supplementalTxt);
-        supplemental.setTextColor(transaction.getSupplementalColour(supplementalTxt));
+        supplemental.setTextColor(getContext().getColor(transaction.getSupplementalColour(supplementalTxt)));
 
         date.setText(Utils.localiseUnixTime(getContext(), transaction.timeStamp));
         date.setVisibility(View.VISIBLE);
@@ -130,38 +117,10 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         setTransactionStatus(transaction.blockNumber, transaction.error, transaction.isPending());
     }
 
-    private void setupToFromText(Token token)
+    private void setupTransactionDetail(Token token)
     {
-        String toFrom = token.getToFromText(getContext(), transaction);
-        if (!TextUtils.isEmpty(toFrom))
-        {
-            toOrFrom.setText(toFrom);
-            toOrFrom.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            toOrFrom.setVisibility(View.GONE);
-        }
-    }
-
-    private void setupAddressField(Token token)
-    {
-        String destinationOrContract = token.getTransactionDestination(transaction);
-        String addressStr = ENSHandler.findMatchingENS(getContext(), destinationOrContract);
-        if (Utils.isAddressValid(addressStr))
-        {
-            Token resolveToken = tokensService.getToken(transaction.chainId, addressStr);
-            if (resolveToken == null || resolveToken.isEthereum())
-            {
-                addressStr = Utils.formatAddress(addressStr);
-            }
-            else
-            {
-                addressStr = resolveToken.getFullName();
-            }
-        }
-
-        address.setText(addressStr);
+        String detailStr = token.getTransactionDetail(getContext(), transaction, tokensService);
+        address.setText(detailStr);
     }
 
     @Override
@@ -194,26 +153,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
 
         return operationToken;
-    }
-
-    private int getValueColour(Token token)
-    {
-        boolean isSent = token.getIsSent(transaction);
-        boolean isSelf = transaction.from.equalsIgnoreCase(transaction.to);
-
-        int colour = ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green);
-        if (isSelf) colour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
-
-        return colour;
-    }
-
-    private void setDate()
-    {
-        Date txDate = LocaleUtils.getLocalDateFromTimestamp(transaction.timeStamp);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(txDate);
-        date.setText(DateFormat.format("dd MMM yyyy", calendar));
     }
 
     @Override

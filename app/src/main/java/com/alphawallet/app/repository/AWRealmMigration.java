@@ -177,6 +177,64 @@ public class AWRealmMigration implements RealmMigration
             if (realmToken.hasField("token")) realmToken.removeField("token");
             oldVersion++;
         }
+
+        if (oldVersion == 17)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransfer");
+            if (realmData == null)
+            {
+                schema.create("RealmTransfer")
+                        .addField("hash", String.class)
+                        .addField("tokenAddress", String.class)
+                        .addField("eventName", String.class)
+                        .addField("transferDetail", String.class);
+            }
+            oldVersion++;
+        }
+
+        if (oldVersion == 18)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransaction");
+            if (realmData != null && realmData.hasField("operations")) realmData.removeField("operations");
+            oldVersion++;
+        }
+
+        if (oldVersion == 19)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransactionOperation");
+            if (realmData != null)
+            {
+                realmData.removeField("viewType");
+                realmData.removeField("from");
+                realmData.removeField("to");
+                realmData.removeField("value");
+                realmData.removeField("contract");
+            }
+
+            realmData = schema.get("RealmTransactionContract");
+            if (realmData != null)
+            {
+                realmData.removeField("name");
+                realmData.removeField("totalSupply");
+                realmData.removeField("decimals");
+                realmData.removeField("symbol");
+                realmData.removeField("balance");
+                realmData.removeField("operation");
+                realmData.removeField("otherParty");
+                realmData.removeField("indices");
+                realmData.removeField("type");
+                realmData.removeField("contractType");
+            }
+
+            oldVersion++;
+        }
+
+        if (oldVersion == 20)
+        {
+            schema.remove("RealmTransactionOperation");
+            schema.remove("RealmTransactionContract");
+            oldVersion++;
+        }
     }
 
     @Override

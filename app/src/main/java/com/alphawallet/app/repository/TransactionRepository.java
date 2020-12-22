@@ -221,7 +221,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return Single.fromCallable(() -> {
 			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, contractAddr);
-			newTx.completeSetup(from.address);
+			//newTx.completeSetup(from.address);
 			inDiskCache.putTransaction(from, newTx);
 			transactionsService.markPending(newTx);
 
@@ -235,7 +235,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 			Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, "");
-			newTx.completeSetup(from.address);
+			//newTx.completeSetup(from.address);
 			inDiskCache.putTransaction(from, newTx);
 			transactionsService.markPending(newTx);
 

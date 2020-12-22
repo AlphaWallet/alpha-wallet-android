@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -564,7 +565,7 @@ public class Token implements Parcelable, Comparable<Token>
         }
         else
         {
-            name = transaction.getOperationName(ctx);
+            name = transaction.getOperationName(ctx, getWallet());
         }
 
 
@@ -624,6 +625,12 @@ public class Token implements Parcelable, Comparable<Token>
         return idList;
     }
 
+    public String convertValue(String value, int precision)
+    {
+        return BalanceUtils.getScaledValueFixed(new BigDecimal(value),
+                tokenInfo.decimals, precision);
+    }
+
     /**
      * Fetch the base native value attached to this transaction
      * @param transaction
@@ -632,7 +639,7 @@ public class Token implements Parcelable, Comparable<Token>
     public String getTransactionValue(Transaction transaction, int precision)
     {
         if (transaction.hasError()) return "";
-        else if (transaction.value.equals("0")) return "0";
+        else if (transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
         return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
     }
 
@@ -674,7 +681,14 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean getIsSent(Transaction transaction)
     {
-        return transaction.from.equalsIgnoreCase(tokenWallet);
+        if (isEthereum())
+        {
+            return transaction.from.equalsIgnoreCase(tokenWallet);
+        }
+        else
+        {
+            return transaction.getIsSent(tokenWallet);
+        }
     }
 
     public String getWallet()
@@ -805,7 +819,7 @@ public class Token implements Parcelable, Comparable<Token>
             }
             else
             {
-                returnValue = transaction.getRawValue();
+                returnValue = transaction.getRawValue(getWallet());
             }
         }
         catch (Exception e)
@@ -819,6 +833,18 @@ public class Token implements Parcelable, Comparable<Token>
     public boolean checkBalanceType()
     {
         return true;
+    }
+
+    public String getTransactionDetail(Context ctx, Transaction tx, TokensService tService)
+    {
+        if (isEthereum())
+        {
+            return ctx.getString(R.string.operation_definition, ctx.getString(getToFromText(tx)), ENSHandler.matchENSOrFormat(ctx, getTransactionDestination(tx)));
+        }
+        else
+        {
+            return tx.getOperationDetail(ctx, this, tService);
+        }
     }
 
     public String getTransactionDestination(Transaction transaction)
@@ -836,7 +862,7 @@ public class Token implements Parcelable, Comparable<Token>
         }
         else
         {
-            return transaction.getContract(this);
+            return transaction.getDestination(this);
         }
     }
 
@@ -970,22 +996,44 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public String getToFromText(Context context, Transaction transaction)
+    public int getToFromText(Transaction transaction)
     {
         if (isEthereum())
         {
             if (getIsSent(transaction))
             {
-                return context.getString(R.string.to);
+                return R.string.to;
             }
             else
             {
-                return context.getString(R.string.from_op);
+                return R.string.from_op;
             }
         }
         else
         {
-            return transaction.getOperationToFrom(context);
+            return transaction.getOperationToFrom(tokenWallet);
+        }
+    }
+
+    /**
+     * Given a transaction which is a Token Transfer of some kind, return the amount of tokens or token ID if NFT
+     * Should be overriden for each distinct token type
+     *
+     * @param tx
+     * @param transactionBalancePrecision
+     * @return
+     */
+    public String getTransferValue(Transaction tx, int transactionBalancePrecision)
+    {
+        if (tx.transactionInput.miscData.size() > 0)
+        {
+            BigInteger bi = new BigInteger(tx.transactionInput.miscData.get(0), 16);
+            return BalanceUtils.getScaledValueMinimal(new BigDecimal(bi),
+                    tokenInfo.decimals, transactionBalancePrecision);
+        }
+        else
+        {
+            return "0";
         }
     }
 }

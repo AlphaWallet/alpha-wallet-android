@@ -235,6 +235,13 @@ public class AWRealmMigration implements RealmMigration
             schema.remove("RealmTransactionContract");
             oldVersion++;
         }
+
+        if (oldVersion == 21)
+        {
+            RealmObjectSchema realmData = schema.get("RealmWCSession");
+            if (realmData != null && !realmData.hasField("chainId")) realmData.addField("chainId", int.class);
+            oldVersion++;
+        }
     }
 
     @Override

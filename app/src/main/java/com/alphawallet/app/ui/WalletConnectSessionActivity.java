@@ -29,6 +29,7 @@ import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
+import com.alphawallet.app.widget.ChainName;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
@@ -139,18 +140,16 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-                break;
-            }
-            case R.id.action_scan: {
-                Intent intent = new Intent(this, QRScanningActivity.class);
-                intent.putExtra("wallet", wallet);
-                intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
-                startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
-            }
-            break;
+        if (item.getItemId() == android.R.id.home)
+        {
+            finish();
+        }
+        else if (item.getItemId() == R.id.action_scan)
+        {
+            Intent intent = new Intent(this, QRScanningActivity.class);
+            intent.putExtra("wallet", wallet);
+            intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+            startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
         }
 
         return super.onOptionsItemSelected(item);
@@ -174,6 +173,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             final TextView peerName;
             final TextView peerUrl;
             final LinearLayout clickLayer;
+            final ChainName chainName;
 
             CustomViewHolder(View view)
             {
@@ -183,6 +183,7 @@ public class WalletConnectSessionActivity extends BaseActivity
                 peerName = view.findViewById(R.id.session_name);
                 peerUrl = view.findViewById(R.id.session_url);
                 clickLayer = view.findViewById(R.id.item_layout);
+                chainName = view.findViewById(R.id.chain_name);
             }
         }
 
@@ -196,6 +197,7 @@ public class WalletConnectSessionActivity extends BaseActivity
                     .into(holder.icon);
             holder.peerName.setText(session.name);
             holder.peerUrl.setText(session.url);
+            holder.chainName.setChainID(session.chainId);
             holder.clickLayer.setOnClickListener(v -> {
                 //go to wallet connect session page
                 Intent intent = new Intent(getApplication(), WalletConnectActivity.class);

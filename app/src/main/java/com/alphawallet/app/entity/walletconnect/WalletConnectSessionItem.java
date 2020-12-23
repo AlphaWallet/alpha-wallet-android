@@ -12,6 +12,7 @@ public class WalletConnectSessionItem
     public final String icon;
     public final String sessionId;
     public final String localSessionId;
+    public final int chainId;
 
     public WalletConnectSessionItem(RealmWCSession s)
     {
@@ -20,5 +21,6 @@ public class WalletConnectSessionItem
         icon = s.getRemotePeerData().getIcons().get(0);
         sessionId = s.getSession().getTopic();
         localSessionId = s.getSessionId();
+        chainId = s.getChainId() == 0 ? 1 : s.getChainId(); //older sessions without chainId set must be mainnet
     }
 }

@@ -24,6 +24,8 @@ public class RealmWCSession extends RealmObject
     private String walletAccount;   // Which wallet we connected this session with (note, you can add/remove available session wallets using the update API call,
                                     //   maybe add this as an advanced option).
 
+    private int chainId;
+
     public WCSession getSession()
     {
         return new Gson().fromJson(sessionData, WCSession.class);
@@ -97,5 +99,15 @@ public class RealmWCSession extends RealmObject
     public String getSessionId()
     {
         return sessionId;
+    }
+
+    public int getChainId()
+    {
+        return chainId;
+    }
+
+    public void setChainId(int chainId)
+    {
+        this.chainId = chainId;
     }
 }

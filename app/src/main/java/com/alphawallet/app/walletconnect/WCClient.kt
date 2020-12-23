@@ -262,6 +262,7 @@ open class WCClient(
                 handshakeId = request.id
                 remotePeerId = param.peerId
                 chainId = param.chainId?.toInt()
+                if (chainId == null) chainId = MAINNET_ID
                 onSessionRequest(request.id, param.peerMeta)
             }
             WCMethod.SESSION_UPDATE -> {

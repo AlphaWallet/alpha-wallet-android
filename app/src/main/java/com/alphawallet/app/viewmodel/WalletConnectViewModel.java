@@ -52,6 +52,8 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+
 public class WalletConnectViewModel extends BaseViewModel {
     private static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -172,7 +174,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {
         resetSignDialog();
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, EthereumNetworkBase.MAINNET_ID)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, MAINNET_ID)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
@@ -309,7 +311,26 @@ public class WalletConnectViewModel extends BaseViewModel {
         return peerId;
     }
 
-    public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData, String remotePeerData)
+    public int getChainId(String sessionId)
+    {
+        int chainId = MAINNET_ID;
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+                    .equalTo("sessionId", sessionId)
+                    .findFirst();
+
+            if (sessionData != null)
+            {
+                chainId = sessionData.getChainId();
+            }
+        }
+
+        return chainId;
+    }
+
+    public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData,
+                                 String remotePeerData, int sessionChainId)
     {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
@@ -327,6 +348,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                 sessionAux.setSessionData(sessionData);
                 sessionAux.setUsageCount(0);
                 sessionAux.setWalletAccount(defaultWallet.getValue().address);
+                sessionAux.setChainId(sessionChainId);
             });
         }
     }

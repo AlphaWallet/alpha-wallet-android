@@ -8,7 +8,7 @@
         android:id="@+id/_text_chain_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|end"
         android:background="@color/ropsten"
         android:fontFamily="@font/font_bold"
         android:padding="2dp"

@@ -34,7 +34,17 @@ public class EtherscanEvent
 
     public Transaction createTransaction(String walletAddress, @NotNull NetworkInfo networkInfo)
     {
-        String input = Numeric.toHexString(TokenRepository.createTokenTransferData(to, new BigInteger(value))); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
+        BigInteger valueBI = BigInteger.ZERO;
+        if (value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
+        {
+            valueBI = new BigInteger(value);
+        }
+        else
+        {
+            System.out.println("YOLESS");
+        }
+
+        String input = Numeric.toHexString(TokenRepository.createTokenTransferData(to, valueBI)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
 
         return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, input,
                 gasUsed, networkInfo.chainId, false);

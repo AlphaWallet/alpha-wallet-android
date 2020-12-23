@@ -35,6 +35,7 @@ import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
@@ -84,6 +85,7 @@ public class WalletConnectActivity extends BaseActivity
     private TextView peerName;
     private TextView peerUrl;
     private TextView address;
+    private ChainName chainName;
     private TextView signCount;
     private ProgressBar progressBar;
     private LinearLayout infoLayout;
@@ -216,6 +218,7 @@ public class WalletConnectActivity extends BaseActivity
         peerName = findViewById(R.id.peer_name);
         peerUrl = findViewById(R.id.peer_url);
         address = findViewById(R.id.address);
+        chainName = findViewById(R.id.chain_name);
         signCount = findViewById(R.id.tx_count);
 
         functionBar = findViewById(R.id.layoutButtons);
@@ -314,12 +317,12 @@ public class WalletConnectActivity extends BaseActivity
                     break;
                 case SIGN_TX:
                     runOnUiThread(() -> {
-                        onEthSignTransaction(rq.id, rq.tx, client.getChainId());
+                        onEthSignTransaction(rq.id, rq.tx, rq.chainId);
                     });
                     break;
                 case SEND_TX:
                     runOnUiThread(() -> {
-                        onEthSendTransaction(rq.id, rq.tx, client.getChainId());
+                        onEthSendTransaction(rq.id, rq.tx, rq.chainId);
                     });
                     break;
                 case FAILURE:
@@ -330,7 +333,7 @@ public class WalletConnectActivity extends BaseActivity
                 case SESSION_REQUEST:
                     Log.d(TAG, "On Request: " + rq.peer.getName());
                     runOnUiThread(() -> {
-                        onSessionRequest(rq.id, rq.peer);
+                        onSessionRequest(rq.id, rq.peer, rq.chainId);
                     });
                     break;
             }
@@ -442,6 +445,7 @@ public class WalletConnectActivity extends BaseActivity
                     .into(icon);
             peerName.setText(remotePeerData.getName());
             peerUrl.setText(remotePeerData.getUrl());
+            chainName.setChainID(viewModel.getChainId(sessionId));
             updateSignCount();
         }
     }
@@ -464,7 +468,7 @@ public class WalletConnectActivity extends BaseActivity
         }
     }
 
-    private void onSessionRequest(Long id, WCPeerMeta peer)
+    private void onSessionRequest(Long id, WCPeerMeta peer, int chainId)
     {
         String[] accounts = {wallet.address};
 
@@ -474,6 +478,7 @@ public class WalletConnectActivity extends BaseActivity
         peerName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());
         signCount.setText(R.string.empty);
+        chainName.setChainID(chainId);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog = builder
@@ -481,8 +486,9 @@ public class WalletConnectActivity extends BaseActivity
                 .setTitle(peer.getName())
                 .setMessage(peer.getUrl())
                 .setPositiveButton(R.string.dialog_approve, (d, w) -> {
-                    client.approveSession(Arrays.asList(accounts), 100);
-                    viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(), new Gson().toJson(session), new Gson().toJson(peer));
+                    client.approveSession(Arrays.asList(accounts), chainId);
+                    viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
+                            new Gson().toJson(session), new Gson().toJson(peer), client.getChainId());
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);
                     infoLayout.setVisibility(View.VISIBLE);

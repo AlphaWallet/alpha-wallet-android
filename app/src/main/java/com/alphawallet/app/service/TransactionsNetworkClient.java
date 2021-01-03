@@ -498,8 +498,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     //convert to gson
                     EtherscanEvent[] events = getEtherscanEvents(fetchTransactions);
                     //we know all these events are relevant to the wallet, and they are all ERC20 events
-                    //TODO: fetch transaction details from Infura to find base currency input. For now mark as zero
-                    //writeTransactions(instance, convertToTxList(events, walletAddress, networkInfo));
                     writeEvents(instance, events, walletAddress, networkInfo, false);
 
                     //Now update tokens if we don't already know this token
@@ -535,7 +533,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     //convert to gson
                     EtherscanEvent[] events = getEtherscanEvents(fetchTransactions);
-                    //writeTransactions(instance, convertToTxList(events, walletAddress, networkInfo));
                     writeEvents(instance, events, walletAddress, networkInfo, true);
 
                     //Now update tokens if we don't already know this token
@@ -899,7 +896,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeEvents(Realm instance, EtherscanEvent[] events, String walletAddress, @NonNull NetworkInfo networkInfo, boolean isNFT) throws Exception
+    private void writeEvents(Realm instance, EtherscanEvent[] events, String walletAddress, @NonNull NetworkInfo networkInfo, final boolean isNFT) throws Exception
     {
         String TO_TOKEN = "[TO_ADDRESS]";
         String FROM_TOKEN = "[FROM_ADDRESS]";
@@ -909,10 +906,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         //write event list
         for (EtherscanEvent ev : events)
         {
-            Transaction tx = isNFT ? ev.createNFTTransaction(walletAddress, networkInfo) : ev.createTransaction(walletAddress, networkInfo);
+            Transaction tx = isNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
             //find tx name
             String activityName = tx.getEventName(walletAddress);
-            String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, isNFT ? "1" : ev.value);
+            String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN,
+                    (isNFT || ev.value == null) ? "1" : ev.value); //Etherscan sometimes interprets NFT transfers as FT's
             storeTransferData(instance, tx.hash, valueList, activityName, ev.contractAddress);
             //ensure we have fetched the transaction for each hash
             checkTransaction(instance, tx, walletAddress, networkInfo);
@@ -997,20 +995,4 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //
         }
     }
-
-    /*
-    {instanceKey:0x8f53a666112f94bab8726f38d664234d638c853271a3e3828893396bd67d6a4a-Transfer-eventName},
-    {chainId:77},{tokenAddress:0xe52ecd3d16e7b194ad16a8c338b1805fe3f66644},{tokenId:0},
-    {functionId:received},
-    {result:from,address,0xfcabe3451ac8edfb8fb6b9274c2e095d9ccc8082,to,address,0xfcabe3451ac8edfb8fb6b9274c2e095d9ccc8082,amount,uint256,100},
-    {resultTime:1600389790},{resultReceivedTime:1607382936134}]
-     */
-
-    /*
-    {instanceKey:0xd62647de7703956824656b3666dde9b3fb4381cfa871fabb7b1f09c0181ca6ce-Transfer-eventName}
-    ,{chainId:77},{tokenAddress:0xe52ecd3d16e7b194ad16a8c338b1805fe3f66644},{tokenId:0},
-    {functionId:sent},
-    {result:from,address,0xc067a53c91258ba513059919e03b81cf93f57ac7,to,address,0x901dbb9771d30124bd25b2f86ef4d8c6c135d948,amount,uint256,1000},
-    {resultTime:1606736945},{resultReceivedTime:1607383206400}]
-     */
 }

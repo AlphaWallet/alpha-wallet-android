@@ -357,4 +357,9 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         this.addressReadyCallback = addressReadyCallback;
     }
+
+    public void stopNameCheck()
+    {
+        displayCheckingDialog(false);
+    }
 }

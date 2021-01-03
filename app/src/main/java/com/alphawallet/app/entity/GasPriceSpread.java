@@ -28,6 +28,8 @@ public class GasPriceSpread
 
     public final long timeStamp;
 
+    private int customIndex;
+
     public GasPriceSpread(String apiReturn)
     {
         BigInteger rRapid = BigInteger.ZERO;
@@ -61,8 +63,8 @@ public class GasPriceSpread
     public GasPriceSpread(BigInteger currentAvGasPrice)
     {
         rapid = BigInteger.ZERO;
-        fast = currentAvGasPrice;
-        standard = BigInteger.ZERO;
+        fast = BigInteger.ZERO;
+        standard = currentAvGasPrice;
         slow = BigInteger.ZERO;
         timeStamp = System.currentTimeMillis();
     }
@@ -78,6 +80,7 @@ public class GasPriceSpread
 
     public int setupGasSpeeds(Context ctx, List<GasSpeed> gasSpeeds, int currentGasSpeedIndex)
     {
+        boolean hasRapid = false;
         GasSpeed customGas = null;
         if (gasSpeeds.size() > 0) customGas = gasSpeeds.get(gasSpeeds.size()-1);
 
@@ -86,17 +89,21 @@ public class GasPriceSpread
         if (rapid.compareTo(BigInteger.ZERO) > 0)
         {
             gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_rapid), GasPriceSpread.RAPID_SECONDS, rapid));
+            hasRapid = true;
         }
 
         if (fast.compareTo(BigInteger.ZERO) > 0)
         {
             gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_fast), GasPriceSpread.FAST_SECONDS, fast));
+            hasRapid = true;
         }
 
         if (standard.compareTo(BigInteger.ZERO) > 0)
         {
+            long txTime = GasPriceSpread.STANDARD_SECONDS;
             if (currentGasSpeedIndex == -1) currentGasSpeedIndex = gasSpeeds.size();
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_average), GasPriceSpread.STANDARD_SECONDS, standard));
+            if (!hasRapid) txTime = GasPriceSpread.FAST_SECONDS; //for non mainnet chains, assume standard tx time is 1 minute
+            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_average), txTime, standard));
         }
 
         if (slow.compareTo(BigInteger.ZERO) > 0)
@@ -104,6 +111,7 @@ public class GasPriceSpread
             gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_slow), GasPriceSpread.SLOW_SECONDS, slow));
         }
 
+        customIndex = gasSpeeds.size();
         if (customGas != null)
         {
             gasSpeeds.add(customGas);
@@ -119,5 +127,10 @@ public class GasPriceSpread
         }
 
         return currentGasSpeedIndex;
+    }
+
+    public int getCustomIndex()
+    {
+        return customIndex;
     }
 }

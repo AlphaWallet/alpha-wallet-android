@@ -4,13 +4,12 @@
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:paddingStart="15dp"
-    android:paddingTop="15dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="15dp">
+    android:background="@color/white">
 
     <LinearLayout
+        android:paddingStart="15dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -69,7 +68,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true">
+        android:layout_centerVertical="true"
+        android:paddingEnd="12dp">
 
         <TextView
             android:id="@+id/text_speed_time"
@@ -90,5 +90,13 @@
             android:src="@drawable/selector_radio" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/translucentWhite"
+        android:visibility="gone"
+        android:orientation="vertical"/>
 
 </RelativeLayout>

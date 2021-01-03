@@ -446,8 +446,10 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     public void amountReady(BigDecimal value, BigDecimal gasPrice)
     {
+        Token base = viewModel.getToken(token.tokenInfo.chainId, wallet.address);
         //validate that we have sufficient balance
-        if (token.balance.subtract(value).compareTo(BigDecimal.ZERO) >= 0)
+        if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
+             || (base.balance.compareTo(BigDecimal.ZERO) > 0)) //contract token, so only need have some base balance for gas
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
@@ -458,6 +460,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             sendAmount = NEGATIVE;
             //insufficient balance
             amountInput.showError(true, R.string.error_insufficient_funds);
+            //if currently resolving ENS, stop
+            addressInput.stopNameCheck();
         }
     }
 
@@ -553,9 +557,10 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 -1);
 
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress, sendAmount.toBigInteger(), viewModel.getTokenService());
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress, viewModel.getTokenService());
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
+
         sendAmount = NEGATIVE;
     }
 
@@ -619,5 +624,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             dialog.dismiss();
         });
         dialog.show();
+
+        confirmationDialog.dismiss();
     }
 }

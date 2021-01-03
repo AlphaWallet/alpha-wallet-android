@@ -32,16 +32,12 @@ public class EtherscanEvent
     String gasPrice;
     String gasUsed;
 
-    public Transaction createTransaction(String walletAddress, @NotNull NetworkInfo networkInfo)
+    public Transaction createTransaction(@NotNull NetworkInfo networkInfo)
     {
         BigInteger valueBI = BigInteger.ZERO;
         if (value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
         {
             valueBI = new BigInteger(value);
-        }
-        else
-        {
-            System.out.println("YOLESS");
         }
 
         String input = Numeric.toHexString(TokenRepository.createTokenTransferData(to, valueBI)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
@@ -50,7 +46,7 @@ public class EtherscanEvent
                 gasUsed, networkInfo.chainId, false);
     }
 
-    public Transaction createNFTTransaction(String walletAddress, @NotNull NetworkInfo networkInfo)
+    public Transaction createNFTTransaction(@NotNull NetworkInfo networkInfo)
     {
         String input = Numeric.toHexString(TokenRepository.createERC721TransferFunction(from, to, contractAddress, BigInteger.ONE)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
 

@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -62,15 +63,15 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private RecyclerView recyclerView;
     private CustomAdapter adapter;
     private RealmGasSpread realmGasSpread;
-    private final Handler handler = new Handler();
 
     private final List<GasSpeed> gasSpeeds = new ArrayList<>();
     private int currentGasSpeedIndex = -1;
     private int chainId;
     private BigDecimal gasLimit;
+    private BigDecimal customGasLimit;
+    private BigDecimal availableBalance;
+    private BigInteger customGasPriceFromWidget;
 
-    private BigDecimal customGasLimit = BigDecimal.ZERO;
-    private BigDecimal customGasPrice = BigDecimal.ZERO;
     private int customIndex = -1;
 
     @Override
@@ -92,10 +93,12 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         currentGasSpeedIndex = getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
         chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         gasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
-        customGasPrice = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
+        customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
+        availableBalance = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
-        gasSliderView.initGasLimit(gasLimit.toBigInteger());
-        gasSliderView.initGasPrice(customGasPrice.toBigInteger());
+        gasSliderView.initGasLimit(customGasLimit.toBigInteger());
+        customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
+        gasSliderView.initGasPrice(customGasPriceFromWidget);
 
         adapter = new CustomAdapter(this);
         recyclerView.setAdapter(adapter);
@@ -117,7 +120,13 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             RealmGasSpread rgs = (RealmGasSpread) realmToken;
             GasPriceSpread gs = rgs.getGasPrice();
             currentGasSpeedIndex = gs.setupGasSpeeds(this, gasSpeeds, currentGasSpeedIndex);
+            customIndex = gs.getCustomIndex();
             gasSliderView.initGasPriceMax(gasSpeeds.get(0).gasPrice);
+            if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
+            {
+                updateCustomElement(customGasPriceFromWidget, customGasLimit.toBigInteger());
+                customGasPriceFromWidget = BigInteger.ZERO;
+            }
             //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
             adapter.notifyDataSetChanged();
         });
@@ -145,8 +154,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         Intent result = new Intent();
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
+        GasSpeed custom = gasSpeeds.get(customIndex);
         result.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex);
-        result.putExtra(C.EXTRA_GAS_PRICE, customGasPrice.toString());
+        result.putExtra(C.EXTRA_GAS_PRICE, custom.gasPrice.toString());
         result.putExtra(C.EXTRA_GAS_LIMIT, customGasLimit.toString());
         result.putExtra(C.EXTRA_NONCE, gasSliderView.getNonce());
         result.putExtra(C.EXTRA_AMOUNT, gs.seconds);
@@ -170,14 +180,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     public void gasSettingsUpdate(BigInteger gasPrice, BigInteger gasLimit)
     {
         if (customIndex < 0) return;
-        GasSpeed gs = gasSpeeds.get(customIndex);
-        //new settings from the slider widget
-        gs = new GasSpeed(gs.speed, getExpectedTransactionTime(gasPrice), gasPrice);
-        gasSpeeds.remove(customIndex);
-        gasSpeeds.add(gs);
-
-        customGasPrice = new BigDecimal(gasPrice);
-        customGasLimit = new BigDecimal(gasLimit);
+        updateCustomElement(gasPrice, gasLimit);
         adapter.notifyItemChanged(customIndex);
     }
 
@@ -201,6 +204,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             final TextView speedCostEth;
             final TextView speedCostFiat;
             final TextView speedTime;
+            final LinearLayout blankOverlay;
             final View itemLayout;
 
             CustomViewHolder(View view)
@@ -213,6 +217,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 speedTime = view.findViewById(R.id.text_speed_time);
                 itemLayout = view.findViewById(R.id.layout_list_item);
                 speedGwei = view.findViewById(R.id.text_gwei);
+                blankOverlay = view.findViewById(R.id.layout_overlay);
             }
         }
 
@@ -232,7 +237,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             holder.itemLayout.setOnClickListener(v -> {
                 if (position == customIndex && currentGasSpeedIndex != customIndex)
                 {
-                    gasSliderView.initGasLimit(gasLimit.toBigInteger());
+                    if (holder.blankOverlay.getVisibility() == View.VISIBLE) { return; } //don't allow selection of invalid amount
+                    gasSliderView.initGasLimit(customGasLimit.toBigInteger());
                     gasSliderView.reportPosition();
                 }
                 currentGasSpeedIndex = position;
@@ -241,9 +247,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             String speedGwei = BalanceUtils.weiToGweiBI(gs.gasPrice).toBigInteger().toString();
 
-            if (gs.speed.equals(context.getString(R.string.speed_custom)))
+            if (position == customIndex)
             {
-                customIndex = position;
                 if (gs.seconds == 0)
                 {
                     blankCustomHolder(holder);
@@ -281,6 +286,17 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             }
 
             setCustomGasDetails(position);
+
+            //determine if this amount can be used
+            if (gs.gasPrice.compareTo(availableBalance.toBigInteger()) > 0)
+            {
+                //cannot be used
+                holder.blankOverlay.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                holder.blankOverlay.setVisibility(View.GONE);
+            }
         }
 
         private void blankCustomHolder(CustomViewHolder holder)
@@ -348,7 +364,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         long expectedTime = gasSpeeds.get(0).seconds;
         if (gasSpeeds.size() > 2)
         {
-            double customGasPrice = customGasPriceBI.doubleValue();
+            double dGasPrice = customGasPriceBI.doubleValue();
             //Extrapolate between adjacent price readings
             for (int index = 0; index < gasSpeeds.size() - 2; index++)
             {
@@ -356,27 +372,27 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 GasSpeed lg = gasSpeeds.get(index + 1);
                 double lowerBound = lg.gasPrice.doubleValue();
                 double upperBound = ug.gasPrice.doubleValue();
-                if (lowerBound <= customGasPrice && (upperBound >= customGasPrice))
+                if (lowerBound <= dGasPrice && (upperBound >= dGasPrice))
                 {
-                    expectedTime = extrapolateTime(lg.seconds, ug.seconds, customGasPrice, lowerBound, upperBound);
+                    expectedTime = extrapolateTime(lg.seconds, ug.seconds, dGasPrice, lowerBound, upperBound);
                     double timeDiff = lg.seconds - ug.seconds;
-                    double extrapolateFactor = (customGasPrice - lowerBound) / (upperBound - lowerBound);
+                    double extrapolateFactor = (dGasPrice - lowerBound) / (upperBound - lowerBound);
                     expectedTime = (long) ((double) lg.seconds - extrapolateFactor * timeDiff);
                     break;
                 }
-                else if (lg.speed.equals(getString(R.string.speed_slow)) && customGasPrice < lowerBound)
+                else if (lg.speed.equals(getString(R.string.speed_slow)) && dGasPrice < lowerBound)
                 {
                     //danger zone - transaction may not complete
                     double dangerAmount = lowerBound / 2.0;
                     long dangerTime = 12 * DateUtils.HOUR_IN_MILLIS / 1000;
 
-                    if (customGasPrice < dangerAmount)
+                    if (dGasPrice < dangerAmount)
                     {
                         expectedTime = -1; //never
                     }
                     else
                     {
-                        expectedTime = extrapolateTime(dangerTime, lg.seconds, customGasPrice, dangerAmount, lowerBound);
+                        expectedTime = extrapolateTime(dangerTime, lg.seconds, dGasPrice, dangerAmount, lowerBound);
                     }
                     break;
                 }
@@ -391,5 +407,17 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         double timeDiff = longTime - shortTime;
         double extrapolateFactor = (customPrice - lowPrice) / (highPrice - lowPrice);
         return (long) ((double) longTime - extrapolateFactor * timeDiff);
+    }
+
+    private void updateCustomElement(BigInteger gasPrice, BigInteger gasLimit)
+    {
+        if (customIndex < 0) return;
+        GasSpeed gs = gasSpeeds.get(customIndex);
+        //new settings from the slider widget
+        gs = new GasSpeed(gs.speed, getExpectedTransactionTime(gasPrice), gasPrice);
+        gasSpeeds.remove(customIndex);
+        gasSpeeds.add(gs);
+
+        this.customGasLimit = new BigDecimal(gasLimit);
     }
 }

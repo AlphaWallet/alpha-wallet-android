@@ -1,7 +1,6 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.view.View;
@@ -9,17 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -28,12 +21,8 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
-import com.alphawallet.app.ui.widget.entity.ProgressCompleteCallback;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.tools.Numeric;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.math.BigDecimal;
@@ -63,7 +52,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private final Token token;
     private final TokensService tokensService;
-    private final BigInteger tokenAmount;
 
     private final Web3Transaction candidateTransaction;
     private final ActionSheetCallback actionSheetCallback;
@@ -71,7 +59,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private String txHash = null;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
-                             String destName, BigInteger tAmount, TokensService ts)
+                             String destName, TokensService ts)
     {
         super(activity);
         setContentView(R.layout.dialog_action_sheet);
@@ -86,7 +74,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.recipient);
         functionBar = findViewById(R.id.layoutButtons);
-        tokenAmount = tAmount;
 
         actionSheetCallback = (ActionSheetCallback) activity;
         if (actionSheetCallback == null)
@@ -99,13 +86,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = tx;
 
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
-        setNewBalanceText();
-        setAmount();
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
 
-        gasWidget.setupWidget(ts, token, candidateTransaction, activity);
+        gasWidget.setupWidget(ts, token, candidateTransaction, this, activity);
+        updateAmount();
+
         if (token.tokenInfo.chainId == MAINNET_ID)
         {
             chainName.setVisibility(View.GONE);
@@ -135,28 +122,30 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)
     {
         gasWidget.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, nonce);
+        updateAmount();
     }
 
     private void setNewBalanceText()
     {
-        BigInteger networkFee = candidateTransaction.gasPrice.multiply(candidateTransaction.gasLimit);
-        BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(tokenAmount);
+        BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
+        BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());
         if (token.isEthereum())
         {
-            balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee);
+            balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);
         }
         //convert to ETH amount
         String newBalanceVal = BalanceUtils.getScaledValueScientific(new BigDecimal(balanceAfterTransaction), token.tokenInfo.decimals);
         newBalance.setText(getContext().getString(R.string.new_balance, newBalanceVal, token.getSymbol()));
     }
 
-    private void setAmount()
+    @Override
+    public void updateAmount()
     {
-        String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(tokenAmount), token.tokenInfo.decimals);
+        String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(gasWidget.getValue()), token.tokenInfo.decimals);
         String displayStr = getContext().getString(R.string.total_cost, amountVal, token.getSymbol());
 
         //fetch ticker if required
-        if (candidateTransaction.value.compareTo(BigInteger.ZERO) > 0)
+        if (gasWidget.getValue().compareTo(BigInteger.ZERO) > 0)
         {
             try (Realm realm = tokensService.getTickerRealmInstance())
             {
@@ -181,10 +170,83 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         amount.setText(displayStr);
+        setNewBalanceText();
     }
 
     @Override
     public void handleClick(String action, int id)
+    {
+        //check gas and warn user
+        if (!gasWidget.checkSufficientGas())
+        {
+            askUserForInsufficientGasConfirm();
+        }
+        else
+        {
+            sendTransaction();
+        }
+    }
+
+    /**
+     * Popup a dialogbox to ask user if they really want to try to send this transaction,
+     * as we calculate it will fail due to insufficient gas. User knows best though.
+     */
+    private void askUserForInsufficientGasConfirm()
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(getContext());
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.insufficient_gas);
+        dialog.setMessage(getContext().getString(R.string.not_enough_gas_message));
+        dialog.setButtonText(R.string.action_send);
+        dialog.setSecondaryButtonText(R.string.cancel_transaction);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+            sendTransaction();
+        });
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    public void transactionWritten(String tx)
+    {
+        txHash = tx;
+        //dismiss on message completion
+        confirmationWidget.completeProgressMessage(txHash, this::showTransactionSuccess);
+        if (!TextUtils.isEmpty(tx))
+        {
+            updateRealmTransactionFinishEstimate(tx);
+        }
+    }
+
+    private void showTransactionSuccess()
+    {
+        Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, txHash);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getContext().startActivity(intent);
+        dismiss();
+    }
+
+    private void updateRealmTransactionFinishEstimate(String txHash)
+    {
+        try (Realm realm = tokensService.getWalletRealmInstance())
+        {
+            RealmTransaction rt = realm.where(RealmTransaction.class)
+                    .equalTo("hash", txHash)
+                    .findFirst();
+
+            if (rt != null)
+            {
+                realm.executeTransaction(instance -> {
+                    rt.setExpectedCompletion(System.currentTimeMillis() + gasWidget.getExpectedTransactionTime() * 1000);
+                });
+            }
+        }
+    }
+
+    private void sendTransaction()
     {
         functionBar.setVisibility(View.GONE);
         //form Web3Transaction
@@ -192,8 +254,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         final Web3Transaction finalTx = new Web3Transaction(
                 candidateTransaction.recipient,
                 candidateTransaction.contract,
-                candidateTransaction.value,
-                gasWidget.getGasPrice(),
+                gasWidget.getValue(),
+                gasWidget.getGasPrice(candidateTransaction.gasPrice),
                 gasWidget.getGasLimit(),
                 gasWidget.getNonce(),
                 candidateTransaction.payload,
@@ -223,42 +285,5 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         };
 
         actionSheetCallback.getAuthorisation(signCallback);
-    }
-
-    public void transactionWritten(String tx)
-    {
-        txHash = tx;
-        //dismiss on message completion
-        confirmationWidget.completeProgressMessage(txHash, this::showTransactionSuccess);
-        if (!TextUtils.isEmpty(tx))
-        {
-            updateRealmTransactionFinishEstimate(tx);
-        }
-    }
-
-    public void showTransactionSuccess()
-    {
-        Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
-        intent.putExtra(C.EXTRA_TXHASH, txHash);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getContext().startActivity(intent);
-        dismiss();
-    }
-
-    private void updateRealmTransactionFinishEstimate(String txHash)
-    {
-        try (Realm realm = tokensService.getWalletRealmInstance())
-        {
-            RealmTransaction rt = realm.where(RealmTransaction.class)
-                    .equalTo("hash", txHash)
-                    .findFirst();
-
-            if (rt != null)
-            {
-                realm.executeTransaction(instance -> {
-                    rt.setExpectedCompletion(System.currentTimeMillis() + gasWidget.getExpectedTransactionTime() * 1000);
-                });
-            }
-        }
     }
 }

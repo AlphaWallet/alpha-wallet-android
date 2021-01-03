@@ -702,4 +702,6 @@
     <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
     <string name="default_approve">Approved %3$s to move %1$s %2$s</string>
     <string name="contract_call">Llamada de contrato</string>
+    <string name="insufficient_gas">Gas insuficientes</string>
+    <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
 </resources>

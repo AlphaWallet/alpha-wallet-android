@@ -716,6 +716,11 @@ public class TokensService
         appHasFocus = false;
     }
 
+    /**
+     * Notify that the new gas setting widget was actually used :)
+     *
+     * @param gasSpeed
+     */
     public void track(String gasSpeed)
     {
         AnalyticsProperties analyticsProperties = new AnalyticsProperties();

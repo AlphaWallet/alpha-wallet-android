@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -40,8 +41,10 @@ import java.text.DecimalFormat;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
+import io.realm.Sort;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
 /**
@@ -357,17 +360,41 @@ public class InputAmount extends LinearLayout
         allFunds.setOnClickListener(v -> {
             if (token.isEthereum() && token.hasPositiveBalance())
             {
-                gasFetch.setVisibility(View.VISIBLE);
-                Web3j web3j = TokenRepository.getWeb3jService(token.tokenInfo.chainId);
-                web3j.ethGasPrice().sendAsync()
-                        .thenAccept(this::onLatestGasPrice)
-                        .exceptionally(this::onGasFetchError);
+                RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
+                            .equalTo("chainId", token.tokenInfo.chainId)
+                            .sort("timeStamp", Sort.DESCENDING)
+                            .findFirst();
+
+                if (gasSpread != null && gasSpread.getGasPrice().standard.compareTo(BigInteger.ZERO) > 0)
+                {
+                    //assume 'average' gas cost here
+                    onLatestGasPrice(gasSpread.getGasPrice().standard);
+                }
+                else //fallback to node price
+                {
+                    gasFetch.setVisibility(View.VISIBLE);
+                    Web3j web3j = TokenRepository.getWeb3jService(token.tokenInfo.chainId);
+                    web3j.ethGasPrice().sendAsync()
+                            .thenAccept(ethGasPrice -> onLatestGasPrice(ethGasPrice.getGasPrice()))
+                            .exceptionally(this::onGasFetchError);
+                }
             }
             else
             {
                 editText.setText(token.getStringBalance());
             }
         });
+    }
+
+    private void onLatestGasPrice(BigInteger price)
+    {
+        gasPriceEstimate = price;
+        //calculate max amount possible
+        BigDecimal networkFee = new BigDecimal(gasPriceEstimate.multiply(BigInteger.valueOf(GAS_LIMIT_MIN)));
+        exactAmount = token.balance.subtract(networkFee);
+        if (exactAmount.compareTo(BigDecimal.ZERO) < 0) exactAmount = BigDecimal.ZERO;
+        //display in the view
+        handler.post(updateValue);
     }
 
     private final Runnable updateValue = new Runnable()
@@ -408,17 +435,6 @@ public class InputAmount extends LinearLayout
         {
             a.recycle();
         }
-    }
-
-    private void onLatestGasPrice(EthGasPrice price)
-    {
-        gasPriceEstimate = price.getGasPrice();
-        //calculate max amount possible
-        BigDecimal networkFee = new BigDecimal(gasPriceEstimate.multiply(BigInteger.valueOf(GAS_LIMIT_MIN)));
-        exactAmount = token.balance.subtract(networkFee);
-        if (exactAmount.compareTo(BigDecimal.ZERO) < 0) exactAmount = BigDecimal.ZERO;
-        //display in the view
-        handler.post(updateValue);
     }
 
     private Void onGasFetchError(Throwable throwable)

@@ -345,6 +345,13 @@ public class TokensService
         else return "";
     }
 
+    public String getNetworkSymbol(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info == null) { info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID); }
+        return info.symbol;
+    }
+
     public void addTokenImageUrl(int networkId, String address, String imageUrl)
     {
         tokenRepository.addImageUrl(networkId, address, imageUrl);

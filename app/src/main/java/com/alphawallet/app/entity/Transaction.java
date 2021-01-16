@@ -14,6 +14,8 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
@@ -100,6 +102,24 @@ public class Transaction implements Parcelable
 		this.gasUsed = gasUsed;
 		this.chainId = chainId;
 		this.isConstructor = isConstructor;
+	}
+
+	public Transaction(Web3Transaction tx, int chainId, String wallet)
+	{
+		this.hash = null;
+		this.error = null;
+		this.blockNumber = null;
+		this.timeStamp = System.currentTimeMillis()/1000;
+		this.nonce = -1;
+		this.from = wallet;
+		this.to = tx.recipient.toString();
+		this.value = tx.value.toString();
+		this.gas = tx.gasLimit.toString();
+		this.gasPrice = tx.gasPrice.toString();
+		this.input = tx.payload;
+		this.gasUsed = tx.gasLimit.toString();
+		this.chainId = chainId;
+		this.isConstructor = tx.isConstructor();
 	}
 
 	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, int chainId, long timeStamp)

@@ -351,6 +351,7 @@
     <string name="signer_address">Address</string>
     <string name="requester_url">Requester</string>
     <string name="dialog_title_sign_message">Sign Message</string>
+    <string name="dialog_title_sign_personal_message">Sign Personal Message</string>
     <string name="dialog_title_sign_typed_message">Sign Typed Message</string>
     <string name="dialog_reject">Reject</string>
     <string name="dialog_approve">Approve</string>

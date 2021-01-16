@@ -37,6 +37,7 @@ import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
@@ -198,7 +199,8 @@ public class WalletConnectViewModel extends BaseViewModel {
     public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, int chainId)
     {
         resetSignDialog();
-        EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId).toString(), requesterURL, w3tx.leafPosition);
+        EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
+                requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
         disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -400,7 +402,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                 signMessage.setSessionId(sessionId);
                 signMessage.setSignType(signType);
                 signMessage.setSignTime(System.currentTimeMillis());
-                signMessage.setSignMessage(tx.getFormattedTransaction(ctx, chainId));
+                signMessage.setSignMessage(tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)));
             });
         }
     }
@@ -461,5 +463,12 @@ public class WalletConnectViewModel extends BaseViewModel {
     {
         if (walletConnectService != null) return walletConnectService.getConnectionCount();
         else return 0;
+    }
+
+    public String getNetworkSymbol(int chainId)
+    {
+        NetworkInfo info = findDefaultNetworkInteract.getNetworkInfo(chainId);
+        if (info == null) { info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID); }
+        return info.symbol;
     }
 }

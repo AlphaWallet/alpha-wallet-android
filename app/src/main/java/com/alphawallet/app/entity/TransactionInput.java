@@ -171,7 +171,6 @@ public class TransactionInput
 
     public String getOperationTitle(Context ctx)
     {
-        int resId = R.string.contract_call;
         return ctx.getString(TransactionLookup.typeToName(type));
     }
 

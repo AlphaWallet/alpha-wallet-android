@@ -337,6 +337,7 @@
     <string name="signer_address">Dirección</string>
     <string name="requester_url">Solicitante</string>
     <string name="dialog_title_sign_message">Firmar mensaje</string>
+    <string name="dialog_title_sign_personal_message">Firmar \'Personal\' mensaje</string>
     <string name="dialog_title_sign_typed_message">Firmar \'Typed\' mensaje</string>
     <string name="dialog_reject">Rechazar</string>
     <string name="dialog_approve">Aprobar</string>

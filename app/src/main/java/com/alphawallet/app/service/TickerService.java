@@ -627,7 +627,6 @@ public class TickerService
         throwable.printStackTrace();
     }
 
-
     //TODO: Refactor this as required
     public static String getCurrencyString(double price)
     {

@@ -2,8 +2,10 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.text.style.StyleSpan;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
@@ -11,18 +13,14 @@ import android.webkit.URLUtil;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.ui.widget.entity.ENSHandler;
+import com.alphawallet.app.web3j.StructuredDataEncoder;
+import com.alphawallet.token.entity.ProviderTypedData;
+import com.alphawallet.token.entity.Signable;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
-import org.web3j.exceptions.MessageDecodingException;
-import org.web3j.protocol.Web3j;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,17 +30,15 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 public class Utils {
 
@@ -283,6 +279,78 @@ public class Utils {
                 break;
 
         }
+    }
+
+    /**
+     * This is here rather than in the Signable class because Signable is cross platform not Android specific
+     *
+     * @param signable
+     * @return
+     */
+    public static int getSigningTitle(Signable signable)
+    {
+        switch (signable.getMessageType())
+        {
+            default:
+            case SIGN_MESSAGE:
+                return R.string.dialog_title_sign_message;
+            case SIGN_PERSONAL_MESSAGE:
+                return R.string.dialog_title_sign_personal_message;
+            case SIGN_TYPED_DATA:
+            case SIGN_TYPED_DATA_V3:
+            case SIGN_TYPES_DATA_V4:
+                return R.string.dialog_title_sign_typed_message;
+        }
+    }
+
+    public static CharSequence formatTypedMessage(ProviderTypedData[] rawData)
+    {
+        //produce readable text to display in the signing prompt
+        StyledStringBuilder sb = new StyledStringBuilder();
+        boolean firstVal = true;
+        for (ProviderTypedData data : rawData)
+        {
+            if (!firstVal) sb.append("\n");
+            sb.startStyleGroup().append(data.name).append(":");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append("\n  ").append(data.value.toString());
+            firstVal = false;
+        }
+
+        sb.applyStyles();
+
+        return sb;
+    }
+
+    public static CharSequence formatEIP721Message(StructuredDataEncoder messageData)
+    {
+        HashMap<String, Object> messageMap = (HashMap<String, Object>) messageData.jsonMessageObject.getMessage();
+        StyledStringBuilder sb = new StyledStringBuilder();
+        for (String entry : messageMap.keySet())
+        {
+            sb.startStyleGroup().append(entry).append(":").append("\n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            Object v = messageMap.get(entry);
+            if (v instanceof LinkedHashMap)
+            {
+                HashMap<String, Object> valueMap = (HashMap<String, Object>) messageMap.get(entry);
+                for (String paramName : valueMap.keySet())
+                {
+                    String value = valueMap.get(paramName).toString();
+                    sb.startStyleGroup().append(" ").append(paramName).append(": ");
+                    sb.setStyle(new StyleSpan(Typeface.BOLD));
+                    sb.append(value).append("\n");
+                }
+            }
+            else
+            {
+                sb.append(" ").append(v.toString()).append("\n");
+            }
+        }
+
+        sb.applyStyles();
+
+        return sb;
     }
 
     public static String loadJSONFromAsset(Context context, String fileName) {

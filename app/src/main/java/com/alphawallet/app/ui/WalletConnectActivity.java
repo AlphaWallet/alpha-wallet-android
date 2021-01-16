@@ -19,12 +19,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.SignRecord;
-import com.alphawallet.app.util.MessageUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -40,6 +41,7 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.ProviderTypedData;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -509,51 +511,23 @@ public class WalletConnectActivity extends BaseActivity
 
     private void onEthSign(Long id, WCEthereumSignMessage message)
     {
-        int signType = 0;
         signable = null;
         lastId = id;
         switch (message.getType())
         {
             case MESSAGE:
-                signType = R.string.dialog_title_sign_message;
-                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id);
+                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_MESSAGE);
                 break;
             case PERSONAL_MESSAGE:
-                signType = R.string.dialog_title_sign_message;
-                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, true);
+                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_PERSONAL_MESSAGE);
                 break;
             case TYPED_MESSAGE:
-                signType = R.string.dialog_title_sign_typed_message;
-                //See TODO in SignCallbackJSInterface, refactor duplicate code
-                try
-                {
-                    try
-                    {
-                        ProviderTypedData[] rawData = new Gson().fromJson(message.getData(), ProviderTypedData[].class);
-                        ByteArrayOutputStream writeBuffer = new ByteArrayOutputStream();
-                        writeBuffer.write(Hash.keccak256(MessageUtils.encodeParams(rawData)));
-                        writeBuffer.write(Hash.keccak256(MessageUtils.encodeValues(rawData)));
-                        CharSequence signMessage = MessageUtils.formatTypedMessage(rawData);
-                        signable = new EthereumTypedMessage(writeBuffer.toByteArray(), signMessage, peerUrl.getText().toString(), id);
-                    }
-                    catch (JsonSyntaxException e)
-                    {
-                        StructuredDataEncoder eip721Object = new StructuredDataEncoder(message.getData());
-                        CharSequence signMessage = MessageUtils.formatEIP721Message(eip721Object);
-                        signable = new EthereumTypedMessage(eip721Object.getStructuredData(), signMessage, peerUrl.getText().toString(), id);
-                    }
-                }
-                catch (IOException e)
-                {
-                    showErrorDialog(getString(R.string.message_authentication_failed));
-                    client.rejectRequest(id, getString(R.string.message_authentication_failed));
-                    if (fromDappBrowser) switchToDappBrowser();
-                }
+                signable = new EthereumTypedMessage(message.getData(), peerUrl.getText().toString(), id, new CryptoFunctions());
                 break;
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        signDialog = builder.setTitle(signType)
+        signDialog = builder.setTitle(Utils.getSigningTitle(signable))
                 .setMessage(signable.getUserMessage())
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> {
                     if (signDialog != null && signDialog.isShowing()) signDialog.cancel();
@@ -573,7 +547,7 @@ public class WalletConnectActivity extends BaseActivity
         Web3Transaction w3Tx = new Web3Transaction(transaction, id);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog = builder.setTitle(R.string.dialog_title_sign_transaction)
-                .setMessage(w3Tx.getFormattedTransaction(this, chainId))
+                .setMessage(w3Tx.getFormattedTransaction(this, chainId, viewModel.getNetworkSymbol(chainId)))
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> {
                     signTransaction(id, transaction);
                 })
@@ -659,7 +633,7 @@ public class WalletConnectActivity extends BaseActivity
             if ((transaction.getTo().equals(Address.EMPTY) && transaction.getData() != null) // Constructor
                     || (!transaction.getTo().equals(Address.EMPTY) && (transaction.getData() != null || transaction.getValue() != null))) // Raw or Function TX
             {
-                signable = new EthereumMessage(transaction.toString(), peerUrl.getText().toString(), id);
+                signable = new EthereumMessage(transaction.toString(), peerUrl.getText().toString(), id, SignMessageType.SIGN_MESSAGE);
                 viewModel.confirmTransaction(this, transaction, peerUrl.getText().toString(), chainId, id);
             }
             else

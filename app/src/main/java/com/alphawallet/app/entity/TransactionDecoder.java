@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.web3.entity.Web3Transaction;
+
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
@@ -90,6 +92,14 @@ public class TransactionDecoder
     public TransactionInput decodeInput(Transaction tx, String walletAddress)
     {
         TransactionInput thisData = decodeInput(tx.input);
+        thisData.setOperationType(tx, walletAddress);
+        return thisData;
+    }
+
+    public TransactionInput decodeInput(Web3Transaction web3Tx, int chainId, String walletAddress)
+    {
+        TransactionInput thisData = decodeInput(web3Tx.payload);
+        Transaction tx = new Transaction(web3Tx, chainId, walletAddress);
         thisData.setOperationType(tx, walletAddress);
         return thisData;
     }

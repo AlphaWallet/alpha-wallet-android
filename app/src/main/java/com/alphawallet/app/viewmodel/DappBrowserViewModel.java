@@ -1,10 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.os.TransactionTooLargeException;
@@ -12,18 +8,12 @@ import android.preference.PreferenceManager;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.service.RealmManager;
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.SendActivity;
-import com.alphawallet.app.ui.WalletConnectActivity;
-import com.alphawallet.token.entity.Signable;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -38,7 +28,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AddEditDappActivity;
@@ -46,34 +36,25 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
-import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.entity.Signable;
 
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.router.ConfirmationRouter;
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.KeyService;
 
-import org.web3j.abi.datatypes.Address;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.Key.WALLET;
 
 public class DappBrowserViewModel extends BaseViewModel  {
@@ -90,7 +71,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
-    private final GasService gasService;
+    private final GasService2 gasService;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -104,7 +85,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService) {
+            GasService2 gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -305,7 +286,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void updateGasPrice(int chainId)
     {
-        gasService.fetchGasPriceForChain(chainId);
+        gasService.startGasPriceCycle(chainId);
     }
 
     public Realm getRealmInstance(Wallet wallet)
@@ -335,5 +316,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra("qrCode", importPassData);
         context.startActivity(intent);
+    }
+
+    public TokensService getTokenService()
+    {
+        return tokensService;
+    }
+
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    {
+        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
 }

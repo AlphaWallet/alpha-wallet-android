@@ -1,9 +1,9 @@
 package com.alphawallet.app.viewmodel;
 
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.annotation.NonNull;
 
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
@@ -11,7 +11,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
@@ -24,7 +24,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
-    private final GasService gasService;
+    private final GasService2 gasService;
 
     public DappBrowserViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -35,7 +35,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService) {
+            GasService2 gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;

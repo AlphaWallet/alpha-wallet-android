@@ -246,7 +246,7 @@ public class GasService2 implements ContractGasProvider
         String finalTxData = txData;
 
         return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), getGasLimit(), toAddress, amount, finalTxData));
+                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), null, toAddress, amount, finalTxData));
     }
 
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,

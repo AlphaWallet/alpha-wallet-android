@@ -49,6 +49,8 @@
 
     </RelativeLayout>
 
+    <!-- TODO: Move into BalanceDisplayWidget -->
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -115,26 +117,31 @@
 
     </LinearLayout>
 
-    <View
+    <!-- End TODO -->
+
+    <com.alphawallet.app.widget.AddressDetailView
+        android:id="@+id/requester"
+        android:visibility="gone"
+        custom:label="@string/requester_url"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+        android:layout_height="wrap_content"/>
 
     <com.alphawallet.app.widget.GasWidget
         android:id="@+id/gas_widgetx"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp20"/>
+        android:layout_height="wrap_content" />
 
-    <View
+    <com.alphawallet.app.widget.TransactionDetailWidget
+        android:id="@+id/detail_widget"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+        android:layout_height="wrap_content"/>
 
     <com.alphawallet.app.widget.AddressDetailView
         android:id="@+id/recipient"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <!-- TODO: This needs to be moved into a view of its own: AmountDisplayWidget -->
 
     <View
         android:layout_width="match_parent"
@@ -171,6 +178,8 @@
             android:textSize="@dimen/sp16"/>
 
     </LinearLayout>
+
+    <!-- End TODO -->
 
     <View
         android:layout_width="match_parent"

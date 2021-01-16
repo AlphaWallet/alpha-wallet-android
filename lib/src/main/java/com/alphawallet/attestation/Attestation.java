@@ -1,12 +1,8 @@
 package com.alphawallet.attestation;
 
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1GeneralizedTime;
@@ -20,6 +16,13 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 public class Attestation implements Signable {
     public static final String OID_OCTETSTRING = "1.3.6.1.4.1.1466.115.121.1.40";
@@ -38,6 +41,7 @@ public class Attestation implements Signable {
     private ASN1Sequence extensions;
 
     public Attestation() {
+
     }
 
     public int getVersion() {
@@ -263,5 +267,11 @@ public class Attestation implements Signable {
     @Override
     public CharSequence getUserMessage() {
         return null;
+    }
+
+    @Override
+    public SignMessageType getMessageType()
+    {
+        return SignMessageType.ATTESTATION;
     }
 }

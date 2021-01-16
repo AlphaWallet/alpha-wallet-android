@@ -5,9 +5,6 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -18,11 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -48,6 +40,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -63,6 +62,7 @@ import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -71,6 +71,7 @@ import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
 import com.alphawallet.app.ui.widget.adapter.DappBrowserSuggestionsAdapter;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.DappBrowserSwipeInterface;
 import com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
@@ -83,7 +84,6 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
 import com.alphawallet.app.web3.OnSignMessageListener;
@@ -94,24 +94,25 @@ import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -121,6 +122,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.RealmResults;
 
 import static android.app.Activity.RESULT_OK;
@@ -134,7 +136,8 @@ import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
 public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback
+        URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
+        ActionSheetCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -149,6 +152,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private WebChromeClient.FileChooserParams fileChooserParams;
     private Intent picker;
     private RealmResults<RealmToken> realmUpdate;
+
+    private ActionSheetDialog confirmationDialog;
 
     private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
@@ -897,13 +902,36 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void onSignMessage(EthereumMessage message) {
+    public void onSignMessage(final EthereumMessage message) {
+        handleSignMessage(message);
+    }
+
+    @Override
+    public void onSignPersonalMessage(EthereumMessage message) {
+        handleSignMessage(message);
+    }
+
+    @Override
+    public void onSignTypedMessage(EthereumTypedMessage message)
+    {
+        if (message.getPrehash() == null || message.getMessageType() == SignMessageType.SIGN_ERROR)
+        {
+            web3.onSignCancel(message);
+        }
+        else
+        {
+            handleSignMessage(message);
+        }
+    }
+
+    private void handleSignMessage(Signable message)
+    {
         messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
             public void DAppError(Throwable error, Signable message) {
                 web3.onSignCancel(message);
-                dialog.dismiss();
+                confirmationDialog.dismiss();
             }
 
             @Override
@@ -911,149 +939,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 String signHex = Numeric.toHexString(data);
                 Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
-                dialog.dismiss();
+
+                if (BuildConfig.DEBUG && message.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE)
+                {
+                    testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
+                }
+
+                confirmationDialog.dismiss();
             }
         };
 
-        try
+        if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
-            dialog = new SignMessageDialog(getActivity(), message);
-            dialog.setAddress(wallet.address);
-            dialog.setOnApproveListener(v -> {
-                // TODO: Weiwu: this segment should be encapsulated in EthereumMessage
-                // ensure we generate the signature correctly:
-                if (messageTBS.getMessage() != null)
-                {
-                    viewModel.getAuthorisation(wallet, getActivity(), this);
-                }
-                else
-                {
-                    onSignError();
-                }
-            });
-            dialog.setOnRejectListener(v -> {
-                if (web3 != null) web3.onSignCancel(message);
-                dialog.dismiss();
-            });
-            dialog.show();
-        }
-        catch (Exception e)
-        {
-            onSignError(e.getMessage());
+            confirmationDialog = new ActionSheetDialog(this, message);
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
         }
     }
-
-    @Override
-    public void onSignPersonalMessage(EthereumMessage message) {
-        messageTBS = message;
-        dAppFunction = new DAppFunction() {
-            @Override
-            public void DAppError(Throwable error, Signable message) {
-                web3.onSignCancel(message);
-                dialog.dismiss();
-            }
-
-            // TODO: Weiwu issue #1556 move this code to a class.
-            @Override
-            public void DAppReturn(byte[] data, Signable message) {
-                String signHex = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.getMessage());
-                web3.onSignPersonalMessageSuccessful(message, signHex);
-                //Test Sig in debug build
-                if (BuildConfig.DEBUG) testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
-                dialog.dismiss();
-            }
-        };
-
-        try
-        {
-            // opens a dialogue to ask the user to sign
-            dialog = new SignMessageDialog(getActivity(), message);
-            dialog.setAddress(wallet.address);
-            dialog.setMessage(message.getUserMessage());
-            dialog.setOnApproveListener(v -> {
-                messageBytes = getEthereumMessage(Numeric.hexStringToByteArray(message.getMessage()));
-                viewModel.getAuthorisation(wallet, getActivity(), this);
-            });
-            dialog.setOnRejectListener(v -> {
-                web3.onSignCancel(message);
-                dialog.dismiss();
-            });
-            dialog.show();
-        }
-        catch (Exception e)
-        {
-            // this will be mainly for developers, so no need to tidy the exception
-            // if a user comes across this message they can report to the dapp writer
-            onSignError(e.getMessage());
-        }
-    }
-
-    static byte[] getEthereumMessage(byte[] message) {
-        byte[] prefix = getEthereumMessagePrefix(message.length);
-
-        byte[] result = new byte[prefix.length + message.length];
-        System.arraycopy(prefix, 0, result, 0, prefix.length);
-        System.arraycopy(message, 0, result, prefix.length, message.length);
-
-        return result;
-    }
-
-    @Override
-    public void onSignTypedMessage(EthereumTypedMessage message)
-    {
-        if (message.getPrehash() == null)
-        {
-            web3.onSignCancel(message);
-        }
-        else
-        {
-            messageTBS = message;
-            dAppFunction = new DAppFunction() {
-                @Override
-                public void DAppError(Throwable error, Signable message) {
-                    web3.onSignCancel(message);
-                    dialog.dismiss();
-                }
-
-                @Override
-                public void DAppReturn(byte[] data, Signable message) {
-                    String signHex = Numeric.toHexString(data);
-                    Log.d(TAG, "Initial Msg: " + message.getMessage());
-                    web3.onSignMessageSuccessful(message, signHex);
-                    dialog.dismiss();
-                }
-            };
-
-            try
-            {
-                dialog = new SignMessageDialog(getActivity(), message);
-                dialog.setAddress(wallet.address);
-                dialog.setOnApproveListener(v -> {
-                    // TODO: Weiwu: this segment should be encapsulated in EthereumMessage
-                    // ensure we generate the signature correctly:
-                    if (messageTBS.getOrigin() != null)
-                    {
-                        viewModel.getAuthorisation(wallet, getActivity(), this);
-                    }
-                    else
-                    {
-                        onSignError();
-                    }
-                });
-                dialog.setOnRejectListener(v -> {
-                    if (web3 != null) web3.onSignCancel(message);
-                    dialog.dismiss();
-                });
-                dialog.show();
-            }
-            catch (Exception e)
-            {
-                onSignError(e.getMessage());
-            }
-        }
-    }
-
 
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url)
@@ -1062,32 +964,57 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             viewModel.updateGasPrice(networkInfo.chainId); //start updating gas price right before we open
             //minimum for transaction to be valid: recipient and value or payload
-            if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
+            if ((confirmationDialog == null || !confirmationDialog.isShowing()) &&
+                    (transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
-                if (canSign)
+                Token token = viewModel.getTokenService().getToken(networkInfo.chainId, transaction.recipient.toString());
+                if (token == null)
                 {
-                    viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
-                    canSign = false;
-                    handler.postDelayed(() -> canSign = true, 3000); //debounce 3 seconds to avoid multiple signing issues
+                    token = viewModel.getTokenService().getToken(networkInfo.chainId, wallet.address); // use base currency
                 }
+                if (dialog != null && dialog.isShowing()) dialog.dismiss();
+                confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token, "",
+                        viewModel.getTokenService(), this);
+                confirmationDialog.setURL(url);
+                confirmationDialog.setCanceledOnTouchOutside(false);
+                confirmationDialog.show();
+
+                viewModel.calculateGasEstimate(wallet, Numeric.hexStringToByteArray(transaction.payload),
+                        networkInfo.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value))
+                        .map(limit -> convertToGasLimit(limit, transaction.gasLimit))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
+                                Throwable::printStackTrace)
+                        .isDisposed();
+
+                return;
             }
-            else
-            {
-                //display transaction error
-                onInvalidTransaction(transaction);
-                web3.onSignCancel(transaction);
-            }
-        }
-        catch (android.os.TransactionTooLargeException e)
-        {
-            transactionTooLarge();
-            web3.onSignCancel(transaction);
         }
         catch (Exception e)
         {
-            onInvalidTransaction(transaction);
-            web3.onSignCancel(transaction);
+            e.printStackTrace();
+        }
+
+        onInvalidTransaction(transaction);
+        web3.onSignCancel(transaction);
+    }
+
+    private void onError(Throwable throwable)
+    {
+        throwable.printStackTrace();
+    }
+
+    private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger txGasLimit)
+    {
+        if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0 && !estimate.hasError())
+        {
+            return estimate.getAmountUsed();
+        }
+        else
+        {
+            return txGasLimit;
         }
     }
 
@@ -1665,6 +1592,28 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     @Override
     public void cancelAuthentication()
+    {
+
+    }
+
+    /**
+     * ActionSheet interfaces
+     */
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthorisation(wallet, getActivity(), callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+
+    }
+
+    @Override
+    public void dismissed(String txHash)
     {
 
     }

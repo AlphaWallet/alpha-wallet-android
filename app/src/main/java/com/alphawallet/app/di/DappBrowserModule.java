@@ -8,7 +8,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
@@ -28,7 +28,7 @@ public class DappBrowserModule {
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService) {
+            GasService2 gasService) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 genericWalletInteract,

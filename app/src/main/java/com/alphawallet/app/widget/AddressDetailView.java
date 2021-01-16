@@ -1,9 +1,12 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,6 +41,18 @@ public class AddressDetailView extends LinearLayout
         addressBlockie = findViewById(R.id.blockie);
         layoutDetails = findViewById(R.id.layout_detail);
         layoutHolder = findViewById(R.id.layout_holder);
+        getAttrs(context, attrs);
+    }
+
+    private void getAttrs(Context context, AttributeSet attrs)
+    {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.InputView,
+                0, 0);
+
+        TextView recipientText = findViewById(R.id.text_recipient_title);
+        recipientText.setText(a.getResourceId(R.styleable.InputView_label, R.string.recipient));
     }
 
     public void setupAddress(String address, String ensName)
@@ -62,5 +77,14 @@ public class AddressDetailView extends LinearLayout
                 recipientDetails.setImageResource(R.drawable.ic_expand_more);
             }
         });
+    }
+
+    public void setupRequester(String requesterUrl)
+    {
+        setVisibility(View.VISIBLE);
+        recipientDetails.setVisibility(View.GONE);
+        textAddressSummary.setText(requesterUrl);
+        ViewGroup.LayoutParams param = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 3.4f);
+        textAddressSummary.setLayoutParams(param);
     }
 }

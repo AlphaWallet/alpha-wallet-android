@@ -4,16 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/dp20"
-    android:paddingBottom="@dimen/dp20"
     android:orientation="vertical">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
     <LinearLayout
+        android:paddingTop="@dimen/dp20"
+        android:paddingBottom="@dimen/dp20"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
     <TextView
+        android:id="@+id/text_recipient_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1.1"

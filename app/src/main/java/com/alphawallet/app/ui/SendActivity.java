@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -66,10 +64,8 @@ import io.reactivex.schedulers.Schedulers;
 import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
@@ -557,7 +553,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 -1);
 
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress, viewModel.getTokenService());
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
+                viewModel.getTokenService(), this);
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
 

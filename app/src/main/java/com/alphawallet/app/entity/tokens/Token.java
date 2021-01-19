@@ -703,7 +703,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean equals(Token token)
     {
-        return token != null && tokenInfo.chainId == token.tokenInfo.chainId && getAddress().equals(token.getAddress());
+        return token != null && tokenInfo.chainId == token.tokenInfo.chainId && getAddress().equalsIgnoreCase(token.getAddress());
     }
 
     public String getTokenTitle()

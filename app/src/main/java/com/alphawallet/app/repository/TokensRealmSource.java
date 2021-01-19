@@ -286,7 +286,7 @@ public class TokensRealmSource implements TokenLocalSource {
     public boolean hasVisibilityBeenChanged(Token token)
     {
         boolean hasBeenChanged = false;
-        try (Realm realm = realmManager.getRealmInstance(new Wallet(token.getWallet())))
+        try (Realm realm = realmManager.getRealmInstance(new Wallet(token.getWallet().toLowerCase())))
         {
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", databaseKey(token))
@@ -327,12 +327,12 @@ public class TokensRealmSource implements TokenLocalSource {
 
     public static String databaseKey(int chainId, String address)
     {
-        return address + "-" + chainId;
+        return address.toLowerCase() + "-" + chainId;
     }
 
     public static String databaseKey(Token token)
     {
-        return databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
+        return databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
     }
 
     public static String eventActivityKey(String txHash, String activityName)
@@ -347,14 +347,14 @@ public class TokensRealmSource implements TokenLocalSource {
 
     public static String eventBlockKey(int chainId, String eventAddress, String namedType, String filter)
     {
-        return eventAddress + "-" + chainId + "-" + namedType + "-" + filter + "-eventBlock";
+        return eventAddress.toLowerCase() + "-" + chainId + "-" + namedType + "-" + filter + "-eventBlock";
     }
 
     @Override
     public void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress)
     {
         if (tokenAddress == null) tokenAddress = wallet.address; //base chain update
-        String key = databaseKey(chainId, tokenAddress);
+        String key = databaseKey(chainId, tokenAddress.toLowerCase());
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             RealmToken realmToken = realm.where(RealmToken.class)

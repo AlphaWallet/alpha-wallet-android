@@ -64,11 +64,11 @@ public class QRExtractorTest {
 
         // Upper case
         extractedString = parser.extractAddressFromQrString("ethereum:0xABC0000000000000000000000000000000000000");
-        assertTrue("0xabc0000000000000000000000000000000000000".equals(extractedString));
+        assertTrue("0xABC0000000000000000000000000000000000000".equals(extractedString));
 
         // Mixed case
         extractedString = parser.extractAddressFromQrString("ethereum:0xABCdef0000000000000000000000000000000000");
-        assertTrue("0xabcdef0000000000000000000000000000000000".equals(extractedString));
+        assertTrue("0xABCdef0000000000000000000000000000000000".equals(extractedString));
 
         // Address without value
         extractedString = parser.extractAddressFromQrString("0x0000000000000000000000000000000000000000");
@@ -110,7 +110,7 @@ public class QRExtractorTest {
 
         // Parse out non-hex characters
         extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000000000000000000000000XyZ?value=0invalid");
-        assertTrue("0x0000000000000000000000000000000000000xyz".equals(extractedString));
+        assertTrue("0x0000000000000000000000000000000000000XyZ".equals(extractedString));
 
         //ethereum:0xB4Eda076896D62419409e6D89f734A336608D18D?token=ENJ&contractAddress=0xF629cBd94d3791C9250152BD8dfBDF380E2a3B9c
 
@@ -147,27 +147,27 @@ public class QRExtractorTest {
 
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?k1=v1");
         assertTrue("protocol".equals(result.getProtocol()));
-        assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
+        assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
 
         assertTrue(result.getFunctionDetail().equals("(k1{v1})"));
 
         // No parameters
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ");
         assertTrue("protocol".equals(result.getProtocol()));
-        assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
+        assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
 
         assertTrue(result.getFunction().length() == 0);
 
         // No parameters
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?");
         assertTrue("protocol".equals(result.getProtocol()));
-        assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
+        assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
         assertTrue(result.getFunction().length() == 0);
 
         // Multiple query params
         result = parser.parse("naga coin:0x0000000000000000000000000000000000000XyZ?k1=v1&k2=v2");
         assertTrue("naga coin".equals(result.getProtocol()));
-        assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
+        assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
 
         assertTrue(result.getFunctionDetail().equals("(k1{v1},k2{v2})"));
 
@@ -178,13 +178,13 @@ public class QRExtractorTest {
         //Test EIP681
         result = parser.parse("ethereum:0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359?value=2.014e18");
         assertTrue("ethereum".equals(result.getProtocol()));
-        assertTrue("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359".equals(result.getAddress()));
+        assertTrue("0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359".equals(result.getAddress()));
         assertTrue(new BigInteger("2014000000000000000",10).equals(result.getValue()));
         assertTrue(1 == result.chainId);
 
         result = parser.parse("ethereum:0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359@100?value=2.014e18");
         assertTrue("ethereum".equals(result.getProtocol()));
-        assertTrue("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359".equals(result.getAddress()));
+        assertTrue("0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359".equals(result.getAddress()));
         assertTrue(100 == result.chainId);
 
         result = parser.parse("ethereum:0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7@100/transfer?address=0x8e23ee67d1332ad560396262c48ffbb01f93d052&uint256=1");
@@ -203,7 +203,7 @@ public class QRExtractorTest {
         result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/pay?uint256=100000&value=1000&gasPrice=700000&gasLimit=27500");
         assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue(result.type == EIP681Type.FUNCTION_CALL);
-        assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
+        assertTrue("0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B".equals(result.getAddress()));
         assertTrue(result.getFunction().equals("pay(uint256)"));
         assertTrue(result.getGasPrice().equals(BigInteger.valueOf(700000)));
         assertTrue(result.getGasLimit().equals(BigInteger.valueOf(27500)));
@@ -212,14 +212,14 @@ public class QRExtractorTest {
         result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/approve?address=0x8e23ee67d1332ad560396262c48ffbb01f93d052&uint256=1000");
         assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue(result.type == EIP681Type.FUNCTION_CALL);
-        assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
+        assertTrue("0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B".equals(result.getAddress()));
         assertTrue(result.getFunction().equals("approve(address,uint256)"));
 
         //ethereum function with no params
         result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/activateCompoundFinance");
         assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue(result.type == EIP681Type.FUNCTION_CALL);
-        assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
+        assertTrue("0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B".equals(result.getAddress()));
         assertTrue(result.getFunction().equals("activateCompoundFinance()"));
 
         //Test magiclink

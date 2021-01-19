@@ -269,12 +269,12 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Transaction storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
+    public Transaction storeRawTx(Wallet wallet, int chainId, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
     {
         if (rawTx.getResult() == null) return null;
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
-        final Transaction tx = new Transaction(ethTx.getHash(), isSuccessful ? "0" : "1", ethTx.getBlockNumber().toString(), timeStamp, ethTx.getNonce().intValue(), ethTx.getFrom(),
-                ethTx.getTo(), ethTx.getValue().toString(), ethTx.getGas().toString(), ethTx.getGasPrice().toString(), ethTx.getInput(), ethTx.getGas().toString(), ethTx.getChainId().intValue(), "");
+
+        final Transaction tx = new Transaction(ethTx, chainId, isSuccessful, timeStamp);
 
         deleteTransaction(wallet, ethTx.getHash());
         try (Realm instance = realmManager.getRealmInstance(wallet))

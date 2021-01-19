@@ -1,8 +1,10 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
+import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -24,6 +26,12 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             if (other.value instanceof ActivityMeta)
             {
                 ActivityMeta otherMeta = (ActivityMeta) other.value;
+                if (other.viewType == TransactionHolder.VIEW_TYPE && otherMeta.hash.equals(value.hash) //the pending tx time will be different from the written tx time
+                        && value.isPending != ((TransactionMeta)otherMeta).isPending)
+                {
+                    return 0; //if comparing the same tx hash with a different time, they are the same
+                }
+
                 // Check if this is a written block replacing a pending block
                 if (value.hash.equals(otherMeta.hash) && otherMeta.getTimeStamp() == value.getTimeStamp()) return 0; // match
 
@@ -56,11 +64,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             if (viewType == other.viewType)
             {
                 TransactionMeta newTx = (TransactionMeta) other.value;
-
-                //boolean hashMatch = oldTx.hash.equals(newTx.hash);
-                boolean pendingMatch = value.isPending == newTx.isPending;
-
-                return pendingMatch;
+                return value.isPending == newTx.isPending;
             }
             else if (other.viewType == EventHolder.VIEW_TYPE)
             {
@@ -84,8 +88,8 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
         {
             if (viewType == other.viewType)
             {
-                TransactionMeta newTx = (TransactionMeta) other.value;
-                return value.hash.equals(newTx.hash);
+                TransactionMeta oldTx = (TransactionMeta) other.value;
+                return value.hash.equals(oldTx.hash);
             }
             else if (other.viewType == EventHolder.VIEW_TYPE)
             {

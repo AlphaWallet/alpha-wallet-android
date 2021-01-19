@@ -63,7 +63,8 @@ public class TransactionsService
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
                                TransactionLocalSource transactionsCache,
-                               Context ctx) {
+                               Context ctx)
+    {
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepositoryType;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
@@ -90,7 +91,8 @@ public class TransactionsService
         currentChainIndex = 0;
         nftCheck = false;
 
-        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed()) fetchTransactionDisposable.dispose();
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+            fetchTransactionDisposable.dispose();
         fetchTransactionDisposable = null;
         //reset transaction timers
         if (eventTimer == null || eventTimer.isDisposed())
@@ -152,7 +154,8 @@ public class TransactionsService
             if (t != null)
             {
                 String tick = (t.isEthereum() && getPendingChains().contains(t.tokenInfo.chainId)) ? "*" : "";
-                if (t.isEthereum()) System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
+                if (t.isEthereum())
+                    System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
                         transactionsClient.storeNewTransactions(currentAddress, network, t.getAddress(), t.lastBlockCheck)
@@ -213,6 +216,7 @@ public class TransactionsService
 
     /**
      * Check new tokens for any unknowns, then find the unknowns
+     *
      * @param txList
      */
     private void checkTokens(Transaction[] txList)
@@ -223,7 +227,8 @@ public class TransactionsService
             if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
             {
                 Token token = tokensService.getToken(tx.chainId, tx.to);
-                if (token == null) tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
+                if (token == null)
+                    tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
             }
         }
     }
@@ -290,20 +295,20 @@ public class TransactionsService
 
                     if (blockNumber.compareTo(BigInteger.ZERO) > 0)
                     {
-                        //detect error and write to database
+                        //Write to database (including detecting Transaction write error)
                         web3j.ethGetTransactionReceipt(tx.hash).sendAsync().thenAccept(receipt -> {
                             if (receipt != null)
                             {
                                 //get timestamp and write tx
                                 EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
-                                        .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))
+                                        .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), chainId, txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe().isDisposed();
                             }
                         }).exceptionally(throwable -> {
-                                throwable.printStackTrace();
-                                return null;
+                            throwable.printStackTrace();
+                            return null;
                         });
                     }
                     else if (!tx.blockNumber.equals(String.valueOf(TRANSACTION_SEEN)))

@@ -191,56 +191,64 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             {
                 case FullScannerFragment.SUCCESS:
                     if (data != null) {
-                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        String qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                         //if barcode is still null, ensure we don't GPF
-                        if (barcode == null) {
+                        if (qrCode == null)
+                        {
                             //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                             displayScanError();
                             return;
                         }
-
-                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
-                        QRResult result = parser.parse(barcode);
-                        String extracted_address = null;
-                        if (result != null)
+                        else if (qrCode.startsWith("wc:"))
                         {
-                            extracted_address = result.getAddress();
-                            switch (result.getProtocol())
-                            {
-                                case "address":
-                                    addressInput.setAddress(extracted_address);
-                                    break;
-                                case "ethereum":
-                                    //EIP681 protocol
-                                    validateEIP681Request(result, false);
-                                    break;
-                                default:
-                                    break;
-                            }
+                            startWalletConnect(qrCode);
                         }
-                        else //try magiclink
+                        else
                         {
-                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                            try
+
+                            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                            QRResult result = parser.parse(qrCode);
+                            String extracted_address = null;
+                            if (result != null)
                             {
-                                if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link
+                                extracted_address = result.getAddress();
+                                switch (result.getProtocol())
                                 {
-                                    //let's try to import the link
-                                    viewModel.showImportLink(this, barcode);
-                                    finish();
-                                    return;
+                                    case "address":
+                                        addressInput.setAddress(extracted_address);
+                                        break;
+                                    case "ethereum":
+                                        //EIP681 protocol
+                                        validateEIP681Request(result, false);
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
-                            catch (SalesOrderMalformed e)
+                            else //try magiclink
                             {
-                                e.printStackTrace();
+                                ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                                try
+                                {
+                                    if (magicParser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
+                                    {
+                                        //let's try to import the link
+                                        viewModel.showImportLink(this, qrCode);
+                                        finish();
+                                        return;
+                                    }
+                                }
+                                catch (SalesOrderMalformed e)
+                                {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
 
-                        if (extracted_address == null)
-                        {
-                            displayScanError();
+                            if (extracted_address == null)
+                            {
+                                displayScanError();
+                            }
                         }
                     }
                     break;
@@ -256,6 +264,16 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void startWalletConnect(String qrCode)
+    {
+        Intent intent = new Intent(this, WalletConnectActivity.class);
+        intent.putExtra("qrCode", qrCode);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        startActivity(intent);
+        setResult(RESULT_OK);
+        finish();
     }
 
     private void showCameraDenied()
@@ -591,7 +609,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    public void dismissed(String txHash)
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
         //ActionSheet was dismissed
         if (!TextUtils.isEmpty(txHash))

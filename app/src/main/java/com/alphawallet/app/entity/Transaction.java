@@ -122,19 +122,33 @@ public class Transaction implements Parcelable
 		this.isConstructor = tx.isConstructor();
 	}
 
-	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, int chainId, long timeStamp)
+	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, int chainId, boolean isSuccess, long timeStamp)
 	{
-		this.to = ethTx.getTo();
+		// Get contract address if constructor
+		String contractAddress = ethTx.getCreates() != null ? ethTx.getCreates() : "";
+		int nonce = ethTx.getNonceRaw() != null ? Numeric.toBigInt(ethTx.getNonceRaw()).intValue() : 0;
+
+		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
+		{
+			to = contractAddress;
+			isConstructor = true;
+			input = CONSTRUCTOR;
+		}
+		else
+		{
+			this.to = ethTx.getTo();
+			this.input = ethTx.getInput();
+		}
+
 		this.hash = ethTx.getHash();
-		this.error = "0";
 		this.blockNumber = ethTx.getBlockNumber().toString();
 		this.timeStamp = timeStamp;
-		this.nonce = ethTx.getNonce().intValue();
+		this.error = isSuccess ? "0" : "1";
+		this.nonce = nonce;
 		this.from = ethTx.getFrom();
 		this.value = ethTx.getValue().toString();
 		this.gas = ethTx.getGas().toString();
 		this.gasPrice = ethTx.getGasPrice().toString();
-		this.input = ethTx.getInput();
 		this.gasUsed = ethTx.getGas().toString();
 		this.chainId = chainId;
 	}

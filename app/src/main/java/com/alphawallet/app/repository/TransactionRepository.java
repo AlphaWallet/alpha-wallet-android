@@ -342,7 +342,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getTransaction().orElseThrow();
 			Web3j web3j = getWeb3jService(fetchedTx.getChainId().intValue());
 			TransactionReceipt txr = web3j.ethGetTransactionReceipt(fetchedTx.getHash()).send().getResult();
-			return inDiskCache.storeRawTx(wallet, rawTx, timeStamp, txr.isStatusOK());
+			return inDiskCache.storeRawTx(wallet, fetchedTx.getChainId().intValue(), rawTx, timeStamp, txr.isStatusOK());
 		});
 	}
 

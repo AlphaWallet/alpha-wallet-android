@@ -79,6 +79,7 @@ import org.web3j.crypto.WalletUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -1011,6 +1012,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         switch (requestCode)
         {
+            case C.SET_GAS_SETTINGS:
+                if (data != null)
+                {
+                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+                    BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
+                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+                    ((DappBrowserFragment) dappBrowserFragment).setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+                }
+                break;
             case DAPP_BARCODE_READER_REQUEST_CODE:
                 ((DappBrowserFragment) dappBrowserFragment).handleQRCode(resultCode, data, this);
                 break;
@@ -1024,9 +1036,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
                 if (resultCode == RESULT_OK) backupWalletSuccess(keyBackup);
                 else backupWalletFail(keyBackup, noLockScreen);
-                break;
-            case C.REQUEST_TRANSACTION_CALLBACK:
-                ((DappBrowserFragment) dappBrowserFragment).handleTransactionCallback(resultCode, data);
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 switch (getSelectedItem())

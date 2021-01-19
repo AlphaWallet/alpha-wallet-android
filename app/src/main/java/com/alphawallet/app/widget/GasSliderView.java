@@ -41,11 +41,6 @@ public class GasSliderView extends RelativeLayout
 
     private GasSettingsCallback gasCallback;
 
-    /**
-     * This is temporary storage of response so that user can have recent updated time whenever slider is moved
-     */
-    private GasTransactionResponse gasTransactionResponse;
-
     public GasSliderView(Context context, AttributeSet attrs) {
         super(context, attrs);
         inflate(context, R.layout.item_gas_slider, this);

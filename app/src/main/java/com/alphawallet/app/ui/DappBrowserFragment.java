@@ -57,8 +57,8 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -95,7 +95,6 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
@@ -136,7 +135,7 @@ import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
 public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
+        URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
         ActionSheetCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
@@ -166,10 +165,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
      */
     private final int ANIMATION_DURATION = 100;
 
-    static byte[] getEthereumMessagePrefix(int messageLength) {
-        return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
-    }
-
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
     private DappBrowserViewModel viewModel;
@@ -180,7 +175,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private ProgressBar progressBar;
     private Wallet wallet;
     private NetworkInfo networkInfo;
-    private SignMessageDialog dialog;
     private AWalletAlertDialog resultDialog;
     private DappBrowserSuggestionsAdapter adapter;
     private String loadOnInit;
@@ -209,18 +203,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String currentFragment;
 
     private Signable messageTBS;  // To-Be-Signed
-    private byte[] messageBytes;
     private DAppFunction dAppFunction;
-    private SignType signType;
-    private volatile boolean canSign = true;
 
     @Nullable
     private Disposable disposable;
-
-    private enum SignType
-    {
-        SIGN_PERSONAL_MESSAGE, SIGN_MESSAGE
-    }
 
     public DappBrowserFragment()
     {
@@ -901,13 +887,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return true;
     }
 
+    public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long customNonce)
+    {
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+        }
+    }
+
     @Override
     public void onSignMessage(final EthereumMessage message) {
         handleSignMessage(message);
     }
 
     @Override
-    public void onSignPersonalMessage(EthereumMessage message) {
+    public void onSignPersonalMessage(final EthereumMessage message) {
         handleSignMessage(message);
     }
 
@@ -916,7 +910,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         if (message.getPrehash() == null || message.getMessageType() == SignMessageType.SIGN_ERROR)
         {
-            web3.onSignCancel(message);
+            web3.onSignCancel(message.getCallbackId());
         }
         else
         {
@@ -930,7 +924,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         dAppFunction = new DAppFunction() {
             @Override
             public void DAppError(Throwable error, Signable message) {
-                web3.onSignCancel(message);
+                web3.onSignCancel(message.getCallbackId());
                 confirmationDialog.dismiss();
             }
 
@@ -973,7 +967,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 {
                     token = viewModel.getTokenService().getToken(networkInfo.chainId, wallet.address); // use base currency
                 }
-                if (dialog != null && dialog.isShowing()) dialog.dismiss();
                 confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token, "",
                         viewModel.getTokenService(), this);
                 confirmationDialog.setURL(url);
@@ -998,7 +991,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         onInvalidTransaction(transaction);
-        web3.onSignCancel(transaction);
+        web3.onSignCancel(transaction.leafPosition);
     }
 
     private void onError(Throwable throwable)
@@ -1015,22 +1008,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         else
         {
             return txGasLimit;
-        }
-    }
-
-    //return from the openConfirmation above
-    public void handleTransactionCallback(int resultCode, Intent data)
-    {
-        if (data == null || web3 == null) return;
-        Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
-        if (resultCode == RESULT_OK && web3Tx != null)
-        {
-            String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
-            web3.onSignTransactionSuccessful(web3Tx, hashData);
-        }
-        else if (web3Tx != null)
-        {
-            web3.onSignCancel(web3Tx);
         }
     }
 
@@ -1078,6 +1055,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
         resultDialog.setCancelable(true);
         resultDialog.show();
+    }
+
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog.setIcon(ERROR);
+        resultDialog.setTitle(R.string.error_transaction_failed);
+        resultDialog.setMessage(throwable.getMessage());
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+
+        confirmationDialog.dismiss();
     }
 
     private void onInvalidTransaction(Web3Transaction transaction)
@@ -1316,19 +1310,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         catch (SignatureException e)
         {
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void signTransaction(Web3Transaction transaction, String txHex, boolean success)
-    {
-        if (success)
-        {
-            web3.onSignTransactionSuccessful(transaction, txHex);
-        }
-        else
-        {
-            web3.onSignCancel(transaction);
         }
     }
 
@@ -1583,10 +1564,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             viewModel.completeAuthentication(SIGN_DATA);
             viewModel.signMessage(messageTBS, dAppFunction);
         }
-        else if (dialog != null && dialog.isShowing())
+        else if (confirmationDialog != null && confirmationDialog.isShowing())
         {
-            web3.onSignCancel(messageTBS);
-            dialog.dismiss();
+            web3.onSignCancel(messageTBS.getCallbackId());
+            confirmationDialog.dismiss();
         }
     }
 
@@ -1609,12 +1590,35 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
+        final SendTransactionInterface callback = new SendTransactionInterface()
+        {
+            @Override
+            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
+            {
+                confirmationDialog.transactionWritten(hashData);
+                web3.onSignTransactionSuccessful(web3Tx, hashData);
+            }
 
+            @Override
+            public void transactionError(long callbackId, Throwable error)
+            {
+                confirmationDialog.dismiss();
+                txError(error);
+                web3.onSignCancel(callbackId);
+            }
+        };
+
+        viewModel.sendTransaction(finalTx, networkInfo.chainId, callback);
     }
 
     @Override
-    public void dismissed(String txHash)
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
-
+        //actionsheet dismissed - if action not completed then user cancelled
+        if (!actionCompleted)
+        {
+            //actionsheet dismissed before completing signing.
+            web3.onSignCancel(callbackId);
+        }
     }
 }

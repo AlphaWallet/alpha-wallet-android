@@ -128,7 +128,7 @@ public class ActivityHistoryList extends LinearLayout
         {
             startUpdateCheck();
         }
-        else if (!hasPending)
+        else
         {
             stopUpdateCheck();
         }

@@ -46,8 +46,10 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.Sort;
 
+import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.POA_ID;
 
@@ -70,6 +72,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private BigDecimal gasLimit;
     private BigDecimal customGasLimit;
     private BigDecimal availableBalance;
+    private BigDecimal sendAmount;
     private BigInteger customGasPriceFromWidget;
 
     private int customIndex = -1;
@@ -94,7 +97,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         gasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
         customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
-        availableBalance = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        availableBalance = new BigDecimal(getIntent().getStringExtra(C.EXTRA_TOKEN_BALANCE));
+        sendAmount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger());
         customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
@@ -106,30 +110,56 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.setCallback(this);
 
         // start listening for gas price updates
+        setupGasSpeeds();
         startGasListener();
+    }
+
+    private RealmQuery<RealmGasSpread> getGasQuery()
+    {
+        return viewModel.getTickerRealm().where(RealmGasSpread.class)
+                .equalTo("chainId", chainId)
+                .sort("timeStamp", Sort.DESCENDING);
     }
 
     private void startGasListener()
     {
-        realmGasSpread = viewModel.getTickerRealm().where(RealmGasSpread.class)
-                .equalTo("chainId", chainId)
-                .sort("timeStamp", Sort.DESCENDING)
-                .findFirstAsync();
-
+        realmGasSpread = getGasQuery().findFirstAsync();
         realmGasSpread.addChangeListener(realmToken -> {
-            RealmGasSpread rgs = (RealmGasSpread) realmToken;
-            GasPriceSpread gs = rgs.getGasPrice();
-            currentGasSpeedIndex = gs.setupGasSpeeds(this, gasSpeeds, currentGasSpeedIndex);
-            customIndex = gs.getCustomIndex();
-            gasSliderView.initGasPriceMax(gasSpeeds.get(0).gasPrice);
-            if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
-            {
-                updateCustomElement(customGasPriceFromWidget, customGasLimit.toBigInteger());
-                customGasPriceFromWidget = BigInteger.ZERO;
-            }
-            //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
-            adapter.notifyDataSetChanged();
+            initGasSpeeds((RealmGasSpread)realmToken);
         });
+    }
+
+    private void setupGasSpeeds()
+    {
+        if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
+        {
+            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, customGasPriceFromWidget));
+        }
+        else
+        {
+            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, new BigInteger(DEFAULT_GAS_PRICE)));
+        }
+
+        RealmGasSpread getGas = getGasQuery().findFirst();
+        if (getGas != null)
+        {
+            initGasSpeeds(getGas);
+        }
+    }
+
+    private void initGasSpeeds(RealmGasSpread rgs)
+    {
+        GasPriceSpread gs = rgs.getGasPrice();
+        currentGasSpeedIndex = gs.setupGasSpeeds(this, gasSpeeds, currentGasSpeedIndex);
+        customIndex = gs.getCustomIndex();
+        gasSliderView.initGasPriceMax(gasSpeeds.get(0).gasPrice);
+        if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
+        {
+            updateCustomElement(customGasPriceFromWidget, customGasLimit.toBigInteger());
+            customGasPriceFromWidget = BigInteger.ZERO;
+        }
+        //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -264,7 +294,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 }
             }
 
-            String gasAmountInBase = BalanceUtils.getScaledValueScientific(new BigDecimal(gs.gasPrice).multiply(useGasLimit), baseCurrency.tokenInfo.decimals, GAS_PRECISION);
+            BigDecimal gasFee = new BigDecimal(gs.gasPrice).multiply(useGasLimit);
+
+            String gasAmountInBase = BalanceUtils.getScaledValueScientific(gasFee, baseCurrency.tokenInfo.decimals, GAS_PRECISION);
             if (gasAmountInBase.equals("0")) gasAmountInBase = "0.00001"; //NB no need to allow for zero gas chains; this activity wouldn't appear
             String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
             String displayTime = context.getString(R.string.gas_time_suffix,
@@ -288,7 +320,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             setCustomGasDetails(position);
 
             //determine if this amount can be used
-            if (gs.gasPrice.compareTo(availableBalance.toBigInteger()) > 0)
+            BigDecimal txCost = gasFee.add(sendAmount);
+            if (txCost.compareTo(availableBalance) >= 0)
             {
                 //cannot be used
                 holder.blankOverlay.setVisibility(View.VISIBLE);

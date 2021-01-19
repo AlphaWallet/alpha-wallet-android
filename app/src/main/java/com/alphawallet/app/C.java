@@ -127,7 +127,7 @@ public abstract class C {
     public static final String CHANGELLY_REF_ID = "968d4f0f0bf9";
     public static final String DONATION_ADDRESS = "0xb1aD48527d694D30401D082bcD21a33F41811501";
 
-    public static final String DEFAULT_GAS_PRICE = "30000000000";
+    public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
     public static final String DEFAULT_GAS_LIMIT = "90000";
     public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";

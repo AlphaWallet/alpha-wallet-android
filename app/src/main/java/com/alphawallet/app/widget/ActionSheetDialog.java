@@ -64,8 +64,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final ActionSheetCallback actionSheetCallback;
     private final SignAuthenticationCallback signCallback;
     private final ActionSheetMode mode;
+    private final long callbackId;
 
     private String txHash = null;
+    private boolean actionCompleted;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, TokensService ts, ActionSheetCallback aCallBack)
@@ -88,10 +90,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         signCallback = null;
 
         actionSheetCallback = aCallBack;
+        actionCompleted = false;
 
         token = t;
         tokensService = ts;
         candidateTransaction = tx;
+        callbackId = tx.leafPosition;
 
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
 
@@ -112,28 +116,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         addressDetail.setupAddress(tx.recipient.toString(), destName);
-
-        cancelButton.setOnClickListener(v -> {
-           dismiss();
-        });
-
-        setOnDismissListener(v -> {
-            actionSheetCallback.dismissed(txHash);
-        });
-    }
-
-    public void setURL(String url)
-    {
-        AddressDetailView requester = findViewById(R.id.requester);
-        requester.setupRequester(url);
-        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
-                tokensService.getNetworkSymbol(token.tokenInfo.chainId));
-        if (candidateTransaction.isConstructor())
-        {
-            addressDetail.setVisibility(View.GONE);
-        }
-
-        detailWidget.setLockCallback(this);
+        setupCancelListeners();
     }
 
     public ActionSheetDialog(@NonNull Fragment fragment, Signable message)
@@ -152,6 +135,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         amount = null;
         detailWidget = null;
         mode = ActionSheetMode.SIGN_MESSAGE;
+        callbackId = message.getCallbackId();
 
         actionSheetCallback = (ActionSheetCallback) fragment;
         signCallback = (SignAuthenticationCallback) fragment;
@@ -159,6 +143,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         token = null;
         tokensService = null;
         candidateTransaction = null;
+        actionCompleted = false;
 
         addressDetail.setupRequester(message.getOrigin());
         SignDataWidget signWidget = findViewById(R.id.sign_widget);
@@ -170,11 +155,26 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
+        setupCancelListeners();
     }
 
     public void onDestroy()
     {
         gasWidget.onDestroy();
+    }
+
+    public void setURL(String url)
+    {
+        AddressDetailView requester = findViewById(R.id.requester);
+        requester.setupRequester(url);
+        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
+                tokensService.getNetworkSymbol(token.tokenInfo.chainId));
+        if (candidateTransaction.isConstructor())
+        {
+            addressDetail.setVisibility(View.GONE);
+        }
+
+        detailWidget.setLockCallback(this);
     }
 
     public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)
@@ -236,6 +236,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
+                actionCompleted = true;
                 //display success and hand back to calling function
                 confirmationWidget.startProgressCycle(1);
                 signCallback.gotAuthorisation(gotAuth);
@@ -311,6 +312,17 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
     }
 
+    private void setupCancelListeners()
+    {
+        cancelButton.setOnClickListener(v -> {
+            dismiss();
+        });
+
+        setOnDismissListener(v -> {
+            actionSheetCallback.dismissed(txHash, callbackId, actionCompleted);
+        });
+    }
+
     private void sendTransaction()
     {
         functionBar.setVisibility(View.GONE);
@@ -335,6 +347,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
+                actionCompleted = true;
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.sendTransaction(finalTx);
@@ -369,6 +382,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(candidateTransaction.value.add(estimate)), token.tokenInfo.decimals);
         //TODO: Show gas estimate in widget
         //showAmount(amountVal);
+        gasWidget.setGasEstimate(estimate);
     }
 
     private void showAmount(String amountVal)

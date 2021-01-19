@@ -970,7 +970,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         Web3j web3j = getWeb3jService(chainId);
         EventUtils.getTransactionDetails(txHash, web3j)
-                .map(ethTx -> new Transaction(ethTx.getResult(), chainId, txTime))
+                .map(ethTx -> new Transaction(ethTx.getResult(), chainId, true, txTime))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tx -> writeTransaction(walletAddress, tx), Throwable::printStackTrace)

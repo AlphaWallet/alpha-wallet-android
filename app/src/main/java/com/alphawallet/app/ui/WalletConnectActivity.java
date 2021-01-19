@@ -105,10 +105,12 @@ public class WalletConnectActivity extends BaseActivity
 
     private SignAuthenticationCallback signCallback;
     private long lastId;
+    private int chainIdOverride;
 
     private boolean startup = false;
     private boolean switchConnection = false;
     private boolean terminateSession = false;
+    private boolean sessionStarted = false;
 
     @Nullable
     private Disposable messageCheck;
@@ -142,6 +144,8 @@ public class WalletConnectActivity extends BaseActivity
     {
         super.onNewIntent(intent);
         Bundle data = intent.getExtras();
+        chainIdOverride = 0;
+        sessionStarted = false;
         if (data != null)
         {
             String sessionId = getSessionId();
@@ -172,6 +176,7 @@ public class WalletConnectActivity extends BaseActivity
         {
             String qrCode = data.getString("qrCode");
             String sessionId = data.getString("session");
+            chainIdOverride = data.getInt(C.EXTRA_CHAIN_ID, 0);
             if (sessionId != null) fromSessionActivity = true;
             if (!TextUtils.isEmpty(qrCode))
             {
@@ -422,6 +427,19 @@ public class WalletConnectActivity extends BaseActivity
                 Log.d(TAG, "Yes");
                 finish();
             }
+            else if (!sessionStarted)
+            {
+                runOnUiThread(() -> {
+                    showErrorDialog("WalletConnect refused session.");
+                });
+            }
+            else
+            {
+                //normal disconnect
+                Log.d(TAG, "WalletConnect terminated from peer");
+                finish();
+            }
+            sessionStarted = false;
             return Unit.INSTANCE;
         });
     }
@@ -470,7 +488,7 @@ public class WalletConnectActivity extends BaseActivity
         }
     }
 
-    private void onSessionRequest(Long id, WCPeerMeta peer, int chainId)
+    private void onSessionRequest(Long id, WCPeerMeta peer, int chainIdHint)
     {
         String[] accounts = {wallet.address};
 
@@ -480,6 +498,7 @@ public class WalletConnectActivity extends BaseActivity
         peerName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());
         signCount.setText(R.string.empty);
+        final int chainId = chainIdOverride > 0 ? chainIdOverride : chainIdHint;
         chainName.setChainID(chainId);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -488,9 +507,10 @@ public class WalletConnectActivity extends BaseActivity
                 .setTitle(peer.getName())
                 .setMessage(peer.getUrl())
                 .setPositiveButton(R.string.dialog_approve, (d, w) -> {
+                    sessionStarted = true;
                     client.approveSession(Arrays.asList(accounts), chainId);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
-                            new Gson().toJson(session), new Gson().toJson(peer), client.getChainId());
+                            new Gson().toJson(session), new Gson().toJson(peer), chainId);
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);
                     infoLayout.setVisibility(View.VISIBLE);
@@ -733,8 +753,12 @@ public class WalletConnectActivity extends BaseActivity
                 .setPositiveButton(R.string.try_again, (d, w) -> {
                     onDefaultWallet(wallet);
                 })
-                .setNegativeButton(R.string.action_cancel, (d, w) -> {
+                .setNeutralButton(R.string.action_cancel, (d, w) -> {
                     d.dismiss();
+                })
+                .setNegativeButton(R.string.action_close, (d, w) -> {
+                    d.dismiss();
+                    killSession();
                 })
                 .setCancelable(false)
                 .create();

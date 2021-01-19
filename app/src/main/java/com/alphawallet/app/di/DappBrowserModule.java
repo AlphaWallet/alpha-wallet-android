@@ -25,7 +25,6 @@ public class DappBrowserModule {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             TokensService tokensService,
-            ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GasService2 gasService) {
@@ -35,7 +34,6 @@ public class DappBrowserModule {
                 assetDefinitionService,
                 createTransactionInteract,
                 tokensService,
-                confirmationRouter,
                 ethereumNetworkRepository,
                 keyService,
                 gasService);
@@ -45,11 +43,6 @@ public class DappBrowserModule {
     FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
             EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
         return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
-    }
-
-    @Provides
-    ConfirmationRouter provideConfirmationRouter() {
-        return new ConfirmationRouter();
     }
 
     @Provides

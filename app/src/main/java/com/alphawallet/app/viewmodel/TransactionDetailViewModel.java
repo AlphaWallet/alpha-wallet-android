@@ -218,7 +218,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
         disposable = EventUtils.getBlockDetails(ethTx.getBlockHash(), web3j)
-                .map(ethBlock -> new Transaction(ethTx, chainId, ethBlock.getBlock().getTimestamp().longValue()))
+                .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
                 .map(tx -> writeTransaction(wallet, tx))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -230,7 +230,7 @@ public class GasService2 implements ContractGasProvider
         }
         catch (Exception e)
         {
-            //
+            e.printStackTrace();
         }
     }
 

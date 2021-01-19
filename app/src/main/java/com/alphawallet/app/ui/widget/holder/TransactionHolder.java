@@ -25,6 +25,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.entity.ContractAddress;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
@@ -113,6 +114,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         date.setText(Utils.localiseUnixTime(getContext(), transaction.timeStamp));
         date.setVisibility(View.VISIBLE);
+        symbol.setVisibility(View.VISIBLE);
+        chainName.setVisibility(View.VISIBLE);
 
         setTransactionStatus(transaction.blockNumber, transaction.error, transaction.isPending());
     }
@@ -150,6 +153,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (operationToken == null)
         {
             operationToken = tokensService.getToken(transaction.chainId, defaultAddress);
+            tokensService.addUnknownTokenToCheck(new ContractAddress(transaction.chainId, operationAddress));
         }
 
         return operationToken;
@@ -196,6 +200,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
             long fetchTxCompletionTime = transactionsInteract.fetchTxCompletionTime(defaultAddress, transaction.hash);
             tokenIcon.startPendingSpinner(transaction.timeStamp, fetchTxCompletionTime/1000);
+            symbol.setVisibility(View.GONE);
+            chainName.setVisibility(View.GONE);
         }
         else if (transactionBackground != null)
         {

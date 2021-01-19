@@ -7,6 +7,18 @@
     android:background="@color/white">
 
     <LinearLayout
+        android:id="@+id/layout_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/layout_details"
+        android:layout_alignBottom="@id/layout_details"
+        android:background="@color/translucentWhite"
+        android:translationZ="1000dp"
+        android:visibility="gone"
+        android:orientation="vertical"/>
+
+    <LinearLayout
+        android:id="@+id/layout_details"
         android:paddingStart="15dp"
         android:paddingTop="15dp"
         android:paddingBottom="15dp"
@@ -90,13 +102,4 @@
             android:src="@drawable/selector_radio" />
 
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/translucentWhite"
-        android:visibility="gone"
-        android:orientation="vertical"/>
-
 </RelativeLayout>

@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -26,7 +27,6 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
@@ -41,6 +41,8 @@ import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
+import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
@@ -68,7 +70,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TokensService tokensService;
-    private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GasService2 gasService;
@@ -82,7 +83,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             TokensService tokensService,
-            ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GasService2 gasService) {
@@ -91,7 +91,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.tokensService = tokensService;
-        this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.gasService = gasService;
@@ -170,11 +169,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
-    {
-        confirmationRouter.open(context, transaction, networkInfo.name, requesterURL, networkInfo.chainId);
-    }
-
     public void setLastUrl(Context context, String url) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
@@ -223,6 +217,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);
             onDefaultNetwork(info);
+            gasService.startGasPriceCycle(chainId);
         }
     }
 
@@ -270,6 +265,25 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.putExtra(C.EXTRA_AMOUNT, result);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
+    }
+
+    public void sendTransaction(final Web3Transaction finalTx, int chainId, SendTransactionInterface callback)
+    {
+        if (finalTx.isConstructor())
+        {
+            disposable = createTransactionInteract
+                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                            error -> callback.transactionError(finalTx.leafPosition, error));
+        }
+        else
+        {
+            byte[] data = Numeric.hexStringToByteArray(finalTx.payload);
+            disposable = createTransactionInteract
+                    .createWithSig(defaultWallet.getValue(), finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                            error -> callback.transactionError(finalTx.leafPosition, error));
+        }
     }
 
     public void showMyAddress(Context ctx)

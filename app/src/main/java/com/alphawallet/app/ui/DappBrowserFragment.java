@@ -1621,4 +1621,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.onSignCancel(callbackId);
         }
     }
+
+    @Override
+    public void notifyConfirm(int mode)
+    {
+        if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
+    }
 }

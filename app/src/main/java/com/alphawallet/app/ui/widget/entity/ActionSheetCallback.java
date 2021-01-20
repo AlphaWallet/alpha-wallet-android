@@ -13,4 +13,5 @@ public interface ActionSheetCallback
     void getAuthorisation(SignAuthenticationCallback callback);
     void sendTransaction(Web3Transaction finalTx);
     void dismissed(String txHash, long callbackId, boolean actionCompleted);
+    void notifyConfirm(int mode);
 }

@@ -19,6 +19,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -402,6 +403,14 @@ public class HomeViewModel extends BaseViewModel {
 
         analyticsService.identify(uuid);
         prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
+    }
+
+    public void actionSheetConfirm(int mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(String.valueOf(mode));
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 
     public void stopTransactionUpdate()

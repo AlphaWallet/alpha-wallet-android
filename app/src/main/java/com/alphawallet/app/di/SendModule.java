@@ -7,6 +7,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
@@ -28,7 +29,8 @@ class SendModule {
                                                      CreateTransactionInteract createTransactionInteract,
                                                      GasService2 gasService,
                                                      AssetDefinitionService assetDefinitionService,
-                                                     KeyService keyService) {
+                                                     KeyService keyService,
+                                                     AnalyticsServiceType analyticsService) {
         return new SendViewModelFactory(myAddressRouter,
                 networkRepositoryType,
                 tokensService,
@@ -37,7 +39,8 @@ class SendModule {
                 createTransactionInteract,
                 gasService,
                 assetDefinitionService,
-                keyService);
+                keyService,
+                analyticsService);
     }
 
     @Provides

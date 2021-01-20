@@ -623,6 +623,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
+    @Override
+    public void notifyConfirm(int mode)
+    {
+        viewModel.actionSheetConfirm(mode);
+    }
+
     private void txWritten(TransactionData transactionData)
     {
         confirmationDialog.transactionWritten(transactionData.txHash);

@@ -25,7 +25,6 @@ import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
-import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
@@ -241,6 +240,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 signMessage();
                 break;
         }
+
+        actionSheetCallback.notifyConfirm(mode.ordinal());
     }
 
     private BigDecimal getTransactionAmount()

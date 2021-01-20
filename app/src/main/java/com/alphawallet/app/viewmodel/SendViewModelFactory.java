@@ -8,6 +8,8 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AnalyticsService;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
@@ -26,6 +28,7 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final GasService2 gasService;
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
+    private final AnalyticsServiceType analyticsService;
 
     public SendViewModelFactory(MyAddressRouter myAddressRouter,
                                 EthereumNetworkRepositoryType networkRepository,
@@ -35,7 +38,8 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
                                 CreateTransactionInteract createTransactionInteract,
                                 GasService2 gasService,
                                 AssetDefinitionService assetDefinitionService,
-                                KeyService keyService) {
+                                KeyService keyService,
+                                AnalyticsServiceType analyticsService) {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = networkRepository;
         this.tokensService = tokensService;
@@ -45,12 +49,13 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
+        this.analyticsService = analyticsService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new SendViewModel(myAddressRouter, networkRepository, tokensService,
-                fetchTransactionsInteract, addTokenInteract, createTransactionInteract, gasService, assetDefinitionService, keyService);
+                fetchTransactionsInteract, addTokenInteract, createTransactionInteract, gasService, assetDefinitionService, keyService, analyticsService);
     }
 }

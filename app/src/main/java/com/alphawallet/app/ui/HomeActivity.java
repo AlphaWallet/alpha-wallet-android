@@ -1172,4 +1172,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             super.onBackPressed();
         }
     }
+
+    public void useActionSheet(int mode)
+    {
+        viewModel.actionSheetConfirm(mode);
+    }
 }

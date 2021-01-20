@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -21,6 +22,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
@@ -52,6 +54,7 @@ public class SendViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
+    private final AnalyticsServiceType analyticsService;
 
     public SendViewModel(MyAddressRouter myAddressRouter,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -61,7 +64,8 @@ public class SendViewModel extends BaseViewModel {
                          CreateTransactionInteract createTransactionInteract,
                          GasService2 gasService,
                          AssetDefinitionService assetDefinitionService,
-                         KeyService keyService)
+                         KeyService keyService,
+                         AnalyticsServiceType analyticsService)
     {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = ethereumNetworkRepositoryType;
@@ -72,6 +76,7 @@ public class SendViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
+        this.analyticsService = analyticsService;
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -169,5 +174,13 @@ public class SendViewModel extends BaseViewModel {
                 .createWithSig(wallet, finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
                 .subscribe(transactionFinalised::postValue,
                         transactionError::postValue);
+    }
+
+    public void actionSheetConfirm(int mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(String.valueOf(mode));
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 }

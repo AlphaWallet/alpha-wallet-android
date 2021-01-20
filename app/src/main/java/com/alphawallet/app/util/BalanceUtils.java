@@ -212,29 +212,6 @@ public class BalanceUtils
         return getScaledValue(valueStr, decimals, Token.TOKEN_BALANCE_PRECISION);
     }
 
-    public static BigDecimal convertInputValue(String input)
-    {
-        if (checkNumericValidity(input))
-        {
-            try
-            {
-                return new BigDecimal(input);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        return BigDecimal.ZERO;
-    }
-
-    private static boolean checkNumericValidity(String strValue)
-    {
-        return strValue != null && (strValue.length() > 1
-                || (strValue.length() == 1 && Character.isDigit(strValue.charAt(0))));
-    }
-
     /**
      * Universal scaled value method
      * @param valueStr

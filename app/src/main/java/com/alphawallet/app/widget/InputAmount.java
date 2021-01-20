@@ -322,9 +322,7 @@ public class InputAmount extends LinearLayout
 
     private BigDecimal getWeiInputAmount()
     {
-        String strValue = editText.getParsedValue();
-        //convert to value without text markers
-        BigDecimal inputVal = BalanceUtils.convertInputValue(strValue);
+        BigDecimal inputVal = editText.getBigDecimalValue();
         //get wei value
         if (inputVal.equals(BigDecimal.ZERO))
         {

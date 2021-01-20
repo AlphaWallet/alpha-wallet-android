@@ -4,17 +4,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -25,13 +22,12 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
+import com.alphawallet.app.ui.widget.entity.NumericInput;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.Utils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthGasPrice;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,7 +40,6 @@ import io.realm.RealmQuery;
 import io.realm.Sort;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
 /**
@@ -53,7 +48,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 public class InputAmount extends LinearLayout
 {
     private final Context context;
-    private final AutoCompleteTextView editText;
+    private final NumericInput editText;
     private final TextView symbolText;
     private final TokenIcon icon;
     private final ChainName chainName;
@@ -327,29 +322,22 @@ public class InputAmount extends LinearLayout
 
     private BigDecimal getWeiInputAmount()
     {
-        String strValue = editText.getText().toString();
+        String strValue = editText.getParsedValue();
+        //convert to value without text markers
+        BigDecimal inputVal = BalanceUtils.convertInputValue(strValue);
         //get wei value
-        if (!TextUtils.isEmpty(strValue) && checkNumericValidity(strValue))
+        if (inputVal.equals(BigDecimal.ZERO))
         {
-            if (showingCrypto)
-            {
-                return new BigDecimal(strValue).multiply(BigDecimal.valueOf(Math.pow(10, token.tokenInfo.decimals)));
-            }
-            else
-            {
-                return convertFiatAmountToWei(Double.parseDouble(strValue));
-            }
+            return inputVal;
+        }
+        else if (showingCrypto)
+        {
+            return inputVal.multiply(BigDecimal.valueOf(Math.pow(10, token.tokenInfo.decimals)));
         }
         else
         {
-            return BigDecimal.ZERO;
+            return convertFiatAmountToWei(inputVal.doubleValue());
         }
-    }
-
-    private boolean checkNumericValidity(String strValue)
-    {
-        return strValue != null && (strValue.length() > 1
-                || (strValue.length() == 1 && Character.isDigit(strValue.charAt(0))));
     }
 
     /**

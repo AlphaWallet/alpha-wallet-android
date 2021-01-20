@@ -109,7 +109,7 @@
                 android:indeterminateTint="@color/azure"
                 android:visibility="gone" />
 
-            <AutoCompleteTextView
+            <com.alphawallet.app.ui.widget.entity.NumericInput
                 android:id="@+id/amount_entry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

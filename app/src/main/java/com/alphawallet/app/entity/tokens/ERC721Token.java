@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -297,8 +298,20 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String getTransferValue(Transaction transaction, int precision)
+    public String getTransferValue(TransactionInput txInput, int precision)
     {
-        return "1";
+        return getTransferValueRaw(txInput).toString();
+    }
+
+    @Override
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        return BigInteger.ONE;
+    }
+
+    @Override
+    public BigDecimal getBalanceRaw()
+    {
+        return new BigDecimal(getArrayBalance().size());
     }
 }

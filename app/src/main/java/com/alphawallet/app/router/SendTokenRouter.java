@@ -2,14 +2,13 @@ package com.alphawallet.app.router;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.SendActivity;
 
 public class SendTokenRouter {
     public void open(Activity context, String address, String symbol, int decimals, Wallet wallet, Token token, int chainId) {

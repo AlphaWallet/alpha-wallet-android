@@ -65,6 +65,7 @@ import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -463,7 +464,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         Token base = viewModel.getToken(token.tokenInfo.chainId, wallet.address);
         //validate that we have sufficient balance
         if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
-             || (base.balance.compareTo(BigDecimal.ZERO) > 0)) //contract token, so only need have some base balance for gas
+             || (hasGasOverride(token.tokenInfo.chainId) && token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0) //allow for chains with no gas requirement
+             || (base.balance.compareTo(BigDecimal.ZERO) > 0 && token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check gas and sufficient token balance
         {
             sendAmount = value;
             sendGasPrice = gasPrice;

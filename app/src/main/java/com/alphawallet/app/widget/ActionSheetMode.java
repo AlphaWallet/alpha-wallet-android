@@ -6,5 +6,6 @@ package com.alphawallet.app.widget;
 enum ActionSheetMode
 {
     SEND_TRANSACTION,
-    SIGN_MESSAGE
+    SEND_TRANSACTION_DAPP,
+    SIGN_MESSAGE,
 }

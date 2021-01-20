@@ -6,7 +6,6 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;

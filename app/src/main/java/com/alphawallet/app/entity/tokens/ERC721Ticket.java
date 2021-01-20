@@ -8,6 +8,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -256,15 +257,27 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public String getTransferValue(Transaction transaction, int precision)
+    public String getTransferValue(TransactionInput txInput, int precision)
     {
-        if (transaction.transactionInput != null && transaction.transactionInput.arrayValues.size() > 1)
+        return getTransferValueRaw(txInput).toString();
+    }
+
+    @Override
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        if (txInput != null && txInput.arrayValues.size() > 1)
         {
-            return String.valueOf(transaction.transactionInput.arrayValues.size());
+            return BigInteger.valueOf(txInput.arrayValues.size());
         }
         else
         {
-            return "1";
+            return BigInteger.ONE;
         }
+    }
+
+    @Override
+    public BigDecimal getBalanceRaw()
+    {
+        return new BigDecimal(getArrayBalance().size());
     }
 }

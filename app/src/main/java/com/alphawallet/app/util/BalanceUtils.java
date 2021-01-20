@@ -8,10 +8,48 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 
-public class BalanceUtils {
+public class BalanceUtils
+{
     private static String weiInEth  = "1000000000000000000";
+
+    private static String getDigitalPattern()
+    {
+        return "###,###,###,##0.";
+    }
+
+    private static String convertToLocale(String value)
+    {
+        return value;
+
+        // TODO: Add localised values, need to do a global value rollout with override.
+        /*char separator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
+        if (separator != ',')
+        {
+            char decimalPoint = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+            value = value.replace('.', '^');
+            value = value.replace(',', separator);
+            value = value.replace('^', decimalPoint);
+        }
+
+        return value;*/
+    }
+
+    public static String convertFromLocale(String value)
+    {
+        CharSequence separator = ",";// + (DecimalFormatSymbols.getInstance().getGroupingSeparator());
+        value = value.replace(separator, "");
+
+        char decimal = '.';//DecimalFormatSymbols.getInstance().getDecimalSeparator();
+        if (decimal != '.')
+        {
+            value = value.replace(decimal, '.');
+        }
+
+        return value;
+    }
 
     public static BigDecimal weiToEth(BigDecimal wei) {
         return Convert.fromWei(wei, Convert.Unit.ETHER);
@@ -88,14 +126,14 @@ public class BalanceUtils {
 
     public static String getScaledValueWithLimit(BigDecimal value, long decimals)
     {
-        String pattern = "###,###,###,##0.00#######";
+        String pattern = getDigitalPattern() + "00#######";
         return scaledValue(value, pattern, decimals);
     }
 
     public static String getScaledValueFixed(BigDecimal value, long decimals, int precision)
     {
         //form precision
-        String pattern = "###,###,###,##0.";
+        String pattern = getDigitalPattern();
         for (int i = 0; i < precision; i++) pattern += "0";
         return scaledValue(value, pattern, decimals);
     }
@@ -103,7 +141,7 @@ public class BalanceUtils {
     public static String getScaledValueMinimal(BigDecimal value, long decimals, int max_precision)
     {
         //form precision
-        String pattern = "###,###,###,##0.";
+        String pattern = getDigitalPattern();
         for (int i = 0; i < max_precision; i++) pattern += "#";
         return scaledValue(value, pattern, decimals);
     }
@@ -136,11 +174,11 @@ public class BalanceUtils {
         else //otherwise display in standard pattern to dPlaces dp
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("###,###,###,##0.");
+            sb.append(getDigitalPattern());
             for (int i = 0; i < dPlaces; i++) { sb.append("#"); }
             DecimalFormat df = new DecimalFormat(sb.toString());
             df.setRoundingMode(RoundingMode.DOWN);
-            returnValue = df.format(correctedValue);
+            returnValue = convertToLocale(df.format(correctedValue));
         }
 
         return returnValue;
@@ -149,7 +187,7 @@ public class BalanceUtils {
     public static String getScaledValue(BigDecimal value, long decimals, int precision)
     {
         //form precision
-        String pattern = "###,###,###,##0.";
+        String pattern = getDigitalPattern();
         for (int i = 0; i < precision; i++) pattern += "#";
         return scaledValue(value, pattern, decimals);
     }
@@ -172,6 +210,29 @@ public class BalanceUtils {
     public static String getScaledValue(String valueStr, long decimals)
     {
         return getScaledValue(valueStr, decimals, Token.TOKEN_BALANCE_PRECISION);
+    }
+
+    public static BigDecimal convertInputValue(String input)
+    {
+        if (checkNumericValidity(input))
+        {
+            try
+            {
+                return new BigDecimal(input);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return BigDecimal.ZERO;
+    }
+
+    private static boolean checkNumericValidity(String strValue)
+    {
+        return strValue != null && (strValue.length() > 1
+                || (strValue.length() == 1 && Character.isDigit(strValue.charAt(0))));
     }
 
     /**

@@ -16,12 +16,16 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.HomeActivity;
+import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
@@ -86,7 +90,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget = findViewById(R.id.detail_widget);
         addressDetail = findViewById(R.id.recipient);
         functionBar = findViewById(R.id.layoutButtons);
-        mode = ActionSheetMode.SEND_TRANSACTION;
+        if (activity instanceof HomeActivity)
+        {
+            mode = ActionSheetMode.SEND_TRANSACTION_DAPP;
+        }
+        else
+        {
+            mode = ActionSheetMode.SEND_TRANSACTION;
+        }
+
         signCallback = null;
 
         actionSheetCallback = aCallBack;
@@ -183,6 +195,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         updateAmount();
     }
 
+    //TODO: Move this to Balance widget, and use code to deduce what to display (as per transaction view).
     private void setNewBalanceText()
     {
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
@@ -190,6 +203,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         if (token.isEthereum())
         {
             balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);
+        }
+        else if (mode == ActionSheetMode.SEND_TRANSACTION)
+        {
+            balanceAfterTransaction = token.getBalanceRaw().subtract(getTransactionAmount()).toBigInteger();
         }
         //convert to ETH amount
         String newBalanceVal = BalanceUtils.getScaledValueScientific(new BigDecimal(balanceAfterTransaction), token.tokenInfo.decimals);
@@ -199,7 +216,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     @Override
     public void updateAmount()
     {
-        String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(gasWidget.getValue()), token.tokenInfo.decimals);
+        String amountVal = BalanceUtils.getScaledValueScientific(getTransactionAmount(), token.tokenInfo.decimals);
         showAmount(amountVal);
     }
 
@@ -209,6 +226,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         switch (mode)
         {
             case SEND_TRANSACTION:
+            case SEND_TRANSACTION_DAPP:
                 //check gas and warn user
                 if (!gasWidget.checkSufficientGas())
                 {
@@ -223,6 +241,27 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 signMessage();
                 break;
         }
+    }
+
+    private BigDecimal getTransactionAmount()
+    {
+        BigDecimal txAmount;
+        if (token.isEthereum())
+        {
+            txAmount = new BigDecimal(gasWidget.getValue());
+        }
+        else if (mode == ActionSheetMode.SEND_TRANSACTION)
+        {
+            //Decode tx
+            TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
+            txAmount = new BigDecimal(token.getTransferValueRaw(transactionInput));
+        }
+        else
+        {
+            txAmount = BigDecimal.ZERO;
+        }
+
+        return txAmount;
     }
 
     private void signMessage()
@@ -288,11 +327,22 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private void showTransactionSuccess()
     {
-        Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
-        intent.putExtra(C.EXTRA_TXHASH, txHash);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getContext().startActivity(intent);
-        dismiss();
+        switch (mode)
+        {
+            case SEND_TRANSACTION:
+                //Display transaction success dialog
+                Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
+                intent.putExtra(C.EXTRA_TXHASH, txHash);
+                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                getContext().startActivity(intent);
+                dismiss();
+                break;
+
+            case SEND_TRANSACTION_DAPP:
+                //return to dapp
+                dismiss();
+                break;
+        }
     }
 
     private void updateRealmTransactionFinishEstimate(String txHash)

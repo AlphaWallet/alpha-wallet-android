@@ -12,6 +12,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -1019,15 +1020,15 @@ public class Token implements Parcelable, Comparable<Token>
      * Given a transaction which is a Token Transfer of some kind, return the amount of tokens or token ID if NFT
      * Should be overriden for each distinct token type
      *
-     * @param tx
+     * @param txInput
      * @param transactionBalancePrecision
      * @return
      */
-    public String getTransferValue(Transaction tx, int transactionBalancePrecision)
+    public String getTransferValue(TransactionInput txInput, int transactionBalancePrecision)
     {
-        if (tx.transactionInput.miscData.size() > 0)
+        BigInteger bi = getTransferValueRaw(txInput);
+        if (bi.compareTo(BigInteger.ZERO) > 0)
         {
-            BigInteger bi = new BigInteger(tx.transactionInput.miscData.get(0), 16);
             return BalanceUtils.getScaledValueMinimal(new BigDecimal(bi),
                     tokenInfo.decimals, transactionBalancePrecision);
         }
@@ -1035,5 +1036,22 @@ public class Token implements Parcelable, Comparable<Token>
         {
             return "0";
         }
+    }
+
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        if (txInput != null && txInput.miscData.size() > 0)
+        {
+            return new BigInteger(txInput.miscData.get(0), 16);
+        }
+        else
+        {
+            return BigInteger.ZERO;
+        }
+    }
+
+    public BigDecimal getBalanceRaw()
+    {
+        return balance;
     }
 }

@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.text.format.DateUtils;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -34,6 +35,7 @@ import io.realm.RealmResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
@@ -169,8 +171,29 @@ public class GasService2 implements ContractGasProvider
 
     private Boolean updateGasPrice(EthGasPrice ethGasPrice, int chainId)
     {
-        updateRealm(new GasPriceSpread(ethGasPrice.getGasPrice()), chainId);
+        BigInteger gasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
+        updateRealm(new GasPriceSpread(gasPrice), chainId);
         return true;
+    }
+
+    private BigInteger fixGasPrice(BigInteger gasPrice, int chainId)
+    {
+        if (gasPrice.compareTo(BigInteger.ZERO) > 0)
+        {
+            return gasPrice;
+        }
+        else
+        {
+            //gas price from node is zero
+            switch (chainId)
+            {
+                default:
+                    return gasPrice;
+                case ARTIS_TAU1_ID:
+                    //this node incorrectly returns gas price zero, use 1 Gwei
+                    return new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
+            }
+        }
     }
 
     private Single<Boolean> updateGasNow()

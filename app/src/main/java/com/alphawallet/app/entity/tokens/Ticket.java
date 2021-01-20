@@ -8,6 +8,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.BalanceUtils;
@@ -426,16 +427,27 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public String getTransferValue(Transaction transaction, int precision)
+    public String getTransferValue(TransactionInput txInput, int precision)
     {
-        //get the count of tickets in this transaction
-        if (transaction.transactionInput != null)
+        return getTransferValueRaw(txInput).toString();
+    }
+
+    @Override
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        if (txInput != null && txInput.arrayValues.size() > 1)
         {
-            return String.valueOf(transaction.transactionInput.arrayValues.size());
+            return BigInteger.valueOf(txInput.arrayValues.size());
         }
         else
         {
-            return "1";
+            return BigInteger.ONE;
         }
+    }
+
+    @Override
+    public BigDecimal getBalanceRaw()
+    {
+        return new BigDecimal(getArrayBalance().size());
     }
 }

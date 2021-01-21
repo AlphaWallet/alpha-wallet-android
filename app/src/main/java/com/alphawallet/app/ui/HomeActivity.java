@@ -1173,7 +1173,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    public void useActionSheet(int mode)
+    public void useActionSheet(String mode)
     {
         viewModel.actionSheetConfirm(mode);
     }

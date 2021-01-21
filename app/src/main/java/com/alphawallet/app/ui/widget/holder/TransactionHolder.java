@@ -115,7 +115,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         date.setText(Utils.localiseUnixTime(getContext(), transaction.timeStamp));
         date.setVisibility(View.VISIBLE);
         symbol.setVisibility(View.VISIBLE);
-        chainName.setVisibility(View.VISIBLE);
 
         setTransactionStatus(transaction.blockNumber, transaction.error, transaction.isPending());
     }

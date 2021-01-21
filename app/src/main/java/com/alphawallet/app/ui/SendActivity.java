@@ -624,7 +624,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    public void notifyConfirm(int mode)
+    public void notifyConfirm(String mode)
     {
         viewModel.actionSheetConfirm(mode);
     }

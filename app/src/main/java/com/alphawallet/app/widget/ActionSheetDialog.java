@@ -241,7 +241,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 break;
         }
 
-        actionSheetCallback.notifyConfirm(mode.ordinal());
+        actionSheetCallback.notifyConfirm(mode.toString());
     }
 
     private BigDecimal getTransactionAmount()

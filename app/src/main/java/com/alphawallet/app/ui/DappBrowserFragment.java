@@ -154,8 +154,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private ActionSheetDialog confirmationDialog;
 
-    private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
-
     private static final int UPLOAD_FILE = 1;
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
@@ -868,6 +866,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             addToBackStack(DAPP_BROWSER);
             web3.loadUrl(Utils.formatUrl(loadOnInit), getWeb3Headers());
             urlTv.setText(Utils.formatUrl(loadOnInit));
+            loadOnInit = null;
         }
     }
 
@@ -1623,7 +1622,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void notifyConfirm(int mode)
+    public void notifyConfirm(String mode)
     {
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
     }

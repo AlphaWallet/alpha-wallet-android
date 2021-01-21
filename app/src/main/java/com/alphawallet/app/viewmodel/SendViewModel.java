@@ -176,10 +176,10 @@ public class SendViewModel extends BaseViewModel {
                         transactionError::postValue);
     }
 
-    public void actionSheetConfirm(int mode)
+    public void actionSheetConfirm(String mode)
     {
         AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(String.valueOf(mode));
+        analyticsProperties.setData(mode);
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }

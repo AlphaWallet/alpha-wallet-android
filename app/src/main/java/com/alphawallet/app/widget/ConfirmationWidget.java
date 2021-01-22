@@ -83,7 +83,7 @@ public class ConfirmationWidget extends RelativeLayout
             completeProgressSuccess(true);
             hashText.setVisibility(View.VISIBLE);
             hashText.setAlpha(1.0f);
-            hashText.setText(message);
+            if (message.length() > 1) hashText.setText(message);
 
             hashText.animate()
                     .alpha(0.0f)

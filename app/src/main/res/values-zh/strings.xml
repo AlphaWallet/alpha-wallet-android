@@ -705,4 +705,5 @@
     <string name="contract_call">合约调用</string>
     <string name="insufficient_gas">资金不够</string>
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
+    <string name="action_send_eth">发送以太币交易</string>
 </resources>

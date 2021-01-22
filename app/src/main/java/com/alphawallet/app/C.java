@@ -121,11 +121,8 @@ public abstract class C {
             "com.stormbird.wallet.CHANGE_CURRENCY";
     public static final String RESET_TRANSACTIONS =
             "com.stormbird.wallet.RESET_TRANSACTIONS";
-
-    public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
-    public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
-    public static final String CHANGELLY_REF_ID = "968d4f0f0bf9";
-    public static final String DONATION_ADDRESS = "0xb1aD48527d694D30401D082bcD21a33F41811501";
+    public static final String WALLET_CONNECT_REQUEST =
+            "com.stormbird.wallet.WALLET_CONNECT";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";

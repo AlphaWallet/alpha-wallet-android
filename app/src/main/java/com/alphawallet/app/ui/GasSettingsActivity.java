@@ -125,7 +125,11 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         realmGasSpread = getGasQuery().findFirstAsync();
         realmGasSpread.addChangeListener(realmToken -> {
-            initGasSpeeds((RealmGasSpread)realmToken);
+            if (realmGasSpread.isValid())
+            {
+                GasPriceSpread gs = ((RealmGasSpread) realmToken).getGasPrice();
+                initGasSpeeds(gs);
+            }
         });
     }
 
@@ -143,13 +147,12 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         RealmGasSpread getGas = getGasQuery().findFirst();
         if (getGas != null)
         {
-            initGasSpeeds(getGas);
+            initGasSpeeds(getGas.getGasPrice());
         }
     }
 
-    private void initGasSpeeds(RealmGasSpread rgs)
+    private void initGasSpeeds(GasPriceSpread gs)
     {
-        GasPriceSpread gs = rgs.getGasPrice();
         currentGasSpeedIndex = gs.setupGasSpeeds(this, gasSpeeds, currentGasSpeedIndex);
         customIndex = gs.getCustomIndex();
         gasSliderView.initGasPriceMax(gasSpeeds.get(0).gasPrice);

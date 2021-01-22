@@ -380,6 +380,12 @@ public class TransactionInput
             return;
         }
 
+        if (tx != null && tx.input != null && tx.input.equals("0x"))
+        {
+            type = TransactionType.SEND_ETH;
+            return;
+        }
+
         switch (functionData.functionName)
         {
             case "trade":

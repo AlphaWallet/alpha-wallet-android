@@ -22,6 +22,9 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import kotlin.Unit;
 
+import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
+import static com.alphawallet.app.C.WALLET_CONNECT_REQUEST;
+
 /**
  * The purpose of this service is to manage the currently active WalletConnect sessions. Keep the connections alive and terminate where required.
  * Doing this in an activity means the connection objects are subject to activity lifecycle events (Destroy etc).
@@ -125,6 +128,7 @@ public class WalletConnectService extends Service
         client.setOnFailure(throwable -> {
             //alert UI
             if (client.sessionId() == null) return Unit.INSTANCE;
+            Log.d(TAG, "On Fail: " + throwable.getMessage());
             signRequests.add(new WCRequest(client.sessionId(), throwable, client.getChainId()));
             return Unit.INSTANCE;
         });
@@ -133,6 +137,9 @@ public class WalletConnectService extends Service
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, message));
+            //see if this connection is live, if so then bring WC request to foreground
+            switchToWalletConnectApprove(client.sessionId());
+            Log.d(TAG, "Sign Request: " + message.toString());
             return Unit.INSTANCE;
         });
 
@@ -140,6 +147,7 @@ public class WalletConnectService extends Service
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, transaction, true, client.getChainId()));
+            switchToWalletConnectApprove(client.sessionId());
             return Unit.INSTANCE;
         });
 
@@ -147,8 +155,23 @@ public class WalletConnectService extends Service
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, transaction, false, client.getChainId()));
+            switchToWalletConnectApprove(client.sessionId());
             return Unit.INSTANCE;
         });
+    }
+
+    private void switchToWalletConnectApprove(String sessionId)
+    {
+        WCClient cc = clientMap.get(sessionId);
+
+        if (cc != null)
+        {
+            Intent intent = new Intent(WALLET_CONNECT_REQUEST);
+            intent.putExtra("sessionid", sessionId);
+            sendBroadcast(intent);
+
+            Log.d(TAG, "Connected clients: " + clientMap.size());
+        }
     }
 
     private void startSessionPinger()
@@ -173,7 +196,7 @@ public class WalletConnectService extends Service
             }
 
             long lastUsed = getLastUsed(c);
-            long timeUntilTerminate = DateUtils.MINUTE_IN_MILLIS*5 - (System.currentTimeMillis() - lastUsed);
+            long timeUntilTerminate = CONNECTION_TIMEOUT - (System.currentTimeMillis() - lastUsed);
             Log.d(TAG, "Time until terminate: " + timeUntilTerminate/DateUtils.SECOND_IN_MILLIS + " (" + sessionKey + ")");
             if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
             {

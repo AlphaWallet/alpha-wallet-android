@@ -204,11 +204,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupWalletDetails()
     {
-        if (token == null)
-        {
-            token = viewModel.getToken(transaction.chainId, wallet.address);
-        }
-
         String operationName = token.getOperationName(transaction, this);
         String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
         amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);

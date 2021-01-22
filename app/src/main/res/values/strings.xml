@@ -731,4 +731,5 @@
     <string name="contract_call">Contract call</string>
     <string name="insufficient_gas">Insufficient Gas</string>
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
+    <string name="action_send_eth">Send Eth</string>
 </resources>

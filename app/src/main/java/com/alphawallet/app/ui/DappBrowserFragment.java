@@ -938,13 +938,13 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
                 }
 
-                confirmationDialog.dismiss();
+                confirmationDialog.success();
             }
         };
 
         if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
-            confirmationDialog = new ActionSheetDialog(this, message);
+            confirmationDialog = new ActionSheetDialog(getActivity(), this, this, message);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
         }
@@ -961,11 +961,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     (transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
-                Token token = viewModel.getTokenService().getToken(networkInfo.chainId, transaction.recipient.toString());
-                if (token == null)
-                {
-                    token = viewModel.getTokenService().getToken(networkInfo.chainId, wallet.address); // use base currency
-                }
+                Token token = viewModel.getTokenService().getTokenOrBase(networkInfo.chainId, transaction.recipient.toString());
                 confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token, "",
                         viewModel.getTokenService(), this);
                 confirmationDialog.setURL(url);

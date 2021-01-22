@@ -735,4 +735,15 @@ public class TokensService
 
         analyticsService.track(C.AN_USE_GAS, analyticsProperties);
     }
+
+    public Token getTokenOrBase(int chainId, String address)
+    {
+        Token token = getToken(chainId, address);
+        if (token == null)
+        {
+            token = getToken(chainId, currentAddress); // use base currency
+        }
+
+        return token;
+    }
 }

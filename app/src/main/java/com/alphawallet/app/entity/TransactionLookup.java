@@ -76,6 +76,7 @@ public class TransactionLookup
             typeMapping.put(TransactionType.APPROVE, R.string.approve);
             typeMapping.put(TransactionType.RECEIVED, R.string.received);
             typeMapping.put(TransactionType.SEND, R.string.action_send);
+            typeMapping.put(TransactionType.SEND_ETH, R.string.action_send_eth);
             typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
         }
     }

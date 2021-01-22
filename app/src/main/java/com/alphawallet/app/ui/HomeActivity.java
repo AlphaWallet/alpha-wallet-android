@@ -866,6 +866,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         ((WalletFragment) walletFragment).refreshTokens();
     }
 
+    @Override
+    public void openWalletConnect(String sessionId)
+    {
+        Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("session", sessionId);
+        startActivity(intent);
+    }
+
     private void hideDialog()
     {
         if (dialog != null && dialog.isShowing())

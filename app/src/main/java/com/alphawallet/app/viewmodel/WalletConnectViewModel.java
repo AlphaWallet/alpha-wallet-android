@@ -12,9 +12,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
@@ -26,8 +28,12 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
+import com.alphawallet.app.service.AnalyticsService;
+import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -42,10 +48,14 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
 
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -61,11 +71,14 @@ public class WalletConnectViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
     protected Disposable disposable;
-    private KeyService keyService;
+    private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final RealmManager realmManager;
+    private final GasService2 gasService;
+    private final TokensService tokensService;
+    private final AnalyticsServiceType analyticsService;
     private final Context context;
     private WalletConnectService walletConnectService;
     private ServiceConnection serviceConnection;
@@ -79,6 +92,9 @@ public class WalletConnectViewModel extends BaseViewModel {
                            CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
                            RealmManager realmManager,
+                           GasService2 gasService,
+                           TokensService tokensService,
+                           AnalyticsServiceType analyticsService,
                            Context ctx) {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -86,6 +102,9 @@ public class WalletConnectViewModel extends BaseViewModel {
         this.genericWalletInteract = genericWalletInteract;
         this.realmManager = realmManager;
         this.context = ctx;
+        this.gasService = gasService;
+        this.tokensService = tokensService;
+        this.analyticsService = analyticsService;
         startService();
     }
 
@@ -150,6 +169,21 @@ public class WalletConnectViewModel extends BaseViewModel {
         }
     }
 
+    public void startGasCycle(int chainId)
+    {
+        gasService.startGasPriceCycle(chainId);
+    }
+
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
+
+    public void onDestroy()
+    {
+        gasService.stopGasPriceCycle();
+    }
+
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
         disposable = genericWalletInteract
@@ -206,6 +240,30 @@ public class WalletConnectViewModel extends BaseViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
                         error -> dAppFunction.DAppError(error, etm));
+    }
+
+    public void sendTransaction(final Web3Transaction finalTx, int chainId, SendTransactionInterface callback)
+    {
+        if (finalTx.isConstructor())
+        {
+            disposable = createTransactionInteract
+                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                            error -> callback.transactionError(finalTx.leafPosition, error));
+        }
+        else
+        {
+            byte[] data = Numeric.hexStringToByteArray(finalTx.payload);
+            disposable = createTransactionInteract
+                    .createWithSig(defaultWallet.getValue(), finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                            error -> callback.transactionError(finalTx.leafPosition, error));
+        }
+    }
+
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    {
+        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
 
     public void resetSignDialog()
@@ -353,6 +411,8 @@ public class WalletConnectViewModel extends BaseViewModel {
                 sessionAux.setChainId(sessionChainId);
             });
         }
+
+        gasService.startGasPriceCycle(sessionChainId);
     }
 
     public void deleteSession(String sessionId)
@@ -470,5 +530,13 @@ public class WalletConnectViewModel extends BaseViewModel {
         NetworkInfo info = findDefaultNetworkInteract.getNetworkInfo(chainId);
         if (info == null) { info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID); }
         return info.symbol;
+    }
+
+    public void actionSheetConfirm(String mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData("(WC)" + mode); //disambiguate signs/sends etc through WC
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 }

@@ -23,5 +23,6 @@ public enum TransactionType
     APPROVE,
     RECEIVED,
     SEND,
+    SEND_ETH,
     ILLEGAL_VALUE
 }

@@ -26,6 +26,7 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -66,7 +67,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final Web3Transaction candidateTransaction;
     private final ActionSheetCallback actionSheetCallback;
     private final SignAuthenticationCallback signCallback;
-    private final ActionSheetMode mode;
+    private ActionSheetMode mode;
     private final long callbackId;
 
     private String txHash = null;
@@ -92,6 +93,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         if (activity instanceof HomeActivity)
         {
             mode = ActionSheetMode.SEND_TRANSACTION_DAPP;
+        }
+        else if (activity instanceof WalletConnectActivity)
+        {
+            mode = ActionSheetMode.SEND_TRANSACTION_WC;
         }
         else
         {
@@ -130,9 +135,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         setupCancelListeners();
     }
 
-    public ActionSheetDialog(@NonNull Fragment fragment, Signable message)
+    public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, SignAuthenticationCallback sCallback, Signable message)
     {
-        super(fragment.getActivity());
+        super(activity);
         setContentView(R.layout.dialog_action_sheet_sign);
 
         gasWidget = findViewById(R.id.gas_widgetx);
@@ -148,8 +153,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         mode = ActionSheetMode.SIGN_MESSAGE;
         callbackId = message.getCallbackId();
 
-        actionSheetCallback = (ActionSheetCallback) fragment;
-        signCallback = (SignAuthenticationCallback) fragment;
+        actionSheetCallback = aCallback;
+        signCallback = sCallback;
 
         token = null;
         tokensService = null;
@@ -167,6 +172,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
         setupCancelListeners();
+    }
+
+    public void setSignOnly()
+    {
+        //sign only, and return signature to process
+        mode = ActionSheetMode.SIGN_TRANSACTION;
     }
 
     public void onDestroy()
@@ -203,13 +214,19 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         {
             balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);
         }
-        else if (mode == ActionSheetMode.SEND_TRANSACTION)
+        else if (isSendingTransaction())
         {
             balanceAfterTransaction = token.getBalanceRaw().subtract(getTransactionAmount()).toBigInteger();
         }
         //convert to ETH amount
         String newBalanceVal = BalanceUtils.getScaledValueScientific(new BigDecimal(balanceAfterTransaction), token.tokenInfo.decimals);
         newBalance.setText(getContext().getString(R.string.new_balance, newBalanceVal, token.getSymbol()));
+    }
+
+    private boolean isSendingTransaction()
+    {
+        return (mode == ActionSheetMode.SEND_TRANSACTION || mode == ActionSheetMode.SEND_TRANSACTION_DAPP || mode == ActionSheetMode.SEND_TRANSACTION_WC
+         || mode == ActionSheetMode.SIGN_TRANSACTION);
     }
 
     @Override
@@ -224,6 +241,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         switch (mode)
         {
+            case SEND_TRANSACTION_WC:
             case SEND_TRANSACTION:
             case SEND_TRANSACTION_DAPP:
                 //check gas and warn user
@@ -239,6 +257,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             case SIGN_MESSAGE:
                 signMessage();
                 break;
+            case SIGN_TRANSACTION:
+                signTransaction();
+                break;
         }
 
         actionSheetCallback.notifyConfirm(mode.toString());
@@ -251,7 +272,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         {
             txAmount = new BigDecimal(gasWidget.getValue());
         }
-        else if (mode == ActionSheetMode.SEND_TRANSACTION)
+        else if (isSendingTransaction())
         {
             //Decode tx
             TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
@@ -320,7 +341,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         txHash = tx;
         //dismiss on message completion
         confirmationWidget.completeProgressMessage(txHash, this::showTransactionSuccess);
-        if (!TextUtils.isEmpty(tx))
+        if (!TextUtils.isEmpty(tx) && tx.startsWith("0x"))
         {
             updateRealmTransactionFinishEstimate(tx);
         }
@@ -339,8 +360,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 dismiss();
                 break;
 
+            case SEND_TRANSACTION_WC:
             case SEND_TRANSACTION_DAPP:
                 //return to dapp
+                dismiss();
+                break;
+
+            case SIGN_TRANSACTION:
                 dismiss();
                 break;
         }
@@ -374,24 +400,11 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         });
     }
 
-    private void sendTransaction()
+    private void signTransaction()
     {
         functionBar.setVisibility(View.GONE);
-        //form Web3Transaction
-        //get user gas settings
-        final Web3Transaction finalTx = new Web3Transaction(
-                candidateTransaction.recipient,
-                candidateTransaction.contract,
-                gasWidget.getValue(),
-                gasWidget.getGasPrice(candidateTransaction.gasPrice),
-                gasWidget.getGasLimit(),
-                gasWidget.getNonce(),
-                candidateTransaction.payload,
-                candidateTransaction.leafPosition
-        );
 
         //get approval and push transaction
-
         //authentication screen
         SignAuthenticationCallback signCallback = new SignAuthenticationCallback()
         {
@@ -401,7 +414,51 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 actionCompleted = true;
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
-                actionSheetCallback.sendTransaction(finalTx);
+                actionSheetCallback.signTransaction(formTransaction());
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+                confirmationWidget.hide();
+                functionBar.setVisibility(View.VISIBLE);
+            }
+        };
+
+        actionSheetCallback.getAuthorisation(signCallback);
+    }
+
+    private Web3Transaction formTransaction()
+    {
+        //form Web3Transaction
+        //get user gas settings
+        return new Web3Transaction(
+                candidateTransaction.recipient,
+                candidateTransaction.contract,
+                gasWidget.getValue(),
+                gasWidget.getGasPrice(candidateTransaction.gasPrice),
+                gasWidget.getGasLimit(),
+                gasWidget.getNonce(),
+                candidateTransaction.payload,
+                candidateTransaction.leafPosition
+        );
+    }
+
+    private void sendTransaction()
+    {
+        functionBar.setVisibility(View.GONE);
+
+        //get approval and push transaction
+        //authentication screen
+        SignAuthenticationCallback signCallback = new SignAuthenticationCallback()
+        {
+            @Override
+            public void gotAuthorisation(boolean gotAuth)
+            {
+                actionCompleted = true;
+                confirmationWidget.startProgressCycle(4);
+                //send the transaction
+                actionSheetCallback.sendTransaction(formTransaction());
             }
 
             @Override
@@ -467,5 +524,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         amount.setText(displayStr);
         setNewBalanceText();
+    }
+
+    public void success()
+    {
+        confirmationWidget.completeProgressMessage(".", this::dismiss);
     }
 }

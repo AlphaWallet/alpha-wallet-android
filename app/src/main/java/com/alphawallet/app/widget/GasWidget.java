@@ -126,7 +126,7 @@ public class GasWidget extends LinearLayout implements Runnable
         RealmGasSpread getGas = getGasQuery().findFirst();
         if (getGas != null)
         {
-            initGasSpeeds(getGas);
+            initGasSpeeds(getGas.getGasPrice());
         }
         else
         {
@@ -242,17 +242,18 @@ public class GasWidget extends LinearLayout implements Runnable
     private void startGasListener()
     {
         realmGasSpread = getGasQuery().findFirstAsync();
-
         realmGasSpread.addChangeListener(realmToken -> {
-            initGasSpeeds((RealmGasSpread) realmToken);
+            if (realmGasSpread.isValid())
+            {
+                initGasSpeeds(((RealmGasSpread) realmToken).getGasPrice());
+            }
         });
     }
 
-    private void initGasSpeeds(RealmGasSpread rgs)
+    private void initGasSpeeds(GasPriceSpread gs)
     {
         try
         {
-            GasPriceSpread gs = rgs.getGasPrice();
             currentGasSpeedIndex = gs.setupGasSpeeds(context, gasSpeeds, currentGasSpeedIndex);
             customGasSpeedIndex = gs.getCustomIndex();
             if (forceCustomGas)

@@ -526,12 +526,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             {
                 calculateEstimateDialog();
                 //form payload and calculate tx cost
-                viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, txSendAddress, sendAmount)
+                viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), sendAmount)
                         .map(this::convertToGasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(estimate -> checkConfirm(estimate, transactionBytes, txSendAddress),
-                                error -> handleError(error, transactionBytes, txSendAddress))
+                        .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress()),
+                                error -> handleError(error, transactionBytes, token.getAddress()))
                         .isDisposed();
             }
         }

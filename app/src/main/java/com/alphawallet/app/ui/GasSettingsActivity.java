@@ -103,7 +103,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger());
         customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
-        //if (customGasPriceFromWidget.equals(BigInteger.ZERO)) customGasPriceFromWidget = minGas;
         gasSliderView.initGasPrice(customGasPriceFromWidget);
 
         adapter = new CustomAdapter(this);
@@ -158,8 +157,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             updateCustomElement(customGasPriceFromWidget, customGasLimit.toBigInteger());
             gasSliderView.initGasPrice(customGasPriceFromWidget);
         }
-
-        //customGasPriceFromWidget = BigInteger.ZERO;
 
         //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
         adapter.notifyDataSetChanged();

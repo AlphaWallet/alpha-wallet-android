@@ -456,6 +456,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     showPage(DAPP_BROWSER);
                 }
+                ((DappBrowserFragment) dappBrowserFragment).selected();
                 return true;
             }
             case WALLET:

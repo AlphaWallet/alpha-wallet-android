@@ -959,6 +959,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         try
         {
             viewModel.updateGasPrice(networkInfo.chainId); //start updating gas price right before we open
+            //TODO: Ensure we have received gas price before continuing
             //minimum for transaction to be valid: recipient and value or payload
             if ((confirmationDialog == null || !confirmationDialog.isShowing()) &&
                     (transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
@@ -1664,5 +1665,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
         layoutParams.bottomMargin = height;
         webFrame.setLayoutParams(layoutParams);
+    }
+
+    public void selected()
+    {
+        //start gas update cycle when user selects Dapp browser
+        if (viewModel != null && networkInfo != null)
+        {
+            viewModel.updateGasPrice(networkInfo.chainId);
+        }
     }
 }

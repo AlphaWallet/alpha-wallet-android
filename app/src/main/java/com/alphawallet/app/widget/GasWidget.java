@@ -134,7 +134,7 @@ public class GasWidget extends LinearLayout implements Runnable
     {
         if (priceFromTx.compareTo(BigInteger.ZERO) > 0)
         {
-            gasSpeeds.add(buildCustomGasElement(priceFromTx));
+            gasSpeeds.add(buildCustomGasElement(priceFromTx, GasPriceSpread.FAST_SECONDS));
             forceCustomGas = true;
         }
         else
@@ -150,12 +150,12 @@ public class GasWidget extends LinearLayout implements Runnable
         else
         {
             // Couldn't get current gas. Add a blank custom gas speed node
-            gasSpeeds.add(buildCustomGasElement(priceFromTx));
+            gasSpeeds.add(buildCustomGasElement(priceFromTx, GasPriceSpread.FAST_SECONDS));
             forceCustomGas = true;
         }
     }
 
-    private GasSpeed buildCustomGasElement(BigInteger newGasPrice)
+    private GasSpeed buildCustomGasElement(BigInteger newGasPrice, long expectedTxTime)
     {
         String customSpeedTitle;
         if (initialTxGasLimit.compareTo(BigInteger.ZERO) > 0 && initialGasPrice.compareTo(BigInteger.ZERO) > 0
@@ -168,7 +168,7 @@ public class GasWidget extends LinearLayout implements Runnable
             customSpeedTitle = getContext().getString(R.string.speed_custom);
         }
 
-        return new GasSpeed(customSpeedTitle, GasPriceSpread.FAST_SECONDS, newGasPrice, true);
+        return new GasSpeed(customSpeedTitle, expectedTxTime, newGasPrice, true);
     }
 
     public void onDestroy()
@@ -195,10 +195,15 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private void handleCustomGas(BigDecimal customGasPrice, BigDecimal custGasLimit, long expectedTxTime)
     {
+        if (currentGasSpeedIndex >= gasSpeeds.size())
+        {
+            setupGasSpeeds(customGasPrice.toBigInteger());
+        }
+
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
         if (gs.isCustom)
         {
-            gs = buildCustomGasElement(customGasPrice.toBigInteger());
+            gs = buildCustomGasElement(customGasPrice.toBigInteger(), expectedTxTime);
             gasSpeeds.remove(currentGasSpeedIndex);
             gasSpeeds.add(gs);
             customGasLimit = custGasLimit.toBigInteger();

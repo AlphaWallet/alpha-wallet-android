@@ -177,7 +177,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         if (requestCode == C.SET_GAS_SETTINGS)
         {
             //will either be an index, or if using custom then it will contain a price and limit
-            if (data != null)
+            if (data != null && confirmationDialog != null)
             {
                 int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
                 long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);

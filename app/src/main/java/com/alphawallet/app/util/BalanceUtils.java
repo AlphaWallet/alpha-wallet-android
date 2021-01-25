@@ -15,9 +15,22 @@ public class BalanceUtils
 {
     private static String weiInEth  = "1000000000000000000";
 
-    private static String getDigitalPattern()
+    private static String getDigitalPattern(int precision)
     {
-        return "###,###,###,##0.";
+        return getDigitalPattern(precision, 0);
+    }
+
+    private static String getDigitalPattern(int precision, int fixed)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("###,###,###,###,##0");
+        if (precision > 0)
+        {
+            sb.append(".");
+            for (int i = 0; i < fixed; i++) sb.append("0");
+            for (int i = 0; i < (precision-fixed); i++) sb.append("#");
+        }
+        return sb.toString();
     }
 
     private static String convertToLocale(String value)
@@ -79,8 +92,15 @@ public class BalanceUtils
         return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).toPlainString();
     }
 
-    public static String weiToGwei(BigInteger wei, int decimals) {
-        return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).setScale(decimals, RoundingMode.HALF_DOWN).toString(); //to 2 dp
+    public static String weiToGweiInt(BigDecimal wei) {
+        return getScaledValue(Convert.fromWei(wei, Convert.Unit.GWEI), 0, 0);
+    }
+
+    public static String weiToGwei(BigDecimal wei, int precision) {
+        BigDecimal value = Convert.fromWei(wei, Convert.Unit.GWEI);
+        return scaledValue(value, getDigitalPattern(precision), 0);
+        //return getScaledValue(wei, Convert.Unit.GWEI.getWeiFactor().intValue(), precision);
+        //return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).setScale(decimals, RoundingMode.HALF_DOWN).toString(); //to 2 dp
     }
 
     public static BigInteger gweiToWei(BigDecimal gwei) {
@@ -126,24 +146,20 @@ public class BalanceUtils
 
     public static String getScaledValueWithLimit(BigDecimal value, long decimals)
     {
-        String pattern = getDigitalPattern() + "00#######";
+        String pattern = getDigitalPattern(9, 2);
         return scaledValue(value, pattern, decimals);
     }
 
     public static String getScaledValueFixed(BigDecimal value, long decimals, int precision)
     {
         //form precision
-        String pattern = getDigitalPattern();
-        for (int i = 0; i < precision; i++) pattern += "0";
+        String pattern = getDigitalPattern(precision);
         return scaledValue(value, pattern, decimals);
     }
 
     public static String getScaledValueMinimal(BigDecimal value, long decimals, int max_precision)
     {
-        //form precision
-        String pattern = getDigitalPattern();
-        for (int i = 0; i < max_precision; i++) pattern += "#";
-        return scaledValue(value, pattern, decimals);
+        return scaledValue(value, getDigitalPattern(max_precision, 0), decimals);
     }
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals)
@@ -173,10 +189,7 @@ public class BalanceUtils
         }
         else //otherwise display in standard pattern to dPlaces dp
         {
-            StringBuilder sb = new StringBuilder();
-            sb.append(getDigitalPattern());
-            for (int i = 0; i < dPlaces; i++) { sb.append("#"); }
-            DecimalFormat df = new DecimalFormat(sb.toString());
+            DecimalFormat df = new DecimalFormat(getDigitalPattern(dPlaces));
             df.setRoundingMode(RoundingMode.DOWN);
             returnValue = convertToLocale(df.format(correctedValue));
         }
@@ -186,10 +199,7 @@ public class BalanceUtils
 
     public static String getScaledValue(BigDecimal value, long decimals, int precision)
     {
-        //form precision
-        String pattern = getDigitalPattern();
-        for (int i = 0; i < precision; i++) pattern += "#";
-        return scaledValue(value, pattern, decimals);
+        return scaledValue(value, getDigitalPattern(precision), decimals);
     }
 
     private static String scaledValue(BigDecimal value, String pattern, long decimals)

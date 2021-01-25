@@ -218,6 +218,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);
             onDefaultNetwork(info);
             gasService.startGasPriceCycle(chainId);
+            defaultNetwork.postValue(info);
         }
     }
 

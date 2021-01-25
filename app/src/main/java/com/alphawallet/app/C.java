@@ -65,6 +65,7 @@ public abstract class C {
     public static final String EXTRA_GAS_PRICE = "GAS_PRICE";
     public static final String EXTRA_GAS_LIMIT = "GAS_LIMIT";
     public static final String EXTRA_CUSTOM_GAS_LIMIT = "CUSTOM_GAS_LIMIT";
+    public static final String EXTRA_GAS_LIMIT_PRESET = "GAS_LIMIT_PRESET";
     public static final String EXTRA_ACTION_NAME = "NAME";
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
@@ -134,7 +135,9 @@ public abstract class C {
     public static final long GAS_PER_BYTE = 310; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_DEFAULT = 90000L;
+    public static final long GAS_LIMIT_CONTRACT = 1000000L;
     public static final long GAS_LIMIT_MAX = 1300000L;
+    public static final long GAS_PRICE_MIN = 400000000L;
     public static final int ETHER_DECIMALS = 18;
 
     //FOR DEMOS ETC

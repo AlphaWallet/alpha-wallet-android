@@ -11,7 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -115,7 +118,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private PinAuthenticationCallbackInterface authInterface;
-    private boolean bottomMarginSet = false;
+    private int navBarHeight;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -123,6 +126,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
     public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
+    public static final String STORED_PAGE = "currentPage";
 
     public HomeActivity()
     {
@@ -238,7 +242,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            showPage(WALLET);
+            WalletPage previousPage = savedInstanceState == null ? WALLET : WalletPage.values()[savedInstanceState.getInt(STORED_PAGE, WALLET.ordinal())];
+            showPage(previousPage);
         }
 
         if (CustomViewSettings.hideDappBrowser())
@@ -255,6 +260,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             showPage(DAPP_BROWSER);
             //remove navbar if running as pure browser. clicking back will send you back to the Action/click that took you there
             hideNavBar();
+            //now remove the bottom margin
+            ((DappBrowserFragment)dappBrowserFragment).removeBottomMargin();
         }
 
         if (bundle != null)
@@ -275,14 +282,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 this, isOpen -> {
                     if (isOpen)
                     {
-                        bottomMarginSet = viewPager.hasBottomMargin();
-                        viewPager.setBottomMargin(false);
+                        navBarHeight = getNavBarHeight();
                         setNavBarVisibility(View.GONE);
+                        ((DappBrowserFragment)dappBrowserFragment).removeBottomMargin();
                     }
                     else
                     {
-                        if (bottomMarginSet) viewPager.setBottomMargin(true);
                         setNavBarVisibility(View.VISIBLE);
+                        ((DappBrowserFragment)dappBrowserFragment).restoreBottomMargin(navBarHeight);
                     }
                 });
     }
@@ -415,19 +422,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
     public void onClick(View view)
     {
-        switch (view.getId())
+        if (view.getId() == R.id.try_again)
         {
-            case R.id.try_again:
-            {
-
-            }
-            break;
-            case R.id.action_buy:
-            {
-                openExchangeDialog();
-            }
+            //What is try again?
+        }
+        else if (view.getId() == R.id.action_buy)
+        {
+            openExchangeDialog();
         }
     }
 
@@ -438,7 +448,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             case DAPP_BROWSER:
             {
-                viewPager.setBottomMargin(true);
                 if (getSelectedItem() == DAPP_BROWSER)
                 {
                     ((DappBrowserFragment) dappBrowserFragment).homePressed();
@@ -451,19 +460,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case WALLET:
             {
-                viewPager.setBottomMargin(false);
                 showPage(WALLET);
                 return true;
             }
             case SETTINGS:
             {
-                viewPager.setBottomMargin(false);
                 showPage(SETTINGS);
                 return true;
             }
             case ACTIVITY:
             {
-                viewPager.setBottomMargin(false);
                 showPage(ACTIVITY);
                 return true;
             }
@@ -539,7 +545,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case DAPP_BROWSER:
             {
                 hideToolbar();
-                viewPager.setBottomMargin(true);
                 viewPager.setCurrentItem(DAPP_BROWSER.ordinal());
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
@@ -550,7 +555,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case WALLET:
             {
                 showToolbar();
-                viewPager.setBottomMargin(false);
                 viewPager.setCurrentItem(WALLET.ordinal());
                 if (walletTitle == null || walletTitle.isEmpty())
                 {
@@ -568,7 +572,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case SETTINGS:
             {
                 showToolbar();
-                viewPager.setBottomMargin(false);
                 viewPager.setCurrentItem(SETTINGS.ordinal());
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
@@ -589,7 +592,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             default:
                 showToolbar();
                 viewPager.setCurrentItem(WALLET.ordinal());
-                viewPager.setBottomMargin(false);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);

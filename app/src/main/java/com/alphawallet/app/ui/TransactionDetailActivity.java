@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -112,7 +113,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         fromValue.setText(transaction.from != null ? transaction.from : "");
         toValue.setText(transaction.to != null ? transaction.to : "");
         txHashView.setText(transaction.hash != null ? transaction.hash : "");
-        ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixTime(getApplicationContext(), transaction.timeStamp));
+        ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
 
@@ -144,7 +145,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             transaction = latestTx;
             ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
             findViewById(R.id.pending_spinner).setVisibility(View.GONE);
-            ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixTime(getApplicationContext(), transaction.timeStamp));
+            ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
             //update function bar
             functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
             checkFailed();
@@ -184,11 +185,15 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         if (gasFee.equals(BigDecimal.ZERO))
         {
             findViewById(R.id.layout_gas_fee).setVisibility(View.GONE);
+            findViewById(R.id.layout_network_fee).setVisibility(View.GONE);
         }
         else
         {
             findViewById(R.id.layout_gas_fee).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());// .toPlainString());
+            findViewById(R.id.layout_network_fee).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.gas_used)).setText(BalanceUtils.getScaledValue(new BigDecimal(transaction.gasUsed), 0, 0));
+            ((TextView) findViewById(R.id.network_fee)).setText(BalanceUtils.getScaledValue(BalanceUtils.weiToEth(gasFee), 0, 6));
+            ((TextView) findViewById(R.id.text_fee_unit)).setText(viewModel.getNetworkSymbol(transaction.chainId));
         }
 
         if (gasPrice.equals(BigDecimal.ZERO))
@@ -198,7 +203,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         else
         {
             findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice.toBigInteger()));
+            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice, 2));
         }
     }
 

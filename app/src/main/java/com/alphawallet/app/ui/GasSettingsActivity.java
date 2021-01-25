@@ -69,7 +69,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private final List<GasSpeed> gasSpeeds = new ArrayList<>();
     private int currentGasSpeedIndex = -1;
     private int chainId;
-    private BigDecimal gasLimit;
+    private BigDecimal presetGasLimit;
     private BigDecimal customGasLimit;
     private BigDecimal availableBalance;
     private BigDecimal sendAmount;
@@ -95,13 +95,14 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
         currentGasSpeedIndex = getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
         chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-        gasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
         customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
+        presetGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT_PRESET));
         availableBalance = new BigDecimal(getIntent().getStringExtra(C.EXTRA_TOKEN_BALANCE));
         sendAmount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger());
         customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
+        if (customGasPriceFromWidget.equals(BigInteger.ZERO)) customGasPriceFromWidget = BigInteger.valueOf(C.GAS_PRICE_MIN);
         gasSliderView.initGasPrice(customGasPriceFromWidget);
 
         adapter = new CustomAdapter(this);
@@ -137,11 +138,11 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
         {
-            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, customGasPriceFromWidget));
+            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, customGasPriceFromWidget, true));
         }
         else
         {
-            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, new BigInteger(DEFAULT_GAS_PRICE)));
+            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, new BigInteger(DEFAULT_GAS_PRICE), true));
         }
 
         RealmGasSpread getGas = getGasQuery().findFirst();
@@ -263,7 +264,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         @Override
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int position)
         {
-            BigDecimal useGasLimit = gasLimit;
+            BigDecimal useGasLimit = presetGasLimit;
             GasSpeed gs = gasSpeeds.get(position);
             holder.speedName.setText(gs.speed);
             holder.checkbox.setSelected(position == currentGasSpeedIndex);
@@ -381,7 +382,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 else
                 {
                     GasSpeed gs = gasSpeeds.get(position);
-                    gasSliderView.initGasPrice(gs.gasPrice);
+                    gasSliderView.initGasPriceMax(gs.gasPrice);
                     notice.setVisibility(View.VISIBLE);
                     gasSliderView.setVisibility(View.GONE);
                 }
@@ -450,7 +451,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         if (customIndex < 0) return;
         GasSpeed gs = gasSpeeds.get(customIndex);
         //new settings from the slider widget
-        gs = new GasSpeed(gs.speed, getExpectedTransactionTime(gasPrice), gasPrice);
+        gs = new GasSpeed(gs.speed, getExpectedTransactionTime(gasPrice), gasPrice, true);
         gasSpeeds.remove(customIndex);
         gasSpeeds.add(gs);
 

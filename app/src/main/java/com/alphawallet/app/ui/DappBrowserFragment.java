@@ -33,6 +33,7 @@ import android.webkit.WebHistoryItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -190,6 +191,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private TextView currentNetwork;
     private ImageView currentNetworkCircle;
     private LinearLayout currentNetworkClicker;
+    private FrameLayout webFrame;
     private TextView balance;
     private TextView symbol;
     private View layoutNavigation;
@@ -466,6 +468,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
+        webFrame = view.findViewById(R.id.frame);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setRefreshInterface(this);
 
@@ -989,6 +992,26 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3.onSignCancel(transaction.leafPosition);
     }
 
+    /**
+     * Debug function for assisting testing
+     *
+     * @param tx
+     * @return
+     */
+    private Web3Transaction getDebugTx(Web3Transaction tx)
+    {
+        return new Web3Transaction(
+                tx.recipient,
+                tx.contract,
+                tx.value,
+                BigInteger.ZERO,//tx.gasPrice,
+                tx.gasLimit,
+                tx.nonce,
+                tx.payload,
+                tx.leafPosition
+        );
+    }
+
     private void onError(Throwable throwable)
     {
         throwable.printStackTrace();
@@ -1310,13 +1333,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public void handleSelectNetwork(int resultCode, Intent data) {
         if (getActivity() == null) return;
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK)
+        {
             int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
-            if (networkInfo.chainId != networkId) {
-                viewModel.setNetwork(networkId);
-                if (getActivity() != null) getActivity().sendBroadcast(new Intent(RESET_WALLET));
+            if (networkInfo.chainId != networkId)
+            {
                 balance.setVisibility(View.GONE);
                 symbol.setVisibility(View.GONE);
+                viewModel.setNetwork(networkId);
+                if (getActivity() != null) getActivity().sendBroadcast(new Intent(RESET_WALLET));
             }
         }
     }
@@ -1621,5 +1646,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void notifyConfirm(String mode)
     {
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
+    }
+
+    public void removeBottomMargin()
+    {
+        handler.postDelayed(() -> setMargin(0), 10);
+    }
+
+    public void restoreBottomMargin(int bottomMarginHeight)
+    {
+        handler.postDelayed(() -> setMargin(bottomMarginHeight), 10);
+    }
+
+    private void setMargin(int height)
+    {
+        if (webFrame == null) return;
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
+        layoutParams.bottomMargin = height;
+        webFrame.setLayoutParams(layoutParams);
     }
 }

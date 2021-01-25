@@ -5,12 +5,14 @@ import android.text.format.DateUtils;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenScriptData;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +37,10 @@ import io.realm.RealmResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
+import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
+import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -286,5 +292,28 @@ public class GasService2 implements ContractGasProvider
                 txData);
 
         return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
+    }
+
+    public static BigInteger getDefaultGasLimit(Token token, Web3Transaction tx)
+    {
+        boolean hasPayload = tx.payload != null && tx.payload.length() >= 10;
+
+        switch (token.getInterfaceSpec())
+        {
+            case ETHEREUM:
+                return hasPayload ? BigInteger.valueOf(GAS_LIMIT_CONTRACT) : BigInteger.valueOf(GAS_LIMIT_MIN);
+            case ERC20:
+                return BigInteger.valueOf(GAS_LIMIT_DEFAULT);
+            case ERC875_LEGACY:
+            case ERC875:
+            case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
+            default:
+                //unknown
+                return BigInteger.valueOf(GAS_LIMIT_CONTRACT);
+        }
     }
 }

@@ -118,7 +118,7 @@ public class GasPriceSpread
         }
         else
         {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_custom), 0, BigInteger.ZERO));
+            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_custom), 0, BigInteger.ZERO, true));
         }
 
         if (currentGasSpeedIndex < 0 || currentGasSpeedIndex >= gasSpeeds.size())

@@ -30,7 +30,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -40,25 +39,20 @@ import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
-import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.utils.Numeric;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -76,7 +70,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
-import wallet.core.jni.Hash;
 
 public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface
 {
@@ -426,7 +419,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void invalidSession()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.invalid_walletconnect_session)
                 .setMessage(R.string.restart_walletconnect_session)
                 .setPositiveButton(R.string.dialog_ok, (d, w) -> finish())
@@ -554,7 +547,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         final int chainId = chainIdOverride > 0 ? chainIdOverride : chainIdHint;
         chainName.setChainID(chainId);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder
                 .setIcon(icon.getDrawable())
                 .setTitle(peer.getName())
@@ -616,7 +609,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onFailure(Throwable throwable)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        if (!checkValidity())
+        {
+            killSession();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                 .setMessage(throwable.getMessage())
                 .setPositiveButton(R.string.try_again, (d, w) -> {
@@ -781,13 +780,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialog(String message)
     {
-        if (this.isDestroyed() || this.isFinishing())
+        if (!checkValidity())
         {
             killSession();
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                 .setMessage(message)
                 .setPositiveButton(R.string.try_again, (d, w) -> {
@@ -807,13 +806,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialogCancel(String title, String message)
     {
-        if (this.isDestroyed() || this.isFinishing())
+        if (!checkValidity())
         {
             killSession();
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(R.string.action_cancel, (d, w) -> {
@@ -851,14 +850,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void endSessionDialog()
     {
-        if (this.isDestroyed() || this.isFinishing())
+        if (!checkValidity())
         {
             killSession();
             return;
         }
 
         runOnUiThread(() -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
             AlertDialog dialog = builder.setTitle(R.string.dialog_title_disconnect_session)
                     .setPositiveButton(R.string.dialog_ok, (d, w) -> {
                         killSession();
@@ -872,10 +871,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
     }
 
+    private boolean checkValidity()
+    {
+        return (WalletConnectActivity.this != null && !WalletConnectActivity.this.isDestroyed() && !WalletConnectActivity.this.isFinishing());
+    }
+
     private void showErrorDialogTerminate(String message)
     {
+        if (!checkValidity())
+        {
+            killSession();
+            return;
+        }
+
         runOnUiThread(() -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
             AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                     .setMessage(message)
                     .setPositiveButton(R.string.dialog_ok, (d, w) -> {
@@ -906,6 +916,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             if (requestCode == C.REQUEST_TRANSACTION_CALLBACK)
             {
                 handleTransactionCallback(resultCode, data);
+            }
+            else if (requestCode == C.SET_GAS_SETTINGS)
+            {
+                //will either be an index, or if using custom then it will contain a price and limit
+                if (data != null && confirmationDialog != null)
+                {
+                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+                    BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
+                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+                    confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+                }
             }
             else if (signCallback != null) signCallback.gotAuthorisation(true);
         }

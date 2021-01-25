@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.GasSettingsActivity;
@@ -34,7 +35,9 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
 
+import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_END_CONTRACT;
 import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
+import static com.alphawallet.app.C.DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
@@ -45,10 +48,13 @@ public class GasWidget extends LinearLayout implements Runnable
 {
     private RealmGasSpread realmGasSpread;
     private TokensService tokensService;
-    private BigInteger gasLimit;
-    private BigInteger baseGasLimit;
-    private BigInteger transactionValue;
-    private BigInteger adjustedValue;
+    private BigInteger customGasLimit;    //from slider
+    private BigInteger initialTxGasLimit; //this is the gas limit specified from the dapp transaction.
+    private BigInteger baseLineGasLimit;  //this is our candidate gas limit - either from the dapp or a default, can be replaced by accurate estimate if initialTx was zero
+    private BigInteger presetGasLimit;    //this is the gas limit used for the presets. It will use, in order of priority: gas estimate from node, gas from dapp tx, calculated gas
+    private BigInteger transactionValue;  //'value' base token amount from dapp transaction
+    private BigInteger adjustedValue;     //adjusted value, in case we are use 'all funds' to wipe an account.
+    private BigInteger initialGasPrice;   //gasprice from dapp transaction
     private Token token;
     private Activity baseActivity;
     private StandardFunctionInterface functionInterface;
@@ -85,8 +91,9 @@ public class GasWidget extends LinearLayout implements Runnable
             Intent intent = new Intent(context, GasSettingsActivity.class);
             intent.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex);
             intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-            intent.putExtra(C.EXTRA_GAS_LIMIT, baseGasLimit.toString());
-            intent.putExtra(C.EXTRA_CUSTOM_GAS_LIMIT, gasLimit.toString());
+            intent.putExtra(C.EXTRA_GAS_LIMIT, baseLineGasLimit.toString());
+            intent.putExtra(C.EXTRA_CUSTOM_GAS_LIMIT, customGasLimit.toString());
+            intent.putExtra(C.EXTRA_GAS_LIMIT_PRESET, presetGasLimit.toString());
             intent.putExtra(C.EXTRA_TOKEN_BALANCE, baseEth.balance.toString());
             intent.putExtra(C.EXTRA_AMOUNT, transactionValue.toString());
             intent.putExtra(C.EXTRA_GAS_PRICE, gasSpeeds.get(customGasSpeedIndex).gasPrice.toString());
@@ -99,13 +106,25 @@ public class GasWidget extends LinearLayout implements Runnable
     {
         tokensService = svs;
         token = t;
-        gasLimit = tx.gasLimit;
+        initialTxGasLimit = tx.gasLimit;
         baseActivity = act;
         functionInterface = sfi;
-        baseGasLimit = tx.gasLimit;
         transactionValue = tx.value;
         adjustedValue = tx.value;
         isSendingAll = isSendingAll(tx);
+        initialGasPrice = tx.gasPrice;
+
+        if (tx.gasLimit.equals(BigInteger.ZERO)) //dapp didn't specify a limit, use default limits until node returns an estimate (see setGasEstimate())
+        {
+            baseLineGasLimit = GasService2.getDefaultGasLimit(token, tx);
+        }
+        else
+        {
+            baseLineGasLimit = tx.gasLimit;
+        }
+
+        presetGasLimit = baseLineGasLimit;
+        customGasLimit = baseLineGasLimit;
 
         setupGasSpeeds(tx.gasPrice);
         startGasListener();
@@ -115,7 +134,7 @@ public class GasWidget extends LinearLayout implements Runnable
     {
         if (priceFromTx.compareTo(BigInteger.ZERO) > 0)
         {
-            gasSpeeds.add(new GasSpeed(getContext().getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, priceFromTx));
+            gasSpeeds.add(buildCustomGasElement(priceFromTx));
             forceCustomGas = true;
         }
         else
@@ -131,9 +150,25 @@ public class GasWidget extends LinearLayout implements Runnable
         else
         {
             // Couldn't get current gas. Add a blank custom gas speed node
-            gasSpeeds.add(new GasSpeed(getContext().getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, priceFromTx));
+            gasSpeeds.add(buildCustomGasElement(priceFromTx));
             forceCustomGas = true;
         }
+    }
+
+    private GasSpeed buildCustomGasElement(BigInteger newGasPrice)
+    {
+        String customSpeedTitle;
+        if (initialTxGasLimit.compareTo(BigInteger.ZERO) > 0 && initialGasPrice.compareTo(BigInteger.ZERO) > 0
+            && customGasLimit.equals(initialTxGasLimit) && newGasPrice.equals(initialGasPrice))
+        {
+            customSpeedTitle = getContext().getString(R.string.speed_dapp);
+        }
+        else
+        {
+            customSpeedTitle = getContext().getString(R.string.speed_custom);
+        }
+
+        return new GasSpeed(customSpeedTitle, GasPriceSpread.FAST_SECONDS, newGasPrice, true);
     }
 
     public void onDestroy()
@@ -158,19 +193,15 @@ public class GasWidget extends LinearLayout implements Runnable
         handler.post(this);
     }
 
-    private void handleCustomGas(BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime)
+    private void handleCustomGas(BigDecimal customGasPrice, BigDecimal custGasLimit, long expectedTxTime)
     {
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
-        if (gs.speed.equals(context.getString(R.string.speed_custom)))
+        if (gs.isCustom)
         {
-            gs = new GasSpeed(gs.speed, expectedTxTime, customGasPrice.toBigInteger());
+            gs = buildCustomGasElement(customGasPrice.toBigInteger());
             gasSpeeds.remove(currentGasSpeedIndex);
             gasSpeeds.add(gs);
-            gasLimit = customGasLimit.toBigInteger();
-        }
-        else
-        {
-            gasLimit = baseGasLimit;
+            customGasLimit = custGasLimit.toBigInteger();
         }
 
         adjustedValue = calculateSendAllValue();
@@ -179,9 +210,10 @@ public class GasWidget extends LinearLayout implements Runnable
 
     public boolean checkSufficientGas()
     {
+        BigInteger useGasLimit = getUseGasLimit();
         boolean sufficientGas = true;
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
-        BigDecimal networkFee = new BigDecimal(gs.gasPrice.multiply(gasLimit));
+        BigDecimal networkFee = new BigDecimal(gs.gasPrice.multiply(useGasLimit));
         Token base = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
 
         if (isSendingAll)
@@ -211,11 +243,23 @@ public class GasWidget extends LinearLayout implements Runnable
         return sufficientGas;
     }
 
+    private BigInteger getUseGasLimit()
+    {
+        if (currentGasSpeedIndex == customGasSpeedIndex)
+        {
+            return customGasLimit;
+        }
+        else
+        {
+            return presetGasLimit;
+        }
+    }
+
     private BigInteger calculateSendAllValue()
     {
         BigInteger sendAllValue;
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
-        BigDecimal networkFee = new BigDecimal(gs.gasPrice.multiply(gasLimit));
+        BigDecimal networkFee = new BigDecimal(gs.gasPrice.multiply(getUseGasLimit()));
 
         if (isSendingAll)
         {
@@ -281,7 +325,7 @@ public class GasWidget extends LinearLayout implements Runnable
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
 
         Token baseCurrency = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
-        BigInteger networkFee = gs.gasPrice.multiply(gasLimit);
+        BigInteger networkFee = gs.gasPrice.multiply(getUseGasLimit());
         String gasAmountInBase = BalanceUtils.getScaledValueScientific(new BigDecimal(networkFee), baseCurrency.tokenInfo.decimals);
         if (gasAmountInBase.equals("0")) gasAmountInBase = "0.0001";
         String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
@@ -353,7 +397,7 @@ public class GasWidget extends LinearLayout implements Runnable
 
     public BigInteger getGasLimit()
     {
-        return gasLimit;
+        return getUseGasLimit();
     }
 
     public long getNonce()
@@ -387,16 +431,22 @@ public class GasWidget extends LinearLayout implements Runnable
         return false;
     }
 
+    /**
+     * Node eth_gasEstimate returned a transaction estimate
+     *
+     * @param estimate
+     */
     public void setGasEstimate(BigInteger estimate)
     {
-        if (baseGasLimit.equals(BigInteger.ZERO))
+        if (initialTxGasLimit.equals(BigInteger.ZERO))
         {
-            baseGasLimit = estimate;
+            baseLineGasLimit = estimate;
         }
 
-        if (gasLimit.equals(BigInteger.ZERO))
-        {
-            gasLimit = estimate;
-        }
+        //presets always use estimate if available
+        presetGasLimit = estimate;
+
+        //now update speeds
+        handler.post(this);
     }
 }

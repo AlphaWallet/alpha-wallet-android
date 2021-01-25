@@ -1,11 +1,8 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -15,9 +12,6 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
-import com.alphawallet.app.util.Blockies;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.Signable;
 
 /**

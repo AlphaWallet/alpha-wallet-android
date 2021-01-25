@@ -22,6 +22,7 @@ import com.alphawallet.app.util.BalanceUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Currency;
 
 public class GasSliderView extends RelativeLayout
 {
@@ -35,7 +36,7 @@ public class GasSliderView extends RelativeLayout
     private final AppCompatSeekBar gasLimitSlider;
 
     private float scaleFactor; //used to convert slider value (0-100) into gas price
-    private final float minimumPrice = 4.0f;
+    private final float minimumPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(C.GAS_PRICE_MIN)).multiply(BigDecimal.TEN).floatValue(); //minimum for slider
     private float gasLimitScaleFactor;
     private boolean limitInit = false;
 
@@ -180,8 +181,8 @@ public class GasSliderView extends RelativeLayout
         if (!TextUtils.isEmpty(gasPriceStr) && !TextUtils.isDigitsOnly(gasPriceStr))
         {
             BigDecimal gweiPrice = new BigDecimal(gasPriceStr);
-            BigDecimal maxGwei = BalanceUtils.weiToGweiBI(maxPrice);
-            maxDefaultPrice = maxGwei.floatValue() * 15.0f;
+            BigDecimal maxDefault = BalanceUtils.weiToGweiBI(maxPrice).multiply(BigDecimal.valueOf(15.0));
+            maxDefaultPrice = Math.max(maxDefaultPrice, maxDefault.floatValue());
             calculateStaticScaleFactor();
             setPriceSlider(gweiPrice);
         }

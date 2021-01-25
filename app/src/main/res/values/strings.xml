@@ -61,6 +61,8 @@
     <string name="subtitle_to">To</string>
     <string name="subtitle_gas_fee">Gas Fee</string>
     <string name="subtitle_gas_price">Gas Price</string>
+    <string name="subtitle_gas_used">Gas Used</string>
+    <string name="subtitle_network_fee">Network Fee</string>
     <string name="subtitle_transaction_num">Transaction #</string>
     <string name="subtitle_transaction_hash_num">Transaction Hash #</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
@@ -713,6 +715,7 @@
     <string name="speed_fast">Fast</string>
     <string name="speed_slow">Slow</string>
     <string name="speed_custom">Custom</string>
+    <string name="speed_dapp">Dapp Settings</string>
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">Set Speed</string>
     <string name="gas_price_widget">Gas Price: %1$s</string>

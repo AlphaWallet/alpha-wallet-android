@@ -487,9 +487,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     public void setGasEstimate(BigInteger estimate)
     {
-        String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(candidateTransaction.value.add(estimate)), token.tokenInfo.decimals);
-        //TODO: Show gas estimate in widget
-        //showAmount(amountVal);
+        //String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(candidateTransaction.value.add(estimate)), token.tokenInfo.decimals);
         gasWidget.setGasEstimate(estimate);
     }
 

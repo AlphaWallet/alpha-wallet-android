@@ -74,6 +74,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private BigDecimal availableBalance;
     private BigDecimal sendAmount;
     private BigInteger customGasPriceFromWidget;
+    private final BigInteger minGas = BigInteger.valueOf(C.GAS_PRICE_MIN);
 
     private int customIndex = -1;
 
@@ -102,7 +103,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger());
         customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
-        if (customGasPriceFromWidget.equals(BigInteger.ZERO)) customGasPriceFromWidget = BigInteger.valueOf(C.GAS_PRICE_MIN);
+        //if (customGasPriceFromWidget.equals(BigInteger.ZERO)) customGasPriceFromWidget = minGas;
         gasSliderView.initGasPrice(customGasPriceFromWidget);
 
         adapter = new CustomAdapter(this);
@@ -136,14 +137,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private void setupGasSpeeds()
     {
-        if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
-        {
-            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, customGasPriceFromWidget, true));
-        }
-        else
-        {
-            gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, new BigInteger(DEFAULT_GAS_PRICE), true));
-        }
+        gasSpeeds.add(new GasSpeed(getString(R.string.speed_custom), GasPriceSpread.FAST_SECONDS, customGasPriceFromWidget, true));
 
         RealmGasSpread getGas = getGasQuery().findFirst();
         if (getGas != null)
@@ -157,11 +151,16 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         currentGasSpeedIndex = gs.setupGasSpeeds(this, gasSpeeds, currentGasSpeedIndex);
         customIndex = gs.getCustomIndex();
         gasSliderView.initGasPriceMax(gasSpeeds.get(0).gasPrice);
-        if (customGasPriceFromWidget.compareTo(BigInteger.ZERO) > 0)
+        if (customGasPriceFromWidget.equals(BigInteger.ZERO))
         {
+            //use slow or average
+            customGasPriceFromWidget = gs.standard;
             updateCustomElement(customGasPriceFromWidget, customGasLimit.toBigInteger());
-            customGasPriceFromWidget = BigInteger.ZERO;
+            gasSliderView.initGasPrice(customGasPriceFromWidget);
         }
+
+        //customGasPriceFromWidget = BigInteger.ZERO;
+
         //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
         adapter.notifyDataSetChanged();
     }

@@ -341,7 +341,7 @@ public class GasWidget extends LinearLayout implements Runnable
             {
                 //calculate equivalent fiat
                 double cryptoRate = Double.parseDouble(rtt.getPrice());
-                double cryptoAmount = Double.parseDouble(gasAmountInBase);
+                double cryptoAmount = BalanceUtils.weiToEth(new BigDecimal(networkFee)).doubleValue();//Double.parseDouble(gasAmountInBase);
                 displayStr += context.getString(R.string.gas_fiat_suffix,
                         TickerService.getCurrencyString(cryptoAmount * cryptoRate),
                         rtt.getCurrencySymbol());

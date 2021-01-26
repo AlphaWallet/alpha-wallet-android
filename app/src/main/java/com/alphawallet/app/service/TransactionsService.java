@@ -47,7 +47,6 @@ public class TransactionsService
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
     private final TransactionLocalSource transactionsCache;
-    private final AnalyticsServiceType analyticsService;
     private final Context context;
     private String currentAddress;
     private int currentChainIndex;
@@ -68,7 +67,6 @@ public class TransactionsService
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
                                TransactionLocalSource transactionsCache,
-                               AnalyticsServiceType analyticsService,
                                Context ctx)
     {
         this.tokensService = tokensService;
@@ -77,7 +75,6 @@ public class TransactionsService
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
         this.currentAddress = preferenceRepository.getCurrentWalletAddress();
-        this.analyticsService = analyticsService;
         this.context = ctx;
 
         checkTransactionReset();
@@ -278,33 +275,6 @@ public class TransactionsService
         tokensService.markChainPending(tx.chainId);
     }
 
-    static final List<String> trackingSeen = new ArrayList<>();
-
-    private void sendTrackingEventIfRequired(int chainId, TransactionReceipt receipt, EthTransaction txDetails)
-    {
-        String txHash = receipt.getTransactionHash();
-        if (trackingSeen.contains(txHash)) return;
-
-        String eventType = null;
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setChainId(chainId);
-
-        if (receipt.getStatus().equals("0x0"))
-        {
-            eventType = C.TRANSACTION_ERROR;
-            analyticsProperties.setData(txHash);
-        }
-        else if (txDetails.getTransaction().get().getInput().length() >= 10)
-        {
-            eventType = C.TRANSACTION_SENT;
-            analyticsProperties.setData(txDetails.getTransaction().get().getTo());
-        }
-
-        if (eventType != null) analyticsService.track(eventType, analyticsProperties);
-
-        trackingSeen.add(txHash);
-    }
-
     private void checkPendingTransactions(int chainId)
     {
         Transaction[] pendingTxs = fetchPendingTransactions();
@@ -333,7 +303,6 @@ public class TransactionsService
                         web3j.ethGetTransactionReceipt(tx.hash).sendAsync().thenAccept(receipt -> {
                             if (receipt != null)
                             {
-                                sendTrackingEventIfRequired(chainId, receipt.getResult(), txDetails);
                                 //get timestamp and write tx
                                 EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
                                         .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), chainId, txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))

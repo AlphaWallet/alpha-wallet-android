@@ -26,6 +26,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
@@ -61,12 +62,12 @@ import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
@@ -526,7 +527,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             {
                 calculateEstimateDialog();
                 //form payload and calculate tx cost
-                viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), sendAmount)
+                viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
                         .map(this::convertToGasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -539,20 +540,20 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private BigInteger convertToGasLimit(EthEstimateGas estimate)
     {
-        if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0 && !estimate.hasError())
+        if (estimate.hasError())
         {
-            return estimate.getAmountUsed();
+            return BigInteger.ZERO;
         }
         else
         {
-            return guessLimit();
+            return estimate.getAmountUsed();
         }
     }
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress)
     {
         Log.w(this.getLocalClassName(), throwable.getMessage());
-        checkConfirm(guessLimit(), transactionBytes, txSendAddress);
+        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress);
     }
 
     /**
@@ -572,24 +573,18 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 Numeric.toHexString(transactionBytes),
                 -1);
 
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
-                viewModel.getTokenService(), this);
-        confirmationDialog.setCanceledOnTouchOutside(false);
-        confirmationDialog.show();
-
-        sendAmount = NEGATIVE;
-    }
-
-    private BigInteger guessLimit()
-    {
-        if (token.isEthereum())
+        if (sendGasLimit.equals(BigInteger.ZERO))
         {
-            return BigInteger.valueOf(GAS_LIMIT_MIN);
+            estimateError(w3tx, transactionBytes, txSendAddress);
         }
         else
         {
-            return BigInteger.valueOf(GAS_LIMIT_DEFAULT);
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
+                    viewModel.getTokenService(), this);
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
+            sendAmount = NEGATIVE;
         }
     }
 
@@ -649,5 +644,26 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         dialog.show();
 
         confirmationDialog.dismiss();
+    }
+
+    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.confirm_transaction);
+        dialog.setMessage(R.string.error_transaction_may_fail);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setButtonListener(v -> {
+            BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
+            checkConfirm(gasEstimate, transactionBytes, txSendAddress);
+        });
+
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 }

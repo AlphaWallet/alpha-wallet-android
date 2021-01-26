@@ -63,6 +63,7 @@ public class GasService2 implements ContractGasProvider
     private final RealmManager realmManager;
     private int currentChainId;
     private Web3j web3j;
+    private BigInteger currentGasPrice;
 
     @Nullable
     private Disposable gasFetchDisposable;
@@ -125,13 +126,13 @@ public class GasService2 implements ContractGasProvider
     @Override
     public BigInteger getGasPrice(String contractFunc)
     {
-        return null;
+        return currentGasPrice;
     }
 
     @Override
     public BigInteger getGasPrice()
     {
-        return null;
+        return currentGasPrice;
     }
 
     @Override
@@ -143,7 +144,7 @@ public class GasService2 implements ContractGasProvider
     @Override
     public BigInteger getGasLimit()
     {
-        return null;
+        return new BigInteger(C.DEFAULT_GAS_LIMIT);
     }
 
     private Single<Boolean> updateCurrentGasPrices()
@@ -164,6 +165,7 @@ public class GasService2 implements ContractGasProvider
         if (EthereumNetworkRepository.hasGasOverride(currentChainId))
         {
             updateRealm(new GasPriceSpread(EthereumNetworkRepository.gasOverrideValue(currentChainId)), currentChainId);
+            currentGasPrice = EthereumNetworkRepository.gasOverrideValue(currentChainId);
             return Single.fromCallable(() -> true);
         }
         else
@@ -177,8 +179,8 @@ public class GasService2 implements ContractGasProvider
 
     private Boolean updateGasPrice(EthGasPrice ethGasPrice, int chainId)
     {
-        BigInteger gasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
-        updateRealm(new GasPriceSpread(gasPrice), chainId);
+        currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
+        updateRealm(new GasPriceSpread(currentGasPrice), chainId);
         return true;
     }
 
@@ -219,8 +221,10 @@ public class GasService2 implements ContractGasProvider
                 {
                     String result = response.body()
                             .string();
-                    updateRealm(new GasPriceSpread(result), MAINNET_ID);
+                    GasPriceSpread gps = new GasPriceSpread(result);
+                    updateRealm(gps, MAINNET_ID);
                     update = true;
+                    currentGasPrice = gps.standard;
                 }
             }
             catch (Exception e)
@@ -275,7 +279,7 @@ public class GasService2 implements ContractGasProvider
         String finalTxData = txData;
 
         return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), null, toAddress, amount, finalTxData));
+                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), getGasLimit(), toAddress, amount, finalTxData));
     }
 
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,

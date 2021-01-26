@@ -77,6 +77,7 @@
     <string name="error_invalid_address">Dirección no válida</string>
     <string name="error_invalid_amount">Cantidad no válida</string>
     <string name="error_transaction_failed">Error de transacción</string>
+    <string name="error_transaction_may_fail">Node indicates transaction may fail. Continue?</string>
     <string name="error_import_failed">Error al importar el token</string>
     <string name="error_must_numeric">debe ser un valor numérico.</string>
     <string name="transaction_succeeded">Transacción realizada correctamente</string>

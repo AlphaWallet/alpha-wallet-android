@@ -65,7 +65,7 @@ public class Transaction implements Parcelable
 
 	public boolean hasError()
 	{
-		return TextUtils.isEmpty(error) && error.equals("1");
+		return !TextUtils.isEmpty(error) && error.equals("1");
 	}
 
 	public boolean hasData()

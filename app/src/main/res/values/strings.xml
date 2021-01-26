@@ -84,6 +84,7 @@
     <string name="error_invalid_address">Invalid address</string>
     <string name="error_invalid_amount">Invalid amount</string>
     <string name="error_transaction_failed">Transaction error</string>
+    <string name="error_transaction_may_fail">Node indicates transaction may fail. Continue?</string>
     <string name="error_import_failed">Failed to import token</string>
     <string name="error_must_numeric">must be a numeric value.</string>
     <string name="transaction_succeeded">Transaction successful</string>

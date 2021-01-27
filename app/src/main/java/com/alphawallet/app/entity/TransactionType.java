@@ -24,5 +24,7 @@ public enum TransactionType
     RECEIVED,
     SEND,
     SEND_ETH,
-    ILLEGAL_VALUE
+    TOKEN_SWAP,
+    CONTRACT_CALL,
+    ILLEGAL_VALUE;
 }

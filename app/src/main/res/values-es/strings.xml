@@ -77,7 +77,7 @@
     <string name="error_invalid_address">Dirección no válida</string>
     <string name="error_invalid_amount">Cantidad no válida</string>
     <string name="error_transaction_failed">Error de transacción</string>
-    <string name="error_transaction_may_fail">Node indicates transaction may fail. Continue?</string>
+    <string name="error_transaction_may_fail">El nodo predice que esta transacción fallará, continuar?</string>
     <string name="error_import_failed">Error al importar el token</string>
     <string name="error_must_numeric">debe ser un valor numérico.</string>
     <string name="transaction_succeeded">Transacción realizada correctamente</string>
@@ -710,4 +710,5 @@
     <string name="insufficient_gas">Gas insuficientes</string>
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
     <string name="action_send_eth">Enviar Eth</string>
+    <string name="action_token_swap">Intercambio de tokens</string>
 </resources>

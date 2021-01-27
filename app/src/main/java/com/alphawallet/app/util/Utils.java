@@ -356,7 +356,7 @@ public class Utils {
 
     public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
     {
-        String symbol = isContractCall(ctx, operationName) ? "" : token.getShortSymbol();
+        String symbol = token != null ? token.getShortSymbol() : "";
         boolean needsBreak = false;
 
         if ((symbol.length() + operationName.length()) > 16 && symbol.length() > 0)

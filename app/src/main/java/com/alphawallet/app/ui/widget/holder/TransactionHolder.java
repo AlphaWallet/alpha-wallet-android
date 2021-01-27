@@ -85,6 +85,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         supplemental.setText("");
         fromTokenView = false;
 
+        if (data.hash.startsWith("0x6cdaf8555"))
+        {
+            System.out.println("YOLESS");
+        }
+
         //fetch data from database
         transaction = transactionsInteract.fetchCached(defaultAddress, data.hash);
 
@@ -102,9 +107,9 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String operationName = token.getOperationName(transaction, getContext());
 
         String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
-        value.setText(Utils.isContractCall(getContext(), operationName) ? "" : transactionOperation);
-
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), operationName, token);
+        boolean shouldShowToken = token.shouldShowSymbol(transaction);
+        value.setText(shouldShowToken ? transactionOperation : "");
+        CharSequence typeValue = Utils.createFormattedValue(getContext(), operationName, shouldShowToken ? token : null);
 
         type.setText(typeValue);
         //set address or contract name
@@ -120,7 +125,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         date.setText(Utils.localiseUnixTime(getContext(), transaction.timeStamp));
         date.setVisibility(View.VISIBLE);
-        //symbol.setVisibility(View.VISIBLE);
 
         setTransactionStatus(transaction.blockNumber, transaction.error, transaction.isPending());
     }

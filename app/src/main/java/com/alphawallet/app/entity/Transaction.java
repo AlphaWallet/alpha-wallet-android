@@ -269,6 +269,19 @@ public class Transaction implements Parcelable
 		}
 	}
 
+	public boolean shouldShowSymbol(Token token)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			return transactionInput.shouldShowSymbol();
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 	public String getOperationTokenAddress()
 	{
 		if (hasInput())

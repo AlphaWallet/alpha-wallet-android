@@ -415,15 +415,11 @@ public class TransactionInput
             case "kill":
                 type = TransactionType.TERMINATE_CONTRACT;
                 break;
+            case "swapExactTokensForTokens":
+                type = TransactionType.TOKEN_SWAP;
+                break;
             default:
-                if (functionData.functionRawHex != null && functionData.functionRawHex.length() >= TransactionDecoder.FUNCTION_LENGTH)
-                {
-                    type = TransactionType.UNKNOWN_FUNCTION;
-                }
-                else
-                {
-                    type = TransactionType.UNKNOWN;
-                }
+                type = TransactionType.CONTRACT_CALL;
                 break;
         }
     }
@@ -544,6 +540,8 @@ public class TransactionInput
     {
         String operationValue = "";
 
+        boolean addSymbol = true;
+
         switch (type)
         {
             case PASS_TO:   //we had a ticket transferred out of our wallet paid for by server.
@@ -575,6 +573,12 @@ public class TransactionInput
             case TERMINATE_CONTRACT:
                 operationValue = "";
                 break;
+            case CONTRACT_CALL:
+                addSymbol = false;
+                break;
+            case TOKEN_SWAP:
+                addSymbol = false;
+                break;
             case UNKNOWN_FUNCTION:
             case INVALID_OPERATION:
             default:
@@ -582,7 +586,24 @@ public class TransactionInput
                 break;
         }
 
+        if (addSymbol)
+        {
+            operationValue = operationValue + " " + token.getSymbol();
+        }
+
         return operationValue;
+    }
+
+    public boolean shouldShowSymbol()
+    {
+        switch (type)
+        {
+            case CONTRACT_CALL:
+            case TOKEN_SWAP:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public StatusType getOperationImage(Transaction tx, String walletAddress)

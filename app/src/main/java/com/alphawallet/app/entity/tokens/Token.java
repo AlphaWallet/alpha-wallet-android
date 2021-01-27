@@ -549,7 +549,7 @@ public class Token implements Parcelable, Comparable<Token>
     public String getOperationName(Transaction transaction, Context ctx)
     {
         String name;
-        if (isEthereum())
+        if (isEthereum() && !transaction.hasInput())
         {
             if (transaction.value.equals("0") && transaction.hasInput())
             {
@@ -652,8 +652,13 @@ public class Token implements Parcelable, Comparable<Token>
      */
     public String getTransactionResultValue(Transaction transaction, int precision)
     {
-        String txResultValue = isEthereum() ? getTransactionValue(transaction, precision) : transaction.getOperationResult(this, precision);
-        return txResultValue + " " + getSymbol();
+        String txResultValue = (isEthereum() && !transaction.hasInput()) ? (getTransactionValue(transaction, precision) + " " + getSymbol()) : transaction.getOperationResult(this, precision);
+        return txResultValue;
+    }
+
+    public boolean shouldShowSymbol(Transaction transaction)
+    {
+        return ((isEthereum() && !transaction.hasInput()) || (transaction.shouldShowSymbol(this)));
     }
 
     public boolean hasArrayBalance()

@@ -77,7 +77,7 @@
     <string name="error_invalid_address">无效地址</string>
     <string name="error_invalid_amount">无效金额</string>
     <string name="error_transaction_failed">交易错误</string>
-    <string name="error_transaction_may_fail">Node indicates transaction may fail. Continue?</string>
+    <string name="error_transaction_may_fail">节点预测此交易将失败。 继续？</string>
     <string name="error_import_failed">导入令牌失败</string>
     <string name="error_must_numeric">必须为一个数值。</string>
     <string name="transaction_succeeded">交易成功</string>
@@ -710,4 +710,5 @@
     <string name="insufficient_gas">资金不够</string>
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
     <string name="action_send_eth">发送以太币交易</string>
+    <string name="action_token_swap">通证交换</string>
 </resources>

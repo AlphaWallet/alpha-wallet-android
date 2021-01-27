@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -60,6 +61,8 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
         {
             props.putString(C.AN_USE_GAS, analyticsProperties.getData());
         }
+
+        props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
 
         firebaseAnalytics.logEvent(eventName, props);
     }

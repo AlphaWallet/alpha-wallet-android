@@ -153,7 +153,7 @@ public class BalanceUtils
     public static String getScaledValueFixed(BigDecimal value, long decimals, int precision)
     {
         //form precision
-        String pattern = getDigitalPattern(precision);
+        String pattern = getDigitalPattern(precision, precision);
         return scaledValue(value, pattern, decimals);
     }
 

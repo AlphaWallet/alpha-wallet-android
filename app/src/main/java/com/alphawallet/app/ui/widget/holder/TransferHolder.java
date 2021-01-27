@@ -53,7 +53,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     private final TextView address;
     private final TextView value;
     private final ChainName chainName;
-    private final TextView symbol;
 
     private final AssetDefinitionService assetDefinition;
     private Token token;
@@ -73,7 +72,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
         chainName = findViewById(R.id.chain_name);
-        symbol = findViewById(R.id.symbol);
         tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
@@ -133,8 +131,9 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        type.setText(getTitle(data));
-        symbol.setText(sym);
+        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data), token);
+
+        type.setText(typeValue);
         address.setText(data.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
         tokenIcon.setStatusIcon(data.getEventStatusType());
 

@@ -26,11 +26,11 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/details"
-            android:layout_width="match_parent"
+            android:id="@+id/value_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/value"
-            android:maxHeight="40dp"
             android:orientation="horizontal">
 
             <TextView
@@ -38,29 +38,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:textAppearance="?attr/textAppearanceListItem"
                 android:textSize="@dimen/sp17"
-                tools:text="Sent" />
+                tools:text="Send ETH" />
 
-            <TextView
-                android:id="@+id/symbol"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:fontFamily="@font/font_semibold"
-                android:textAppearance="?attr/textAppearanceListItem"
-                android:textSize="@dimen/sp17"
-                tools:text="ETH" />
+                android:layout_gravity="center"
+                android:orientation="horizontal">
 
-            <com.alphawallet.app.widget.ChainName
-                android:id="@+id/chain_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="3dp"
-                android:visibility="visible"
-                custom:font_size="10" />
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/chain_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_marginStart="3dp"
+                    android:gravity="start"
+                    android:visibility="visible"
+                    custom:font_size="10" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -68,7 +67,7 @@
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/details"
+            android:layout_alignTop="@id/value_layout"
             android:layout_alignParentEnd="true"
             android:fontFamily="@font/font_semibold"
             android:layout_centerVertical="true"
@@ -95,8 +94,8 @@
                 android:id="@+id/address"
                 android:layout_marginTop="@dimen/dp10"
                 android:layout_toStartOf="@id/supplimental"
-                android:layout_below="@id/details"
-                android:layout_alignStart="@id/details"
+                android:layout_below="@id/value_layout"
+                android:layout_alignStart="@id/value_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"

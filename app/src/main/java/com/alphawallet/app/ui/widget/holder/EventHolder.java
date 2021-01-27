@@ -61,7 +61,6 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private final TextView value;
     private final ChainName chainName;
     private final TextView supplemental;
-    private final TextView symbol;
     private final LinearLayout transactionBackground;
 
     private final AssetDefinitionService assetDefinition;
@@ -86,7 +85,6 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         chainName = findViewById(R.id.chain_name);
         supplemental = findViewById(R.id.supplimental);
         transactionBackground = findViewById(R.id.layout_background);
-        symbol = findViewById(R.id.symbol);
         tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
@@ -139,8 +137,10 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        type.setText(getTitle(eventData));
-        symbol.setText(sym);
+        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(eventData), token);
+
+        type.setText(typeValue);
+        //symbol.setText(sym);
         address.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
         tokenIcon.setStatusIcon(eventData.getEventStatusType());
 

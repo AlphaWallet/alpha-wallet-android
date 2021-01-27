@@ -13,6 +13,7 @@ import android.webkit.URLUtil;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
@@ -347,6 +348,45 @@ public class Utils {
                 sb.append(" ").append(v.toString()).append("\n");
             }
         }
+
+        sb.applyStyles();
+
+        return sb;
+    }
+
+    public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
+    {
+        String symbol = isContractCall(ctx, operationName) ? "" : token.getShortSymbol();
+        boolean needsBreak = false;
+
+        if ((symbol.length() + operationName.length()) > 16 && symbol.length() > 0)
+        {
+            int spaceIndex = operationName.lastIndexOf(' ');
+            if (spaceIndex > 0)
+            {
+                operationName = operationName.substring(0, spaceIndex) + '\n' + operationName.substring(spaceIndex+1);
+            }
+            else
+            {
+                needsBreak = true;
+            }
+        }
+
+        StyledStringBuilder sb = new StyledStringBuilder();
+        sb.startStyleGroup().append(operationName);
+        sb.setStyle(new StyleSpan(Typeface.NORMAL));
+
+        if (needsBreak)
+        {
+            sb.append("\n");
+        }
+        else
+        {
+            sb.append(" ");
+        }
+
+        sb.startStyleGroup().append(symbol);
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
 
         sb.applyStyles();
 

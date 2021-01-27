@@ -1,7 +1,9 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -21,11 +23,15 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.ContractAddress;
+
+import java.math.BigDecimal;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
@@ -44,7 +50,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView value;
     private final ChainName chainName;
     private final TextView supplemental;
-    private final TextView symbol;
+    //private final TextView symbol;
     private final TokensService tokensService;
     private final LinearLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
@@ -65,7 +71,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         chainName = findViewById(R.id.chain_name);
         supplemental = findViewById(R.id.supplimental);
         transactionBackground = findViewById(R.id.layout_background);
-        symbol = findViewById(R.id.symbol);
+        //symbol = findViewById(R.id.symbol);
         tokensService = service;
         transactionsInteract = interact;
         assetService = svs;
@@ -98,9 +104,9 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
         value.setText(Utils.isContractCall(getContext(), operationName) ? "" : transactionOperation);
 
-        type.setText(operationName);
-        symbol.setText(Utils.isContractCall(getContext(), operationName) ? "" : token.getShortSymbol());
+        CharSequence typeValue = Utils.createFormattedValue(getContext(), operationName, token);
 
+        type.setText(typeValue);
         //set address or contract name
         setupTransactionDetail(token);
 
@@ -114,7 +120,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         date.setText(Utils.localiseUnixTime(getContext(), transaction.timeStamp));
         date.setVisibility(View.VISIBLE);
-        symbol.setVisibility(View.VISIBLE);
+        //symbol.setVisibility(View.VISIBLE);
 
         setTransactionStatus(transaction.blockNumber, transaction.error, transaction.isPending());
     }
@@ -199,7 +205,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
             long fetchTxCompletionTime = transactionsInteract.fetchTxCompletionTime(defaultAddress, transaction.hash);
             tokenIcon.startPendingSpinner(transaction.timeStamp, fetchTxCompletionTime/1000);
-            symbol.setVisibility(View.GONE);
+            //symbol.setVisibility(View.GONE);
             chainName.setVisibility(View.GONE);
         }
         else if (transactionBackground != null)

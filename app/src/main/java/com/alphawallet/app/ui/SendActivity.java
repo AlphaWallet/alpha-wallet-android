@@ -318,6 +318,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     {
         if (dialog != null) dialog.dismiss();
         //check chain
+        if (result == null)
+        {
+            displayScanError();
+            return;
+        }
+
         NetworkInfo info = viewModel.getNetworkInfo(result.chainId);
         if (info == null)
         {

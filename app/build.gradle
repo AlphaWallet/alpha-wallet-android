@@ -107,7 +107,7 @@ android {
             apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
-                implementation 'com.google.firebase:firebase-analytics:18.0.0'
+                implementation 'com.google.firebase:firebase-analytics:18.0.1'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
         }

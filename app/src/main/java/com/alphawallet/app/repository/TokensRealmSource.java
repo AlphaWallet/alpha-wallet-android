@@ -679,18 +679,20 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                     .sort("addedTime", Sort.ASCENDING)
-                    .equalTo("isEnabled", true)
+                    .beginGroup().equalTo("isEnabled", true).or().like("address", wallet.address.toLowerCase() + "*").endGroup()
                     .like("address", ADDRESS_FORMAT)
                     .findAll();
 
             for (RealmToken t : realmItems)
             {
-                if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
+                if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) ||
+                        (t.getContractType() != ContractType.ETHEREUM && !t.getEnabled())) continue;
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(),
                         convertStringBalance(t.getBalance(), t.getContractType()), t.getUpdateTime(),
                         null, t.getName(), t.getSymbol(), t.getContractType());
                 meta.lastTxUpdate = t.getLastTxTime();
+
                 tokenMetas.add(meta);
             }
         }

@@ -85,11 +85,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         supplemental.setText("");
         fromTokenView = false;
 
-        if (data.hash.startsWith("0x09273f7048a245a9b95d4e338697b0f6b8bbce974e85f3ce4b014b63c027b3f5"))
-        {
-            System.out.println("YOLESS");
-        }
-
         //fetch data from database
         transaction = transactionsInteract.fetchCached(defaultAddress, data.hash);
 

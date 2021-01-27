@@ -25,6 +25,8 @@ public enum TransactionType
     SEND,
     SEND_ETH,
     TOKEN_SWAP,
+    WITHDRAW,
+    DEPOSIT,
     CONTRACT_CALL,
     ILLEGAL_VALUE;
 }

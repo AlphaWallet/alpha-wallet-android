@@ -418,6 +418,12 @@ public class TransactionInput
             case "swapExactTokensForTokens":
                 type = TransactionType.TOKEN_SWAP;
                 break;
+            case "withdraw":
+                type = TransactionType.WITHDRAW;
+                break;
+            case "deposit":
+                type = TransactionType.DEPOSIT;
+                break;
             default:
                 type = TransactionType.CONTRACT_CALL;
                 break;
@@ -579,6 +585,12 @@ public class TransactionInput
             case TOKEN_SWAP:
                 addSymbol = false;
                 break;
+            case WITHDRAW:
+                addSymbol = false;
+                break;
+            case DEPOSIT:
+                addSymbol = false;
+                break;
             case UNKNOWN_FUNCTION:
             case INVALID_OPERATION:
             default:
@@ -588,21 +600,29 @@ public class TransactionInput
 
         if (addSymbol)
         {
-            operationValue = operationValue + " " + token.getSymbol();
+            if (!token.isEthereum())
+            {
+                operationValue = operationValue + " " + token.getSymbol();
+            }
+            else
+            {
+                operationValue = "";
+            }
         }
 
         return operationValue;
     }
 
-    public boolean shouldShowSymbol()
+    public boolean shouldShowSymbol(Token token)
     {
         switch (type)
         {
             case CONTRACT_CALL:
             case TOKEN_SWAP:
+            case WITHDRAW:
                 return false;
             default:
-                return true;
+                return !token.isEthereum(); //can't be ethereum if has transaction input
         }
     }
 

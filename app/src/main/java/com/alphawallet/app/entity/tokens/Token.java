@@ -566,7 +566,7 @@ public class Token implements Parcelable, Comparable<Token>
         }
         else
         {
-            name = transaction.getOperationName(ctx, getWallet());
+            name = transaction.getOperationName(ctx, this, getWallet());
         }
 
 
@@ -647,13 +647,27 @@ public class Token implements Parcelable, Comparable<Token>
     /**
      * Fetch the Token value of this transaction eg +20 DAI, or if a native chain transaction then return the value
      *
+     * TODO: Refactor when Class Token refactor stage 2 is done
+     *
      * @param transaction
      * @return
      */
     public String getTransactionResultValue(Transaction transaction, int precision)
     {
-        String txResultValue = (isEthereum() && !transaction.hasInput()) ? (getTransactionValue(transaction, precision) + " " + getSymbol()) : transaction.getOperationResult(this, precision);
-        return txResultValue;
+        if (isEthereum() && !transaction.hasInput())
+        {
+            //basic eth transaction
+            return getTransactionValue(transaction, precision) + " " + getSymbol();
+        }
+        else if (transaction.hasInput())
+        {
+            //smart contract call
+            return transaction.getOperationResult(this, precision);
+        }
+        else
+        {
+            return "";
+        }
     }
 
     public boolean shouldShowSymbol(Transaction transaction)

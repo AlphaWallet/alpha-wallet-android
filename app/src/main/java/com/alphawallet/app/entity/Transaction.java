@@ -269,12 +269,17 @@ public class Transaction implements Parcelable
 		}
 	}
 
+	/**
+	 * Can the contract call be valid if the operation token is Ethereum?
+	 * @param token
+	 * @return
+	 */
 	public boolean shouldShowSymbol(Token token)
 	{
 		if (hasInput())
 		{
 			decodeTransactionInput(token.getWallet());
-			return transactionInput.shouldShowSymbol();
+			return transactionInput.shouldShowSymbol(token);
 		}
 		else
 		{
@@ -294,7 +299,7 @@ public class Transaction implements Parcelable
 		}
 	}
 
-	public String getOperationName(Context ctx, String walletAddress)
+	public String getOperationName(Context ctx, Token token, String walletAddress)
 	{
 		String txName = null;
 		if (isPending())
@@ -304,6 +309,11 @@ public class Transaction implements Parcelable
 		else if (hasInput())
 		{
 			decodeTransactionInput(walletAddress);
+			if (token.isEthereum() && shouldShowSymbol(token))
+			{
+				transactionInput.type = TransactionType.CONTRACT_CALL;
+			}
+
 			return transactionInput.getOperationTitle(ctx);
 		}
 
@@ -373,7 +383,7 @@ public class Transaction implements Parcelable
 		if (hasInput())
 		{
 			decodeTransactionInput(token.getWallet());
-			if (!transactionInput.isSendOrReceive(this))
+			if (!transactionInput.isSendOrReceive(this) || token.isEthereum())
 			{
 				return "";
 			}

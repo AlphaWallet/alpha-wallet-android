@@ -711,4 +711,6 @@
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
     <string name="action_send_eth">发送以太币交易</string>
     <string name="action_token_swap">通证交换</string>
+    <string name="action_withdraw">Withdraw</string>
+    <string name="deposit">Deposit</string>
 </resources>

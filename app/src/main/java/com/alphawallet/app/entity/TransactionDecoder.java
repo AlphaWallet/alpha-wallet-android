@@ -284,6 +284,8 @@ public class TransactionDecoder
         addFunction("delegate(address)", ContractType.ERC20, false);
         addFunction("mint(address,uint)", ContractType.ERC20, false);
         addFunction("swapExactTokensForTokens(uint256,uint256,address[],address,uint256)", ContractType.ERC20, false);
+        addFunction("withdraw(address,uint256,address)", ContractType.ERC20, false);
+        addFunction("deposit(address,uint256,address,uint16)", ContractType.ERC20, false);
 
         addFunction("transferFrom(address,address,uint256[])", ContractType.ERC875, false);
         addFunction("transfer(address,uint256[])", ContractType.ERC875, false);

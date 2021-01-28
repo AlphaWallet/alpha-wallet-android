@@ -2,6 +2,7 @@ package com.alphawallet.token.entity;
 
 import com.alphawallet.token.tools.Numeric;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
@@ -26,16 +27,26 @@ public class EthereumMessage implements Signable {
         this.messageBytes = Numeric.hexStringToByteArray(message);
         this.displayOrigin = displayOrigin;
         this.leafPosition = leafPosition;
-        this.prehash = getEthereumMessage(messageBytes);
+        this.prehash = getEthereumMessage(message);
         this.userMessage = message;
         messageType = type;
     }
 
-    static byte[] getEthereumMessage(byte[] message) {
-        byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(message.length)).getBytes();
-        byte[] result = new byte[prefix.length + message.length];
+    private byte[] getEthereumMessage(String message) {
+        byte[] encodedMessage;
+        if (message.startsWith("0x"))
+        {
+            encodedMessage = messageBytes;
+        }
+        else
+        {
+            encodedMessage = message.getBytes();
+        }
+
+        byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(encodedMessage.length)).getBytes();
+        byte[] result = new byte[prefix.length + encodedMessage.length];
         System.arraycopy(prefix, 0, result, 0, prefix.length);
-        System.arraycopy(message, 0, result, prefix.length, message.length);
+        System.arraycopy(encodedMessage, 0, result, prefix.length, encodedMessage.length);
         return result;
     }
 
@@ -74,12 +85,11 @@ public class EthereumMessage implements Signable {
 
     private String hexToUtf8(CharSequence hexData) {
         String hex = cleanHexPrefix(hexData.toString());
-        ByteBuffer buff = ByteBuffer.allocate(hex.length() / 2);
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         for (int i = 0; i < hex.length(); i += 2) {
-            buff.put((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
+            byteBuffer.write((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
         }
-        buff.rewind();
-        CharBuffer cb = StandardCharsets.UTF_8.decode(buff);
+        CharBuffer cb = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(byteBuffer.toByteArray()));
         return cb.toString();
     }
 

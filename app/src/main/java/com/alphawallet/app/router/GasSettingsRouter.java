@@ -17,7 +17,7 @@ public class GasSettingsRouter {
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
         intent.putExtra(C.EXTRA_STATE, false);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        context.startActivityForResult(intent, GasSettingsViewModel.SET_GAS_SETTINGS);
+        context.startActivityForResult(intent, C.SET_GAS_SETTINGS);
     }
 
     public void openLimit(Activity context, GasSettings gasSettings, int chainId) {
@@ -27,6 +27,6 @@ public class GasSettingsRouter {
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
         intent.putExtra(C.EXTRA_STATE, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        context.startActivityForResult(intent, GasSettingsViewModel.SET_GAS_SETTINGS);
+        context.startActivityForResult(intent, C.SET_GAS_SETTINGS);
     }
 }

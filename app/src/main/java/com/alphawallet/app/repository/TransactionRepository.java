@@ -63,6 +63,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public long fetchTxCompletionTime(String walletAddr, String hash)
+	{
+		Wallet wallet = new Wallet(walletAddr);
+		return inDiskCache.fetchTxCompletionTime(wallet, hash);
+	}
+
+	@Override
 	public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
 	{
 		final Web3j web3j = getWeb3jService(chainId);
@@ -214,7 +221,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return Single.fromCallable(() -> {
 			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, contractAddr);
-			newTx.completeSetup(from.address);
+			//newTx.completeSetup(from.address);
 			inDiskCache.putTransaction(from, newTx);
 			transactionsService.markPending(newTx);
 
@@ -228,7 +235,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 			Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, "");
-			newTx.completeSetup(from.address);
+			//newTx.completeSetup(from.address);
 			inDiskCache.putTransaction(from, newTx);
 			transactionsService.markPending(newTx);
 
@@ -335,7 +342,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getTransaction().orElseThrow();
 			Web3j web3j = getWeb3jService(fetchedTx.getChainId().intValue());
 			TransactionReceipt txr = web3j.ethGetTransactionReceipt(fetchedTx.getHash()).send().getResult();
-			return inDiskCache.storeRawTx(wallet, rawTx, timeStamp, txr.isStatusOK());
+			return inDiskCache.storeRawTx(wallet, fetchedTx.getChainId().intValue(), rawTx, timeStamp, txr.isStatusOK());
 		});
+	}
+
+	@Override
+	public void restartService()
+	{
+		transactionsService.startUpdateCycle();
 	}
 }

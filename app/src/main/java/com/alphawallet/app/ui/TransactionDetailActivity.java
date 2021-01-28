@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,25 +16,22 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,6 +40,7 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface
 {
@@ -88,7 +85,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         functionBar = findViewById(R.id.layoutButtons);
 
         String blockNumber = transaction.blockNumber;
-        TransactionOperation op = null;
         if (transaction.isPending())
         {
             //how long has this TX been pending
@@ -117,30 +113,23 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         fromValue.setText(transaction.from != null ? transaction.from : "");
         toValue.setText(transaction.to != null ? transaction.to : "");
         txHashView.setText(transaction.hash != null ? transaction.hash : "");
-        ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
+        ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
-
-        if (transaction.operations != null && transaction.operations.length > 0)
-        {
-            op = transaction.operations[0];
-            if (op != null && op.to != null) toValue.findViewById(R.id.to);
-        }
 
         chainName = viewModel.getNetworkName(transaction.chainId);
         ((TextView) findViewById(R.id.network)).setText(chainName);
         ((ImageView) findViewById(R.id.network_icon)).setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
-        TextView chainLabel = findViewById(R.id.text_chain_name);
 
-        Utils.setChainColour(chainLabel, transaction.chainId);
-        chainLabel.setText(chainName);
+        ChainName chainName = findViewById(R.id.chain_name);
+        chainName.setChainID(transaction.chainId);
 
         setOperationName();
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
-        setupWalletDetails(op);
+        setupWalletDetails();
         checkFailed();
     }
 
@@ -156,7 +145,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             transaction = latestTx;
             ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
             findViewById(R.id.pending_spinner).setVisibility(View.GONE);
-            ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
+            ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
             //update function bar
             functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
             checkFailed();
@@ -196,11 +185,15 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         if (gasFee.equals(BigDecimal.ZERO))
         {
             findViewById(R.id.layout_gas_fee).setVisibility(View.GONE);
+            findViewById(R.id.layout_network_fee).setVisibility(View.GONE);
         }
         else
         {
             findViewById(R.id.layout_gas_fee).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());// .toPlainString());
+            findViewById(R.id.layout_network_fee).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.gas_used)).setText(BalanceUtils.getScaledValue(new BigDecimal(transaction.gasUsed), 0, 0));
+            ((TextView) findViewById(R.id.network_fee)).setText(BalanceUtils.getScaledValue(BalanceUtils.weiToEth(gasFee), 0, 6));
+            ((TextView) findViewById(R.id.text_fee_unit)).setText(viewModel.getNetworkSymbol(transaction.chainId));
         }
 
         if (gasPrice.equals(BigDecimal.ZERO))
@@ -210,49 +203,15 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         else
         {
             findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice.toBigInteger()));
+            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice, 2));
         }
     }
 
-    private void setupWalletDetails(TransactionOperation op) {
-        boolean isSent = transaction.from.equalsIgnoreCase(wallet.address);
-        String rawValue;
-        String prefix = "";
-
-        if (token == null && op == null)
-        {
-            token = viewModel.getToken(transaction.chainId, wallet.address);
-        }
-
-        if (token != null)
-        {
-            if (token.isNonFungible() || op != null)
-            {
-                rawValue = token.getTransactionResultValue(transaction, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
-            }
-            else
-            {
-                rawValue = BalanceUtils.getScaledValueWithLimit(token.getTxValue(transaction), token.tokenInfo.decimals) + " " + token.getSymbol();
-                prefix = (token.getIsSent(transaction) ? "-" : "+");
-            }
-        }
-        else
-        {
-            BigDecimal txValue = new BigDecimal(transaction.value);
-            rawValue = BalanceUtils.getScaledValueWithLimit(txValue, 18) + " " + viewModel.getNetworkSymbol(transaction.chainId);
-            prefix = (isSent ? "-" : "+");
-        }
-
-        rawValue =  prefix + rawValue;
-        amount.setText(rawValue);
-    }
-
-    private String localiseUnixTime(long timeStampInSec)
+    private void setupWalletDetails()
     {
-        Date date = new java.util.Date(timeStampInSec*DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
-        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
-        return timeFormat.format(date) + " | " + dateFormat.format(date);
+        String operationName = token.getOperationName(transaction, this);
+        String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
+        amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
     }
 
     @Override
@@ -267,6 +226,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             viewModel.shareTransactionDetail(this, transaction);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        viewModel.restartServices();
     }
 
     @Override

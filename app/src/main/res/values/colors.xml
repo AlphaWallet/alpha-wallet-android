@@ -14,6 +14,7 @@
     <color name="semitransparentWhite">#AAFFFFFF</color>
 	<color name="white20">#32FFFFFF</color>
 	<color name="translucentWhite">#80FFFFFF</color>
+	<color name="translucentWhiteSolid">#A0FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="item_icon_tint">#89000000</color>
 	<color name="blur">#80000000</color>

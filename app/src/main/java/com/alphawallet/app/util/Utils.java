@@ -2,7 +2,10 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.text.style.StyleSpan;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
@@ -10,20 +13,30 @@ import android.webkit.URLUtil;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.web3j.StructuredDataEncoder;
+import com.alphawallet.token.entity.ProviderTypedData;
+import com.alphawallet.token.entity.Signable;
 
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +44,10 @@ import java.util.regex.Pattern;
 public class Utils {
 
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
+    private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
+    private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
+    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/alphawallet/iconassets/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -79,12 +96,33 @@ public class Utils {
         return result;
     }
 
+    public static boolean isValidValue(String testStr)
+    {
+        boolean result = false;
+        if (testStr != null && testStr.length() > 0)
+        {
+            result = true;
+            for (int i = 0; i < testStr.length(); i++)
+            {
+                char c = testStr.charAt(i);
+                if (!Character.isDigit(c) && !(c == '.' || c == ','))
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
     private static String getFirstWord(String text) {
+        text = text.trim();
         int index = text.indexOf(' ');
         if (index > -1) {
             return text.substring(0, index).trim();
         } else {
-            return text;
+            return text.trim();
         }
     }
 
@@ -95,6 +133,20 @@ public class Utils {
         if (!TextUtils.isEmpty(firstWord))
         {
             return firstWord.substring(0, Math.min(firstWord.length(), 4)).toUpperCase();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public static String getShortSymbol(String text)
+    {
+        if (TextUtils.isEmpty(text)) return "";
+        String firstWord = getFirstWord(text);
+        if (!TextUtils.isEmpty(firstWord))
+        {
+            return firstWord.substring(0, Math.min(firstWord.length(), 5)).toUpperCase();
         }
         else
         {
@@ -230,6 +282,117 @@ public class Utils {
         }
     }
 
+    /**
+     * This is here rather than in the Signable class because Signable is cross platform not Android specific
+     *
+     * @param signable
+     * @return
+     */
+    public static int getSigningTitle(Signable signable)
+    {
+        switch (signable.getMessageType())
+        {
+            default:
+            case SIGN_MESSAGE:
+                return R.string.dialog_title_sign_message;
+            case SIGN_PERSONAL_MESSAGE:
+                return R.string.dialog_title_sign_personal_message;
+            case SIGN_TYPED_DATA:
+            case SIGN_TYPED_DATA_V3:
+            case SIGN_TYPES_DATA_V4:
+                return R.string.dialog_title_sign_typed_message;
+        }
+    }
+
+    public static CharSequence formatTypedMessage(ProviderTypedData[] rawData)
+    {
+        //produce readable text to display in the signing prompt
+        StyledStringBuilder sb = new StyledStringBuilder();
+        boolean firstVal = true;
+        for (ProviderTypedData data : rawData)
+        {
+            if (!firstVal) sb.append("\n");
+            sb.startStyleGroup().append(data.name).append(":");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append("\n  ").append(data.value.toString());
+            firstVal = false;
+        }
+
+        sb.applyStyles();
+
+        return sb;
+    }
+
+    public static CharSequence formatEIP721Message(StructuredDataEncoder messageData)
+    {
+        HashMap<String, Object> messageMap = (HashMap<String, Object>) messageData.jsonMessageObject.getMessage();
+        StyledStringBuilder sb = new StyledStringBuilder();
+        for (String entry : messageMap.keySet())
+        {
+            sb.startStyleGroup().append(entry).append(":").append("\n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            Object v = messageMap.get(entry);
+            if (v instanceof LinkedHashMap)
+            {
+                HashMap<String, Object> valueMap = (HashMap<String, Object>) messageMap.get(entry);
+                for (String paramName : valueMap.keySet())
+                {
+                    String value = valueMap.get(paramName).toString();
+                    sb.startStyleGroup().append(" ").append(paramName).append(": ");
+                    sb.setStyle(new StyleSpan(Typeface.BOLD));
+                    sb.append(value).append("\n");
+                }
+            }
+            else
+            {
+                sb.append(" ").append(v.toString()).append("\n");
+            }
+        }
+
+        sb.applyStyles();
+
+        return sb;
+    }
+
+    public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
+    {
+        String symbol = token != null ? token.getShortSymbol() : "";
+        boolean needsBreak = false;
+
+        if ((symbol.length() + operationName.length()) > 16 && symbol.length() > 0)
+        {
+            int spaceIndex = operationName.lastIndexOf(' ');
+            if (spaceIndex > 0)
+            {
+                operationName = operationName.substring(0, spaceIndex) + '\n' + operationName.substring(spaceIndex+1);
+            }
+            else
+            {
+                needsBreak = true;
+            }
+        }
+
+        StyledStringBuilder sb = new StyledStringBuilder();
+        sb.startStyleGroup().append(operationName);
+        sb.setStyle(new StyleSpan(Typeface.NORMAL));
+
+        if (needsBreak)
+        {
+            sb.append("\n");
+        }
+        else
+        {
+            sb.append(" ");
+        }
+
+        sb.startStyleGroup().append(symbol);
+        sb.setStyle(new StyleSpan(Typeface.BOLD));
+
+        sb.applyStyles();
+
+        return sb;
+    }
+
     public static String loadJSONFromAsset(Context context, String fileName) {
         String json = null;
         try {
@@ -346,6 +509,7 @@ public class Utils {
     }
 
     public static String formatAddress(String address) {
+        address = Keys.toChecksumAddress(address);
         String result = "";
         String firstSix = address.substring(0, 6);
         String lastSix = address.substring(address.length()-4);
@@ -465,6 +629,81 @@ public class Utils {
         return sb.toString();
     }
 
+    public static String shortConvertTimePeriodInSeconds(long pendingTimeInSeconds, Context ctx)
+    {
+        long days = pendingTimeInSeconds/(60*60*24);
+        pendingTimeInSeconds -= (days*60*60*24);
+        long hours = pendingTimeInSeconds/(60*60);
+        pendingTimeInSeconds -= (hours*60*60);
+        long minutes = pendingTimeInSeconds/60;
+        long seconds = pendingTimeInSeconds%60;
+
+        String timeStr;
+
+        if (pendingTimeInSeconds == -1)
+        {
+            timeStr = ctx.getString(R.string.never);
+        }
+        else if (days > 0)
+        {
+            timeStr = ctx.getString(R.string.day_single);
+        }
+        else if (hours > 0)
+        {
+            if (hours == 1 && minutes == 0)
+            {
+                timeStr = ctx.getString(R.string.hour_single);
+            }
+            else
+            {
+                BigDecimal hourStr = BigDecimal.valueOf(hours + (double)minutes/60.0)
+                        .setScale(1, RoundingMode.HALF_DOWN); //to 1 dp
+                timeStr = ctx.getString(R.string.hour_plural, hourStr.toString());
+            }
+        }
+        else if (minutes > 0)
+        {
+            if (minutes == 1 && seconds == 0)
+            {
+                timeStr = ctx.getString(R.string.minute_single);
+            }
+            else
+            {
+                BigDecimal minsStr = BigDecimal.valueOf(minutes + (double)seconds/60.0)
+                        .setScale(1, RoundingMode.HALF_DOWN); //to 1 dp
+                timeStr = ctx.getString(R.string.minute_plural, minsStr.toString());
+            }
+        }
+        else
+        {
+            if (seconds == 1)
+            {
+                timeStr = ctx.getString(R.string.second_single);
+            }
+            else
+            {
+                timeStr = ctx.getString(R.string.second_plural, String.valueOf(seconds));
+            }
+        }
+
+        return timeStr;
+    }
+
+    public static String localiseUnixTime(Context ctx, long timeStampInSec)
+    {
+        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        return timeFormat.format(date);
+    }
+
+    public static String localiseUnixDate(Context ctx, long timeStampInSec)
+    {
+        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
+        return timeFormat.format(date) + " | " + dateFormat.format(date);
+    }
+
     public static long randomId() {
         return new Date().getTime();
     }
@@ -481,5 +720,41 @@ public class Utils {
         {
             return url != null ? url : "";
         }
+    }
+
+    public static String getTokenImageUrl(int chainId, String address)
+    {
+        String tURL = TRUST_ICON_REPO;
+        String repoChain;
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.CLASSIC_ID:
+                repoChain = "classic";
+                break;
+            case EthereumNetworkRepository.XDAI_ID:
+                repoChain = "xdai";
+                break;
+            case EthereumNetworkRepository.POA_ID:
+                repoChain = "poa";
+                break;
+            case EthereumNetworkBase.KOVAN_ID:
+            case EthereumNetworkBase.RINKEBY_ID:
+            case EthereumNetworkBase.SOKOL_ID:
+            case EthereumNetworkBase.ROPSTEN_ID:
+                tURL = ALPHAWALLET_ICON_REPO;
+                repoChain = "";
+                break;
+            default:
+                repoChain = "ethereum";
+                break;
+        }
+        tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
+
+        return tURL;
+    }
+
+    public static boolean isContractCall(Context context, String operationName)
+    {
+        return !TextUtils.isEmpty(operationName) && context.getString(R.string.contract_call).equals(operationName);
     }
 }

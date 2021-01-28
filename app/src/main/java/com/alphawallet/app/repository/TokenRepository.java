@@ -282,7 +282,6 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             TokenFactory tf      = new TokenFactory();
             NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-
             //check balance before we store it
             List<BigInteger> balanceArray = null;
             BigDecimal       balance      = BigDecimal.ZERO;
@@ -432,7 +431,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenInfo> update(String contractAddr, int chainId) {
+    public Single<TokenInfo> update(String contractAddr, int chainId)
+    {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
@@ -1220,6 +1220,16 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
+    public static byte[] createERC721TransferFunction(String from, String to, String token, BigInteger tokenId)
+    {
+        List<TypeReference<?>> returnTypes = Collections.emptyList();
+        List<Type> params = Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId));
+        Function function = new Function("safeTransferFrom", params, returnTypes);
+
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
     public static byte[] createTrade(Token token, BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
     {
         Function function = token.getTradeFunction(expiry, ticketIndices, v, r, s);
@@ -1391,15 +1401,18 @@ public class TokenRepository implements TokenRepositoryType {
     {
         ContractType returnType = ContractType.OTHER;
 
-        int responseLength = balanceResponse.length();
+        if (balanceResponse != null)
+        {
+            int responseLength = balanceResponse.length();
 
-        if (isERC875 || (responseLength > 66))
-        {
-            returnType = ContractType.ERC875;
-        }
-        else if (balanceResponse.length() == 66) //expected biginteger size in hex + 0x
-        {
-            returnType = ContractType.ERC20;
+            if (isERC875 || (responseLength > 66))
+            {
+                returnType = ContractType.ERC875;
+            }
+            else if (balanceResponse.length() == 66) //expected biginteger size in hex + 0x
+            {
+                returnType = ContractType.ERC20;
+            }
         }
 
         return returnType;

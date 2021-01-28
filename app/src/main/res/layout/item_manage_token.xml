@@ -42,7 +42,7 @@
             android:textSize="18sp"
             tools:text="Sample Token Name" />
 
-        <Switch
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_enabled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
@@ -129,7 +131,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, tokensService, realm);
+                TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, realm);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
                 break;
@@ -162,6 +164,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         items.get(position).view = holder;
         holder.bind(items.get(position).value);
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull BinderViewHolder holder)
+    {
+        holder.onDestroyView();
     }
 
     @Override

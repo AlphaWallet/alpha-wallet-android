@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,13 +21,18 @@ import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
@@ -42,9 +49,13 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 
 /**
  * Created by James on 22/01/2018.
@@ -79,7 +90,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     private SystemView systemView;
     private ProgressBar progressView;
-    private RecyclerView list;
     private FinishReceiver finishReceiver;
     private CertifiedToolbarView toolbarView;
     private FunctionButtonBar functionBar;
@@ -91,6 +101,9 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private final Handler handler = new Handler();
     private int checkVal;
     private int itemViewHeight;
+
+    private RecyclerView tokenView;
+    private ActivityHistoryList activityHistoryList = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -116,7 +129,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
         testView = findViewById(R.id.test_web3);
 
-        list = findViewById(R.id.listTickets);
+        tokenView = findViewById(R.id.token_view);
         toolbarView = findViewById(R.id.toolbar);
 
         viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
@@ -129,8 +142,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
         functionBar = findViewById(R.id.layoutButtons);
 
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setHapticFeedbackEnabled(true);
+        tokenView.setLayoutManager(new LinearLayoutManager(this));
+        tokenView.setHapticFeedbackEnabled(true);
 
         finishReceiver = new FinishReceiver(this);
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
@@ -147,6 +160,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         }
 
         viewModel.checkForNewScript(token); //check for updated script
+        setUpRecentTransactionsView();
     }
 
     private void loadItemViewHeight()
@@ -380,7 +394,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         functionBar.setWalletType(wallet.type);
-        list.setAdapter(adapter);
+        tokenView.setAdapter(adapter);
     }
 
     private void errorInsufficientFunds(Token currency)
@@ -410,5 +424,19 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    private void setUpRecentTransactionsView()
+    {
+        if (activityHistoryList != null) return;
+        activityHistoryList = findViewById(R.id.history_list);
+        ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
+                viewModel.getAssetDefinitionService());
+
+        adapter.setDefaultWallet(wallet);
+
+        activityHistoryList.setupAdapter(adapter);
+        activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
+                token, BigInteger.ZERO, HISTORY_LENGTH);
     }
 }

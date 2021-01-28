@@ -19,7 +19,7 @@ import java.math.BigInteger;
 
 //TODO: Refactor when we add token type to token class
 public class ConfirmationRouter {
-    public void open(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails, int chainId) {
+    public void open(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, BigInteger gasPrice, String ensDetails, int chainId) {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_TO_ADDRESS, to);
         intent.putExtra(C.EXTRA_AMOUNT, amount.toString());
@@ -29,6 +29,7 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
         intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
+        intent.putExtra(C.EXTRA_GAS_PRICE, gasPrice.toString());
         int tokenType = ConfirmationType.ETH.ordinal();
         if (sendingTokens) tokenType = ConfirmationType.ERC20.ordinal();
         intent.putExtra(C.TOKEN_TYPE, tokenType);

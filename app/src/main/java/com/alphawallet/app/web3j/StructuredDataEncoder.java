@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,8 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Pair;
 import org.web3j.utils.Numeric;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.convertArgToBytes;
+import static org.web3j.crypto.Hash.hash;
 import static org.web3j.crypto.Hash.sha3;
 import static org.web3j.crypto.Hash.sha3String;
 
@@ -166,6 +169,10 @@ public class StructuredDataEncoder {
             }
         }
 
+        if (dimensions.size() == 0) {
+            dimensions.add(Integer.parseInt("-1"));
+        }
+
         return dimensions;
     }
 
@@ -234,6 +241,64 @@ public class StructuredDataEncoder {
         return flattenedArray;
     }
 
+    private byte[] convertToEncodedItem(String baseType, Object data) {
+        byte[] hashBytes;
+        try {
+            if (baseType.toLowerCase().startsWith("uint") || baseType.toLowerCase().startsWith("int")) {
+                hashBytes = convertToBigInt(data).toByteArray();
+            }
+            else if (baseType.equals("string")) {
+                hashBytes = ((String) data).getBytes();
+            }
+            else if (baseType.equals("bytes")) {
+                hashBytes = Numeric.hexStringToByteArray((String) data);
+            }
+            else {
+                byte[] b = convertArgToBytes((String) data);
+                BigInteger bi = new BigInteger(1, b);
+                hashBytes = Numeric.toBytesPadded(bi, 32);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            hashBytes = new byte[0];
+        }
+
+        return hashBytes;
+    }
+
+    private List<Object> getArrayItems(StructuredData.Entry field, Object value)
+    {
+        List<Integer> expectedDimensions =
+                getArrayDimensionsFromDeclaration(field.getType());
+        // This function will itself give out errors in case
+        // that the data is not a proper array
+        List<Integer> dataDimensions = getArrayDimensionsFromData(value);
+
+        final String format =
+                String.format(
+                        "Array Data %s has dimensions %s, "
+                                + "but expected dimensions are %s",
+                        value.toString(),
+                        dataDimensions.toString(),
+                        expectedDimensions.toString());
+        if (expectedDimensions.size() != dataDimensions.size()) {
+            // Ex: Expected a 3d array, but got only a 2d array
+            throw new RuntimeException(format);
+        }
+        for (int i = 0; i < expectedDimensions.size(); i++) {
+            if (expectedDimensions.get(i) == -1) {
+                // Skip empty or dynamically declared dimensions
+                continue;
+            }
+            if (!expectedDimensions.get(i).equals(dataDimensions.get(i))) {
+                throw new RuntimeException(format);
+            }
+        }
+
+        return flattenMultidimensionalArray(value);
+    }
+
     @SuppressWarnings("unchecked")
     public byte[] encodeData(String primaryType, HashMap<String, Object> data)
             throws RuntimeException {
@@ -249,6 +314,8 @@ public class StructuredDataEncoder {
         // Add field contents
         for (StructuredData.Entry field : types.get(primaryType)) {
             Object value = data.get(field.getName());
+
+            if (value == null) continue;
 
             if (field.getType().equals("string")) {
                 encTypes.add("bytes32");
@@ -268,41 +335,22 @@ public class StructuredDataEncoder {
                 encValues.add(Numeric.hexStringToByteArray((String) value));
             } else if (arrayTypePattern.matcher(field.getType()).find()) {
                 String baseTypeName = field.getType().substring(0, field.getType().indexOf('['));
-                List<Integer> expectedDimensions =
-                        getArrayDimensionsFromDeclaration(field.getType());
-                // This function will itself give out errors in case
-                // that the data is not a proper array
-                List<Integer> dataDimensions = getArrayDimensionsFromData(value);
-
-                final String format =
-                        String.format(
-                                "Array Data %s has dimensions %s, "
-                                        + "but expected dimensions are %s",
-                                value.toString(),
-                                dataDimensions.toString(),
-                                expectedDimensions.toString());
-                if (expectedDimensions.size() != dataDimensions.size()) {
-                    // Ex: Expected a 3d array, but got only a 2d array
-                    throw new RuntimeException(format);
-                }
-                for (int i = 0; i < expectedDimensions.size(); i++) {
-                    if (expectedDimensions.get(i) == -1) {
-                        // Skip empty or dynamically declared dimensions
-                        continue;
-                    }
-                    if (!expectedDimensions.get(i).equals(dataDimensions.get(i))) {
-                        throw new RuntimeException(format);
-                    }
-                }
-
-                List<Object> arrayItems = flattenMultidimensionalArray(value);
+                List<Object> arrayItems = getArrayItems(field, value);
                 ByteArrayOutputStream concatenatedArrayEncodingBuffer = new ByteArrayOutputStream();
+
                 for (Object arrayItem : arrayItems) {
-                    byte[] arrayItemEncoding =
-                            encodeData(baseTypeName, (HashMap<String, Object>) arrayItem);
+                    byte[] arrayItemEncoding;
+                    if (types.containsKey(baseTypeName)) {
+                        arrayItemEncoding = sha3(encodeData(baseTypeName, (HashMap<String, Object>) arrayItem)); //need to hash each user type before adding
+                    }
+                    else {
+                        arrayItemEncoding = convertToEncodedItem(baseTypeName, arrayItem); //add raw item, packed to 32 bytes
+                    }
+
                     concatenatedArrayEncodingBuffer.write(
                             arrayItemEncoding, 0, arrayItemEncoding.length);
                 }
+
                 byte[] concatenatedArrayEncodings = concatenatedArrayEncodingBuffer.toByteArray();
                 byte[] hashedValue = sha3(concatenatedArrayEncodings);
                 encTypes.add("bytes32");
@@ -312,11 +360,7 @@ public class StructuredDataEncoder {
                 encTypes.add(field.getType());
                 // convert to BigInteger for ABI constructor compatibility
                 try {
-                    if (value.toString().startsWith("0x")) {
-                        encValues.add(Numeric.toBigInt(value.toString()));
-                    } else {
-                        encValues.add(new BigInteger(value.toString()));
-                    }
+                    encValues.add(convertToBigInt(value));
                 } catch (NumberFormatException | NullPointerException e) {
                     encValues.add(value); // value null or failed to convert, fallback to add string as before
                 }
@@ -362,9 +406,16 @@ public class StructuredDataEncoder {
                                 typeClazz.getSimpleName()));
             }
         }
-        byte[] result = baos.toByteArray();
 
-        return result;
+        return baos.toByteArray();
+    }
+
+    private BigInteger convertToBigInt(Object value) throws NumberFormatException, NullPointerException {
+        if (value.toString().startsWith("0x")) {
+            return Numeric.toBigInt(value.toString());
+        } else {
+            return new BigInteger(value.toString());
+        }
     }
 
     public byte[] hashMessage(String primaryType, HashMap<String, Object> data)
@@ -423,12 +474,6 @@ public class StructuredDataEncoder {
         validateStructuredData(tempJSONMessageObject);
 
         return tempJSONMessageObject;
-    }
-
-    @SuppressWarnings("unchecked")
-    public byte[] hashStructuredData() throws RuntimeException {
-
-        return sha3(getStructuredData());
     }
 
     @SuppressWarnings("unchecked")

@@ -1,0 +1,53 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ProgressBar
+        android:id="@+id/_progress_bar_waiting"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:rotation="270"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal"
+        android:progressDrawable="@drawable/indeterminate_gradient_ring"
+        android:background="@drawable/indeterminate_drawable_grey"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/_progress_bar_main"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:rotation="270"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal"
+        android:progressDrawable="@drawable/item_circle_progress"
+        android:background="@drawable/indeterminate_drawable_grey"
+        android:visibility="visible"
+        android:max="500"
+        android:progress="0"/>
+
+    <ProgressBar
+        android:id="@+id/_progress_bar_knob"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal"
+        android:progressDrawable="@drawable/rotate_knobkerry"
+        android:visibility="visible"
+        android:max="500"
+        android:progress="0"/>
+
+    <ImageView
+        android:id="@+id/_progress_complete"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:src="@drawable/ic_correct"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/white"
+        android:visibility="gone"/>
+
+</RelativeLayout>

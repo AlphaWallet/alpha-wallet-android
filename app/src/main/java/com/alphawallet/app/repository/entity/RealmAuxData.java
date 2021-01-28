@@ -6,7 +6,10 @@ import android.text.TextUtils;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EventResult;
+import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -61,6 +64,21 @@ public class RealmAuxData extends RealmObject
         String[] split = instanceKey.split("-");
         if (split.length > 1) return split[1];
         else return "";
+    }
+
+    public int getExtendId()
+    {
+        String[] split = instanceKey.split("-");
+        if (split.length > 3)
+        {
+            String extendId = split[3];
+            if (extendId != null && extendId.length() > 0 && Character.isDigit(extendId.charAt(0)))
+            {
+                return Integer.parseInt(extendId);
+            }
+        }
+
+        return 0;
     }
 
     public void setChainId(int chainId)
@@ -157,6 +175,31 @@ public class RealmAuxData extends RealmObject
         }
     }
 
+    public String getDetailAddress()
+    {
+        Map<String, EventResult> resultMap = getEventResultMap();
+        switch (getFunctionId())
+        {
+            case "sent":
+                if (resultMap.containsKey("to")) return resultMap.get("to").value;
+                break;
+            case "received":
+                if (resultMap.containsKey("from")) return resultMap.get("from").value;
+                break;
+            case "ownerApproved":
+                if (resultMap.containsKey("spender")) return resultMap.get("spender").value;
+                break;
+            case "approvalObtained":
+                if (resultMap.containsKey("owner")) return resultMap.get("owner").value;
+                break;
+            default:
+                //use name of event
+                break;
+        }
+
+        return getEventName();
+    }
+
     public String getDetail(Context ctx, Transaction tx, final String itemView)
     {
         Map<String, EventResult> resultMap = getEventResultMap();
@@ -183,16 +226,16 @@ public class RealmAuxData extends RealmObject
         switch (getFunctionId())
         {
             case "sent":
-                if (resultMap.containsKey("to")) return ctx.getString(R.string.sent_to, resultMap.get("to").value);
+                if (resultMap.containsKey("to")) return ctx.getString(R.string.sent_to, ENSHandler.displayAddressOrENS(ctx, resultMap.get("to").value));
                 break;
             case "received":
-                if (resultMap.containsKey("from")) return ctx.getString(R.string.from, resultMap.get("from").value);
+                if (resultMap.containsKey("from")) return ctx.getString(R.string.from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("from").value));
                 break;
             case "ownerApproved":
-                if (resultMap.containsKey("spender")) return ctx.getString(R.string.approval_granted_to, resultMap.get("spender").value);
+                if (resultMap.containsKey("spender")) return ctx.getString(R.string.approval_granted_to, ENSHandler.displayAddressOrENS(ctx, resultMap.get("spender").value));
                 break;
             case "approvalObtained":
-                if (resultMap.containsKey("owner")) return ctx.getString(R.string.approval_obtained_from, resultMap.get("owner").value);
+                if (resultMap.containsKey("owner")) return ctx.getString(R.string.approval_obtained_from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("owner").value));
                 break;
             default:
                 //use name of event
@@ -203,24 +246,25 @@ public class RealmAuxData extends RealmObject
         return tokenId + " " + result;
     }
 
-    public String getTitle(Context ctx, String sym)
+    public String getTitle(Context ctx)
     {
         //TODO: pick up item-view
         //catch standard Token events
         switch (getFunctionId())
         {
             case "sent":
-                return ctx.getString(R.string.activity_sent, sym);
+                return ctx.getString(R.string.activity_sent);
             case "received":
-                return ctx.getString(R.string.activity_received, sym);
+                return ctx.getString(R.string.activity_received);
             case "ownerApproved":
-                return ctx.getString(R.string.activity_approved, sym);
+                return ctx.getString(R.string.activity_approved);
             case "approvalObtained":
-                return ctx.getString(R.string.activity_approval_granted, sym);
+                return ctx.getString(R.string.activity_approval_granted);
             default:
+                //already set up
+                return getFunctionId();
                 //display non indexed value
                 //getString(R.string.valueSymbol, transactionValue, sym)
-                return ctx.getString(R.string.valueSymbol, getFunctionId(), sym);
         }
     }
 
@@ -228,18 +272,6 @@ public class RealmAuxData extends RealmObject
         NAME,
         TYPE,
         RESULT
-    }
-
-    public static class EventResult
-    {
-        public final String type;
-        public final String value;
-
-        public EventResult(String t, String v)
-        {
-            type = t;
-            value = v;
-        }
     }
 
     public Map<String, EventResult> getEventResultMap()

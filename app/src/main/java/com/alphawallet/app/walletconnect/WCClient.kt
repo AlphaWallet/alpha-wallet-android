@@ -1,7 +1,7 @@
 package com.alphawallet.app.walletconnect
 
 import android.util.Log
-import com.alphawallet.app.util.Utils
+import com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
@@ -260,6 +260,8 @@ open class WCClient(
                         .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
+                chainId = param.chainId?.toInt()
+                if (chainId == null) chainId = MAINNET_ID
                 onSessionRequest(request.id, param.peerMeta)
             }
             WCMethod.SESSION_UPDATE -> {

@@ -5,15 +5,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
-import com.alphawallet.token.entity.ContractAddress;
 
 import java.util.List;
 
@@ -22,7 +20,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 /**
  * Created by JB on 26/06/2020.
@@ -130,6 +127,11 @@ public class ActivityViewModel extends BaseViewModel
     public Realm getRealmInstance()
     {
         return fetchTransactionsInteract.getRealmInstance(wallet.getValue());
+    }
+
+    public Transaction getTransaction(String hash)
+    {
+        return fetchTransactionsInteract.fetchCached(wallet.getValue().address, hash);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

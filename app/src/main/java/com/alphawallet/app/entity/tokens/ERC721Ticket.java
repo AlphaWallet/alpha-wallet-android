@@ -6,13 +6,13 @@ import android.os.Parcelable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionOperation;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
@@ -219,18 +219,15 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
+    public String convertValue(String value, int precision)
+    {
+        return value;
+    }
+
+    @Override
     public boolean getIsSent(Transaction transaction)
     {
-        boolean isSent = true;
-        TransactionOperation operation = transaction.operations == null
-                                                 || transaction.operations.length == 0 ? null : transaction.operations[0];
-
-        if (operation != null && operation.contract instanceof ERC875ContractTransaction)
-        {
-            ERC875ContractTransaction ct = (ERC875ContractTransaction) operation.contract;
-            if (ct.type > 0) isSent = false;
-        }
-        return isSent;
+        return transaction.isNFTSent(getWallet());
     }
 
     @Override
@@ -257,5 +254,30 @@ public class ERC721Ticket extends Token implements Parcelable {
         {
             //
         }
+    }
+
+    @Override
+    public String getTransferValue(TransactionInput txInput, int precision)
+    {
+        return getTransferValueRaw(txInput).toString();
+    }
+
+    @Override
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        if (txInput != null && txInput.arrayValues.size() > 1)
+        {
+            return BigInteger.valueOf(txInput.arrayValues.size());
+        }
+        else
+        {
+            return BigInteger.ONE;
+        }
+    }
+
+    @Override
+    public BigDecimal getBalanceRaw()
+    {
+        return new BigDecimal(getArrayBalance().size());
     }
 }

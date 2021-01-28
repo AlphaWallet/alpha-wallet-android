@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -42,19 +43,37 @@
                     android:id="@+id/token_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     app:showStatus="true"
                     app:largeIcon="true" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp6"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/event_action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    tools:text="Sent ETH"
+                    android:fontFamily="@font/font_regular"
+                    tools:text="Sent"
                     android:textColor="@color/black"
-                    android:layout_marginTop="@dimen/dp6"
-                    android:layout_marginBottom="10dp"
                     android:textSize="@dimen/sp17" />
+
+                <TextView
+                    android:id="@+id/event_action_symbol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_semibold"
+                    android:layout_marginStart="4dp"
+                    tools:text="ETH"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/sp20" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/event_amount"
@@ -68,19 +87,14 @@
                     android:layout_marginTop="@dimen/dp16"
                     android:textSize="@dimen/sp24" />
 
-                <TextView
-                    android:id="@+id/text_chain_name"
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/chain_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dp5"
                     android:layout_marginEnd="@dimen/dp8"
                     android:layout_marginStart="@dimen/dp5"
-                    android:background="@drawable/background_status_pending"
-                    android:fontFamily="@font/font_bold"
-                    android:padding="2dp"
-                    android:text="@string/action_clear"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
+                    custom:font_size="10"
                     android:visibility="gone" />
 
                 <LinearLayout
@@ -113,6 +127,11 @@
                     android:orientation="horizontal"/>
 
                 <include layout="@layout/item_ticket" />
+
+                <com.alphawallet.app.widget.EventDetailWidget
+                    android:id="@+id/event_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
         </ScrollView>

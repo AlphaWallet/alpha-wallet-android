@@ -1,14 +1,11 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,17 +14,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.SettingsItemView;
 
 import javax.inject.Inject;
@@ -38,7 +39,8 @@ import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
-public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener {
+public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback
+{
     @Inject
     WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
@@ -52,6 +54,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private ImageView walletSelectedIcon;
     private SettingsItemView deleteWalletSetting;
     private SettingsItemView backUpSetting;
+    private InputAddress inputAddress;
     private LinearLayout successOverlay;
     private AWalletAlertDialog aDialog;
     private final Handler handler = new Handler();
@@ -59,7 +62,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private Wallet wallet;
     private int walletCount;
     private boolean isNewWallet;
-    private Boolean isTaskRunning;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -106,7 +108,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     private void onTaskStatusChanged(Boolean isTaskRunning) {
-        this.isTaskRunning = isTaskRunning;
+
     }
 
     private void onSaved(Integer integer) {
@@ -165,6 +167,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         deleteWalletSetting = findViewById(R.id.delete);
         backUpSetting = findViewById(R.id.setting_backup);
         walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
+        inputAddress = findViewById(R.id.input_ens);
         walletSelectedIcon.setOnClickListener(this);
 
         walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
@@ -196,6 +199,9 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         }
 
         walletSelectedIcon.setImageResource(R.drawable.ic_copy);
+
+        inputAddress.setAddress(wallet.ENSname);
+        inputAddress.setAddressCallback(this);
     }
 
     private void onDeleteWalletSettingClicked() {
@@ -314,10 +320,13 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     @Override
     public void onBackPressed() {
-        if (isNewWallet) {
-            viewModel.showHome(this);
-        } else {
-            finish();
+        if (inputAddress == null)
+        {
+            addressReady(null, null);
+        }
+        else
+        {
+            inputAddress.getAddress(false); //fetch the address and ENS name from the input view. Note - if ENS is still finishing this skips the waiting
         }
     }
 
@@ -347,5 +356,27 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         clipboard.setPrimaryClip(clip);
 
         Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void addressReady(String address, String ensName)
+    {
+        //update ENS name if address matches and either there's no ENS name or it's a different ENS name
+        //(user could have multiple ENS names and wants their wallet to be labelled with a different one)
+        if (!TextUtils.isEmpty(address)
+                && wallet.address.equalsIgnoreCase(address)
+                && !TextUtils.isEmpty(ensName)
+                && (TextUtils.isEmpty(wallet.ENSname) || !ensName.equalsIgnoreCase(wallet.ENSname))) //Wallet ENS currently empty or new ENS name is different
+        {
+            wallet.ENSname = ensName;
+            //update database
+            viewModel.storeWallet(wallet);
+        }
+
+        if (isNewWallet) {
+            viewModel.showHome(this);
+        } else {
+            finish();
+        }
     }
 }

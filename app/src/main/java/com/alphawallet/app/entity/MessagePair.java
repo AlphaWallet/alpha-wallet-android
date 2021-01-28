@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 
 /**
@@ -44,5 +45,11 @@ public class MessagePair implements Signable
     @Override
     public CharSequence getUserMessage() {
         return "";
+    }
+
+    @Override
+    public SignMessageType getMessageType()
+    {
+        return null;
     }
 }

@@ -12,6 +12,10 @@ public abstract class C {
     public static final int UPDATE_CURRENCY = 1014;
     public static final int REQUEST_UNIVERSAL_SCAN = 1015;
 
+    public static final int BARCODE_READER_REQUEST_CODE = 1;
+    public static final int SET_GAS_SETTINGS = 2;
+    public static final int COMPLETED_TRANSACTION = 3;
+
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
     public static final String POA_NETWORK_NAME = "POA";
@@ -23,7 +27,7 @@ public abstract class C {
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";
-    public static final String BINANCE_TEST_NETWORK = "Binance (Test)";
+    public static final String BINANCE_TEST_NETWORK = "BSC TestNet";
     public static final String BINANCE_MAIN_NETWORK = "Binance";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
@@ -60,6 +64,8 @@ public abstract class C {
     public static final String EXTRA_AMOUNT = "AMOUNT";
     public static final String EXTRA_GAS_PRICE = "GAS_PRICE";
     public static final String EXTRA_GAS_LIMIT = "GAS_LIMIT";
+    public static final String EXTRA_CUSTOM_GAS_LIMIT = "CUSTOM_GAS_LIMIT";
+    public static final String EXTRA_GAS_LIMIT_PRESET = "GAS_LIMIT_PRESET";
     public static final String EXTRA_ACTION_NAME = "NAME";
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
@@ -116,13 +122,10 @@ public abstract class C {
             "com.stormbird.wallet.CHANGE_CURRENCY";
     public static final String RESET_TRANSACTIONS =
             "com.stormbird.wallet.RESET_TRANSACTIONS";
+    public static final String WALLET_CONNECT_REQUEST =
+            "com.stormbird.wallet.WALLET_CONNECT";
 
-    public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
-    public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
-    public static final String CHANGELLY_REF_ID = "968d4f0f0bf9";
-    public static final String DONATION_ADDRESS = "0xb1aD48527d694D30401D082bcD21a33F41811501";
-
-    public static final String DEFAULT_GAS_PRICE = "30000000000";
+    public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
     public static final String DEFAULT_GAS_LIMIT = "90000";
     public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
@@ -132,9 +135,9 @@ public abstract class C {
     public static final long GAS_PER_BYTE = 310; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_DEFAULT = 90000L;
-    public static final long GAS_LIMIT_MAX = 900000L;
-    public static final long GAS_PRICE_MIN = 1000000000L;
-    public static final long NETWORK_FEE_MAX = 90000000000000000L;
+    public static final long GAS_LIMIT_CONTRACT = 1000000L;
+    public static final long GAS_LIMIT_MAX = 1300000L;
+    public static final long GAS_PRICE_MIN = 400000000L;
     public static final int ETHER_DECIMALS = 18;
 
     //FOR DEMOS ETC
@@ -201,4 +204,7 @@ public abstract class C {
     public static final String AN_SEED_PHRASE = "Seed Phrase";
     public static final String AN_KEYSTORE = "Keystore";
     public static final String AN_PRIVATE_KEY = "Private Key";
+    public static final String AN_USE_GAS = "Gas Settings";
+    public static final String AN_CALL_ACTIONSHEET = "Use ActionSheet";
+    public static final String APP_NAME = "PACKAGE_NAME";
 }

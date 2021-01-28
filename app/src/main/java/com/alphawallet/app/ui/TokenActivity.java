@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,13 +23,12 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
@@ -38,6 +36,8 @@ import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.app.widget.ChainName;
+import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.TokenIcon;
@@ -50,10 +50,8 @@ import com.alphawallet.token.tools.TokenDefinition;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,9 +65,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
+import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
@@ -92,15 +90,16 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     private Token token;
     private StringBuilder attrs;
     private Web3TokenView tokenView;
+    private EventDetailWidget eventDetail;
     private int parsePass;
     private final Map<String, String> args = new HashMap<>();
     private TSTokenView scriptViewData;
     private BigInteger tokenId;
     private Realm realm;
-    private RealmResults<RealmTransaction> realmTransactionUpdates;
     private final Handler handler = new Handler();
     private boolean isFromTokenHistory = false;
     private long pendingStart = 0;
+
     @Nullable
     private Disposable pendingTxUpdate;
 
@@ -123,6 +122,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         findViewById(R.id.layout_select_ticket).setVisibility(View.GONE);
 
         tokenId = BigInteger.ZERO;
+        eventDetail = findViewById(R.id.event_detail);
     }
 
     private void setupViewModel()
@@ -149,6 +149,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
 
         viewModel.getCurrentWallet();
+        viewModel.restartServices();
     }
 
     @Override
@@ -170,7 +171,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     public void onDestroy()
     {
         super.onDestroy();
-        if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
         stopPendingUpdate();
     }
@@ -207,8 +207,9 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         TextView eventTime = findViewById(R.id.event_time);
         TextView eventAmount = findViewById(R.id.event_amount);
         TextView eventAction = findViewById(R.id.event_action);
+        TextView eventActionSymbol = findViewById(R.id.event_action_symbol);
         //date
-        eventTime.setText(localiseUnixTime(transaction.timeStamp));
+        eventTime.setText(Utils.localiseUnixTime(getApplicationContext(), transaction.timeStamp));
         //icon
         token = getOperationToken(transaction);
         String sym = token != null ? token.tokenInfo.symbol : ETH_SYMBOL;
@@ -218,11 +219,17 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
         String operationName = token.getOperationName(transaction, this);
 
-        eventAction.setText(getString(R.string.valueSymbol, operationName, sym));
+        eventAction.setText(operationName);
+        eventActionSymbol.setText(sym);
         //amount
         String transactionValue = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
 
-        if (TextUtils.isEmpty(transactionValue))
+        if (!token.shouldShowSymbol(transaction) && transaction.input.length() >= FUNCTION_LENGTH)
+        {
+            eventAmount.setText(transaction.input.substring(0, FUNCTION_LENGTH));
+            eventActionSymbol.setText(getString(R.string.sent_to, token.getFullName()));
+        }
+        else if (TextUtils.isEmpty(transactionValue))
         {
             eventAmount.setVisibility(View.GONE);
         }
@@ -231,39 +238,26 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             eventAmount.setText(transactionValue);
         }
 
-        if (token != null && token.getTxStatus(transaction) == StatusType.PENDING)
+        if (transaction.isPending())
         {
             //listen for token completion
-            setupPendingListener(wallet, transaction.hash);
+            setupPendingListener(wallet);
             pendingStart = transaction.timeStamp;
+            icon.startPendingSpinner(transaction.timeStamp, viewModel.fetchExpectedTxTime(transactionHash)/1000);
+        }
+
+        String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), viewModel.getTokensService().getNetworkName(token.tokenInfo.chainId));
+        if (!TextUtils.isEmpty(supplementalTxt))
+        {
+            eventDetail.setupTransactionView(transaction, token, viewModel.getAssetDefinitionService(), supplementalTxt);
         }
 
         setChainName(transaction);
     }
 
-    private void setupPendingListener(Wallet wallet, String hash)
+    private void setupPendingListener(Wallet wallet)
     {
         realm = viewModel.getRealmInstance(wallet);
-        realmTransactionUpdates = realm.where(RealmTransaction.class)
-                .equalTo("hash", hash)
-                .findAllAsync();
-
-        realmTransactionUpdates.addChangeListener(realmTransactions -> {
-            if (realmTransactions.size() > 0)
-            {
-                RealmTransaction rTx = realmTransactions.first();
-                if (rTx != null && !rTx.isPending())
-                {
-                    Transaction tx = TransactionsRealmCache.convert(rTx);
-                    //tx written, update icon
-                    handler.post(() -> {
-                        icon.setStatusIcon(token.getTxStatus(tx));
-                    });
-                    stopPendingUpdate();
-                }
-            }
-        });
-
         startPendingUpdate();
     }
 
@@ -279,8 +273,26 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
                         long pendingTimeInSeconds = (System.currentTimeMillis() / 1000) - pendingStart;
                         TextView pendingText = findViewById(R.id.pending_time);
                         if (pendingText != null) pendingText.setText(getString(R.string.transaction_pending_for, Utils.convertTimePeriodInSeconds(pendingTimeInSeconds, this)));
+                        checkForUpdate();
                     });
                 }).subscribe();
+    }
+
+    private void checkForUpdate()
+    {
+        RealmTransaction realmTransaction = realm.where(RealmTransaction.class)
+                .equalTo("hash", transactionHash)
+                .findFirst();
+
+        if (realmTransaction != null && !realmTransaction.isPending())
+        {
+            Transaction tx = TransactionsRealmCache.convert(realmTransaction);
+            //tx written, update icon
+            handler.post(() -> {
+                icon.setStatusIcon(token.getTxStatus(tx));
+            });
+            stopPendingUpdate();
+        }
     }
 
     private void stopPendingUpdate()
@@ -290,6 +302,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         if (txPending != null) txPending.setVisibility(View.GONE);
 
         if (pendingTxUpdate != null && !pendingTxUpdate.isDisposed()) pendingTxUpdate.dispose();
+        pendingTxUpdate = null;
     }
 
     private Token getOperationToken(Transaction tx)
@@ -315,9 +328,10 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             TextView eventTime = findViewById(R.id.event_time);
             TextView eventAmount = findViewById(R.id.event_amount);
             TextView eventAction = findViewById(R.id.event_action);
+            TextView eventActionSymbol = findViewById(R.id.event_action_symbol);
             //handle info
             //date
-            eventTime.setText(localiseUnixTime(item.getResultTime()));
+            eventTime.setText(Utils.localiseUnixTime(getApplicationContext(), item.getResultTime()));
             //icon
             token = viewModel.getToken(item.getChainId(), item.getTokenAddress());
             tokenId = determineTokenId(item);
@@ -332,7 +346,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             //status
             icon.setStatusIcon(item.getEventStatusType());
             //amount
-            String transactionValue = getEventAmount(item, transaction);
+            String transactionValue = getEventAmount(item, transaction, true);
             if (TextUtils.isEmpty(transactionValue))
             {
                 eventAmount.setVisibility(View.GONE);
@@ -342,12 +356,13 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
                 eventAmount.setText(getString(R.string.valueSymbol, transactionValue, sym));
             }
             //action
-            eventAction.setText(item.getTitle(getApplicationContext(), sym));
+            eventAction.setText(item.getTitle(getApplicationContext()));
+            eventActionSymbol.setText(sym);
 
             //Is the token an NFT and does the event hold tokenId data?
             if (token != null)
             {
-                populateActivityInfo(item);
+                populateActivityInfo(item, getEventAmount(item, transaction, false));
             }
 
             setChainName(transaction);
@@ -367,54 +382,60 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
     }
 
-    private void populateActivityInfo(RealmAuxData item)
+    private void populateActivityInfo(RealmAuxData item, String transactionValue)
     {
         //check for TokenScript
         TokenDefinition def = viewModel.getAssetDefinitionService().getAssetDefinition(item.getChainId(), item.getTokenAddress());
-        if (def == null) return;
 
         //corresponding view for this activity?
         String cardName = item.getFunctionId();
-        //look up in activities
-        TSActivityView view = def.getActivityCards().get(cardName);
 
-        if (view != null && view.getView(ASSET_DETAIL_VIEW_NAME) != null)
+        if (def != null)
         {
-            scriptViewData = view.getView(ASSET_DETAIL_VIEW_NAME);
-            tokenView.setChainId(token.tokenInfo.chainId);
-            tokenView.setWalletAddress(new Address(token.getWallet()));
-            tokenView.setRpcUrl(token.tokenInfo.chainId);
-            tokenView.setOnReadyCallback(this);
-            tokenView.setOnSetValuesListener(this);
-            tokenView.setKeyboardListenerCallback(this);
-            parsePass = 1;
-            viewModel.getAssetDefinitionService().clearResultMap();
-            args.clear();
-
-            //corresponding view. Populate the view
-            getAttrs(item);
+            //look up in activities
+            TSActivityView view = def.getActivityCards().get(cardName);
+            if (view != null)
+            {
+                scriptViewData = view.getView(ASSET_DETAIL_VIEW_NAME);
+            }
         }
+
+        if (scriptViewData == null)
+        {
+            renderDefaultView(item, transactionValue);
+            return;
+        }
+
+        tokenView.setChainId(token.tokenInfo.chainId);
+        tokenView.setWalletAddress(new Address(token.getWallet()));
+        tokenView.setRpcUrl(token.tokenInfo.chainId);
+        tokenView.setOnReadyCallback(this);
+        tokenView.setOnSetValuesListener(this);
+        tokenView.setKeyboardListenerCallback(this);
+        parsePass = 1;
+        viewModel.getAssetDefinitionService().clearResultMap();
+        args.clear();
+
+        //corresponding view. Populate the view
+        getAttrs(item);
     }
 
-    private String localiseUnixTime(long timeStampInSec)
+    private void renderDefaultView(RealmAuxData item, String transactionValue)
     {
-        Date date = new java.util.Date(timeStampInSec* DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
-        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
-        return timeFormat.format(date) + " | " + dateFormat.format(date);
+        eventDetail.setupView(item, token, viewModel.getAssetDefinitionService(), transactionValue);
     }
 
-    private String getEventAmount(RealmAuxData eventData, Transaction tx)
+    private String getEventAmount(RealmAuxData eventData, Transaction tx, boolean addSign)
     {
-        Map<String, RealmAuxData.EventResult> resultMap = eventData.getEventResultMap();
+        Map<String, EventResult> resultMap = eventData.getEventResultMap();
         int decimals = token != null ? token.tokenInfo.decimals : C.ETHER_DECIMALS;
         String value = "";
         switch (eventData.getFunctionId())
         {
             case "received":
-                value += "+ ";
+                if (addSign) value += "+ ";
             case "sent":
-                if (value.length() == 0) value += "- ";
+                if (value.length() == 0 && addSign) value += "- ";
                 if (resultMap.containsKey("amount"))
                 {
                     value += BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("amount").value),
@@ -456,7 +477,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             //add result map values
             if (eventData != null)
             {
-                Map<String, RealmAuxData.EventResult> resultMap = eventData.getEventResultMap();
+                Map<String, EventResult> resultMap = eventData.getEventResultMap();
                 for (String resultKey : resultMap.keySet())
                 {
                     TokenScriptResult.addPair(attrs, resultKey, resultMap.get(resultKey).value);
@@ -515,12 +536,11 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void setChainName(Transaction transaction)
     {
-        TextView chainName = findViewById(R.id.text_chain_name);
-        if (transaction.chainId != MAINNET_ID && token != null && !token.isEthereum())
+        ChainName chainName = findViewById(R.id.chain_name);
+        if (transaction.chainId != MAINNET_ID)
         {
             chainName.setVisibility(View.VISIBLE);
-            Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            chainName.setText(token.getNetworkName());
+            chainName.setChainID(transaction.chainId);
         }
         else
         {

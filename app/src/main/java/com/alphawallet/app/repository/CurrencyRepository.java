@@ -14,7 +14,10 @@ public class CurrencyRepository implements CurrencyRepositoryType {
             new CurrencyItem("AUD", "Australian Dollar", "$", R.drawable.ic_flags_australia),
             new CurrencyItem("CNY", "China Yuan Renminbi","¥", R.drawable.ic_flags_china),
             new CurrencyItem("INR", "Indian Rupee","₹", R.drawable.ic_flags_india),
-            new CurrencyItem("SGD", "Singapore Dollar","$", R.drawable.ic_flag_sgd)
+            new CurrencyItem("SGD", "Singapore Dollar","$", R.drawable.ic_flag_sgd),
+            new CurrencyItem("JPY", "Japanese Yen","¥", R.drawable.ic_flags_japan),
+            new CurrencyItem("KRW", "Korean Won","₩", R.drawable.ic_flags_korea),
+            new CurrencyItem("RUB", "Russian Ruble","₽", R.drawable.ic_flags_russia)
     };
 
     private final PreferenceRepositoryType preferences;
@@ -54,5 +57,14 @@ public class CurrencyRepository implements CurrencyRepositoryType {
             }
         }
         return null;
+    }
+
+    public static int getFlagByISO(String currencyIsoCode) {
+        for (CurrencyItem c : CURRENCIES) {
+            if (currencyIsoCode.equals(c.getCode())) {
+                return c.getFlag();
+            }
+        }
+        return 0;
     }
 }

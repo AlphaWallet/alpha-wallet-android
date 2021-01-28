@@ -2,6 +2,7 @@ package com.alphawallet.token.entity;
 
 import com.alphawallet.token.tools.Numeric;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
@@ -15,73 +16,56 @@ import static com.alphawallet.token.tools.Numeric.cleanHexPrefix;
 public class EthereumMessage implements Signable {
 
     public final byte[] messageBytes;
-    public final String message;
+    private final CharSequence userMessage;
     public final String displayOrigin;
     public final long leafPosition;
-    public final byte[] prehash;
+    public final byte[] prehash; //this could be supplied on-demand
     public static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
-    private final boolean isSignPersonal;
+    private final SignMessageType messageType;
 
-    public EthereumMessage(String message, String displayOrigin, long leafPosition, boolean isPersonalMessage) {
-        if (message.substring(0, 2).equals("0x"))
-        {
-            messageBytes = Numeric.hexStringToByteArray(message);
-        } else {
-            messageBytes = message.getBytes();
-        }
-
-        this.message = message;
+    public EthereumMessage(String message, String displayOrigin, long leafPosition, SignMessageType type) {
+        this.messageBytes = Numeric.hexStringToByteArray(message);
         this.displayOrigin = displayOrigin;
         this.leafPosition = leafPosition;
-        this.prehash = getEthereumMessage(messageBytes);
-        isSignPersonal = isPersonalMessage;
+        this.prehash = getEthereumMessage(message);
+        this.userMessage = message;
+        messageType = type;
     }
 
-    public EthereumMessage(String message, String displayOrigin, long leafPosition) {
-        /* this logic certainly have edge conditions, but such a
-         * problem is probably inherited from web3.js which might only
-         * passes binary data to be signed in string format with no
-         * other indicator than the leading 0x.  Anyway, the logic was
-         * like this before I encapsulate this portion of code - Weiwu
-         */
-        if (message.substring(0, 2).equals("0x"))
+    private byte[] getEthereumMessage(String message) {
+        byte[] encodedMessage;
+        if (message.startsWith("0x"))
         {
-            messageBytes = Numeric.hexStringToByteArray(message);
-        } else {
-            messageBytes = message.getBytes();
+            encodedMessage = messageBytes;
+        }
+        else
+        {
+            encodedMessage = message.getBytes();
         }
 
-        this.message = message;
-        this.displayOrigin = displayOrigin;
-        this.leafPosition = leafPosition;
-        this.prehash = messageBytes;
-        this.isSignPersonal = false;
-    }
-
-    static byte[] getEthereumMessage(byte[] message) {
-        byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(message.length)).getBytes();
-        byte[] result = new byte[prefix.length + message.length];
+        byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(encodedMessage.length)).getBytes();
+        byte[] result = new byte[prefix.length + encodedMessage.length];
         System.arraycopy(prefix, 0, result, 0, prefix.length);
-        System.arraycopy(message, 0, result, prefix.length, message.length);
+        System.arraycopy(encodedMessage, 0, result, prefix.length, encodedMessage.length);
         return result;
     }
 
     @Override
     public String getMessage()
     {
-        return this.message;
+        return this.userMessage.toString();
     }
 
     @Override
     public CharSequence getUserMessage()
     {
-        if (!isSignPersonal || !StandardCharsets.UTF_8.newEncoder().canEncode(message))
+        if (messageType != SignMessageType.SIGN_PERSONAL_MESSAGE || !StandardCharsets.UTF_8.newEncoder().canEncode(userMessage))
         {
-            return message;
+            return userMessage;
         }
         else
         {
-            return hexToUtf8(message);
+            return hexToUtf8(userMessage);
         }
     }
 
@@ -99,14 +83,19 @@ public class EthereumMessage implements Signable {
         return this.leafPosition;
     }
 
-    private String hexToUtf8(String hex) {
-        hex = cleanHexPrefix(hex);
-        ByteBuffer buff = ByteBuffer.allocate(hex.length() / 2);
+    private String hexToUtf8(CharSequence hexData) {
+        String hex = cleanHexPrefix(hexData.toString());
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         for (int i = 0; i < hex.length(); i += 2) {
-            buff.put((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
+            byteBuffer.write((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
         }
-        buff.rewind();
-        CharBuffer cb = StandardCharsets.UTF_8.decode(buff);
+        CharBuffer cb = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(byteBuffer.toByteArray()));
         return cb.toString();
+    }
+
+    @Override
+    public SignMessageType getMessageType()
+    {
+        return messageType;
     }
 }

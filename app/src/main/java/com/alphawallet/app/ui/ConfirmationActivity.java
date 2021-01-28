@@ -55,6 +55,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
@@ -118,6 +119,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
     private Web3Transaction transaction;
+    private boolean sendingAllFunds = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -166,6 +168,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
         String functionDetails = getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
+        String gasPriceStr = getIntent().getStringExtra(C.EXTRA_GAS_PRICE);
+        gasPrice = TextUtils.isEmpty(gasPriceStr) ? BigInteger.ZERO : new BigInteger(gasPriceStr);
 
         if (Utils.isAddressValid(contractAddress))
         {
@@ -203,6 +207,11 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         switch (confirmationType) {
             case ETH:
                 amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
+                if (gasPrice.compareTo(BigInteger.ZERO) > 0)
+                {
+                    amountString += getString(R.string.bracketed, getString(R.string.all_funds));
+                    sendingAllFunds = true;
+                }
                 symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
@@ -666,9 +675,27 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         // Should we add the network fee for all transactions?
         switch (confirmationType)
         {
+            case ETH:
+                if (sendingAllFunds)
+                {
+                    String amountString;
+                    if (gasSettings.gasLimit.compareTo(BigInteger.valueOf(GAS_LIMIT_MIN)) != 0) //did user adjust gas limit?
+                    {
+                        sendingAllFunds = false;
+                        amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
+                    }
+                    else
+                    {
+                        //adjust value as appropriate
+                        amount = token.balance.subtract(networkFeeBD);
+                        //patch new value
+                        amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals) + getString(R.string.bracketed, getString(R.string.all_funds));
+                    }
+                    valueText.setText(amountString);
+                }
+                break;
             case WEB3TRANSACTION:
                 BigDecimal ethValueBD = amount.add(networkFeeBD);
-
                 //convert to ETH
                 ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
                 String valueUpdate = getEthString(ethValueBD.doubleValue());
@@ -704,17 +731,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String networkFee = BalanceUtils.getScaledValue(networkFeeBD, C.ETHER_DECIMALS, 8)
                 + " " + viewModel.getNetworkSymbol(chainId);
         networkFeeText.setText(networkFee);
-
-//        hideDialog();
-//        dialog = new AWalletAlertDialog(this);
-//        dialog.setIcon(WARNING);
-//        dialog.setTitle(R.string.transaction_fail_warning);
-//        dialog.setMessage(getString(R.string.node_predicts_tx_will_fail, error.message));
-//        dialog.setButtonText(R.string.ok);
-//        dialog.setButtonListener(v -> {
-//            dialog.dismiss();
-//        });
-//        dialog.show();
     }
 
     private void onError(ErrorEnvelope error) {
@@ -755,7 +771,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
 
-        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS)
+        if (requestCode == C.SET_GAS_SETTINGS)
         {
             if (resultCode == RESULT_OK)
             {

@@ -23,6 +23,7 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
@@ -319,7 +320,7 @@ public abstract class TokenscriptFunction
                         break;
                     case "bytes":
                         if (value == null) throw new Exception("Attempt to use null value");
-                        params.add(new Bytes32(Numeric.hexStringToByteArray(value)));
+                        params.add(new DynamicBytes(Numeric.hexStringToByteArray(value)));
                         break;
                     case "bytes1":
                         params.add(new Bytes1(argValueBytes));

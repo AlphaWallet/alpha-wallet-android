@@ -2,6 +2,8 @@
 <resources>
     <!-- String related to sending -->
     <string name="action_send">Enviar</string>
+    <string name="action_send_tkn">Enviar %1$s</string>
+    <string name="recipient">Destinatario</string>
     <string name="error_field_required">Este campo es obligatorio</string>
     <string name="action_settings">Ajustes</string>
     <string name="title_account_list">Monederos</string>
@@ -44,6 +46,7 @@
     <string name="label_to">A</string>
     <string name="label_gas_limit">Límite de gas</string>
     <string name="label_gas_price">Precio del gas</string>
+    <string name="label_gas_price_gwei">Precio del gas (GWEI)</string>
     <string name="label_old_gas_price">Precio antiguo del gas</string>
     <string name="label_network_fee">Tarifa de red (máximo)</string>
     <string name="button_ok">OK</string>
@@ -52,6 +55,8 @@
     <string name="subtitle_to">A</string>
     <string name="subtitle_gas_fee">Tarifa de gas</string>
     <string name="subtitle_gas_price">Precio del gas</string>
+    <string name="subtitle_gas_used">Gas usado</string>
+    <string name="subtitle_network_fee">Tarifa de red</string>
     <string name="subtitle_transaction_num">Transacción n.º</string>
     <string name="subtitle_transaction_hash_num">Hash de la transacción n.º</string>
     <string name="subtitle_transaction_time">Hora de la transacción</string>
@@ -72,6 +77,7 @@
     <string name="error_invalid_address">Dirección no válida</string>
     <string name="error_invalid_amount">Cantidad no válida</string>
     <string name="error_transaction_failed">Error de transacción</string>
+    <string name="error_transaction_may_fail">El nodo predice que esta transacción fallará, continuar?</string>
     <string name="error_import_failed">Error al importar el token</string>
     <string name="error_must_numeric">debe ser un valor numérico.</string>
     <string name="transaction_succeeded">Transacción realizada correctamente</string>
@@ -312,6 +318,8 @@
     <string name="action_contract_info">Información del contrato</string>
     <string name="contract_address">Dirección del contrato</string>
     <string name="input_address">Dirección de Ethereum o nombre ENS</string>
+    <string name="ens_name">Nombre ENS</string>
+    <string name="enter_ens">Tu Nombre de ENS</string>
     <string name="ticket_range_expired">MagicLink expirado</string>
     <string name="ticket_not_valid">Token no válido</string>
     <string name="ticket_not_valid_body">No hay ningún contrato válido en esta dirección en esta red. El contrato podría haber sido rescindido o puede que se encuentre en una red diferente. Prueba a cambiar a \"Ropsten (Test)\".</string>
@@ -332,6 +340,7 @@
     <string name="signer_address">Dirección</string>
     <string name="requester_url">Solicitante</string>
     <string name="dialog_title_sign_message">Firmar mensaje</string>
+    <string name="dialog_title_sign_personal_message">Firmar \'Personal\' mensaje</string>
     <string name="dialog_title_sign_typed_message">Firmar \'Typed\' mensaje</string>
     <string name="dialog_reject">Rechazar</string>
     <string name="dialog_approve">Aprobar</string>
@@ -619,6 +628,7 @@
     <string name="minute_plural">%s minutos</string>
     <string name="second_single">1 segundo</string>
     <string name="second_plural">%s segundos</string>
+    <string name="never">Desconocido</string>
     <string name="transaction_pending_for">Transacción pendiente para %s</string>
     <string name="speedup_tx_description">Enviar una transacción de reemplazo con un precio del gas más alto.</string>
     <string name="cancel_tx_description">Cancelar la transacción sustituyendo la pendiente por una transacción de valor cero.</string>
@@ -646,15 +656,16 @@
     <string name="message_authentication_failed">Error de autenticación</string>
     <string name="tx_rejected">Transacción rechazada (prueba a utilizar más gas)</string>
     <string name="from">de: %1$s</string>
+    <string name="from_op">de</string>
     <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">a: %1$s</string>
     <string name="approval_granted_to">aprobado para transferir tokens: %1$s</string>
     <string name="approval_obtained_from">para gastar en nombre de: %1$s</string>
     <string name="unknown_event">Evento desconocido</string>
-    <string name="activity_sent">Enviado %1$s</string>
-    <string name="activity_received">Recibido %1$s</string>
-    <string name="activity_approved">Aprobado %1$s</string>
-    <string name="activity_approval_granted">Aprobación concedida %1$s</string>
+    <string name="activity_sent">Enviado</string>
+    <string name="activity_received">Recibido</string>
+    <string name="activity_approved">Aprobado</string>
+    <string name="activity_approval_granted">Aprobación concedida</string>
     <string name="tokenscript_call">Llamada de TokenScript:</string>
     <string name="today">Hoy</string>
     <string name="go_to_token">Ir al token</string>
@@ -670,4 +681,36 @@
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">Tokens Populares</string>
     <string name="unable_to_get_biometrics">No se puede obtener el desbloqueo Biométrico</string>
+    <string name="all_funds">Todos los fondos</string>
+    <string name="recipient_address">Dirección del destinatario</string>
+    <string name="confirm_transaction">Confirmar Transacción</string>
+    <string name="balance">Saldo</string>
+    <string name="speed_average">Velocidad media</string>
+    <string name="speed_rapid">velocidad rápida</string>
+    <string name="speed_fast">rápida velocidad</string>
+    <string name="speed_slow">Velocidad lenta</string>
+    <string name="speed_custom">Personalizar</string>
+    <string name="speed_dapp">Configuración del Dapp</string>
+    <string name="new_balance">(Nuevo: %1$s %2$s)</string>
+    <string name="set_speed_title">Velocidad de la Transacción</string>
+    <string name="gas_price_widget">Precio del gas: %1$s</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="set_your_speed">Establece tu propio</string>
+    <string name="nonce_optional">Nonce (opcional)</string>
+    <string name="calc_gas_limit">Calcular el Límite de gas</string>
+    <string name="wallet_address">Dirección del Monedero</string>
+    <string name="transaction_in_progress">Transacción en Curso</string>
+    <string name="transaction_progress_detail">The transaction is sent to the Ethereum blockchain. It might take few minutes to be confirmed by miners.</string>
+    <string name="action_show_tx_details">Show Transaction Details</string>
+    <string name="default_to">Sent %1$s %2$s to %3$s</string>
+    <string name="default_from">Received %1$s %2$s from %3$s</string>
+    <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
+    <string name="default_approve">Approved %3$s to move %1$s %2$s</string>
+    <string name="contract_call">Llamada de contrato</string>
+    <string name="insufficient_gas">Gas insuficientes</string>
+    <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
+    <string name="action_send_eth">Enviar Eth</string>
+    <string name="action_token_swap">Intercambio de tokens</string>
+    <string name="action_withdraw">Withdraw</string>
+    <string name="deposit">Deposit</string>
 </resources>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -85,6 +86,22 @@
             android:text="@string/delete_lose_funds_warning"
             android:textColor="@color/dove"
             android:textSize="13sp" />
+
+        <com.alphawallet.app.widget.InputAddress
+            android:id="@+id/input_ens"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="15dp"
+            custom:hint="@string/enter_ens"
+            custom:label="@string/ens_name"
+            custom:ens="true"
+            custom:nocam="true"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/mercury" />
 
     </LinearLayout>
 

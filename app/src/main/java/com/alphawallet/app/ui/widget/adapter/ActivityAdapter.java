@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -33,19 +34,22 @@ import com.alphawallet.app.ui.widget.entity.EventSortedItem;
 import com.alphawallet.app.ui.widget.entity.LabelSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TimestampSortedItem;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.ui.widget.entity.TransactionSortedItem;
+import com.alphawallet.app.ui.widget.entity.TransferSortedItem;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionDateHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
+import com.alphawallet.app.ui.widget.holder.TransferHolder;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback {
-    private int layoutResId = -1;
-
+public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback
+{
     private final ActivitySortedList<SortedItem> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem left, SortedItem right)
@@ -103,49 +107,38 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         tokensService = service;
     }
 
-    public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs, int layoutResId)
+    public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         tokensService = service;
-        this.layoutResId = layoutResId;
         this.dataInteract = null;
         this.assetService = svs;
     }
 
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
-        BinderViewHolder holder = null;
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE:
-                holder = new TransactionHolder(getTxLayoutId(), parent, tokensService, fetchTransactionsInteract,
+                return new TransactionHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService);
-                break;
             case EventHolder.VIEW_TYPE:
-                holder = new EventHolder(R.layout.item_event, parent, tokensService, fetchTransactionsInteract,
+                return new EventHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService, this);
-                break;
             case TransactionDateHolder.VIEW_TYPE:
-                holder = new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
-                break;
+                return new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
             case LabelSortedItem.VIEW_TYPE:
-                holder = new LabelHolder(R.layout.item_activity_label, parent);
-                break;
+                return new LabelHolder(R.layout.item_activity_label, parent);
+            case TransferHolder.VIEW_TYPE:
+                return new TransferHolder(parent, tokensService, fetchTransactionsInteract,
+                        assetService);
         }
-        return holder;
-    }
 
-    private int getTxLayoutId()
-    {
-        if (this.layoutResId != -1) {
-            //return R.layout.item_recent_transaction;
-            return R.layout.item_transaction;
-        } else {
-            return R.layout.item_transaction;
-        }
+        return null;
     }
 
     @Override
-    public void onBindViewHolder(BinderViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(BinderViewHolder holder, @SuppressLint("RecyclerView") int position)
+    {
         Bundle addition = new Bundle();
         addition.putString(TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL, wallet.address);
         holder.bind(items.get(position).value, addition);
@@ -161,6 +154,13 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         lastItemPos = position;
     }
 
+    @Override
+    public void onViewRecycled(@NonNull BinderViewHolder holder)
+    {
+        super.onViewRecycled(holder);
+        holder.onDestroyView();
+    }
+
     private void fetchData(long earliestDate)
     {
         if (dataInteract != null) dataInteract.fetchMoreData(earliestDate);
@@ -170,17 +170,10 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         //get final position time
         SortedItem item = items.get(items.size() - 1);
         long earliestDate = 0;
-        if (item instanceof TransactionSortedItem)
+        if (item instanceof TimestampSortedItem)
         {
-            earliestDate = ((TransactionSortedItem)item).value.timeStamp;
-        }
-        else if (item instanceof DateSortedItem)
-        {
-            earliestDate = ((DateSortedItem)item).value.getTime();
-        }
-        else if (item instanceof EventSortedItem)
-        {
-            earliestDate = ((EventSortedItem)item).value.timeStamp;
+            Date itemDate = ((TimestampSortedItem)item).getTimestamp();
+            earliestDate = itemDate.getTime();
         }
 
         fetchData(earliestDate);
@@ -219,6 +212,10 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         {
             return ((DateSortedItem)obj).getUID();
         }
+        else if (obj instanceof TransferSortedItem)
+        {
+            return ((TransferSortedItem)obj).getUID();
+        }
         else
         {
             //Not unique and may error
@@ -250,7 +247,12 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
                 EventSortedItem sortedItem = new EventSortedItem(EventHolder.VIEW_TYPE, (EventMeta)item, TimestampSortedItem.DESC);
                 items.add(sortedItem);
             }
-            items.add(DateSortedItem.round(item.timeStamp));
+            else if (item instanceof TokenTransferData)
+            {
+                TransferSortedItem sortedItem = new TransferSortedItem(TransferHolder.VIEW_TYPE, (TokenTransferData)item, TimestampSortedItem.DESC);
+                items.add(sortedItem);
+            }
+            items.add(DateSortedItem.round(item.getTimeStampSeconds()));
         }
 
         applyItemLimit();

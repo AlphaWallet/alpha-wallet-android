@@ -2,11 +2,11 @@ package com.alphawallet.app.interact;
 
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
-
-import io.reactivex.Single;
 import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigInteger;
+
+import io.reactivex.Single;
 
 /**
  * Created by James on 4/12/2018.

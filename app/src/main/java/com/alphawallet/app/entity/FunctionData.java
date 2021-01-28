@@ -1,5 +1,8 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.widget.FunctionButtonBar;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,13 +15,23 @@ import static com.alphawallet.app.entity.ContractType.*;
 
 public class FunctionData
 {
-    public String functionName;
-    public String functionFullName;
-    public List<String> args;
-    public boolean hasSig;
-    public List<ContractType> contractType;
+    public final String functionName;
+    public final String functionFullName;
+    public String functionRawHex;
+    public final List<String> args;
+    public final boolean hasSig;
+    public final List<ContractType> contractType;
 
-    public FunctionData(String methodSig, ContractType type, boolean hasSingature)
+    public FunctionData(String fName, ContractType t)
+    {
+        functionName = fName;
+        functionFullName = fName;
+        args = new ArrayList<>();
+        hasSig = false;
+        contractType = new ArrayList<>();
+    }
+
+    public FunctionData(String methodSig, ContractType t, boolean hasSignature)
     {
         int b1Index = methodSig.indexOf("(");
         int b2Index = methodSig.lastIndexOf(")");
@@ -31,8 +44,8 @@ public class FunctionData
         this.args.addAll(temp);
         functionFullName = methodSig;
         contractType = new ArrayList<>();
-        contractType.add(type);
-        hasSig  = hasSingature;
+        contractType.add(t);
+        hasSig  = hasSignature;
 
         for (int i = 0; i < temp.size(); i++)//String arg : data.args)
         {
@@ -49,7 +62,6 @@ public class FunctionData
 
     public void addType(ContractType type)
     {
-        if (contractType == null) contractType = new ArrayList<>();
         contractType.add(type);
     }
 

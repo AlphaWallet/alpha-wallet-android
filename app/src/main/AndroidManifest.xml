@@ -307,6 +307,11 @@
         <activity
             android:name=".ui.WalletConnectSessionActivity"
             android:label="WalletConnect Sessions" />
+
+        <activity
+            android:name=".ui.TransactionSuccessActivity"
+            android:label="Transaction Success" />
+
     </application>
 
 </manifest>

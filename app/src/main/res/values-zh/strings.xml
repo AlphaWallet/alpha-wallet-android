@@ -2,6 +2,8 @@
 <resources>
     <!-- String related to sending -->
     <string name="action_send">发送</string>
+    <string name="action_send_tkn">发送%1$s</string>
+    <string name="recipient">接收人</string>
     <string name="error_field_required">此为必填字段</string>
     <string name="action_settings">设置</string>
     <string name="title_account_list">钱包</string>
@@ -44,6 +46,7 @@
     <string name="label_to">接收地址</string>
     <string name="label_gas_limit">燃料限制</string>
     <string name="label_gas_price">燃料价格</string>
+    <string name="label_gas_price_gwei">燃料价格 (GWEI)</string>
     <string name="label_old_gas_price">先前的燃油价格</string>
     <string name="label_network_fee">交易手续费</string>
     <string name="button_ok">确定</string>
@@ -52,6 +55,8 @@
     <string name="subtitle_to">接收地址</string>
     <string name="subtitle_gas_fee">燃料费用</string>
     <string name="subtitle_gas_price">燃料价格</string>
+    <string name="subtitle_gas_used">交易燃料费用</string>
+    <string name="subtitle_network_fee">交易手续费</string>
     <string name="subtitle_transaction_num">交易 #</string>
     <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">交易时间</string>
@@ -72,6 +77,7 @@
     <string name="error_invalid_address">无效地址</string>
     <string name="error_invalid_amount">无效金额</string>
     <string name="error_transaction_failed">交易错误</string>
+    <string name="error_transaction_may_fail">节点预测此交易将失败。 继续？</string>
     <string name="error_import_failed">导入令牌失败</string>
     <string name="error_must_numeric">必须为一个数值。</string>
     <string name="transaction_succeeded">交易成功</string>
@@ -312,6 +318,8 @@
     <string name="action_contract_info">智能合约信息</string>
     <string name="contract_address">智能合约地址</string>
     <string name="input_address">以太坊地址或ENS名称</string>
+    <string name="ens_name">ENS名称</string>
+    <string name="enter_ens">您的ENS的名称</string>
     <string name="ticket_range_expired">MagicLink已经过期</string>
     <string name="ticket_not_valid">无效的Token</string>
     <string name="ticket_not_valid_body">在当前网络上此地址没有有效智能合约： 合约可能已经被终止，或者它可能位于不同的网络上。 可以尝试将网络改为“Ropsten（测试网络）”。</string>
@@ -332,6 +340,7 @@
     <string name="signer_address">签署人地址</string>
     <string name="requester_url">请求链接</string>
     <string name="dialog_title_sign_message">签署消息</string>
+    <string name="dialog_title_sign_personal_message">签署消息\'Personal\'</string>
     <string name="dialog_title_sign_typed_message">签署消息\'Typed\'</string>
     <string name="dialog_reject">拒绝</string>
     <string name="dialog_approve">同意</string>
@@ -619,6 +628,7 @@
     <string name="minute_plural">%s分钟</string>
     <string name="second_single">1秒</string>
     <string name="second_plural">%s秒</string>
+    <string name="never">不明</string>
     <string name="transaction_pending_for">交易待定时间：%s</string>
     <string name="speedup_tx_description">以更高的燃料价格提交替换交易。</string>
     <string name="cancel_tx_description">通过将未确认的交易替换为零值交易以取消交易。</string>
@@ -646,15 +656,16 @@
     <string name="message_authentication_failed">身份验证失败</string>
     <string name="tx_rejected">交易被拒绝（尝试使用更多的燃料）</string>
     <string name="from">来源地址 %1$s</string>
+    <string name="from_op">来源地址</string>
     <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">接收地址 %1$s</string>
     <string name="approval_granted_to">批准转让代币了 %1$s</string>
     <string name="approval_obtained_from">代表地址 %1$s</string>
     <string name="unknown_event">未知事件</string>
-    <string name="activity_sent">发送了 %1$s</string>
-    <string name="activity_received">收到了 %1$s</string>
-    <string name="activity_approved">已批准 %1$s</string>
-    <string name="activity_approval_granted">批准给 %1$s</string>
+    <string name="activity_sent">发送了</string>
+    <string name="activity_received">收到了</string>
+    <string name="activity_approved">已批准</string>
+    <string name="activity_approval_granted">批准给</string>
     <string name="tokenscript_call">TokenScript调用:</string>
     <string name="today">今天</string>
     <string name="go_to_token">前往通证</string>
@@ -670,4 +681,36 @@
     <string name="message_transaction_not_sent">Transaction not sent</string>
     <string name="popular_tokens">热门通证</string>
     <string name="unable_to_get_biometrics">无法获得生物识别解锁</string>
+    <string name="all_funds">所有基金</string>
+    <string name="recipient_address">接收者的地址</string>
+    <string name="confirm_transaction">确认交易</string>
+    <string name="balance">余额</string>
+    <string name="speed_average">平均速度</string>
+    <string name="speed_rapid">快速的速度</string>
+    <string name="speed_fast">速度快</string>
+    <string name="speed_slow">速度慢</string>
+    <string name="speed_custom">自定义</string>
+    <string name="speed_dapp">Dapp 设置</string>
+    <string name="new_balance">(待确认: %1$s %2$s)</string>
+    <string name="set_speed_title">设定交易确认速度</string>
+    <string name="gas_price_widget">燃料价格: %1$s</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="set_your_speed">自己设定</string>
+    <string name="nonce_optional">Nonce (可选的)</string>
+    <string name="calc_gas_limit">正在计算燃料限制</string>
+    <string name="wallet_address">钱包地址</string>
+    <string name="transaction_in_progress">进行中的交易</string>
+    <string name="transaction_progress_detail">The transaction is sent to the Ethereum blockchain. It might take few minutes to be confirmed by miners.</string>
+    <string name="action_show_tx_details">Show Transaction Details</string>
+    <string name="default_to">Sent %1$s %2$s to %3$s</string>
+    <string name="default_from">Received %1$s %2$s from %3$s</string>
+    <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
+    <string name="default_approve">Approved %3$s to move %1$s %2$s</string>
+    <string name="contract_call">合约调用</string>
+    <string name="insufficient_gas">资金不够</string>
+    <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
+    <string name="action_send_eth">发送以太币交易</string>
+    <string name="action_token_swap">通证交换</string>
+    <string name="action_withdraw">Withdraw</string>
+    <string name="deposit">Deposit</string>
 </resources>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/background_card">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="60dp">
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:contentDescription="@string/action_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp16"
+            android:padding="5dp"
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:src="@drawable/ic_close" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/image_close"
+            android:layout_toStartOf="@id/logo"
+            android:text="@string/confirm_transaction"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_semibold"
+            android:layout_centerVertical="true"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="@dimen/dp8"
+            android:layout_marginBottom="@dimen/dp8"
+            android:textSize="@dimen/sp20"/>
+
+        <ImageView
+            android:id="@+id/logo"
+            android:contentDescription="@string/app_name"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:layout_marginEnd="10dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+    <!-- TODO: Move into BalanceDisplayWidget -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/balance"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp13"/>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.4"
+            android:layout_marginBottom="@dimen/dp14"
+            android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="start"
+            tools:text="35.4236 ETH"
+            android:textSize="@dimen/sp16"/>
+
+            <TextView
+                android:id="@+id/text_new_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:layout_below="@id/text_balance"
+                android:textColor="@color/dove"
+                android:fontFamily="@font/font_regular"
+                android:gravity="start"
+                tools:text="(New: 31.1818 ETH)"
+                android:textSize="@dimen/sp15"/>
+
+            <com.alphawallet.app.widget.ChainName
+                android:id="@+id/chain_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp5"
+                custom:font_size="10"
+                android:visibility="visible"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!-- End TODO -->
+
+    <com.alphawallet.app.widget.AddressDetailView
+        android:id="@+id/requester"
+        android:visibility="gone"
+        custom:label="@string/requester_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.alphawallet.app.widget.GasWidget
+        android:id="@+id/gas_widgetx"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.alphawallet.app.widget.TransactionDetailWidget
+        android:id="@+id/detail_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.alphawallet.app.widget.AddressDetailView
+        android:id="@+id/recipient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- TODO: This needs to be moved into a view of its own: AmountDisplayWidget -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:layout_marginBottom="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/amount"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp13"/>
+
+        <TextView
+            android:id="@+id/text_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="start"
+            tools:text="1.234 ETH ≈ 500.23 USD"
+            android:textSize="@dimen/sp16"/>
+
+    </LinearLayout>
+
+    <!-- End TODO -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <com.alphawallet.app.widget.ConfirmationWidget
+        android:id="@+id/confirmation_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

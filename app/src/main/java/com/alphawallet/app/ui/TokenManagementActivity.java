@@ -170,7 +170,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     private void startRealmListener(Wallet wallet)
     {
-        if (realmId == null || !realmId.equals(wallet.address))
+        if (realmId == null || !realmId.equalsIgnoreCase(wallet.address))
         {
             realmId = wallet.address;
             realm = viewModel.getRealmInstance(wallet);
@@ -199,6 +199,15 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
                 adapter.addToken(meta);
             }
         });
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
+        if (realm != null) realm.close();
+        adapter.onDestroy();
     }
 
 }

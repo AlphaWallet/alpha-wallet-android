@@ -16,6 +16,43 @@ public class TransactionLookup
         else return typeMapping.get(type);
     }
 
+    public static String typeToEvent(TransactionType type)
+    {
+        switch (type)
+        {
+            case TRANSFER_FROM:
+            case SEND:
+                return "sent";
+            case TRANSFER_TO:
+                return "received";
+            case RECEIVE_FROM:
+                return "received";
+            case RECEIVED:
+                return "received";
+            case APPROVE:
+                return "ownerApproved";
+            default:
+                return "";
+        }
+    }
+
+    public static int toFromText(TransactionType type)
+    {
+        switch (type)
+        {
+            case MAGICLINK_PURCHASE:
+            case TRANSFER_TO:
+                return R.string.to;
+            case RECEIVED:
+            case RECEIVE_FROM:
+                return R.string.from_op;
+            case APPROVE:
+                return R.string.approve;
+            default:
+                return R.string.empty;
+        }
+    }
+
     private static void setupTypes()
     {
         if (typeMapping.size() == 0)
@@ -38,7 +75,13 @@ public class TransactionLookup
             typeMapping.put(TransactionType.ALLOCATE_TO, R.string.allocate_to);
             typeMapping.put(TransactionType.APPROVE, R.string.approve);
             typeMapping.put(TransactionType.RECEIVED, R.string.received);
-            typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.ticket_invalid_op);
+            typeMapping.put(TransactionType.SEND, R.string.action_send);
+            typeMapping.put(TransactionType.SEND_ETH, R.string.action_send_eth);
+            typeMapping.put(TransactionType.TOKEN_SWAP, R.string.action_token_swap);
+            typeMapping.put(TransactionType.WITHDRAW, R.string.action_withdraw);
+            typeMapping.put(TransactionType.DEPOSIT, R.string.deposit);
+            typeMapping.put(TransactionType.CONTRACT_CALL, R.string.contract_call);
+            typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
         }
     }
 }

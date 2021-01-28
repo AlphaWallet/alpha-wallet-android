@@ -1,13 +1,16 @@
 package com.alphawallet.app.di;
 
 import com.alphawallet.app.interact.AddTokenInteract;
+import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
-import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
 
@@ -18,25 +21,26 @@ import dagger.Provides;
 class SendModule {
 
     @Provides
-    SendViewModelFactory provideSendViewModelFactory(ConfirmationRouter confirmationRouter,
-                                                     MyAddressRouter myAddressRouter,
+    SendViewModelFactory provideSendViewModelFactory(MyAddressRouter myAddressRouter,
                                                      EthereumNetworkRepositoryType networkRepositoryType,
                                                      TokensService tokensService,
                                                      FetchTransactionsInteract fetchTransactionsInteract,
                                                      AddTokenInteract addTokenInteract,
-                                                     GasService gasService) {
-        return new SendViewModelFactory(confirmationRouter,
-                myAddressRouter,
+                                                     CreateTransactionInteract createTransactionInteract,
+                                                     GasService2 gasService,
+                                                     AssetDefinitionService assetDefinitionService,
+                                                     KeyService keyService,
+                                                     AnalyticsServiceType analyticsService) {
+        return new SendViewModelFactory(myAddressRouter,
                 networkRepositoryType,
                 tokensService,
                 fetchTransactionsInteract,
                 addTokenInteract,
-                gasService);
-    }
-
-    @Provides
-    ConfirmationRouter provideConfirmationRouter() {
-        return new ConfirmationRouter();
+                createTransactionInteract,
+                gasService,
+                assetDefinitionService,
+                keyService,
+                analyticsService);
     }
 
     @Provides
@@ -54,5 +58,11 @@ class SendModule {
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
                                                                TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
+    }
+
+    @Provides
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository)
+    {
+        return new CreateTransactionInteract(transactionRepository);
     }
 }

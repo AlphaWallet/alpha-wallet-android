@@ -14,4 +14,5 @@ public interface HomeCommsInterface
     void changedLocale();
     void resetTransactions();
     default void refreshTokens() { };
+    void openWalletConnect(String sessionId);
 }

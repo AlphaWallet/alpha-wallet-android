@@ -3,7 +3,6 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,7 +11,6 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnTokenManageClickListener;
 import com.alphawallet.app.ui.widget.entity.ManageTokensLabelData;
-import com.alphawallet.app.widget.TokenIcon;
 
 public class TokenLabelViewHolder extends BinderViewHolder<ManageTokensLabelData> implements View.OnClickListener {
 

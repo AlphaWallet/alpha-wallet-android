@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/layout_header"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:background="@color/alabaster">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/mercury" />
+
+        <TextView
+            android:id="@+id/text_header"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center_vertical|end"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="@string/wallet_name"
+            android:textAllCaps="true"
+            android:textColor="@color/dove"
+            android:textSize="15sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/mercury" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/box_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_header"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:background="@drawable/background_password_entry"
+        android:layout_marginTop="@dimen/dp16">
+
+        <AutoCompleteTextView
+            android:id="@+id/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:background="@color/transparent"
+            android:fontFamily="@font/font_regular"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:paddingStart="@dimen/dp8"
+            android:paddingTop="@dimen/dp12"
+            android:paddingEnd="@dimen/dp8"
+            android:paddingBottom="@dimen/dp12"
+            android:textColor="@color/black"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17"
+            android:layout_toStartOf="@id/img_scan_qr"
+            tools:text="Awesome High Yield DeFi Token" />
+
+        <ImageButton
+            android:id="@+id/img_scan_qr"
+            android:src="@drawable/ic_camera_scan"
+            android:contentDescription="@string/scan_qr"
+            android:background="?android:selectableItemBackground"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/dp8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/box_layout"
+        android:layout_marginStart="31dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="-9dp"
+        android:background="@color/white"
+        android:fontFamily="@font/font_semibold"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textColor="@color/dove"
+        android:textSize="@dimen/sp13"
+        tools:text="Token Name"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/text_paste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/font_semibold"
+        android:textColor="@color/azure"
+        android:textSize="@dimen/sp17"
+        android:text="@string/paste"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/dp10"
+        android:layout_toStartOf="@id/text_paste"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/font_regular"
+        android:textColor="@color/green"
+        android:textSize="@dimen/sp12"
+        android:visibility="gone"
+        tools:text="Awesome Tokens" />
+
+    <TextView
+        android:id="@+id/error_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/box_layout"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/dp10"
+        android:layout_toStartOf="@id/text_paste"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/font_regular"
+        android:textColor="@color/danger"
+        android:textSize="@dimen/sp12"
+        android:visibility="gone"
+        tools:text="That address already exists" />
+
+</RelativeLayout>

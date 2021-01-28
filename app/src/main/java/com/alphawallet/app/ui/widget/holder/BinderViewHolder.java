@@ -8,12 +8,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
+import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
 public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 	public BinderViewHolder(int resId, ViewGroup parent) {
 		super(LayoutInflater.from(parent.getContext())
 				.inflate(resId, parent, false));
+		LinearLayout backgroundLayout = findViewById(R.id.layout_background);
+		if (backgroundLayout != null) { backgroundLayout.setLabelFor(0); }
 	}
 
 	public abstract void bind(@Nullable T data, @NonNull Bundle addition);
@@ -41,4 +46,6 @@ public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 	public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) { }
 
 	public void setFromTokenView() { }
+
+	public void onDestroyView() { };
 }

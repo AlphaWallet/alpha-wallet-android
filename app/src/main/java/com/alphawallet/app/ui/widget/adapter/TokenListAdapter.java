@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.entity.TokenManageType.DISPLAY_TOKEN;
@@ -56,6 +57,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     private ItemClickListener listener;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    private Disposable disposable;
 
     int hiddenTokensCount = 0;
     int popularTokensCount = 0;
@@ -373,11 +375,10 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     public void filter(String searchString)
     {
-        tokensService.getAllTokenMetas(searchString)
+        disposable = tokensService.getAllTokenMetas(searchString)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(metas -> updateList(metas, searchString), error -> { })
-                .isDisposed();
+                .subscribe(metas -> updateList(metas, searchString), error -> { });
     }
 
     private void updateList(TokenCardMeta[] metas, String searchString)
@@ -392,6 +393,15 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     public interface ItemClickListener {
         void onItemClick(Token token, boolean enabled);
+    }
+
+    public void onDestroy()
+    {
+        if (disposable != null && !disposable.isDisposed())
+        {
+            disposable.dispose();
+            disposable = null;
+        }
     }
 
     @Override

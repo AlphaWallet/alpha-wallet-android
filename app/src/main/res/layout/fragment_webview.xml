@@ -21,50 +21,12 @@
         android:layout_height="0dp"
         android:layout_below="@id/progressBar" />
 
-    <RelativeLayout
-        android:id="@+id/secondary_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/anchor"
-        android:background="@color/white">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true">
-
-            <TextView
-                android:id="@+id/balance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center_vertical"
-                android:text="0.0"
-                android:textColor="@color/text_dark_gray"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/symbol"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/eth"
-                android:gravity="center_vertical"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="15sp" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
     <FrameLayout
         android:id="@+id/frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/secondary_toolbar"
+        android:layout_below="@+id/anchor"
+        android:layout_marginBottom="?android:attr/actionBarSize"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -79,5 +41,46 @@
                 android:layout_height="match_parent" />
 
         </com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="end"
+            android:paddingStart="6dp"
+            android:paddingEnd="2dp"
+            android:layout_marginEnd="@dimen/dp8"
+            android:clickable="false"
+            android:focusable="false"
+            android:background="@drawable/background_eth_lozenge">
+
+            <TextView
+                android:id="@+id/balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:fontFamily="@font/font_regular"
+                android:gravity="center_vertical"
+                android:clickable="false"
+                android:focusable="false"
+                android:text="0.0"
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/symbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/eth"
+                android:gravity="center_vertical"
+                android:clickable="false"
+                android:focusable="false"
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
     </FrameLayout>
 </RelativeLayout>

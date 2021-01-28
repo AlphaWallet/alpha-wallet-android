@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -66,6 +67,7 @@ public class TokensService
     private final Context context;
     private final TickerService tickerService;
     private final OpenseaService openseaService;
+    private final AnalyticsServiceType analyticsService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
@@ -93,12 +95,14 @@ public class TokensService
                          PreferenceRepositoryType preferenceRepository,
                          Context context,
                          TickerService tickerService,
-                         OpenseaService openseaService) {
+                         OpenseaService openseaService,
+                         AnalyticsServiceType analyticsService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.context = context;
         this.tickerService = tickerService;
         this.openseaService = openseaService;
+        this.analyticsService = analyticsService;
         networkFilter = new ArrayList<>();
         setupFilter();
         focusToken = null;
@@ -341,6 +345,13 @@ public class TokensService
         else return "";
     }
 
+    public String getNetworkSymbol(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info == null) { info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID); }
+        return info.symbol;
+    }
+
     public void addTokenImageUrl(int networkId, String address, String imageUrl)
     {
         tokenRepository.addImageUrl(networkId, address, imageUrl);
@@ -490,6 +501,18 @@ public class TokensService
     public Realm getRealmInstance(Wallet wallet)
     {
         return tokenRepository.getRealmInstance(wallet);
+    }
+
+    public Realm getWalletRealmInstance()
+    {
+        if (currentAddress != null)
+        {
+            return tokenRepository.getRealmInstance(new Wallet(currentAddress));
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -698,5 +721,29 @@ public class TokensService
     public void appOutOfFocus()
     {
         appHasFocus = false;
+    }
+
+    /**
+     * Notify that the new gas setting widget was actually used :)
+     *
+     * @param gasSpeed
+     */
+    public void track(String gasSpeed)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(gasSpeed);
+
+        analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+    }
+
+    public Token getTokenOrBase(int chainId, String address)
+    {
+        Token token = getToken(chainId, address);
+        if (token == null)
+        {
+            token = getToken(chainId, currentAddress); // use base currency
+        }
+
+        return token;
     }
 }

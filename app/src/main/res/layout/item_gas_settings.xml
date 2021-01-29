@@ -50,7 +50,13 @@
                 android:textSize="14sp"/>
 
         </LinearLayout>
-
+        <ImageView
+            android:id="@+id/speed_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_red_warning"
+            android:layout_marginRight="6dp"
+            android:visibility="gone"/>
         <TextView
             android:id="@+id/text_speed"
             android:layout_width="0dp"

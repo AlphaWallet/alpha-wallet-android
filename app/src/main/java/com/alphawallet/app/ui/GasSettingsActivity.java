@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -419,6 +421,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     double dangerAmount = lowerBound / 2.0;
                     long dangerTime = 12 * DateUtils.HOUR_IN_MILLIS / 1000;
 
+                    showGasWarning(false);
+
                     if (dGasPrice < dangerAmount)
                     {
                         expectedTime = -1; //never
@@ -428,6 +432,10 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                         expectedTime = extrapolateTime(dangerTime, lg.seconds, dGasPrice, dangerAmount, lowerBound);
                     }
                     break;
+                }
+                else if (lg.speed.equals(getString(R.string.speed_rapid)) && dGasPrice > 1.5 * upperBound)
+                {
+                    showGasWarning(true);
                 }
             }
         }
@@ -445,6 +453,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private void updateCustomElement(BigInteger gasPrice, BigInteger gasLimit)
     {
         if (customIndex < 0) return;
+        hideGasWarning();
         GasSpeed gs = gasSpeeds.get(customIndex);
         //new settings from the slider widget
         gs = new GasSpeed(gs.speed, getExpectedTransactionTime(gasPrice), gasPrice, true);
@@ -452,5 +461,44 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSpeeds.add(gs);
 
         this.customGasLimit = new BigDecimal(gasLimit);
+    }
+
+    private void showGasWarning(boolean high)
+    {
+        TextView gas_message = findViewById(R.id.text_notice);
+        gas_message.setVisibility(View.GONE);
+
+        TextView heading = findViewById(R.id.bubble_title);
+        TextView body = findViewById(R.id.bubble_body);
+        if (high)
+        {
+            heading.setText(getString(R.string.high_gas_setting));
+            body.setText(getString(R.string.body_high_gas));
+
+        }
+        else
+        {
+            heading.setText(getString(R.string.low_gas_setting));
+            body.setText(getString(R.string.body_low_gas));
+        }
+        FrameLayout warning = findViewById(R.id.gas_warning_bubble);
+        warning.setVisibility(View.VISIBLE);
+
+        EditText gas_price_entry = findViewById(R.id.gas_price_entry);
+        gas_price_entry.setTextColor(getColor(R.color.danger));
+        gas_price_entry.setBackground(getDrawable(R.drawable.background_password_error));
+    }
+
+    private void hideGasWarning()
+    {
+        TextView gas_message = findViewById(R.id.text_notice);
+        gas_message.setVisibility(View.VISIBLE);
+
+        FrameLayout warning = findViewById(R.id.gas_warning_bubble);
+        warning.setVisibility(View.GONE);
+
+        EditText gas_price_entry = findViewById(R.id.gas_price_entry);
+        gas_price_entry.setTextColor(getColor(R.color.dove));
+        gas_price_entry.setBackground(getDrawable(R.drawable.background_password_entry));
     }
 }

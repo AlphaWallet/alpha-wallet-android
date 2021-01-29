@@ -716,6 +716,8 @@
     <string name="speed_fast">Fast</string>
     <string name="speed_slow">Slow</string>
     <string name="speed_custom">Custom</string>
+    <String name="speed_too_low">Too Low</String>
+    <String name="speed_high_gas">High Fee</String>
     <string name="speed_dapp">Dapp Settings</string>
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">Set Speed</string>
@@ -739,4 +741,8 @@
     <string name="action_token_swap">Token Swap</string>
     <string name="action_withdraw">Withdraw</string>
     <string name="deposit">Deposit</string>
+    <string name="body_low_gas">Gas price is set below the \'slow\' speed.\nYour transaction may take a long time to be written or may never be written.</string>
+    <string name="low_gas_setting">Gas Fee Might Be Too Low</string>
+    <string name="body_high_gas">You have set a really high gas fee. Please make sure this is not a mistake. AlphaWallet uses gasnow.org live oracle and updates the gas price every 15 sec.</string>
+    <string name="high_gas_setting">High Fee Warning!</string>
 </resources>

@@ -144,7 +144,7 @@ public class GasService2 implements ContractGasProvider
     @Override
     public BigInteger getGasLimit()
     {
-        return new BigInteger(C.DEFAULT_GAS_LIMIT);
+        return new BigInteger(C.DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT);
     }
 
     private Single<Boolean> updateCurrentGasPrices()

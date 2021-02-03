@@ -133,6 +133,7 @@ import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
+import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
 public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
@@ -542,7 +543,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             cancelSearchSession();
         } else {
             urlTv.getText().clear();
-            beginSearchSession();
+            openURLInputView();
+            KeyboardUtils.showKeyboard(urlTv); //ensure keyboard shows here so we can listen for it being cancelled
         }
     }
 
@@ -568,11 +570,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
         // Both these are required, the onFocus listener is required to respond to the first click.
         urlTv.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && getActivity() != null) beginSearchSession();
+            if (hasFocus && getActivity() != null) openURLInputView();
         });
 
         urlTv.setOnClickListener(v -> {
-            beginSearchSession();
+            openURLInputView();
         });
 
         urlTv.setShowSoftInputOnFocus(true);
@@ -600,7 +602,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
     }
 
-    private void beginSearchSession() {
+    // TODO: Move all nav stuff to widget
+    private void openURLInputView() {
         urlTv.setAdapter(null);
         expandCollapseView(currentNetwork, false);
         expandCollapseView(layoutNavigation, false);
@@ -620,7 +623,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (item.getVisibility() == View.GONE)
         {
             expandCollapseView(item, true);
-            KeyboardUtils.showKeyboard(urlTv);
+            showKeyboard(urlTv);
         }
     }
 
@@ -703,6 +706,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void cancelSearchSession() {
         detachFragment(SEARCH);
+        KeyboardUtils.hideKeyboard(urlTv);
+        setBackForwardButtons();
+    }
+
+    private void shrinkSearchBar()
+    {
         if (toolbar != null)
         {
             toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
@@ -711,8 +720,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             clear.setVisibility(View.GONE);
             urlTv.dismissDropDown();
         }
-        KeyboardUtils.hideKeyboard(urlTv);
-        setBackForwardButtons();
     }
 
     private void detachFragment(String tag) {
@@ -1649,14 +1656,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
     }
 
-    public void removeBottomMargin()
+    public void softKeyboardVisible()
     {
         handler.postDelayed(() -> setMargin(0), 10);
     }
 
-    public void restoreBottomMargin(int bottomMarginHeight)
+    public void softKeyboardGone(int bottomMarginHeight)
     {
         handler.postDelayed(() -> setMargin(bottomMarginHeight), 10);
+        shrinkSearchBar();
     }
 
     private void setMargin(int height)

@@ -1,21 +1,22 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -33,10 +34,8 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModelFactory;
-import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
@@ -58,6 +57,7 @@ import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.entity.ConfirmationType.CANCEL_TX;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -328,6 +328,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
                 oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
                 transactionHex = "0x";
+                transactionAddress = viewModel.getWalletAddress();
+                to = transactionAddress;
                 setupCancelGasSettings();
                 break;
             default:
@@ -636,30 +638,35 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void setupCancelGasSettings()
     {
-        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2))); //doesn't need more than this for cancel
+        //cancel requires at least 10% higher gas
+        BigInteger candidateGasOverridePrice = new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).toBigInteger();
+        BigInteger checkGasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
+        BigInteger overrideGasPrice = checkGasPrice.max(candidateGasOverridePrice); //highest price between adding 2 gwei or 10%
 
         findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
         ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
 
-        String gasPriceStr = BalanceUtils.weiToGwei(gasPrice);
+        String gasPriceStr = BalanceUtils.weiToGwei(overrideGasPrice);
 
         gasPriceText.setText(gasPriceStr);
-        GasSettings overrideSettings = new GasSettings(gasPrice, oldGasLimit);
+        GasSettings overrideSettings = new GasSettings(overrideGasPrice, oldGasLimit);
         viewModel.overrideGasSettings(overrideSettings);
     }
 
     private void setupResendGasSettings()
     {
-        //increase gas price - gas price is in GWEI, so add 2 GWEI to price
-        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
+        //increase gas price - gas price is in GWEI; a sped up transaction needs to be at least 10% higher gas price
+        BigInteger candidateGasOverridePrice = new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).toBigInteger();
+        BigInteger checkGasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
+        BigInteger overrideGasPrice = checkGasPrice.max(candidateGasOverridePrice); //highest price between adding 2 gwei or 10%
 
         findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
         ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
 
-        String gasPriceStr = BalanceUtils.weiToGwei(gasPrice);
+        String gasPriceStr = BalanceUtils.weiToGwei(overrideGasPrice);
 
         gasPriceText.setText(gasPriceStr);
-        GasSettings overrideSettings = new GasSettings(gasPrice, oldGasLimit);
+        GasSettings overrideSettings = new GasSettings(overrideGasPrice, oldGasLimit);
         viewModel.overrideGasSettings(overrideSettings);
     }
 
@@ -718,6 +725,28 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         gasEstimateText.setText(String.valueOf(gasEstimate));
 
         viewModel.updateGasLimit();
+
+        if (confirmationType == CANCEL_TX)
+        {
+            finaliseCancelGasSettings(gasEstimate);
+        }
+    }
+
+    private void finaliseCancelGasSettings(BigInteger gasEstimate)
+    {
+        GasSettings overrideSettings = new GasSettings(viewModel.gasSettings().getValue().gasPrice, gasEstimate);
+        viewModel.overrideGasSettings(overrideSettings);
+        findViewById(R.id.layout_gas_estimate).setVisibility(View.GONE);
+        ((TextView)findViewById(R.id.text_network_fee_title)).setText(R.string.label_network_fee);
+        BigDecimal networkFeeBD = new BigDecimal(gasPrice.multiply(gasEstimate));
+        String networkFee = BalanceUtils.getScaledValue(networkFeeBD, C.ETHER_DECIMALS, 8)
+                + " " + viewModel.getNetworkSymbol(chainId);
+        networkFeeText.setText(networkFee);
+
+        LinearLayout nonceLayout = findViewById(R.id.layout_nonce);
+        TextView nonceText = findViewById(R.id.text_nonce);
+        nonceLayout.setVisibility(View.VISIBLE);
+        nonceText.setText(nonce.toString());
     }
 
     private void onEstimateError(ErrorEnvelope error) {

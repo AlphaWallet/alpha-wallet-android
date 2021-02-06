@@ -4,7 +4,6 @@ package com.alphawallet.app.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,9 +48,7 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
 
-import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.POA_ID;
 
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {

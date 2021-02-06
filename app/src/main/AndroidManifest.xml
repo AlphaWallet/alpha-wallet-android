@@ -182,6 +182,10 @@
             android:label="@string/title_send_settings" />
 
         <activity
+            android:name=".ui.GasSettingsActivityLegacy"
+            android:label="@string/title_send_settings" />
+
+        <activity
             android:name=".ui.SellDetailActivity"
             android:label="@string/action_sell"
             android:windowSoftInputMode="adjustPan" />

@@ -387,7 +387,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean isToken()
     {
-        return (contractType != ContractType.ETHEREUM);
+        return !(contractType == ContractType.ETHEREUM_INVISIBLE || contractType == ContractType.ETHEREUM);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)
@@ -472,7 +472,10 @@ public class Token implements Parcelable, Comparable<Token>
 
     public void setRealmInterfaceSpec(RealmToken realmToken)
     {
-        if (isEthereum()) contractType = ContractType.ETHEREUM;
+        if (isEthereum() && realmToken.getInterfaceSpec() != ContractType.ETHEREUM_INVISIBLE.ordinal())
+        {
+            contractType = ContractType.ETHEREUM;
+        }
         realmToken.setInterfaceSpec(contractType.ordinal());
     }
 

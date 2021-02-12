@@ -174,6 +174,7 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             case ETHEREUM:
             case ERC20:
+            case DYNAMIC_CONTRACT:
             case ERC875_LEGACY:
             case ERC875:
             case CURRENCY:

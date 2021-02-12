@@ -174,6 +174,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         if (token == null) return;
         switch (token.getInterfaceSpec()) {
             case ERC20:
+            case DYNAMIC_CONTRACT:
             case ETHEREUM:
                 addFunction(R.string.action_send);
                 addFunction(R.string.action_receive);

@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
@@ -101,7 +102,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     private long pendingStart = 0;
 
     @Nullable
-    private Disposable pendingTxUpdate;
+    private Disposable pendingTxUpdate = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -194,7 +195,18 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         if (token != null)
         {
             functionBar.revealButtons();
-            List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.go_to_token));
+            List<Integer> functions = new ArrayList<>();
+            if (pendingTxUpdate != null)
+            {
+                functions.add(R.string.speedup_transaction);
+                functions.add(R.string.go_to_token);
+                functions.add(R.string.cancel_transaction);
+            }
+            else
+            {
+                functions.add(R.string.go_to_token);
+            }
+
             functionBar.setupFunctions(this, functions);
         }
     }
@@ -601,16 +613,29 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     @Override
     public void handleClick(String action, int actionId)
     {
-        //go to the token
-        if (isFromTokenHistory)
+        if (actionId == R.string.speedup_transaction)
         {
-            //go back to token - we arrived here from the token view
-            finish();
+            //resend the transaction to speedup
+            viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.RESEND);
+        }
+        else if (actionId == R.string.cancel_transaction)
+        {
+            //cancel the transaction
+            viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.CANCEL_TX);
         }
         else
         {
-            //same as if you clicked on it in the wallet view
-            token.clickReact(viewModel, this);
+            //go to the token
+            if (isFromTokenHistory)
+            {
+                //go back to token - we arrived here from the token view
+                finish();
+            }
+            else
+            {
+                //same as if you clicked on it in the wallet view
+                token.clickReact(viewModel, this);
+            }
         }
     }
 }

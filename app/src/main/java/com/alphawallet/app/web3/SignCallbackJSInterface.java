@@ -1,29 +1,27 @@
 package com.alphawallet.app.web3;
 
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+
+import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
-import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.SignMessageType;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 
-import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-
-import wallet.core.jni.Hash;
 
 public class SignCallbackJSInterface
 {
@@ -36,18 +34,22 @@ public class SignCallbackJSInterface
     private final OnSignPersonalMessageListener onSignPersonalMessageListener;
     @NonNull
     private final OnSignTypedMessageListener onSignTypedMessageListener;
+    @NonNull
+    private final OnEthCallListener onEthCallListener;
 
     public SignCallbackJSInterface(
             WebView webView,
             @NonNull OnSignTransactionListener onSignTransactionListener,
             @NonNull OnSignMessageListener onSignMessageListener,
             @NonNull OnSignPersonalMessageListener onSignPersonalMessageListener,
-            @NonNull OnSignTypedMessageListener onSignTypedMessageListener) {
+            @NonNull OnSignTypedMessageListener onSignTypedMessageListener,
+            @NotNull OnEthCallListener onEthCallListener) {
         this.webView = webView;
         this.onSignTransactionListener = onSignTransactionListener;
         this.onSignMessageListener = onSignMessageListener;
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
         this.onSignTypedMessageListener = onSignTypedMessageListener;
+        this.onEthCallListener = onEthCallListener;
     }
 
     @JavascriptInterface
@@ -104,6 +106,21 @@ public class SignCallbackJSInterface
                 e.printStackTrace();
             }
         });
+    }
+
+    @JavascriptInterface
+    public void ethCall(int callbackId, String recipient, String payload) {
+        DefaultBlockParameter defaultBlockParameter;
+        if (payload.equals("undefined")) payload = "0x";
+        defaultBlockParameter = DefaultBlockParameterName.LATEST;
+
+        Web3Call call = new Web3Call(
+                new Address(recipient),
+                defaultBlockParameter,
+                payload,
+                callbackId);
+
+        webView.post(() -> onEthCallListener.onEthCall(call));
     }
 
     private String getUrl() {

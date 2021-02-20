@@ -342,4 +342,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
+
+    public String getNetworkNodeRPC(int chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
+    }
 }

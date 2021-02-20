@@ -21,6 +21,7 @@ import android.webkit.WebViewClient;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import com.alphawallet.token.entity.EthereumMessage;
@@ -45,6 +46,8 @@ public class Web3View extends WebView {
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
     @Nullable
     private OnSignTypedMessageListener onSignTypedMessageListener;
+    @Nullable
+    private OnEthCallListener onEthCallListener;
     @Nullable
     private OnVerifyListener onVerifyListener;
     @Nullable
@@ -98,7 +101,8 @@ public class Web3View extends WebView {
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
-                innerOnSignTypedMessageListener), "alpha");
+                innerOnSignTypedMessageListener,
+                innerOnEthCallListener), "alpha");
     }
 
     public void setWalletAddress(@NonNull Address address) {
@@ -156,6 +160,10 @@ public class Web3View extends WebView {
         this.onSignTypedMessageListener = onSignTypedMessageListener;
     }
 
+    public void setOnEthCallListener(@Nullable OnEthCallListener onEthCallListener) {
+        this.onEthCallListener = onEthCallListener;
+    }
+
     public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
         this.onVerifyListener = onVerifyListener;
     }
@@ -172,6 +180,14 @@ public class Web3View extends WebView {
     public void onSignMessageSuccessful(Signable message, String signHex) {
         long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
+    }
+
+    public void onCallFunctionSuccessful(long callbackId, String result) {
+        callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, result);
+    }
+
+    public void onCallFunctionError(long callbackId, String error) {
+        callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
     public void onSignError(Web3Transaction transaction, String error) {
@@ -222,6 +238,15 @@ public class Web3View extends WebView {
         @Override
         public void onSignTypedMessage(EthereumTypedMessage message) {
             onSignTypedMessageListener.onSignTypedMessage(message);
+        }
+    };
+
+    private final OnEthCallListener innerOnEthCallListener = new OnEthCallListener()
+    {
+        @Override
+        public void onEthCall(Web3Call txData)
+        {
+            onEthCallListener.onEthCall(txData);
         }
     };
 

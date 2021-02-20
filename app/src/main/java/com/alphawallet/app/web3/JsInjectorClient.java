@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 
 import com.alphawallet.app.R;
 
+import org.web3j.crypto.Keys;
+
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -201,7 +203,7 @@ public class JsInjectorClient {
 
     private String loadInitJs(Context context) {
         String initSrc = loadFile(context, R.raw.init);
-        String address = walletAddress == null ? Address.EMPTY.toString() : walletAddress.toString();
+        String address = walletAddress == null ? Address.EMPTY.toString() : Keys.toChecksumAddress(walletAddress.toString());
         return String.format(initSrc, address, rpcUrl, chainId);
     }
 

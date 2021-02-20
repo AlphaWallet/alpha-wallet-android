@@ -23,6 +23,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
@@ -31,8 +32,10 @@ import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.token.tools.Convert;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -220,13 +223,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void onPause() {
+    public void onPause()
+    {
         super.onPause();
         viewModel.getTokensService().clearFocusToken();
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         if (viewModel == null)
         {
@@ -281,5 +286,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 }
                 break;
         }
+    }
+
+    @Override
+    public void openDapp(String dappURL)
+    {
+        //switch to dappbrowser and open at dappURL
+        Intent intent = new Intent();
+        intent.putExtra(C.DAPP_URL_LOAD, dappURL);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

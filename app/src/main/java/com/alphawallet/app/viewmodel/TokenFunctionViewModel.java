@@ -516,7 +516,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
 
     @Override
-    public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
+    public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         Intent intent = new Intent(context, Erc20DetailActivity.class);

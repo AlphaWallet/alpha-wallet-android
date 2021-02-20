@@ -7,6 +7,9 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import androidx.annotation.Nullable;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
@@ -224,26 +227,33 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     }
 
     private void handleStandardFunctionClick(ItemClick action) {
-        switch (action.buttonId)
+        if (action.buttonId == R.string.action_sell)
         {
-            case R.string.action_sell:      //ERC875 only
-                if (isSelectionValid(action.buttonId)) callStandardFunctions.sellTicketRouter(selection);
-                break;
-            case R.string.action_send:      //Eth + ERC20
-                callStandardFunctions.showSend();
-                break;
-            case R.string.action_receive:   //Everything
-                callStandardFunctions.showReceive();
-                break;
-            case R.string.action_transfer:  //Any NFT
-                if (isSelectionValid(action.buttonId)) callStandardFunctions.showTransferToken(selection);
-                break;
-            case R.string.action_use:    //NFT with Redeem
-                if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
-                break;
-            default:
-                callStandardFunctions.handleClick(action.buttonText, action.buttonId);
-                break;
+            if (isSelectionValid(action.buttonId)) callStandardFunctions.sellTicketRouter(selection);
+        }
+        else if (action.buttonId == R.string.action_send)
+        {
+            callStandardFunctions.showSend();
+        }
+        else if (action.buttonId == R.string.action_receive)
+        {
+            callStandardFunctions.showReceive();
+        }
+        else if (action.buttonId == R.string.action_transfer)
+        {
+            if (isSelectionValid(action.buttonId)) callStandardFunctions.showTransferToken(selection);
+        }
+        else if (action.buttonId == R.string.action_use)
+        {
+            if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
+        }
+        else if (action.buttonId == R.string.convert_to_xdai)
+        {
+            callStandardFunctions.openDapp(C.XDAI_BRIDGE_DAPP);
+        }
+        else
+        {
+            callStandardFunctions.handleClick(action.buttonText, action.buttonId);
         }
     }
 
@@ -520,11 +530,41 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         Map<String, TSAction> availableFunctions = new HashMap<>();
 
-        if (!token.isNonFungible()) addStandardTokenFunctions(token);
+        //If Token is Non-Fungible then display the custom functions first - usually these are more frequently used
+        if (!token.isNonFungible())
+        {
+            addStandardTokenFunctions(token);
+        }
 
+        boolean hasOverrideFunctions = setupCustomTokenActions();
+
+        //Only add TokenScript if not already overridden
+        if (!hasOverrideFunctions)
+        {
+            addTokenScriptFunctions(availableFunctions, token, tokenId);
+        }
+        else
+        {
+            token.setFunctionAvailability(null);
+            functions = null;
+        }
+
+        //now add the standard functions for NonFungibles
+        if (token.isNonFungible())
+        {
+            addStandardTokenFunctions(token);
+        }
+
+        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+
+        //TODO: Update Token name with result from selection
+    }
+
+    private void addTokenScriptFunctions(Map<String, TSAction> availableFunctions, Token token, BigInteger tokenId)
+    {
         TokenDefinition td = assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
 
-        if (td != null && tokenId != null)
+        if (td != null && tokenId != null && functions != null)
         {
             for (String actionName : functions.keySet())
             {
@@ -549,12 +589,32 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 addFunction(new ItemClick(actions.get(actions.keyAt(i)), 0));
             }
         }
+    }
 
-        if (token.isNonFungible()) addStandardTokenFunctions(token); //For non-fungible, include custom functions first - usually these are more frequently used
+    /**
+     * Adds custom commands for known tokens
+     */
+    private boolean setupCustomTokenActions()
+    {
+        int chainId = token.tokenInfo.chainId;
+        String address = token.getAddress();
 
-        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+        switch (chainId)
+        {
+            case EthereumNetworkBase.MAINNET_ID:
+                switch (address.toLowerCase())
+                {
+                    case C.DAI_TOKEN:
+                    case C.SAI_TOKEN:
+                        addFunction(R.string.convert_to_xdai);
+                        return true;
+                    default:
+                        break;
+                }
+                break;
+        }
 
-        //TODO: Update Token name with result from selection
+        return false;
     }
 
     private void getFunctionMap(AssetDefinitionService assetSvs)

@@ -713,4 +713,5 @@
     <string name="action_token_swap">通证交换</string>
     <string name="action_withdraw">Withdraw</string>
     <string name="deposit">Deposit</string>
+    <string name="convert_to_xdai">Convert to xDAI</string>
 </resources>

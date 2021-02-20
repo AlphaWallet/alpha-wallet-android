@@ -1588,9 +1588,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        if (confirmationDialog != null && confirmationDialog.isShowing())
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
         else if (requestCode == UPLOAD_FILE && uploadMessage != null)
         {
@@ -1613,7 +1613,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth)
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.completeSignRequest(gotAuth);
+        }
+        else if (gotAuth)
         {
             viewModel.completeAuthentication(SIGN_DATA);
             viewModel.signMessage(messageTBS, dAppFunction);

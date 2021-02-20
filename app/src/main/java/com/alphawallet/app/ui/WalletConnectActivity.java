@@ -43,6 +43,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SignMessageType;
@@ -932,6 +933,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+        }
         if (resultCode == RESULT_OK)
         {
             if (requestCode == C.REQUEST_TRANSACTION_CALLBACK)

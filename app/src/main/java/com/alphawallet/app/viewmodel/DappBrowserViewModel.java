@@ -279,9 +279,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         }
         else
         {
-            byte[] data = Numeric.hexStringToByteArray(finalTx.payload);
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
+                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
                     .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }

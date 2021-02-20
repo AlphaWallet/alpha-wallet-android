@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
+import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigInteger;
 
@@ -43,11 +44,19 @@ public class CreateTransactionInteract
                                              .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+    public Single<TransactionData> createWithSig(Wallet from, Web3Transaction web3Tx, int chainId)
     {
-        return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)
+        return transactionRepository.createTransactionWithSig(from, web3Tx.recipient.toString(), web3Tx.value,
+                        web3Tx.gasPrice, web3Tx.gasLimit, web3Tx.nonce, Numeric.hexStringToByteArray(web3Tx.payload), chainId)
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+    {
+        return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, -1, data, chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<TransactionData> createWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)

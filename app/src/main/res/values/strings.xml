@@ -634,8 +634,8 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
-    <string name="speedup_transaction">Speedup TX</string>
-    <string name="cancel_transaction">Cancel</string>
+    <string name="speedup_transaction">Speedup Trans</string>
+    <string name="cancel_transaction">Cancel Transaction</string>
     <string name="day_single">1 day</string>
     <string name="day_plural">%s days</string>
     <string name="hour_single">1 hour</string>

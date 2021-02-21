@@ -1048,7 +1048,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 switch (getSelectedItem())
                 {
                     case DAPP_BROWSER:
-                        ((DappBrowserFragment) dappBrowserFragment).gotAuthorisation(resultCode == RESULT_OK);
+                        ((DappBrowserFragment) dappBrowserFragment).pinAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
                         //continue with generating the authenticated key - NB currently no flow reaches this code but in future it could

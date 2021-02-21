@@ -439,14 +439,20 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 case SEND_TRANSACTION_WC:
                 case SEND_TRANSACTION:
                 case SEND_TRANSACTION_DAPP:
-                    confirmationWidget.startProgressCycle(1);
+                    signCallback.gotAuthorisation(gotAuth);
                     break;
 
-                default:
+                case SIGN_MESSAGE:
+                    actionCompleted = true;
+                    //display success and hand back to calling function
+                    confirmationWidget.startProgressCycle(1);
+                    signCallback.gotAuthorisation(gotAuth);
+                    break;
+
+                case SIGN_TRANSACTION:
+                    signCallback.gotAuthorisation(gotAuth);
                     break;
             }
-
-            signCallback.gotAuthorisation(gotAuth);
         }
     }
 

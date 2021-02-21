@@ -1613,19 +1613,27 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
-        if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.completeSignRequest(gotAuth);
-        }
-        else if (gotAuth)
+        if (gotAuth && dAppFunction != null) //sign message
         {
             viewModel.completeAuthentication(SIGN_DATA);
             viewModel.signMessage(messageTBS, dAppFunction);
         }
         else if (confirmationDialog != null && confirmationDialog.isShowing())
         {
-            web3.onSignCancel(messageTBS.getCallbackId());
+            if (messageTBS != null) web3.onSignCancel(messageTBS.getCallbackId());
             confirmationDialog.dismiss();
+        }
+    }
+
+    /**
+     * Endpoint from PIN/Swipe authorisation
+     * @param gotAuth
+     */
+    public void pinAuthorisation(boolean gotAuth)
+    {
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.completeSignRequest(gotAuth);
         }
     }
 

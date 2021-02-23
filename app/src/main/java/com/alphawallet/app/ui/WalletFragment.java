@@ -47,6 +47,7 @@ import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
+import com.alphawallet.app.util.Ramp;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
@@ -174,6 +175,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
+        Ramp.getInstance().init(wallet.address);
         if (CustomViewSettings.showManageTokens()) {
             adapter.setWalletAddress(wallet.address);
         }

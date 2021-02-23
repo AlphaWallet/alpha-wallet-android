@@ -26,7 +26,7 @@ public final class Ramp {
     }
 
     public void start(Context context) {
-        String rampApiKey = "j5wr7oqktym7z69yyf84bb8a6cqb7qfu5ynmeyvn";
+        String rampApiKey = "";
         Uri.Builder builder = new Uri.Builder();
         Uri uri = builder.scheme("https")
                 .authority("buy.ramp.network")

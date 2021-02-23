@@ -7,6 +7,10 @@ import android.net.Uri;
 import com.alphawallet.app.ui.HomeActivity;
 
 public class Ramp {
+    static {
+        System.loadLibrary("keys");
+    }
+    
     public static native String getRampKey();
 
     public static void start(Context context, String address, String symbol) {

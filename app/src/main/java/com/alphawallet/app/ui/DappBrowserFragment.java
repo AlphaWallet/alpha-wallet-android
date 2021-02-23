@@ -167,10 +167,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
 
-    static {
-        System.loadLibrary("keys");
-    }
-
     /**
      Below object is used to set Animation duration for expand/collapse and rotate
      */

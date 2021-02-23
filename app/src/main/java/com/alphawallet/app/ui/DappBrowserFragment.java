@@ -1296,7 +1296,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    private boolean loadUrl(String urlText)
+    public boolean loadUrl(String urlText)
     {
         detachFragments();
         addToBackStack(DAPP_BROWSER);

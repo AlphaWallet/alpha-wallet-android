@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -268,7 +269,7 @@ public class Token implements Parcelable, Comparable<Token>
         else return tokenInfo.symbol.toUpperCase();
     }
 
-    public void clickReact(BaseViewModel viewModel, Context context)
+    public void clickReact(BaseViewModel viewModel, Activity context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }

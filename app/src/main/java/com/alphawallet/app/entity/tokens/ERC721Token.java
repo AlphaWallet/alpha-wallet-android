@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -153,7 +154,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public void clickReact(BaseViewModel viewModel, Context context)
+    public void clickReact(BaseViewModel viewModel, Activity context)
     {
         viewModel.showTokenList(context, this);
     }

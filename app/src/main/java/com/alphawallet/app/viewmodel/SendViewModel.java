@@ -169,9 +169,8 @@ public class SendViewModel extends BaseViewModel {
 
     public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId)
     {
-        byte[] data = Numeric.hexStringToByteArray(finalTx.payload);
         disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
+                .createWithSig(wallet, finalTx, chainId)
                 .subscribe(transactionFinalised::postValue,
                         transactionError::postValue);
     }

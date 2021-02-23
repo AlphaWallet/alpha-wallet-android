@@ -1085,6 +1085,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         }
                     }
                 }
+            case C.TOKEN_SEND_ACTIVITY:
+                if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.DAPP_URL_LOAD))
+                {
+                    String url = data.getStringExtra(C.DAPP_URL_LOAD);
+                    ((DappBrowserFragment)dappBrowserFragment).loadUrl(url);
+                    showPage(DAPP_BROWSER);
+                }
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

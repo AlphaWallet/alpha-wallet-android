@@ -128,16 +128,16 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
+	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, int chainId) {
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 
 		TransactionData txData = new TransactionData();
 
-		return networkRepository.getLastTransactionNonce(web3j, from.address)
-				.flatMap(nonce -> {
-					txData.nonce = nonce;
-					return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId);
+		return getNonceForTransaction(web3j, from.address, nonce)
+				.flatMap(txNonce -> {
+					txData.nonce = txNonce;
+					return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, txNonce.longValue(), data, chainId);
 				})
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
@@ -190,9 +190,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 		TransactionData txData = new TransactionData();
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
-				.flatMap(nonce -> {
-					txData.nonce = nonce;
-					return getRawTransaction(nonce, useGasPrice, gasLimit, BigInteger.ZERO, data);
+				.flatMap(txNonce -> {
+					txData.nonce = txNonce;
+					return getRawTransaction(txNonce, useGasPrice, gasLimit, BigInteger.ZERO, data);
 				})
 				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
@@ -350,5 +350,17 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public void restartService()
 	{
 		transactionsService.startUpdateCycle();
+	}
+
+	private Single<BigInteger> getNonceForTransaction(Web3j web3j, String wallet, long nonce)
+	{
+		if (nonce != -1) //use supplied nonce
+		{
+			return Single.fromCallable(() -> BigInteger.valueOf(nonce));
+		}
+		else
+		{
+			return networkRepository.getLastTransactionNonce(web3j, wallet);
+		}
 	}
 }

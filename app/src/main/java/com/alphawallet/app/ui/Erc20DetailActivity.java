@@ -23,19 +23,17 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
+import com.alphawallet.app.util.Ramp;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.token.tools.Convert;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -296,5 +294,11 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         intent.putExtra(C.DAPP_URL_LOAD, dappURL);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    @Override
+    public void startRamp(String symbol)
+    {
+        Ramp.start(this, wallet.address, symbol);
     }
 }

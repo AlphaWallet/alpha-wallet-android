@@ -3,39 +3,20 @@ package com.alphawallet.app.util;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import com.alphawallet.app.ui.HomeActivity;
 
-public final class Ramp {
-    private static Ramp INSTANCE;
-    private String address;
+public class Ramp {
+    public static native String getRampKey();
 
-    private Ramp() {
-    }
-
-    public static Ramp getInstance() {
-        if(INSTANCE == null) {
-            INSTANCE = new Ramp();
-        }
-        return INSTANCE;
-    }
-
-    public void init(String address) {
-        this.address = address;
-    }
-
-    public void start(Context context) {
-        String rampApiKey = "";
+    public static void start(Context context, String address, String symbol) {
         Uri.Builder builder = new Uri.Builder();
         Uri uri = builder.scheme("https")
                 .authority("buy.ramp.network")
-//                .authority("ri-widget-staging-ropsten.firebaseapp.com")
-//                .authority("ri-widget-staging.firebaseapp.com")
-                .appendQueryParameter("hostApiKey", rampApiKey)
+                .appendQueryParameter("hostApiKey", getRampKey())
                 .appendQueryParameter("hostLogoUrl", "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg")
                 .appendQueryParameter("hostAppName", "AlphaWallet")
-                .appendQueryParameter("swapAsset", "xDai")
+                .appendQueryParameter("swapAsset", symbol)
                 .appendQueryParameter("userAddress", address)
                 .build();
 

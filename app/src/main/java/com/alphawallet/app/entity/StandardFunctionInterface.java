@@ -19,4 +19,5 @@ public interface StandardFunctionInterface
     default void showWaitSpinner(boolean show) { };
     default void handleFunctionDenied(String denialMessage) { };
     default void openDapp(String xdaiBridgeDapp) { };
+    default void startRamp(String symbol) { }
 }

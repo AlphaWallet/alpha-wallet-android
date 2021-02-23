@@ -175,7 +175,6 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
-        Ramp.getInstance().init(wallet.address);
         if (CustomViewSettings.showManageTokens()) {
             adapter.setWalletAddress(wallet.address);
         }

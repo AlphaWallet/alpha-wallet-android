@@ -167,6 +167,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
 
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getRampKey();
+
     /**
      Below object is used to set Animation duration for expand/collapse and rotate
      */
@@ -228,6 +234,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void onCreate(@Nullable Bundle savedInstanceState) {
         LocaleUtils.setActiveLocale(getContext());
         super.onCreate(savedInstanceState);
+
+        //Justin: Check API key and delete this code. Note if you need the Ramp key in a different class you have to change the function name in keys.c
+        String kk = getRampKey();
+        System.out.println("Ramp key: " + getRampKey());
     }
 
     @Override

@@ -30,6 +30,8 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,8 +129,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     @Override
-    public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        BinderViewHolder holder = null;
+    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+        BinderViewHolder<?> holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
                 TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, realm);
@@ -164,6 +166,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         items.get(position).view = holder;
         holder.bind(items.get(position).value);
+    }
+
+    public void onRViewRecycled(RecyclerView.ViewHolder holder)
+    {
+        ((BinderViewHolder<?>)holder).onDestroyView();
     }
 
     @Override
@@ -464,6 +471,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         return -1;
+    }
+
+    public void onDestroy(RecyclerView recyclerView)
+    {
+        //ensure all holders have their realm listeners cleaned up
+        for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
+        {
+            ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
+        }
     }
 
     public void setDebug()

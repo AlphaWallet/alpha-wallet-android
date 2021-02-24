@@ -61,7 +61,7 @@ public class SignCallbackJSInterface
             String gasLimit,
             String gasPrice,
             String payload) {
-        if (value.equals("undefined")) value = "0";
+        if (value.equals("undefined") || value == null) value = "0";
         if (gasPrice == null) gasPrice = "0";
         Web3Transaction transaction = new Web3Transaction(
                 TextUtils.isEmpty(recipient) ? Address.EMPTY : new Address(recipient),

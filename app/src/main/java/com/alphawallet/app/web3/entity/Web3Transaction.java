@@ -73,7 +73,7 @@ public class Web3Transaction implements Parcelable {
 
         this.recipient = TextUtils.isEmpty(wcTx.getTo()) ? Address.EMPTY : new Address(wcTx.getTo());
         this.contract = null;
-        this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);;
+        this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);
         this.gasPrice = Hex.hexToBigInteger(gasPrice, BigInteger.ZERO);
         this.gasLimit = Hex.hexToBigInteger(gasLimit, BigInteger.ZERO);
         this.nonce = Hex.hexToLong(nonce, -1);

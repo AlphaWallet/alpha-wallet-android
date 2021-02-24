@@ -207,7 +207,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         super.onDestroy();
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         if (realm != null) realm.close();
-        adapter.onDestroy();
+        if (adapter != null) adapter.onDestroy();
     }
 
 }

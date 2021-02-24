@@ -1296,7 +1296,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    public boolean loadUrl(String urlText)
+    private boolean loadUrl(String urlText)
     {
         detachFragments();
         addToBackStack(DAPP_BROWSER);
@@ -1312,6 +1312,17 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             current.sendBroadcast(new Intent(RESET_TOOLBAR));
         }
         return true;
+    }
+
+    public void loadDirect(String urlText)
+    {
+        cancelSearchSession();
+        addToBackStack(DAPP_BROWSER);
+        urlTv.setText(Utils.formatUrl(urlText));
+        web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
+        //ensure focus isn't on the keyboard
+        KeyboardUtils.hideKeyboard(urlTv);
+        web3.requestFocus();
     }
 
     /* Required for CORS requests */

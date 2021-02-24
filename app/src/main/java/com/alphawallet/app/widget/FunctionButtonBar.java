@@ -6,12 +6,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import androidx.annotation.Nullable;
-
-import com.alphawallet.app.C;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -27,18 +21,24 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.tools.TokenDefinition;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -246,10 +246,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         else if (action.buttonId == R.string.action_use)
         {
             if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
-        }
-        else if (action.buttonId == R.string.convert_to_xdai)
-        {
-            callStandardFunctions.openDapp(C.XDAI_BRIDGE_DAPP);
         }
         else
         {
@@ -611,6 +607,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                     default:
                         break;
                 }
+                addFunction(R.string.action_buy_eth);
+                break;
+            case EthereumNetworkBase.XDAI_ID:
+                addFunction(R.string.action_buy_xdai);
+                //TODO: Add convert to DAI bridge.
                 break;
         }
 

@@ -2,11 +2,14 @@ package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.text.TextUtils;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -33,6 +36,12 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getRampKey();
 
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
                                 FetchTransactionsInteract fetchTransactionsInteract,
@@ -117,5 +126,22 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public void restartServices()
     {
         fetchTransactionsInteract.restartTransactionService();
+    }
+
+    public Intent startRamp(String address, String symbol)
+    {
+        Uri.Builder builder = new Uri.Builder();
+        Uri uri = builder.scheme("https")
+                .authority("buy.ramp.network")
+                .appendQueryParameter("hostApiKey", getRampKey())
+                .appendQueryParameter("hostLogoUrl", "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg")
+                .appendQueryParameter("hostAppName", "AlphaWallet")
+                .appendQueryParameter("swapAsset", symbol)
+                .appendQueryParameter("userAddress", address)
+                .build();
+
+        Intent intent = new Intent();
+        intent.putExtra(C.DAPP_URL_LOAD, uri.toString());
+        return intent;
     }
 }

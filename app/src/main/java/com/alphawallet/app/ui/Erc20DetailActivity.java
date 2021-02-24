@@ -217,6 +217,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         super.onDestroy();
         if (activityHistoryList != null) activityHistoryList.onDestroy();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
+        if (tokenViewAdapter != null && tokenView != null) tokenViewAdapter.onDestroy(tokenView);
     }
 
     @Override

@@ -197,6 +197,7 @@ public class ActivityHistoryList extends LinearLayout
         if (realm != null && !realm.isClosed()) realm.close();
         handler.removeCallbacksAndMessages(null);
         stopUpdateCheck();
+        if (activityAdapter != null && recentTransactionsView != null) activityAdapter.onDestroy(recentTransactionsView);
     }
 
     //Start update check on the database if anything is pending. Sometimes the listener doesn't pick up the change.

@@ -467,6 +467,7 @@ public class WalletFragment extends BaseFragment implements
         //viewModel.clearProcess();
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
+        if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
     }
 
     public void resetTokens()

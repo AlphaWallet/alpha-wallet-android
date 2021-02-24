@@ -64,8 +64,8 @@ Java_com_alphawallet_app_service_AnalyticsService_getAnalyticsKey( JNIEnv* env, 
 #endif
 }
 
-JNIEXPORT jstring JNICALL //com.alphawallet.app.ui
-Java_com_alphawallet_app_util_Ramp_getRampKey( JNIEnv* env, jobject thiz )
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_viewmodel_Erc20DetailViewModel_getRampKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, rampKey);

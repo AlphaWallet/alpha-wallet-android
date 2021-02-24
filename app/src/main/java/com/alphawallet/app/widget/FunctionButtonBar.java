@@ -247,18 +247,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         {
             if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
         }
-        else if (action.buttonId == R.string.convert_to_xdai)
-        {
-            callStandardFunctions.openDapp(C.XDAI_BRIDGE_DAPP);
-        }
-        else if (action.buttonId == R.string.action_buy_eth)
-        {
-            callStandardFunctions.startRamp(C.ETH_SYMBOL);
-        }
-        else if (action.buttonId == R.string.action_buy_xdai)
-        {
-            callStandardFunctions.startRamp(C.xDAI_SYMBOL);
-        }
         else
         {
             callStandardFunctions.handleClick(action.buttonText, action.buttonId);
@@ -623,6 +611,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 break;
             case EthereumNetworkBase.XDAI_ID:
                 addFunction(R.string.action_buy_xdai);
+                //TODO: Add convert to DAI bridge.
                 break;
         }
 

@@ -26,7 +26,6 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
-import com.alphawallet.app.util.Ramp;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
@@ -287,18 +286,35 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void openDapp(String dappURL)
+    public void handleClick(String action, int actionId)
+    {
+        if (actionId == R.string.convert_to_xdai)
+        {
+            openDapp(C.XDAI_BRIDGE_DAPP);
+        }
+        else if (actionId == R.string.action_buy_eth)
+        {
+            startRamp(C.ETH_SYMBOL);
+        }
+        else if (actionId == R.string.action_buy_xdai)
+        {
+            startRamp(C.xDAI_SYMBOL);
+        }
+    }
+
+    private void startRamp(String symbol)
+    {
+        Intent intent = viewModel.startRamp(wallet.address, symbol);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    private void openDapp(String dappURL)
     {
         //switch to dappbrowser and open at dappURL
         Intent intent = new Intent();
         intent.putExtra(C.DAPP_URL_LOAD, dappURL);
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    @Override
-    public void startRamp(String symbol)
-    {
-        Ramp.start(this, wallet.address, symbol);
     }
 }

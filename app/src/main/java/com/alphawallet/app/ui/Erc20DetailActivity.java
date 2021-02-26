@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -293,19 +294,17 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             openDapp(C.XDAI_BRIDGE_DAPP);
         }
-        else if (actionId == R.string.action_buy_eth)
-        {
-            startRamp(C.ETH_SYMBOL);
-        }
-        else if (actionId == R.string.action_buy_xdai)
-        {
-            startRamp(C.xDAI_SYMBOL);
-        }
     }
 
-    private void startRamp(String symbol)
+    @Override
+    public void buy(OnRampContract data)
     {
-        Intent intent = viewModel.startRamp(wallet.address, symbol);
+        buyCrypto(data);
+    }
+
+    private void buyCrypto(OnRampContract data)
+    {
+        Intent intent = viewModel.getBuyIntent(wallet.address, data);
         setResult(RESULT_OK, intent);
         finish();
     }

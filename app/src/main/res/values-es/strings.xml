@@ -714,6 +714,5 @@
     <string name="action_withdraw">Withdraw</string>
     <string name="deposit">Deposit</string>
     <string name="convert_to_xdai">Convert to xDAI</string>
-    <string name="action_buy_xdai">Buy xDAI</string>
-    <string name="action_buy_eth">Buy ETH</string>
+    <string name="crypto">Crypto</string>
 </resources>

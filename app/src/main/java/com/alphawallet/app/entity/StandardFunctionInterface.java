@@ -13,6 +13,7 @@ public interface StandardFunctionInterface
     default void showSend() { };
     default void showReceive() { };
     default void updateAmount() { };
+    default void buy(OnRampContract data) { };
     default void displayTokenSelectionError(TSAction action) { };
     default void handleClick(String action, int actionId) { };
     default void handleTokenScriptFunction(String function, List<BigInteger> selection) { };

@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -128,20 +129,35 @@ public class Erc20DetailViewModel extends BaseViewModel {
         fetchTransactionsInteract.restartTransactionService();
     }
 
-    public Intent startRamp(String address, String symbol)
+    public Intent getBuyIntent(String address, OnRampContract contract)
+    {
+        switch (contract.getProvider())
+        {
+            case "ramp":
+                return getRampIntent(address, contract.getSymbol());
+
+            default: // Default to Ramp if provider is not specified
+                return getRampIntent(address, contract.getSymbol());
+        }
+    }
+
+    private Intent getRampIntent(String address, String symbol)
     {
         Uri.Builder builder = new Uri.Builder();
-        Uri uri = builder.scheme("https")
+        builder.scheme("https")
                 .authority("buy.ramp.network")
                 .appendQueryParameter("hostApiKey", getRampKey())
                 .appendQueryParameter("hostLogoUrl", "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg")
                 .appendQueryParameter("hostAppName", "AlphaWallet")
-                .appendQueryParameter("swapAsset", symbol)
-                .appendQueryParameter("userAddress", address)
-                .build();
+                .appendQueryParameter("userAddress", address);
+
+        if (!symbol.isEmpty())
+        {
+            builder.appendQueryParameter("swapAsset", symbol);
+        }
 
         Intent intent = new Intent();
-        intent.putExtra(C.DAPP_URL_LOAD, uri.toString());
+        intent.putExtra(C.DAPP_URL_LOAD, builder.build().toString());
         return intent;
     }
 }

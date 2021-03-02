@@ -6,9 +6,5 @@ import com.alphawallet.app.entity.tokens.Token;
 public interface OnRampRepositoryType {
     String getUri(String address, Token token);
 
-    boolean isInKnownContractsList(Token token);
-
     OnRampContract getContract(Token token);
-
-    String getDefaultProvider();
 }

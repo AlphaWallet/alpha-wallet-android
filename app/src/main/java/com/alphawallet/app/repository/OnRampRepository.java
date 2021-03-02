@@ -32,12 +32,6 @@ public class OnRampRepository implements OnRampRepositoryType {
     public static native String getRampKey();
 
     @Override
-    public String getDefaultProvider()
-    {
-        return DEFAULT_PROVIDER;
-    }
-
-    @Override
     public String getUri(String address, Token token)
     {
         OnRampContract contract = getContract(token);
@@ -55,15 +49,11 @@ public class OnRampRepository implements OnRampRepositoryType {
         Map<String, OnRampContract> contractMap = getKnownContracts();
         OnRampContract contract = contractMap.get(token.getAddress().toLowerCase());
         if (contract != null) return contract;
-        else return new OnRampContract();
-    }
-
-    @Override
-    public boolean isInKnownContractsList(Token token)
-    {
-        Map<String, OnRampContract> contractMap = getKnownContracts();
-        OnRampContract contract = contractMap.get(token.getAddress().toLowerCase());
-        return contract != null;
+        else
+        {
+            if (token.isEthereum()) return new OnRampContract(token.tokenInfo.symbol);
+            else return new OnRampContract();
+        }
     }
 
     private Map<String, OnRampContract> getKnownContracts()

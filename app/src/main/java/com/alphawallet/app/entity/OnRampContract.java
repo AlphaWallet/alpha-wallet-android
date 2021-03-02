@@ -6,6 +6,12 @@ public class OnRampContract {
     private String symbol;
     private String provider;
 
+    public OnRampContract(String symbol)
+    {
+        this.symbol = symbol;
+        this.provider = OnRampRepository.DEFAULT_PROVIDER;
+    }
+
     public OnRampContract()
     {
         this.symbol = "";

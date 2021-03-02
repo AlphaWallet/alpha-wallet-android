@@ -708,13 +708,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private void addPurchaseVerb(Token token, OnRampRepositoryType onRampRepository)
     {
         OnRampContract contract = onRampRepository.getContract(token);
-        if (token.isEthereum() || onRampRepository.isInKnownContractsList(token))
-        {
-            addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, token.tokenInfo.symbol, contract.getProvider()), R.string.action_buy_crypto));
-        }
-        else
-        {
-            addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, context.getString(R.string.crypto), onRampRepository.getDefaultProvider()), R.string.action_buy_crypto));
-        }
+        String symbol = contract.getSymbol().isEmpty()? context.getString(R.string.crypto) : token.tokenInfo.symbol;
+        addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, symbol, contract.getProvider()), R.string.action_buy_crypto));
     }
 }

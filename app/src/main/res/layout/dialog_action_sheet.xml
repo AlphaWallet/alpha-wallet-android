@@ -143,6 +143,7 @@
 
     <!-- TODO: This needs to be moved into a view of its own: AmountDisplayWidget -->
 
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

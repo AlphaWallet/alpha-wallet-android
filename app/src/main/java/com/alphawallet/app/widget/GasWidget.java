@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,9 +24,11 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.GasSettingsActivity;
 import com.alphawallet.app.ui.widget.entity.GasSpeed;
+import com.alphawallet.app.ui.widget.entity.GasWarningLayout;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.google.api.Distribution;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -64,6 +68,7 @@ public class GasWidget extends LinearLayout implements Runnable
     private final TextView speedText;
     private final TextView timeEstimate;
     private final LinearLayout gasWarning;
+    private LinearLayout speedWarning;
     private final Context context;
 
     private final List<GasSpeed> gasSpeeds;
@@ -82,6 +87,7 @@ public class GasWidget extends LinearLayout implements Runnable
         speedText = findViewById(R.id.text_speed);
         timeEstimate = findViewById(R.id.text_time_estimate);
         gasWarning = findViewById(R.id.layout_gas_warning);
+        speedWarning = findViewById(R.id.layout_speed_warning);
 
         gasSpeeds = new ArrayList<>();
 
@@ -167,7 +173,6 @@ public class GasWidget extends LinearLayout implements Runnable
         {
             customSpeedTitle = getContext().getString(R.string.speed_custom);
         }
-
         return new GasSpeed(customSpeedTitle, expectedTxTime, newGasPrice, true);
     }
 
@@ -190,6 +195,7 @@ public class GasWidget extends LinearLayout implements Runnable
         currentGasSpeedIndex = gasSelectionIndex;
         customNonce = nonce;
         handleCustomGas(customGasPrice, customGasLimit, expectedTxTime);
+
         handler.post(this);
     }
 
@@ -207,6 +213,7 @@ public class GasWidget extends LinearLayout implements Runnable
             gasSpeeds.remove(currentGasSpeedIndex);
             gasSpeeds.add(gs);
             customGasLimit = custGasLimit.toBigInteger();
+
         }
 
         adjustedValue = calculateSendAllValue();
@@ -237,12 +244,10 @@ public class GasWidget extends LinearLayout implements Runnable
         if (!sufficientGas)
         {
             gasWarning.setVisibility(View.VISIBLE);
-            speedText.setVisibility(View.GONE);
         }
         else
         {
             gasWarning.setVisibility(View.GONE);
-            speedText.setVisibility(View.VISIBLE);
         }
 
         return sufficientGas;
@@ -362,7 +367,6 @@ public class GasWidget extends LinearLayout implements Runnable
         {
             //
         }
-
         timeEstimate.setText(displayStr);
         speedText.setText(gs.speed);
         adjustedValue = calculateSendAllValue();
@@ -372,7 +376,12 @@ public class GasWidget extends LinearLayout implements Runnable
             functionInterface.updateAmount();
         }
 
+        if (currentGasSpeedIndex == customGasSpeedIndex)
+        {
+            checkCustomGasPrice(gasSpeeds.get(customGasSpeedIndex).gasPrice);
+        }
         checkSufficientGas();
+        manageWarnings();
     }
 
     public BigInteger getGasPrice(BigInteger defaultPrice)
@@ -397,6 +406,75 @@ public class GasWidget extends LinearLayout implements Runnable
         else
         {
             return transactionValue;
+        }
+    }
+
+    private void checkCustomGasPrice(BigInteger customGasPrice)
+    {
+        if (currentGasSpeedIndex != customGasSpeedIndex)
+        {
+            return;
+        }
+        if (gasSpeeds.size() <= 2)
+        {
+            return;
+        }
+
+        double dGasPrice = customGasPrice.doubleValue();
+
+        GasSpeed ug = gasSpeeds.get(0); //rapid
+        GasSpeed lg = gasSpeeds.get(gasSpeeds.size() - 2); //slow
+
+        double lowerBound = lg.gasPrice.doubleValue();
+        double upperBound = ug.gasPrice.doubleValue();
+
+        if (dGasPrice < lowerBound)
+        {
+            showCustomSpeedWarning(false);
+        }
+        else if (dGasPrice > 1.5 * upperBound)
+        {
+            showCustomSpeedWarning(true);
+        }
+        else
+        {
+            speedWarning.setVisibility(View.GONE);
+        }
+    }
+
+    private void showCustomSpeedWarning(boolean high)
+    {
+        if(currentGasSpeedIndex != customGasSpeedIndex)
+        {
+            return;
+        }
+
+        TextView warningText = findViewById(R.id.text_speed_warning);
+
+        if(high)
+        {
+            warningText.setText(getResources().getString(R.string.speed_high_gas));
+        }
+        else
+        {
+            warningText.setText(getResources().getString(R.string.speed_too_low));
+        }
+        speedWarning.setVisibility(View.VISIBLE);
+    }
+
+    private void manageWarnings()
+    {
+        if (gasWarning.getVisibility() == VISIBLE || speedWarning.getVisibility() == VISIBLE)
+        {
+            speedText.setVisibility(View.GONE);
+            if (gasWarning.getVisibility() == VISIBLE && speedWarning.getVisibility() == VISIBLE)
+            {
+                speedWarning.setVisibility(View.GONE);
+            }
+        }
+        else
+        {
+            speedText.setVisibility(View.VISIBLE);
         }
     }
 

@@ -2,6 +2,7 @@ package com.alphawallet.app.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -39,6 +40,7 @@ public class GasSliderView extends RelativeLayout
     private final float minimumPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(C.GAS_PRICE_MIN)).multiply(BigDecimal.TEN).floatValue(); //minimum for slider
     private float gasLimitScaleFactor;
     private boolean limitInit = false;
+    private final Handler handler = new Handler();
 
     private GasSettingsCallback gasCallback;
 
@@ -136,7 +138,13 @@ public class GasSliderView extends RelativeLayout
                 if (gasLimitValue.hasFocus() || gasPriceValue.hasFocus())
                 {
                     limitInit = true;
-                    updateGasControl();
+                    handler.removeCallbacks(null);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateGasControl();
+                        }
+                    },2000);
                 }
             }
         };

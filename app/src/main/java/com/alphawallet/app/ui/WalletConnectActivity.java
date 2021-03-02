@@ -451,7 +451,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         String name = getString(R.string.app_name);
         String url = "https://www.alphawallet.com";
         String description = viewModel.getWallet().address;
-        String[] icons = {"https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg"};
+        String[] icons = {C.ALPHAWALLET_LOGO_URI};
 
         peerMeta = new WCPeerMeta(
                 name,

@@ -215,4 +215,6 @@ public abstract class C {
     public static final String AN_USE_GAS = "Gas Settings";
     public static final String AN_CALL_ACTIONSHEET = "Use ActionSheet";
     public static final String APP_NAME = "PACKAGE_NAME";
+
+    public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg";
 }

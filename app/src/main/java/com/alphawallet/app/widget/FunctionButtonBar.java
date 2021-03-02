@@ -27,12 +27,14 @@ import androidx.core.content.ContextCompat;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BuyCryptoInterface;
 import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -40,8 +42,6 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -63,6 +63,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private NonFungibleTokenAdapter adapter;
     private List<BigInteger> selection = new ArrayList<>();
     private StandardFunctionInterface callStandardFunctions;
+    private BuyCryptoInterface buyFunctionInterface;
     private int buttonCount;
     private Token token = null;
     private boolean showButtons = false;
@@ -80,7 +81,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private FunctionItemAdapter moreActionsAdapter;
     private final Semaphore functionMapComplete = new Semaphore(1);
 
-    private OnRampContract contract;
+    private boolean hasBuyFunction;
+    private OnRampRepositoryType onRampRepository;
 
     public FunctionButtonBar(Context ctx, @Nullable AttributeSet attrs) {
         super(ctx, attrs);
@@ -224,9 +226,16 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     }
 
     private void handleAction(ItemClick action) {
-        if (functions != null && functions.containsKey(action.buttonText)) {
+        if (functions != null && functions.containsKey(action.buttonText))
+        {
             handleUseClick(action);
-        } else {
+        }
+        else if (action.buttonId == R.string.action_buy_crypto)
+        {
+            buyFunctionInterface.handleBuyFunction(token);
+        }
+        else
+        {
             handleStandardFunctionClick(action);
         }
     }
@@ -251,10 +260,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         else if (action.buttonId == R.string.action_use)
         {
             if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
-        }
-        else if (action.buttonId == R.string.action_buy)
-        {
-            callStandardFunctions.buy(contract);
         }
         else
         {
@@ -400,9 +405,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        bottomSheet.dismiss();
         ItemClick action = moreActionsAdapter.getItem(position);
         handleAction(action);
-        bottomSheet.hide();
     }
 
     public void setPrimaryButtonText(Integer resource) {
@@ -502,10 +507,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         addFunction(new ItemClick(function, 0));
     }
 
-    private void addFunction(int resourceId, String res) {
-        addFunction(new ItemClick(context.getString(resourceId, res), resourceId));
-    }
-
     private void addFunction(int resourceId) {
         addFunction(new ItemClick(context.getString(resourceId), resourceId));
     }
@@ -558,6 +559,12 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             functions = null;
         }
 
+        //Add buy function
+        if (hasBuyFunction)
+        {
+            addBuyFunction();
+        }
+
         //now add the standard functions for NonFungibles
         if (token.isNonFungible())
         {
@@ -605,76 +612,21 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      */
     private boolean setupCustomTokenActions()
     {
-        boolean result = false;
         int chainId = token.tokenInfo.chainId;
         String address = token.getAddress();
 
-        if (chainId == EthereumNetworkBase.MAINNET_ID)
+        switch (chainId)
         {
-            if (address.toLowerCase().equals(C.DAI_TOKEN) || address.toLowerCase().equals(C.SAI_TOKEN))
-            {
-                addFunction(R.string.convert_to_xdai);
-            }
-
-            if (token.tokenInfo.symbol.toLowerCase().equals("eth"))
-            {
-                this.contract = new OnRampContract(token.tokenInfo.symbol);
-                addFunction(R.string.action_buy, token.tokenInfo.symbol);
-            }
-            else
-            {
-                checkKnownContracts(address);
-            }
-            result = true;
+            case EthereumNetworkBase.MAINNET_ID:
+                switch (address.toLowerCase())
+                {
+                    case C.DAI_TOKEN:
+                    case C.SAI_TOKEN:
+                        addFunction(R.string.convert_to_xdai);
+                        return true;
+                }
         }
-        else if (chainId == EthereumNetworkBase.XDAI_ID)
-        {
-            if (token.tokenInfo.symbol.toLowerCase().equals("xdai"))
-            {
-                this.contract = new OnRampContract(token.tokenInfo.symbol);
-                addFunction(R.string.action_buy, token.tokenInfo.symbol);
-            }
-            else
-            {
-                checkKnownContracts(address);
-            }
-            result = true;
-        }
-
-        return result;
-    }
-
-    private void checkKnownContracts(String address)
-    {
-        this.contract = findContract(address);
-        if (contract != null)
-        {
-            addFunction(R.string.action_buy, token.tokenInfo.symbol);
-        }
-        else
-        {
-            this.contract = new OnRampContract(token.tokenInfo.symbol);
-            addFunction(R.string.action_buy, context.getString(R.string.crypto));
-        }
-    }
-
-    private OnRampContract findContract(String address)
-    {
-        for (OnRampContract contract : getKnownContracts(getContext()))
-        {
-            if (address.equals(contract.getAddress()))
-            {
-                return contract;
-            }
-        }
-        return null;
-    }
-
-    public ArrayList<OnRampContract> getKnownContracts(Context context)
-    {
-        return new Gson().fromJson(Utils.loadJSONFromAsset(context, "onramp_contracts.json"),
-                new TypeToken<List<OnRampContract>>() {
-                }.getType());
+        return false;
     }
 
     private void getFunctionMap(AssetDefinitionService assetSvs)
@@ -733,6 +685,36 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                     findViewById(R.id.text_debug).setVisibility(View.VISIBLE);
                 }
             });
+        }
+    }
+
+    public void setupBuyFunction(BuyCryptoInterface buyCryptoInterface, OnRampRepositoryType onRampRepository)
+    {
+        this.hasBuyFunction = true;
+        this.buyFunctionInterface = buyCryptoInterface;
+        this.onRampRepository = onRampRepository;
+    }
+
+    private void addBuyFunction()
+    {
+        switch (token.tokenInfo.chainId)
+        {
+            case EthereumNetworkBase.MAINNET_ID:
+            case EthereumNetworkBase.XDAI_ID:
+                addPurchaseVerb(token, onRampRepository);
+        }
+    }
+
+    private void addPurchaseVerb(Token token, OnRampRepositoryType onRampRepository)
+    {
+        OnRampContract contract = onRampRepository.getContract(token);
+        if (token.isEthereum() || onRampRepository.isInKnownContractsList(token))
+        {
+            addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, token.tokenInfo.symbol, contract.getProvider()), R.string.action_buy_crypto));
+        }
+        else
+        {
+            addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, context.getString(R.string.crypto), onRampRepository.getDefaultProvider()), R.string.action_buy_crypto));
         }
     }
 }

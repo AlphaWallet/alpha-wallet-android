@@ -1,6 +1,7 @@
 package com.alphawallet.app.di;
 
 import com.alphawallet.app.interact.FetchTransactionsInteract;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -17,11 +18,13 @@ class Erc20DetailModule {
     Erc20DetailViewModelFactory provideErc20DetailViewModelFactory(MyAddressRouter myAddressRouter,
                                                                    FetchTransactionsInteract fetchTransactionsInteract,
                                                                    AssetDefinitionService assetDefinitionService,
-                                                                   TokensService tokensService) {
+                                                                   TokensService tokensService,
+                                                                   OnRampRepositoryType onRampRepository) {
         return new Erc20DetailViewModelFactory(myAddressRouter,
                 fetchTransactionsInteract,
                 assetDefinitionService,
-                tokensService);
+                tokensService,
+                onRampRepository);
     }
 
     @Provides

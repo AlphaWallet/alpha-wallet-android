@@ -63,7 +63,7 @@ public class OnRampRepository implements OnRampRepositoryType {
                 }.getType());
     }
 
-    private static Uri buildRampUri(String address, String symbol)
+    private Uri buildRampUri(String address, String symbol)
     {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")

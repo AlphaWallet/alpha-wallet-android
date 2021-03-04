@@ -27,11 +27,14 @@ import androidx.core.content.ContextCompat;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BuyCryptoInterface;
 import com.alphawallet.app.entity.ItemClick;
+import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -60,6 +63,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private NonFungibleTokenAdapter adapter;
     private List<BigInteger> selection = new ArrayList<>();
     private StandardFunctionInterface callStandardFunctions;
+    private BuyCryptoInterface buyFunctionInterface;
     private int buttonCount;
     private Token token = null;
     private boolean showButtons = false;
@@ -76,6 +80,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private List<ItemClick> moreActionsList;
     private FunctionItemAdapter moreActionsAdapter;
     private final Semaphore functionMapComplete = new Semaphore(1);
+
+    private boolean hasBuyFunction;
+    private OnRampRepositoryType onRampRepository;
 
     public FunctionButtonBar(Context ctx, @Nullable AttributeSet attrs) {
         super(ctx, attrs);
@@ -219,9 +226,16 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     }
 
     private void handleAction(ItemClick action) {
-        if (functions != null && functions.containsKey(action.buttonText)) {
+        if (functions != null && functions.containsKey(action.buttonText))
+        {
             handleUseClick(action);
-        } else {
+        }
+        else if (action.buttonId == R.string.action_buy_crypto)
+        {
+            buyFunctionInterface.handleBuyFunction(token);
+        }
+        else
+        {
             handleStandardFunctionClick(action);
         }
     }
@@ -391,9 +405,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        bottomSheet.dismiss();
         ItemClick action = moreActionsAdapter.getItem(position);
         handleAction(action);
-        bottomSheet.hide();
     }
 
     public void setPrimaryButtonText(Integer resource) {
@@ -545,6 +559,12 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             functions = null;
         }
 
+        //Add buy function
+        if (hasBuyFunction)
+        {
+            addBuyFunction();
+        }
+
         //now add the standard functions for NonFungibles
         if (token.isNonFungible())
         {
@@ -604,17 +624,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                     case C.SAI_TOKEN:
                         addFunction(R.string.convert_to_xdai);
                         return true;
-                    default:
-                        break;
                 }
-                addFunction(R.string.action_buy_eth);
-                break;
-            case EthereumNetworkBase.XDAI_ID:
-                addFunction(R.string.action_buy_xdai);
-                //TODO: Add convert to DAI bridge.
-                break;
         }
-
         return false;
     }
 
@@ -675,5 +686,29 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 }
             });
         }
+    }
+
+    public void setupBuyFunction(BuyCryptoInterface buyCryptoInterface, OnRampRepositoryType onRampRepository)
+    {
+        this.hasBuyFunction = true;
+        this.buyFunctionInterface = buyCryptoInterface;
+        this.onRampRepository = onRampRepository;
+    }
+
+    private void addBuyFunction()
+    {
+        switch (token.tokenInfo.chainId)
+        {
+            case EthereumNetworkBase.MAINNET_ID:
+            case EthereumNetworkBase.XDAI_ID:
+                addPurchaseVerb(token, onRampRepository);
+        }
+    }
+
+    private void addPurchaseVerb(Token token, OnRampRepositoryType onRampRepository)
+    {
+        OnRampContract contract = onRampRepository.getContract(token);
+        String symbol = contract.getSymbol().isEmpty()? context.getString(R.string.crypto) : token.tokenInfo.symbol;
+        addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, symbol), R.string.action_buy_crypto));
     }
 }

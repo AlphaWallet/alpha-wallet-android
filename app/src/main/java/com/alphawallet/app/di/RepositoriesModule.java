@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.OnRampRepository;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.TokenLocalSource;
@@ -100,6 +102,12 @@ public class RepositoriesModule {
 				accountKeystoreService,
 				inDiskCache,
 				transactionsService);
+	}
+
+	@Singleton
+	@Provides
+	OnRampRepositoryType provideOnRampRepository(Context context, AnalyticsServiceType analyticsServiceType) {
+		return new OnRampRepository(context, analyticsServiceType);
 	}
 
 	@Singleton

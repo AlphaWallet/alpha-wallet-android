@@ -1,4 +1,5 @@
-[
+[ 
+  {"name": "Rare Coin", "description": "Free Crypto Faucet & Yeild Farming", "url": "make.rare.claims", "category": "Tool"},
   {"name": "Eporio", "description": "The cheaper marketplace for NFT - Non Fungible Tokens", "url": "https://epor.io", "category": "Marketplace"},
   {"name": "DeFiBox", "description": "one-stop DeFi asset, data and protocols aggregation platform", "url": "https://www.defibox.com/index?utm_source=2189969", "category": "Tool"},
   {"name": "TokenSets", "description": "Enhance your portfolio with automated asset management strategies.", "url": "https://www.tokensets.com/", "category": "Finance"},

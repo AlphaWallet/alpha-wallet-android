@@ -52,7 +52,7 @@ public class InputView extends LinearLayout {
         inflate(context, R.layout.item_input_view, this);
 
         labelText = findViewById(R.id.label);
-        errorText = findViewById(R.id.error);
+        errorText = findViewById(R.id.error_text);
         editText = findViewById(R.id.edit_text);
         statusText = findViewById(R.id.status_text);
         boxLayout = findViewById(R.id.box_layout);

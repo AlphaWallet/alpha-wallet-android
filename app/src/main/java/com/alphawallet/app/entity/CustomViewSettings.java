@@ -27,6 +27,10 @@ public class CustomViewSettings
         //boolean badToken = token.isTerminated() || token.isBad();
         //if (!token.tokenInfo.isEnabled) filterResult = false;
         if (token.isEthereum()) filterResult = true;
+
+        if (token.type == ContractType.LEGACY_DYNAMIC_CONTRACT
+                || token.type == ContractType.ETHEREUM_INVISIBLE) { filterResult = false;}
+
         return !badToken && filterResult;
     }
 

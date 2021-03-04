@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 138
-        versionName "3.24.0"
+        versionCode 140
+        versionName "3.24.1"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -107,7 +107,7 @@ android {
             apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
-                implementation 'com.google.firebase:firebase-analytics:18.0.1'
+                implementation 'com.google.firebase:firebase-analytics:18.0.2'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
         }
@@ -193,7 +193,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.1'
 
     implementation "com.trustwallet:wallet-core:0.12.31"
 

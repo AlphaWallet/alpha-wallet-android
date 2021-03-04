@@ -10,6 +10,7 @@ import com.alphawallet.app.ui.DappBrowserFragment;
 import com.alphawallet.app.ui.Erc20DetailActivity;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.GasSettingsActivity;
+import com.alphawallet.app.ui.GasSettingsActivityLegacy;
 import com.alphawallet.app.ui.HelpActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -68,6 +69,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = GasSettingsModule.class)
 	abstract GasSettingsActivity bindGasSettingsModule();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = GasSettingsModule.class)
+	abstract GasSettingsActivityLegacy bindGasSettingsLegacyModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AddTokenModule.class)

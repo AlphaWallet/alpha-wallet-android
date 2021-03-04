@@ -217,16 +217,19 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         super.onDestroy();
         if (activityHistoryList != null) activityHistoryList.onDestroy();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
+        if (tokenViewAdapter != null && tokenView != null) tokenViewAdapter.onDestroy(tokenView);
     }
 
     @Override
-    public void onPause() {
+    public void onPause()
+    {
         super.onPause();
         viewModel.getTokensService().clearFocusToken();
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         if (viewModel == null)
         {
@@ -281,5 +284,38 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 }
                 break;
         }
+    }
+
+    @Override
+    public void handleClick(String action, int actionId)
+    {
+        if (actionId == R.string.convert_to_xdai)
+        {
+            openDapp(C.XDAI_BRIDGE_DAPP);
+        }
+        else if (actionId == R.string.action_buy_eth)
+        {
+            startRamp(C.ETH_SYMBOL);
+        }
+        else if (actionId == R.string.action_buy_xdai)
+        {
+            startRamp(C.xDAI_SYMBOL);
+        }
+    }
+
+    private void startRamp(String symbol)
+    {
+        Intent intent = viewModel.startRamp(wallet.address, symbol);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    private void openDapp(String dappURL)
+    {
+        //switch to dappbrowser and open at dappURL
+        Intent intent = new Intent();
+        intent.putExtra(C.DAPP_URL_LOAD, dappURL);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

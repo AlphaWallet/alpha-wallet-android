@@ -66,7 +66,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private final Web3Transaction candidateTransaction;
     private final ActionSheetCallback actionSheetCallback;
-    private final SignAuthenticationCallback signCallback;
+    private SignAuthenticationCallback signCallback;
     private ActionSheetMode mode;
     private final long callbackId;
 
@@ -406,7 +406,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         //get approval and push transaction
         //authentication screen
-        SignAuthenticationCallback signCallback = new SignAuthenticationCallback()
+        signCallback = new SignAuthenticationCallback()
         {
             @Override
             public void gotAuthorisation(boolean gotAuth)
@@ -426,6 +426,34 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         };
 
         actionSheetCallback.getAuthorisation(signCallback);
+    }
+
+    public void completeSignRequest(boolean gotAuth)
+    {
+        if (signCallback != null)
+        {
+            actionCompleted = true;
+
+            switch (mode)
+            {
+                case SEND_TRANSACTION_WC:
+                case SEND_TRANSACTION:
+                case SEND_TRANSACTION_DAPP:
+                    signCallback.gotAuthorisation(gotAuth);
+                    break;
+
+                case SIGN_MESSAGE:
+                    actionCompleted = true;
+                    //display success and hand back to calling function
+                    confirmationWidget.startProgressCycle(1);
+                    signCallback.gotAuthorisation(gotAuth);
+                    break;
+
+                case SIGN_TRANSACTION:
+                    signCallback.gotAuthorisation(gotAuth);
+                    break;
+            }
+        }
     }
 
     private Web3Transaction formTransaction()
@@ -450,7 +478,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         //get approval and push transaction
         //authentication screen
-        SignAuthenticationCallback signCallback = new SignAuthenticationCallback()
+        signCallback = new SignAuthenticationCallback()
         {
             @Override
             public void gotAuthorisation(boolean gotAuth)

@@ -19,7 +19,7 @@ import io.realm.Realm;
 
 public interface TransactionRepositoryType {
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
-	Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
+	Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, int chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId);
 	Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, int chainId);
 	Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId);

@@ -127,6 +127,8 @@ public class SignTransactionDialog extends BottomSheetDialog
                 switch (errorCode)
                 {
                     case FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED:
+                        removeFingerprintGraphic();
+                        break;
                     case FingerprintManager.FINGERPRINT_ERROR_CANCELED:
                         authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
                         break;
@@ -144,6 +146,7 @@ public class SignTransactionDialog extends BottomSheetDialog
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_NO_FINGERPRINTS:
+                        removeFingerprintGraphic();
                         fingerprintError.setText(R.string.no_fingerprint_enrolled);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
@@ -151,6 +154,7 @@ public class SignTransactionDialog extends BottomSheetDialog
                         //safe to ignore
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
+                        removeFingerprintGraphic();
                         fingerprintError.setText(R.string.cannot_process_fingerprint);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;

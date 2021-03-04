@@ -24,11 +24,9 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
-import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
@@ -68,7 +66,6 @@ import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 public class WalletConnectViewModel extends BaseViewModel {
     private static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
     protected Disposable disposable;
     private final KeyService keyService;
@@ -81,9 +78,11 @@ public class WalletConnectViewModel extends BaseViewModel {
     private final AnalyticsServiceType analyticsService;
     private final Context context;
     private WalletConnectService walletConnectService;
-    private ServiceConnection serviceConnection;
+    private final ServiceConnection serviceConnection;
 
     private final HashMap<String, WCClient> clientBuffer = new HashMap<>();
+
+    private Wallet wallet;
 
     private static final String TAG = "WCClientVM";
 
@@ -105,12 +104,15 @@ public class WalletConnectViewModel extends BaseViewModel {
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
-        startService();
+        serviceConnection = startService();
+        disposable = genericWalletInteract
+                .find()
+                .subscribe(w -> this.wallet = w, this::onError);
     }
 
-    public void startService()
+    public ServiceConnection startService()
     {
-        serviceConnection = new ServiceConnection()
+        ServiceConnection serviceConnection = new ServiceConnection()
         {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
@@ -138,13 +140,15 @@ public class WalletConnectViewModel extends BaseViewModel {
         Intent i = new Intent(context, WalletConnectService.class);
         context.startService(i);
         context.bindService(i, serviceConnection, Context.BIND_ABOVE_CLIENT);
+
+        return serviceConnection;
     }
 
     public void prepare()
     {
-        disposable = findDefaultNetworkInteract
+        disposable = genericWalletInteract
                 .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void pruneSession(String sessionId)
@@ -184,19 +188,18 @@ public class WalletConnectViewModel extends BaseViewModel {
         gasService.stopGasPriceCycle();
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    private void onDefaultWallet(Wallet wallet) {
-        defaultWallet.postValue(wallet);
+    private void onDefaultWallet(Wallet w) {
+        this.wallet = w;
+        defaultWallet.postValue(w);
     }
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
+    }
+
+    public Wallet getWallet()
+    {
+        return wallet;
     }
 
     public LiveData<Boolean> serviceReady() {
@@ -253,9 +256,8 @@ public class WalletConnectViewModel extends BaseViewModel {
         }
         else
         {
-            byte[] data = Numeric.hexStringToByteArray(finalTx.payload);
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx.recipient.toString(), finalTx.value, finalTx.gasPrice, finalTx.gasLimit, data, chainId)
+                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
                     .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
@@ -538,5 +540,10 @@ public class WalletConnectViewModel extends BaseViewModel {
         analyticsProperties.setData("(WC)" + mode); //disambiguate signs/sends etc through WC
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
+    public boolean connectedToService()
+    {
+        return walletConnectService != null;
     }
 }

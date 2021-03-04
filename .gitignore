@@ -17,6 +17,7 @@ app/unused.txt
 app/full-r8-config.txt
 app/awallet
 app/analytics
+app/noAnalytics
 
 # Files for the Dalvik VM
 *.dex

@@ -119,7 +119,7 @@ public class GasService2 implements ContractGasProvider
         updateCurrentGasPrices()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(updated -> { System.out.println("Updated gas prices: " + updated); })
+                .subscribe(updated -> System.out.println("Updated gas prices: " + updated), Throwable::printStackTrace)
                 .isDisposed();
     }
 
@@ -144,7 +144,7 @@ public class GasService2 implements ContractGasProvider
     @Override
     public BigInteger getGasLimit()
     {
-        return new BigInteger(C.DEFAULT_GAS_LIMIT);
+        return new BigInteger(C.DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT);
     }
 
     private Single<Boolean> updateCurrentGasPrices()

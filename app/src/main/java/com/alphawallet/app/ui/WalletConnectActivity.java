@@ -29,6 +29,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.SignRecord;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
@@ -42,6 +43,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SignMessageType;
@@ -70,6 +72,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
+
+import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 
 public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface
 {
@@ -102,7 +106,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                                               // -- according to WalletConnect's expected UX docs.
     private boolean fromSessionActivity = false;
 
-    private Wallet wallet;
     private String qrCode;
 
     private SignAuthenticationCallback signCallback;
@@ -113,6 +116,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private boolean switchConnection = false;
     private boolean terminateSession = false;
     private boolean sessionStarted = false;
+    private boolean waitForWalletConnectSession = false;
 
     private final Handler handler = new Handler();
 
@@ -165,6 +169,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
+    private void onServiceReady(Boolean b)
+    {
+        if (waitForWalletConnectSession)
+        {
+            waitForWalletConnectSession = false;
+            handleStartDirectFromQRScan();
+        }
+    }
+
     private void handleStartDirectFromQRScan()
     {
         String sessionId = getSessionId();
@@ -173,7 +186,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         Log.d(TAG, "Received New Intent: " + newSessionId + " (" + sessionId + ")");
         client = viewModel.getClient(newSessionId);
 
-        if (client == null || !client.isConnected())
+        if (!viewModel.connectedToService())
+        {
+            //wait for service to connect
+            waitForWalletConnectSession = true;
+        }
+        else if (client == null || !client.isConnected())
         {
             //TODO: ERROR!
             showErrorDialogTerminate(getString(R.string.session_terminated));
@@ -251,6 +269,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 .get(WalletConnectViewModel.class);
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.serviceReady().observe(this, this::onServiceReady);
     }
 
     private void initViews()
@@ -278,15 +297,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     //TODO: Refactor this into elements - this function is unmaintainable
     private void onDefaultWallet(Wallet wallet)
     {
-        this.wallet = wallet;
-        address.setText(wallet.address);
+        address.setText(viewModel.getWallet().address);
 
         Log.d(TAG, "Open Connection: " + getSessionId());
 
         String peerId;
         String sessionId = getSessionId();
         String connectionId = viewModel.getRemotePeerId(sessionId);
-        if (!TextUtils.isEmpty(wallet.address))
+        if (!TextUtils.isEmpty(viewModel.getWallet().address))
         {
             if (connectionId == null && session != null) //new session request
             {
@@ -432,7 +450,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         String name = getString(R.string.app_name);
         String url = "https://www.alphawallet.com";
-        String description = wallet.address;
+        String description = viewModel.getWallet().address;
         String[] icons = {"https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg"};
 
         peerMeta = new WCPeerMeta(
@@ -536,7 +554,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onSessionRequest(Long id, WCPeerMeta peer, int chainIdHint)
     {
-        String[] accounts = {wallet.address};
+        String[] accounts = {viewModel.getWallet().address};
 
         Glide.with(this)
                 .load(peer.getIcons().get(0))
@@ -619,7 +637,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                 .setMessage(throwable.getMessage())
                 .setPositiveButton(R.string.try_again, (d, w) -> {
-                    onDefaultWallet(wallet);
+                    onDefaultWallet(viewModel.getWallet());
                 })
                 .setNeutralButton(R.string.action_cancel, (d, w) -> {
                     killSession();
@@ -707,9 +725,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confDialog.setURL(remotePeerData.getUrl());
                 confDialog.setCanceledOnTouchOutside(false);
 
-                viewModel.calculateGasEstimate(wallet, com.alphawallet.token.tools.Numeric.hexStringToByteArray(w3Tx.payload),
+                viewModel.calculateGasEstimate(viewModel.getWallet(), com.alphawallet.token.tools.Numeric.hexStringToByteArray(w3Tx.payload),
                         chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value))
-                        .map(limit -> convertToGasLimit(limit, w3Tx.gasLimit))
+                        .map(limit -> convertToGasLimit(limit, w3Tx))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
@@ -726,15 +744,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         return confDialog;
     }
 
-    private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger txGasLimit)
+    private BigInteger convertToGasLimit(EthEstimateGas estimate, Web3Transaction w3Tx)
     {
-        if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0 && !estimate.hasError())
+        if (!estimate.hasError() && estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
         {
             return estimate.getAmountUsed();
         }
+        else if (w3Tx.gasLimit.equals(BigInteger.ZERO))
+        {
+            return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS); //cautious gas limit
+        }
         else
         {
-            return txGasLimit;
+            return w3Tx.gasLimit;
         }
     }
 
@@ -790,7 +812,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                 .setMessage(message)
                 .setPositiveButton(R.string.try_again, (d, w) -> {
-                    onDefaultWallet(wallet);
+                    onDefaultWallet(viewModel.getWallet());
                 })
                 .setNeutralButton(R.string.action_cancel, (d, w) -> {
                     d.dismiss();
@@ -911,6 +933,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+        }
         if (resultCode == RESULT_OK)
         {
             if (requestCode == C.REQUEST_TRANSACTION_CALLBACK)
@@ -976,7 +1002,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
-        viewModel.getAuthenticationForSignature(wallet, this, callback);
+        viewModel.getAuthenticationForSignature(viewModel.getWallet(), this, callback);
     }
 
     @Override

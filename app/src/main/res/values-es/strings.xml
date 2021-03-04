@@ -720,4 +720,7 @@
     <string name="speed_too_low">Too Low</string>
     <string name="speed_high_gas">High Fee</string>
     <string name="body_insufficient_warning">Your balance has insufficient funds for the transaction value plus transaction fee.</string>
+    <string name="convert_to_xdai">Convert to xDAI</string>
+    <string name="action_buy_xdai">Buy xDAI</string>
+    <string name="action_buy_eth">Buy ETH</string>
 </resources>

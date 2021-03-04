@@ -66,6 +66,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
@@ -87,12 +88,14 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
+import com.alphawallet.app.web3.OnEthCallListener;
 import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.OnSignTransactionListener;
 import com.alphawallet.app.web3.OnSignTypedMessageListener;
 import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -107,6 +110,8 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
@@ -120,6 +125,7 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -133,10 +139,12 @@ import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
+import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
+        OnEthCallListener, URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
         ActionSheetCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
@@ -542,7 +550,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             cancelSearchSession();
         } else {
             urlTv.getText().clear();
-            beginSearchSession();
+            openURLInputView();
+            KeyboardUtils.showKeyboard(urlTv); //ensure keyboard shows here so we can listen for it being cancelled
         }
     }
 
@@ -568,11 +577,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
         // Both these are required, the onFocus listener is required to respond to the first click.
         urlTv.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && getActivity() != null) beginSearchSession();
+            if (hasFocus && getActivity() != null) openURLInputView();
         });
 
         urlTv.setOnClickListener(v -> {
-            beginSearchSession();
+            openURLInputView();
         });
 
         urlTv.setShowSoftInputOnFocus(true);
@@ -600,7 +609,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
     }
 
-    private void beginSearchSession() {
+    // TODO: Move all nav stuff to widget
+    private void openURLInputView() {
         urlTv.setAdapter(null);
         expandCollapseView(currentNetwork, false);
         expandCollapseView(layoutNavigation, false);
@@ -620,7 +630,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (item.getVisibility() == View.GONE)
         {
             expandCollapseView(item, true);
-            KeyboardUtils.showKeyboard(urlTv);
+            showKeyboard(urlTv);
         }
     }
 
@@ -703,6 +713,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void cancelSearchSession() {
         detachFragment(SEARCH);
+        KeyboardUtils.hideKeyboard(urlTv);
+        setBackForwardButtons();
+    }
+
+    private void shrinkSearchBar()
+    {
         if (toolbar != null)
         {
             toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
@@ -711,8 +727,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             clear.setVisibility(View.GONE);
             urlTv.dismissDropDown();
         }
-        KeyboardUtils.hideKeyboard(urlTv);
-        setBackForwardButtons();
     }
 
     private void detachFragment(String tag) {
@@ -775,7 +789,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void setupWeb3() {
         web3.setActivity(getActivity());
         web3.setChainId(networkInfo.chainId);
-        web3.setRpcUrl(EthereumNetworkBase.getDefaultNodeURL(networkInfo.chainId));
+        web3.setRpcUrl(viewModel.getNetworkNodeRPC(networkInfo.chainId));
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {
@@ -863,6 +877,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3.setOnSignPersonalMessageListener(this);
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
+        web3.setOnEthCallListener(this);
 
         if (loadOnInit != null)
         {
@@ -918,6 +933,24 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             handleSignMessage(message);
         }
+    }
+
+    @Override
+    public void onEthCall(Web3Call call)
+    {
+        Single.fromCallable(() -> {
+            //let's make the call
+            Web3j web3j = TokenRepository.getWeb3jService(networkInfo.chainId);
+            //construct call
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(wallet.address, call.to.toString(), call.payload);
+            return web3j.ethCall(transaction, call.blockParam).send();
+        }).map(EthCall::getValue)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> web3.onCallFunctionSuccessful(call.leafPosition, result),
+                        error -> web3.onCallFunctionError(call.leafPosition, error.getMessage()))
+                .isDisposed();
     }
 
     private void handleSignMessage(Signable message)
@@ -1281,6 +1314,17 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return true;
     }
 
+    public void loadDirect(String urlText)
+    {
+        cancelSearchSession();
+        addToBackStack(DAPP_BROWSER);
+        urlTv.setText(Utils.formatUrl(urlText));
+        web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
+        //ensure focus isn't on the keyboard
+        KeyboardUtils.hideKeyboard(urlTv);
+        web3.requestFocus();
+    }
+
     /* Required for CORS requests */
     private Map<String, String> getWeb3Headers()
     {
@@ -1555,9 +1599,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        if (confirmationDialog != null && confirmationDialog.isShowing())
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
         else if (requestCode == UPLOAD_FILE && uploadMessage != null)
         {
@@ -1580,15 +1624,27 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth)
+        if (gotAuth && dAppFunction != null) //sign message
         {
             viewModel.completeAuthentication(SIGN_DATA);
             viewModel.signMessage(messageTBS, dAppFunction);
         }
         else if (confirmationDialog != null && confirmationDialog.isShowing())
         {
-            web3.onSignCancel(messageTBS.getCallbackId());
+            if (messageTBS != null) web3.onSignCancel(messageTBS.getCallbackId());
             confirmationDialog.dismiss();
+        }
+    }
+
+    /**
+     * Endpoint from PIN/Swipe authorisation
+     * @param gotAuth
+     */
+    public void pinAuthorisation(boolean gotAuth)
+    {
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.completeSignRequest(gotAuth);
         }
     }
 
@@ -1649,14 +1705,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
     }
 
-    public void removeBottomMargin()
+    public void softKeyboardVisible()
     {
         handler.postDelayed(() -> setMargin(0), 10);
     }
 
-    public void restoreBottomMargin(int bottomMarginHeight)
+    public void softKeyboardGone(int bottomMarginHeight)
     {
         handler.postDelayed(() -> setMargin(bottomMarginHeight), 10);
+        shrinkSearchBar();
     }
 
     private void setMargin(int height)

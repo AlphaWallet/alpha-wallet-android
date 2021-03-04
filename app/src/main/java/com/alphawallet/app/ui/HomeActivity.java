@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Application;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -11,9 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Color;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,14 +20,12 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -259,9 +254,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
             //remove navbar if running as pure browser. clicking back will send you back to the Action/click that took you there
-            hideNavBar();
-            //now remove the bottom margin
-            ((DappBrowserFragment)dappBrowserFragment).removeBottomMargin();
+            boolean isNavBarShown = intent.getBooleanExtra("showNavBar", false);
+            if (!isNavBarShown) {
+                setNavBarVisibility(View.GONE);
+                //now remove the bottom margin
+                ((DappBrowserFragment)dappBrowserFragment).softKeyboardVisible();
+            }
         }
 
         if (bundle != null)
@@ -284,12 +282,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     {
                         navBarHeight = getNavBarHeight();
                         setNavBarVisibility(View.GONE);
-                        ((DappBrowserFragment)dappBrowserFragment).removeBottomMargin();
+                        ((DappBrowserFragment)dappBrowserFragment).softKeyboardVisible();
                     }
                     else
                     {
                         setNavBarVisibility(View.VISIBLE);
-                        ((DappBrowserFragment)dappBrowserFragment).restoreBottomMargin(navBarHeight);
+                        ((DappBrowserFragment)dappBrowserFragment).softKeyboardGone(navBarHeight);
                     }
                 });
     }
@@ -1053,7 +1051,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 switch (getSelectedItem())
                 {
                     case DAPP_BROWSER:
-                        ((DappBrowserFragment) dappBrowserFragment).gotAuthorisation(resultCode == RESULT_OK);
+                        ((DappBrowserFragment) dappBrowserFragment).pinAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
                         //continue with generating the authenticated key - NB currently no flow reaches this code but in future it could
@@ -1087,6 +1085,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         }
                     }
                 }
+            case C.TOKEN_SEND_ACTIVITY:
+                if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.DAPP_URL_LOAD))
+                {
+                    String url = data.getStringExtra(C.DAPP_URL_LOAD);
+                    ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
+                    showPage(DAPP_BROWSER);
+                }
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

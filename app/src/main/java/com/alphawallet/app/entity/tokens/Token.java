@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -268,7 +269,7 @@ public class Token implements Parcelable, Comparable<Token>
         else return tokenInfo.symbol.toUpperCase();
     }
 
-    public void clickReact(BaseViewModel viewModel, Context context)
+    public void clickReact(BaseViewModel viewModel, Activity context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
@@ -387,7 +388,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean isToken()
     {
-        return (contractType != ContractType.ETHEREUM);
+        return !(contractType == ContractType.ETHEREUM_INVISIBLE || contractType == ContractType.ETHEREUM);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)
@@ -472,7 +473,10 @@ public class Token implements Parcelable, Comparable<Token>
 
     public void setRealmInterfaceSpec(RealmToken realmToken)
     {
-        if (isEthereum()) contractType = ContractType.ETHEREUM;
+        if (isEthereum() && realmToken.getInterfaceSpec() != ContractType.ETHEREUM_INVISIBLE.ordinal())
+        {
+            contractType = ContractType.ETHEREUM;
+        }
         realmToken.setInterfaceSpec(contractType.ordinal());
     }
 

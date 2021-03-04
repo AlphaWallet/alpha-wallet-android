@@ -4,8 +4,10 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.util.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,10 +25,12 @@ public class OnRampRepository implements OnRampRepositoryType {
     }
 
     private final Context context;
+    private final AnalyticsServiceType analyticsService;
 
-    public OnRampRepository(Context context)
+    public OnRampRepository(Context context, AnalyticsServiceType analyticsService)
     {
         this.context = context;
+        this.analyticsService = analyticsService;
     }
 
     public static native String getRampKey();
@@ -35,6 +39,11 @@ public class OnRampRepository implements OnRampRepositoryType {
     public String getUri(String address, Token token)
     {
         OnRampContract contract = getContract(token);
+
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(contract.getSymbol());
+        analyticsService.track(C.AN_USE_ONRAMP, analyticsProperties);
+
         switch (contract.getProvider().toLowerCase())
         {
             case RAMP:

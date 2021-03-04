@@ -4,6 +4,7 @@ package com.alphawallet.app.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -77,7 +78,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private BigInteger customGasPriceFromWidget;
     private GasWarningLayout gasWarning;
     private GasWarningLayout insufficientWarning;
-    private ScrollView scroll;oX
+    private ScrollView scroll;
     private final Handler handler = new Handler();
 
     private int customIndex = -1;

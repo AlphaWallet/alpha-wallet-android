@@ -1250,7 +1250,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             WebHistoryItem newItem = sessionHistory.getItemAtIndex(newIndex);
             if (newItem != null)
             {
-                String urlText = newItem.getUrl();
                 urlTv.setText(newItem.getUrl());
             }
         }
@@ -1289,7 +1288,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (web3 != null)
         {
             sessionHistory = web3.copyBackForwardList();
-            String url2 = urlTv.getText().toString();
             String url = web3.getUrl();
             canBrowseBack = web3.canGoBack() || (!TextUtils.isEmpty(url) && !url.equals(EthereumNetworkBase.defaultDapp()));
             canBrowseForward = (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1);

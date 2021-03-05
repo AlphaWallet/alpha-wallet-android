@@ -85,19 +85,17 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         search.addTextChangedListener(textWatcher);
     }
 
-    private TextWatcher textWatcher = new TextWatcher() {
-        private String searchString;
+    private final TextWatcher textWatcher = new TextWatcher() {
         @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
         @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
         @Override
         public void afterTextChanged(final Editable s) {
-            searchString = s.toString();
-            delayHandler.removeCallbacks(workRunnable);
-            delayHandler.postDelayed(workRunnable, 500 /*delay*/);
+            delayHandler.removeCallbacksAndMessages(null);
+            delayHandler.postDelayed(() -> {
+                if (adapter != null) adapter.filter(s.toString());
+            }, 750);
         }
-
-        Runnable workRunnable = () -> { if (adapter != null) adapter.filter(searchString); };
     };
 
     private void onTokens(TokenCardMeta[] tokenArray) {
@@ -184,7 +182,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
                 .like("address", ADDRESS_FORMAT)
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
-            if (realmTokens.size() == 0) return;
+            String filterText = search.getText().toString();
+            if (realmTokens.size() == 0 || filterText.length() > 0) return;
 
             //Insert when discover
             for (RealmToken token : realmTokens)

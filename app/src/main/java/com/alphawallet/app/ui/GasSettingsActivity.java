@@ -94,7 +94,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
         gasSliderView = findViewById(R.id.gasSliderView);
         recyclerView = findViewById(R.id.list);
-        gasWarning= findViewById(R.id.gas_warning_bubble);
+        gasWarning = findViewById(R.id.gas_warning_bubble);
         insufficientWarning = findViewById(R.id.insufficient_bubble);
         scroll = findViewById(R.id.setting_scroll);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -278,7 +278,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     gasSliderView.initGasLimit(customGasLimit.toBigInteger());
                     gasSliderView.reportPosition();
                 }
-                else if(position != customIndex && currentGasSpeedIndex == customIndex)
+                else if (position != customIndex && currentGasSpeedIndex == customIndex)
                 {
                     hideGasWarning();
                 }
@@ -469,7 +469,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private void showGasWarning(boolean high)
     {
-        if(currentGasSpeedIndex != customIndex)
+        if (currentGasSpeedIndex != customIndex)
         {
             return;
         }

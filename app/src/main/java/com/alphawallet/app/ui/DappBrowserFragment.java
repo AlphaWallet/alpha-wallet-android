@@ -881,8 +881,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             addToBackStack(DAPP_BROWSER);
             web3.loadUrl(Utils.formatUrl(loadOnInit), getWeb3Headers());
-            //urlTv.setText(Utils.formatUrl(loadOnInit));
-            //setBackForwardButtons();
             setUrlText(Utils.formatUrl(loadOnInit));
             loadOnInit = null;
         }

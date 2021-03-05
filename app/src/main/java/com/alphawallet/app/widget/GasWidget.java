@@ -444,14 +444,14 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private void showCustomSpeedWarning(boolean high)
     {
-        if(currentGasSpeedIndex != customGasSpeedIndex)
+        if (currentGasSpeedIndex != customGasSpeedIndex)
         {
             return;
         }
 
         TextView warningText = findViewById(R.id.text_speed_warning);
 
-        if(high)
+        if (high)
         {
             warningText.setText(getResources().getString(R.string.speed_high_gas));
         }

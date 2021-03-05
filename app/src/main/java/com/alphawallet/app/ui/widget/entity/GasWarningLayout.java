@@ -23,7 +23,10 @@ public class GasWarningLayout extends FrameLayout {
     public void onVisibilityChanged(View changedView, int visibility)
     {
         super.onVisibilityChanged(changedView, visibility);
-        if (visibilityCallback != null) visibilityCallback.onVisibilityChanged(visibility == View.VISIBLE);
+        if (visibilityCallback != null)
+        {
+            visibilityCallback.onVisibilityChanged(visibility == View.VISIBLE);
+        }
     }
     public void setVisibilityCallback(VisibilityCallback vs)
     {

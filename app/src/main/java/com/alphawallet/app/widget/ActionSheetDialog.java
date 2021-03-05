@@ -49,8 +49,6 @@ import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
  */
 public class ActionSheetDialog extends BottomSheetDialog implements StandardFunctionInterface, ActionSheetInterface
 {
-    private final TextView balance;
-    private final TextView newBalance;
     private final TextView amount;
 
     private final ImageView cancelButton;
@@ -79,8 +77,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         super(activity);
         setContentView(R.layout.dialog_action_sheet);
 
-        balance = findViewById(R.id.text_balance);
-        newBalance = findViewById(R.id.text_new_balance);
         amount = findViewById(R.id.text_amount);
 
         gasWidget = findViewById(R.id.gas_widgetx);
@@ -265,7 +261,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         actionSheetCallback.notifyConfirm(mode.toString());
     }
 
-    private BigDecimal getTransactionAmount()
+    public BigDecimal getTransactionAmount()
     {
         BigDecimal txAmount;
         if (token.isEthereum())

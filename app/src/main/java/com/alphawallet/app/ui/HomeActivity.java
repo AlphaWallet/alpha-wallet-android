@@ -156,6 +156,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus)
+        {
+            if (viewModel.fullScreenSelected())
+            {
+                hideSystemUI();
+            }
+            else
+            {
+                showSystemUI();
+            }
+        }
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         AndroidInjection.inject(this);
@@ -163,8 +180,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
         Bundle bundle = null;
@@ -1198,5 +1213,27 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void useActionSheet(String mode)
     {
         viewModel.actionSheetConfirm(mode);
+    }
+
+    private void hideSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+                        // Set the content to appear under the system bars so that the
+                        // content doesn't resize when the system bars hide and show.
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        // Hide the nav bar and status bar
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
+    private void showSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_VISIBLE);
     }
 }

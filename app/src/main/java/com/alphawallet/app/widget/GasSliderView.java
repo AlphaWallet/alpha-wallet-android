@@ -2,6 +2,7 @@ package com.alphawallet.app.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -39,6 +40,7 @@ public class GasSliderView extends RelativeLayout
     private final float minimumPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(C.GAS_PRICE_MIN)).multiply(BigDecimal.TEN).floatValue(); //minimum for slider
     private float gasLimitScaleFactor;
     private boolean limitInit = false;
+    private final Handler handler = new Handler();
 
     private GasSettingsCallback gasCallback;
 
@@ -136,7 +138,14 @@ public class GasSliderView extends RelativeLayout
                 if (gasLimitValue.hasFocus() || gasPriceValue.hasFocus())
                 {
                     limitInit = true;
-                    updateGasControl();
+                    handler.removeCallbacks(null);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateSliderSettingsFromText(); //ensure sliders reflect new values
+                            updateGasControl();
+                        }
+                    },2000);
                 }
             }
         };
@@ -161,6 +170,34 @@ public class GasSliderView extends RelativeLayout
             {
                 //
             }
+        }
+    }
+
+    //After user updates the gas settings, reflect the new values in the sliders
+    private void updateSliderSettingsFromText()
+    {
+        String gasPriceStr = gasPriceValue.getText().toString();
+        String gasLimitStr = gasLimitValue.getText().toString();
+
+        try
+        {
+            BigDecimal gweiPrice = new BigDecimal(gasPriceStr);
+            setPriceSlider(gweiPrice);
+        }
+        catch (Exception e)
+        {
+            // - user typed a number that couldn't be converted
+        }
+
+        try
+        {
+            BigDecimal gasLimitGwei = new BigDecimal(gasLimitStr);
+            int progress = (int)((float)(gasLimitGwei.longValue() - C.GAS_LIMIT_MIN)/gasLimitScaleFactor);
+            gasLimitSlider.setProgress(progress);
+        }
+        catch (Exception e)
+        {
+            // - no need to act
         }
     }
 

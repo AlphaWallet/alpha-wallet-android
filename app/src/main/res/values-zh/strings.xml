@@ -713,6 +713,13 @@
     <string name="action_token_swap">通证交换</string>
     <string name="action_withdraw">Withdraw</string>
     <string name="deposit">Deposit</string>
+    <string name="body_low_gas">Gas price is set below the \'slow\' speed.</string>
+    <string name="low_gas_setting">Gas Fee Might Be Too Low</string>
+    <string name="body_high_gas">You have set a really high gas fee. Please make sure this is not a mistake. AlphaWallet uses gasnow.org live oracle and updates the gas price every 15 sec.</string>
+    <string name="high_gas_setting">High Fee Warning!</string>
+    <string name="speed_too_low">Too Low</string>
+    <string name="speed_high_gas">高价</string>
+    <string name="body_insufficient_warning">Your balance has insufficient funds for the transaction value plus transaction fee.</string>
     <string name="convert_to_xdai">Convert to xDAI</string>
     <string name="crypto">Crypto</string>
     <string name="action_buy_crypto">Buy %1$s</string>

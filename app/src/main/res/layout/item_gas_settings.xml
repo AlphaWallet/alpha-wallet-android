@@ -40,17 +40,43 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
                 android:src="@drawable/ic_red_warning"/>
 
             <TextView
+                android:id="@+id/text_warning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/cancel_red"
+                android:textColor="@color/danger"
+                android:fontFamily="@font/font_semibold"
                 android:text="@string/insufficient_gas"
-                android:textSize="14sp"/>
+                android:textSize="@dimen/sp17"/>
 
         </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_speed_warning"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.1"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:src="@drawable/ic_red_warning"/>
+
+            <TextView
+                android:id="@+id/text_speed_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/danger"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/speed_too_low"
+                android:textSize="@dimen/sp17"/>
+
+        </LinearLayout>
         <TextView
             android:id="@+id/text_speed"
             android:layout_width="0dp"
@@ -60,7 +86,7 @@
             android:fontFamily="@font/font_semibold"
             android:text="@string/speed_average"
             android:gravity="start"
-            android:textSize="@dimen/sp16"/>
+            android:textSize="@dimen/sp17"/>
 
         <TextView
             android:layout_width="0dp"

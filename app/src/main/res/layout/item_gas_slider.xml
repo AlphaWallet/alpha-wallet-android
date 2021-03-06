@@ -50,7 +50,7 @@
             android:gravity="end|center_vertical"
             android:textSize="@dimen/sp14"
             android:paddingEnd="10dp"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             tools:text="20"/>
 
 

@@ -723,4 +723,5 @@
     <string name="convert_to_xdai">Convert to xDAI</string>
     <string name="crypto">Crypto</string>
     <string name="action_buy_crypto">Buy %1$s</string>
+    <string name="fullscreen">全屏</string>
 </resources>

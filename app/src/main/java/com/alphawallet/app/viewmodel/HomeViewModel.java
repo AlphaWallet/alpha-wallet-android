@@ -422,4 +422,9 @@ public class HomeViewModel extends BaseViewModel {
     {
         transactionsService.startUpdateCycle();
     }
+
+    public boolean fullScreenSelected()
+    {
+        return preferenceRepository.getFullScreenState();
+    }
 }

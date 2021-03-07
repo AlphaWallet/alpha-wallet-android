@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
+        return new ArrayList<>(Arrays.asList(EthereumNetworkRepository.MAINNET_ID, EthereumNetworkRepository.XDAI_ID));
     }
 
     public static String getNodeURLByNetworkId(int networkId) {

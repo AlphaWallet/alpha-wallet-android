@@ -116,6 +116,10 @@ public class BackupKeyActivity extends BaseActivity implements
                 state = BackupState.ENTER_JSON_BACKUP;
                 setupJSONExport();
                 break;
+            case SHOW_SEED_PHRASE_SETTINGS:
+                state = BackupState.SHOW_SEED_PHRASE_SETTINGS;
+                setShowSeedPhraseSplash();
+                break;
             case SHOW_SEED_PHRASE:
                 state = BackupState.SHOW_SEED_PHRASE;
                 setupTestSeed();
@@ -236,6 +240,14 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
+    private void setShowSeedPhraseSplash() {
+        setContentView(R.layout.activity_show_seed2);
+        initViews();
+        title.setText(R.string.backup_seed_phrase);
+        functionButtonBar.setPrimaryButtonText(R.string.show_seed_phrase);
+        functionButtonBar.setPrimaryButtonClickListener(this);
+    }
+
     private void setHDBackupSplash() {
         setContentView(R.layout.activity_backup);
         initViews();
@@ -263,12 +275,16 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void run() {
+    public void run()
+    {
         if (successOverlay == null) return;
-        if (successOverlay.getAlpha() > 0) {
+        if (successOverlay.getAlpha() > 0)
+        {
             successOverlay.animate().alpha(0.0f).setDuration(500);
             handler.postDelayed(this, 750);
-        } else {
+        }
+        else
+        {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
         }
@@ -811,11 +827,11 @@ public class BackupKeyActivity extends BaseActivity implements
 
     private enum BackupState {
         UNDEFINED, ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
-        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, SHOW_SEED_PHRASE, UPGRADE_KEY_SECURITY
+        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, SHOW_SEED_PHRASE, SHOW_SEED_PHRASE_SETTINGS, SHOW_SEED_PHRASE_SINGLE, UPGRADE_KEY_SECURITY
     }
 
     public enum BackupOperationType {
-        UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY, UPGRADE_KEY
+        UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, SHOW_SEED_PHRASE_SETTINGS, EXPORT_PRIVATE_KEY, UPGRADE_KEY
     }
 
     @Override
@@ -835,6 +851,12 @@ public class BackupKeyActivity extends BaseActivity implements
             case SEED_PHRASE_INVALID:
                 ResetInputBox();
                 VerifySeedPhrase();
+                break;
+            case SHOW_SEED_PHRASE_SETTINGS:
+                state = BackupState.SHOW_SEED_PHRASE_SINGLE;
+                setupTestSeed();
+                ((TextView)findViewById(R.id.text_title)).setText(R.string.your_seed_phrase);
+                DisplaySeed();
                 break;
             case ENTER_JSON_BACKUP:
                 JSONBackup();

@@ -750,4 +750,7 @@
     <string name="crypto">Crypto</string>
     <string name="action_buy_crypto">Buy %1$s</string>
     <string name="fullscreen">Full Screen</string>
+    <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
+    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
 </resources>

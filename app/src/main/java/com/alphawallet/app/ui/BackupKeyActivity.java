@@ -242,7 +242,7 @@ public class BackupKeyActivity extends BaseActivity implements
     private void setShowSeedPhraseSplash() {
         setContentView(R.layout.activity_show_seed);
         initViews();
-        title.setText(R.string.backup_seed_phrase);
+        //title.setText(R.string.backup_seed_phrase);
         functionButtonBar.setPrimaryButtonText(R.string.show_seed_phrase);
         functionButtonBar.setPrimaryButtonClickListener(this);
     }
@@ -368,6 +368,12 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
             case SET_JSON_PASSWORD:
                 setupJSONExport();
+                break;
+            case FINISH:
+            case SHOW_SEED_PHRASE_SETTINGS:
+            case SHOW_SEED_PHRASE_SINGLE:
+                state = BackupState.FINISH;
+                finish();
                 break;
             default:
                 keyFailure("");

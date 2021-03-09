@@ -519,7 +519,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         symbol = view.findViewById(R.id.symbol);
         web3.setWebLoadCallback(this);
 
-        if (viewModel.getActiveFilterCount() == 1 && EthereumNetworkRepository.defaultDapp() != null) currentNetworkClicker.setVisibility(View.GONE);
+        //if (viewModel.getActiveFilterCount() == 1 && EthereumNetworkRepository.defaultDapp() != null) currentNetworkClicker.setVisibility(View.GONE);
     }
 
     private void displayNothingToShare()

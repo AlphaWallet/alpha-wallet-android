@@ -83,7 +83,7 @@
     <string name="transaction_succeeded">交易成功</string>
     <string name="NA">不适用</string>
     <string name="error_wallet_not_selected">未选择钱包</string>
-    <string name="no_transactions_yet">尚无交易！</string>
+    <string name="no_transactions_yet">交易活动将出现在这里</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">发送中……</string>

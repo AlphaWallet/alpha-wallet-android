@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
 import com.alphawallet.app.util.QRParser;
 import com.google.zxing.BarcodeFormat;
@@ -23,12 +24,13 @@ import com.google.zxing.Result;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.entity.EIP681Type.OTHER;
 
 public class FullScannerFragment extends Fragment implements ZXingScannerView.ResultHandler
 {
     public static final String BarcodeObject = "Barcode";
-    public static final int SUCCESS = Activity.RESULT_OK; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu
+    public static final int SUCCESS = RESULT_OK; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu
                                             yes it does because there's also 'DENY_PERMISSION' I assume that wasn't coded at the time
                                             of the comment - JB*/
 
@@ -103,6 +105,10 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         {
             listener.onReceive(rawResult.getText());
         }
+        else if (rawResult.getText().startsWith("wc:"))
+        {
+            startWalletConnect(rawResult.getText());
+        }
         else
         {
             Intent intent = new Intent();
@@ -110,6 +116,15 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
             getActivity().setResult(SUCCESS, intent);
             getActivity().finish();
         }
+    }
+
+    private void startWalletConnect(String qrCode)
+    {
+        Intent intent = new Intent(getActivity(), WalletConnectActivity.class);
+        intent.putExtra("qrCode", qrCode);
+        startActivity(intent);
+        getActivity().setResult(QRScanningActivity.WALLET_CONNECT);
+        getActivity().finish();
     }
 
     @Override

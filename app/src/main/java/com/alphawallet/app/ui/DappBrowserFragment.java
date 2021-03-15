@@ -1455,6 +1455,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 case QRScanningActivity.DENY_PERMISSION:
                     showCameraDenied();
                     break;
+                case QRScanningActivity.WALLET_CONNECT:
+                    return;
                 default:
                     break;
             }

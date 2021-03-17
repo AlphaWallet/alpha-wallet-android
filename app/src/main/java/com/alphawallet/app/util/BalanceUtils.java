@@ -52,16 +52,16 @@ public class BalanceUtils
 
     public static String convertFromLocale(String value)
     {
-        CharSequence separator = ",";// + (DecimalFormatSymbols.getInstance().getGroupingSeparator());
+        CharSequence separator = String.valueOf(DecimalFormatSymbols.getInstance().getGroupingSeparator());
         value = value.replace(separator, "");
 
-        char decimal = '.';//DecimalFormatSymbols.getInstance().getDecimalSeparator();
+        char decimal = DecimalFormatSymbols.getInstance().getDecimalSeparator();
         if (decimal != '.')
         {
             value = value.replace(decimal, '.');
         }
 
-        return value;
+        return value.trim();
     }
 
     public static BigDecimal weiToEth(BigDecimal wei) {

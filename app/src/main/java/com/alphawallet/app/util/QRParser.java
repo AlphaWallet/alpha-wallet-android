@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -142,26 +143,6 @@ public class QRParser {
         }
 
         return result.getAddress();
-    }
-
-    private static boolean couldBeENS(String address)
-    {
-        String[] split = address.split("[.]");
-        if (split.length > 1)
-        {
-            String extension = split[split.length - 1];
-            switch (extension)
-            {
-                case "eth":
-                case "xyz":
-                case "crypto":
-                    return true;
-                default:
-                    break;
-            }
-        }
-
-        return false;
     }
 
     /**

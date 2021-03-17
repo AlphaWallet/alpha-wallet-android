@@ -443,7 +443,7 @@
     <string name="authentication_cancelled">已取消身份验证</string>
     <string name="authentication_failed">身份验证失败</string>
     <string name="backup_seed_phrase">通过助记词备份您的钱包</string>
-    <string name="backup_seed_phrase_detail">备份钱包是很容易安全的：只需要按顺序写下12个助记词，并离线包存在安全的地方。</string>
+    <string name="backup_seed_phrase_detail">备份钱包是很容易安全的：只需要按顺序写下12个助记词，并离线包存在秘密的地方。</string>
     <string name="action_back_up_my_wallet">备份我的钱包</string>
     <string name="write_down_seed_phrase">请将助记词写在纸上</string>
     <string name="wrote_down_seed_phrase">好的，我记下来了</string>

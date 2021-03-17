@@ -457,7 +457,7 @@
     <string name="authentication_cancelled">Authentication Cancelled</string>
     <string name="authentication_failed">Authentication Failed</string>
     <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
-    <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
+    <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a secret place, offline.</string>
     <string name="action_back_up_my_wallet">Back up my wallet</string>
     <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>
     <string name="wrote_down_seed_phrase">OK, I wrote this down</string>

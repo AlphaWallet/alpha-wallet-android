@@ -2,6 +2,8 @@ package com.alphawallet.app.ui;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -128,7 +130,10 @@ public class SelectNetworkActivity extends BaseActivity {
     private void handleSetNetworks() {
         Integer[] filterList = adapter.getSelectedItems();
         if (filterList.length == 0)
+        {
             filterList = EthereumNetworkRepository.addDefaultNetworks().toArray(new Integer[0]);
+        }
+
         if (singleItem) {
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_CHAIN_ID, filterList[0]);
@@ -225,13 +230,70 @@ public class SelectNetworkActivity extends BaseActivity {
                 notifyDataSetChanged();
             } else if (!dataSet.get(position).getName().equals(CustomViewSettings.primaryNetworkName())) {
                 dataSet.get(position).setSelected(!dataSet.get(position).isSelected());
+                checkDappNetwork(position);
             }
             holder.checkbox.setSelected(dataSet.get(position).isSelected());
+        }
+
+        private void checkDappNetwork(int position)
+        {
+            NetworkInfo currentNetwork = viewModel.getDefaultNetwork();
+            NetworkItem selectedItem = dataSet.get(position);
+            if (!selectedItem.isSelected() && currentNetwork != null && selectedItem.getChainId() == currentNetwork.chainId)
+            {
+                //deselected active network - need to revert or select a new active network
+                runOnUiThread(() -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SelectNetworkActivity.this);
+                    AlertDialog dialog = builder.setTitle(getString(R.string.disconnect_title, currentNetwork.getShortName()))
+                            .setMessage(getString(R.string.disconnect_body, currentNetwork.getShortName()))
+                            .setPositiveButton(R.string.disconnect, (d, w) -> {
+                                //remove network from filters
+                                setSelectedNetworks();
+                                //open network select
+                                selectNetwork(dataSet.get(0).getChainId());
+                            })
+                            .setNegativeButton(R.string.keep_connect, (d, w) -> {
+                                selectedItem.setSelected(true);
+                                notifyItemChanged(position);
+                            })
+                            .create();
+                    dialog.show();
+                });
+            }
         }
 
         @Override
         public int getItemCount() {
             return dataSet.size();
+        }
+    }
+
+    private void setSelectedNetworks()
+    {
+        Integer[] filterList = adapter.getSelectedItems();
+        viewModel.setFilterNetworks(filterList);
+    }
+
+    private void selectNetwork(int chainId)
+    {
+        Intent intent = new Intent(this, SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(chainId));
+        startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == C.REQUEST_SELECT_NETWORK && resultCode == RESULT_OK)
+        {
+            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1);
+            viewModel.setActiveNetwork(networkId);
+            //reset dappbrowser
+            Intent intent = new Intent(C.CHANGED_NETWORK);
+            intent.putExtra(C.EXTRA_CHAIN_ID, networkId);
+            sendBroadcast(intent);
         }
     }
 }

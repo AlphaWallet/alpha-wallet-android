@@ -19,6 +19,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -220,7 +221,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (customIndex < 0) return;
         updateCustomElement(gasPrice, gasLimit);
-        hideGasWarning();
         adapter.notifyItemChanged(customIndex);
     }
 
@@ -420,12 +420,15 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     expectedTime = (long) ((double) lg.seconds - extrapolateFactor * timeDiff);
                     break;
                 }
-                else if (lg.speed.equals(getString(R.string.speed_slow)) && dGasPrice < lowerBound) {
+                else if (lg.speed.equals(getString(R.string.speed_slow))) { //final entry
                     //danger zone - transaction may not complete
                     double dangerAmount = lowerBound / 2.0;
                     long dangerTime = 12 * DateUtils.HOUR_IN_MILLIS / 1000;
 
-                    showGasWarning(false);
+                    if (dGasPrice < (lowerBound*0.95)) //only show gas warning if less than 95% of slow
+                    {
+                        showGasWarning(false);
+                    }
 
                     if (dGasPrice < dangerAmount) {
                         expectedTime = -1; //never
@@ -433,12 +436,23 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                         expectedTime = extrapolateTime(dangerTime, lg.seconds, dGasPrice, dangerAmount, lowerBound);
                     }
 
+                    return expectedTime;
                 }
-                else if (ug.speed.equals(getString(R.string.speed_rapid)) && dGasPrice > 1.5 * upperBound)
+                else if (ug.speed.equals(getString(R.string.speed_rapid)) && dGasPrice >= upperBound)
                 {
-                    showGasWarning(true);
+                    if (dGasPrice > 1.4 * upperBound)
+                    {
+                        showGasWarning(true); //only show gas warning if greater than 140% of max needed gas
+                    }
+                    else
+                    {
+                        hideGasWarning();
+                    }
+                    return expectedTime; //exit here so we don't hit the speed_slow catcher
                 }
             }
+
+            hideGasWarning(); // Didn't need a gas warning: custom gas is within bounds
         }
 
         return expectedTime;
@@ -462,7 +476,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gs = new GasSpeed(gs.speed, getExpectedTransactionTime(gasPrice), gasPrice, true);
         gasSpeeds.remove(customIndex);
         gasSpeeds.add(gs);
-        hideGasWarning();
 
         this.customGasLimit = new BigDecimal(gasLimit);
     }
@@ -474,31 +487,34 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             return;
         }
 
+        displayGasWarning(); //if gas warning already showing, no need to take focus from user input
+
         TextView heading = findViewById(R.id.bubble_title);
         TextView body = findViewById(R.id.bubble_body);
         if (high)
         {
             heading.setText(getString(R.string.high_gas_setting));
             body.setText(getString(R.string.body_high_gas));
-
         }
         else
         {
             heading.setText(getString(R.string.low_gas_setting));
             body.setText(getString(R.string.body_low_gas));
         }
-        gasWarning.setVisibility(View.VISIBLE);
+    }
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                scroll.fullScroll(View.FOCUS_DOWN);
-            }
-        },100);
+    private void displayGasWarning()
+    {
+        if (gasWarning.getVisibility() != View.VISIBLE) //no need to re-apply
+        {
+            handler.postDelayed(() -> scroll.fullScroll(View.FOCUS_DOWN), 100);
 
-        EditText gas_price_entry = findViewById(R.id.gas_price_entry);
-        gas_price_entry.setTextColor(getColor(R.color.danger));
-        gas_price_entry.setBackground(getDrawable(R.drawable.background_text_edit_error));
+            gasWarning.setVisibility(View.VISIBLE);
+
+            EditText gas_price_entry = findViewById(R.id.gas_price_entry);
+            gas_price_entry.setTextColor(getColor(R.color.danger));
+            gas_price_entry.setBackground(ContextCompat.getDrawable(this, R.drawable.background_text_edit_error));
+        }
     }
 
     private void hideGasWarning()

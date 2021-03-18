@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -54,6 +53,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final ImageView cancelButton;
     private final GasWidget gasWidget;
     private final ConfirmationWidget confirmationWidget;
+    private final BalanceDisplay balanceDisplay;
     private final ChainName chainName;
     private final AddressDetailView addressDetail;
     private final FunctionButtonBar functionBar;
@@ -81,6 +81,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         gasWidget = findViewById(R.id.gas_widgetx);
         cancelButton = findViewById(R.id.image_close);
+        balanceDisplay = findViewById(R.id.balance);
         chainName = findViewById(R.id.chain_name);
         confirmationWidget = findViewById(R.id.confirmation_view);
         detailWidget = findViewById(R.id.detail_widget);
@@ -109,7 +110,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = tx;
         callbackId = tx.leafPosition;
 
-        balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
+        balanceDisplay.setupBalance(token, candidateTransaction, activity, getTransactionAmount());
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
@@ -142,8 +143,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.requester);
         functionBar = findViewById(R.id.layoutButtons);
-        balance = null;
-        newBalance = null;
+        balanceDisplay = findViewById(R.id.balance);
         amount = null;
         detailWidget = null;
         mode = ActionSheetMode.SIGN_MESSAGE;
@@ -199,24 +199,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         gasWidget.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, nonce);
         updateAmount();
-    }
-
-    //TODO: Move this to Balance widget, and use code to deduce what to display (as per transaction view).
-    private void setNewBalanceText()
-    {
-        BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
-        BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());
-        if (token.isEthereum())
-        {
-            balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);
-        }
-        else if (isSendingTransaction())
-        {
-            balanceAfterTransaction = token.getBalanceRaw().subtract(getTransactionAmount()).toBigInteger();
-        }
-        //convert to ETH amount
-        String newBalanceVal = BalanceUtils.getScaledValueScientific(new BigDecimal(balanceAfterTransaction), token.tokenInfo.decimals);
-        newBalance.setText(getContext().getString(R.string.new_balance, newBalanceVal, token.getSymbol()));
     }
 
     private boolean isSendingTransaction()
@@ -545,7 +527,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         amount.setText(displayStr);
-        setNewBalanceText();
+        balanceDisplay.setNewBalanceText(token, getTransactionAmount());
     }
 
     public void success()

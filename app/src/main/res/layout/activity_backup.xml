@@ -53,15 +53,6 @@
             android:textColor="@color/black"
             android:textSize="17sp" />
 
-        <TextView android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:background="@color/golden_yellow"
-                  android:layout_margin="30dp"
-                  android:padding="@dimen/dp10"
-                  android:layout_below="@+id/text_detail"
-                  android:text="@string/do_not_share"
-                  />
-
         <com.alphawallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"

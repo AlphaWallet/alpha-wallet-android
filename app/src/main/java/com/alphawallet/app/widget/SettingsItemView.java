@@ -7,18 +7,18 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.util.Utils;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsItemView extends LinearLayout {
     private RelativeLayout layout;
     private ImageView icon;
     private TextView title;
     private TextView subtitle;
-    private Switch toggle;
+    private SwitchMaterial toggle;
     private ImageView arrow;
     private Type type;
     private int iconRes;
@@ -32,7 +32,7 @@ public class SettingsItemView extends LinearLayout {
     }
 
     public static class Builder {
-        private Context context;
+        private final Context context;
         private int iconResId = -1;
         private int titleResId = -1;
         private int subtitleResId = -1;

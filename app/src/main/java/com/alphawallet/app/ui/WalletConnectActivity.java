@@ -721,7 +721,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 WCPeerMeta remotePeerData = viewModel.getRemotePeer(getSessionId());
                 Token token = viewModel.getTokensService().getTokenOrBase(chainId, w3Tx.recipient.toString());
                 confDialog = new ActionSheetDialog(this, w3Tx, token, "",
-                        viewModel.getTokensService(), this);
+                        w3Tx.recipient.toString(), viewModel.getTokensService(), this);
                 confDialog.setURL(remotePeerData.getUrl());
                 confDialog.setCanceledOnTouchOutside(false);
 

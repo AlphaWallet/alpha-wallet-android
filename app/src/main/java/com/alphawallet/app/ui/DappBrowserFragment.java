@@ -1003,8 +1003,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
                 Token token = viewModel.getTokenService().getTokenOrBase(networkInfo.chainId, transaction.recipient.toString());
-                confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token, "",
-                        viewModel.getTokenService(), this);
+                confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token,
+                        "", transaction.recipient.toString(), viewModel.getTokenService(), this);
                 confirmationDialog.setURL(url);
                 confirmationDialog.setCanceledOnTouchOutside(false);
                 confirmationDialog.show();

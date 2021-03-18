@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -65,7 +66,7 @@ public class StructuredData {
                 @JsonProperty(value = "salt") String salt) {
             this.name = name;
             this.version = version;
-            this.chainId = new Uint256(new BigInteger(chainId));
+            this.chainId = chainId != null ? new Uint256(new BigInteger(chainId)) : new Uint256(EthereumNetworkRepository.MAINNET_ID);
             this.verifyingContract = verifyingContract;
             this.salt = salt;
         }

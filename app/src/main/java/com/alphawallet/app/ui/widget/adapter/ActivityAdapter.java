@@ -351,6 +351,20 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
         notifyDataSetChanged();
     };
 
+    public boolean isEmpty()
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object item = items.get(i).value;
+            if (item instanceof ActivityMeta)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static class LabelHolder extends BinderViewHolder<Date> {
 
         public LabelHolder(int resId, ViewGroup parent) {

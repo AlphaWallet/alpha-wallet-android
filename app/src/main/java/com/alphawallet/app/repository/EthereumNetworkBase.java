@@ -76,6 +76,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
+    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
 
     public static final int MAINNET_ID = 1;
     public static final int CLASSIC_ID = 61;
@@ -85,6 +87,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int SOKOL_ID = 77;
     public static final int RINKEBY_ID = 4;
     public static final int XDAI_ID = 100;
+    public static final int HECO_ID = 128;
+    public static final int HECO_TEST_ID = 256;
     public static final int GOERLI_ID = 5;
     public static final int ARTIS_SIGMA1_ID = 246529;
     public static final int ARTIS_TAU1_ID = 246785;
@@ -150,6 +154,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://bscscan.com/tx/", BINANCE_MAIN_ID, false,
                     BINANCE_MAIN_FALLBACK_RPC_URL,
                     "https://api.bscscan.com/"),
+            new NetworkInfo(C.HECO_MAIN_NETWORK, C.HECO_SYMBOL, HECO_RPC_URL,
+                    "https://hecoinfo.com/tx/", HECO_ID, false,
+                    HECO_RPC_URL,
+                    "https://api.hecoinfo.com/"),
+            new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL, HECO_TEST_RPC_URL,
+                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID, false,
+                    HECO_TEST_RPC_URL,
+                    "https://testnet.hecoinfo.com/"),
     };
 
     final PreferenceRepositoryType preferences;
@@ -297,6 +309,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case EthereumNetworkRepository.XDAI_ID:
             case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
             case EthereumNetworkRepository.BINANCE_MAIN_ID:
+            case EthereumNetworkRepository.HECO_ID:
                 return true;
 
             default:
@@ -333,6 +346,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return BINANCE_MAIN_FALLBACK_RPC_URL;
             case BINANCE_TEST_ID:
                 return BINANCE_TEST_FALLBACK_RPC_URL;
+            case HECO_ID:
+                return HECO_RPC_URL;
+            case HECO_TEST_ID:
+                return HECO_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -367,6 +384,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return R.drawable.ic_binance_logo;
             case BINANCE_TEST_ID:
                 return R.drawable.ic_binance_test_logo;
+            case HECO_ID:
+            case HECO_TEST_ID:
+                return R.drawable.ic_heco_logo;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
@@ -401,6 +421,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return BINANCE_MAIN_RPC_URL;
             case BINANCE_TEST_ID:
                 return BINANCE_TEST_RPC_URL;
+            case HECO_ID:
+                return HECO_RPC_URL;
+            case HECO_TEST_ID:
+                return HECO_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }

@@ -83,7 +83,7 @@
     <string name="transaction_succeeded">交易成功</string>
     <string name="NA">不适用</string>
     <string name="error_wallet_not_selected">未选择钱包</string>
-    <string name="no_transactions_yet">尚无交易！</string>
+    <string name="no_transactions_yet">交易活动将出现在这里</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">发送中……</string>
@@ -443,7 +443,7 @@
     <string name="authentication_cancelled">已取消身份验证</string>
     <string name="authentication_failed">身份验证失败</string>
     <string name="backup_seed_phrase">通过助记词备份您的钱包</string>
-    <string name="backup_seed_phrase_detail">备份钱包是很容易安全的：只需要按顺序写下12个助记词，并离线包存在安全的地方。</string>
+    <string name="backup_seed_phrase_detail">备份钱包是很容易安全的：只需要按顺序写下12个助记词，并离线包存在秘密的地方。</string>
     <string name="action_back_up_my_wallet">备份我的钱包</string>
     <string name="write_down_seed_phrase">请将助记词写在纸上</string>
     <string name="wrote_down_seed_phrase">好的，我记下来了</string>
@@ -728,4 +728,8 @@
     <string name="disconnect_body">You are connected to %1$s Network in the Browser but you have just disabled %1$s Network in Active Networks. Do you want to connect to %1$s Network?</string>
     <string name="disconnect">Disconnect</string>
     <string name="keep_connect">Keep Connected</string>
+    <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
+    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
+    <string name="hide_seed_text">OK, Hide Seed Phrase</string>
 </resources>

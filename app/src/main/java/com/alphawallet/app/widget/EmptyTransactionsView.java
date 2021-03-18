@@ -20,7 +20,7 @@ public class EmptyTransactionsView extends FrameLayout {
         LayoutInflater.from(getContext())
                 .inflate(R.layout.layout_empty_transactions, this, true);
 
-        findViewById(R.id.action_buy).setOnClickListener(onClickListener);
+        /*findViewById(R.id.action_buy).setOnClickListener(onClickListener);
 
         ((TextView)findViewById(R.id.no_transactions_subtext)).setText(context.getString(R.string.no_recent_transactions_subtext,
                                                                                          CustomViewSettings.primaryNetworkName()));
@@ -35,6 +35,6 @@ public class EmptyTransactionsView extends FrameLayout {
         else
         {
             buyButton.setVisibility(GONE);
-        }
+        }*/
     }
 }

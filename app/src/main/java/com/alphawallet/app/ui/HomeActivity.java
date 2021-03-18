@@ -448,10 +448,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             //What is try again?
         }
-        else if (view.getId() == R.id.action_buy)
-        {
-            openExchangeDialog();
-        }
     }
 
     @Override
@@ -505,33 +501,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             dialog.setButtonListener(v -> dialog.dismiss());
             dialog.show();
         }
-    }
-
-    public void openExchangeDialog()
-    {
-        Wallet wallet = ((WalletFragment) walletFragment).getCurrentWallet();
-        if (wallet == null)
-        {
-            Toast.makeText(this, getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
-                    .show();
-        }
-        else
-        {
-            BottomSheetDialog dialog = new BottomSheetDialog(this);
-            DepositView view = new DepositView(this, wallet);
-            view.setOnDepositClickListener(this::onDepositClick);
-            dialog.setContentView(view);
-            dialog.show();
-            this.dialog = dialog;
-        }
-    }
-
-    private void onDepositClick(View view, String url)
-    {
-        showPage(DAPP_BROWSER);
-        ((DappBrowserFragment) dappBrowserFragment).onItemClick(url);
-        dialog.dismiss();
-        dialog = null;
     }
 
     public void onBrowserWithURL(String url)

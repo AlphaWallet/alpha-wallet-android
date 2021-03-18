@@ -3,6 +3,7 @@ package com.alphawallet.app.viewmodel;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
@@ -57,5 +58,19 @@ public class SelectNetworkViewModel extends BaseViewModel {
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(intent);
+    }
+
+    public NetworkInfo getDefaultNetwork()
+    {
+        return networkRepository.getDefaultNetwork();
+    }
+
+    public void setActiveNetwork(int networkId)
+    {
+        NetworkInfo info = networkRepository.getNetworkByChain(networkId);
+        if (info != null)
+        {
+            networkRepository.setDefaultNetworkInfo(info);
+        }
     }
 }

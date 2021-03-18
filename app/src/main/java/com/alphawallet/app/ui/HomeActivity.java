@@ -840,6 +840,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
+    public void changedNetwork(Intent data)
+    {
+        ((DappBrowserFragment)dappBrowserFragment).handleSelectNetwork(RESULT_OK, data);
+    }
+
+    @Override
     public void resetTransactions()
     {
         ((ActivityFragment) activityFragment).resetTransactions();

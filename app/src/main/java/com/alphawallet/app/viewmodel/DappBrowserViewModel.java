@@ -3,7 +3,6 @@ package com.alphawallet.app.viewmodel;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -41,8 +40,6 @@ import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
-import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
@@ -127,7 +124,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
+        //are we allowed this network?
+        if (!tokensService.getNetworkFilters().contains(networkInfo.chainId))
+        {
+            //not allowed it. Switch to first entry in filter list
+            networkInfo = ethereumNetworkRepository.getNetworkByChain(tokensService.getNetworkFilters().get(0));
+        }
+
         defaultNetwork.postValue(networkInfo);
         disposable = genericWalletInteract
                 .find()

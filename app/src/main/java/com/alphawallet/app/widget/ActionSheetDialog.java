@@ -74,7 +74,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private boolean actionCompleted;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
-                             String destName, TokensService ts, ActionSheetCallback aCallBack)
+                             String destName, String destAddress, TokensService ts,
+                             ActionSheetCallback aCallBack)
     {
         super(activity);
         setContentView(R.layout.dialog_action_sheet);
@@ -131,7 +132,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             chainName.setChainID(token.tokenInfo.chainId);
         }
 
-        addressDetail.setupAddress(tx.recipient.toString(), destName);
+        addressDetail.setupAddress(destAddress, destName);
         setupCancelListeners();
     }
 

@@ -457,7 +457,7 @@
     <string name="authentication_cancelled">Authentication Cancelled</string>
     <string name="authentication_failed">Authentication Failed</string>
     <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
-    <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
+    <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a secret place, offline.</string>
     <string name="action_back_up_my_wallet">Back up my wallet</string>
     <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>
     <string name="wrote_down_seed_phrase">OK, I wrote this down</string>
@@ -750,4 +750,8 @@
     <string name="crypto">Crypto</string>
     <string name="action_buy_crypto">Buy %1$s</string>
     <string name="fullscreen">Full Screen</string>
+    <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
+    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
+    <string name="hide_seed_text">OK, Hide Seed Phrase</string>
 </resources>

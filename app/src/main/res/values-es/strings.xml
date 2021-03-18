@@ -443,7 +443,7 @@
     <string name="authentication_cancelled">Autenticación cancelada</string>
     <string name="authentication_failed">Error de autenticación</string>
     <string name="backup_seed_phrase">Haz una copia de seguridad de tu monedero con la frase semilla</string>
-    <string name="backup_seed_phrase_detail">Hacer una copia de seguridad es muy fácil y seguro: solo tienes que escribir 12 palabras y guardarlas en un lugar seguro, fuera de línea.</string>
+    <string name="backup_seed_phrase_detail">Hacer una copia de seguridad es muy fácil y seguro: solo tienes que escribir 12 palabras y guardarlas en un lugar secreto, fuera de línea.</string>
     <string name="action_back_up_my_wallet">Hacer una copia de seguridad de mi monedero</string>
     <string name="write_down_seed_phrase">Escribe la frase semilla\nen un papel</string>
     <string name="wrote_down_seed_phrase">Vale, he escrito esto</string>
@@ -724,4 +724,8 @@
     <string name="crypto">Crypto</string>
     <string name="action_buy_crypto">Buy %1$s</string>
     <string name="fullscreen">Pantalla completa</string>
+    <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
+    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
+    <string name="hide_seed_text">OK, Hide Seed Phrase</string>
 </resources>

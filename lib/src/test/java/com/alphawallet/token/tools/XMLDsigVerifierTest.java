@@ -27,24 +27,24 @@ public class XMLDsigVerifierTest {
 
     @Test
     public void verifyRSAxmldsig() throws Exception {
-        InputStream DAIToken = new FileInputStream("src/test/ts/EntryToken-valid-RSA.tsml");
-        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(DAIToken);
+        InputStream fileTS = new FileInputStream("src/test/ts/EntryToken-valid-RSA.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(fileTS);
         assert(result.isValid);
         assert(result.subjectPrincipal.equals("CN=aw.app"));
     }
 
     @Test
     public void testFifaTSMLECDSA() throws Exception {
-        InputStream EntryToken = new FileInputStream("src/test/ts/fifa.tsml");
-        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+        InputStream fileTS = new FileInputStream("src/test/ts/fifa.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(fileTS);
         //cert is expired but we still allow this so long as the signature is valid and is approved by ca
         assert(result.isValid);
     }
 
     @Test
     public void testDuplicateKeyInfo() throws Exception {
-        InputStream EntryToken = new FileInputStream("src/test/ts/EntryToken-duplicate-Values.tsml");
-        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+        InputStream fileTS = new FileInputStream("src/test/ts/EntryToken-duplicate-Values.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(fileTS);
         assert(!result.isValid);
         System.out.println(result.failureReason);
         assert(result.failureReason.contains("expected KeyInfo or Object"));
@@ -53,15 +53,15 @@ public class XMLDsigVerifierTest {
     // Always fails on travis, comment out for now to preserve Android test integrity
 //    @Test
 //    public void testWrongOrderCertChain() throws Exception {
-//        InputStream EntryToken = new FileInputStream("src/test/ts/DAI-wrong-chain-order.tsml");
-//        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+//        InputStream fileTS = new FileInputStream("src/test/ts/DAI-wrong-chain-order.tsml");
+//        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(fileTS);
 //        assert(result.isValid);
 //    }
 
     @Test
     public void testNotYetValidCertificate() throws Exception {
-        InputStream EntryToken = new FileInputStream("src/test/ts/EntryToken-future-cert-self-signed.tsml");
-        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+        InputStream fileTS = new FileInputStream("src/test/ts/EntryToken-future-cert-self-signed.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(fileTS);
         assert(!result.isValid);
         assert(result.failureReason.contains("NotBefore")); // save travis from misreporting thanks to timezone
     }

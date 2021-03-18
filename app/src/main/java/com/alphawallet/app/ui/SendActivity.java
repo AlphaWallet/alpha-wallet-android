@@ -600,7 +600,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             if (dialog != null && dialog.isShowing()) dialog.dismiss();
             confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
-                    viewModel.getTokenService(), this);
+                    addressInput.getInputText(), viewModel.getTokenService(), this);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
             sendAmount = NEGATIVE;

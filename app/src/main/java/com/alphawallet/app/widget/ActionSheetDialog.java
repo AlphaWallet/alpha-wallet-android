@@ -204,7 +204,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private boolean isSendingTransaction()
     {
         return (mode == ActionSheetMode.SEND_TRANSACTION || mode == ActionSheetMode.SEND_TRANSACTION_DAPP || mode == ActionSheetMode.SEND_TRANSACTION_WC
-         || mode == ActionSheetMode.SIGN_TRANSACTION);
+                || mode == ActionSheetMode.SIGN_TRANSACTION);
     }
 
     @Override

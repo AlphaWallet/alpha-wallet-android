@@ -235,7 +235,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void showEmptyTx()
     {
-        if (adapter.getItemCount() == 0)
+        if (adapter.isEmpty())
         {
             EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
             systemView.showEmpty(emptyView);
@@ -311,8 +311,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Override
     public void onClick(View v)
     {
-        //open exchange dialog
-        ((HomeActivity)getActivity()).openExchangeDialog();
+
     }
 
     public void resetTransactions()

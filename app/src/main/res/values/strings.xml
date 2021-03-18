@@ -90,7 +90,7 @@
     <string name="transaction_succeeded">Transaction successful</string>
     <string name="NA">N/A</string>
     <string name="error_wallet_not_selected">Wallet is not selected</string>
-    <string name="no_transactions_yet">No transactions yet!</string>
+    <string name="no_transactions_yet">Activities will appear here</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">Sending...</string>
@@ -747,6 +747,7 @@
     <string name="high_gas_setting">High Fee Warning!</string>
     <string name="body_insufficient_warning">Your balance has insufficient funds for the transaction value plus transaction fee.</string>
     <string name="convert_to_xdai">Convert to xDAI</string>
-    <string name="action_buy_xdai">Buy xDAI</string>
-    <string name="action_buy_eth">Buy ETH</string>
+    <string name="crypto">Crypto</string>
+    <string name="action_buy_crypto">Buy %1$s</string>
+    <string name="fullscreen">Full Screen</string>
 </resources>

@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.LocaleItem;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.LocaleUtils;
@@ -19,14 +20,17 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final PreferenceRepositoryType preferenceRepository;
 
     AdvancedSettingsViewModel(
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            PreferenceRepositoryType preferenceRepository) {
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.assetDefinitionService = assetDefinitionService;
+        this.preferenceRepository = preferenceRepository;
     }
 
     public String getUserPreferenceLocale()
@@ -86,5 +90,15 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public String getActiveLocale()
     {
         return localeRepository.getActiveLocale();
+    }
+
+    public void setFullScreenState(boolean state)
+    {
+        preferenceRepository.setFullScreenState(state);
+    }
+
+    public boolean getFullScreenState()
+    {
+        return preferenceRepository.getFullScreenState();
     }
 }

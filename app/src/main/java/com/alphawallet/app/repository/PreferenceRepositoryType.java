@@ -40,4 +40,7 @@ public interface PreferenceRepositoryType {
 
     String getUserPreferenceLocale();
     void setUserPreferenceLocale(String locale);
+
+    void setFullScreenState(boolean state);
+    boolean getFullScreenState();
 }

@@ -1,20 +1,19 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -22,7 +21,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
-import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
@@ -48,6 +46,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
     private SettingsItemView changeLanguage;
     private SettingsItemView tokenScriptManagement;
     private SettingsItemView changeCurrency;
+    private SettingsItemView fullScreenSettings;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,7 +104,20 @@ public class AdvancedSettingsActivity extends BaseActivity {
                 .withListener(this::onTokenScriptManagementClicked)
                 .build();
 
+        fullScreenSettings = new SettingsItemView.Builder(this)
+                        .withType(SettingsItemView.Type.TOGGLE)
+                        .withIcon(R.drawable.ic_phoneicon)
+                        .withTitle(R.string.fullscreen)
+                        .withListener(this::onFullScreenClicked)
+                        .build();
+
         changeLanguage.setSubtitle(LocaleUtils.getDisplayLanguage(viewModel.getActiveLocale(), viewModel.getActiveLocale()));
+        fullScreenSettings.setToggleState(viewModel.getFullScreenState());
+    }
+
+    private void onFullScreenClicked()
+    {
+        viewModel.setFullScreenState(fullScreenSettings.getToggleState());
     }
 
     private void addSettingsToLayout() {
@@ -119,6 +131,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
         advancedSettingsLayout.addView(changeLanguage);
         advancedSettingsLayout.addView(changeCurrency);
         advancedSettingsLayout.addView(tokenScriptManagement);
+        advancedSettingsLayout.addView(fullScreenSettings);
     }
 
     private void onConsoleClicked() {

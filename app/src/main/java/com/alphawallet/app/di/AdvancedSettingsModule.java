@@ -17,12 +17,14 @@ class AdvancedSettingsModule {
     AdvancedSettingsViewModelFactory provideAdvancedSettingsViewModelFactory(
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
-            AssetDefinitionService assetDefinitionService
+            AssetDefinitionService assetDefinitionService,
+            PreferenceRepositoryType preferenceRepository
     ) {
         return new AdvancedSettingsViewModelFactory(
                 localeRepository,
                 currencyRepository,
-                assetDefinitionService);
+                assetDefinitionService,
+                preferenceRepository);
     }
 
     @Provides

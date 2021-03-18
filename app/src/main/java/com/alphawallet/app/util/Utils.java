@@ -184,6 +184,10 @@ public class Utils {
                 return R.color.binance_main;
             case EthereumNetworkRepository.BINANCE_TEST_ID:
                 return R.color.binance_test;
+            case EthereumNetworkBase.HECO_ID:
+                return R.color.heco_main;
+            case EthereumNetworkBase.HECO_TEST_ID:
+                return R.color.heco_test;
             default:
                 return R.color.mine;
         }
@@ -232,6 +236,12 @@ public class Utils {
             case EthereumNetworkRepository.BINANCE_TEST_ID:
                 view.setBackgroundResource(R.drawable.background_binance_test);
                 break;
+            case EthereumNetworkRepository.HECO_ID:
+                view.setBackgroundResource(R.drawable.background_heco_main);
+                break;
+            case EthereumNetworkRepository.HECO_TEST_ID:
+                view.setBackgroundResource(R.drawable.background_heco_test);
+                break;
             default:
                 EthereumNetworkRepository.setChainColour(view, chainId);
                 break;
@@ -274,6 +284,12 @@ public class Utils {
                 break;
             case EthereumNetworkRepository.BINANCE_TEST_ID:
                 view.setBackgroundResource(R.drawable.item_binance_test_circle);
+                break;
+            case EthereumNetworkRepository.HECO_ID:
+                view.setBackgroundResource(R.drawable.item_heco_main_circle);
+                break;
+            case EthereumNetworkRepository.HECO_TEST_ID:
+                view.setBackgroundResource(R.drawable.item_heco_test_circle);
                 break;
             default:
                 EthereumNetworkRepository.setChainCircle(view, chainId);

@@ -53,6 +53,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
 
     @NonNull
     private OnImportSeedListener onImportSeedListener = dummyOnImportSeedListener;
+    private int inputWords = 0;
 
     public static ImportSeedFragment create() {
         return new ImportSeedFragment();
@@ -192,41 +193,63 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
             wordCount.setVisibility(View.VISIBLE);
         }
 
-        int words = wordCount(value);
-        String wordCountDisplay = words + "/" + maxWordCount;
+        inputWords = wordCount(value);
+        String wordCountDisplay = inputWords + "/" + maxWordCount;
         wordCount.setText(wordCountDisplay);
 
-        if(words == maxWordCount) {
+        if (inputWords != maxWordCount && importButton != null && importButton.getVisibility() == View.VISIBLE)
+        {
+            importButton.setVisibility(View.GONE);
+            setHintState(false);
+        }
+
+        if (inputWords == maxWordCount)
+        {
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.nasty_green));
             wordCount.setTypeface(boldTypeface);
             updateButtonState(true);
-        }else if(words == (maxWordCount -1)){
+        }
+        else if (inputWords == (maxWordCount -1))
+        {
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.colorPrimaryDark));
             wordCount.setTypeface(normalTypeface);
             updateButtonState(false);
-        }else if(words > maxWordCount){
+        }
+        else if (inputWords > maxWordCount)
+        {
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.dark_seed_danger));
             updateButtonState(false);
         }
 
         //get last word from the text
-        if(value.length() > 0) {
+        if (value.length() > 0)
+        {
             String lastWord = getLastWord(value);
-            if(lastWord.trim().length() > 0) {
+            if (lastWord.trim().length() > 0)
+            {
                 filterList(lastWord);
-                if(listSuggestions.getVisibility() == View.GONE){
-                    listSuggestions.setVisibility(View.VISIBLE);
-                }
                 if (!deletePressed && suggestionsAdapter.getSingleSuggestion().equals(lastWord))
                 {
                     seedPhrase.getEditText().append(" ");
                     listSuggestions.setVisibility(View.GONE);
+                    showImport();
                 }
-            }else{
-                listSuggestions.setVisibility(View.GONE);
+                else if (!(suggestionsAdapter.getSingleSuggestion().equals(lastWord) && inputWords == maxWordCount) && listSuggestions.getVisibility() == View.GONE)
+                {
+                    listSuggestions.setVisibility(View.VISIBLE);
+                    importButton.setVisibility(View.GONE);
+                }
             }
-        }else{
+            else
+            {
+                listSuggestions.setVisibility(View.GONE);
+                showImport();
+            }
+        }
+        else
+        {
             listSuggestions.setVisibility(View.GONE);
+            showImport();
         }
     }
 
@@ -252,8 +275,11 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     @Override
     public void onLayoutShrunk()
     {
-        if (importButton != null) importButton.setVisibility(View.GONE);
-        setHintState(false);
+        if (listSuggestions.getVisibility() == View.GONE && inputWords != maxWordCount)
+        {
+            if (importButton != null) importButton.setVisibility(View.GONE);
+            setHintState(false);
+        }
     }
 
     @Override
@@ -262,6 +288,15 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         if (importButton != null) importButton.setVisibility(View.VISIBLE);
         listSuggestions.setVisibility(View.GONE);
         setHintState(true);
+    }
+
+    private void showImport()
+    {
+        if (inputWords == maxWordCount)
+        {
+            if (importButton != null) importButton.setVisibility(View.VISIBLE);
+            setHintState(true);
+        }
     }
 
     @Override

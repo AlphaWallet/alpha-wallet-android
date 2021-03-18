@@ -197,7 +197,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         String wordCountDisplay = inputWords + "/" + maxWordCount;
         wordCount.setText(wordCountDisplay);
 
-        if (importButton != null && importButton.getVisibility() == View.VISIBLE)
+        if (inputWords != maxWordCount && importButton != null && importButton.getVisibility() == View.VISIBLE)
         {
             importButton.setVisibility(View.GONE);
             setHintState(false);
@@ -228,15 +228,16 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
             if (lastWord.trim().length() > 0)
             {
                 filterList(lastWord);
-                if (listSuggestions.getVisibility() == View.GONE)
-                {
-                    listSuggestions.setVisibility(View.VISIBLE);
-                }
                 if (!deletePressed && suggestionsAdapter.getSingleSuggestion().equals(lastWord))
                 {
                     seedPhrase.getEditText().append(" ");
                     listSuggestions.setVisibility(View.GONE);
                     showImport();
+                }
+                else if (!(suggestionsAdapter.getSingleSuggestion().equals(lastWord) && inputWords == maxWordCount) && listSuggestions.getVisibility() == View.GONE)
+                {
+                    listSuggestions.setVisibility(View.VISIBLE);
+                    importButton.setVisibility(View.GONE);
                 }
             }
             else

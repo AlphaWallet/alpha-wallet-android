@@ -85,3 +85,14 @@ Java_com_alphawallet_app_repository_OnRampRepository_getRampKey( JNIEnv* env, jo
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, secondaryInfuraKey);
+#else
+    const jstring key = "da3717f25f824cc1baa32d812386d93f";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

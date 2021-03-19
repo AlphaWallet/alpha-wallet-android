@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="@dimen/dp16"
+            android:text="@string/balance"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"
+            android:gravity="start"
+            android:textSize="@dimen/sp13"/>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.4"
+            android:layout_marginBottom="@dimen/dp14"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="start"
+                tools:text="35.4236 ETH"
+                android:textSize="@dimen/sp16"/>
+
+            <TextView
+                android:id="@+id/text_new_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:layout_below="@id/text_balance"
+                android:textColor="@color/dove"
+                android:fontFamily="@font/font_regular"
+                android:gravity="start"
+                tools:text="(New: 31.1818 ETH)"
+                android:textSize="@dimen/sp15"/>
+
+            <com.alphawallet.app.widget.ChainName
+                android:id="@+id/chain_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp5"
+                custom:font_size="10"
+                android:visibility="visible"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+</LinearLayout>

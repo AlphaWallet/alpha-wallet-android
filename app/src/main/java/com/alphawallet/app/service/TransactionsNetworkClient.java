@@ -61,8 +61,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 7; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 3; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
+    private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -335,7 +336,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             if (networkInfo.etherscanTxUrl.contains("etherscan"))
             {
-                sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+                sb.append(ETHERSCAN_API_KEY);
             }
 
             fullUrl = sb.toString();
@@ -630,9 +631,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         final String WALLET_ADDR = "[WALLET_ADDR]";
         final String ETHERSCAN = "[ETHERSCAN]";
         final String QUERY_TYPE = "[QUERY_TYPE]";
-        String fullUrl = ETHERSCAN + "api?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+        final String APIKEY_TOKEN = "[APIKEY]";
+        String fullUrl = ETHERSCAN + "api?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
         fullUrl = fullUrl.replace(QUERY_TYPE, queryType).replace(ETHERSCAN, networkInfo.etherscanTxUrl).replace(START_BLOCK, String.valueOf(lastBlockChecked + 1)).replace(WALLET_ADDR, walletAddress);
-        //sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+        if (networkInfo.etherscanTxUrl.contains("etherscan"))
+        {
+            fullUrl = fullUrl.replace(APIKEY_TOKEN, ETHERSCAN_API_KEY);
+        }
+        else
+        {
+            fullUrl = fullUrl.replace(APIKEY_TOKEN, "");
+        }
 
         try
         {
@@ -913,7 +922,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     (isNFT || ev.value == null) ? "1" : ev.value); //Etherscan sometimes interprets NFT transfers as FT's
             storeTransferData(instance, tx.hash, valueList, activityName, ev.contractAddress);
             //ensure we have fetched the transaction for each hash
-            checkTransaction(instance, tx, walletAddress, networkInfo);
+            writeTransaction(instance, tx);
         }
     }
 
@@ -994,5 +1003,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             //
         }
+    }
+
+    private void writeTransaction(Realm instance, Transaction tx)
+    {
+        instance.executeTransaction(r -> {
+            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                    .equalTo("hash", tx.hash)
+                    .findFirst();
+            if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+            TransactionsRealmCache.fill(instance, realmTx, tx);
+        });
     }
 }

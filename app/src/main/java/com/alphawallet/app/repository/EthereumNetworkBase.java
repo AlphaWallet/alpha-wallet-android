@@ -63,7 +63,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BACKUP_INFURA_KEY = BuildConfig.XInfuraAPI;
     public static final String MAINNET_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() : MAINNET_RPC_URL;
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String XDAI_RPC_URL = "https://dai.poa.network";
+    public static final String XDAI_RPC_URL = "https://rpc.xdaichain.com/";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
     public static final String RINKEBY_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() + "&x-amberdata-blockchain-id=1b3f7a72b3e99c13" : RINKEBY_RPC_URL;

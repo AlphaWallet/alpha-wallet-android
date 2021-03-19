@@ -10,6 +10,10 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
+
+import wallet.core.jni.proto.Harmony;
 
 public class BalanceUtils
 {
@@ -52,16 +56,18 @@ public class BalanceUtils
 
     public static String convertFromLocale(String value)
     {
-        CharSequence separator = String.valueOf(DecimalFormatSymbols.getInstance().getGroupingSeparator());
-        value = value.replace(separator, "");
-
-        char decimal = DecimalFormatSymbols.getInstance().getDecimalSeparator();
-        if (decimal != '.')
+        try
         {
-            value = value.replace(decimal, '.');
+            NumberFormat nf = DecimalFormat.getInstance(Locale.getDefault());
+            Number n = nf.parse(value.trim());
+            return String.valueOf(n.doubleValue());
+        }
+        catch (Exception e)
+        {
+            // no action - number unparsable - drop through to return 0
         }
 
-        return value.trim();
+        return "0";
     }
 
     public static BigDecimal weiToEth(BigDecimal wei) {

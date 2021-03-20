@@ -8,12 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Locale;
-
-import wallet.core.jni.proto.Harmony;
 
 public class BalanceUtils
 {
@@ -52,22 +47,6 @@ public class BalanceUtils
         }
 
         return value;*/
-    }
-
-    public static String convertFromLocale(String value)
-    {
-        try
-        {
-            NumberFormat nf = DecimalFormat.getInstance(Locale.getDefault());
-            Number n = nf.parse(value.trim());
-            return String.valueOf(n.doubleValue());
-        }
-        catch (Exception e)
-        {
-            // no action - number unparsable - drop through to return 0
-        }
-
-        return "0";
     }
 
     public static BigDecimal weiToEth(BigDecimal wei) {

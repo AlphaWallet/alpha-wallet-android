@@ -5,10 +5,12 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.GeolocationPermissions;
+import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -811,6 +814,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
 
             @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                requestCameraPermission(request);
+            }
+
+            @Override
             public void onGeolocationPermissionsShowPrompt(String origin,
                                                            GeolocationPermissions.Callback callback)
             {
@@ -1566,6 +1574,31 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         else
         {
             callback.invoke(origin, true, false);
+        }
+    }
+
+    // Handles the requesting of the camera permission.
+    private void requestCameraPermission(PermissionRequest request)
+    {
+        final String[] requestedResources = request.getResources();
+        for (String r : requestedResources)
+        {
+            if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+            {
+                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                alertDialog.setMessage(String.format(getString(R.string.message_permission_request_webkit_camera), request.getOrigin().getAuthority()));
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.action_deny_webkit_camera),
+                        (dialog, which) -> {
+                            request.deny();
+                            dialog.dismiss();
+                        });
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.action_allow_webkit_camera),
+                        (dialog, which) -> {
+                            request.grant(requestedResources);
+                            dialog.dismiss();
+                        });
+                alertDialog.show();
+            }
         }
     }
 

@@ -732,4 +732,5 @@
     <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
     <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
     <string name="hide_seed_text">OK, Hide Seed Phrase</string>
+    <string name="ens_not_match_wallet">ENS Name does not match wallet address</string>
 </resources>

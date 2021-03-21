@@ -318,7 +318,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
                 getAuthenticationForLinkGeneration();
                 break;
             case TRANSFER_TO_ADDRESS:
-                addressInput.getAddress(true); // ask address module to supply address
+                addressInput.getAddress(); // ask address module to supply address
                 break;
         }
 

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -111,10 +110,10 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     }
 
-    private void onSaved(Integer integer) {
-        if (!isNewWallet) {
-            showWalletsActivity();
-        }
+    private void onSaved(Integer integer)
+    {
+        //refresh the WalletHolder
+        setENSText();
     }
 
     private void onBackupWallet(String keystore) {
@@ -175,14 +174,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         walletBalance.setText(wallet.balance);
         walletBalanceCurrency.setText(wallet.balanceSymbol);
 
-        if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
-            walletNameText.setText(wallet.ENSname);
-            walletNameText.setVisibility(View.VISIBLE);
-            walletAddressSeparator.setVisibility(View.VISIBLE);
-        } else {
-            walletNameText.setVisibility(View.GONE);
-            walletAddressSeparator.setVisibility(View.GONE);
-        }
+        setENSText();
 
         walletAddressText.setText(Utils.formatAddress(wallet.address));
 
@@ -202,6 +194,18 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         inputAddress.setAddress(wallet.ENSname);
         inputAddress.setAddressCallback(this);
+    }
+
+    private void setENSText()
+    {
+        if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
+            walletNameText.setText(wallet.ENSname);
+            walletNameText.setVisibility(View.VISIBLE);
+            walletAddressSeparator.setVisibility(View.VISIBLE);
+        } else {
+            walletNameText.setVisibility(View.GONE);
+            walletAddressSeparator.setVisibility(View.GONE);
+        }
     }
 
     private void onDeleteWalletSettingClicked() {
@@ -239,14 +243,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     private void showWalletsActivity() {
         finish();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-        }
-        return false;
     }
 
     private void confirmDelete(Wallet wallet) {
@@ -319,18 +315,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     @Override
-    public void onBackPressed() {
-        if (inputAddress == null)
-        {
-            addressReady(null, null);
-        }
-        else
-        {
-            inputAddress.getAddress(false); //fetch the address and ENS name from the input view. Note - if ENS is still finishing this skips the waiting
-        }
-    }
-
-    @Override
     public void run() {
         if (successOverlay.getAlpha() > 0) {
             successOverlay.animate().alpha(0.0f).setDuration(500);
@@ -359,10 +343,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     @Override
-    public void addressReady(String address, String ensName)
+    public void resolvedAddress(String address, String ensName)
     {
-        //update ENS name if address matches and either there's no ENS name or it's a different ENS name
-        //(user could have multiple ENS names and wants their wallet to be labelled with a different one)
         if (!TextUtils.isEmpty(address)
                 && wallet.address.equalsIgnoreCase(address)
                 && !TextUtils.isEmpty(ensName)
@@ -371,12 +353,18 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
             wallet.ENSname = ensName;
             //update database
             viewModel.storeWallet(wallet);
+            successOverlay.setVisibility(View.VISIBLE);
+            handler.postDelayed(this, 1000);
         }
+        else if (TextUtils.isEmpty(wallet.ENSname) || !ensName.equalsIgnoreCase(wallet.ENSname))
+        {
+            Toast.makeText(this, R.string.ens_not_match_wallet, Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        if (isNewWallet) {
-            viewModel.showHome(this);
-        } else {
-            finish();
-        }
+    @Override
+    public void addressReady(String address, String ensName)
+    {
+
     }
 }

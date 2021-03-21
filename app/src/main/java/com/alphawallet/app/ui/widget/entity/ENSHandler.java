@@ -6,6 +6,7 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -54,7 +55,7 @@ public class ENSHandler implements Runnable
     @Nullable
     private Disposable disposable;
     public volatile boolean waitingForENS = false;
-    public boolean transferAfterENS = false;
+    private boolean hostCallbackAfterENS = false;
 
     public ENSHandler(InputAddress host, AutoCompleteAddressAdapter adapter)
     {
@@ -126,7 +127,8 @@ public class ENSHandler implements Runnable
         if (waitingForENS)
         {
             host.displayCheckingDialog(true);
-            transferAfterENS = true;
+            hostCallbackAfterENS = true;
+            handler.postDelayed(this::checkIfWaitingForENS, 5000);
         }
         else
         {
@@ -149,6 +151,7 @@ public class ENSHandler implements Runnable
     public void onENSSuccess(String resolvedAddress, String ensDomain)
     {
         waitingForENS = false;
+        host.setWaitingSpinner(false);
         if (!TextUtils.isEmpty(resolvedAddress) && isValidAddress(resolvedAddress) && canBeENSName(ensDomain))
         {
             toAddressEditText.dismissDropDown();
@@ -156,6 +159,7 @@ public class ENSHandler implements Runnable
             if (toAddressEditText.hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(resolvedAddress, ensDomain);
+            host.ENSResolved(resolvedAddress, ensDomain);
         }
         else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && isValidAddress(ensDomain)) //in case user typed an address and hit an ENS name
         {
@@ -164,6 +168,7 @@ public class ENSHandler implements Runnable
             if (toAddressEditText.hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);
+            host.ENSResolved(resolvedAddress, ensDomain);
         }
         else
         {
@@ -176,22 +181,24 @@ public class ENSHandler implements Runnable
     private void checkIfWaitingForENS()
     {
         host.setWaitingSpinner(false);
-        if (transferAfterENS)
+        handler.removeCallbacksAndMessages(null);
+        if (hostCallbackAfterENS)
         {
-            transferAfterENS = false;
+            hostCallbackAfterENS = false;
             host.ENSComplete();
         }
     }
 
     private void onENSError(Throwable throwable)
     {
+        host.setWaitingSpinner(false);
         host.setStatus(null);
         checkIfWaitingForENS();
     }
 
     public static boolean canBeENSName(String address)
     {
-        return !TextUtils.isEmpty(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
+        return !TextUtils.isEmpty(address) && !isValidAddress(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
     }
 
     @Override

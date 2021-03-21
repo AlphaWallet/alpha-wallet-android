@@ -45,7 +45,17 @@ public class EtherscanEvent
 
     public Transaction createNFTTransaction(@NotNull NetworkInfo networkInfo)
     {
-        String input = Numeric.toHexString(TokenRepository.createERC721TransferFunction(from, to, contractAddress, BigInteger.ONE)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
+        BigInteger tokenId = BigInteger.ONE;
+        try
+        {
+            tokenId = new BigInteger(tokenID);
+        }
+        catch (Exception e)
+        {
+            //no action, default to '1'
+        }
+
+        String input = Numeric.toHexString(TokenRepository.createERC721TransferFunction(from, to, contractAddress, tokenId)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
 
         return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, input,
                 gasUsed, networkInfo.chainId, false);

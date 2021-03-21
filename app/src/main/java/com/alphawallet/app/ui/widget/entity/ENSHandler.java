@@ -35,6 +35,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -115,11 +116,18 @@ public class ENSHandler implements Runnable
 
     private void checkAddress()
     {
-        waitingForENS = true;
         handler.removeCallbacks(this);
-        handler.postDelayed(this, ENS_RESOLVE_DELAY);
-        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
-        host.setWaitingSpinner(false);
+        if (couldBeENS(toAddressEditText.getText().toString().trim()))
+        {
+            waitingForENS = true;
+            handler.postDelayed(this, ENS_RESOLVE_DELAY);
+            if (disposable != null && !disposable.isDisposed()) disposable.dispose();
+            host.setWaitingSpinner(false);
+        }
+        else
+        {
+            waitingForENS = false;
+        }
     }
 
     public void getAddress()

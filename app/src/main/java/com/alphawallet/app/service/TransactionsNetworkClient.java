@@ -51,6 +51,7 @@ import okhttp3.Request;
 
 import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -575,7 +576,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 if (tokenDecimal >= 0)
                 {
                     TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, tokenDecimal, true, networkInfo.chainId);
-                    Token newToken = new Token(info, BigDecimal.ZERO, 0, networkInfo.getShortName(), ContractType.ERC20);
+                    Token newToken = new Token(info, BigDecimal.ZERO, 0, networkInfo.getShortName(),
+                            tokenDecimal > 0 ? ContractType.ERC20 : ContractType.MAYBE_ERC20);
                     newToken.setTokenWallet(walletAddress);
                     svs.storeToken(newToken);
                 }
@@ -611,7 +613,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 // write token to DB - note this also fetches the balance
                 TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, 0, true, networkInfo.chainId);
-                ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), ContractType.ERC721);
+                ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), ContractType.ERC721_UNDETERMINED);
                 newToken.setTokenWallet(walletAddress);
                 svs.storeToken(newToken);
             }
@@ -806,11 +808,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
 
         return metas;
-    }
-
-    private String databaseKey(int chainId, String walletAddress)
-    {
-        return walletAddress.toLowerCase() + "-" + chainId;
     }
 
     private void storeLatestBlockRead(String walletAddress, int chainId, String tokenAddress, String lastBlockRead)
@@ -1011,8 +1008,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             RealmTransaction realmTx = instance.where(RealmTransaction.class)
                     .equalTo("hash", tx.hash)
                     .findFirst();
-            if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
-            TransactionsRealmCache.fill(instance, realmTx, tx);
+            if (realmTx == null)
+            {
+                realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+            }
+
+            if (realmTx.getInput() == null || realmTx.getInput().length() <= 10)
+            {
+                TransactionsRealmCache.fill(instance, realmTx, tx);
+            }
         });
     }
 }

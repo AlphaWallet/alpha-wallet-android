@@ -35,6 +35,7 @@ public class TokenFactory
                 break;
             case NOT_SET:
             case ERC20:
+            case MAYBE_ERC20:
             case OTHER:
             case CURRENCY:
             case DELETED_ACCOUNT:

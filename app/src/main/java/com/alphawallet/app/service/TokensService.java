@@ -24,6 +24,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
@@ -60,7 +61,7 @@ public class TokensService
     private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>(); //this is used to compute the USD value of the tokens on an address
     private static final Map<Integer, Long> pendingChainMap = new ConcurrentHashMap<>();
     private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>();
+    private final Map<String, Token> tokenStoreList = new ConcurrentHashMap<>(); //used to hold tokens that will be stored
     private String currentAddress = null;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
@@ -165,20 +166,35 @@ public class TokensService
         if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
 
         //store token to database, update balance
-        tokenStoreList.add(token);
+        //check for duplicates
+        addToTokenStoreList(token);
         if (storeErc20Tokens == null)
         {
-            storeErc20Tokens = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
-                    .doOnNext(l -> storeNextToken()).subscribe();
+            storeErc20Tokens = Observable.interval(0, 50, TimeUnit.MILLISECONDS)
+                    .doOnNext(l -> storeNextToken()).subscribeOn(Schedulers.newThread()).subscribe();
+        }
+    }
+
+    private void addToTokenStoreList(Token token)
+    {
+        String key = TokensRealmSource.databaseKey(token);
+        Token existing = tokenStoreList.get(key);
+
+        if (existing == null || (existing.getInterfaceSpec() != token.getInterfaceSpec() && existing.getInterfaceSpec() == ContractType.ERC20))
+        {
+            tokenStoreList.put(key, token);
         }
     }
 
     private void storeNextToken()
     {
-        Token t = tokenStoreList.poll();
-        if (t != null)
+        //process chains in order
+        if (tokenStoreList.keySet().iterator().hasNext())
         {
+            String key = tokenStoreList.keySet().iterator().next();
+            Token t = tokenStoreList.get(key);
             Wallet wallet = new Wallet(t.getWallet());
+            tokenStoreList.remove(key);
             tokenRepository.addToken(wallet, t.tokenInfo, t.getInterfaceSpec())
                     .flatMap(token -> tokenRepository.checkInterface(new Token[]{token}, wallet)) //if ERC721 determine the specific contract type
                     .subscribeOn(Schedulers.io())
@@ -197,7 +213,7 @@ public class TokensService
     {
         if (tokens.length > 0)
         {
-            System.out.println("Stored Token: " + tokens[0].getFullName());
+            //token is stored
         }
     }
 
@@ -230,6 +246,7 @@ public class TokensService
             currentAddress = newWalletAddr.toLowerCase();
             tokenValueMap.clear();
             pendingChainMap.clear();
+            tokenStoreList.clear();
             stopUpdateCycle();
         }
     }

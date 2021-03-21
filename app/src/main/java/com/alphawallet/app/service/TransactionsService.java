@@ -93,7 +93,7 @@ public class TransactionsService
     private void fetchTransactions()
     {
         currentChainIndex = 0;
-        nftCheck = false;
+        nftCheck = true; //check nft first to filter out NFT tokens
 
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
             fetchTransactionDisposable.dispose();
@@ -265,6 +265,12 @@ public class TransactionsService
         if (eventTimer != null && !eventTimer.isDisposed())
         {
             eventTimer.dispose();
+        }
+
+        if (erc20EventCheckCycle != null && !erc20EventCheckCycle.isDisposed())
+        {
+            erc20EventCheckCycle.dispose();
+            erc20EventCheckCycle = null;
         }
         eventTimer = null;
     }

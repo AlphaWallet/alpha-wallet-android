@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 
 public class BalanceUtils
@@ -48,20 +47,6 @@ public class BalanceUtils
         }
 
         return value;*/
-    }
-
-    public static String convertFromLocale(String value)
-    {
-        CharSequence separator = ",";// + (DecimalFormatSymbols.getInstance().getGroupingSeparator());
-        value = value.replace(separator, "");
-
-        char decimal = '.';//DecimalFormatSymbols.getInstance().getDecimalSeparator();
-        if (decimal != '.')
-        {
-            value = value.replace(decimal, '.');
-        }
-
-        return value;
     }
 
     public static BigDecimal weiToEth(BigDecimal wei) {

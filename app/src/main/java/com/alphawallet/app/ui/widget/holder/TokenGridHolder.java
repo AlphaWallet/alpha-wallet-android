@@ -62,6 +62,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
                     if (firstAsset != null) {
                         Glide.with(getContext())
                                 .load(firstAsset.getImagePreviewUrl())
+                                .override(72)
                                 .into(imageIcon);
                         name.setText(token.tokenInfo.name);
                         textIcon.setVisibility(View.GONE);

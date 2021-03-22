@@ -1,11 +1,9 @@
 package com.alphawallet.app.widget;
 
-import android.animation.Animator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepository;

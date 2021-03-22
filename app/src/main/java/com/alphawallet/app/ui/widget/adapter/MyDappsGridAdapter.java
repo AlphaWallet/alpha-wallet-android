@@ -68,6 +68,7 @@ public class MyDappsGridAdapter extends RecyclerView.Adapter<MyDappsGridAdapter.
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(viewHolder.icon.getContext())
                     .load(favicon)
+                    .override(80)
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(viewHolder.icon);

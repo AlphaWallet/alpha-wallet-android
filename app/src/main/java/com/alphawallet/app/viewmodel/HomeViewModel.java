@@ -272,6 +272,7 @@ public class HomeViewModel extends BaseViewModel {
         }
         else
         {
+            walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
                     .resolveEnsName(wallet.address)

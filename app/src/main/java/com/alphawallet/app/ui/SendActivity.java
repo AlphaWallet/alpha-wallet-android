@@ -94,7 +94,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private BigDecimal sendAmount;
     private BigDecimal sendGasPrice;
     private ActionSheetDialog confirmationDialog;
-    private SignAuthenticationCallback signingCallback;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -509,7 +508,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
             amountInput.getInputAmount();
-            addressInput.getAddress(true);
+            addressInput.getAddress();
         }
     }
 
@@ -540,7 +539,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
             if (token.isEthereum())
             {
-                checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress);
+                checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);
             }
             else
             {
@@ -550,8 +549,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                         .map(this::convertToGasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress()),
-                                error -> handleError(error, transactionBytes, token.getAddress()))
+                        .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
+                                error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress))
                         .isDisposed();
             }
         }
@@ -569,17 +568,17 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress)
+    private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         Log.w(this.getLocalClassName(), throwable.getMessage());
-        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress);
+        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
     }
 
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      *
      */
-    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress)
+    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
         Web3Transaction w3tx = new Web3Transaction(
@@ -594,13 +593,13 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
         if (sendGasLimit.equals(BigInteger.ZERO))
         {
-            estimateError(w3tx, transactionBytes, txSendAddress);
+            estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
         }
         else
         {
             if (dialog != null && dialog.isShowing()) dialog.dismiss();
             confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
-                    addressInput.getInputText(), viewModel.getTokenService(), this);
+                    resolvedAddress, viewModel.getTokenService(), this);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
             sendAmount = NEGATIVE;
@@ -615,7 +614,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
-        signingCallback = callback;
         viewModel.getAuthentication(this, wallet, callback);
     }
 
@@ -666,7 +664,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         confirmationDialog.dismiss();
     }
 
-    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress)
+    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
@@ -677,7 +675,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
             BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
-            checkConfirm(gasEstimate, transactionBytes, txSendAddress);
+            checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
         });
 
         dialog.setSecondaryButtonListener(v -> {

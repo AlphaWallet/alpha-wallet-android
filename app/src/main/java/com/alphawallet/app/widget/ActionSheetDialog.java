@@ -48,13 +48,12 @@ import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
  */
 public class ActionSheetDialog extends BottomSheetDialog implements StandardFunctionInterface, ActionSheetInterface
 {
-    private final TextView amount;
-
     private final ImageView cancelButton;
     private final GasWidget gasWidget;
     private final BalanceDisplay balanceDisplay;
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
+    private final AmountDisplay amountDisplay;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
 
@@ -77,14 +76,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         super(activity);
         setContentView(R.layout.dialog_action_sheet);
 
-        amount = findViewById(R.id.text_amount);
-
         gasWidget = findViewById(R.id.gas_widgetx);
         balanceDisplay = findViewById(R.id.balance);
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = findViewById(R.id.confirmation_view);
         detailWidget = findViewById(R.id.detail_widget);
         addressDetail = findViewById(R.id.recipient);
+        amountDisplay = findViewById(R.id.amount_display);
         functionBar = findViewById(R.id.layoutButtons);
         if (activity instanceof HomeActivity)
         {
@@ -131,8 +129,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.requester);
+        amountDisplay = findViewById(R.id.amount_display);
         functionBar = findViewById(R.id.layoutButtons);
-        amount = null;
         detailWidget = null;
         mode = ActionSheetMode.SIGN_MESSAGE;
         callbackId = message.getCallbackId();

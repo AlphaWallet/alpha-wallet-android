@@ -249,36 +249,18 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     }
 
     @Override
+    public void ENSResolved(String address, String ens)
+    {
+        addressReadyCallback.resolvedAddress(address, ens);
+    }
+
+    @Override
     public void ENSComplete()
     {
-        //address and ENS are ready
-        //determine which is which
-        String address = null;
-        String ensName = null;
-        String mainText = editText.getText().toString().trim();
-        String status = statusText.getText().toString().trim();
-
-        if (!TextUtils.isEmpty(mainText) && isValidAddress(mainText))
-        {
-            address = mainText;
-            if (!TextUtils.isEmpty(status) && status.contains("."))
-            {
-                ensName = status;
-            }
-        }
-        else if (!TextUtils.isEmpty(status) && isValidAddress(status))
-        {
-            address = status;
-            if (!TextUtils.isEmpty(mainText) && mainText.contains("."))
-            {
-                ensName = mainText;
-            }
-        }
-
         displayCheckingDialog(false);
         if (addressReadyCallback != null)
         {
-            addressReadyCallback.addressReady(address, ensName);
+            addressReadyCallback.addressReady(getInputAddress(), getENS());
         }
         else
         {
@@ -287,23 +269,55 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
     }
 
+    private String getInputAddress()
+    {
+        String mainText = editText.getText().toString().trim();
+        String status = statusText.getText().toString().trim();
+
+        if (!TextUtils.isEmpty(mainText) && isValidAddress(mainText))
+        {
+            return mainText;
+        }
+        else if (!TextUtils.isEmpty(status) && isValidAddress(status))
+        {
+            return status;
+        }
+
+        return null;
+    }
+
+    private String getENS()
+    {
+        String mainText = editText.getText().toString().trim();
+        String status = statusText.getText().toString().trim();
+
+        if (!TextUtils.isEmpty(mainText) && isValidAddress(mainText) && !TextUtils.isEmpty(status) && status.contains("."))
+        {
+            return status;
+        }
+        else if (!TextUtils.isEmpty(status) && isValidAddress(status) && !TextUtils.isEmpty(mainText) && mainText.contains("."))
+        {
+            return mainText;
+        }
+
+        return null;
+    }
+
     /**
      * Wait until we have fully resolved the ENS name if required
      * @return
      */
-    public void getAddress(boolean waitForENS)
+    public void getAddress()
     {
-        if (waitForENS)
-        {
-            ensHandler.getAddress();
-        }
-        else if (ensHandler == null || !ensHandler.waitingForENS)
+        String addressInput = editText.getText().toString().trim();
+
+        if (!ENSHandler.canBeENSName(addressInput) || ensHandler == null || !ensHandler.waitingForENS)
         {
             ENSComplete();
         }
-        else //ENS values are unsafe to use
+        else
         {
-            addressReadyCallback.addressReady(null, null);
+            ensHandler.getAddress();
         }
     }
 

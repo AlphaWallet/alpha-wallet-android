@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.text.Editable;
+import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -9,14 +10,21 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.LocaleUtils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * Created by JB on 20/01/2021.
  */
 public class NumericInput extends AppCompatAutoCompleteTextView
 {
+    private final Locale deviceSettingsLocale = LocaleUtils.getDeviceLocale(getContext());
+
     public NumericInput(@NonNull Context context)
     {
         super(context);
@@ -25,14 +33,9 @@ public class NumericInput extends AppCompatAutoCompleteTextView
     public NumericInput(@NonNull Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
-    }
-
-    public String getParsedValue()
-    {
-        CharSequence text = super.getText();
-
-        //ensure text is pre-parsed to remove numeric groupings and convert to standard format
-        return BalanceUtils.convertFromLocale(text.toString());
+        //ensure we use the decimal separator appropriate for the phone settings
+        char separator = DecimalFormatSymbols.getInstance(deviceSettingsLocale).getDecimalSeparator();
+        setKeyListener(DigitsKeyListener.getInstance("0123456789" + separator));
     }
 
     /**
@@ -43,28 +46,19 @@ public class NumericInput extends AppCompatAutoCompleteTextView
     public BigDecimal getBigDecimalValue()
     {
         CharSequence text = super.getText();
+        BigDecimal value = BigDecimal.ZERO;
 
-        //ensure text is pre-parsed to remove numeric groupings and convert to standard format
-        String parsedValue = BalanceUtils.convertFromLocale(text.toString());
-
-        if (checkNumericValidity(parsedValue))
+        try
         {
-            try
-            {
-                return new BigDecimal(parsedValue);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(deviceSettingsLocale);
+            df.setParseBigDecimal(true);
+            value = (BigDecimal) df.parseObject(text.toString());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
-        return BigDecimal.ZERO;
-    }
-
-    private boolean checkNumericValidity(String strValue)
-    {
-        return strValue != null && (strValue.length() > 1
-                || (strValue.length() == 1 && Character.isDigit(strValue.charAt(0))));
+        return value;
     }
 }

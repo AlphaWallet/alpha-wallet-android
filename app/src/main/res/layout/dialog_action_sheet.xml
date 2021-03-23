@@ -76,46 +76,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <!-- TODO: This needs to be moved into a view of its own: AmountDisplayWidget -->
-
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <com.alphawallet.app.widget.AmountDisplay
+        android:id="@+id/amount_display"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp20"
-        android:layout_marginBottom="@dimen/dp20"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/dp16"
-            android:text="@string/amount"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
-            android:gravity="start"
-            android:textSize="@dimen/sp13"/>
-
-        <TextView
-            android:id="@+id/text_amount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3.5"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="start"
-            tools:text="1.234 ETH ≈ 500.23 USD"
-            android:textSize="@dimen/sp16"/>
-
-    </LinearLayout>
-
-    <!-- End TODO -->
+        android:layout_width="match_parent"/>
 
     <View
         android:layout_width="match_parent"

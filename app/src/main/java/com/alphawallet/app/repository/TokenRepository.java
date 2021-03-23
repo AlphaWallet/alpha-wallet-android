@@ -88,6 +88,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static final BigInteger INTERFACE_OFFICIAL_ERC721 = new BigInteger ("80ac58cd", 16);
     public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
     public static final BigInteger INTERFACE_BALANCES_721_TICKET = new BigInteger ("c84aae17", 16);
+    public static final BigInteger INTERFACE_SUPERRARE = new BigInteger ("5b5e139f", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -136,7 +137,7 @@ public class TokenRepository implements TokenRepositoryType {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
-                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || !t.checkBalanceType()) //balance type appears to be wrong
+                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20 || !t.checkBalanceType()) //balance type appears to be wrong
                 {
                     ContractType type = determineCommonType(t.tokenInfo).blockingGet();
                     TokenInfo tInfo = t.tokenInfo;
@@ -144,10 +145,19 @@ public class TokenRepository implements TokenRepositoryType {
                     switch (type)
                     {
                         case OTHER:
+                            if (t.getInterfaceSpec() == ContractType.MAYBE_ERC20)
+                            {
+                                type = ContractType.ERC20;
+                                break;
+                            }
                             //couldn't determine the type, try again next time
                             continue;
-                        default:
-                            type = ContractType.ERC721;
+                        case ERC20:
+                            if (t.getInterfaceSpec() != ContractType.MAYBE_ERC20)
+                            {
+                                type = ContractType.ERC721;
+                            }
+                            break;
                         case ERC721:
                         case ERC721_LEGACY:
                             List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
@@ -160,6 +170,8 @@ public class TokenRepository implements TokenRepositoryType {
                             t = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
                             tokens[i] = t;
                             break;
+                        default:
+                            type = ContractType.ERC721;
                     }
 
                     //update in database
@@ -1333,6 +1345,8 @@ public class TokenRepository implements TokenRepositoryType {
                     returnType = ContractType.ERC721_LEGACY;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))
+                    returnType = ContractType.ERC721;
                 else
                     returnType = ContractType.OTHER;
             }

@@ -128,4 +128,26 @@ public class AWEnsResolver extends EnsResolver
             return address;
         });
     }
+
+    public static boolean couldBeENS(String address)
+    {
+        if (address == null || address.length() == 0) return false;
+
+        String[] split = address.split("[.]");
+        if (split.length > 1)
+        {
+            String extension = split[split.length - 1];
+            switch (extension)
+            {
+                case "eth":
+                case "xyz":
+                case "crypto":
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        return false;
+    }
 }

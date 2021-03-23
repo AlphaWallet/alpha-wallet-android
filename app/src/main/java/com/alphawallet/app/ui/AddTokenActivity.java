@@ -366,7 +366,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
         else
         {
-            inputAddressView.getAddress(false);
+            inputAddressView.getAddress();
         }
     }
 
@@ -382,13 +382,13 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             aDialog.dismiss();
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
             pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, false).apply();
-            inputAddressView.getAddress(false);
+            inputAddressView.getAddress();
         });
         aDialog.setSecondaryButtonText(R.string.action_cancel);
         aDialog.setSecondaryButtonListener(v -> {
             //don't switch on the zero balance tokens
             aDialog.dismiss();
-            inputAddressView.getAddress(false);
+            inputAddressView.getAddress();
         });
         aDialog.show();
     }

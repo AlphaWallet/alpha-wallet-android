@@ -1159,7 +1159,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public void backPressed()
     {
-        if (back.getAlpha() == 0.3f) return;
+        if (web3 == null || back == null || back.getAlpha() == 0.3f) return;
         if (web3.canGoBack())
         {
             checkBackClickArrowVisibility(); //to make arrows function correctly - don't want to wait for web page to load to check back/forwards - this looks clunky
@@ -1455,6 +1455,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 case QRScanningActivity.DENY_PERMISSION:
                     showCameraDenied();
                     break;
+                case QRScanningActivity.WALLET_CONNECT:
+                    return;
                 default:
                     break;
             }

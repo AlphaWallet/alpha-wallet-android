@@ -151,6 +151,11 @@ public class AWHttpService extends HttpService
             return buildNullInputStream();
         }
 
+        if (response.code()/100 == 4) //rate limited
+        {
+            return trySecondaryNode(request);
+        }
+
         return processNodeResponse(response, request, false);
     }
 

@@ -14,6 +14,7 @@
     <color name="semitransparentWhite">#AAFFFFFF</color>
 	<color name="white20">#32FFFFFF</color>
 	<color name="translucentWhite">#80FFFFFF</color>
+	<color name="translucentWhiteSolid">#A0FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="item_icon_tint">#89000000</color>
 	<color name="blur">#80000000</color>
@@ -87,6 +88,8 @@
 	<color name="artis_tau1">#F97599</color>
 	<color name="binance_test">#ffca2f</color>
 	<color name="binance_main">#f3ba2f</color>
+	<color name="heco_test">#5F9FFF</color>
+	<color name="heco_main">#3F7FFF</color>
 
 	<!-- Fiji Colour Pallette -->
 	<color name="black">#000000</color>

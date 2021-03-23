@@ -42,7 +42,7 @@
         android:paddingTop="5dp"
         android:paddingRight="10dp"
         android:paddingBottom="5dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <View
             android:id="@+id/network_icon"

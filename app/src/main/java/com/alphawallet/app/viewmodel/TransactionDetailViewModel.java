@@ -20,6 +20,8 @@ import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.TransactionsRealmCache;
+import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ConfirmationActivity;
@@ -34,6 +36,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
@@ -127,7 +130,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     public Token getToken(int chainId, String address)
     {
-        return tokenService.getToken(chainId, address);
+        return tokenService.getTokenOrBase(chainId, address);
     }
 
     @Nullable
@@ -196,7 +199,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
             disposable = EventUtils.getTransactionDetails(txHash, web3j)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe(ethTx -> storeTx(ethTx, wallet, web3j), this::onError);
+                    .subscribe(ethTx -> storeTx(ethTx, wallet, chainId, web3j), this::onError);
         }
         else
         {
@@ -204,7 +207,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
     }
 
-    private void storeTx(EthTransaction rawTx, Wallet wallet, Web3j web3j)
+    private void storeTx(EthTransaction rawTx, Wallet wallet, int chainId, Web3j web3j)
     {
         //need to fetch the tx block time
         if (rawTx == null)
@@ -215,9 +218,36 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
         disposable = EventUtils.getBlockDetails(ethTx.getBlockHash(), web3j)
-                .flatMap(ethBlock -> fetchTransactionsInteract.storeRawTx(wallet, rawTx, ethBlock.getBlock().getTimestamp().longValue()))
+                .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
+                .map(tx -> writeTransaction(wallet, tx))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(transaction::postValue, this::onError);
+    }
+
+    private Transaction writeTransaction(Wallet wallet, Transaction tx)
+    {
+        try (Realm instance = fetchTransactionsInteract.getRealmInstance(wallet))
+        {
+            instance.beginTransaction();
+            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                    .equalTo("hash", tx.hash)
+                    .findFirst();
+
+            if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+            TransactionsRealmCache.fill(instance, realmTx, tx);
+            instance.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return tx;
+    }
+
+    public void restartServices()
+    {
+        fetchTransactionsInteract.restartTransactionService();
     }
 }

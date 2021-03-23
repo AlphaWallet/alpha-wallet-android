@@ -88,6 +88,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static final BigInteger INTERFACE_OFFICIAL_ERC721 = new BigInteger ("80ac58cd", 16);
     public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
     public static final BigInteger INTERFACE_BALANCES_721_TICKET = new BigInteger ("c84aae17", 16);
+    public static final BigInteger INTERFACE_SUPERRARE = new BigInteger ("5b5e139f", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -136,7 +137,7 @@ public class TokenRepository implements TokenRepositoryType {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
-                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || !t.checkBalanceType()) //balance type appears to be wrong
+                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20 || !t.checkBalanceType()) //balance type appears to be wrong
                 {
                     ContractType type = determineCommonType(t.tokenInfo).blockingGet();
                     TokenInfo tInfo = t.tokenInfo;
@@ -144,10 +145,19 @@ public class TokenRepository implements TokenRepositoryType {
                     switch (type)
                     {
                         case OTHER:
+                            if (t.getInterfaceSpec() == ContractType.MAYBE_ERC20)
+                            {
+                                type = ContractType.ERC20;
+                                break;
+                            }
                             //couldn't determine the type, try again next time
                             continue;
-                        default:
-                            type = ContractType.ERC721;
+                        case ERC20:
+                            if (t.getInterfaceSpec() != ContractType.MAYBE_ERC20)
+                            {
+                                type = ContractType.ERC721;
+                            }
+                            break;
                         case ERC721:
                         case ERC721_LEGACY:
                             List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
@@ -160,6 +170,8 @@ public class TokenRepository implements TokenRepositoryType {
                             t = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
                             tokens[i] = t;
                             break;
+                        default:
+                            type = ContractType.ERC721;
                     }
 
                     //update in database
@@ -170,6 +182,13 @@ public class TokenRepository implements TokenRepositoryType {
 
             return tokens;
         });
+    }
+
+    @Override
+    public TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters)
+    {
+        if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
+        return localSource.fetchTokenMetasForUpdate(wallet, networkFilters);
     }
 
     @Override
@@ -263,6 +282,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Boolean> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
     {
         Wallet wallet = new Wallet(walletAddress);
+        localSource.markBalanceChecked(wallet, chainId, tokenAddress);
         return updateBalance(wallet, chainId, tokenAddress, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
@@ -274,7 +294,6 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             TokenFactory tf      = new TokenFactory();
             NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-
             //check balance before we store it
             List<BigInteger> balanceArray = null;
             BigDecimal       balance      = BigDecimal.ZERO;
@@ -424,7 +443,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenInfo> update(String contractAddr, int chainId) {
+    public Single<TokenInfo> update(String contractAddr, int chainId)
+    {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
@@ -455,6 +475,7 @@ public class TokenRepository implements TokenRepositoryType {
                             balanceArray = getBalanceArray721Ticket(wallet, chainId, tokenAddress);
                             break;
                         case ERC20:
+                        case DYNAMIC_CONTRACT:
                             balance = checkUint256Balance(wallet, chainId, tokenAddress);
                             break;
                         case NOT_SET:
@@ -528,6 +549,7 @@ public class TokenRepository implements TokenRepositoryType {
 
                 switch (interfaceSpec)
                 {
+                    case DYNAMIC_CONTRACT:
                     case ETHEREUM:
                         balance = getEthBalance(wallet, tInfo.chainId);
                         break;
@@ -1212,6 +1234,16 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
+    public static byte[] createERC721TransferFunction(String from, String to, String token, BigInteger tokenId)
+    {
+        List<TypeReference<?>> returnTypes = Collections.emptyList();
+        List<Type> params = Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId));
+        Function function = new Function("safeTransferFrom", params, returnTypes);
+
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
     public static byte[] createTrade(Token token, BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
     {
         Function function = token.getTradeFunction(expiry, ticketIndices, v, r, s);
@@ -1313,6 +1345,8 @@ public class TokenRepository implements TokenRepositoryType {
                     returnType = ContractType.ERC721_LEGACY;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))
+                    returnType = ContractType.ERC721;
                 else
                     returnType = ContractType.OTHER;
             }
@@ -1383,15 +1417,18 @@ public class TokenRepository implements TokenRepositoryType {
     {
         ContractType returnType = ContractType.OTHER;
 
-        int responseLength = balanceResponse.length();
+        if (balanceResponse != null)
+        {
+            int responseLength = balanceResponse.length();
 
-        if (isERC875 || (responseLength > 66))
-        {
-            returnType = ContractType.ERC875;
-        }
-        else if (balanceResponse.length() == 66) //expected biginteger size in hex + 0x
-        {
-            returnType = ContractType.ERC20;
+            if (isERC875 || (responseLength > 66))
+            {
+                returnType = ContractType.ERC875;
+            }
+            else if (balanceResponse.length() == 66) //expected biginteger size in hex + 0x
+            {
+                returnType = ContractType.ERC20;
+            }
         }
 
         return returnType;

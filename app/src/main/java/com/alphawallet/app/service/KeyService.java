@@ -968,25 +968,27 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private boolean AuthorisationFailMessage(String message)
     {
         if (alertDialog != null && alertDialog.isShowing())
-            alertDialog.dismiss();
+            activity.runOnUiThread(() -> alertDialog.dismiss());
         if (activity == null || activity.isDestroyed())
             return false;
 
-        alertDialog = new AWalletAlertDialog(activity);
-        alertDialog.setIcon(AWalletAlertDialog.ERROR);
-        alertDialog.setTitle(R.string.key_error);
-        alertDialog.setMessage(message);
-        alertDialog.setButtonText(R.string.action_continue);
-        alertDialog.setCanceledOnTouchOutside(true);
-        alertDialog.setButtonListener(v -> {
-            keyFailure("");
-            alertDialog.dismiss();
+        activity.runOnUiThread(() -> {
+            alertDialog = new AWalletAlertDialog(activity);
+            alertDialog.setIcon(AWalletAlertDialog.ERROR);
+            alertDialog.setTitle(R.string.key_error);
+            alertDialog.setMessage(message);
+            alertDialog.setButtonText(R.string.action_continue);
+            alertDialog.setCanceledOnTouchOutside(true);
+            alertDialog.setButtonListener(v -> {
+                keyFailure("");
+                alertDialog.dismiss();
+            });
+            alertDialog.setOnCancelListener(v -> {
+                keyFailure("");
+                cancelAuthentication();
+            });
+            alertDialog.show();
         });
-        alertDialog.setOnCancelListener(v -> {
-            keyFailure("");
-            cancelAuthentication();
-        });
-        alertDialog.show();
 
         return true;
     }

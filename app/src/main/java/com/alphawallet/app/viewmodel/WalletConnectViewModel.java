@@ -12,9 +12,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
@@ -25,8 +27,11 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
+import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -36,14 +41,19 @@ import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
 
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -51,22 +61,28 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+
 public class WalletConnectViewModel extends BaseViewModel {
     private static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
     protected Disposable disposable;
-    private KeyService keyService;
+    private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final RealmManager realmManager;
+    private final GasService2 gasService;
+    private final TokensService tokensService;
+    private final AnalyticsServiceType analyticsService;
     private final Context context;
     private WalletConnectService walletConnectService;
-    private ServiceConnection serviceConnection;
+    private final ServiceConnection serviceConnection;
 
     private final HashMap<String, WCClient> clientBuffer = new HashMap<>();
+
+    private Wallet wallet;
 
     private static final String TAG = "WCClientVM";
 
@@ -75,6 +91,9 @@ public class WalletConnectViewModel extends BaseViewModel {
                            CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
                            RealmManager realmManager,
+                           GasService2 gasService,
+                           TokensService tokensService,
+                           AnalyticsServiceType analyticsService,
                            Context ctx) {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -82,12 +101,18 @@ public class WalletConnectViewModel extends BaseViewModel {
         this.genericWalletInteract = genericWalletInteract;
         this.realmManager = realmManager;
         this.context = ctx;
-        startService();
+        this.gasService = gasService;
+        this.tokensService = tokensService;
+        this.analyticsService = analyticsService;
+        serviceConnection = startService();
+        disposable = genericWalletInteract
+                .find()
+                .subscribe(w -> this.wallet = w, this::onError);
     }
 
-    public void startService()
+    public ServiceConnection startService()
     {
-        serviceConnection = new ServiceConnection()
+        ServiceConnection serviceConnection = new ServiceConnection()
         {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
@@ -97,7 +122,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                 for (String sessionId : clientBuffer.keySet())
                 {
                     Log.d(TAG, "put from buffer: " + sessionId);
-                    WCClient c  = clientBuffer.get(sessionId);
+                    WCClient c = clientBuffer.get(sessionId);
                     walletConnectService.putClient(sessionId, c);
                 }
                 clientBuffer.clear();
@@ -115,13 +140,15 @@ public class WalletConnectViewModel extends BaseViewModel {
         Intent i = new Intent(context, WalletConnectService.class);
         context.startService(i);
         context.bindService(i, serviceConnection, Context.BIND_ABOVE_CLIENT);
+
+        return serviceConnection;
     }
 
     public void prepare()
     {
-        disposable = findDefaultNetworkInteract
+        disposable = genericWalletInteract
                 .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void pruneSession(String sessionId)
@@ -146,19 +173,33 @@ public class WalletConnectViewModel extends BaseViewModel {
         }
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
+    public void startGasCycle(int chainId)
+    {
+        gasService.startGasPriceCycle(chainId);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
-        defaultWallet.postValue(wallet);
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
+
+    public void onDestroy()
+    {
+        gasService.stopGasPriceCycle();
+    }
+
+    private void onDefaultWallet(Wallet w) {
+        this.wallet = w;
+        defaultWallet.postValue(w);
     }
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
+    }
+
+    public Wallet getWallet()
+    {
+        return wallet;
     }
 
     public LiveData<Boolean> serviceReady() {
@@ -171,7 +212,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {
         resetSignDialog();
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, 1)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, MAINNET_ID)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
@@ -195,12 +236,36 @@ public class WalletConnectViewModel extends BaseViewModel {
     public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, int chainId)
     {
         resetSignDialog();
-        EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId).toString(), requesterURL, w3tx.leafPosition);
+        EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
+                requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
         disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
                         error -> dAppFunction.DAppError(error, etm));
+    }
+
+    public void sendTransaction(final Web3Transaction finalTx, int chainId, SendTransactionInterface callback)
+    {
+        if (finalTx.isConstructor())
+        {
+            disposable = createTransactionInteract
+                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                            error -> callback.transactionError(finalTx.leafPosition, error));
+        }
+        else
+        {
+            disposable = createTransactionInteract
+                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                            error -> callback.transactionError(finalTx.leafPosition, error));
+        }
+    }
+
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    {
+        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
 
     public void resetSignDialog()
@@ -308,7 +373,26 @@ public class WalletConnectViewModel extends BaseViewModel {
         return peerId;
     }
 
-    public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData, String remotePeerData)
+    public int getChainId(String sessionId)
+    {
+        int chainId = MAINNET_ID;
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+                    .equalTo("sessionId", sessionId)
+                    .findFirst();
+
+            if (sessionData != null)
+            {
+                chainId = sessionData.getChainId();
+            }
+        }
+
+        return chainId;
+    }
+
+    public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData,
+                                 String remotePeerData, int sessionChainId)
     {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
@@ -326,8 +410,11 @@ public class WalletConnectViewModel extends BaseViewModel {
                 sessionAux.setSessionData(sessionData);
                 sessionAux.setUsageCount(0);
                 sessionAux.setWalletAccount(defaultWallet.getValue().address);
+                sessionAux.setChainId(sessionChainId);
             });
         }
+
+        gasService.startGasPriceCycle(sessionChainId);
     }
 
     public void deleteSession(String sessionId)
@@ -377,7 +464,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                 signMessage.setSessionId(sessionId);
                 signMessage.setSignType(signType);
                 signMessage.setSignTime(System.currentTimeMillis());
-                signMessage.setSignMessage(tx.getFormattedTransaction(ctx, chainId));
+                signMessage.setSignMessage(tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)));
             });
         }
     }
@@ -438,5 +525,25 @@ public class WalletConnectViewModel extends BaseViewModel {
     {
         if (walletConnectService != null) return walletConnectService.getConnectionCount();
         else return 0;
+    }
+
+    public String getNetworkSymbol(int chainId)
+    {
+        NetworkInfo info = findDefaultNetworkInteract.getNetworkInfo(chainId);
+        if (info == null) { info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID); }
+        return info.symbol;
+    }
+
+    public void actionSheetConfirm(String mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData("(WC)" + mode); //disambiguate signs/sends etc through WC
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
+    public boolean connectedToService()
+    {
+        return walletConnectService != null;
     }
 }

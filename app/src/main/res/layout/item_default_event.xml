@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_default_event"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/dp14"
+    android:paddingBottom="@dimen/dp14"
+    android:orientation="vertical"
+    android:background="@drawable/background_card"
+    android:gravity="center_horizontal"
+    android:visibility="gone">
+
+    <com.alphawallet.app.widget.TokenIcon
+        android:id="@+id/token_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        custom:showStatus="false"
+        custom:largeIcon="true"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp8"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_regular"
+            tools:text="Sent"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17" />
+
+        <TextView
+            android:id="@+id/text_title_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_semibold"
+            android:layout_marginStart="3dp"
+            tools:text="awDAI"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp20" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp8"
+        android:layout_marginStart="@dimen/dp24"
+        android:layout_marginEnd="@dimen/dp24"
+        android:fontFamily="@font/font_regular"
+
+        android:textColor="@color/grey2"
+        android:textSize="@dimen/sp16"
+        tools:text="Sent 4.23 awDAI to 0x123456789abcdef1234567890123456789abcdef"/>
+
+    <TextView
+        android:id="@+id/supplimental"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_marginTop="@dimen/dp8"
+        android:layout_marginStart="@dimen/dp24"
+        android:layout_marginEnd="@dimen/dp24"
+        android:visibility="gone"
+        android:fontFamily="@font/font_regular"
+
+        android:textColor="@color/grey2"
+        android:textSize="@dimen/sp16"
+        tools:text="+1.0 ETH" />
+
+</LinearLayout>

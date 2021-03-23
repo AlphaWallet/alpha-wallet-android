@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -12,13 +13,14 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BuyCryptoInterface;
+import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -27,7 +29,6 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
-import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
@@ -47,7 +48,7 @@ import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
-public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface
+public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
 {
     @Inject
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
@@ -70,7 +71,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private RealmResults<RealmToken> realmTokenUpdates;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
@@ -106,11 +108,10 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (activityHistoryList != null) return;
         activityHistoryList = findViewById(R.id.history_list);
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService(), R.layout.item_recent_transaction);
+                viewModel.getAssetDefinitionService());
 
         adapter.setDefaultWallet(wallet);
 
-        String tokenAddress = token.isEthereum() ? "eth" : token.getAddress();
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
                 token, BigInteger.ZERO, HISTORY_LENGTH);
@@ -140,13 +141,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
     }
 
-    private void getIntentData() {
+    private void getIntentData()
+    {
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
@@ -193,21 +196,22 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-                break;
-            }
-            case R.id.action_qr:
-                viewModel.showContractInfo(this, wallet, token);
-                break;
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            finish();
+        }
+        else if (item.getItemId() == R.id.action_qr)
+        {
+            viewModel.showContractInfo(this, wallet, token);
         }
         return false;
     }
@@ -217,16 +221,19 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         super.onDestroy();
         if (activityHistoryList != null) activityHistoryList.onDestroy();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
+        if (tokenViewAdapter != null && tokenView != null) tokenViewAdapter.onDestroy(tokenView);
     }
 
     @Override
-    public void onPause() {
+    public void onPause()
+    {
         super.onPause();
         viewModel.getTokensService().clearFocusToken();
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         if (viewModel == null)
         {
@@ -236,6 +243,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             setUpRecentTransactionsView();
         }
         viewModel.getTokensService().setFocusToken(token);
+        viewModel.restartServices();
     }
 
     @Override
@@ -260,5 +268,51 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     public void showReceive()
     {
         viewModel.showMyAddress(this, wallet, token);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        String transactionHash = null;
+
+        switch (requestCode)
+        {
+            case C.COMPLETED_TRANSACTION: //completed a transaction send and got with either a hash or a null
+                if (data != null) transactionHash = data.getStringExtra("tx_hash");
+                if (transactionHash != null)
+                {
+                    //display transaction complete message
+
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void handleClick(String action, int actionId)
+    {
+        if (actionId == R.string.convert_to_xdai)
+        {
+            openDapp(C.XDAI_BRIDGE_DAPP);
+        }
+    }
+
+    private void openDapp(String dappURL)
+    {
+        //switch to dappbrowser and open at dappURL
+        Intent intent = new Intent();
+        intent.putExtra(C.DAPP_URL_LOAD, dappURL);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    @Override
+    public void handleBuyFunction(Token token)
+    {
+        Intent intent = viewModel.getBuyIntent(wallet.address, token);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

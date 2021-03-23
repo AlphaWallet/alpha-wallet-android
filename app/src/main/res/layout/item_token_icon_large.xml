@@ -80,4 +80,12 @@
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
 
+    <com.alphawallet.app.widget.ProgressKnobkerry
+        android:id="@+id/pending_progress"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

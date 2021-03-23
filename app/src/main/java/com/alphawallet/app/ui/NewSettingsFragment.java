@@ -2,7 +2,7 @@ package com.alphawallet.app.ui;
 
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,11 +27,12 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
-import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
+
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -59,6 +60,7 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView advancedSetting;
     private SettingsItemView supportSetting;
     private SettingsItemView walletConnectSetting;
+    private SettingsItemView showSeedPhrase;
 
     private LinearLayout layoutBackup;
     private View warningSeparator;
@@ -87,7 +89,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         setToolbarTitle(R.string.toolbar_header_settings);
 
-        initializeSettinngs(view);
+        initializeSettings(view);
 
         addSettingsToLayout();
 
@@ -122,7 +124,7 @@ public class NewSettingsFragment extends BaseFragment {
         warningSeparator = view.findViewById(R.id.warning_separator);
     }
 
-    private void initializeSettinngs(View view) {
+    private void initializeSettings(View view) {
         walletSettingsLayout = view.findViewById(R.id.layout_settings_wallet);
         systemSettingsLayout = view.findViewById(R.id.layout_settings_system);
         supportSettingsLayout = view.findViewById(R.id.layout_settings_support);
@@ -147,6 +149,12 @@ public class NewSettingsFragment extends BaseFragment {
                         .withTitle(R.string.title_back_up_wallet)
                         .withListener(this::onBackUpWalletSettingClicked)
                         .build();
+
+        showSeedPhrase = new SettingsItemView.Builder(getContext())
+                .withIcon(R.drawable.ic_settings_show_seed)
+                .withTitle(R.string.show_seed_phrase)
+                .withListener(this::onShowSeedPhrase) //onShow
+                .build();
 
         walletConnectSetting =
                 new SettingsItemView.Builder(getContext())
@@ -205,6 +213,9 @@ public class NewSettingsFragment extends BaseFragment {
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
 
+        walletSettingsLayout.addView(showSeedPhrase, walletIndex++);
+        showSeedPhrase.setVisibility(View.GONE);
+
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
         systemSettingsLayout.addView(notificationsSetting, systemIndex++);
@@ -221,11 +232,22 @@ public class NewSettingsFragment extends BaseFragment {
 
     private void setInitialSettingsData(View view) {
         TextView appVersionText = view.findViewById(R.id.text_version);
-        appVersionText.setText(String.format("%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+        appVersionText.setText(String.format(Locale.getDefault(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
         tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
 
         notificationsSetting.setToggleState(viewModel.getNotificationState());
+    }
+
+    private void openShowSeedPhrase(Wallet wallet)
+    {
+        if (wallet.type != WalletType.HDKEY) return;
+
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+        intent.putExtra(WALLET, wallet);
+        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.SHOW_SEED_PHRASE_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        startActivity(intent);
     }
 
     private void openBackupActivity(Wallet wallet) {
@@ -290,8 +312,22 @@ public class NewSettingsFragment extends BaseFragment {
                 break;
         }
 
-        if (wallet.type == WalletType.WATCH) {
-            backUpWalletSetting.setVisibility(View.GONE);
+        switch (wallet.type)
+        {
+            case NOT_DEFINED:
+                break;
+            case KEYSTORE:
+                break;
+            case HDKEY:
+                showSeedPhrase.setVisibility(View.VISIBLE);
+                break;
+            case WATCH:
+                backUpWalletSetting.setVisibility(View.GONE);
+                break;
+            case TEXT_MARKER:
+                break;
+            case KEYSTORE_LEGACY:
+                break;
         }
     }
 
@@ -382,6 +418,14 @@ public class NewSettingsFragment extends BaseFragment {
         Wallet wallet = viewModel.defaultWallet().getValue();
         if (wallet != null) {
             openBackupActivity(wallet);
+        }
+    }
+
+    private void onShowSeedPhrase()
+    {
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (wallet != null) {
+            openShowSeedPhrase(wallet);
         }
     }
 

@@ -73,7 +73,7 @@ public class Web3Transaction implements Parcelable {
 
         this.recipient = TextUtils.isEmpty(wcTx.getTo()) ? Address.EMPTY : new Address(wcTx.getTo());
         this.contract = null;
-        this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);;
+        this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);
         this.gasPrice = Hex.hexToBigInteger(gasPrice, BigInteger.ZERO);
         this.gasLimit = Hex.hexToBigInteger(gasLimit, BigInteger.ZERO);
         this.nonce = Hex.hexToLong(nonce, -1);
@@ -122,13 +122,18 @@ public class Web3Transaction implements Parcelable {
         dest.writeLong(leafPosition);
     }
 
+    public boolean isConstructor()
+    {
+        return (recipient.equals(Address.EMPTY) && payload != null);
+    }
+
     /**
      * Can be used anywhere to generate an 'instant' human readable transaction dump
      * @param ctx
      * @param chainId
      * @return
      */
-    public CharSequence getFormattedTransaction(Context ctx, int chainId)
+    public CharSequence getFormattedTransaction(Context ctx, int chainId, String symbol)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
         sb.startStyleGroup().append(ctx.getString(R.string.to)).append(":\n ");
@@ -138,6 +143,7 @@ public class Web3Transaction implements Parcelable {
         sb.startStyleGroup().append("\n").append(ctx.getString(R.string.value)).append(":\n ");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(BalanceUtils.getScaledValueWithLimit(new BigDecimal(value), 18));
+        sb.append(" ").append(symbol);
 
         sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(":\n ");
         sb.setStyle(new StyleSpan(Typeface.BOLD));

@@ -1,15 +1,10 @@
 package com.alphawallet.token.entity;
 
-import com.alphawallet.token.tools.Numeric;
-
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.DefaultListSelectionModel;
 
 /**
  * Created by JB on 21/03/2020.

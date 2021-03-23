@@ -6,7 +6,6 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.fingerprint.FingerprintManager;
@@ -23,8 +22,6 @@ import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-
-import java.util.List;
 
 import static android.content.Context.KEYGUARD_SERVICE;
 
@@ -70,6 +67,10 @@ public class SignTransactionDialog extends BottomSheetDialog
         usePin.setOnClickListener(v -> {
             showAuthenticationScreen();
         });
+
+        cancel.setOnClickListener(v -> {
+            authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callBackId);
+        });
     }
 
     //get fingerprint or PIN
@@ -79,7 +80,7 @@ public class SignTransactionDialog extends BottomSheetDialog
 
         if (fpManager != null)
         {
-            authenticate(fpManager, context, authCallback);
+            authenticate(fpManager, context, authCallback, callBackId);
         }
         else
         {
@@ -116,7 +117,7 @@ public class SignTransactionDialog extends BottomSheetDialog
         }
     }
 
-    private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback) {
+    private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback, final Operation callbackId) {
         CancellationSignal cancellationSignal;
         cancellationSignal = new CancellationSignal();
         fpManager.authenticate(null, cancellationSignal, 0, new FingerprintManager.AuthenticationCallback() {
@@ -125,8 +126,11 @@ public class SignTransactionDialog extends BottomSheetDialog
                 super.onAuthenticationError(errorCode, errString);
                 switch (errorCode)
                 {
+                    case FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED:
+                        removeFingerprintGraphic();
+                        break;
                     case FingerprintManager.FINGERPRINT_ERROR_CANCELED:
-                        //No action, safe to ignore this return code
+                        authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_HW_NOT_PRESENT:
                     case FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE:
@@ -142,6 +146,7 @@ public class SignTransactionDialog extends BottomSheetDialog
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_NO_FINGERPRINTS:
+                        removeFingerprintGraphic();
                         fingerprintError.setText(R.string.no_fingerprint_enrolled);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
@@ -149,6 +154,7 @@ public class SignTransactionDialog extends BottomSheetDialog
                         //safe to ignore
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
+                        removeFingerprintGraphic();
                         fingerprintError.setText(R.string.cannot_process_fingerprint);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
@@ -193,10 +199,6 @@ public class SignTransactionDialog extends BottomSheetDialog
     {
         KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
         return (keyguardManager == null || keyguardManager.isDeviceSecure());
-    }
-
-    public void setCancelListener(View.OnClickListener listener) {
-        cancel.setOnClickListener(listener);
     }
 
     @Override

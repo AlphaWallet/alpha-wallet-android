@@ -20,5 +20,9 @@ public enum ContractType
     ERC721_LEGACY,
     ERC721_TICKET,
     ERC721_UNDETERMINED, //when we receive an ERC721 we don't know what kind it is
+    DYNAMIC_CONTRACT,
+    LEGACY_DYNAMIC_CONTRACT,
+    ETHEREUM_INVISIBLE,
+    MAYBE_ERC20,
     CREATION //Placeholder for generic, should be at end of list
 }

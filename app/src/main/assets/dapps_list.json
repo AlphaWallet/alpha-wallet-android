@@ -1,4 +1,7 @@
-[
+[ 
+  {"name": "Rare Coin", "description": "Free Crypto Faucet & Yeild Farming", "url": "make.rare.claims", "category": "Tool"},
+  {"name": "Eporio", "description": "The cheaper marketplace for NFT - Non Fungible Tokens", "url": "https://epor.io", "category": "Marketplace"},
+  {"name": "DeFiBox", "description": "one-stop DeFi asset, data and protocols aggregation platform", "url": "https://www.defibox.com/index?utm_source=2189969", "category": "Tool"},
   {"name": "TokenSets", "description": "Enhance your portfolio with automated asset management strategies.", "url": "https://www.tokensets.com/", "category": "Finance"},
   {"name": "State of the ÐApps", "description": "Directory of Decentralized Applications", "url": "https://www.stateofthedapps.com/", "category": "Directory"},
   {"name": "BulkSender", "description": "Batch sending of tokens", "url": "https://bulksender.app/", "category": "Finance"},
@@ -34,6 +37,7 @@
   {"name": "NFT Token Factory", "description": "Create an ERC875 NFT contract at the click of a button", "url": "https://tf.alphawallet.com/", "category": "Tool"},
   {"name": "SmartDrops", "description": "A platform that lets people earn crypto by joining new token projects.", "url": "https://www.smartdrops.io/", "category": "Tool"},
   {"name": "xDai Bridge", "description": "xDai/Ethereum bridge for self transfers of Dai to xDai", "url": "https://dai-bridge.poa.network/", "category": "Tool"},
+  {"name": "Alfacash", "description": "Trade crypto instantly. ETH, BTC, XRP and 30+ other coins and tokens", "url": "https://www.alfa.cash/", "category": "Exchange"},
   {"name": "0x Instant", "description": "A free and flexible way to offer simple crypto purchasing", "url": "http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/", "category": "Exchange"},
   {"name": "KyberSwap", "description": "Instant and Secure Token to Token Swaps", "url": "https://kyber.network/swap/eth_knc", "category": "Exchange"},
   {"name": "localethereum", "description": "Peer-to-peer marketplace allowing to trade eth to fiat", "url": "https://localethereum.com/", "category": "Exchange"},
@@ -58,5 +62,9 @@
   {"name": "LENDF.ME", "description": "Algorithmic money markets for dForce USDx", "url": "https://www.lendf.me/", "category": "Finance"},
   {"name": "1inch.exchange", "description": "DEX Aggregator with the best prices on the market. Achieving best rates by splitting orders among multiple DEXes in one single transaction.", "url": "https://1inch.exchange", "category": "Exchange"},
   {"name": "SpiderDEX", "description": "Decentralized exchange for crypto collectibles.", "url": "https://www.spiderdex.com", "category": "Exchange"},
-  {"name": "DeFi Money Market (DMM)", "description": "Earn interest on your crypto through tokenized real world assets", "url": "https://app.defimoneymarket.com", "category": "Finance"}
+  {"name": "DeFi Money Market (DMM)", "description": "Earn interest on your crypto through tokenized real world assets", "url": "https://app.defimoneymarket.com", "category": "Finance"},
+  {"name": "Idle Finance", "description": "DeFi Yield Aggregator and Rebalancing Protocol", "url": "https://idle.finance", "category": "Finance"},
+  {"name": "GG Copyright EX", "description": "GeekGit Copyright Exchange for Music & Web Literature", "url": "https://crex.geekgit.com", "category": "Exchange"},
+  {"name": "DerivaDEX | Insurance Fund", "description": "DerivaDEX is the next generation of crypto derivatives. Begin earning DDX by bootstrapping the insurance fund.", "url": "https://insurance.derivadex.com", "category": "Finance"}
 ]
+

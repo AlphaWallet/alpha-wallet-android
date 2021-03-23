@@ -109,7 +109,6 @@ public class WalletViewModel extends BaseViewModel
     {
         tokens.postValue(metaTokens);
         tokensService.updateTickers();
-        tokensService.addToUpdateList(metaTokens);
         tokensService.startBalanceUpdate();
     }
 
@@ -166,7 +165,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @Override
-    public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
+    public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
         boolean isToken = !address.equalsIgnoreCase(defaultWallet.getValue().address);
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         erc20DetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);

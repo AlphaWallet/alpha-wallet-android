@@ -242,6 +242,29 @@ public class TokenFunctionViewModel extends BaseViewModel
         ctx.startActivity(intent);
     }
 
+    public void reSendTransaction(String txHash, Context ctx, Token token, ConfirmationType type)
+    {
+        Transaction tx = fetchTransaction(txHash);
+        Intent intent = new Intent(ctx, ConfirmationActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, tx.hash);
+        intent.putExtra(C.EXTRA_TRANSACTION_DATA, tx.input);
+        intent.putExtra(C.EXTRA_TO_ADDRESS, tx.to);
+        intent.putExtra(C.EXTRA_AMOUNT, tx.value);
+        intent.putExtra(C.EXTRA_NONCE, tx.nonce);
+        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, tx.to);
+        intent.putExtra(C.EXTRA_GAS_PRICE, tx.gasPrice);
+        intent.putExtra(C.EXTRA_GAS_LIMIT, tx.gasUsed);
+        String symbol = token != null ? token.tokenInfo.symbol : "";
+        intent.putExtra(C.EXTRA_SYMBOL, symbol);
+        //TODO: reverse resolve 'tx.to' ENS
+        //intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
+        intent.putExtra(C.EXTRA_NETWORKID, tx.chainId);
+        intent.putExtra(C.TOKEN_TYPE, type.ordinal());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ctx.startActivity(intent);
+    }
+
     public Token getToken(int chainId, String contractAddress)
     {
         return tokensService.getToken(chainId, contractAddress);
@@ -487,8 +510,13 @@ public class TokenFunctionViewModel extends BaseViewModel
         return fetchTransactionsInteract.fetchCached(wallet.address, txHash);
     }
 
+    public long fetchExpectedTxTime(String txHash)
+    {
+        return fetchTransactionsInteract.fetchTxCompletionTime(wallet.address, txHash);
+    }
+
     @Override
-    public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
+    public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         Intent intent = new Intent(context, Erc20DetailActivity.class);
@@ -511,5 +539,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.Key.WALLET, wallet);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
+    }
+
+    public void restartServices()
+    {
+        fetchTransactionsInteract.restartTransactionService();
     }
 }

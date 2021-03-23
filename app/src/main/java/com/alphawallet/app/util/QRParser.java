@@ -1,22 +1,18 @@
 package com.alphawallet.app.util;
 
-import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.token.entity.ChainSpec;
-import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MagicLinkInfo;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -147,26 +143,6 @@ public class QRParser {
         }
 
         return result.getAddress();
-    }
-
-    private static boolean couldBeENS(String address)
-    {
-        String[] split = address.split("[.]");
-        if (split.length > 1)
-        {
-            String extension = split[split.length - 1];
-            switch (extension)
-            {
-                case "eth":
-                case "xyz":
-                case "crypto":
-                    return true;
-                default:
-                    break;
-            }
-        }
-
-        return false;
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository.entity;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -183,5 +184,16 @@ public class RealmToken extends RealmObject {
     public void setVisibilityChanged(boolean visibilityChanged)
     {
         this.visibilityChanged = visibilityChanged;
+    }
+
+    public void updateTokenInfoIfRequired(TokenInfo tokenInfo)
+    {
+        //check decimal integrity, if received a non-18 decimals, this is most likely an update correction from etherscan
+        if (tokenInfo.decimals != decimals && (tokenInfo.decimals > 0 && (decimals == 0 || decimals == 18)))
+        {
+            setName(tokenInfo.name);
+            setSymbol(tokenInfo.symbol);
+            setDecimals(tokenInfo.decimals);
+        }
     }
 }

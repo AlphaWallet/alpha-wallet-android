@@ -65,7 +65,7 @@
             android:src="@drawable/ic_arrow_right"
             android:visibility="gone" />
 
-        <Switch
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/setting_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

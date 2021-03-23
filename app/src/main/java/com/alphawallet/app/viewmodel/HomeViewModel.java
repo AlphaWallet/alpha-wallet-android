@@ -19,6 +19,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -261,21 +262,24 @@ public class HomeViewModel extends BaseViewModel {
 
     private void onWallet(Wallet wallet) {
         transactionsService.changeWallet(wallet);
-        if (TextUtils.isEmpty(wallet.ENSname))
+        if (!TextUtils.isEmpty(wallet.ENSname))
+        {
+            walletName.postValue(wallet.ENSname);
+        }
+        else if (!TextUtils.isEmpty(wallet.name))
         {
             walletName.postValue(wallet.name);
         }
         else
         {
-            walletName.postValue(wallet.ENSname);
+            walletName.postValue("");
+            //check for ENS name
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
+                    .resolveEnsName(wallet.address)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(walletName::postValue, this::onENSError).isDisposed();
         }
-
-        //check for ENS name (could have changed)
-        new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
-                .resolveEnsName(wallet.address)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(walletName::postValue, this::onENSError).isDisposed();
     }
 
     public LiveData<String> walletName() {
@@ -404,13 +408,26 @@ public class HomeViewModel extends BaseViewModel {
         prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
     }
 
+    public void actionSheetConfirm(String mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(mode);
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
     public void stopTransactionUpdate()
     {
-        transactionsService.onDestroy();
+        transactionsService.lostFocus();
     }
 
     public void startTransactionUpdate()
     {
         transactionsService.startUpdateCycle();
+    }
+
+    public boolean fullScreenSelected()
+    {
+        return preferenceRepository.getFullScreenState();
     }
 }

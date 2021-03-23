@@ -1,33 +1,30 @@
 package com.alphawallet.app.web3;
 
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import androidx.annotation.NonNull;
+
+import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.util.Hex;
-import com.alphawallet.app.util.MessageUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
-import com.alphawallet.token.entity.ProviderTypedData;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.alphawallet.token.entity.SignMessageType;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 
-import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
 
-import wallet.core.jni.Hash;
-
-public class SignCallbackJSInterface {
-
+public class SignCallbackJSInterface
+{
     private final WebView webView;
     @NonNull
     private final OnSignTransactionListener onSignTransactionListener;
@@ -37,18 +34,22 @@ public class SignCallbackJSInterface {
     private final OnSignPersonalMessageListener onSignPersonalMessageListener;
     @NonNull
     private final OnSignTypedMessageListener onSignTypedMessageListener;
+    @NonNull
+    private final OnEthCallListener onEthCallListener;
 
     public SignCallbackJSInterface(
             WebView webView,
             @NonNull OnSignTransactionListener onSignTransactionListener,
             @NonNull OnSignMessageListener onSignMessageListener,
             @NonNull OnSignPersonalMessageListener onSignPersonalMessageListener,
-            @NonNull OnSignTypedMessageListener onSignTypedMessageListener) {
+            @NonNull OnSignTypedMessageListener onSignTypedMessageListener,
+            @NotNull OnEthCallListener onEthCallListener) {
         this.webView = webView;
         this.onSignTransactionListener = onSignTransactionListener;
         this.onSignMessageListener = onSignMessageListener;
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
         this.onSignTypedMessageListener = onSignTypedMessageListener;
+        this.onEthCallListener = onEthCallListener;
     }
 
     @JavascriptInterface
@@ -60,7 +61,7 @@ public class SignCallbackJSInterface {
             String gasLimit,
             String gasPrice,
             String payload) {
-        if (value.equals("undefined")) value = "0";
+        if (value.equals("undefined") || value == null) value = "0";
         if (gasPrice == null) gasPrice = "0";
         Web3Transaction transaction = new Web3Transaction(
                 TextUtils.isEmpty(recipient) ? Address.EMPTY : new Address(recipient),
@@ -77,12 +78,12 @@ public class SignCallbackJSInterface {
 
     @JavascriptInterface
     public void signMessage(int callbackId, String data) {
-        webView.post(() -> onSignMessageListener.onSignMessage(new EthereumMessage(data, getUrl(), callbackId)));
+        webView.post(() -> onSignMessageListener.onSignMessage(new EthereumMessage(data, getUrl(), callbackId, SignMessageType.SIGN_MESSAGE)));
     }
 
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
-        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId, true)));
+        webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId, SignMessageType.SIGN_PERSONAL_MESSAGE)));
     }
 
     @JavascriptInterface
@@ -93,32 +94,33 @@ public class SignCallbackJSInterface {
                 JSONObject obj = new JSONObject(data);
                 String address = obj.getString("from");
                 String messageData = obj.getString("data");
+                CryptoFunctions cryptoFunctions = new CryptoFunctions();
 
-                //TODO: Find a common place for this code (duplicated in WalletConnectActivity)
-                //TODO: - if moved to EthereumTypedMessage then we need to add Web3j helper classes to this library
-                //TODO: use a more deterministic method to detect EIP712 vs Legacy SignTypedData -
-                //TODO: Currently we throw if the data can't be decoded as Legacy and assume it must be EIP712
-                try
-                {
-                    ProviderTypedData[] rawData = new Gson().fromJson(messageData, ProviderTypedData[].class);
-                    ByteArrayOutputStream writeBuffer = new ByteArrayOutputStream();
-                    writeBuffer.write(Hash.keccak256(MessageUtils.encodeParams(rawData)));
-                    writeBuffer.write(Hash.keccak256(MessageUtils.encodeValues(rawData)));
-                    CharSequence message = MessageUtils.formatTypedMessage(rawData);
-                    onSignTypedMessageListener.onSignTypedMessage(new EthereumTypedMessage(writeBuffer.toByteArray(), message, getDomainName(), callbackId));
-                }
-                catch (JsonSyntaxException e)
-                {
-                    StructuredDataEncoder eip721Object = new StructuredDataEncoder(messageData);
-                    CharSequence message = MessageUtils.formatEIP721Message(eip721Object);
-                    onSignTypedMessageListener.onSignTypedMessage(new EthereumTypedMessage(eip721Object.getStructuredData(), message, getDomainName(), callbackId));
-                }
+                EthereumTypedMessage message = new EthereumTypedMessage(messageData, getDomainName(), callbackId, cryptoFunctions);
+                onSignTypedMessageListener.onSignTypedMessage(message);
             }
             catch (Exception e)
             {
-                onSignTypedMessageListener.onSignTypedMessage(new EthereumTypedMessage(null, "", getUrl(), callbackId));
+                EthereumTypedMessage message = new EthereumTypedMessage(null, "", getDomainName(), callbackId);
+                onSignTypedMessageListener.onSignTypedMessage(message);
+                e.printStackTrace();
             }
         });
+    }
+
+    @JavascriptInterface
+    public void ethCall(int callbackId, String recipient, String payload) {
+        DefaultBlockParameter defaultBlockParameter;
+        if (payload.equals("undefined")) payload = "0x";
+        defaultBlockParameter = DefaultBlockParameterName.LATEST;
+
+        Web3Call call = new Web3Call(
+                new Address(recipient),
+                defaultBlockParameter,
+                payload,
+                callbackId);
+
+        webView.post(() -> onEthCallListener.onEthCall(call));
     }
 
     private String getUrl() {

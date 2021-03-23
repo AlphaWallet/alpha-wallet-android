@@ -77,7 +77,7 @@ You can submit feedback and report bugs as Github issues. Please be sure to incl
 
 ### Request or submit a feature :postbox:
 
-Would you like to request a feature? Please get in touch with us [Telegram](https://t.me/AlphaWalletGroup), [Twitter](https://twitter.com/AlphaWallet) or through our [community forums](https://community.tokenscript.org/).
+Would you like to request a feature? Please get in touch with us [Telegram](https://t.me/AlphaWalletGroup), [Discord](https://discord.gg/d8Tqvx9e74), [Twitter](https://twitter.com/AlphaWallet) or through our [community forums](https://community.tokenscript.org/).
 
 If you’d like to contribute code with a Pull Request, please make sure to follow code submission guidelines.
 

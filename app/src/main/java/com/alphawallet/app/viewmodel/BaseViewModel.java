@@ -3,6 +3,8 @@ package com.alphawallet.app.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
+import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -140,7 +142,7 @@ public class BaseViewModel extends ViewModel
 		//do nothing
 	}
 
-	public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
+	public void showErc20TokenDetail(Activity context, String address, String symbol, int decimals, Token token) {
 		//do nothing
 	}
 }

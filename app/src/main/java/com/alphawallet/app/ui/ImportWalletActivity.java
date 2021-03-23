@@ -61,7 +61,6 @@ import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.ErrorCode.ALREADY_ADDED;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback, OnImportKeystoreListener, OnImportPrivateKeyListener
 {
@@ -255,7 +254,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             case R.id.action_scan: {
                 //scan QR address
                 Intent intent = new Intent(this, QRScanningActivity.class);
-                startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+                startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
             }
             break;
         }
@@ -390,7 +389,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                 importWalletViewModel.failedAuthentication(taskCode);
             }
         }
-        else if (requestCode == BARCODE_READER_REQUEST_CODE)
+        else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
         {
             //return code from scanning QR
             handleScanQR(resultCode, data);

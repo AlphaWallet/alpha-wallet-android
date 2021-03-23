@@ -5,10 +5,15 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.alphawallet.app.ui.widget.holder.TransferHolder;
 
 public class RecycleViewDivider extends RecyclerView.ItemDecoration {
 
@@ -16,6 +21,7 @@ public class RecycleViewDivider extends RecyclerView.ItemDecoration {
     private Drawable mDivider;
     private final Rect mBounds = new Rect();
     private int marginPx = 2;
+    private int childTxMargin = marginPx;
 
     public RecycleViewDivider(Context context)
     {
@@ -45,15 +51,56 @@ public class RecycleViewDivider extends RecyclerView.ItemDecoration {
 
         for (int i = 0; i < childCount; ++i)
         {
+            int dividerHeight = this.mDivider.getIntrinsicHeight();
             View child = parent.getChildAt(i);
+            left = marginPx;
+            if (i < (childCount - 1))
+            {
+                View nextView = parent.getChildAt(i+1);
+                if (isChildView(nextView)) //since we are building the margin below, we have to look at the next view so we can effectively be building the margin above
+                {
+                    left = findChildViewMargin(nextView);
+                }
+            }
+
             parent.getDecoratedBoundsWithMargins(child, this.mBounds);
             int bottom = this.mBounds.bottom + Math.round(child.getTranslationY());
-            int top = bottom - this.mDivider.getIntrinsicHeight();
+            int top = bottom - dividerHeight;
             this.mDivider.setBounds(left, top, right, bottom);
             this.mDivider.draw(canvas);
         }
 
         canvas.restore();
+    }
+
+    private int findChildViewMargin(View nextView)
+    {
+        if (childTxMargin == marginPx)
+        {
+            for (int index = 0; index < ((ViewGroup) nextView).getChildCount(); index++)
+            {
+                View nextChild = ((ViewGroup) nextView).getChildAt(index);
+                if (nextChild instanceof RelativeLayout)
+                {
+                    childTxMargin = nextChild.getLeft();
+                    break;
+                }
+            }
+        }
+
+        return childTxMargin;
+    }
+
+    private boolean isChildView(View child)
+    {
+        if (child.getLabelFor() == TransferHolder.VIEW_TYPE)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)

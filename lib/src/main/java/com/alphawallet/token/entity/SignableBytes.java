@@ -34,4 +34,10 @@ public class SignableBytes implements Signable{
     public CharSequence getUserMessage() {
         return "";
     }
+
+    @Override
+    public SignMessageType getMessageType()
+    {
+        return SignMessageType.SIGN_MESSAGE;
+    }
 }

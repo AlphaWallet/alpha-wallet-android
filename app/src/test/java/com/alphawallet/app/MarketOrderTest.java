@@ -95,7 +95,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, int chainId)
             {
                 return null;
             }
@@ -143,6 +143,12 @@ public class MarketOrderTest
             public Transaction fetchCachedTransaction(String walletAddr, String hash)
             {
                 return null;
+            }
+
+            @Override
+            public long fetchTxCompletionTime(String walletAddr, String hash)
+            {
+                return 0;
             }
 
             @Override
@@ -194,6 +200,12 @@ public class MarketOrderTest
             public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
             {
                 return null;
+            }
+
+            @Override
+            public void restartService()
+            {
+
             }
         };
 

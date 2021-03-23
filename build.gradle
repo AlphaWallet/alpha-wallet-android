@@ -1,5 +1,3 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     ext.kotlin_version = '1.4.10'
     repositories {
@@ -8,20 +6,20 @@ buildscript {
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-	// WARNING WARNING WARNING
-	// you are about to add here a repository which provides some library for the Android app
-	// don't do that. add that repository to app/build.gradle
+        // WARNING WARNING WARNING
+        // you are about to add here a repository which provides some library for the Android app
+        // don't do that. add that repository to app/build.gradle
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.4' //NB - there is an issue with newer versions of gradle. The APK balloons out, so far haven't diagnosed why.
-                                                         //If you want to try upgrading gradle plugin past 3.5.4 you will need to also diagnose the APK ballooning issue.
+        //If you want to try upgrading gradle plugin past 3.5.4 you will need to also diagnose the APK ballooning issue.
         classpath "io.realm:realm-gradle-plugin:7.0.8"
-	// WARNING WARNING WARNING
-	// you are about to add here a dependency to be used in the Android app
-	// don't do that. add that dependency to app/build.gradle
+        // WARNING WARNING WARNING
+        // you are about to add here a dependency to be used in the Android app
+        // don't do that. add that dependency to app/build.gradle
         classpath 'com.google.gms:google-services:4.3.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.3.0'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
     }
 }
 
@@ -31,9 +29,9 @@ allprojects {
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-	// WARNING WARNING WARNING
-	// you are about to add here a repository which provides some library for the Android app
-	// don't do that. add that repository to app/build.gradle
+        // WARNING WARNING WARNING
+        // you are about to add here a repository which provides some library for the Android app
+        // don't do that. add that repository to app/build.gradle
     }
 
     configurations.all {
@@ -46,7 +44,3 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
-// WARNING WARNING WARNING
-// you are about to add here a plugin that is only related to the Android app
-// don't do that. add that repository to app/build.gradle

@@ -1,11 +1,6 @@
 package com.alphawallet.app.repository.entity;
 
-import android.text.AndroidCharacter;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.IntStream;
 
 import io.realm.RealmObject;
 

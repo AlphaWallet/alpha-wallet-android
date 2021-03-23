@@ -74,9 +74,17 @@
         android:id="@+id/status_icon"
         android:layout_width="@dimen/dp16"
         android:layout_height="@dimen/dp16"
-        android:visibility="visible"
+        android:visibility="gone"
         android:contentDescription="@string/empty"
-        android:src="@drawable/ic_sent_white_small"
+        android:src="@drawable/ic_timer_small"
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
+
+    <com.alphawallet.app.widget.ProgressKnobkerry
+        android:id="@+id/pending_progress"
+        android:layout_width="@dimen/dp16"
+        android:layout_height="@dimen/dp16"
+        android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
 

@@ -51,6 +51,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static native String getAmberDataKey();
     public static native String getInfuraKey();
+    public static native String getSecondaryInfuraKey();
 
     //Fallback nodes: these nodes are used if there's no Amberdata key, and also as a fallback in case the primary node times out while attempting a call
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
@@ -60,22 +61,27 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
-    public static final String BACKUP_INFURA_KEY = BuildConfig.XInfuraAPI;
-    public static final String MAINNET_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() : MAINNET_RPC_URL;
+    public static final String BACKUP_INFURA_KEY = getSecondaryInfuraKey();
+    public static final String MAINNET_FALLBACK_RPC_URL = "https://mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String XDAI_RPC_URL = "https://dai.poa.network";
+    public static final String XDAI_RPC_URL = "https://rpc.xdaichain.com/";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
-    public static final String RINKEBY_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() + "&x-amberdata-blockchain-id=1b3f7a72b3e99c13" : RINKEBY_RPC_URL;
+    public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String RINKEBY_FALLBACK_RPC_URL = "https://rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + getInfuraKey();
+    public static final String KOVAN_FALLBACK_RPC_URL = "https://kovan.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + getInfuraKey();
+    public static final String GOERLI_FALLBACK_RPC_URL = "https://goerli.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
+    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
 
     public static final int MAINNET_ID = 1;
     public static final int CLASSIC_ID = 61;
@@ -85,6 +91,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int SOKOL_ID = 77;
     public static final int RINKEBY_ID = 4;
     public static final int XDAI_ID = 100;
+    public static final int HECO_ID = 128;
+    public static final int HECO_TEST_ID = 256;
     public static final int GOERLI_ID = 5;
     public static final int ARTIS_SIGMA1_ID = 246529;
     public static final int ARTIS_TAU1_ID = 246785;
@@ -120,12 +128,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.sigma1.artis.network/"),
             new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
                     "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
-                    "https://kovan.infura.io/v3/" + BACKUP_INFURA_KEY,
+                    KOVAN_FALLBACK_RPC_URL,
                     "https://api-kovan.etherscan.io/"),
             new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
                     ROPSTEN_RPC_URL,
                     "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
-                    "https://ropsten.infura.io/v3/" + BACKUP_INFURA_KEY,
+                    ROPSTEN_FALLBACK_RPC_URL,
                     "https://api-ropsten.etherscan.io/"),
             new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
                     SOKOL_RPC_URL,
@@ -136,26 +144,33 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api-rinkeby.etherscan.io/"),
             new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/",GOERLI_ID, false,
-                    GOERLI_RPC_URL,
+                    GOERLI_FALLBACK_RPC_URL,
                     "https://api-goerli.etherscan.io/"),
             new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
                     "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID, false,
                     ARTIS_TAU1_RPC_URL,
                     "https://explorer.tau1.artis.network/"),
             new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
-                    "https://explorer.binance.org/smart-testnet/tx/", BINANCE_TEST_ID, false,
+                    "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID, false,
                     BINANCE_TEST_FALLBACK_RPC_URL,
-                    "https://explorer.binance.org/smart-testnet/"),
+                    "https://api-testnet.bscscan.com/"),
             new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
-                    "https://explorer.binance.org/smart/tx/", BINANCE_MAIN_ID, false,
+                    "https://bscscan.com/tx/", BINANCE_MAIN_ID, false,
                     BINANCE_MAIN_FALLBACK_RPC_URL,
-                    "https://explorer.binance.org/smart"),
+                    "https://api.bscscan.com/"),
+            new NetworkInfo(C.HECO_MAIN_NETWORK, C.HECO_SYMBOL, HECO_RPC_URL,
+                    "https://hecoinfo.com/tx/", HECO_ID, false,
+                    HECO_RPC_URL,
+                    "https://api.hecoinfo.com/"),
+            new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL, HECO_TEST_RPC_URL,
+                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID, false,
+                    HECO_TEST_RPC_URL,
+                    "https://testnet.hecoinfo.com/"),
     };
 
     final PreferenceRepositoryType preferences;
     NetworkInfo defaultNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
-    private boolean updatedTickers;
 
     EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, NetworkInfo[] additionalNetworks, boolean useTestNets)
     {
@@ -186,8 +201,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             networkMap.put(network.chainId, network);
         }
-
-        updatedTickers = false;
     }
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
@@ -297,6 +310,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case EthereumNetworkRepository.XDAI_ID:
             case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
             case EthereumNetworkRepository.BINANCE_MAIN_ID:
+            case EthereumNetworkRepository.HECO_ID:
                 return true;
 
             default:
@@ -333,6 +347,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return BINANCE_MAIN_FALLBACK_RPC_URL;
             case BINANCE_TEST_ID:
                 return BINANCE_TEST_FALLBACK_RPC_URL;
+            case HECO_ID:
+                return HECO_RPC_URL;
+            case HECO_TEST_ID:
+                return HECO_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -342,7 +360,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         switch (networkId)
         {
             case MAINNET_ID:
-                return R.drawable.ic_ethereum_logo;
+                return R.drawable.ic_token_eth;
             case KOVAN_ID:
                 return R.drawable.kovan_logo;
             case ROPSTEN_ID:
@@ -367,6 +385,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return R.drawable.ic_binance_logo;
             case BINANCE_TEST_ID:
                 return R.drawable.ic_binance_test_logo;
+            case HECO_ID:
+            case HECO_TEST_ID:
+                return R.drawable.ic_heco_logo;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
@@ -401,6 +422,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return BINANCE_MAIN_RPC_URL;
             case BINANCE_TEST_ID:
                 return BINANCE_TEST_RPC_URL;
+            case HECO_ID:
+                return HECO_RPC_URL;
+            case HECO_TEST_ID:
+                return HECO_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }

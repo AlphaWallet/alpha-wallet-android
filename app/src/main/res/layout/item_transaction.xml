@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="horizontal"
-    android:paddingTop="@dimen/normal_margin"
-    android:minHeight="60dp"
-    android:paddingBottom="3dp">
+    android:padding="@dimen/dp8"
+    android:minHeight="80dp">
 
     <com.alphawallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
@@ -16,95 +17,107 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginEnd="@dimen/dp10"
-        android:layout_marginStart="@dimen/dp5"
         app:showStatus="false" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/token_icon"
-        android:layout_centerVertical="true"
-        android:layout_toStartOf="@+id/valueLayout"
-        android:orientation="vertical">
+        android:layout_gravity="center"
+        android:orientation="horizontal">
 
         <LinearLayout
+            android:id="@+id/value_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/value"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_light"
-                android:maxLines="1"
-                android:text="Sent"
-                android:textAppearance="?attr/textAppearanceListItem" />
+                android:fontFamily="@font/font_regular"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="@dimen/sp17"
+                tools:text="Send ETH" />
 
-            <TextView
-                android:id="@+id/supplimental"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:maxLines="1"
-                android:text=""
-                android:textAppearance="?attr/textAppearanceListItem"
-                android:textSize="12sp" />
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/chain_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_marginStart="3dp"
+                    android:gravity="start"
+                    android:visibility="visible"
+                    custom:font_size="10" />
+
+            </LinearLayout>
+
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/small_margin"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_light"
-            android:maxLines="1"
-            android:text="Transaction pending ..."
-            android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/valueLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/big_margin"
-        android:gravity="right"
-        android:orientation="vertical">
 
         <TextView
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignTop="@id/value_layout"
+            android:layout_alignParentEnd="true"
             android:fontFamily="@font/font_semibold"
-            android:text="..."
-            android:textColor="@color/colorAccent" />
+            android:layout_centerVertical="true"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            tools:text="+ 673.345 ETH" />
 
         <TextView
-            android:id="@+id/text_chain_name"
+            android:id="@+id/supplimental"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/background_status_pending"
-            android:fontFamily="@font/font_bold"
-            android:padding="2dp"
-            android:text="@string/action_clear"
-            android:textColor="@color/white"
-            android:textSize="10sp"
-            android:visibility="visible" />
+            android:layout_alignBottom="@id/address"
+            android:layout_toStartOf="@id/text_tx_time"
+            android:fontFamily="@font/font_regular"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:layout_marginEnd="2dp"
+            android:layout_marginStart="2dp"
+            android:textSize="12sp"
+            android:visibility="visible"
+            tools:text="+1.0 ETH" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/address"
+                android:layout_marginTop="@dimen/dp10"
+                android:layout_toStartOf="@id/supplimental"
+                android:layout_below="@id/value_layout"
+                android:layout_alignStart="@id/value_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_light"
+                tools:text="0x123456778 ... 3434"
+                android:textColor="@color/dove"
+                android:textSize="@dimen/sp12" />
 
-    <ProgressBar
-        android:id="@+id/pending_spinner"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/big_margin"
-        android:contentDescription="@string/empty"
-        android:indeterminateTint="@color/colorPrimaryDark"
-        android:visibility="gone" />
-</RelativeLayout>
+        <TextView
+            android:id="@+id/text_tx_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/address"
+            android:layout_alignParentEnd="true"
+            android:visibility="visible"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/dove"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            tools:text="11:53 pm"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textSize="12sp" />
+
+    </RelativeLayout>
+</LinearLayout>

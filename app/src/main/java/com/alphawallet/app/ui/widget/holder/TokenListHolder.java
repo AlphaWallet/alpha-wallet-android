@@ -18,12 +18,13 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenManageClickListener;
 import com.alphawallet.app.widget.TokenIcon;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     final RelativeLayout layout;
     final TextView tokenName;
-    final Switch switchEnabled;
+    final SwitchMaterial switchEnabled;
     final View overlay;
     final TokenIcon tokenIcon;
     int chainId;

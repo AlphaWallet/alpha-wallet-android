@@ -59,7 +59,40 @@ Java_com_alphawallet_app_service_AnalyticsService_getAnalyticsKey( JNIEnv* env, 
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, mixpanelKey);
 #else
-    const jstring key = "3d1724375414474d7aa4cc3d8be074af";
+    const jstring key = "d4c1140e21f6204184bb1ea02eb84412";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_viewmodel_Erc20DetailViewModel_getRampKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, rampKey);
+#else
+    const jstring key = "asfjkdhvcmbnekjfhskjdhfskjdhfskjdhfsdkjf"; // <-- replace with your Ramp key
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_OnRampRepository_getRampKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, rampKey);
+#else
+    const jstring key = "asfjkdhvcmbnekjfhskjdhfskjdhfskjdhfsdkjf"; // <-- replace with your Ramp key
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, secondaryInfuraKey);
+#else
+    const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);
 #endif
 }

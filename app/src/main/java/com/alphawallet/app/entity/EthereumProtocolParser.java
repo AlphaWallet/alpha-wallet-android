@@ -33,7 +33,7 @@ public class EthereumProtocolParser
             if (address.value.length() < 2) return null;
             if (address.value.startsWith("0x") && address.value.length() != ADDRESS_LENGTH) return null;
 
-            result = new QRResult(protocol, address.value.toLowerCase());
+            result = new QRResult(protocol, address.value);
             ParseState readState = ParseState.ADDRESS;
 
             String type = null;

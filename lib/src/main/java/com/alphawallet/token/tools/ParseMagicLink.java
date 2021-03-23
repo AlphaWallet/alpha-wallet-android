@@ -101,6 +101,11 @@ public class ParseMagicLink
             if (chainId > 0) magicLinkUrlPrefix = extraChains.get(chainId).urlPrefix;
         }
 
+        if (magicLinkUrlPrefix == null)
+        {
+            throw new SalesOrderMalformed("Invalid link format");
+        }
+
         int offset = link.indexOf(magicLinkUrlPrefix);
         if (offset > -1)
         {

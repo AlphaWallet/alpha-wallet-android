@@ -13,10 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
@@ -31,6 +32,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.Keys;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
 
@@ -39,6 +41,7 @@ public class TokenIcon extends ConstraintLayout
     private final ImageView icon;
     private final TextView textIcon;
     private final ImageView statusIcon;
+    private final ProgressKnobkerry pendingProgress;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -47,8 +50,11 @@ public class TokenIcon extends ConstraintLayout
     private AssetDefinitionService assetDefinition;
     private boolean showStatus = false;
     private boolean largeIcon = false;
+    private boolean smallIcon = false;
+    private StatusType currentStatus;
 
-    public TokenIcon(Context context, AttributeSet attrs) {
+    public TokenIcon(Context context, AttributeSet attrs)
+    {
         super(context, attrs);
 
         getAttrs(context, attrs);
@@ -65,7 +71,9 @@ public class TokenIcon extends ConstraintLayout
         icon = findViewById(R.id.icon);
         textIcon = findViewById(R.id.text_icon);
         statusIcon = findViewById(R.id.status_icon);
-        statusIcon.setVisibility(View.GONE);
+        pendingProgress = findViewById(R.id.pending_progress);
+        statusIcon.setVisibility(isInEditMode() ? View.VISIBLE : View.GONE);
+        currentStatus = StatusType.NONE;
 
         bindViews();
     }
@@ -150,7 +158,7 @@ public class TokenIcon extends ConstraintLayout
         else
         {
             setupTextIcon(token);
-            IconItem iconItem = assetDefinition.fetchIconForToken(token);
+            IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
 
             Glide.with(getContext().getApplicationContext())
                     .load(iconItem.getUrl())
@@ -161,6 +169,13 @@ public class TokenIcon extends ConstraintLayout
                     .listener(requestListener)
                     .into(viewTarget);
         }
+    }
+
+    private IconItem getIconUrl(Token token)
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        String tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
+        return new IconItem(tURL, false, correctedAddr, token.tokenInfo.chainId);
     }
 
     /**
@@ -174,7 +189,9 @@ public class TokenIcon extends ConstraintLayout
 
     public void setStatusIcon(StatusType type)
     {
+        boolean requireAnimation = statusIcon.getVisibility() == View.VISIBLE && type != currentStatus;
         statusIcon.setVisibility(View.VISIBLE);
+        pendingProgress.setVisibility(View.GONE);
         switch (type)
         {
             case SENT:
@@ -185,6 +202,7 @@ public class TokenIcon extends ConstraintLayout
                 break;
             case PENDING:
                 statusIcon.setImageResource(R.drawable.ic_timer_small);
+                pendingProgress.setVisibility(View.VISIBLE);
                 break;
             case FAILED:
                 statusIcon.setImageResource(R.drawable.ic_rejected_small);
@@ -202,6 +220,19 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setVisibility(View.GONE);
                 break;
         }
+
+        currentStatus = type;
+
+        if (requireAnimation)
+        {
+            statusIcon.setAlpha(0.0f);
+            statusIcon.animate().alpha(1.0f).setDuration(500);
+        }
+    }
+
+    public void startPendingSpinner(long startTime, long completionTime)
+    {
+        pendingProgress.startAnimation(startTime, completionTime);
     }
 
     /**
@@ -242,7 +273,7 @@ public class TokenIcon extends ConstraintLayout
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             return false;
@@ -256,4 +287,10 @@ public class TokenIcon extends ConstraintLayout
             return true;
         }
     };
+
+    public void showLocalCurrency()
+    {
+        String isoCode = TickerService.getCurrencySymbolTxt();
+        icon.setImageResource(CurrencyRepository.getFlagByISO(isoCode));
+    }
 }

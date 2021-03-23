@@ -5,21 +5,22 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.alphawallet.app.C;
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.EventResult;
+import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
 
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -33,7 +34,8 @@ import java.util.Map;
  *    including the signatures in it;
  * 4. already included in a blockchain.
  */
-public class Transaction implements Parcelable {
+public class Transaction implements Parcelable
+{
     @SerializedName("id")
     public final String hash;
     public final String blockNumber;
@@ -46,14 +48,15 @@ public class Transaction implements Parcelable {
     public final String gasPrice;
     public final String gasUsed;
     public final String input;
-    public final TransactionOperation[] operations;
     public final String error;
     public final int chainId;
 
     public boolean isConstructor = false;
+    public TransactionInput transactionInput = null;
 
-	private static TransactionDecoder decoder = null;
-	private static ParseMagicLink parser = null;
+    public static final String CONSTRUCTOR = "Constructor";
+	public static final TransactionDecoder decoder = new TransactionDecoder();
+	public static ParseMagicLink parser = null;
 
 	public boolean isPending()
 	{
@@ -62,7 +65,7 @@ public class Transaction implements Parcelable {
 
 	public boolean hasError()
 	{
-		return TextUtils.isEmpty(error) && error.equals("1");
+		return !TextUtils.isEmpty(error) && error.equals("1");
 	}
 
 	public boolean hasData()
@@ -84,7 +87,7 @@ public class Transaction implements Parcelable {
 			String input,
 			String gasUsed,
             int chainId,
-            TransactionOperation[] operations) {
+            boolean isConstructor) {
         this.hash = hash;
         this.error = error;
         this.blockNumber = blockNumber;
@@ -98,170 +101,66 @@ public class Transaction implements Parcelable {
 		this.input = input;
 		this.gasUsed = gasUsed;
 		this.chainId = chainId;
-		this.operations = operations;
+		this.isConstructor = isConstructor;
+	}
+
+	public Transaction(Web3Transaction tx, int chainId, String wallet)
+	{
+		this.hash = null;
+		this.error = null;
+		this.blockNumber = null;
+		this.timeStamp = System.currentTimeMillis()/1000;
+		this.nonce = -1;
+		this.from = wallet;
+		this.to = tx.recipient.toString();
+		this.value = tx.value.toString();
+		this.gas = tx.gasLimit.toString();
+		this.gasPrice = tx.gasPrice.toString();
+		this.input = tx.payload;
+		this.gasUsed = tx.gasLimit.toString();
+		this.chainId = chainId;
+		this.isConstructor = tx.isConstructor();
+	}
+
+	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, int chainId, boolean isSuccess, long timeStamp)
+	{
+		// Get contract address if constructor
+		String contractAddress = ethTx.getCreates() != null ? ethTx.getCreates() : "";
+		int nonce = ethTx.getNonceRaw() != null ? Numeric.toBigInt(ethTx.getNonceRaw()).intValue() : 0;
+
+		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
+		{
+			to = contractAddress;
+			isConstructor = true;
+			input = CONSTRUCTOR;
+		}
+		else
+		{
+			this.to = ethTx.getTo();
+			this.input = ethTx.getInput();
+		}
+
+		this.hash = ethTx.getHash();
+		this.blockNumber = ethTx.getBlockNumber().toString();
+		this.timeStamp = timeStamp;
+		this.error = isSuccess ? "0" : "1";
+		this.nonce = nonce;
+		this.from = ethTx.getFrom();
+		this.value = ethTx.getValue().toString();
+		this.gas = ethTx.getGas().toString();
+		this.gasPrice = ethTx.getGasPrice().toString();
+		this.gasUsed = ethTx.getGas().toString();
+		this.chainId = chainId;
 	}
 
 	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
 					   String value, String gas, String gasPrice, String input, String gasUsed, int chainId, String contractAddress)
 	{
-		//build transaction using input
-		TransactionInput f;
-
 		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
 		{
-			if (decoder == null) decoder = new TransactionDecoder(); //initialise decoder on demand
 			to = contractAddress;
-			//add a constructor here
-			operations = generateERC875Op();
-			TransactionContract ct = operations[0].contract;
-			ct.setOperation(TransactionType.CONSTRUCTOR);
-			ct.address = contractAddress;
-			ct.setType(-3);// indicate that we need to load the contract
-			operations[0].value = "";
 			isConstructor = true;
-			ContractType type = decoder.getContractType(input);
-			ct.decimals = type.ordinal();
-			input = "Constructor"; //Placeholder - don't consume storage for the constructor
-		}
-		else
-		{
-			//Now perform as complete processing as we are able to here. This saves re-allocating and makes code far less brittle.
-			TransactionOperation[] o = new TransactionOperation[0];
-
-			//TODO: Handle transaction with multiple operations
-			if (input != null && input.length() >= 10)
-			{
-				TransactionOperation op = null;
-				TransactionContract ct;
-
-				if (decoder == null) decoder = new TransactionDecoder(); //initialise decoder on demand
-
-				f = decoder.decodeInput(input);
-				//is this a trade?
-				if (f.functionData != null)
-				{
-					//recover recipient
-					switch (f.functionData.functionFullName)
-					{
-						case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
-						case "trade(uint256,uint256[],uint8,bytes32,bytes32)":
-							o = processTrade(f, contractAddress);
-							op = o[0];
-							setName(o, TransactionType.MAGICLINK_TRANSFER);
-							op.contract.address = to;
-							op.value = String.valueOf(f.paramValues.size());
-							break;
-						case "transferFrom(address,address,uint16[])":
-						case "transferFrom(address,address,uint256[])":
-							o = generateERC875Op();
-							op = o[0];
-							op.contract.setIndicies(f.paramValues);
-							if (f.containsAddress(C.BURN_ADDRESS))
-							{
-								setName(o, TransactionType.REDEEM);
-							}
-							else
-							{
-								setName(o, TransactionType.TRANSFER_FROM);
-							}
-							op.contract.setType(-1);
-							op.contract.address = to;
-							op.contract.setOtherParty(f.getFirstAddress());
-							op.value = String.valueOf(f.paramValues.size());
-							op.to = f.getAddress(1);
-							break;
-						case "transfer(address,uint16[])":
-						case "transfer(address,uint256[])":
-							o = generateERC875Op();
-							op = o[0];
-							op.contract.setOtherParty(f.getFirstAddress());
-							op.contract.setIndicies(f.paramValues);
-							setName(o, TransactionType.TRANSFER_TO);
-							op.value = String.valueOf(f.paramValues.size());
-							op.contract.address = to;
-							break;
-						case "transfer(address,uint256)":
-							o = generateERC20Op();
-							op = o[0];
-							op.from = from;
-							op.to = f.getFirstAddress();
-							op.value = String.valueOf(f.getFirstValue());
-							op.contract.address = to;
-							setName(o, TransactionType.TRANSFER_TO);
-							break;
-						case "transferFrom(address,address,uint256)":
-							o = generateERC20Op();
-							op = o[0];
-							op.from = f.getFirstAddress();
-							op.to = f.getAddress(1);
-							op.value = String.valueOf(f.getFirstValue());
-							op.contract.address = to;
-							setName(o, TransactionType.TRANSFER_FROM);
-							op.contract.setType(1);
-							break;
-						case "allocateTo(address,uint256)":
-							o = generateERC20Op();
-							op = o[0];
-							op.from = from;
-							op.to = f.getFirstAddress();
-							op.value = String.valueOf(f.getFirstValue());
-							op.contract.address = to;
-							setName(o, TransactionType.ALLOCATE_TO);
-							break;
-						case "approve(address,uint256)":
-							o = generateERC20Op();
-							op = o[0];
-							op.from = from;
-							op.to = f.getFirstAddress();
-							op.value = String.valueOf(f.getFirstValue());
-							op.contract.address = to;
-							setName(o, TransactionType.APPROVE);
-							break;
-						case "loadNewTickets(bytes32[])":
-						case "loadNewTickets(uint256[])":
-							o = generateERC875Op();
-							op = o[0];
-							op.from = from;
-							op.value = String.valueOf(f.paramValues.size());
-							op.contract.address = to;
-							setName(o, TransactionType.LOAD_NEW_TOKENS);
-							op.contract.setType(1);
-							break;
-						case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
-						case "passTo(uint256,uint256[],uint8,bytes32,bytes32,address)":
-							o = processPassTo(f, contractAddress);
-							op = o[0];
-							op.from = from;
-							op.to = f.getFirstAddress();
-							op.value = String.valueOf(f.paramValues.size());
-							op.contract.address = to;
-							setName(o, TransactionType.PASS_TO);
-							op.contract.setType(-1);
-							break;
-						case "endContract()":
-						case "selfdestruct()":
-						case "kill()":
-							o = generateERC875Op();
-							op = o[0];
-							ct = op.contract;
-							ct.setOperation(TransactionType.TERMINATE_CONTRACT);
-							ct.name = to;
-							ct.setType(-2);
-							setName(o, TransactionType.TERMINATE_CONTRACT);
-							op.value = "";
-							ct.address = to;
-							break;
-						default:
-							break;
-					}
-
-					if (op != null)
-					{
-						op.transactionId = hash;
-					}
-				}
-			}
-			operations = o;
+			input = CONSTRUCTOR;
 		}
 
 		this.to = to;
@@ -279,15 +178,6 @@ public class Transaction implements Parcelable {
 		this.chainId = chainId;
 	}
 
-	public String getTokenAddress(String walletAddress)
-	{
-		if (operations == null || operations.length == 0)
-		{
-			return walletAddress;
-		}
-		else return to;
-	}
-
 	protected Transaction(Parcel in)
 	{
 		hash = in.readString();
@@ -303,13 +193,6 @@ public class Transaction implements Parcelable {
 		input = in.readString();
 		gasUsed = in.readString();
 		chainId = in.readInt();
-		Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
-		TransactionOperation[] operations = null;
-		if (parcelableArray != null)
-		{
-			operations = Arrays.copyOf(parcelableArray, parcelableArray.length, TransactionOperation[].class);
-		}
-		this.operations = operations;
 	}
 
 	public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
@@ -344,14 +227,10 @@ public class Transaction implements Parcelable {
 		dest.writeString(input);
 		dest.writeString(gasUsed);
 		dest.writeInt(chainId);
-		dest.writeParcelableArray(operations, flags);
 	}
 
 	public boolean isRelated(String contractAddress, String walletAddress)
 	{
-		TransactionOperation operation = operations == null
-				|| operations.length == 0 ? null : operations[0];
-
 		if (contractAddress.equals("eth"))
 		{
 			return (input.equals("0x") || from.equalsIgnoreCase(walletAddress));
@@ -360,101 +239,13 @@ public class Transaction implements Parcelable {
 		{
 			return from.equalsIgnoreCase(walletAddress) || to.equalsIgnoreCase(walletAddress);
 		}
+		else if (to.equalsIgnoreCase(contractAddress))
+		{
+			return true;
+		}
 		else
 		{
-			if (to.equalsIgnoreCase(contractAddress)) return true;
-			else return operation != null && (operation.walletInvolvedWithTransaction(walletAddress) || operation.contract.address.equalsIgnoreCase(contractAddress));
-		}
-	}
-
-    public TransactionContract getOperation()
-    {
-		return operations == null
-				|| operations.length == 0 ? null : operations[0].contract;
-    }
-
-
-	private TransactionOperation[] generateERC20Op()
-	{
-		TransactionOperation[] o = new TransactionOperation[1];
-		TransactionOperation op = new TransactionOperation();
-		TransactionContract ct = new TransactionContract();
-		o[0] = op;
-		op.contract = ct;
-		return o;
-	}
-
-	private TransactionOperation[] generateERC875Op()
-	{
-		TransactionOperation[] o = new TransactionOperation[1];
-		TransactionOperation op = new TransactionOperation();
-		ERC875ContractTransaction ct = new ERC875ContractTransaction();
-		o[0] = op;
-		op.contract = ct;
-		return o;
-	}
-
-	private TransactionOperation[] processPassTo(TransactionInput f, String contractAddress)
-	{
-		TransactionOperation[] o = processTrade(f, contractAddress);
-		if (o.length > 0)
-		{
-			o[0].contract.totalSupply = f.getFirstAddress(); //store destination address for this passTo. We don't use totalSupply for anything else in this case
-		}
-
-		return o;
-	}
-
-	private TransactionOperation[] processTrade(TransactionInput f, String contractAddress)
-	{
-		TransactionOperation[] o;
-		try
-		{
-			Sign.SignatureData sig = decoder.getSignatureData(f);
-			//ecrecover the recipient of the ether
-			int[] ticketIndexArray = decoder.getIndices(f);
-			String expiryStr = f.miscData.get(0);
-			long expiry = Long.valueOf(expiryStr, 16);
-			BigInteger priceWei = new BigInteger(value);
-			contractAddress = to;
-			o = generateERC875Op();
-			TransactionOperation op = o[0];
-			TransactionContract ct = op.contract;
-			if (error.equals("0")) //don't bother checking signature unless the transaction succeeded
-			{
-				if (parser == null) parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains()); //parser on demand
-				byte[] tradeBytes = parser.getTradeBytes(ticketIndexArray, contractAddress, priceWei, expiry);
-				//attempt ecrecover
-				BigInteger key = Sign.signedMessageToKey(tradeBytes, sig);
-				ct.setOtherParty("0x" + Keys.getAddress(key));
-			}
-			ct.address = contractAddress;
-			ct.setIndicies(f.paramValues);
-			ct.name = contractAddress;
-		}
-		catch (Exception e)
-		{
-			o = generateERC875Op();
-			//e.printStackTrace();
-		}
-
-		return o;
-	}
-
-	private void setName(TransactionOperation[] o, TransactionType name)
-	{
-		if (o.length > 0 && o[0] != null)
-		{
-			TransactionOperation op = o[0];
-			TransactionContract ct = op.contract;
-			if (ct instanceof ERC875ContractTransaction)
-			{
-				((ERC875ContractTransaction) ct).operation = name;
-			}
-			else
-			{
-				op.contract.name = "*" + String.valueOf(name.ordinal());
-			}
+			return getWalletInvolvedInTransaction(walletAddress);
 		}
 	}
 
@@ -466,81 +257,101 @@ public class Transaction implements Parcelable {
 	 */
 	public String getOperationResult(Token token, int precision)
 	{
-		if (operations == null || operations.length == 0)
+		//get amount here. will be amount + symbol if appropriate
+		if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			return getPrefix(token) + transactionInput.getOperationValue(token, this);
+		}
+		else
+		{
 			return token.getTransactionValue(this, precision);
-		if (hasError()) return "";
+		}
+	}
 
-		//TODO: Handle multiple operation transactions
-		TransactionOperation operation = operations[0];
-
-		return operation.getOperationResult(token, this);
+	/**
+	 * Can the contract call be valid if the operation token is Ethereum?
+	 * @param token
+	 * @return
+	 */
+	public boolean shouldShowSymbol(Token token)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			return transactionInput.shouldShowSymbol(token);
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	public String getOperationTokenAddress()
 	{
-		TransactionOperation operation = operations == null
-												 || operations.length == 0 ? null : operations[0];
-
-		if (operation == null || operation.contract == null)
+		if (hasInput())
 		{
-			return "";
+			return to;
 		}
 		else
 		{
-			return operation.contract.address;
+			return "";
 		}
 	}
 
-	public String getOperationName(Context ctx)
+	public String getOperationName(Context ctx, Token token, String walletAddress)
 	{
 		String txName = null;
-		try
+		if (isPending())
 		{
-			if (isPending())
-			{
-				txName = ctx.getString(R.string.status_pending);
-			}
-			else if (operations != null && operations.length > 0)
-			{
-				TransactionOperation operation = operations[0];
-				txName = operation.getOperationName(ctx);
-			}
+			txName = ctx.getString(R.string.status_pending);
 		}
-		catch (NumberFormatException e)
+		else if (hasInput())
 		{
-			//Silent fail, number was invalid just display default
+			decodeTransactionInput(walletAddress);
+			if (token.isEthereum() && shouldShowSymbol(token))
+			{
+				transactionInput.type = TransactionType.CONTRACT_CALL;
+			}
+
+			return transactionInput.getOperationTitle(ctx);
 		}
 
 		return txName;
 	}
 
-	public String getContract(Token token)
+	public boolean hasInput()
 	{
-		TransactionOperation operation = operations == null
-												 || operations.length == 0 ? null : operations[0];
+		return input != null && input.length() >= 10;
+	}
 
-		if (operation == null || operation.contract == null)
+	public int getOperationToFrom(String walletAddress)
+	{
+		if (hasInput())
 		{
-			return token.getAddress();
+			decodeTransactionInput(walletAddress);
+			return transactionInput.getOperationToFrom();
 		}
 		else
 		{
-			return token.getFullName();
+			return 0;
 		}
 	}
 
 	public StatusType getOperationImage(Token token)
 	{
-		TransactionOperation operation = operations == null
-												 || operations.length == 0 ? null : operations[0];
-
-		if (operation == null || operation.contract == null)
+		if (hasError())
 		{
-			return from.equalsIgnoreCase(token.getWallet()) ? StatusType.SENT : StatusType.RECEIVE;
+			return StatusType.FAILED;
+		}
+		else if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			return transactionInput.getOperationImage(this, token.getWallet());
 		}
 		else
 		{
-			return operation.contract.getOperationImage(token, this);
+			return from.equalsIgnoreCase(token.getWallet()) ? StatusType.SENT : StatusType.RECEIVE;
 		}
 	}
 
@@ -548,7 +359,7 @@ public class Transaction implements Parcelable {
 	 * Supplimental info in this case is the intrinsic root value attached to a contract call
 	 * EG: Calling cryptokitties ERC721 'breedWithAuto' function requires you to call the function and also attach a small amount of ETH
 	 * for the 'breeding fee'. That fee is later released to the caller of the 'birth' function.
-	 * Supplimental info for these transaction would appear as -0.031 for the 'breedWithAuto' and +0.031 on the 'birth' call
+	 * Supplemental info for these transaction would appear as -0.031 for the 'breedWithAuto' and +0.031 on the 'birth' call
 	 * However it's not that simple - the 'breeding fee' will be in the value attached to the transaction, however the 'midwife' reward appears
 	 * as an internal transaction, so won't be in the 'value' property.
 	 *
@@ -556,38 +367,45 @@ public class Transaction implements Parcelable {
 	 */
 	public String getSupplementalInfo(String walletAddress, String networkName)
 	{
-		TransactionOperation operation = operations == null
-												 || operations.length == 0 ? null : operations[0];
-
-		if (operation == null || operation.contract == null)
+		if (hasInput())
 		{
-			return "";
+			decodeTransactionInput(walletAddress);
+			return transactionInput.getSupplimentalInfo(this, walletAddress, networkName);
 		}
 		else
 		{
-			return operation.contract.getSupplimentalInfo(this, walletAddress, networkName);
+			return "";
 		}
 	}
 
 	public String getPrefix(Token token)
 	{
+		if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			if (!transactionInput.isSendOrReceive(this) || token.isEthereum())
+			{
+				return "";
+			}
+		}
+
 		boolean isSent = token.getIsSent(this);
 		boolean isSelf = from.equalsIgnoreCase(to);
 		if (isSelf) return "";
-		else if (isSent) return "-";
-		else return "+";
+		else if (isSent) return "- ";
+		else return "+ ";
 	}
 
-    public BigDecimal getRawValue() throws Exception
+    public BigDecimal getRawValue(String walletAddress) throws Exception
     {
-		if (operations == null || operations.length == 0)
+    	if (hasInput())
+		{
+			decodeTransactionInput(walletAddress);
+			return transactionInput.getRawValue();
+		}
+    	else
 		{
 			return new BigDecimal(value);
-		}
-		else
-		{
-			TransactionOperation operation = operations[0];
-			return operation.getRawValue();
 		}
     }
 
@@ -611,21 +429,125 @@ public class Transaction implements Parcelable {
 		}
 	}
 
-	public void completeSetup(String walletAddress)
+    public void addTransactionElements(Map<String, EventResult> resultMap)
+    {
+    	resultMap.put("__hash", new EventResult("", hash));
+		resultMap.put("__to", new EventResult("", to));
+		resultMap.put("__from", new EventResult("", from));
+		resultMap.put("__value", new EventResult("", value));
+		resultMap.put("__chainId", new EventResult("", String.valueOf(chainId)));
+    }
+
+	public String getEventName(String walletAddress)
 	{
-		if (operations.length > 0)
+		String eventName = "";
+		if (hasInput())
 		{
-			TransactionOperation op = operations[0];
-			if (op.contract != null) op.contract.completeSetup(walletAddress.toLowerCase(), this);
+			decodeTransactionInput(walletAddress);
+			eventName = transactionInput.getOperationEvent(walletAddress);
+		}
+
+		return eventName;
+	}
+
+	public int getSupplementalColour(String supplementalTxt)
+	{
+		if (!TextUtils.isEmpty(supplementalTxt))
+		{
+			switch (supplementalTxt.charAt(1))
+			{
+				case '-':
+					return R.color.red;
+				case '+':
+					return R.color.green;
+				default:
+					break;
+			}
+		}
+
+		return R.color.black;
+	}
+
+	public String getDestination(Token token)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			return transactionInput.getOperationAddress(this, token);
+		}
+		else
+		{
+			return token.getAddress();
 		}
 	}
 
-    public void addTransactionElements(Map<String, RealmAuxData.EventResult> resultMap)
-    {
-    	resultMap.put("__hash", new RealmAuxData.EventResult("", hash));
-		resultMap.put("__to", new RealmAuxData.EventResult("", to));
-		resultMap.put("__from", new RealmAuxData.EventResult("", from));
-		resultMap.put("__value", new RealmAuxData.EventResult("", value));
-		resultMap.put("__chainId", new RealmAuxData.EventResult("", String.valueOf(chainId)));
-    }
+	public String getOperationDetail(Context ctx, Token token, TokensService tService)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(token.getWallet());
+			return transactionInput.getOperationDescription (ctx, this, token, tService);
+		}
+		else
+		{
+			return ctx.getString(R.string.operation_definition, ctx.getString(R.string.to), ENSHandler.matchENSOrFormat(ctx, to));
+		}
+	}
+
+	private void decodeTransactionInput(String walletAddress)
+	{
+		if (transactionInput == null && hasInput() && Utils.isAddressValid(walletAddress))
+		{
+			transactionInput = decoder.decodeInput(this, walletAddress);
+		}
+	}
+
+	public boolean getWalletInvolvedInTransaction(String walletAddr)
+	{
+		decodeTransactionInput(walletAddr);
+		if ((transactionInput != null && transactionInput.functionData != null) && transactionInput.containsAddress(walletAddr)) return true;
+		else if (from.equalsIgnoreCase(walletAddr)) return true;
+		else if (to.equalsIgnoreCase(walletAddr)) return true;
+		else if (input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr.toLowerCase()))) return true;
+		else return false;
+	}
+
+	public boolean isNFTSent(String walletAddress)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(walletAddress);
+			return transactionInput.isSent();
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	public boolean getIsSent(String walletAddress)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(walletAddress);
+			return transactionInput.isSent();
+		}
+		else
+		{
+			return from.equalsIgnoreCase(walletAddress);
+		}
+	}
+
+	public boolean isValueChange(String walletAddress)
+	{
+		if (hasInput())
+		{
+			decodeTransactionInput(walletAddress);
+			return transactionInput.isSendOrReceive(this);
+		}
+		else
+		{
+			return true;
+		}
+	}
 }

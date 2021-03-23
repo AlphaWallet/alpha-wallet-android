@@ -1,8 +1,5 @@
 package com.alphawallet.app.repository.entity;
 
-import android.text.TextUtils;
-
-import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -21,8 +18,8 @@ public class RealmTransaction extends RealmObject {
     private String input;
     private String error;
     private int chainId;
-    private String token;
-    private RealmList<RealmTransactionOperation> operations;
+    private long expectedCompletion;
+    //private RealmList<RealmTransactionOperation> operations;
 
     public String getHash() {
         return hash;
@@ -120,9 +117,9 @@ public class RealmTransaction extends RealmObject {
         this.error = error;
     }
 
-    public RealmList<RealmTransactionOperation> getOperations() {
+    /*public RealmList<RealmTransactionOperation> getOperations() {
         return operations;
-    }
+    }*/
 
     public int getChainId()
     {
@@ -134,18 +131,18 @@ public class RealmTransaction extends RealmObject {
         this.chainId = chainId;
     }
 
-    public String getToken()
-    {
-        return token;
-    }
-
-    public void setToken(String token)
-    {
-        this.token = token;
-    }
-
     public boolean isPending()
     {
         return blockNumber == null || blockNumber.length() == 0 || (blockNumber.equals("0") || blockNumber.equals("-2"));
+    }
+
+    public long getExpectedCompletion()
+    {
+        return expectedCompletion;
+    }
+
+    public void setExpectedCompletion(long expectedCompletion)
+    {
+        this.expectedCompletion = expectedCompletion;
     }
 }

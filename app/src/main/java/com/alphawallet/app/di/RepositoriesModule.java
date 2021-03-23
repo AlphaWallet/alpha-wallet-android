@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.OnRampRepository;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.TokenLocalSource;
@@ -23,6 +25,7 @@ import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.MarketQueueService;
@@ -102,6 +105,12 @@ public class RepositoriesModule {
 	}
 
 	@Singleton
+	@Provides
+	OnRampRepositoryType provideOnRampRepository(Context context, AnalyticsServiceType analyticsServiceType) {
+		return new OnRampRepository(context, analyticsServiceType);
+	}
+
+	@Singleton
     @Provides
     TransactionLocalSource provideTransactionInDiskCache(RealmManager realmManager) {
         return new TransactionsRealmCache(realmManager);
@@ -151,8 +160,9 @@ public class RepositoriesModule {
 									   PreferenceRepositoryType preferenceRepository,
 									   Context context,
 									   TickerService tickerService,
-									   OpenseaService openseaService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, preferenceRepository, context, tickerService, openseaService);
+									   OpenseaService openseaService,
+									   AnalyticsServiceType analyticsService) {
+		return new TokensService(ethereumNetworkRepository, tokenRepository, preferenceRepository, context, tickerService, openseaService, analyticsService);
 	}
 
 	@Singleton
@@ -170,6 +180,12 @@ public class RepositoriesModule {
 	@Provides
 	GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
 		return new GasService(ethereumNetworkRepository);
+	}
+
+	@Singleton
+	@Provides
+	GasService2 provideGasService2(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager) {
+		return new GasService2(ethereumNetworkRepository, client, realmManager);
 	}
 
 	@Singleton

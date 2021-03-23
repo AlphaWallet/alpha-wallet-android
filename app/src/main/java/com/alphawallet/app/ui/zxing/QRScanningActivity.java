@@ -45,6 +45,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     public static final int RC_HANDLE_IMAGE_PICKUP = 3;
 
     public static final int DENY_PERMISSION = 1;
+    public static final int WALLET_CONNECT = 2;
 
     private FullScannerFragment fullScannerFragment;
 
@@ -53,6 +54,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     private TextView browseButton;
     private Disposable disposable;
     private AWalletAlertDialog dialog;
+    private int chainIdOverride;
 
     @Override
     public void onCreate(Bundle state)
@@ -69,6 +71,8 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         {
             requestCameraPermission();
         }
+
+        chainIdOverride = getIntent().getIntExtra(C.EXTRA_NETWORKID, 0);
     }
 
     private void initView()
@@ -203,11 +207,12 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         }
     }
 
-    private void startWalletConnect(String qrCode) {
+    private void startWalletConnect(String qrCode)
+    {
         Intent intent = new Intent(this, WalletConnectActivity.class);
         intent.putExtra("qrCode", qrCode);
         startActivity(intent);
-        setResult(RESULT_OK);
+        setResult(WALLET_CONNECT);
         finish();
     }
 

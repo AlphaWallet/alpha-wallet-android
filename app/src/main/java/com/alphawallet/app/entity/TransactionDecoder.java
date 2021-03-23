@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.web3.entity.Web3Transaction;
+
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
@@ -27,9 +29,8 @@ import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 // TODO: Should be a factory class that emits an object containing transaction interpretation
 public class TransactionDecoder
 {
-    TransactionInput thisData;
-
-    private static List<String> endContractSignatures = new ArrayList<>();
+    public static final int FUNCTION_LENGTH = 10;
+    private final static List<String> endContractSignatures = new ArrayList<>();
 
     private int parseIndex;
     private Map<String, FunctionData> functionList;
@@ -37,12 +38,14 @@ public class TransactionDecoder
     private ReadState state = ARGS;
     private int sigCount = 0;
 
-    private FunctionData unknownFunction = new FunctionData("unknown()", ContractType.OTHER, false);
+    private FunctionData getUnknownFunction()
+    {
+        return new FunctionData("N/A", ContractType.OTHER);
+    }
 
     public TransactionDecoder()
     {
         setupKnownFunctions();
-        setupUnknownFunction();
     }
 
     public TransactionInput decodeInput(String input)
@@ -50,10 +53,10 @@ public class TransactionDecoder
         ParseStage parseState = ParseStage.PARSE_FUNCTION;
         parseIndex = 0;
         //1. check function
-        thisData = new TransactionInput();
+        TransactionInput thisData = new TransactionInput();
         if (input == null || input.length() < 10)
         {
-            thisData.functionData = unknownFunction;
+            thisData.functionData = getUnknownFunction();
             return thisData;
         }
 
@@ -61,10 +64,10 @@ public class TransactionDecoder
             while (parseIndex < input.length() && !(parseState == ParseStage.FINISH)) {
                 switch (parseState) {
                     case PARSE_FUNCTION: //get function
-                        parseState = setFunction(readBytes(input, 10), input.length());
+                        parseState = setFunction(thisData, readBytes(input, FUNCTION_LENGTH), input.length());
                         break;
                     case PARSE_ARGS: //now get params
-                        parseState = getParams(input);
+                        parseState = getParams(thisData, input);
                         break;
                     case FINISH:
                         break;
@@ -82,24 +85,42 @@ public class TransactionDecoder
             e.printStackTrace();
         }
 
+        thisData.setOperationType(null, null); //works for most cases; for magiclink requires tx and wallet data - but we don't see many of these now
         return thisData;
     }
 
-    private ParseStage setFunction(String input, int length) {
+    public TransactionInput decodeInput(Transaction tx, String walletAddress)
+    {
+        TransactionInput thisData = decodeInput(tx.input);
+        thisData.setOperationType(tx, walletAddress);
+        return thisData;
+    }
+
+    public TransactionInput decodeInput(Web3Transaction web3Tx, int chainId, String walletAddress)
+    {
+        TransactionInput thisData = decodeInput(web3Tx.payload);
+        Transaction tx = new Transaction(web3Tx, chainId, walletAddress);
+        thisData.setOperationType(tx, walletAddress);
+        return thisData;
+    }
+
+    private ParseStage setFunction(TransactionInput thisData, String input, int length) {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
 
         if (data != null)
         {
             thisData.functionData = data;
-            thisData.paramValues.clear();
+            thisData.arrayValues.clear();
             thisData.addresses.clear();
             thisData.sigData.clear();
             thisData.miscData.clear();
+            thisData.functionData.functionRawHex = input;
         }
         else
         {
-            thisData.functionData = unknownFunction;
+            thisData.functionData = getUnknownFunction();
+            thisData.functionData.functionRawHex = input;
             return ParseStage.ERROR;
         }
 
@@ -112,7 +133,7 @@ public class TransactionDecoder
         SIGNATURE
     }
 
-    private ParseStage getParams(String input) {
+    private ParseStage getParams(TransactionInput thisData, String input) {
         state = ARGS;
         BigInteger count;
         StringBuilder sb = new StringBuilder();
@@ -144,7 +165,7 @@ public class TransactionDecoder
                         }
                         break;
                     case "bytes32":
-                        addArg(argData);
+                        addArg(thisData, argData);
                         break;
                     case "bytes32[]":
                     case "uint16[]":
@@ -152,19 +173,19 @@ public class TransactionDecoder
                         count = new BigInteger(argData, 16);
                         for (int i = 0; i < count.intValue(); i++) {
                             String inputData = read256bits(input);
-                            thisData.paramValues.add(new BigInteger(inputData, 16));
+                            thisData.arrayValues.add(new BigInteger(inputData, 16));
                             if (inputData.equals("0")) break;
                         }
                         break;
                     case "uint256":
-                        addArg(argData);
+                        addArg(thisData, argData);
                         break;
                     case "uint8": //In our standards, we will put uint8 as the signature marker
                         if (thisData.functionData.hasSig) {
                             state = ReadState.SIGNATURE;
                             sigCount = 0;
                         }
-                        addArg(argData);
+                        addArg(thisData, argData);
                         break;
                     case "nodata":
                         //no need to store this data - eg placeholder to indicate presence of a vararg
@@ -182,7 +203,7 @@ public class TransactionDecoder
         return ParseStage.FINISH;
     }
 
-    private void addArg(String input)
+    private void addArg(TransactionInput thisData, String input)
     {
         switch (state)
         {
@@ -260,6 +281,11 @@ public class TransactionDecoder
         addFunction("approveAndCall(address,uint,bytes)", ContractType.ERC20, false);
         addFunction("balanceOf(address)", ContractType.ERC20, false);
         addFunction("transferAnyERC20Token(address,uint)", ContractType.ERC20, false);
+        addFunction("delegate(address)", ContractType.ERC20, false);
+        addFunction("mint(address,uint)", ContractType.ERC20, false);
+        addFunction("swapExactTokensForTokens(uint256,uint256,address[],address,uint256)", ContractType.ERC20, false);
+        addFunction("withdraw(address,uint256,address)", ContractType.ERC20, false);
+        addFunction("deposit(address,uint256,address,uint16)", ContractType.ERC20, false);
 
         addFunction("transferFrom(address,address,uint256[])", ContractType.ERC875, false);
         addFunction("transfer(address,uint256[])", ContractType.ERC875, false);
@@ -391,12 +417,12 @@ public class TransactionDecoder
     public int[] getIndices(TransactionInput data)
     {
         int[] indices = null;
-        if (data != null && data.paramValues != null)
+        if (data != null && data.arrayValues != null)
         {
-            indices = new int[data.paramValues.size()];
-            for (int i = 0; i < data.paramValues.size() ; i++)
+            indices = new int[data.arrayValues.size()];
+            for (int i = 0; i < data.arrayValues.size() ; i++)
             {
-                indices[i] = data.paramValues.get(i).intValue();
+                indices[i] = data.arrayValues.get(i).intValue();
             }
         }
 
@@ -434,12 +460,6 @@ public class TransactionDecoder
         endContractSignatures.add(buildMethodId("endContract()"));
         endContractSignatures.add(buildMethodId("selfdestruct()"));
         endContractSignatures.add(buildMethodId("kill()"));
-    }
-
-    private void setupUnknownFunction()
-    {
-        unknownFunction.functionName = "N/A";
-        unknownFunction.functionFullName = "N/A";
     }
 }
 

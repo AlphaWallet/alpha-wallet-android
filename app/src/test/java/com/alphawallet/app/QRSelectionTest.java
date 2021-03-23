@@ -75,7 +75,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, int chainId)
             {
                 return null;
             }
@@ -129,6 +129,12 @@ public class QRSelectionTest
             }
 
             @Override
+            public long fetchTxCompletionTime(String walletAddr, String hash)
+            {
+                return 0;
+            }
+
+            @Override
             public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
             {
                 return Single.fromCallable(() -> { return ""; });
@@ -178,6 +184,12 @@ public class QRSelectionTest
             public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
             {
                 return null;
+            }
+
+            @Override
+            public void restartService()
+            {
+
             }
         };
 

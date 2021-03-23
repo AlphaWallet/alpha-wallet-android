@@ -21,6 +21,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int ARTIS_TAU1_ID = 246785;
     public static final int BINANCE_TEST_ID = 97;
     public static final int BINANCE_MAIN_ID = 56;
+    public static final int HECO_ID = 128;
+    public static final int HECO_TEST_ID = 256;
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
@@ -35,6 +37,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
+    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
 
     static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
@@ -60,14 +64,47 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     GOERLI_ID, false));
             put(ARTIS_TAU1_ID, new NetworkInfo("ARTIS tau1 (Test)", "ATS", ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/tx/",
                     ARTIS_TAU1_ID, false));
-            put(BINANCE_TEST_ID, new NetworkInfo("Binance (Test)", "BNB", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
-                    ARTIS_TAU1_ID, false));
+            put(BINANCE_TEST_ID, new NetworkInfo("BSC TestNet (Test)", "BNB", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
+                    BINANCE_MAIN_ID, false));
             put(BINANCE_MAIN_ID, new NetworkInfo("Binance", "BNB", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",
-                    ARTIS_TAU1_ID, false));
+                    BINANCE_TEST_ID, false));
+            put(HECO_ID, new NetworkInfo("Heco", "HT", HECO_RPC_URL, "https://hecoinfo.com/tx/",
+                    HECO_ID, false));
+            put(HECO_TEST_ID, new NetworkInfo("Heco (Test)", "HT", HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/tx/",
+                    HECO_TEST_ID, false));
         }
     };
 
     public static NetworkInfo getNetworkByChain(int chainId) {
         return networkMap.get(chainId);
+    }
+
+
+    public static String getShortChainName(int chainId)
+    {
+        NetworkInfo info = networkMap.get(chainId);
+        if (info != null)
+        {
+            int index = info.name.indexOf(" (Test)");
+            if (index > 0) return info.name.substring(0, index);
+            return info.name;
+        }
+        else
+        {
+            return networkMap.get(1).name;
+        }
+    }
+
+    public static String getChainSymbol(int chainId)
+    {
+        NetworkInfo info = networkMap.get(chainId);
+        if (info != null)
+        {
+            return info.symbol;
+        }
+        else
+        {
+            return networkMap.get(0).symbol;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,7 +8,7 @@ import android.os.Parcelable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionOperation;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -153,7 +154,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public void clickReact(BaseViewModel viewModel, Context context)
+    public void clickReact(BaseViewModel viewModel, Activity context)
     {
         viewModel.showTokenList(context, this);
     }
@@ -181,20 +182,6 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public boolean isToken() {
         return false;
-    }
-
-    @Override
-    public String getTransactionValue(Transaction transaction, int precision)
-    {
-        if (transaction.operations != null && transaction.operations.length > 0)
-        {
-            TransactionOperation operation = transaction.operations[0];
-            return "#" + operation.value;
-        }
-        else
-        {
-            return "-"; //Placeholder - should never see this
-        }
     }
 
     @Override
@@ -269,6 +256,12 @@ public class ERC721Token extends Token implements Parcelable
         return false;
     }
 
+    @Override
+    public String convertValue(String value, int precision)
+    {
+        return value;
+    }
+
     /**
      * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
      * @return
@@ -284,5 +277,42 @@ public class ERC721Token extends Token implements Parcelable
         }
 
         return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
+    }
+
+    public String getTransferID(Transaction tx)
+    {
+        if (tx.transactionInput != null && tx.transactionInput.miscData.size() > 0)
+        {
+            String tokenHex = tx.transactionInput.miscData.get(0);
+            if (tokenHex.length() > 0)
+            {
+                BigInteger id = new BigInteger(tokenHex, 16);
+                tokenHex = id.toString();
+                if (tokenHex.length() < 7)
+                {
+                    return id.toString(16);
+                }
+            }
+        }
+
+        return "0";
+    }
+
+    @Override
+    public String getTransferValue(TransactionInput txInput, int precision)
+    {
+        return getTransferValueRaw(txInput).toString();
+    }
+
+    @Override
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        return BigInteger.ONE;
+    }
+
+    @Override
+    public BigDecimal getBalanceRaw()
+    {
+        return new BigDecimal(getArrayBalance().size());
     }
 }

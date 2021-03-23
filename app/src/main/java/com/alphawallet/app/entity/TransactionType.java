@@ -22,5 +22,11 @@ public enum TransactionType
     ALLOCATE_TO,
     APPROVE,
     RECEIVED,
-    ILLEGAL_VALUE
+    SEND,
+    SEND_ETH,
+    TOKEN_SWAP,
+    WITHDRAW,
+    DEPOSIT,
+    CONTRACT_CALL,
+    ILLEGAL_VALUE;
 }

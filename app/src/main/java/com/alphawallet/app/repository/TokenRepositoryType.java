@@ -59,6 +59,8 @@ public interface TokenRepositoryType {
     Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                             String searchTerm);
 
+    TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters);
+
     Realm getRealmInstance(Wallet wallet);
     Realm getTickerRealmInstance();
 

@@ -1,9 +1,6 @@
 package com.alphawallet.app.ui.widget.entity;
 
-import android.text.format.DateUtils;
-
-import com.alphawallet.app.entity.EventMeta;
-import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
@@ -24,26 +21,24 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
         if (other.tags.contains(IS_TIMESTAMP_TAG))
         {
             TimestampSortedItem otherTimestamp = (TimestampSortedItem) other;
-            String otherHash = null;
-            if (other.viewType == TransactionHolder.VIEW_TYPE)
-            {
-                otherHash = ((TransactionMeta) other.value).hash;
-            }
-            else if (other.viewType == EventHolder.VIEW_TYPE)
-            {
-                otherHash = ((EventMeta) other.value).hash;
-            }
 
-            if (otherHash != null)
+            if (other.value instanceof ActivityMeta)
             {
+                ActivityMeta otherMeta = (ActivityMeta) other.value;
+                if (other.viewType == TransactionHolder.VIEW_TYPE && otherMeta.hash.equals(value.hash) //the pending tx time will be different from the written tx time
+                        && value.isPending != ((TransactionMeta)otherMeta).isPending)
+                {
+                    return 0; //if comparing the same tx hash with a different time, they are the same
+                }
+
                 // Check if this is a written block replacing a pending block
-                if (value.hash.equals(otherHash)) return 0; // match
+                if (value.hash.equals(otherMeta.hash) && otherMeta.getTimeStamp() == value.getTimeStamp()) return 0; // match
 
                 //we were getting an instance where two transactions went through on the same
                 //block - so the timestamp was the same. The display flickered between the two transactions.
                 if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
                 {
-                    return value.hash.compareTo(otherHash);
+                    return value.hash.compareTo(otherMeta.hash);
                 }
                 else
                 {
@@ -68,11 +63,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             if (viewType == other.viewType)
             {
                 TransactionMeta newTx = (TransactionMeta) other.value;
-
-                //boolean hashMatch = oldTx.hash.equals(newTx.hash);
-                boolean pendingMatch = value.isPending == newTx.isPending;
-
-                return pendingMatch;
+                return value.isPending == newTx.isPending;
             }
             else if (other.viewType == EventHolder.VIEW_TYPE)
             {
@@ -96,8 +87,8 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
         {
             if (viewType == other.viewType)
             {
-                TransactionMeta newTx = (TransactionMeta) other.value;
-                return value.hash.equals(newTx.hash);
+                TransactionMeta oldTx = (TransactionMeta) other.value;
+                return value.hash.equals(oldTx.hash);
             }
             else if (other.viewType == EventHolder.VIEW_TYPE)
             {
@@ -117,7 +108,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     @Override
     public Date getTimestamp() {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(value.timeStamp * DateUtils.SECOND_IN_MILLIS);
+        calendar.setTimeInMillis(value.getTimeStamp());
         return calendar.getTime();
     }
 }

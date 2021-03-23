@@ -1,6 +1,11 @@
 package com.alphawallet.app.entity;
 
-import android.text.TextUtils;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.token.tools.Numeric;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.math.BigInteger;
 
 /**
  * Created by JB on 21/10/2020.
@@ -12,11 +17,11 @@ public class EtherscanEvent
     public String hash;
     public int nonce;
     String blockHash;
-    String from;
+    public String from;
     public String contractAddress;
-    String to;
+    public String to;
     String tokenID;
-    String value;
+    public String value;
     public String tokenName;
     public String tokenSymbol;
     public String tokenDecimal;
@@ -24,70 +29,35 @@ public class EtherscanEvent
     String gasPrice;
     String gasUsed;
 
-    public Transaction createTransaction(String walletAddress, NetworkInfo networkInfo)
+    public Transaction createTransaction(@NotNull NetworkInfo networkInfo)
     {
-        TransactionOperation[] operations = createOperation(walletAddress);
+        BigInteger valueBI = BigInteger.ZERO;
+        if (value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
+        {
+            valueBI = new BigInteger(value);
+        }
 
-        return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, "0x",
-                gasUsed, networkInfo.chainId, operations);
+        String input = Numeric.toHexString(TokenRepository.createTokenTransferData(to, valueBI)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
+
+        return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, input,
+                gasUsed, networkInfo.chainId, false);
     }
 
-    private TransactionOperation[] createOperation(String walletAddress)
+    public Transaction createNFTTransaction(@NotNull NetworkInfo networkInfo)
     {
-        TransactionOperation[] o = generateOp();
-        TransactionOperation op = o[0];
-        op.from = from;
-        op.to = to;
-        if (!TextUtils.isEmpty(value) && !value.equals("null"))
+        BigInteger tokenId = BigInteger.ONE;
+        try
         {
-            op.value = value;
+            tokenId = new BigInteger(tokenID);
         }
-        else
+        catch (Exception e)
         {
-            op.value = tokenID;
-            if (tokenID.length() > 10)
-            {
-                op.value = "1";
-            }
-        }
-        op.contract.address = contractAddress;
-        if (from.equalsIgnoreCase(walletAddress))
-        {
-            setName(o, TransactionType.TRANSFER_TO);
-        }
-        else
-        {
-            setName(o, TransactionType.RECEIVED);
+            //no action, default to '1'
         }
 
-        op.transactionId = hash;
-        return o;
-    }
+        String input = Numeric.toHexString(TokenRepository.createERC721TransferFunction(from, to, contractAddress, tokenId)); //write the input to the transaction to ensure this is correctly handled elsewhere in the wallet
 
-    private TransactionOperation[] generateOp()
-    {
-        TransactionOperation[] o = new TransactionOperation[1];
-        TransactionOperation op = new TransactionOperation();
-        TransactionContract ct = new TransactionContract();
-        o[0] = op;
-        op.contract = ct;
-        return o;
-    }
-
-    private void setName(TransactionOperation[] o, TransactionType name)
-    {
-        if (o.length > 0 && o[0] != null)
-        {
-            TransactionOperation op = o[0];
-            TransactionContract ct = op.contract;
-            if (ct instanceof ERC875ContractTransaction)
-            {
-                ((ERC875ContractTransaction) ct).operation = name;
-            }
-            else
-            {
-                op.contract.name = "*" + String.valueOf(name.ordinal());
-            }
-        }
+        return new Transaction(hash, "0", blockNumber, timeStamp, nonce, from, contractAddress, "0", gas, gasPrice, input,
+                gasUsed, networkInfo.chainId, false);
     }
 }

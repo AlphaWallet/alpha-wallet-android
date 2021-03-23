@@ -1,36 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_simple_toolbar" />
-
-    <include layout="@layout/item_wallet_manage" />
-
+    <!-- NB: Wrapped in RelativeLayout to enable the 'big green success tick' -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
+        <include layout="@layout/layout_simple_toolbar" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@color/alabaster" />
+        <include layout="@layout/item_wallet_manage" />
 
         <LinearLayout
-            android:id="@+id/layout_backup_method"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
             android:orientation="vertical">
 
             <View
@@ -38,16 +29,59 @@
                 android:layout_height="1dp"
                 android:background="@color/mercury" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/alabaster" />
+
+            <LinearLayout
+                android:id="@+id/layout_backup_method"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/mercury" />
+
+                <com.alphawallet.app.widget.SettingsItemView
+                    android:id="@+id/setting_backup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:settingIcon="-1"
+                    app:settingTitle="@string/show_seed_phrase"
+                    app:settingType="default" />
+
+                <TextView
+                    android:id="@+id/backup_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="19dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginEnd="51dp"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/seed_phrase_loss_warning"
+                    android:textColor="@color/dove"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/mercury" />
+
             <com.alphawallet.app.widget.SettingsItemView
-                android:id="@+id/setting_backup"
+                android:id="@+id/delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:settingIcon="-1"
-                app:settingTitle="@string/show_seed_phrase"
+                app:settingTitle="@string/lose_this_wallet"
                 app:settingType="default" />
 
             <TextView
-                android:id="@+id/backup_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="19dp"
@@ -55,36 +89,27 @@
                 android:layout_marginEnd="51dp"
                 android:layout_marginBottom="16dp"
                 android:fontFamily="@font/font_regular"
-                android:text="@string/seed_phrase_loss_warning"
+                android:text="@string/delete_lose_funds_warning"
                 android:textColor="@color/dove"
                 android:textSize="13sp" />
 
+            <com.alphawallet.app.widget.InputAddress
+                android:id="@+id/input_ens"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="15dp"
+                custom:hint="@string/enter_ens"
+                custom:label="@string/ens_name"
+                custom:ens="true"
+                custom:nocam="true"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/mercury" />
+
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
-
-        <com.alphawallet.app.widget.SettingsItemView
-            android:id="@+id/delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:settingIcon="-1"
-            app:settingTitle="@string/lose_this_wallet"
-            app:settingType="default" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="19dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="51dp"
-            android:layout_marginBottom="16dp"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/delete_lose_funds_warning"
-            android:textColor="@color/dove"
-            android:textSize="13sp" />
 
     </LinearLayout>
 
@@ -105,4 +130,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

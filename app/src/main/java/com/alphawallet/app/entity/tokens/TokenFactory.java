@@ -35,11 +35,15 @@ public class TokenFactory
                 break;
             case NOT_SET:
             case ERC20:
+            case MAYBE_ERC20:
             case OTHER:
             case CURRENCY:
             case DELETED_ACCOUNT:
+            case DYNAMIC_CONTRACT:
+            case LEGACY_DYNAMIC_CONTRACT:
             case CREATION:
             case ETHEREUM:
+            case ETHEREUM_INVISIBLE:
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 break;
             default:
@@ -62,11 +66,19 @@ public class TokenFactory
 
         switch (type)
         {
+            case ETHEREUM_INVISIBLE:
+                tokenInfo.isEnabled = false;
+                if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
+                BigDecimal balance = new BigDecimal(realmBalance);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
+                thisToken.pendingBalance = balance;
+                break;
             case ETHEREUM:
                 tokenInfo.isEnabled = true; //native eth always enabled
             case ERC20:
+            case DYNAMIC_CONTRACT:
                 if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
-                BigDecimal balance = new BigDecimal(realmBalance);
+                balance = new BigDecimal(realmBalance);
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 thisToken.pendingBalance = balance;
                 break;
@@ -142,6 +154,7 @@ public class TokenFactory
                 thisToken.pendingBalance = BigDecimal.ZERO;
                 break;
             case ERC20:
+            case DYNAMIC_CONTRACT:
             default:
                 thisToken = new Token(
                         new TokenInfo(tokenInfo.address,

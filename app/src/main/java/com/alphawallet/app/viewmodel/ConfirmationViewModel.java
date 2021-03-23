@@ -367,4 +367,9 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         gasService.stopGasListener();
     }
+
+    public String getWalletAddress()
+    {
+        return tokensService.getCurrentAddress();
+    }
 }

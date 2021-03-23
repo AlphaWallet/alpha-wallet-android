@@ -12,9 +12,11 @@
  */
 package com.alphawallet.app.web3j;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -59,12 +61,12 @@ public class StructuredData {
         public EIP712Domain(
                 @JsonProperty(value = "name") String name,
                 @JsonProperty(value = "version") String version,
-                @JsonProperty(value = "chainId") Uint256 chainId,
+                @JsonProperty(value = "chainId") String chainId,
                 @JsonProperty(value = "verifyingContract") Address verifyingContract,
                 @JsonProperty(value = "salt") String salt) {
             this.name = name;
             this.version = version;
-            this.chainId = chainId;
+            this.chainId = chainId != null ? new Uint256(new BigInteger(chainId)) : new Uint256(EthereumNetworkRepository.MAINNET_ID);
             this.verifyingContract = verifyingContract;
             this.salt = salt;
         }

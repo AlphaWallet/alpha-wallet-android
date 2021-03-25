@@ -512,7 +512,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             }
         }
 
-        amount.setText(displayStr);
+        amountDisplay.setAmountString(displayStr);
 
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());

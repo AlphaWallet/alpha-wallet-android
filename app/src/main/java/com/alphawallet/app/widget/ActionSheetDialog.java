@@ -41,8 +41,6 @@ import java.util.Collections;
 
 import io.realm.Realm;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
-
 /**
  * Created by JB on 17/11/2020.
  */
@@ -512,7 +510,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             }
         }
 
-        amountDisplay.setAmountString(displayStr);
+        amountDisplay.setAmountFromString(displayStr);
 
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());

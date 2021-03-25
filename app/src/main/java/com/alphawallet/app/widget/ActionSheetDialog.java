@@ -105,7 +105,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = tx;
         callbackId = tx.leafPosition;
 
-        balanceDisplay.setupBalance(token, activity);
+        balanceDisplay.setupBalance(token, tokensService, activity);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();

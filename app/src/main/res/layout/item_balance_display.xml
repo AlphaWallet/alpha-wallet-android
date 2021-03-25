@@ -28,34 +28,40 @@
             android:gravity="start"
             android:textSize="@dimen/sp13"/>
 
-        <RelativeLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.4"
             android:layout_marginBottom="@dimen/dp14"
-            android:orientation="vertical">
+            android:layout_weight="3.4"
+            android:orientation="vertical"
+            custom:layout_constraintBottom_toTopOf="@+id/text_new_balance"
+            custom:layout_constraintTop_toTopOf="@+id/text_new_balance">
 
             <TextView
                 android:id="@+id/text_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
                 android:fontFamily="@font/font_semibold"
                 android:gravity="start"
-                tools:text="35.4236 ETH"
-                android:textSize="@dimen/sp16"/>
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp16"
+                custom:layout_constraintStart_toStartOf="parent"
+                custom:layout_constraintTop_toTopOf="parent"
+                tools:text="35.4236 ETH" />
 
             <TextView
                 android:id="@+id/text_new_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
-                android:layout_below="@id/text_balance"
-                android:textColor="@color/dove"
                 android:fontFamily="@font/font_regular"
                 android:gravity="start"
-                tools:text="(New: 31.1818 ETH)"
-                android:textSize="@dimen/sp15"/>
+                android:textColor="@color/dove"
+                android:textSize="@dimen/sp15"
+                custom:layout_constraintStart_toStartOf="parent"
+                custom:layout_constraintTop_toBottomOf="@id/text_balance"
+                tools:text="(New: 31.1818 ETH)" />
 
             <com.alphawallet.app.widget.ChainName
                 android:id="@+id/chain_name"
@@ -65,9 +71,24 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="@dimen/dp5"
                 custom:font_size="10"
-                android:visibility="visible"/>
+                custom:layout_constraintBottom_toBottomOf="parent"
+                custom:layout_constraintEnd_toEndOf="parent" />
 
-        </RelativeLayout>
+            <com.alphawallet.app.widget.TokenIcon
+                android:id="@+id/chain_icon"
+                android:layout_width="39dp"
+                android:layout_height="41dp"
+                custom:largeIcon="false"
+                custom:layout_constrainedHeight="true"
+                custom:layout_constrainedWidth="true"
+                custom:layout_constraintBottom_toTopOf="@+id/chain_name"
+                custom:layout_constraintDimensionRatio="W,1:1"
+                custom:layout_constraintEnd_toEndOf="@+id/chain_name"
+                custom:layout_constraintStart_toStartOf="@+id/chain_name"
+                custom:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
+
 </LinearLayout>

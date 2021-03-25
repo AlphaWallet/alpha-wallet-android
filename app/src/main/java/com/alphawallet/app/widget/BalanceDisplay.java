@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
@@ -26,9 +27,11 @@ public class BalanceDisplay extends LinearLayout
 {
     public final TextView balance;
     public final TextView newBalance;
-    public final ChainName chainName;
+    private final ChainName chainName;
+    private final TokenIcon chainIcon;
 
     private Token token;
+    private TokensService tokenService;
     private Activity activity;
 
     public BalanceDisplay(Context context, @Nullable AttributeSet attrs)
@@ -39,26 +42,23 @@ public class BalanceDisplay extends LinearLayout
         newBalance = findViewById(R.id.text_new_balance);
         chainName = findViewById(R.id.chain_name);
 
-        activity = null;
+        tokenService = null;
         token = null;
+
+        chainIcon = findViewById(R.id.chain_icon);
 
     }
 
-    public void setupBalance(Token t, Activity act)
+    public void setupBalance(Token t, TokensService ts ,Activity act)
     {
         token = t;
         activity = act;
+        tokenService = ts;
 
+        chainName.setVisibility(View.VISIBLE);
+        chainName.setChainID(token.tokenInfo.chainId);
+        chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, token.getAddress()), null);
 
-        if (token.tokenInfo.chainId == MAINNET_ID)
-        {
-            chainName.setVisibility(View.GONE);
-        }
-        else
-        {
-            chainName.setVisibility(View.VISIBLE);
-            chainName.setChainID(token.tokenInfo.chainId);
-        }
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
     }
 

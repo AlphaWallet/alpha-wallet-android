@@ -35,7 +35,7 @@ android {
         }
     }
     defaultConfig {
-        versionCode 146
+        versionCode 147
         versionName "3.24.5"
 
         applicationId "io.stormbird.wallet"

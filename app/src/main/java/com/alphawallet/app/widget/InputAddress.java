@@ -28,6 +28,8 @@ import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 
+import io.reactivex.Single;
+
 import static android.content.Context.CLIPBOARD_SERVICE;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -364,7 +366,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
     public String getInputText()
     {
-        return editText.getText().toString();
+        return editText.getText().toString().trim();
     }
 
     public void setAddressCallback(AddressReadyCallback addressReadyCallback)
@@ -375,5 +377,20 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public void stopNameCheck()
     {
         displayCheckingDialog(false);
+    }
+
+    public float getTextSize()
+    {
+        return editText.getTextSize();
+    }
+
+    public AutoCompleteTextView getInputView()
+    {
+        return editText;
+    }
+
+    public int getInputLength()
+    {
+        return editText.getText().length();
     }
 }

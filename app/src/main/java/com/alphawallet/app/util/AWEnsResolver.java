@@ -40,6 +40,9 @@ public class AWEnsResolver extends EnsResolver
     {
         return Single.fromCallable(() -> {
             String ensName = "";
+
+            //Optimise. First check known ENS names
+
             try
             {
                 ensName = reverseResolve(address);
@@ -68,6 +71,25 @@ public class AWEnsResolver extends EnsResolver
             }
             return ensName;
         });
+    }
+
+    //Only checks wallet history for ENS name
+    //TODO: Check address book for name, once addressbook is implemented
+    public String checkENSHistoryForAddress(String address)
+    {
+        String ensName = "";
+        //try previously resolved names
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
+        if (historyJson.length() > 0)
+        {
+            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
+            if (history.containsKey(address.toLowerCase()))
+            {
+                ensName = history.get(address.toLowerCase());
+            }
+        }
+
+        return ensName;
     }
 
     private String fetchPreviouslyUsedENS(String address)

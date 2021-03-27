@@ -31,6 +31,7 @@ import org.web3j.crypto.Keys;
 
 import java.util.HashMap;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -50,7 +51,6 @@ public class ENSHandler implements Runnable
     private final Handler handler;
     private final AutoCompleteAddressAdapter adapterUrl;
     private AWEnsResolver ensResolver;
-    private final AutoCompleteTextView toAddressEditText;
     private final float standardTextSize;
 
     @Nullable
@@ -63,10 +63,9 @@ public class ENSHandler implements Runnable
         this.handler = new Handler();
         this.adapterUrl = adapter;
         this.host = host;
-        this.toAddressEditText = host.getEditText();
         this.ensResolver = null;
 
-        standardTextSize = toAddressEditText.getTextSize();
+        standardTextSize = host.getTextSize();
 
         createWatcher();
         getENSHistoryFromPrefs(host.getContext());
@@ -74,8 +73,8 @@ public class ENSHandler implements Runnable
 
     private void createWatcher()
     {
-        toAddressEditText.setAdapter(adapterUrl);
-        toAddressEditText.setOnClickListener(v -> toAddressEditText.showDropDown());
+        host.getInputView().setAdapter(adapterUrl);
+        host.getInputView().setOnClickListener(v -> host.getInputView().showDropDown());
 
         waitingForENS = false;
 
@@ -91,15 +90,15 @@ public class ENSHandler implements Runnable
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
                 host.setStatus(null);
-                float ts = toAddressEditText.getTextSize();
-                int amount = toAddressEditText.getText().length();
+                float ts = host.getTextSize();
+                int amount = host.getInputLength();
                 if (amount > 30 && ts == standardTextSize)
                 {
-                    toAddressEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
+                    host.getInputView().setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
                 }
                 else if (amount <= 30 && ts < standardTextSize)
                 {
-                    toAddressEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize);
+                    host.getInputView().setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize);
                 }
             }
 
@@ -111,13 +110,13 @@ public class ENSHandler implements Runnable
             }
         };
 
-        toAddressEditText.addTextChangedListener(ensTextWatcher);
+        host.getInputView().addTextChangedListener(ensTextWatcher);
     }
 
     private void checkAddress()
     {
         handler.removeCallbacks(this);
-        if (couldBeENS(toAddressEditText.getText().toString().trim()))
+        if (couldBeENS(host.getInputText()))
         {
             waitingForENS = true;
             handler.postDelayed(this, ENS_RESOLVE_DELAY);
@@ -140,6 +139,16 @@ public class ENSHandler implements Runnable
         }
         else
         {
+            if (Utils.isAddressValid(host.getInputText()) && TextUtils.isEmpty(host.getStatusText()))
+            {
+                //check our known ENS names list for a match
+                String ensName = ensResolver.checkENSHistoryForAddress(host.getInputText());
+                if (!TextUtils.isEmpty(ensName))
+                {
+                    host.ENSResolved(host.getInputText(), ensName);
+                }
+            }
+
             host.ENSComplete();
         }
     }
@@ -147,10 +156,10 @@ public class ENSHandler implements Runnable
     public void handleHistoryItemClick(String ensName)
     {
         host.hideKeyboard();
-        toAddressEditText.removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
-        toAddressEditText.setText(ensName);
-        toAddressEditText.addTextChangedListener(ensTextWatcher);
-        toAddressEditText.dismissDropDown();
+        host.getInputView().removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
+        host.getInputView().setText(ensName);
+        host.getInputView().addTextChangedListener(ensTextWatcher);
+        host.getInputView().dismissDropDown();
         handler.removeCallbacksAndMessages(this);
         waitingForENS = true;
         handler.post(this);
@@ -162,18 +171,18 @@ public class ENSHandler implements Runnable
         host.setWaitingSpinner(false);
         if (!TextUtils.isEmpty(resolvedAddress) && isValidAddress(resolvedAddress) && canBeENSName(ensDomain))
         {
-            toAddressEditText.dismissDropDown();
+            host.getInputView().dismissDropDown();
             host.setStatus(resolvedAddress);
-            if (toAddressEditText.hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
+            if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(resolvedAddress, ensDomain);
             host.ENSResolved(resolvedAddress, ensDomain);
         }
         else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && isValidAddress(ensDomain)) //in case user typed an address and hit an ENS name
         {
-            toAddressEditText.dismissDropDown();
+            host.getInputView().dismissDropDown();
             host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
-            if (toAddressEditText.hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
+            if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);
             host.ENSResolved(resolvedAddress, ensDomain);
@@ -213,7 +222,7 @@ public class ENSHandler implements Runnable
     public void run()
     {
         //address update delay check
-        final String to = toAddressEditText.getText().toString().trim();
+        final String to = host.getInputText();
 
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
 
@@ -243,6 +252,8 @@ public class ENSHandler implements Runnable
             host.setWaitingSpinner(false);
         }
     }
+
+    public Single<String> resolveAddressToENS()
 
     /**
      * This method will fetch stored ENS cached history of Reverse lookup

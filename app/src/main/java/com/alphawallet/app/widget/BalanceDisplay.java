@@ -55,8 +55,9 @@ public class BalanceDisplay extends LinearLayout
         activity = act;
         tokenService = ts;
 
-        chainName.setVisibility(View.VISIBLE);
         chainName.setChainID(token.tokenInfo.chainId);
+        chainName.invertChainID(token.tokenInfo.chainId);
+        chainName.setVisibility(View.VISIBLE);
         chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, token.getAddress()), null);
 
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));

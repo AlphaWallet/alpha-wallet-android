@@ -67,9 +67,9 @@
                 android:id="@+id/chain_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="@dimen/dp5"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/dp16"
                 custom:font_size="10"
                 custom:layout_constraintBottom_toBottomOf="parent"
                 custom:layout_constraintEnd_toEndOf="parent" />

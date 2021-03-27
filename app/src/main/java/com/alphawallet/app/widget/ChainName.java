@@ -35,6 +35,12 @@ public class ChainName extends LinearLayout
         chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
     }
 
+    public void invertChainID(int chainId)
+    {
+        chainName.setTextColor(Utils.getChainColour(chainId));
+        chainName.setBackgroundResource(0);
+    }
+
     private void getAttrs(Context context, AttributeSet attrs)
     {
         TypedArray a = context.getTheme().obtainStyledAttributes(

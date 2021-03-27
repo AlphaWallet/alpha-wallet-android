@@ -253,7 +253,11 @@ public class ENSHandler implements Runnable
         }
     }
 
-    public Single<String> resolveAddressToENS()
+    //Given an Ethereum address, check if we can find a matching ENS name
+    public Single<String> resolveAddressToENS(String address)
+    {
+        return ensResolver.resolveEnsName(address);
+    }
 
     /**
      * This method will fetch stored ENS cached history of Reverse lookup

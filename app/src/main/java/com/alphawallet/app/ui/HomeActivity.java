@@ -928,6 +928,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode)
         {
+            case DappBrowserFragment.REQUEST_CAMERA_ACCESS:
+                ((DappBrowserFragment) dappBrowserFragment).gotCameraAccess(permissions, grantResults);
+                break;
             case DappBrowserFragment.REQUEST_FILE_ACCESS:
                 ((DappBrowserFragment) dappBrowserFragment).gotFileAccess(permissions, grantResults);
                 break;

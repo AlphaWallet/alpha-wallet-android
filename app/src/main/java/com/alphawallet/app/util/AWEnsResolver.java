@@ -39,12 +39,14 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> resolveEnsName(String address)
     {
         return Single.fromCallable(() -> {
-            //Optimise. First check known ENS names
-            String ensName = checkENSHistoryForAddress(address);
+            String ensName = checkENSHistoryForAddress(address); //First check known ENS names
 
             try
             {
-                if (TextUtils.isEmpty(ensName)) ensName = reverseResolve(address);
+                if (TextUtils.isEmpty(ensName))
+                {
+                    ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
+                }
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
@@ -53,10 +55,6 @@ public class AWEnsResolver extends EnsResolver
                     {
                         ensName = "";
                     }
-                }
-                else
-                {
-                    ensName = fetchPreviouslyUsedENS(address);
                 }
             }
             catch (UnableToResolveENS resolve)

@@ -311,16 +311,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
      */
     public void getAddress()
     {
-        String addressInput = editText.getText().toString().trim();
-
-        if (!ENSHandler.canBeENSName(addressInput) || ensHandler == null || !ensHandler.waitingForENS)
-        {
-            ENSComplete();
-        }
-        else
-        {
-            ensHandler.getAddress();
-        }
+        ensHandler.getAddress();
     }
 
     @Override

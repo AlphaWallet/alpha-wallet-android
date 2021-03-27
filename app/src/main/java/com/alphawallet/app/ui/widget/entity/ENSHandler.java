@@ -6,13 +6,11 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
-import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.Nullable;
 
@@ -106,7 +104,10 @@ public class ENSHandler implements Runnable
             public void afterTextChanged(Editable s)
             {
                 host.setStatus(null);
-                checkAddress();
+                if (!TextUtils.isEmpty(host.getInputText()))
+                {
+                    checkAddress();
+                }
             }
         };
 
@@ -122,6 +123,11 @@ public class ENSHandler implements Runnable
             handler.postDelayed(this, ENS_RESOLVE_DELAY);
             if (disposable != null && !disposable.isDisposed()) disposable.dispose();
             host.setWaitingSpinner(false);
+        }
+        else if (isValidAddress(host.getInputText()))
+        {
+            //finding the ENS address is not required, only helpful so no need to wait
+            handler.post(this);
         }
         else
         {
@@ -145,7 +151,7 @@ public class ENSHandler implements Runnable
                 String ensName = ensResolver.checkENSHistoryForAddress(host.getInputText());
                 if (!TextUtils.isEmpty(ensName))
                 {
-                    host.ENSResolved(host.getInputText(), ensName);
+                    host.setStatus(ensName);
                 }
             }
 
@@ -254,7 +260,7 @@ public class ENSHandler implements Runnable
     }
 
     //Given an Ethereum address, check if we can find a matching ENS name
-    public Single<String> resolveAddressToENS(String address)
+    public Single<String> resolveENSNameFromAddress(String address)
     {
         return ensResolver.resolveEnsName(address);
     }

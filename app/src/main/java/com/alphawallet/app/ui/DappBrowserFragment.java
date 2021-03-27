@@ -47,6 +47,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -168,6 +169,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private static final int UPLOAD_FILE = 1;
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
+    public static final int REQUEST_CAMERA_ACCESS = 111;
 
     /**
      Below object is used to set Animation duration for expand/collapse and rotate
@@ -206,6 +208,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private TextView symbol;
     private View layoutNavigation;
     private GeolocationPermissions.Callback geoCallback = null;
+    private PermissionRequest requestCallback = null;
     private String geoOrigin;
     private final Handler handler = new Handler();
 
@@ -1581,25 +1584,29 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void requestCameraPermission(PermissionRequest request)
     {
         final String[] requestedResources = request.getResources();
+        requestCallback = request;
         for (String r : requestedResources)
         {
             if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
             {
-                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
-                alertDialog.setMessage(String.format(getString(R.string.message_permission_request_webkit_camera), request.getOrigin().getAuthority()));
-                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.action_deny_webkit_camera),
-                        (dialog, which) -> {
-                            request.deny();
-                            dialog.dismiss();
-                        });
-                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.action_allow_webkit_camera),
-                        (dialog, which) -> {
-                            request.grant(requestedResources);
-                            dialog.dismiss();
-                        });
-                alertDialog.show();
+                final String[] permissions = new String[]{Manifest.permission.CAMERA};
+                getActivity().requestPermissions(permissions, REQUEST_CAMERA_ACCESS);
             }
         }
+    }
+
+    public void gotCameraAccess(String[] permissions, int[] grantResults)
+    {
+        boolean cameraAccess = false;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (permissions[i].equals(Manifest.permission.CAMERA) && grantResults[i] != -1)
+            {
+                cameraAccess = true;
+                if (requestCallback != null) requestCallback.grant(requestCallback.getResources()); //now we can grant permission
+            }
+        }
+        if (!cameraAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
     }
 
     public void gotGeoAccess(String[] permissions, int[] grantResults)

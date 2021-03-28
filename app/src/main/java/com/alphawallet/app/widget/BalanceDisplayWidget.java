@@ -21,7 +21,7 @@ import java.math.BigInteger;
  * Created by Jenny Jingjing Li on 4/3/2021
  */
 
-public class BalanceDisplay extends LinearLayout
+public class BalanceDisplayWidget extends LinearLayout
 {
     public final TextView balance;
     public final TextView newBalance;
@@ -29,10 +29,9 @@ public class BalanceDisplay extends LinearLayout
     private final TokenIcon chainIcon;
 
     private Token token;
-    private TokensService tokenService;
     private Activity activity;
 
-    public BalanceDisplay(Context context, @Nullable AttributeSet attrs)
+    public BalanceDisplayWidget(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
         inflate(context, R.layout.item_balance_display,this);
@@ -40,28 +39,26 @@ public class BalanceDisplay extends LinearLayout
         newBalance = findViewById(R.id.text_new_balance);
         chainName = findViewById(R.id.chain_name);
 
-        tokenService = null;
         token = null;
 
         chainIcon = findViewById(R.id.chain_icon);
 
     }
 
-    public void setupBalance(Token t, TokensService ts ,Activity act)
+    public void setupBalance(Token t, TokensService tokenService, Activity act)
     {
         token = t;
         activity = act;
-        tokenService = ts;
 
         chainName.setChainID(token.tokenInfo.chainId);
         chainName.invertChainID(token.tokenInfo.chainId);
         chainName.setVisibility(View.VISIBLE);
-        chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, token.getAddress()), null);
+        chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, tokenService.getCurrentAddress()), null);
 
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
     }
 
-    public void setNewBalanceText(Token token, BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction, boolean isSendingTransaction)
+    public void setNewBalanceText(BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction, boolean isSendingTransaction)
     {
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
 

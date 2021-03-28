@@ -48,10 +48,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 {
     private final ImageView cancelButton;
     private final GasWidget gasWidget;
-    private final BalanceDisplay balanceDisplay;
+    private final BalanceDisplayWidget balanceDisplay;
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
-    private final AmountDisplay amountDisplay;
+    private final AmountDisplayWidget amountDisplay;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
 
@@ -514,7 +514,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());
-        balanceDisplay.setNewBalanceText(token, getTransactionAmount(), networkFee, balanceAfterTransaction, isSendingTransaction());
+        balanceDisplay.setNewBalanceText(getTransactionAmount(), networkFee, balanceAfterTransaction, isSendingTransaction());
     }
 
     public void success()

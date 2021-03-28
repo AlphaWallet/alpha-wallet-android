@@ -18,13 +18,13 @@ import javax.annotation.Nullable;
  * Created by Jenny Jingjing Li on 21/03/2021
  * */
 
-public class AmountDisplay extends LinearLayout {
+public class AmountDisplayWidget extends LinearLayout {
 
     private final Locale deviceSettingsLocale = LocaleUtils.getDeviceLocale(getContext());
     private TextView amount;
 
 
-    public AmountDisplay(Context context, @Nullable AttributeSet attrs)
+    public AmountDisplayWidget(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
 

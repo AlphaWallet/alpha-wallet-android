@@ -733,4 +733,7 @@
     <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
     <string name="hide_seed_text">OK, Hide Seed Phrase</string>
     <string name="ens_not_match_wallet">ENS Name does not match wallet address</string>
+    <string name="action_allow_webkit_camera">Allow</string>
+    <string name="action_deny_webkit_camera">Deny</string>
+    <string name="message_permission_request_webkit_camera">%s wants to use your camera</string>
 </resources>

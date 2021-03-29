@@ -102,7 +102,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         viewModel.isTaskRunning().observe(this, this::onTaskStatusChanged);
 
         if (isNewWallet) {
-            wallet.name = getString(R.string.wallet_name_template, walletCount);
+            wallet.setName(getString(R.string.wallet_name_template, walletCount));
             viewModel.storeWallet(wallet);
         }
     }
@@ -193,14 +193,14 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         walletSelectedIcon.setImageResource(R.drawable.ic_copy);
 
-        inputAddress.setAddress(wallet.ENSname);
+        inputAddress.setAddress(wallet.getDisplayName());
         inputAddress.setAddressCallback(this);
     }
 
     private void setENSText()
     {
-        if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
-            walletNameText.setText(wallet.ENSname);
+        if (wallet.getDisplayName() != null && !wallet.getDisplayName().isEmpty()) {
+            walletNameText.setText(wallet.getDisplayName());
             walletNameText.setVisibility(View.VISIBLE);
             walletAddressSeparator.setVisibility(View.VISIBLE);
         } else {
@@ -218,12 +218,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     private void saveWalletName() {
-//        wallet.name = walletNameText.getText().toString();
-        viewModel.storeWallet(wallet);
-        if (isNewWallet) {
-            viewModel.showHome(this);
-            finish(); //drop back to home screen, no need to recreate everything
-        }
+        wallet.setName(inputAddress.getInputText().toString());
+        viewModel.updateWallet(wallet);
     }
 
     private void doBackUp() {
@@ -349,15 +345,15 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         if (!TextUtils.isEmpty(address)
                 && wallet.address.equalsIgnoreCase(address)
                 && !TextUtils.isEmpty(ensName)
-                && (TextUtils.isEmpty(wallet.ENSname) || !ensName.equalsIgnoreCase(wallet.ENSname))) //Wallet ENS currently empty or new ENS name is different
+                && (TextUtils.isEmpty(wallet.getDisplayName()) || !ensName.equalsIgnoreCase(wallet.getDisplayName()))) //Wallet ENS currently empty or new ENS name is different
         {
-            wallet.ENSname = ensName;
+            wallet.setEnsName(ensName);
             //update database
             viewModel.storeWallet(wallet);
             successOverlay.setVisibility(View.VISIBLE);
             handler.postDelayed(this, 1000);
         }
-        else if (TextUtils.isEmpty(wallet.ENSname) || !ensName.equalsIgnoreCase(wallet.ENSname))
+        else if (TextUtils.isEmpty(wallet.getDisplayName()) || !ensName.equalsIgnoreCase(wallet.getDisplayName()))
         {
             Toast.makeText(this, R.string.ens_not_match_wallet, Toast.LENGTH_SHORT).show();
         }
@@ -367,5 +363,11 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     public void addressReady(String address, String ensName)
     {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveWalletName();
+        super.onBackPressed();
     }
 }

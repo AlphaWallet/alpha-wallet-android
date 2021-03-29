@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import androidx.core.content.ContextCompat;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.method.DigitsKeyListener;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
@@ -15,9 +16,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -47,6 +45,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private int innerPadding;
     private String imeOptions;
     private String hintTxt;
+    private String charsAllowed;
     private Activity activity;
     private LayoutCallbackListener callbackListener;
 
@@ -70,6 +69,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         setInputType();
         setMinHeight();
         setLines();
+        setCharsAllowed();
     }
 
     public void setLayoutListener(Activity a, LayoutCallbackListener callback)
@@ -115,6 +115,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             minHeight = a.getInteger(R.styleable.InputView_minHeightValue, 0);
             innerPadding = a.getInteger(R.styleable.InputView_innerPadding, 0);
             hintTxt = a.getString(R.styleable.InputView_hint);
+            charsAllowed = a.getString(R.styleable.InputView_charsAllowed);
         } finally {
             a.recycle();
         }
@@ -189,6 +190,14 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         }
 
         editText.setMinLines(lines);
+    }
+
+    private void setCharsAllowed()
+    {
+        if (!TextUtils.isEmpty(charsAllowed))
+        {
+            editText.setKeyListener(DigitsKeyListener.getInstance(charsAllowed));
+        }
     }
 
     public CharSequence getText() {

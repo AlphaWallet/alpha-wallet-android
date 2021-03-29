@@ -262,13 +262,9 @@ public class HomeViewModel extends BaseViewModel {
 
     private void onWallet(Wallet wallet) {
         transactionsService.changeWallet(wallet);
-        if (!TextUtils.isEmpty(wallet.ENSname))
+        if (!TextUtils.isEmpty(wallet.getDisplayName()))
         {
-            walletName.postValue(wallet.ENSname);
-        }
-        else if (!TextUtils.isEmpty(wallet.name))
-        {
-            walletName.postValue(wallet.name);
+            walletName.postValue(wallet.getDisplayName());
         }
         else
         {

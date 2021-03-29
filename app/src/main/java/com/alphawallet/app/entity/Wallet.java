@@ -7,13 +7,15 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
 
+import org.web3j.utils.Strings;
+
 import java.math.BigDecimal;
 
 public class Wallet implements Parcelable {
     public final String address;
     public String balance;
-    public String ENSname;
-    public String name;
+    private String ENSname;
+    private String name;
     public WalletType type;
     public long lastBackupTime;
     public KeyService.AuthenticationLevel authLevel;
@@ -109,5 +111,34 @@ public class Wallet implements Parcelable {
 			balanceSymbol = networkInfo.symbol;
 			balance = BalanceUtils.getScaledValueFixed(BigDecimal.ZERO, 0, Token.TOKEN_BALANCE_PRECISION);
 		}
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public void setEnsName(String name)
+	{
+		this.ENSname = name;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public String getENSName()
+	{
+		return ENSname;
+	}
+
+	public String getDisplayName()
+	{
+		if (!Strings.isEmpty(name))
+		{
+			return name;
+		}
+		return ENSname;
 	}
 }

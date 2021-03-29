@@ -76,20 +76,14 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 			manageWalletBtn.setVisibility(View.VISIBLE);
 
-			if (wallet.name != null && !wallet.name.isEmpty()) {
-				walletNameText.setText(wallet.name);
+			if (wallet.getDisplayName() != null && !wallet.getDisplayName().isEmpty())
+			{
+				walletNameText.setText(wallet.getDisplayName());
 				walletAddressSeparator.setVisibility(View.VISIBLE);
 				walletNameText.setVisibility(View.VISIBLE);
-			} else {
-				walletAddressSeparator.setVisibility(View.GONE);
-				walletNameText.setVisibility(View.GONE);
 			}
-
-			if (wallet.ENSname != null && wallet.ENSname.length() > 0) {
-				walletNameText.setText(wallet.ENSname);
-				walletAddressSeparator.setVisibility(View.VISIBLE);
-				walletNameText.setVisibility(View.VISIBLE);
-			} else {
+			else
+			{
 				walletAddressSeparator.setVisibility(View.GONE);
 				walletNameText.setVisibility(View.GONE);
 			}
@@ -146,8 +140,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		if (realmWallet != null)
 		{
 			w.balance = realmWallet.getBalance();
-			w.ENSname = realmWallet.getENSName();
-			w.name = realmWallet.getName();
+			w.setEnsName(realmWallet.getENSName());
+			w.setName(realmWallet.getName());
 		}
 
 		return w;

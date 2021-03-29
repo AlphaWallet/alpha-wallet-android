@@ -122,4 +122,12 @@ public class WalletActionsViewModel extends BaseViewModel {
     public void showHome(Context context) {
         homeRouter.open(context, true);
     }
+
+    public void updateWallet(Wallet wallet) {
+        isTaskRunning.postValue(true);
+        disposable = fetchWalletsInteract.updateWalletData(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onStored, this::onError);
+    }
 }

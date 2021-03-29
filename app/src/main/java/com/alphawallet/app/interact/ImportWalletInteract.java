@@ -38,7 +38,7 @@ public class ImportWalletInteract {
         wallet.lastBackupTime = System.currentTimeMillis();
         return ensResolver.resolveEnsName(wallet.address)
                 .subscribeOn(Schedulers.io())
-                .map(name -> { wallet.ENSname = name; return wallet; })
+                .map(name -> { wallet.setEnsName(name); return wallet; })
                 .flatMap(walletRepository::storeWallet);
     }
 
@@ -49,7 +49,7 @@ public class ImportWalletInteract {
         wallet.lastBackupTime = System.currentTimeMillis();
         return ensResolver.resolveEnsName(wallet.address)
                 .subscribeOn(Schedulers.io())
-                .map(name -> { wallet.ENSname = name; return wallet; })
+                .map(name -> { wallet.setEnsName(name); return wallet; })
                 .flatMap(walletRepository::storeWallet);
     }
 
@@ -60,7 +60,7 @@ public class ImportWalletInteract {
         wallet.lastBackupTime = System.currentTimeMillis();
         return ensResolver.resolveEnsName(wallet.address)
                 .subscribeOn(Schedulers.io())
-                .map(name -> { wallet.ENSname = name; return wallet; })
+                .map(name -> { wallet.setEnsName(name); return wallet; })
                 .flatMap(walletRepository::storeWallet);
     }
 

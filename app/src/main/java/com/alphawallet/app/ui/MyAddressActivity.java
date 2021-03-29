@@ -279,7 +279,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         }
         copyAddress.setVisibility(View.VISIBLE);
         onWindowFocusChanged(true);
-        updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
+        updateAddressWithENS(wallet.getDisplayName()); //JB: see if there's any cached value to display while we wait for ENS
 
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
@@ -303,7 +303,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         if (ensFetchProgressBar != null) {
             ensFetchProgressBar.setVisibility(View.GONE);
         }
-        updateAddressWithENS(wallet.ENSname); // JB: if there's any issue then fall back to cached name
+        updateAddressWithENS(wallet.getDisplayName()); // JB: if there's any issue then fall back to cached name
     }
 
     private void showContract()

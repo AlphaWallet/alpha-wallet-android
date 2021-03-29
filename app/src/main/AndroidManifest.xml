@@ -305,10 +305,6 @@
             android:label="WalletConnect" />
 
         <activity
-            android:name=".ui.BackupFlowActivity"
-            android:label="WalletConnect" />
-
-        <activity
             android:name=".ui.SignDetailActivity"
             android:label="Sign Details" />
 

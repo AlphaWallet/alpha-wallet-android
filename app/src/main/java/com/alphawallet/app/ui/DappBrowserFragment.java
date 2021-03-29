@@ -5,12 +5,10 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -28,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.GeolocationPermissions;
-import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -47,7 +44,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -169,7 +165,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private static final int UPLOAD_FILE = 1;
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
-    public static final int REQUEST_CAMERA_ACCESS = 111;
 
     /**
      Below object is used to set Animation duration for expand/collapse and rotate
@@ -208,7 +203,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private TextView symbol;
     private View layoutNavigation;
     private GeolocationPermissions.Callback geoCallback = null;
-    private PermissionRequest requestCallback = null;
     private String geoOrigin;
     private final Handler handler = new Handler();
 
@@ -814,11 +808,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
                 currentWebpageTitle = title;
-            }
-
-            @Override
-            public void onPermissionRequest(final PermissionRequest request) {
-                requestCameraPermission(request);
             }
 
             @Override
@@ -1578,35 +1567,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             callback.invoke(origin, true, false);
         }
-    }
-
-    // Handles the requesting of the camera permission.
-    private void requestCameraPermission(PermissionRequest request)
-    {
-        final String[] requestedResources = request.getResources();
-        requestCallback = request;
-        for (String r : requestedResources)
-        {
-            if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
-            {
-                final String[] permissions = new String[]{Manifest.permission.CAMERA};
-                getActivity().requestPermissions(permissions, REQUEST_CAMERA_ACCESS);
-            }
-        }
-    }
-
-    public void gotCameraAccess(String[] permissions, int[] grantResults)
-    {
-        boolean cameraAccess = false;
-        for (int i = 0; i < permissions.length; i++)
-        {
-            if (permissions[i].equals(Manifest.permission.CAMERA) && grantResults[i] != -1)
-            {
-                cameraAccess = true;
-                if (requestCallback != null) requestCallback.grant(requestCallback.getResources()); //now we can grant permission
-            }
-        }
-        if (!cameraAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
     }
 
     public void gotGeoAccess(String[] permissions, int[] grantResults)

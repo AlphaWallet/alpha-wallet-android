@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -81,8 +80,9 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+
         setContentView(R.layout.activity_import_wallet);
 
         toolbar();

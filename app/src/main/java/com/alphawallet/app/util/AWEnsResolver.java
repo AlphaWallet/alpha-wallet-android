@@ -39,14 +39,10 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> resolveEnsName(String address)
     {
         return Single.fromCallable(() -> {
-            String ensName = checkENSHistoryForAddress(address); //First check known ENS names
-
+            String ensName = "";
             try
             {
-                if (TextUtils.isEmpty(ensName))
-                {
-                    ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
-                }
+                ensName = reverseResolve(address);
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
@@ -55,6 +51,10 @@ public class AWEnsResolver extends EnsResolver
                     {
                         ensName = "";
                     }
+                }
+                else
+                {
+                    ensName = fetchPreviouslyUsedENS(address);
                 }
             }
             catch (UnableToResolveENS resolve)
@@ -68,25 +68,6 @@ public class AWEnsResolver extends EnsResolver
             }
             return ensName;
         });
-    }
-
-    //Only checks wallet history for ENS name
-    //TODO: Check address book for name, once addressbook is implemented
-    public String checkENSHistoryForAddress(String address)
-    {
-        String ensName = "";
-        //try previously resolved names
-        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
-        if (historyJson.length() > 0)
-        {
-            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
-            if (history.containsKey(address.toLowerCase()))
-            {
-                ensName = history.get(address.toLowerCase());
-            }
-        }
-
-        return ensName;
     }
 
     private String fetchPreviouslyUsedENS(String address)

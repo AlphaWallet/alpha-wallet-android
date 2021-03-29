@@ -17,6 +17,8 @@ import com.alphawallet.app.util.BalanceUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+
 /**
  * Created by Jenny Jingjing Li on 4/3/2021
  */

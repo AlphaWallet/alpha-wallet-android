@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -237,7 +236,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private void testSeedPhrase(Wallet wallet) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
-        intent.putExtra("TYPE", BackupOperationType.SHOW_SEED_PHRASE);
+        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.SHOW_SEED_PHRASE);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
@@ -263,7 +262,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private void exportJSON(Wallet wallet) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
-        intent.putExtra("TYPE", BackupOperationType.BACKUP_KEYSTORE_KEY);
+        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }

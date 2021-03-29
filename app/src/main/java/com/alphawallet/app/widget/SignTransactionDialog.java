@@ -61,7 +61,7 @@ public class SignTransactionDialog extends BottomSheetDialog
 
         this.callBackId = callBackId;
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        setCanceledOnTouchOutside(false);
+        setCanceledOnTouchOutside(true);
 
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         usePin.setOnClickListener(v -> {
@@ -131,7 +131,6 @@ public class SignTransactionDialog extends BottomSheetDialog
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_CANCELED:
                         authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
-                        cancellationSignal.cancel();
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_HW_NOT_PRESENT:
                     case FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE:

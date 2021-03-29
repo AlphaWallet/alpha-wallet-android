@@ -20,7 +20,6 @@ import android.widget.TextView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -40,8 +39,6 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
-import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 public class NewSettingsFragment extends BaseFragment {
@@ -248,39 +245,42 @@ public class NewSettingsFragment extends BaseFragment {
 
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
-        intent.putExtra("TYPE", BackupOperationType.SHOW_SEED_PHRASE_SETTINGS);
+        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.SHOW_SEED_PHRASE_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);
     }
 
     private void openBackupActivity(Wallet wallet) {
-        Intent intent = new Intent(getContext(), BackupFlowActivity.class);
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
 
         switch (wallet.type)
         {
             case HDKEY:
-                intent.putExtra("TYPE", BACKUP_HD_KEY);
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
                 break;
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                intent.putExtra("TYPE", BACKUP_KEYSTORE_KEY);
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
                 break;
         }
 
         //override if this is an upgrade
-        switch (wallet.authLevel)
+        if (!backUpWalletSetting.getSubtitle().equals(getString(R.string.not_locked)))
         {
-            case NOT_SET:
-            case STRONGBOX_NO_AUTHENTICATION:
-            case TEE_NO_AUTHENTICATION:
-                if (wallet.lastBackupTime > 0)
-                {
-                    intent.putExtra("TYPE", BackupOperationType.UPGRADE_KEY);
-                }
-                break;
-            default:
-                break;
+            switch (wallet.authLevel)
+            {
+                case NOT_SET:
+                case STRONGBOX_NO_AUTHENTICATION:
+                case TEE_NO_AUTHENTICATION:
+                    if (wallet.lastBackupTime > 0)
+                    {
+                        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.UPGRADE_KEY);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

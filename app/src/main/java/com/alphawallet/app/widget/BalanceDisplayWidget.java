@@ -1,9 +1,7 @@
 package com.alphawallet.app.widget;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,8 +14,6 @@ import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by Jenny Jingjing Li on 4/3/2021

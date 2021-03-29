@@ -44,6 +44,8 @@ import io.realm.Realm;
 /**
  * Created by JB on 17/11/2020.
  */
+
+
 public class ActionSheetDialog extends BottomSheetDialog implements StandardFunctionInterface, ActionSheetInterface
 {
     private final ImageView cancelButton;
@@ -514,7 +516,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());
-        balanceDisplay.setNewBalanceText(getTransactionAmount(), networkFee, balanceAfterTransaction, isSendingTransaction());
+        balanceDisplay.setNewBalanceText(token, getTransactionAmount(), networkFee, balanceAfterTransaction, isSendingTransaction());
     }
 
     public void success()

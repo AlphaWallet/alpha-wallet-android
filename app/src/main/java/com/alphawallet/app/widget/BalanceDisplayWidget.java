@@ -28,7 +28,6 @@ public class BalanceDisplayWidget extends LinearLayout
     private final ChainName chainName;
     private final TokenIcon chainIcon;
 
-    private Token token;
     private Activity activity;
 
     public BalanceDisplayWidget(Context context, @Nullable AttributeSet attrs)
@@ -38,16 +37,13 @@ public class BalanceDisplayWidget extends LinearLayout
         balance = findViewById(R.id.text_balance);
         newBalance = findViewById(R.id.text_new_balance);
         chainName = findViewById(R.id.chain_name);
-
-        token = null;
-
         chainIcon = findViewById(R.id.chain_icon);
 
+        activity = null;
     }
 
-    public void setupBalance(Token t, TokensService tokenService, Activity act)
+    public void setupBalance(Token token, TokensService tokenService, Activity act)
     {
-        token = t;
         activity = act;
 
         chainName.setChainID(token.tokenInfo.chainId);
@@ -58,7 +54,7 @@ public class BalanceDisplayWidget extends LinearLayout
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
     }
 
-    public void setNewBalanceText(BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction, boolean isSendingTransaction)
+    public void setNewBalanceText(Token token, BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction, boolean isSendingTransaction)
     {
         balance.setText(activity.getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
 

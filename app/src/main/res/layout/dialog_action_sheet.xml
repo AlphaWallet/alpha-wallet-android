@@ -48,7 +48,7 @@
 
     </RelativeLayout>
 
-    <com.alphawallet.app.widget.BalanceDisplay
+    <com.alphawallet.app.widget.BalanceDisplayWidget
         android:id="@+id/balance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -75,7 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <com.alphawallet.app.widget.AmountDisplay
+    <com.alphawallet.app.widget.AmountDisplayWidget
         android:id="@+id/amount_display"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"/>

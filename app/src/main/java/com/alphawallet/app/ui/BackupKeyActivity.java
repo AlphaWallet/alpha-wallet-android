@@ -26,6 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BackupOperationType;
+import com.alphawallet.app.entity.BackupState;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -46,6 +48,7 @@ import com.google.android.flexbox.FlexboxLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -90,17 +93,65 @@ public class BackupKeyActivity extends BaseActivity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        alertDialog = null;
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        lockOrientation();
+        secureWindow();
 
-        BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
-        wallet = getIntent().getParcelableExtra(WALLET);
-        if (type == null) type = BackupOperationType.UNDEFINED;
+        alertDialog = null;
+        lockOrientation();
 
         toolbar();
         initViewModel();
         determineScreenWidth();
+
+        wallet = getIntent().getParcelableExtra(WALLET);
+
+        if (Objects.requireNonNull(getIntent().getExtras()).containsKey("STATE"))
+        {
+            initBackupState();
+        }
+        else
+        {
+            initBackupType();
+        }
+    }
+
+    private void initBackupState() {
+        state = (BackupState) getIntent().getSerializableExtra("STATE");
+
+        assert state != null;
+        switch (state) {
+            case ENTER_BACKUP_STATE_HD:
+                WriteDownSeedPhrase();
+                DisplaySeed();
+                break;
+            case WRITE_DOWN_SEED_PHRASE:
+            case SHOW_SEED_PHRASE:
+                VerifySeedPhrase();
+                break;
+            case VERIFY_SEED_PHRASE:
+                TestSeedPhrase();
+                break;
+            case SEED_PHRASE_INVALID:
+                ResetInputBox();
+                VerifySeedPhrase();
+                break;
+            case ENTER_JSON_BACKUP:
+                JSONBackup();
+                break;
+            case SET_JSON_PASSWORD:
+                inputView = findViewById(R.id.input_password);
+                keystorePassword = inputView.getText().toString();
+                viewModel.getPasswordForKeystore(wallet, this, this);
+                break;
+            case UPGRADE_KEY_SECURITY:
+                //first open authentication
+                setupUpgradeKey(false);
+                break;
+        }
+    }
+
+    private void initBackupType() {
+        BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
+        if (type == null) type = BackupOperationType.UNDEFINED;
 
         switch (type) {
             case UNDEFINED:
@@ -109,11 +160,12 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
             case BACKUP_HD_KEY:
                 state = BackupState.ENTER_BACKUP_STATE_HD;
-                setHDBackupSplash();
+                WriteDownSeedPhrase();
+                DisplaySeed();
                 break;
             case BACKUP_KEYSTORE_KEY:
                 state = BackupState.ENTER_JSON_BACKUP;
-                setupJSONExport();
+                JSONBackup();
                 break;
             case SHOW_SEED_PHRASE_SETTINGS:
                 state = BackupState.SHOW_SEED_PHRASE_SETTINGS;
@@ -266,6 +318,8 @@ public class BackupKeyActivity extends BaseActivity implements
         state = BackupState.ENTER_JSON_BACKUP;
         functionButtonBar.setPrimaryButtonText(R.string.export_keystore_json);
         functionButtonBar.setPrimaryButtonClickListener(this);
+
+        secureWindow();
     }
 
     private void setupTestSeed() {
@@ -292,6 +346,7 @@ public class BackupKeyActivity extends BaseActivity implements
     @Override
     public void onPause() {
         super.onPause();
+
         viewModel.resetSignDialog();
         //hide seed phrase and any visible words
         if (layoutWordHolder != null) layoutWordHolder.removeAllViews();
@@ -299,7 +354,8 @@ public class BackupKeyActivity extends BaseActivity implements
         switch (state) {
             case WRITE_DOWN_SEED_PHRASE:
             case SHOW_SEED_PHRASE:
-                setHDBackupSplash(); //note, the OS calls onPause if user chooses to authenticate using PIN or password (takes them to the auth screen).
+                //note, the OS calls onPause if user chooses to authenticate using PIN or password (takes them to the auth screen).
+                WriteDownSeedPhrase();
                 break;
 
             case SHOW_SEED_PHRASE_SINGLE:
@@ -310,11 +366,12 @@ public class BackupKeyActivity extends BaseActivity implements
             case SEED_PHRASE_INVALID:
             case VERIFY_SEED_PHRASE:
                 state = BackupState.ENTER_BACKUP_STATE_HD; //reset view back to splash screen
-                setHDBackupSplash();
+                WriteDownSeedPhrase();
+                DisplaySeed();
                 break;
 
             case SET_JSON_PASSWORD:
-                setupJSONExport();
+                JSONBackup();
                 break;
 
             case ENTER_JSON_BACKUP:
@@ -364,10 +421,11 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
             case WRITE_DOWN_SEED_PHRASE:
                 state = BackupState.ENTER_BACKUP_STATE_HD;
-                setHDBackupSplash();
+                keyFailure("");
                 break;
             case SET_JSON_PASSWORD:
-                setupJSONExport();
+                state = BackupState.ENTER_JSON_BACKUP;
+                keyFailure("");
                 break;
             case FINISH:
             case SHOW_SEED_PHRASE_SETTINGS:
@@ -460,6 +518,8 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void finishBackupSuccess(boolean upgradeKey) {
+        state = BackupState.SEED_PHRASE_VALIDATED;
+
         Intent intent = new Intent();
         switch (wallet.type) {
             case KEYSTORE_LEGACY:
@@ -523,7 +583,8 @@ public class BackupKeyActivity extends BaseActivity implements
         verifyTextBox.setText(currentText);
 
         String[] currentTest = currentText.split(" ");
-        if (currentTest.length == mnemonicArray.length) {
+        if (currentTest.length == mnemonicArray.length)
+        {
             functionButtonBar.setPrimaryButtonEnabled(true);
         }
     }
@@ -538,7 +599,8 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void DisplaySeed() {
-        if (layoutWordHolder != null) {
+        if (layoutWordHolder != null)
+        {
             layoutWordHolder.setVisibility(View.VISIBLE);
             layoutWordHolder.removeAllViews();
         }
@@ -552,11 +614,14 @@ public class BackupKeyActivity extends BaseActivity implements
         float textSize;
         int textViewHeight;
 
-        if (screenWidth > 800) {
+        if (screenWidth > 800)
+        {
             textSize = 16.0f;
             padding = Utils.dp2px(this, 20);
             textViewHeight = Utils.dp2px(this, 44);
-        } else {
+        }
+        else
+        {
             textSize = 14.0f;
             padding = Utils.dp2px(this, 16);
             textViewHeight = Utils.dp2px(this, 38);
@@ -587,9 +652,12 @@ public class BackupKeyActivity extends BaseActivity implements
 
     @Override
     public void keyFailure(String message) {
-        if (message != null && message.length() > 0) {
+        if (message != null && message.length() > 0)
+        {
             DisplayKeyFailureDialog(message);
-        } else {
+        }
+        else
+        {
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
             intent.putExtra("Key", wallet.address);
@@ -692,6 +760,10 @@ public class BackupKeyActivity extends BaseActivity implements
                     upgradeKeySecurity();
                     break;
             }
+        }
+        else
+        {
+            DisplayKeyFailureDialog(getString(R.string.authentication_error));
         }
     }
 
@@ -831,21 +903,14 @@ public class BackupKeyActivity extends BaseActivity implements
     public void onInputDoneClick(View view) {
         inputView = findViewById(R.id.input_password);
         keystorePassword = inputView.getText().toString();
-        if (keystorePassword.length() > 5) {
-            //first get authentication
-            viewModel.getAuthentication(wallet, this, this);
-        } else {
+        if (keystorePassword.length() > 5)
+        {
+            viewModel.getPasswordForKeystore(wallet, this, this);
+        }
+        else
+        {
             inputView.setError(R.string.password_6_characters_or_more);
         }
-    }
-
-    private enum BackupState {
-        UNDEFINED, ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
-        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, SHOW_SEED_PHRASE, SHOW_SEED_PHRASE_SETTINGS, SHOW_SEED_PHRASE_SINGLE, UPGRADE_KEY_SECURITY, FINISH
-    }
-
-    public enum BackupOperationType {
-        UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, SHOW_SEED_PHRASE_SETTINGS, EXPORT_PRIVATE_KEY, UPGRADE_KEY
     }
 
     @Override
@@ -891,5 +956,10 @@ public class BackupKeyActivity extends BaseActivity implements
                 viewModel.getAuthentication(wallet, this, this);
                 break;
         }
+    }
+
+    private void secureWindow()
+    {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
     }
 }

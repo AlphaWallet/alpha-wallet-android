@@ -36,6 +36,7 @@ public class BalanceDisplayWidget extends LinearLayout
         newBalance = findViewById(R.id.text_new_balance);
         chainName = findViewById(R.id.chain_name);
         chainIcon = findViewById(R.id.chain_icon);
+
     }
 
     public void setupBalance(Token token, TokensService tokenService)
@@ -49,7 +50,6 @@ public class BalanceDisplayWidget extends LinearLayout
 
     public void setNewBalanceText(Token token, BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction, boolean isSendingTransaction)
     {
-
         if (token.isEthereum())
         {
             balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);

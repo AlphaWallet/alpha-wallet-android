@@ -105,7 +105,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = tx;
         callbackId = tx.leafPosition;
 
-        balanceDisplay.setupBalance(token, tokensService, activity);
+        balanceDisplay.setupBalance(token, tokensService);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
@@ -514,7 +514,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());
-        balanceDisplay.setNewBalanceText(getTransactionAmount(), networkFee, balanceAfterTransaction, isSendingTransaction());
+        balanceDisplay.setNewBalanceText(token, getTransactionAmount(), networkFee, balanceAfterTransaction, isSendingTransaction());
     }
 
     public void success()

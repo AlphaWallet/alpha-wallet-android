@@ -119,7 +119,7 @@ dependencies {
     implementation project(":lib")
 
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  
-    // WARNING!  Don't add depdency on Google Play Services without consulting
+    // WARNING!  Don't add dependency on Google Play Services without consulting
     // WARNING!  The China marketing team
     // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
     // WARNING!  users google gms summarily, like immune systems cleansing infections
@@ -209,5 +209,5 @@ dependencies {
 }
 
 // WARNING WARNING WARNING
-// don't add any additional things here without first search "China" in this file
+// don't add any additional things here without first searching "China" in this file
 

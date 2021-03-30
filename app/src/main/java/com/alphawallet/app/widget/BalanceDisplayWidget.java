@@ -45,13 +45,14 @@ public class BalanceDisplayWidget extends LinearLayout
         balance.setText(getContext().getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
     }
 
-    public void setNewBalanceText(Token token, BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction, boolean isSendingTransaction)
+    public void setNewBalanceText(Token token, BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction)
     {
 
         if (token.isEthereum())
         {
             balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);
-        } else if (isSendingTransaction)
+        }
+        else
         {
             balanceAfterTransaction = token.getBalanceRaw().subtract(transactionAmount).toBigInteger();
         }

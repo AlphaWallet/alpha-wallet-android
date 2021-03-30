@@ -2,17 +2,24 @@ package com.alphawallet.app.ui.widget.entity;
 
 import com.bumptech.glide.signature.ObjectKey;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class IconItem {
     private final String url;
     private final boolean fetchFromCache;
     private final String correctedAddress;
     private final int chainId;
 
-    public IconItem(String url, boolean fetchFromCache, String correctedAddress, int chainId) {
+    private final static Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
+
+    public IconItem(String url, String correctedAddress, int chainId) {
         this.url = url;
-        this.fetchFromCache = fetchFromCache;
+        this.fetchFromCache = iconCheck.containsKey(correctedAddress);
         this.correctedAddress = correctedAddress;
         this.chainId = chainId;
+
+        iconCheck.put(correctedAddress, true);
     }
 
     public String getUrl() {

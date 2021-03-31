@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -37,7 +36,7 @@ public class ChainName extends LinearLayout
 
     public void invertChainID(int chainId)
     {
-        chainName.setTextColor(Utils.getChainColour(chainId));
+        chainName.setTextColor(getContext().getColor(Utils.getChainColour(chainId)));
         chainName.setBackgroundResource(0);
     }
 

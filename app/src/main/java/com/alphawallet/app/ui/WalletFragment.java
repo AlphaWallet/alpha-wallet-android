@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,7 +48,6 @@ import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
@@ -96,7 +94,6 @@ public class WalletFragment extends BaseFragment implements
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
-    private ImageView addressBlockie;
     private View selectedToken;
     private final Handler handler = new Handler();
     private String importFileName;
@@ -169,7 +166,6 @@ public class WalletFragment extends BaseFragment implements
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
         recyclerView = view.findViewById(R.id.list);
-        addressBlockie = view.findViewById(R.id.user_address_blockie);
 
         progressView.hide();
         systemView.showProgress(true);
@@ -183,7 +179,6 @@ public class WalletFragment extends BaseFragment implements
         if (CustomViewSettings.showManageTokens()) {
             adapter.setWalletAddress(wallet.address);
         }
-        addressBlockie.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
         //Do we display new user backup popup?
         ((HomeActivity) getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);

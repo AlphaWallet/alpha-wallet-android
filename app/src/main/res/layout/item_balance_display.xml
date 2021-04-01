@@ -13,7 +13,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp20"
+        android:layout_marginTop="@dimen/dp16"
         android:orientation="horizontal">
 
         <TextView
@@ -32,7 +32,7 @@
             android:id="@+id/relativeLayout2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/dp14"
+            android:layout_marginBottom="@dimen/dp8"
             android:layout_weight="3.4"
             android:orientation="vertical"
             custom:layout_constraintBottom_toTopOf="@+id/text_new_balance"
@@ -76,8 +76,8 @@
 
             <com.alphawallet.app.widget.TokenIcon
                 android:id="@+id/chain_icon"
-                android:layout_width="39dp"
-                android:layout_height="41dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 custom:largeIcon="false"
                 custom:layout_constrainedHeight="true"
                 custom:layout_constrainedWidth="true"

@@ -17,13 +17,6 @@
     app:popupTheme="@style/AppTheme.PopupOverlay"
     app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
-    <ImageView
-        android:id="@+id/user_address_blockie"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/big_green_tick"
-        android:layout_marginHorizontal="15dp"/>
-
     <TextView
         android:id="@+id/toolbar_title"
         android:layout_width="wrap_content"
@@ -33,11 +26,10 @@
         android:ellipsize="end"
         android:fontFamily="@font/font_semibold"
         android:gravity="center"
-        android:paddingHorizontal="15dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         android:singleLine="true"
         android:textColor="@color/toolbar_text_color"
         android:textSize="20sp" />
-
-
 
 </androidx.appcompat.widget.Toolbar>

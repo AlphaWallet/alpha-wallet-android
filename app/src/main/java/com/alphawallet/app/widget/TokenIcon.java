@@ -50,7 +50,6 @@ public class TokenIcon extends ConstraintLayout
     private AssetDefinitionService assetDefinition;
     private boolean showStatus = false;
     private boolean largeIcon = false;
-    private boolean smallIcon = false;
     private StatusType currentStatus;
 
     public TokenIcon(Context context, AttributeSet attrs)

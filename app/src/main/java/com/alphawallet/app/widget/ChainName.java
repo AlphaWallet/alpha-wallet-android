@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,6 +32,12 @@ public class ChainName extends LinearLayout
     {
         Utils.setChainColour(chainName, chainId);
         chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
+    }
+
+    public void invertChainID(int chainId)
+    {
+        chainName.setTextColor(getContext().getColor(Utils.getChainColour(chainId)));
+        chainName.setBackgroundResource(0);
     }
 
     private void getAttrs(Context context, AttributeSet attrs)

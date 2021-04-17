@@ -57,7 +57,7 @@ public class SelectNetworkActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
+        setContentView(R.layout.activity_select_network);
         toolbar();
         setTitle(getString(R.string.select_active_networks));
 

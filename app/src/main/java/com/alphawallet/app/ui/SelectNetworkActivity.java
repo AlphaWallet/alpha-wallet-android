@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -14,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,9 +25,10 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModel;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +43,15 @@ public class SelectNetworkActivity extends BaseActivity {
     @Inject
     SelectNetworkViewModelFactory viewModelFactory;
     private SelectNetworkViewModel viewModel;
-    private RecyclerView recyclerView;
-    private CustomAdapter adapter;
+    private RecyclerView mainnetRecyclerView;
+    private RecyclerView testnetRecyclerView;
+    private CustomAdapter mainnetAdapter;
+    private CustomAdapter testnetAdapter;
+    private SwitchMaterial mainnetSwitch;
+    private SwitchMaterial testnetSwitch;
     private boolean singleItem;
     private String selectedChainId;
+    private BottomSheetDialog dialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,18 +64,86 @@ public class SelectNetworkActivity extends BaseActivity {
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(SelectNetworkViewModel.class);
 
-        if (getIntent() != null) {
+        if (getIntent() != null)
+        {
             singleItem = getIntent().getBooleanExtra(C.EXTRA_SINGLE_ITEM, false);
             selectedChainId = getIntent().getStringExtra(C.EXTRA_CHAIN_ID);
         }
 
-        if (selectedChainId == null || selectedChainId.isEmpty()) {
+        if (selectedChainId == null || selectedChainId.isEmpty())
+        {
             selectedChainId = viewModel.getFilterNetworkList();
         }
 
-        recyclerView = findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new ListDivider(this));
+        initViews();
+    }
+
+    private void initViews()
+    {
+        mainnetSwitch = findViewById(R.id.mainnet_switch);
+        testnetSwitch = findViewById(R.id.testnet_switch);
+
+        mainnetSwitch.setChecked(viewModel.isActiveMainnet());
+        testnetSwitch.setChecked(!viewModel.isActiveMainnet());
+
+        mainnetRecyclerView = findViewById(R.id.main_list);
+        mainnetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mainnetRecyclerView.addItemDecoration(new ListDivider(this));
+
+        testnetRecyclerView = findViewById(R.id.test_list);
+        testnetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        testnetRecyclerView.addItemDecoration(new ListDivider(this));
+
+        dialog = new BottomSheetDialog(this);
+        dialog.setContentView(R.layout.layout_dialog_testnet_confirmation);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.findViewById(R.id.enable_testnet_action).setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.findViewById(R.id.close_action).setOnClickListener(v -> {
+            testnetSwitch.setChecked(false);
+            dialog.dismiss();
+        });
+
+        CompoundButton.OnCheckedChangeListener mainnetListener = (compoundButton, b) -> {
+            testnetSwitch.setChecked(!b);
+        };
+
+        CompoundButton.OnCheckedChangeListener testnetListener = (compoundButton, b) ->
+        {
+            if (b)
+            {
+                testnetRecyclerView.setVisibility(View.VISIBLE);
+                mainnetRecyclerView.setVisibility(View.GONE);
+                dialog.show();
+            }
+            else
+            {
+                testnetRecyclerView.setVisibility(View.GONE);
+                mainnetRecyclerView.setVisibility(View.VISIBLE);
+            }
+
+            mainnetSwitch.setOnCheckedChangeListener(null);
+            mainnetSwitch.setChecked(!b);
+            mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
+
+            viewModel.setActiveMainnet(!b);
+        };
+
+        if (viewModel.isActiveMainnet())
+        {
+            testnetRecyclerView.setVisibility(View.GONE);
+            mainnetRecyclerView.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            testnetRecyclerView.setVisibility(View.VISIBLE);
+            mainnetRecyclerView.setVisibility(View.GONE);
+        }
+
+        mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
+        testnetSwitch.setOnCheckedChangeListener(testnetListener);
     }
 
     @Override
@@ -82,7 +156,8 @@ public class SelectNetworkActivity extends BaseActivity {
     }
 
     private void setupFilterList() {
-        ArrayList<NetworkItem> list = new ArrayList<>();
+        ArrayList<NetworkItem> mainnetlist = new ArrayList<>();
+        ArrayList<NetworkItem> testnetlist = new ArrayList<>();
         List<Integer> intList = Utils.intListToArray(selectedChainId);
         List<Integer> activeNetworks = viewModel.getActiveNetworks();
 
@@ -98,14 +173,26 @@ public class SelectNetworkActivity extends BaseActivity {
             intList.add(MAINNET_ID);
         }
 
-        for (NetworkInfo info : viewModel.getNetworkList()) {
-            if (!singleItem || activeNetworks.contains(info.chainId)) {
-                list.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
+        for (NetworkInfo info : viewModel.getNetworkList())
+        {
+            if (!singleItem || activeNetworks.contains(info.chainId))
+            {
+                if (EthereumNetworkRepository.hasRealValue(info.chainId))
+                {
+                    mainnetlist.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
+                }
+                else
+                {
+                    testnetlist.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
+                }
             }
         }
 
-        adapter = new CustomAdapter(list, singleItem);
-        recyclerView.setAdapter(adapter);
+        mainnetAdapter = new CustomAdapter(mainnetlist, singleItem);
+        mainnetRecyclerView.setAdapter(mainnetAdapter);
+
+        testnetAdapter = new CustomAdapter(testnetlist, singleItem);
+        testnetRecyclerView.setAdapter(testnetAdapter);
     }
 
     @Override
@@ -128,7 +215,7 @@ public class SelectNetworkActivity extends BaseActivity {
     }
 
     private void handleSetNetworks() {
-        Integer[] filterList = adapter.getSelectedItems();
+        Integer[] filterList = mainnetSwitch.isChecked() ? mainnetAdapter.getSelectedItems() : testnetAdapter.getSelectedItems();
         if (filterList.length == 0)
         {
             filterList = EthereumNetworkRepository.addDefaultNetworks().toArray(new Integer[0]);
@@ -138,12 +225,11 @@ public class SelectNetworkActivity extends BaseActivity {
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_CHAIN_ID, filterList[0]);
             setResult(RESULT_OK, intent);
-            finish();
         } else {
             viewModel.setFilterNetworks(filterList);
             sendBroadcast(new Intent(C.RESET_WALLET));
-            finish();
         }
+        finish();
     }
 
     @Override
@@ -270,7 +356,7 @@ public class SelectNetworkActivity extends BaseActivity {
 
     private void setSelectedNetworks()
     {
-        Integer[] filterList = adapter.getSelectedItems();
+        Integer[] filterList = mainnetSwitch.isChecked() ? mainnetAdapter.getSelectedItems() : testnetAdapter.getSelectedItems();
         viewModel.setFilterNetworks(filterList);
     }
 

@@ -23,6 +23,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
+    public static final String ACTIVE_MAINNET = "active_mainnet";
 
     private final SharedPreferences pref;
 
@@ -145,5 +146,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public boolean getFullScreenState()
     {
         return pref.getBoolean(FULL_SCREEN_STATE, false);
+    }
+
+    @Override
+    public void setActiveMainnet(boolean state) {
+        pref.edit().putBoolean(ACTIVE_MAINNET, state).apply();
+    }
+
+    @Override
+    public boolean isActiveMainnet() {
+        return pref.getBoolean(ACTIVE_MAINNET, true);
     }
 }

@@ -201,11 +201,11 @@ public class TransactionInput
         switch (type)
         {
             case APPROVE: //show address as token name, ENS name or formatted address
-                String amount = getFirstValueScaled(ctx, t.tokenInfo.decimals);
+                String amount = getOperationValue(t, tx);
                 String approveAddr = getFirstAddress();
                 Token approveToken = tService.getToken(tx.chainId, approveAddr);
                 approveAddr = approveToken == null ? ENSHandler.matchENSOrFormat(ctx, approveAddr) : approveToken.getShortName();
-                operation = ctx.getString(R.string.default_approve, amount, t.getSymbol(), approveAddr);
+                operation = ctx.getString(R.string.default_approve, amount, approveAddr);
                 break;
             case TERMINATE_CONTRACT:
                 operation = ENSHandler.matchENSOrFormat(ctx, tx.to);
@@ -562,7 +562,8 @@ public class TransactionInput
                 break;
             case APPROVE:
             case ALLOCATE_TO:
-                operationValue = getFirstValueScaled(null, token.tokenInfo.decimals);
+                operationValue = getApproveValue(token);
+                if (token.isNonFungible()) addSymbol = false;
                 break;
             case TRANSFER_TO:
             case RECEIVE_FROM:
@@ -611,6 +612,20 @@ public class TransactionInput
         }
 
         return operationValue;
+    }
+
+    private String getApproveValue(Token token)
+    {
+        if (token.isNonFungible() && miscData.size() > 0)
+        {
+            //grab tokenId
+            BigInteger bi = new BigInteger(miscData.get(0), 16);
+            return "#" + bi.toString(10);
+        }
+        else
+        {
+            return getFirstValueScaled(null, token.tokenInfo.decimals);
+        }
     }
 
     public boolean shouldShowSymbol(Token token)

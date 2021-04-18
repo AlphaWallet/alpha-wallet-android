@@ -705,7 +705,7 @@
     <string name="default_to">Sent %1$s %2$s to %3$s</string>
     <string name="default_from">Received %1$s %2$s from %3$s</string>
     <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
-    <string name="default_approve">Approved %3$s to move %1$s %2$s</string>
+    <string name="default_approve">Approved %2$s to move %1$s</string>
     <string name="contract_call">合约调用</string>
     <string name="insufficient_gas">资金不够</string>
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>

@@ -99,6 +99,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         Token token = getOperationToken();
         if (token == null) return;
 
+        if (token.getSymbol().equalsIgnoreCase("SART"))
+        {
+            System.out.println("YOLESS");
+        }
+
         String operationName = token.getOperationName(transaction, getContext());
 
         String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);

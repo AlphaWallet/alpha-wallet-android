@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
 
@@ -49,6 +50,7 @@ public class MyDappsFragment extends Fragment {
         list.setAdapter(adapter);
         noDapps = view.findViewById(R.id.no_dapps);
         showOrHideViews();
+        KeyboardUtils.hideKeyboard(view);
         return view;
     }
 

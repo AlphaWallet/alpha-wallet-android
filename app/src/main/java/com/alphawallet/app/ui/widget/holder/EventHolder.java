@@ -114,6 +114,11 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         }
         token = tokensService.getToken(eventData.getChainId(), eventData.getTokenAddress());
 
+        if (token.getSymbol().equalsIgnoreCase("SART"))
+        {
+            System.out.println("YOLESS");
+        }
+
         if (token == null) token = tokensService.getToken(data.chainId, walletAddress);
         String sym = token.getShortSymbol();
         tokenIcon.bindData(token, assetDefinition);

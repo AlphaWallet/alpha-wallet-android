@@ -196,15 +196,15 @@ public class SelectNetworkActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                handleSetNetworks();
-                break;
-            }
-            case R.id.action_filter: {
-                viewModel.openFilterSelect(this);
-            }
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            handleSetNetworks();
+        }
+        else if (item.getItemId() == R.id.action_filter)
+        {
+            viewModel.openFilterSelect(this);
         }
         return super.onOptionsItemSelected(item);
     }

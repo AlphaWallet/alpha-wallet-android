@@ -42,20 +42,15 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -84,7 +79,6 @@ public class HomeViewModel extends BaseViewModel {
     private final Context context;
     private final MyAddressRouter myAddressRouter;
     private final AnalyticsServiceType analyticsService;
-    private final TokensService tokensService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -107,8 +101,7 @@ public class HomeViewModel extends BaseViewModel {
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
             TickerService tickerService,
-            AnalyticsServiceType analyticsService,
-            TokensService tokensService) {
+            AnalyticsServiceType analyticsService) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -123,7 +116,6 @@ public class HomeViewModel extends BaseViewModel {
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
         this.analyticsService = analyticsService;
-        this.tokensService = tokensService;
     }
 
     @Override
@@ -435,68 +427,5 @@ public class HomeViewModel extends BaseViewModel {
     public boolean fullScreenSelected()
     {
         return preferenceRepository.getFullScreenState();
-    }
-
-    public void setActiveNetwork()
-    {
-        String selectedChainIds = getFilterNetworkList();
-        List<Integer> testNetworks = new ArrayList<>();
-
-        for (NetworkInfo info : getNetworkList())
-        {
-            if (isActiveMainnet() && !EthereumNetworkRepository.hasRealValue(info.chainId))
-            {
-                testNetworks.add(info.chainId);
-            }
-        }
-
-        if (testNetworks.size() > 0)
-        {
-            List<Integer> activeNetworks = Utils.intListToArray(selectedChainIds);
-            for (Iterator<Integer> iterator = activeNetworks.iterator(); iterator.hasNext(); )
-            {
-                Integer chainId = iterator.next();
-                if (testNetworks.contains(chainId))
-                {
-                    iterator.remove();
-                }
-            }
-            setFilterNetworks(activeNetworks);
-        }
-    }
-
-    public boolean isActiveMainnet()
-    {
-        return preferenceRepository.isActiveMainnet();
-    }
-
-    public void setFilterNetworks(List<Integer> selectedItems)
-    {
-        int[] selectedIds = new int[selectedItems.size()];
-        int index = 0;
-        for (Integer selectedId : selectedItems)
-        {
-            selectedIds[index++] = selectedId;
-        }
-        ethereumNetworkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter();
-    }
-
-    public NetworkInfo[] getNetworkList()
-    {
-        return ethereumNetworkRepository.getAvailableNetworkList();
-    }
-
-    public String getFilterNetworkList()
-    {
-        List<Integer> networkIds = ethereumNetworkRepository.getFilterNetworkList();
-        StringBuilder sb = new StringBuilder();
-        boolean firstValue = true;
-        for (int networkId : networkIds) {
-            if (!firstValue) sb.append(",");
-            sb.append(networkId);
-            firstValue = false;
-        }
-        return sb.toString();
     }
 }

@@ -19,7 +19,6 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 
@@ -40,8 +39,7 @@ class HomeModule {
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
             TickerService tickerService,
-            AnalyticsServiceType analyticsService,
-            TokensService tokensService) {
+            AnalyticsServiceType analyticsService) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -56,8 +54,7 @@ class HomeModule {
                 myAddressRouter,
                 transactionsService,
                 tickerService,
-                analyticsService,
-                tokensService);
+                analyticsService);
     }
 
     @Provides

@@ -545,4 +545,14 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         fetchTransactionsInteract.restartTransactionService();
     }
+
+    public void updateTokensCheck(Token token)
+    {
+        tokensService.setFocusToken(token);
+    }
+
+    public void clearFocusToken()
+    {
+        tokensService.clearFocusToken();
+    }
 }

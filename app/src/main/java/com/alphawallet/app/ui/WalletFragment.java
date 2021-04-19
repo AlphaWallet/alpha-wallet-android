@@ -247,6 +247,7 @@ public class WalletFragment extends BaseFragment implements
         handler.post(() -> {
             adapter.clear();
             viewModel.prepare();
+            viewModel.notifyRefresh();
         });
     }
 

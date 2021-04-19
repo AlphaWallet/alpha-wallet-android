@@ -583,7 +583,7 @@ public class TokensRealmSource implements TokenLocalSource {
         deleteAssets(realm, dbKey);
 
         //now create the assets inside this
-        for (Asset asset : e.getTokenAssets())
+        for (Asset asset : e.getTokenAssets().values())
         {
             RealmERC721Asset realmAsset = realm.where(RealmERC721Asset.class)
                     .equalTo("tokenIdAddr", RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), dbKey))

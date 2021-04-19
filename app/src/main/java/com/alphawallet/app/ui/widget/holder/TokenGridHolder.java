@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 
 public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
@@ -56,9 +57,9 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
             Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
             if (token.isERC721()) {
                 ERC721Token tkn = (ERC721Token) token;
-                List<Asset> assets = tkn.getTokenAssets();
+                Collection<Asset> assets = tkn.getTokenAssets().values();
                 if (assets != null && assets.size() > 0) {
-                    Asset firstAsset = assets.get(0);
+                    Asset firstAsset = assets.iterator().next();
                     if (firstAsset != null) {
                         Glide.with(getContext())
                                 .load(firstAsset.getImagePreviewUrl())

@@ -47,6 +47,7 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 
@@ -55,8 +56,6 @@ import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
@@ -181,7 +180,7 @@ public class HomeViewModel extends BaseViewModel {
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);
 
-            if (isValidAddress(data.contractAddress)) {
+            if (Utils.isAddressValid(data.contractAddress)) {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {

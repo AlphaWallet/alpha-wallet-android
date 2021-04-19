@@ -35,7 +35,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 4/12/2018.
@@ -124,7 +123,7 @@ public class ENSHandler implements Runnable
             if (disposable != null && !disposable.isDisposed()) disposable.dispose();
             host.setWaitingSpinner(false);
         }
-        else if (isValidAddress(host.getInputText()))
+        else if (Utils.isAddressValid(host.getInputText()))
         {
             //finding the ENS address is not required, only helpful so no need to wait
             handler.post(this);
@@ -175,7 +174,7 @@ public class ENSHandler implements Runnable
     {
         waitingForENS = false;
         host.setWaitingSpinner(false);
-        if (!TextUtils.isEmpty(resolvedAddress) && isValidAddress(resolvedAddress) && canBeENSName(ensDomain))
+        if (Utils.isAddressValid(resolvedAddress) && canBeENSName(ensDomain))
         {
             host.getInputView().dismissDropDown();
             host.setStatus(resolvedAddress);
@@ -184,7 +183,7 @@ public class ENSHandler implements Runnable
             storeItem(resolvedAddress, ensDomain);
             host.ENSResolved(resolvedAddress, ensDomain);
         }
-        else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && isValidAddress(ensDomain)) //in case user typed an address and hit an ENS name
+        else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && Utils.isAddressValid(ensDomain)) //in case user typed an address and hit an ENS name
         {
             host.getInputView().dismissDropDown();
             host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
@@ -221,7 +220,7 @@ public class ENSHandler implements Runnable
 
     public static boolean canBeENSName(String address)
     {
-        return !TextUtils.isEmpty(address) && !isValidAddress(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
+        return !Utils.isAddressValid(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
     }
 
     @Override
@@ -233,7 +232,7 @@ public class ENSHandler implements Runnable
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
 
         //is this an address? If so, attempt reverse lookup or resolve from known ENS addresses
-        if (!TextUtils.isEmpty(to) && isValidAddress(to))
+        if (Utils.isAddressValid(to))
         {
             initENSHandler();
             host.setWaitingSpinner(true);

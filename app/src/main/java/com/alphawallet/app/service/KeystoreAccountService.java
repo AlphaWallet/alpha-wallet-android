@@ -1,31 +1,45 @@
 package com.alphawallet.app.service;
 
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.Signable;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
 
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.crypto.*;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.Sign;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.crypto.WalletFile;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
-import org.web3j.utils.Bytes;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 
@@ -380,7 +394,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                 String fName = f.getName();
                 int index = fName.lastIndexOf("-");
                 String address = "0x" + fName.substring(index + 1);
-                if (WalletUtils.isValidAddress(address))
+                if (Utils.isAddressValid(address))
                 {
                     String d = fName.substring(5, index-1).replace("T", " ").substring(0, 23);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS", Locale.ROOT);

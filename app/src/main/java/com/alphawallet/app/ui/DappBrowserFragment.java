@@ -375,7 +375,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.stopLoading();
 
             web3.loadUrl(EthereumNetworkRepository.defaultDapp(), getWeb3Headers());
-            urlTv.setText(EthereumNetworkRepository.defaultDapp());
+            setUrlText(EthereumNetworkRepository.defaultDapp());
         }
 
         //blank forward / backward arrows
@@ -899,6 +899,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void setUrlText(String newUrl)
     {
+        if (getView() == null) return;
+        urlTv = getView().findViewById(R.id.url_tv);
         urlTv.setText(newUrl);
         setBackForwardButtons();
     }
@@ -1183,7 +1185,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             //load homepage
             homePressed = true;
             web3.loadUrl(EthereumNetworkBase.defaultDapp(), getWeb3Headers());
-            urlTv.setText(EthereumNetworkBase.defaultDapp());
+            setUrlText(EthereumNetworkBase.defaultDapp());
             checkBackClickArrowVisibility();
         }
         else
@@ -1259,7 +1261,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             WebHistoryItem newItem = sessionHistory.getItemAtIndex(newIndex);
             if (newItem != null)
             {
-                urlTv.setText(newItem.getUrl());
+                setUrlText(newItem.getUrl());
             }
         }
     }
@@ -1334,7 +1336,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         cancelSearchSession();
         if (checkForMagicLink(urlText)) return true;
         web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
-        urlTv.setText(Utils.formatUrl(urlText));
+        setUrlText(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
         Activity current = getActivity();
@@ -1349,7 +1351,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         cancelSearchSession();
         addToBackStack(DAPP_BROWSER);
-        urlTv.setText(Utils.formatUrl(urlText));
+        setUrlText(Utils.formatUrl(urlText));
         web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
         //ensure focus isn't on the keyboard
         KeyboardUtils.hideKeyboard(urlTv);

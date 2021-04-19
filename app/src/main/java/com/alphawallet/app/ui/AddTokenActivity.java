@@ -1,12 +1,9 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -16,6 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -56,7 +56,6 @@ import dagger.android.AndroidInjection;
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface
 {
@@ -297,7 +296,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onCheck(String address)
     {
-        if (!isValidAddress(address))
+        if (!Utils.isAddressValid(address))
         {
             //if it's not a valid address is there something that appears to be an address in here?
             Matcher matcher = findAddress.matcher(address);
@@ -307,7 +306,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             }
         }
 
-        if (isValidAddress(address) && !address.equals(lastCheck))
+        if (Utils.isAddressValid(address) && !address.equals(lastCheck))
         {
             lastCheck = address;
             showProgress(true);
@@ -346,7 +345,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             isValid = false;
         }
 
-        if (!isValidAddress(address)) {
+        if (!Utils.isAddressValid(address)) {
             inputAddressView.setError(getString(R.string.error_invalid_address));
             isValid = false;
         }

@@ -22,8 +22,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
-
-import org.web3j.crypto.WalletUtils;
+import com.alphawallet.app.util.Utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -553,7 +552,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     private void saveToken(Wallet wallet, Token token, Date currentTime) {
-        if (!WalletUtils.isValidAddress(wallet.address)) return;
+        if (!Utils.isAddressValid(wallet.address)) return;
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             realm.executeTransaction(instance -> {

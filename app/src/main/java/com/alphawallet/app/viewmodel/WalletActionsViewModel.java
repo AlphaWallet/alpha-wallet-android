@@ -72,6 +72,8 @@ public class WalletActionsViewModel extends BaseViewModel {
         isTaskRunning.postValue(true);
         disposable = deleteWalletInteract
                 .delete(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onDelete, this::onDeleteWalletError);
     }
 

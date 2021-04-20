@@ -784,10 +784,10 @@ public class Utils {
     {
         if (TextUtils.isEmpty(URL)) return URL;
         String parsed = URL;
-        int ipfsIndex = URL.indexOf("/ipfs/");
+        int ipfsIndex = URL.lastIndexOf("/ipfs/");
         if (ipfsIndex >= 0)
         {
-            parsed = "https://ipfs.io/ipfs/" + URL.substring(ipfsIndex);
+            parsed = "https://ipfs.io" + URL.substring(ipfsIndex);
         }
 
         return parsed;

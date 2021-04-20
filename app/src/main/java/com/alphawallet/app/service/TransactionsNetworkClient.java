@@ -658,7 +658,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 else
                 {
                     //removed a token
-                    //too easy
                     token.removeBalance(ev.tokenID);
                 }
             }

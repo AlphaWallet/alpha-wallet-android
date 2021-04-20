@@ -46,8 +46,9 @@ public class Utils {
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
+    public  static final String ALPHAWALLET_REPO_NAME = "alphawallet/iconassets";
     private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/alphawallet/iconassets/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/" + ALPHAWALLET_REPO_NAME + "/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -767,6 +768,11 @@ public class Utils {
         tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
 
         return tURL;
+    }
+
+    public static String getAWIconRepo(String address)
+    {
+        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
     }
 
     public static boolean isContractCall(Context context, String operationName)

@@ -157,8 +157,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     @Nullable
     private Disposable checkEventDisposable;
 
-    private final Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
-
     /* Designed with the assmuption that only a single instance of this class at any given time
     *  ^^ The "service" part of AssetDefinitionService is the keyword here.
     *  This is shorthand in the project to indicate this is a singleton that other classes inject.
@@ -2569,10 +2567,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
         }
 
-        boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
-        iconCheck.put(correctedAddr, true);
-
-        return new IconItem(tURL, onlyTryCache, correctedAddr, token.tokenInfo.chainId);
+        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)

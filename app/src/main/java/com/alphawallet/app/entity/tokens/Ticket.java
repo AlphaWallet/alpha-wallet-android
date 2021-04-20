@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
@@ -83,7 +84,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return bigIntListToString(balanceArray, true);
+        else return Utils.bigIntListToString(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -143,7 +144,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(bigIntListToString(balanceArray, true));
+        realmToken.setBalance(Utils.bigIntListToString(balanceArray, true));
     }
 
     @Override
@@ -406,7 +407,7 @@ public class Ticket extends Token implements Parcelable
     public String getTransferListFormat(String CSVstringIdList)
     {
         List<BigInteger> indexList = ticketIdStringToIndexList(CSVstringIdList); //convert the list of tokenID to indices.
-        return bigIntListToString(indexList, true);
+        return Utils.bigIntListToString(indexList, true);
     }
 
     /**

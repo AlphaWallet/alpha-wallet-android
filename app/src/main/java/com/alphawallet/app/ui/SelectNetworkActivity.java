@@ -1,15 +1,9 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +11,16 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
@@ -31,6 +31,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -50,7 +51,8 @@ public class SelectNetworkActivity extends BaseActivity {
     private SwitchMaterial mainnetSwitch;
     private SwitchMaterial testnetSwitch;
     private boolean singleItem;
-    private String selectedChainId;
+    private boolean switchedNetworks = false;
+    private String selectedChainId = null;
     private BottomSheetDialog dialog;
 
     @Override
@@ -112,25 +114,25 @@ public class SelectNetworkActivity extends BaseActivity {
 
         CompoundButton.OnCheckedChangeListener testnetListener = (compoundButton, b) ->
         {
-            if (b)
-            {
-                testnetRecyclerView.setVisibility(View.VISIBLE);
-                mainnetRecyclerView.setVisibility(View.GONE);
-                dialog.show();
-            }
-            else
-            {
-                testnetRecyclerView.setVisibility(View.GONE);
-                mainnetRecyclerView.setVisibility(View.VISIBLE);
-            }
-
             mainnetSwitch.setOnCheckedChangeListener(null);
             mainnetSwitch.setChecked(!b);
             mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
 
             viewModel.setActiveMainnet(!b);
+            setupListVisibility();
+            //ask user to confirm new dappbrowser network
+            pickNewBrowserNetwork();
+            switchedNetworks = true;
         };
 
+        setupListVisibility();
+
+        mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
+        testnetSwitch.setOnCheckedChangeListener(testnetListener);
+    }
+
+    private void setupListVisibility()
+    {
         if (viewModel.isActiveMainnet())
         {
             testnetRecyclerView.setVisibility(View.GONE);
@@ -141,18 +143,6 @@ public class SelectNetworkActivity extends BaseActivity {
             testnetRecyclerView.setVisibility(View.VISIBLE);
             mainnetRecyclerView.setVisibility(View.GONE);
         }
-
-        mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
-        testnetSwitch.setOnCheckedChangeListener(testnetListener);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (singleItem) {
-            setTitle(getString(R.string.select_single_network));
-            getMenuInflater().inflate(R.menu.menu_filter_network, menu);
-        }
-        return super.onCreateOptionsMenu(menu);
     }
 
     private void setupFilterList() {
@@ -161,30 +151,23 @@ public class SelectNetworkActivity extends BaseActivity {
         List<Integer> intList = Utils.intListToArray(selectedChainId);
         List<Integer> activeNetworks = viewModel.getActiveNetworks();
 
-        //Ensure that there's always a network selected in single network mode
-        if (singleItem && (intList.size() < 1 || !activeNetworks.contains(intList.get(0)))) {
-            intList.clear();
-            intList.add(MAINNET_ID);
-        }
-
         //if active networks is empty ensure mainnet is displayed
         if (activeNetworks.size() == 0) {
             activeNetworks.add(MAINNET_ID);
             intList.add(MAINNET_ID);
         }
 
+        //If we're in 'single selection' mode (eg dappbrowser network select) this sets up the currently selected network
+        //If we're in 'group selection' mode (eg select active networks) it sets any currently selected networks
         for (NetworkInfo info : viewModel.getNetworkList())
         {
-            if (!singleItem || activeNetworks.contains(info.chainId))
+            if (EthereumNetworkRepository.hasRealValue(info.chainId))
             {
-                if (EthereumNetworkRepository.hasRealValue(info.chainId))
-                {
-                    mainnetlist.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
-                }
-                else
-                {
-                    testnetlist.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
-                }
+                mainnetlist.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
+            }
+            else
+            {
+                testnetlist.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
             }
         }
 
@@ -222,6 +205,9 @@ public class SelectNetworkActivity extends BaseActivity {
         }
 
         if (singleItem) {
+            //ensure any single selection is made into an active network
+            // - eg if user is using xDai in a dapp, received xdai token they won't appear unless they also activated xDai network
+            addNetworkToActiveList(filterList[0]);
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_CHAIN_ID, filterList[0]);
             setResult(RESULT_OK, intent);
@@ -238,9 +224,61 @@ public class SelectNetworkActivity extends BaseActivity {
         setupFilterList();
     }
 
+    /**
+     * User just switched between testnet / mainnet, prompt them to pick a new dappbrowser network if in network selection
+     *  - or just pick the first network if we're already picking a single item
+     */
+    private void pickNewBrowserNetwork()
+    {
+        if (!singleItem)
+        {
+            NetworkInfo currentNetwork = viewModel.getDefaultNetwork();
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SelectNetworkActivity.this);
+                AlertDialog dialog = builder.setTitle(R.string.change_network_title)
+                        .setMessage(getString(R.string.change_network_message, currentNetwork.getShortName()))
+                        .setPositiveButton(R.string.ok, (d, w) -> {
+                            //remove network from filter
+                            setSelectedNetworks();
+                            //open network select
+                            selectNetwork(getFirstSelectionItem().getChainId());
+                        })
+                        .create();
+                dialog.show();
+            });
+        }
+        else
+        {
+            acceptPreviousOrSetDefault();
+        }
+    }
+
+    //single selection: is an item already set? If not, select first item in list to be active
+    private void acceptPreviousOrSetDefault()
+    {
+        CustomAdapter activeAdapter = viewModel.isActiveMainnet() ? mainnetAdapter : testnetAdapter;
+        if (!activeAdapter.hasSelection())
+        {
+            getFirstSelectionItem().setSelected(true);
+            activeAdapter.notifyItemChanged(0);
+        }
+    }
+
+    private NetworkItem getFirstSelectionItem()
+    {
+        CustomAdapter useAdapter = viewModel.isActiveMainnet() ? mainnetAdapter : testnetAdapter;
+        if (useAdapter.dataSet.size() > 0)
+        {
+            return useAdapter.dataSet.get(0);
+        }
+        else
+        {
+            return new NetworkItem(C.ETHEREUM_NETWORK_NAME, MAINNET_ID, false);
+        }
+    }
+
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         private ArrayList<NetworkItem> dataSet;
-        private int chainId;
         private final boolean singleItem;
 
         public Integer[] getSelectedItems() {
@@ -253,12 +291,22 @@ public class SelectNetworkActivity extends BaseActivity {
         }
 
         @Override
-        public CustomAdapter.CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public CustomAdapter.CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             int buttonTypeId = singleItem ? R.layout.item_simple_radio : R.layout.item_simple_check;
             View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(buttonTypeId, parent, false);
 
             return new CustomAdapter.CustomViewHolder(itemView);
+        }
+
+        // Determine if the adapter already has an item selected
+        public boolean hasSelection()
+        {
+            for (NetworkItem data : dataSet) {
+                if (data.isSelected()) return true;
+            }
+
+            return false;
         }
 
         class CustomViewHolder extends RecyclerView.ViewHolder {
@@ -325,7 +373,7 @@ public class SelectNetworkActivity extends BaseActivity {
         {
             NetworkInfo currentNetwork = viewModel.getDefaultNetwork();
             NetworkItem selectedItem = dataSet.get(position);
-            if (!selectedItem.isSelected() && currentNetwork != null && selectedItem.getChainId() == currentNetwork.chainId)
+            if (!singleItem && !selectedItem.isSelected() && currentNetwork != null && selectedItem.getChainId() == currentNetwork.chainId)
             {
                 //deselected active network - need to revert or select a new active network
                 runOnUiThread(() -> {
@@ -376,10 +424,24 @@ public class SelectNetworkActivity extends BaseActivity {
         {
             int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1);
             viewModel.setActiveNetwork(networkId);
+            //ensure this network is set active
+            List<Integer> filterList = new ArrayList<>(Arrays.asList(EthereumNetworkRepository.hasRealValue(networkId) ?
+                    mainnetAdapter.getSelectedItems() : testnetAdapter.getSelectedItems()));
+            if (!filterList.contains(networkId)) { filterList.add(networkId); }
+            selectedChainId = Utils.integerListToString(filterList, false);
+
             //reset dappbrowser
             Intent intent = new Intent(C.CHANGED_NETWORK);
             intent.putExtra(C.EXTRA_CHAIN_ID, networkId);
             sendBroadcast(intent);
         }
+    }
+
+    // Add network filter to prefs
+    private void addNetworkToActiveList(int chainId)
+    {
+        List<Integer> activeNetworks = switchedNetworks ? new ArrayList<>() : viewModel.getActiveNetworks(); //if we switched networks then use a blank list
+        if (!activeNetworks.contains(chainId)) { activeNetworks.add(chainId); }
+        viewModel.setFilterNetworks(activeNetworks.toArray(new Integer[0]));
     }
 }

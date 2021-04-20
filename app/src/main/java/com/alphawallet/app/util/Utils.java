@@ -22,6 +22,7 @@ import com.alphawallet.token.entity.Signable;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.utils.Numeric;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -488,6 +489,75 @@ public class Utils {
         int[] indexList = new int[ticketSendIndexList.size()];
         for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
         return indexList;
+    }
+
+
+    /**
+     * Produce a string CSV of integer IDs given an input list of values
+     * @param idList
+     * @param keepZeros
+     * @return
+     */
+    public static String bigIntListToString(List<BigInteger> idList, boolean keepZeros)
+    {
+        if (idList == null) return "";
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (BigInteger id : idList)
+        {
+            if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
+            if (!first)
+            {
+                sb.append(",");
+            }
+            first = false;
+
+            sb.append(Numeric.toHexStringNoPrefix(id));
+            displayIDs = sb.toString();
+        }
+
+        return displayIDs;
+    }
+
+    public static List<Integer> stringIntsToIntegerList(String userList)
+    {
+        List<Integer> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = userList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                Integer intId = Integer.parseInt(trim);
+                idList.add(intId);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = new ArrayList<>();
+        }
+
+        return idList;
+    }
+
+    public static String integerListToString(List<Integer> intList, boolean keepZeros)
+    {
+        if (intList == null) return "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Integer id : intList)
+        {
+            if (!keepZeros && id == 0) continue;
+            if (!first)sb.append(",");
+            sb.append(String.valueOf(id));
+            first = false;
+        }
+
+        return sb.toString();
     }
 
     public static boolean isHex(String hexStr)

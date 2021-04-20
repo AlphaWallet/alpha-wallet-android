@@ -128,8 +128,9 @@ public class TransactionsService
      */
     private void checkTransactions()
     {
-        if (currentAddress == null || (eventFetch != null && !eventFetch.isDisposed())) return;
         List<Integer> filters = tokensService.getNetworkFilters();
+        if (currentAddress == null || filters.size() == 0 ||
+                (eventFetch != null && !eventFetch.isDisposed())) { return; }
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
         int chainId = filters.get(currentChainIndex);
 

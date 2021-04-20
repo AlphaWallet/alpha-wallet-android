@@ -763,7 +763,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     @Override
     public void handleClick(String action, int id)
     {
-        viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
+        viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
     }
 
     @Override
@@ -779,7 +779,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         {
             if (token instanceof ERC721Token)
             {
-                viewModel.openConfirm(this, address, token, token.bigIntListToString(selection, true), ensName);
+                viewModel.openConfirm(this, address, token, Utils.bigIntListToString(selection, true), ensName);
             }
             else
             {

@@ -725,6 +725,8 @@
     <string name="action_buy_crypto">Buy %1$s</string>
     <string name="fullscreen">全屏</string>
     <string name="disconnect_title">Do you want to disconnect from %1$s Network?</string>
+    <string name="change_network_title">Select new Dapp Browser Network</string>
+    <string name="change_network_message">Disconnected browser from %1$s, please select a new network for Browser</string>
     <string name="disconnect_body">You are connected to %1$s Network in the Browser but you have just disabled %1$s Network in Active Networks. Do you want to connect to %1$s Network?</string>
     <string name="disconnect">Disconnect</string>
     <string name="keep_connect">Keep Connected</string>

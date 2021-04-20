@@ -163,6 +163,7 @@ public class TokenRepository implements TokenRepositoryType {
                             Map<Long, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
                             t = new ERC721Token(tInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
+                            t.lastTxTime = tokens[i].lastTxTime;
                             tokens[i] = t;
                             break;
                         case ERC721_TICKET:
@@ -286,6 +287,19 @@ public class TokenRepository implements TokenRepositoryType {
         return updateBalance(wallet, chainId, tokenAddress, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<Token> addToken(Wallet wallet, Token token)
+    {
+        if (!token.isERC721())
+        {
+            return addToken(wallet, token.tokenInfo, token.getInterfaceSpec());
+        }
+        else
+        {
+            return localSource.saveToken(wallet, token); //store token directly
+        }
     }
 
     @Override

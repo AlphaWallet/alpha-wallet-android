@@ -5,9 +5,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -70,6 +75,28 @@ public class Asset implements Parcelable {
         }
         this.tokenId = tokenId;
         this.assetContract = contract;
+    }
+
+    public static Asset fromMetaData(JSONObject metaData, String tokenId, Token token)
+    {
+        AssetContract contract = new AssetContract(token);
+        Asset asset = new Asset(tokenId, contract);
+        try
+        {
+            if (metaData.has("name")) asset.name = metaData.getString("name");
+            if (metaData.has("image")) asset.imagePreviewUrl = Utils.parseIPFS(metaData.getString("image"));
+            if (metaData.has("description")) asset.description = metaData.getString("description");
+            if (metaData.has("external_link")) asset.externalLink = metaData.getString("external_link");
+            if (metaData.has("background_color")) asset.backgroundColor = metaData.getString("background_color");
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        if (asset.name == null && asset.imagePreviewUrl == null) asset = null;
+
+        return asset;
     }
 
     public static final Creator<Asset> CREATOR = new Creator<Asset>() {

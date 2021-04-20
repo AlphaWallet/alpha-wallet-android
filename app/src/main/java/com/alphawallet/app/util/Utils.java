@@ -779,4 +779,17 @@ public class Utils {
     {
         return !TextUtils.isEmpty(operationName) && context.getString(R.string.contract_call).equals(operationName);
     }
+
+    public static String parseIPFS(String URL)
+    {
+        if (TextUtils.isEmpty(URL)) return URL;
+        String parsed = URL;
+        int ipfsIndex = URL.indexOf("/ipfs/");
+        if (ipfsIndex >= 0)
+        {
+            parsed = "https://ipfs.io/ipfs/" + URL.substring(ipfsIndex);
+        }
+
+        return parsed;
+    }
 }

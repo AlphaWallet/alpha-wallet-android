@@ -103,6 +103,12 @@ public class RealmERC721Asset extends RealmObject
     {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
+        if (traits == null)
+        {
+            this.traits = "";
+            return;
+        }
+
         for (Trait t : traits)
         {
             if (!first) sb.append(",");

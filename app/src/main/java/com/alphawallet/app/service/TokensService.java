@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
@@ -195,7 +196,7 @@ public class TokensService
             Token t = tokenStoreList.get(key);
             Wallet wallet = new Wallet(t.getWallet());
             tokenStoreList.remove(key);
-            tokenRepository.addToken(wallet, t.tokenInfo, t.getInterfaceSpec())
+            tokenRepository.addToken(wallet, t)
                     .flatMap(token -> tokenRepository.checkInterface(new Token[]{token}, wallet)) //if ERC721 determine the specific contract type
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -513,18 +514,30 @@ public class TokensService
     {
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
-            final String walletAddress = currentAddress;
-
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
-            erc20CheckDisposable = tickerService.getTokensOnNetwork(info, walletAddress, this)
-                    .flatMap(tokens -> tokenRepository.addERC20(new Wallet(walletAddress), tokens))
+            //get mainnet ERC20 token tickers
+            erc20CheckDisposable = tickerService.getERC20Tickers(getAllERC20(MAINNET_ID))
+                    .subscribeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::finishCheckChain, this::onERC20Error);
         }
     }
 
-    private void finishCheckChain(Token[] updatedMarketTokens)
+    private List<TokenCardMeta> getAllERC20(int chainId)
+    {
+        TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), Collections.singletonList(chainId));
+        List<TokenCardMeta> allERC20 = new ArrayList<>();
+        for (TokenCardMeta tcm : tokenList)
+        {
+            if (tcm.type == ContractType.ERC20)
+            {
+                allERC20.add(tcm);
+            }
+        }
+        return allERC20;
+    }
+
+    private void finishCheckChain(int updated)
     {
         erc20CheckDisposable = null;
     }

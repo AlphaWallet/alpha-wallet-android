@@ -12,28 +12,45 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 
+import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,10 +65,13 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import wallet.core.jni.Hash;
 
 import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -62,7 +82,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 3; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 4; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -538,7 +558,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     writeEvents(instance, events, walletAddress, networkInfo, true);
 
                     //Now update tokens if we don't already know this token
-                    writeERC721Tokens(instance, walletAddress, networkInfo, events, svs);
+                    writeERC721Tokens(walletAddress, networkInfo, events, svs);
 
                     lastBlockChecked = Long.parseLong(events[events.length - 1].blockNumber);
 
@@ -595,33 +615,62 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeERC721Tokens(Realm instance, String walletAddress, NetworkInfo networkInfo, EtherscanEvent[] events, TokensService svs)
+    private void writeERC721Tokens(String walletAddress, NetworkInfo networkInfo, EtherscanEvent[] events, TokensService svs)
     {
-        for (EtherscanEvent ev : events)
-        {
-            //have this token?
-            RealmToken realmItem = instance.where(RealmToken.class)
-                    .equalTo("address", databaseKey(networkInfo.chainId, ev.contractAddress.toLowerCase()))
-                    .equalTo("chainId", networkInfo.chainId)
-                    .findFirst();
+        Map<String, List<EtherscanEvent>> eventMap = getEventMap(events);
 
-            if (realmItem == null ||
-                    ( realmItem.getInterfaceSpec() != ContractType.ERC721.ordinal() &&
-                            realmItem.getInterfaceSpec() != ContractType.ERC721_LEGACY.ordinal() &&
-                            realmItem.getInterfaceSpec() != ContractType.ERC721_TICKET.ordinal() &&
-                            realmItem.getInterfaceSpec() != ContractType.ERC721_UNDETERMINED.ordinal()))
+        for (String contract : eventMap.keySet())
+        {
+            if (contract.equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
             {
-                // write token to DB - note this also fetches the balance
-                TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, 0, true, networkInfo.chainId);
-                ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), ContractType.ERC721_UNDETERMINED);
-                newToken.setTokenWallet(walletAddress);
-                svs.storeToken(newToken);
+                System.out.println("YOLESS: ERC721 Writing update");
             }
-            else
+            Token token = svs.getToken(networkInfo.chainId, contract);
+
+            if (token == null ||
+                    ( token.getInterfaceSpec() != ContractType.ERC721 &&
+                            token.getInterfaceSpec() != ContractType.ERC721_LEGACY &&
+                            token.getInterfaceSpec() != ContractType.ERC721_TICKET &&
+                            token.getInterfaceSpec() != ContractType.ERC721_UNDETERMINED ))
             {
-                //update token block read so we don't check events on this contract
-                storeLatestBlockRead(walletAddress, networkInfo.chainId, ev.contractAddress, ev.blockNumber);
+                token = createNewERC721Token(eventMap.get(contract).get(0), networkInfo, walletAddress, false);
             }
+
+            for (EtherscanEvent ev : eventMap.get(contract))
+            {
+                BigInteger tokenId = getTokenId(ev.tokenID);
+
+                if (tokenId.compareTo(new BigInteger("-1")) == 0) continue;
+
+                if (ev.to.equalsIgnoreCase(walletAddress))
+                {
+                    //do we already have this token from opensea? Don't overwrite opensea data (opensea can overwrite data from here).
+                    if (token.getAssetForToken(ev.tokenID) != null) { continue; }
+                    //added a token
+                    //need to fetch metadata
+                    Asset asset = parseTokenMetadata(token, tokenId);
+                    if (asset != null)
+                    {
+                        if (token.getInterfaceSpec() != ContractType.ERC721) { token = createNewERC721Token(ev, networkInfo, walletAddress, true); }
+                        token.addAssetToTokenBalanceAssets(asset);
+                    }
+                }
+                else
+                {
+                    //removed a token
+                    //too easy
+                    token.removeBalance(ev.tokenID);
+                }
+            }
+
+            if (token.getAddress().equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
+            {
+                System.out.println("YOLESS: ERC721 Actually Writing token update");
+            }
+
+            //Send to storage as soon as each token is done
+            token.lastTxTime = System.currentTimeMillis();
+            svs.storeToken(token);
         }
     }
 
@@ -1018,5 +1067,142 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 TransactionsRealmCache.fill(instance, realmTx, tx);
             }
         });
+    }
+
+
+    /**
+     * These functions are experimental, for discovering and populating NFT's without opensea.
+     * So far the experiment appears to be working correctly,
+     *
+     * Tested: rapid discovery and update of tokens without opensea.
+     * Once opensea is on, tokens are updated correctly.
+     *
+     * If tokens already discovered from opensea then we don't replace them here.
+     */
+    private Map<String, List<EtherscanEvent>> getEventMap(EtherscanEvent[] events)
+    {
+        Map<String, List<EtherscanEvent>> eventMap = new HashMap<>();
+        for (EtherscanEvent ev : events)
+        {
+            List<EtherscanEvent> thisEventList = eventMap.get(ev.contractAddress);
+            if (thisEventList == null)
+            {
+                thisEventList = new ArrayList<>();
+                eventMap.put(ev.contractAddress, thisEventList);
+            }
+
+            thisEventList.add(ev);
+        }
+
+        return eventMap;
+    }
+
+    private Token tokenFromRealm(RealmToken realmItem, NetworkInfo networkInfo, String walletAddress)
+    {
+        TokenFactory tf = new TokenFactory();
+        TokenInfo tInfo = tf.createTokenInfo(realmItem);
+        Token result = tf.createToken(tInfo, realmItem, realmItem.getUpdateTime(), networkInfo.getShortName());
+        result.setTokenWallet(walletAddress);
+        return result;
+    }
+
+    private Asset parseTokenMetadata(Token newToken, BigInteger tokenId)
+    {
+        //1. get TokenURI
+        Web3j web3j = TokenRepository.getWeb3jService(newToken.tokenInfo.chainId);
+        String responseValue = callSmartContractFunction(web3j, getTokenURI(tokenId), newToken.getAddress(), newToken.getWallet());
+        if (responseValue == null) responseValue = callSmartContractFunction(web3j, getTokenURI2(tokenId), newToken.getAddress(), newToken.getWallet());
+        JSONObject metaData = loadMetaData(responseValue);
+        if (metaData != null)
+        {
+            return Asset.fromMetaData(metaData, tokenId.toString(), newToken);
+        }
+
+        return null;
+    }
+
+    private JSONObject loadMetaData(String tokenURI)
+    {
+        JSONObject metaData = null;
+
+        try
+        {
+            Request request = new Request.Builder()
+                    .url(Utils.parseIPFS(tokenURI))
+                    .get()
+                    .build();
+
+            okhttp3.Response response = httpClient.newCall(request).execute();
+            metaData = new JSONObject(response.body().string());
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return metaData;
+    }
+
+    private static Function getTokenURI(BigInteger tokenId)
+    {
+        return new Function("tokenURI",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static Function getTokenURI2(BigInteger tokenId)
+    {
+        return new Function("uri",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private BigInteger getTokenId(String tokenID)
+    {
+        BigInteger tokenIdBI;
+        try
+        {
+            tokenIdBI = new BigInteger(tokenID);
+        }
+        catch (Exception e)
+        {
+            tokenIdBI = BigInteger.valueOf(-1);
+        }
+
+        return tokenIdBI;
+    }
+
+    private ERC721Token createNewERC721Token(EtherscanEvent ev, NetworkInfo networkInfo, String walletAddress, boolean knownERC721)
+    {
+        TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, 0, true, networkInfo.chainId);
+        ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), knownERC721 ? ContractType.ERC721 : ContractType.ERC721_UNDETERMINED);
+        newToken.setTokenWallet(walletAddress);
+        return newToken;
+    }
+
+    private String callSmartContractFunction(Web3j web3j,
+                                             Function function, String contractAddress, String walletAddr)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+
+            if (!responseValues.isEmpty())
+            {
+                return responseValues.get(0).getValue().toString();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return null;
     }
 }

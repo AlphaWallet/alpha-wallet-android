@@ -1077,4 +1077,9 @@ public class Token implements Parcelable, Comparable<Token>
     {
         return balance;
     }
+
+    public void removeBalance(String tokenID)
+    {
+        //
+    }
 }

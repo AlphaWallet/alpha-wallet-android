@@ -297,7 +297,7 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public List<Asset> getTokenAssets() {
+    public Map<Long, Asset> getTokenAssets() {
         return null;
     }
 

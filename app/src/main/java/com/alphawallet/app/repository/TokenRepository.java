@@ -160,7 +160,7 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721:
                         case ERC721_LEGACY:
-                            List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            Map<Long, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
                             t = new ERC721Token(tInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             tokens[i] = t;

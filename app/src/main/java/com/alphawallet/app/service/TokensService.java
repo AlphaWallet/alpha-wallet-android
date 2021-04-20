@@ -68,7 +68,7 @@ public class TokensService
     private final Context context;
     private final TickerService tickerService;
     private final OpenseaService openseaService;
-    private final AnalyticsServiceType analyticsService;
+    private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
@@ -97,7 +97,7 @@ public class TokensService
                          Context context,
                          TickerService tickerService,
                          OpenseaService openseaService,
-                         AnalyticsServiceType analyticsService) {
+                         AnalyticsServiceType<AnalyticsProperties> analyticsService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.context = context;
@@ -296,6 +296,10 @@ public class TokensService
     public void setFocusToken(Token token)
     {
         focusToken = new ContractLocator(token.getAddress(), token.tokenInfo.chainId);
+        if (token.isERC721())
+        {
+            nextOpenSeaCheck = 0;
+        }
     }
 
     public void clearFocusToken()
@@ -429,7 +433,12 @@ public class TokensService
                     .subscribe(balanceChange -> onBalanceChange(balanceChange, t.tokenInfo.chainId), this::onError);
         }
 
-        if (System.currentTimeMillis() > nextOpenSeaCheck && focusToken == null) checkOpenSea();
+        if (System.currentTimeMillis() > nextOpenSeaCheck &&
+                (focusToken == null || getToken(focusToken.chainId, focusToken.address).isERC721()))
+        {
+            checkOpenSea();
+        }
+
         checkPendingChains();
     }
 
@@ -467,7 +476,7 @@ public class TokensService
         openSeaCount++;
         nextOpenSeaCheck = System.currentTimeMillis() + OPENSEA_CHECK_INTERVAL;
         final Wallet wallet = new Wallet(currentAddress);
-        NetworkInfo info = openSeaCount != OPENSEA_RINKEBY_CHECK ? ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+        NetworkInfo info = getOpenSeaNetwork();
         if (BuildConfig.DEBUG) Log.d("OPENSEA", "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
         tokenCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                 .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
@@ -477,6 +486,27 @@ public class TokensService
                 .subscribe(this::checkERC20, this::onOpenseaError);
 
         if (openSeaCount >= OPENSEA_RINKEBY_CHECK) openSeaCount = 0;
+    }
+
+    // If focus token is ERC721, only query that chain
+    private NetworkInfo getOpenSeaNetwork()
+    {
+        if (focusToken != null)
+        {
+            Token t = getToken(focusToken.chainId, focusToken.address);
+            if (t.isERC721())
+            {
+                switch (t.tokenInfo.chainId)
+                {
+                    case MAINNET_ID:
+                        return ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
+                    case RINKEBY_ID:
+                        return ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+                }
+            }
+        }
+        return openSeaCount != OPENSEA_RINKEBY_CHECK ?
+                ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
     }
 
     private void checkERC20(Token[] checkedERC721Tokens)

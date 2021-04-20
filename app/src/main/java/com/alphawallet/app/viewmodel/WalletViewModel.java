@@ -213,4 +213,9 @@ public class WalletViewModel extends BaseViewModel
             return GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE;
         }
     }
+
+    public void notifyRefresh()
+    {
+        tokensService.clearFocusToken(); //ensure if we do a refresh there's no focus token preventing correct update
+    }
 }

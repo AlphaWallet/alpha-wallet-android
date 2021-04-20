@@ -161,6 +161,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
         viewModel.checkForNewScript(token); //check for updated script
         setUpRecentTransactionsView();
+        viewModel.updateTokensCheck(token);
     }
 
     private void loadItemViewHeight()
@@ -242,6 +243,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         super.onDestroy();
         unregisterReceiver(finishReceiver);
+        viewModel.clearFocusToken();
     }
 
     private void onTokenUpdate(Token t)

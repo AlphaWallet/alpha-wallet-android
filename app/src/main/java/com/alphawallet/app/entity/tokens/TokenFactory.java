@@ -7,6 +7,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,7 +32,11 @@ public class TokenFactory
                 break;
             case ERC721:
             case ERC721_LEGACY:
-                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), updateBlancaTime, networkName, type);
+                if (tokenInfo.decimals != 0)
+                {
+                    tokenInfo = new TokenInfo(tokenInfo.address, tokenInfo.name, tokenInfo.symbol, 0, tokenInfo.isEnabled, tokenInfo.chainId);
+                }
+                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), updateBlancaTime, networkName, type);
                 break;
             case NOT_SET:
             case ERC20:
@@ -139,7 +144,7 @@ public class TokenFactory
             case ERC721:
             case ERC721_LEGACY:
             case ERC721_UNDETERMINED:
-                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), currentTime, networkName, type);
+                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), currentTime, networkName, type);
                 break;
             case ETHEREUM:
                 String[] split = tokenInfo.address.split("-");

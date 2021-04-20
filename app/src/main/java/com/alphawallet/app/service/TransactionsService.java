@@ -19,9 +19,12 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -311,7 +314,7 @@ public class TransactionsService
                             {
                                 //get timestamp and write tx
                                 EventUtils.getBlockDetails(fetchedTx.getBlockHash(), web3j)
-                                        .map(ethBlock -> transactionsCache.storeRawTx(new Wallet(currentWallet), chainId, txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1")))
+                                        .map(ethBlock -> storeRawTx(ethBlock, chainId, receipt, txDetails, currentWallet))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe().isDisposed();
@@ -337,6 +340,18 @@ public class TransactionsService
                     return null;
                 });
             }
+        }
+    }
+
+    private Transaction storeRawTx(EthBlock ethBlock, int chainId, EthGetTransactionReceipt receipt, EthTransaction txDetails, String currentWallet)
+    {
+        if (ethBlock != null || ethBlock.getBlock() != null)
+        {
+            return transactionsCache.storeRawTx(new Wallet(currentWallet), chainId, txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1"));
+        }
+        else
+        {
+            return null;
         }
     }
 }

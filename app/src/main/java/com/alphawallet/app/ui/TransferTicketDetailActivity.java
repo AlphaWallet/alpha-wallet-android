@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +44,7 @@ import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -78,7 +78,6 @@ import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 21/02/2018.
@@ -771,7 +770,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     public void addressReady(String address, String ensName)
     {
         //complete the transfer
-        if (TextUtils.isEmpty(address) || !isValidAddress(address))
+        if (!Utils.isAddressValid(address))
         {
             //show address error
             addressInput.setError(getString(R.string.error_invalid_address));

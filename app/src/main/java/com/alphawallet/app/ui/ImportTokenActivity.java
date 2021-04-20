@@ -1,13 +1,10 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +13,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -27,7 +27,7 @@ import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.viewmodel.HomeViewModel;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -53,7 +53,6 @@ import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 9/03/2018.
@@ -618,7 +617,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
                     ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
-                    if (isValidAddress(order.contractAddress) && order.indices.length > 0)
+                    if (Utils.isAddressValid(order.contractAddress) && order.indices.length > 0)
                     {
                         magicLink = text.toString();
                         //now clear the clipboard - we only ever do this if it's definitely a magicLink in the clipboard

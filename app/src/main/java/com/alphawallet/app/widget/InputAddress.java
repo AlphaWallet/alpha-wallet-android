@@ -27,11 +27,9 @@ import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
-
-import io.reactivex.Single;
+import com.alphawallet.app.util.Utils;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by JB on 28/10/2020.
@@ -276,11 +274,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         String mainText = editText.getText().toString().trim();
         String status = statusText.getText().toString().trim();
 
-        if (!TextUtils.isEmpty(mainText) && isValidAddress(mainText))
+        if (Utils.isAddressValid(mainText))
         {
             return mainText;
         }
-        else if (!TextUtils.isEmpty(status) && isValidAddress(status))
+        else if (Utils.isAddressValid(status))
         {
             return status;
         }
@@ -293,11 +291,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         String mainText = editText.getText().toString().trim();
         String status = statusText.getText().toString().trim();
 
-        if (!TextUtils.isEmpty(mainText) && isValidAddress(mainText) && !TextUtils.isEmpty(status) && status.contains("."))
+        if (Utils.isAddressValid(mainText) && !TextUtils.isEmpty(status) && status.contains("."))
         {
             return status;
         }
-        else if (!TextUtils.isEmpty(status) && isValidAddress(status) && !TextUtils.isEmpty(mainText) && mainText.contains("."))
+        else if (Utils.isAddressValid(status) && !TextUtils.isEmpty(mainText) && mainText.contains("."))
         {
             return mainText;
         }

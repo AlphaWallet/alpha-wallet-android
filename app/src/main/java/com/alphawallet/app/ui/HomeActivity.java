@@ -60,20 +60,17 @@ import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.RootUtil;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.DepositView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-
-import org.web3j.crypto.WalletUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -309,7 +306,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onBackup(String address)
     {
-        if (address != null && WalletUtils.isValidAddress(address))
+        if (Utils.isAddressValid(address))
         {
             Toast.makeText(this, getString(R.string.postponed_backup_warning), Toast.LENGTH_LONG).show();
         }
@@ -810,7 +807,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void backupSuccess(String keyAddress)
     {
-        if (WalletUtils.isValidAddress(keyAddress)) backupWalletSuccess(keyAddress);
+        if (Utils.isAddressValid(keyAddress)) backupWalletSuccess(keyAddress);
     }
 
     @Override

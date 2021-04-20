@@ -15,7 +15,6 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Keys;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
 import org.web3j.ens.NameHash;
@@ -114,7 +113,7 @@ public class EnsResolver {
                 throw new RuntimeException("Unable to execute Ethereum request", e);
             }
 
-            if (!WalletUtils.isValidAddress(contractAddress))
+            if (!Utils.isAddressValid(contractAddress))
             {
                 throw new RuntimeException("Unable to resolve address for name: " + contractId);
             }
@@ -139,7 +138,7 @@ public class EnsResolver {
     public String reverseResolve(String address) throws UnableToResolveENS
     {
         String name = null;
-        if (WalletUtils.isValidAddress(address))
+        if (Utils.isAddressValid(address))
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
             try
@@ -286,6 +285,6 @@ public class EnsResolver {
 
     public static boolean isValidEnsName(String input, int addressLength) {
         return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !WalletUtils.isValidAddress(input));
+                && (input.contains(".") || !Utils.isAddressValid(input));
     }
 }

@@ -1,24 +1,20 @@
 package com.alphawallet.app.ui;
 
 import android.app.Activity;
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-
-import com.alphawallet.app.viewmodel.ImportTokenViewModel;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.core.util.Pair;
-import androidx.viewpager.widget.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+
+import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager.widget.ViewPager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -38,10 +34,12 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ImportWalletViewModel;
 import com.alphawallet.app.viewmodel.ImportWalletViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -272,7 +270,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     public void onKeystore(String keystore, String password)
     {
         String address = extractAddressFromStore(keystore);
-        if (address != null && WalletUtils.isValidAddress(address))
+        if (Utils.isAddressValid(address))
         {
             onProgress(true);
             importWalletViewModel.checkKeystorePassword(keystore, address, password)

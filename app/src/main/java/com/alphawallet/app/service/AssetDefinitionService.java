@@ -31,7 +31,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionRepositoryType;
-import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.repository.entity.RealmTokenScriptData;
@@ -62,7 +61,6 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Keys;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -2080,7 +2078,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     @Override
     public TransactionResult storeAuxData(String walletAddress, TransactionResult tResult)
     {
-        if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return tResult;
+        if (tokensService.getCurrentAddress() == null || !Utils.isAddressValid(tokensService.getCurrentAddress())) return tResult;
         if (tResult.result == null || tResult.resultTime < 0) return tResult;
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {

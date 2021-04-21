@@ -263,11 +263,38 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public List<Integer> getFilterNetworkList()
     {
-        List<Integer> networkIds = EthereumNetworkRepository.addDefaultNetworks();
         String filterList = preferences.getNetworkFilterList();
-        if (filterList.length() > 0)
+        boolean mainNets = preferences.isActiveMainnet();
+        List<Integer> storedIds = Utils.intListToArray(filterList);
+        List<Integer> networkIds = new ArrayList<>();
+
+        for (Integer filterId : storedIds)
         {
-            networkIds = Utils.intListToArray(filterList);
+            if (mainNets && hasRealValue(filterId)
+                    || !mainNets && !hasRealValue(filterId))
+            {
+                networkIds.add(filterId);
+            }
+        }
+
+        if (networkIds.size() == 0)
+        {
+            //add the first network we find as empty list is very bad
+            if (mainNets)
+            {
+                networkIds = EthereumNetworkRepository.addDefaultNetworks();
+            }
+            else
+            {
+                for (NetworkInfo info : getAvailableNetworkList())
+                {
+                    if (!hasRealValue(info.chainId))
+                    {
+                        networkIds.add(info.chainId);
+                        break;
+                    }
+                }
+            }
         }
 
         return networkIds;

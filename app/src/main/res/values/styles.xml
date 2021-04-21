@@ -70,6 +70,11 @@
         <item name="colorSwitchThumbNormal">@color/dove</item>
     </style>
 
+    <style name="ToggleItemSwitchAppearance" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/rinkeby</item>
+        <item name="colorSwitchThumbNormal">@color/mainnet</item>
+    </style>
+
     <style name="MyAddressCopyTextStyle">
         <item name="android:paddingTop">@dimen/dp15</item>
         <item name="android:paddingBottom">@dimen/dp15</item>

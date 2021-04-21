@@ -391,7 +391,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 String currentBalance = realmToken.getBalance();
                 String newBalance = balance.toString();
-                if (balanceArray != null) newBalance = Token.bigIntListToString(balanceArray, true);
+                if (balanceArray != null) newBalance = Utils.bigIntListToString(balanceArray, true);
 
                 if (type == ContractType.ERC721 || type == ContractType.ERC721_LEGACY)
                 {

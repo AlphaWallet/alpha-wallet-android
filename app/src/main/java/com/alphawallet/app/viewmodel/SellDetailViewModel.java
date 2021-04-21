@@ -132,7 +132,7 @@ public class SellDetailViewModel extends BaseViewModel {
 
     public void openUniversalLinkSetExpiry(Context context, List<BigInteger> selection, double price)
     {
-        sellDetailRouter.openUniversalLink(context, token, token.bigIntListToString(selection, false), defaultWallet.getValue(), SellDetailActivity.SET_EXPIRY, price);
+        sellDetailRouter.openUniversalLink(context, token, Utils.bigIntListToString(selection, false), defaultWallet.getValue(), SellDetailActivity.SET_EXPIRY, price);
     }
 
     private void gotSignature(SignatureFromKey signature)

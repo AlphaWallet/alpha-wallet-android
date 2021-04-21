@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketViewModelFactory;
@@ -137,7 +138,7 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     private void handleTransferERC875(Token token)
     {
         TicketRange txRange = adapter.getSelectedRange(token.getArrayBalance());
-        String idListStr = token.bigIntListToString(txRange.tokenIds, false);
+        String idListStr = Utils.bigIntListToString(txRange.tokenIds, false);
         viewModel.openSellDialog(this, idListStr);
     }
 

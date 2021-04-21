@@ -3,6 +3,7 @@ package com.alphawallet.app.di;
 import dagger.Module;
 import dagger.Provides;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
 
@@ -10,7 +11,8 @@ import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
 class SelectNetworkModule {
     @Provides
     SelectNetworkViewModelFactory provideSelectNetworkViewModelFactory(EthereumNetworkRepositoryType networkRepositoryType,
-                                                                       TokensService tokensService) {
-        return new SelectNetworkViewModelFactory(networkRepositoryType, tokensService);
+                                                                       TokensService tokensService,
+                                                                       PreferenceRepositoryType preferenceRepositoryType) {
+        return new SelectNetworkViewModelFactory(networkRepositoryType, tokensService, preferenceRepositoryType);
     }
 }

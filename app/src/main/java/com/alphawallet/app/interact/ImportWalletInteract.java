@@ -21,12 +21,14 @@ public class ImportWalletInteract {
     public Single<Wallet> importKeystore(String keystore, String password, String newPassword) {
         return walletRepository
                         .importKeystoreToWallet(keystore, password, newPassword)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<Wallet> importPrivateKey(String privateKey, String newPassword) {
         return walletRepository
                         .importPrivateKeyToWallet(privateKey, newPassword)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

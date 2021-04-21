@@ -549,6 +549,13 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
             }
         }
+
+        //Final check to see if the token should be visible
+        if (token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0 && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
+        {
+            token.tokenInfo.isEnabled = true;
+            realmToken.setEnabled(true);
+        }
     }
 
     private void saveToken(Wallet wallet, Token token, Date currentTime) {
@@ -644,8 +651,7 @@ public class TokensRealmSource implements TokenLocalSource {
     private List<Asset> getERC721Assets(List<String> keys, Realm realm, Token token)
     {
         List<Asset> assets = new ArrayList<>();
-        AssetContract contract = new AssetContract(token.tokenInfo.address, token.tokenInfo.name,
-                                                   token.tokenInfo.symbol, token.getInterfaceSpec().toString());
+        AssetContract contract = new AssetContract(token);
 
         for (String key : keys)
         {
@@ -1102,12 +1108,6 @@ public class TokensRealmSource implements TokenLocalSource {
         if (network == null) return null;
         Token result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
         result.setTokenWallet(wallet.address);
-
-        String useAddress = (realmItem.getContractType() == ContractType.ETHEREUM) ? "eth" : realmItem.getTokenAddress();
-
-        RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
-                .equalTo("contract", useAddress + "-" + result.tokenInfo.chainId)
-                .findFirst();
 
         if (result.isERC721()) //add erc721 assets
         {

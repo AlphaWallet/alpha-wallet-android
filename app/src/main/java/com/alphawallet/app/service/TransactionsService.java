@@ -6,8 +6,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -19,14 +17,12 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.token.entity.ContractAddress;
-import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -64,6 +60,8 @@ public class TransactionsService
     private Disposable eventTimer;
     @Nullable
     private Disposable erc20EventCheckCycle;
+    @Nullable
+    private Disposable eventFetch;
 
     public TransactionsService(TokensService tokensService,
                                PreferenceRepositoryType preferenceRepositoryType,
@@ -130,15 +128,15 @@ public class TransactionsService
      */
     private void checkTransactions()
     {
-        if (currentAddress == null) return;
+        if (currentAddress == null || (eventFetch != null && !eventFetch.isDisposed())) return;
         List<Integer> filters = tokensService.getNetworkFilters();
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
         int chainId = filters.get(currentChainIndex);
 
-        transactionsClient.readTransactions(currentAddress, ethereumNetworkRepository.getNetworkByChain(chainId), tokensService, nftCheck)
+        eventFetch = transactionsClient.readTransactions(currentAddress, ethereumNetworkRepository.getNetworkByChain(chainId), tokensService, nftCheck)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> { System.out.println("Received: " + count); }).isDisposed();
+                .subscribe(count -> { eventFetch = null; System.out.println("Received: " + count); });
 
         if (!nftCheck)
         {

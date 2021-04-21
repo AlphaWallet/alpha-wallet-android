@@ -20,7 +20,7 @@ public class EtherscanEvent
     public String from;
     public String contractAddress;
     public String to;
-    String tokenID;
+    public String tokenID;
     public String value;
     public String tokenName;
     public String tokenSymbol;

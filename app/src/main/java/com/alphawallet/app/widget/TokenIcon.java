@@ -119,10 +119,7 @@ public class TokenIcon extends ConstraintLayout
             protected void onResourceCleared(@Nullable Drawable placeholder) { }
 
             @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable)
-            {
-                setupTextIcon(token);
-            }
+            public void onLoadFailed(@Nullable Drawable errorDrawable) { }
 
             @Override
             public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
@@ -160,9 +157,10 @@ public class TokenIcon extends ConstraintLayout
             RequestBuilder<Drawable> rb = null;
 
             //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
-            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME))
+            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME) && !iconItem.onlyFetchFromCache())
             {
-                rb = Glide.with(getContext().getApplicationContext()).load(Utils.getAWIconRepo(token.getAddress()));
+                rb = Glide.with(getContext().getApplicationContext())
+                        .load(Utils.getAWIconRepo(token.getAddress()));
             }
 
             Glide.with(getContext().getApplicationContext())
@@ -274,7 +272,7 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             setupTextIcon(token);
-            return true;
+            return false;
         }
 
         @Override
@@ -282,7 +280,7 @@ public class TokenIcon extends ConstraintLayout
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);
-            return true;
+            return false;
         }
     };
 

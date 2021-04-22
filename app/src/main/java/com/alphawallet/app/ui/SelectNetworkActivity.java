@@ -61,7 +61,6 @@ public class SelectNetworkActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_network);
         toolbar();
-        setTitle(getString(R.string.select_active_networks));
 
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(SelectNetworkViewModel.class);
@@ -78,6 +77,19 @@ public class SelectNetworkActivity extends BaseActivity {
         }
 
         initViews();
+
+        if (singleItem)
+        {
+            setTitle(getString(R.string.select_dappbrowser_network));
+            findViewById(R.id.mainnet_frame).setVisibility(View.GONE);
+            findViewById(R.id.testnet_frame).setVisibility(View.GONE);
+            mainnetSwitch.setVisibility(View.GONE);
+            testnetSwitch.setVisibility(View.GONE);
+        }
+        else
+        {
+            setTitle(getString(R.string.select_active_networks));
+        }
     }
 
     private void initViews()
@@ -102,6 +114,7 @@ public class SelectNetworkActivity extends BaseActivity {
         dialog.setCanceledOnTouchOutside(true);
         dialog.findViewById(R.id.enable_testnet_action).setOnClickListener(v -> {
             dialog.dismiss();
+            pickNewBrowserNetwork();
         });
         dialog.findViewById(R.id.close_action).setOnClickListener(v -> {
             testnetSwitch.setChecked(false);
@@ -120,9 +133,24 @@ public class SelectNetworkActivity extends BaseActivity {
 
             viewModel.setActiveMainnet(!b);
             setupListVisibility();
-            //ask user to confirm new dappbrowser network
-            pickNewBrowserNetwork();
             switchedNetworks = true;
+
+            if (viewModel.isActiveMainnet())
+            {
+                pickNewBrowserNetwork();
+            }
+            else
+            {
+                if (!viewModel.hasShownTestNetWarning())
+                {
+                    dialog.show();
+                    viewModel.setShownTestNetWarning();
+                }
+                else
+                {
+                    pickNewBrowserNetwork();
+                }
+            }
         };
 
         setupListVisibility();

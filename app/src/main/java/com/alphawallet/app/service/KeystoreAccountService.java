@@ -1,5 +1,8 @@
 package com.alphawallet.app.service;
 
+import android.util.Log;
+
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
@@ -280,6 +283,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             e.printStackTrace();
         }
 
+        if (BuildConfig.DEBUG) Log.d("RealmDebug", "gotcredentials + " + address);
         return credentials;
     }
 

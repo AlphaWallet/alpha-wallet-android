@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.Wallet;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import java.math.BigDecimal;
@@ -25,14 +26,8 @@ public class GenericWalletInteract
 	}
 
 	public Single<Wallet> find() {
-		return walletRepository
-				.getDefaultWallet()
-				.onErrorResumeNext(walletRepository
-						.fetchWallets()
-						.to(single -> Flowable.fromArray(single.blockingGet()))
-						.firstOrError()
-						.flatMapCompletable(walletRepository::setDefaultWallet)
-						.andThen(walletRepository.getDefaultWallet()))
+		return walletRepository.getDefaultWallet()
+				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread());
 	}
 
@@ -77,11 +72,6 @@ public class GenericWalletInteract
 	{
 		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
-
-    public Single<Wallet> getWallet(String keyAddress)
-    {
-    	return walletRepository.findWallet(keyAddress);
-    }
 
 	private boolean hasBalance(Wallet wallet)
 	{

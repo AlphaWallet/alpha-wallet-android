@@ -158,7 +158,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel = new ViewModelProvider(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
         viewModel.progress().observe(getViewLifecycleOwner(), systemView::showProgress);
-        viewModel.error().observe(getViewLifecycleOwner(), this::onError);
+        //viewModel.error().observe(getViewLifecycleOwner(), this::onError);
         viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);

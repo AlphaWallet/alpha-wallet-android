@@ -742,4 +742,5 @@
     <string name="title_dialog_what_testnet">What is Testnet?</string>
     <string name="action_enable_testnet">Got it, enable Testnet</string>
     <string name="message_dialog_testnet">Testnets tokens are like \'Monopoly\' money. They have zero financial worth but are used by developers to try out new designs without needing to spend valuable coins.</string>
+    <string name="select_dappbrowser_network">Pick Browser Network</string>
 </resources>

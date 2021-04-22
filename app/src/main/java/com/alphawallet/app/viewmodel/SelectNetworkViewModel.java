@@ -87,4 +87,14 @@ public class SelectNetworkViewModel extends BaseViewModel {
     {
         preferenceRepository.setActiveMainnet(flag);
     }
+
+    public boolean hasShownTestNetWarning()
+    {
+        return preferenceRepository.hasShownTestNetWarning();
+    }
+
+    public void setShownTestNetWarning()
+    {
+        preferenceRepository.setShownTestNetWarning();
+    }
 }

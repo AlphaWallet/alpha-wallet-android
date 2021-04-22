@@ -244,10 +244,6 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
-        if (tokenInfo.address.equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-        {
-            System.out.println("YOLESS: Check Balance Change: " + lastTxTime + " > " + realmToken.getLastTxTime());
-        }
         if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;

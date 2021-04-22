@@ -38,10 +38,7 @@ public class ImportWalletInteract {
         wallet.type = WalletType.HDKEY;
         wallet.authLevel = authLevel;
         wallet.lastBackupTime = System.currentTimeMillis();
-        return ensResolver.resolveEnsName(wallet.address)
-                .subscribeOn(Schedulers.io())
-                .map(name -> { wallet.ENSname = name; return wallet; })
-                .flatMap(walletRepository::storeWallet);
+        return walletRepository.storeWallet(wallet);
     }
 
     public Single<Wallet> storeWatchWallet(String address, AWEnsResolver ensResolver)
@@ -49,10 +46,12 @@ public class ImportWalletInteract {
         Wallet wallet = new Wallet(address);
         wallet.type = WalletType.WATCH;
         wallet.lastBackupTime = System.currentTimeMillis();
-        return ensResolver.resolveEnsName(wallet.address)
+        return walletRepository.storeWallet(wallet);
+                /* return ensResolver.resolveEnsName(wallet.address)
+                .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
                 .map(name -> { wallet.ENSname = name; return wallet; })
-                .flatMap(walletRepository::storeWallet);
+                .flatMap(walletRepository::storeWallet);*/
     }
 
     public Single<Wallet> storeKeystoreWallet(Wallet wallet, KeyService.AuthenticationLevel level, AWEnsResolver ensResolver)
@@ -60,10 +59,13 @@ public class ImportWalletInteract {
         wallet.authLevel = level;
         wallet.type = WalletType.KEYSTORE;
         wallet.lastBackupTime = System.currentTimeMillis();
-        return ensResolver.resolveEnsName(wallet.address)
+        return walletRepository.storeWallet(wallet);
+
+        /*return ensResolver.resolveEnsName(wallet.address)
+                .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
                 .map(name -> { wallet.ENSname = name; return wallet; })
-                .flatMap(walletRepository::storeWallet);
+                .flatMap(walletRepository::storeWallet);*/
     }
 
     public boolean keyStoreExists(String address)

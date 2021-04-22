@@ -621,10 +621,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         for (String contract : eventMap.keySet())
         {
-            if (contract.equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-            {
-                System.out.println("YOLESS: ERC721 Writing update");
-            }
             Token token = svs.getToken(networkInfo.chainId, contract);
 
             if (token == null ||
@@ -660,11 +656,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     //removed a token
                     token.removeBalance(ev.tokenID);
                 }
-            }
-
-            if (token.getAddress().equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-            {
-                System.out.println("YOLESS: ERC721 Actually Writing token update");
             }
 
             //Send to storage as soon as each token is done

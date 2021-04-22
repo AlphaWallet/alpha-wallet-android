@@ -46,4 +46,7 @@ public interface PreferenceRepositoryType {
 
     void setActiveMainnet(boolean state);
     boolean isActiveMainnet();
+
+    boolean hasShownTestNetWarning();
+    void setShownTestNetWarning();
 }

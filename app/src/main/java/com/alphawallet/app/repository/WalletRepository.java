@@ -1,8 +1,10 @@
 package com.alphawallet.app.repository;
 
-import org.web3j.protocol.Web3j;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.service.AccountKeystoreService;
+import com.alphawallet.app.service.KeyService;
+
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -11,13 +13,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.service.AccountKeystoreService;
-import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.TransactionsNetworkClientType;
-
 import io.realm.Realm;
-import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
@@ -41,22 +37,35 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
 	public Single<Wallet[]> fetchWallets()
 	{
-		return accountKeystoreService.fetchAccounts().flatMap(wallets -> walletDataRealmSource.populateWalletData(wallets, keyService));
+		return accountKeystoreService.fetchAccounts()
+				.flatMap(wallets -> walletDataRealmSource.populateWalletData(wallets, keyService))
+				.map(wallets -> {
+					if (preferenceRepositoryType.getCurrentWalletAddress() == null && wallets.length > 0)
+					{
+						preferenceRepositoryType.setCurrentWalletAddress(wallets[0].address);
+					}
+					return wallets;
+				});
 	}
 
 	@Override
 	public Single<Wallet> findWallet(String address)
 	{
-		return fetchWallets().flatMap(accounts -> {
-			for (Wallet wallet : accounts)
-			{
-				if (wallet.sameAddress(address))
-				{
-					return Single.just(wallet);
-				}
-			}
-			return null;
-		});
+		return fetchWallets()
+				.flatMap(wallets -> {
+					if (wallets.length == 0) return Single.error(new Exception("No wallets"));
+					Wallet firstWallet = null;
+					for (Wallet wallet : wallets)
+					{
+						if (address == null || wallet.sameAddress(address))
+						{
+							return Single.just(wallet);
+						}
+						if (firstWallet == null) firstWallet = wallet;
+					}
+
+					return Single.just(firstWallet);
+				});
 	}
 
 	@Override
@@ -134,7 +143,8 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
 	public Single<Wallet> getDefaultWallet()
 	{
-		return Single.fromCallable(preferenceRepositoryType::getCurrentWalletAddress).flatMap(this::findWallet);
+		return Single.fromCallable(preferenceRepositoryType::getCurrentWalletAddress)
+				.flatMap(this::findWallet);
 	}
 
 	@Override

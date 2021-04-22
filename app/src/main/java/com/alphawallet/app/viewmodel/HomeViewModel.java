@@ -47,6 +47,7 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 
@@ -121,10 +122,6 @@ public class HomeViewModel extends BaseViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
     }
 
     public LiveData<Transaction[]> transactions() {
@@ -259,6 +256,7 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     private void onWallet(Wallet wallet) {
+        //TODO: change priority here: First, show name, if blank then scan for ENS
         transactionsService.changeWallet(wallet);
         if (!TextUtils.isEmpty(wallet.ENSname))
         {
@@ -274,9 +272,11 @@ public class HomeViewModel extends BaseViewModel {
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
                     .resolveEnsName(wallet.address)
+                    .map(ensName -> { wallet.ENSname = ensName; return wallet; })
+                    .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
-                    .subscribe(walletName::postValue, this::onENSError).isDisposed();
+                    .subscribe(updatedWallet -> walletName.postValue(updatedWallet.ENSname), this::onENSError).isDisposed();
         }
     }
 

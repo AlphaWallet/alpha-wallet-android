@@ -101,11 +101,13 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.internal.operators.parallel.ParallelRunOn;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -151,6 +153,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private FragmentMessenger homeMessenger;
 
     private final TokenscriptFunction tokenscriptUtility;
+    private final Realm realm;
 
     @Nullable
     private Disposable checkEventDisposable;
@@ -177,6 +180,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         transactionRespository = trt;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
+        realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB);
         //deleteAllEventData();
         loadAssetScripts();
     }
@@ -295,10 +299,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 } );
     }
 
-    private void deleteTokenScriptFromRealm(Realm realm, String fileHash)
+    private void deleteTokenScriptFromRealm(Realm realm, String fileHash) throws RealmException
     {
         //delete from realm
-        realm.executeTransaction(r -> {
+        realm.executeTransactionAsync(r -> {
             //have to remove all instances of this hash
             RealmResults<RealmTokenScriptData> hashInstances = r.where(RealmTokenScriptData.class)
                     .equalTo("fileHash", fileHash)
@@ -342,7 +346,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     //This loads bundled TokenScripts in the /assets directory eg xDAI bridge
     private void loadInternalAssets()
     {
-        deleteAllInternalScriptFromRealm(); //Slightly sub-optimal, we delete all internal scripts and re-check them. Currently only one so not an issue
+        deleteAllInternalScriptFromRealm();
         //First load the bundled scripts
         Observable.fromIterable(getLocalTSMLFiles())
                 .subscribeOn(Schedulers.io())
@@ -352,9 +356,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void deleteAllInternalScriptFromRealm()
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try
         {
-            realm.executeTransaction(r -> {
+            realm.executeTransactionAsync(r -> {
                 //have to remove all instances of this hash
                 RealmResults<RealmTokenScriptData> hashInstances = r.where(RealmTokenScriptData.class)
                         .equalTo("fileHash", BUNDLED_SCRIPT)
@@ -940,32 +944,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void deleteScriptEntriesFromRealm(List<ContractLocator> origins, boolean isDebug)
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
-        {
-            realm.executeTransaction(r -> {
-                for (ContractLocator cl : origins)
-                {
-                    String entryKey = getTSDataKey(cl.chainId, cl.address);
-                    RealmTokenScriptData realmData = realm.where(RealmTokenScriptData.class)
-                            .equalTo("instanceKey", entryKey)
-                            .findFirst();
+        realm.executeTransactionAsync(r -> {
+            for (ContractLocator cl : origins)
+            {
+                String entryKey = getTSDataKey(cl.chainId, cl.address);
+                RealmTokenScriptData realmData = realm.where(RealmTokenScriptData.class)
+                        .equalTo("instanceKey", entryKey)
+                        .findFirst();
 
-                    if (realmData != null && (isDebug || isInSecureZone(realmData.getFilePath()))) //delete the existing entry if this script is debug, or if the old script is in the server area
-                    {
-                        RealmCertificateData realmCert = realm.where(RealmCertificateData.class)
-                                .equalTo("instanceKey", realmData.getFileHash())
-                                .findFirst();
-                        if (realmCert != null) realmCert.deleteFromRealm();
-                        deleteEventDataForScript(realmData);
-                        realmData.deleteFromRealm();
-                    }
+                if (realmData != null && (isDebug || isInSecureZone(realmData.getFilePath()))) //delete the existing entry if this script is debug, or if the old script is in the server area
+                {
+                    RealmCertificateData realmCert = realm.where(RealmCertificateData.class)
+                            .equalTo("instanceKey", realmData.getFileHash())
+                            .findFirst();
+                    if (realmCert != null) realmCert.deleteFromRealm();
+                    deleteEventDataForScript(realmData);
+                    realmData.deleteFromRealm();
                 }
-            });
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+            }
+        });
     }
 
     private Single<File> fetchXMLFromServer(String address)
@@ -1140,27 +1137,20 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void updateRealmForBundledScript(int chainId, String address, String asset, TokenDefinition td)
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
-        {
-            realm.executeTransaction(r -> {
-                String entryKey = getTSDataKey(chainId, address);
-                RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
-                        .equalTo("instanceKey", entryKey)
-                        .findFirst();
+        realm.executeTransactionAsync(r -> {
+            String entryKey = getTSDataKey(chainId, address);
+            RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+                    .equalTo("instanceKey", entryKey)
+                    .findFirst();
 
-                if (entry == null) entry = realm.createObject(RealmTokenScriptData.class, entryKey);
-                entry.setFilePath(asset);
-                entry.setViewList(td.getViews());
-                entry.setNames(td.getTokenNameList());
-                entry.setHasEvents(td.hasEvents());
-                entry.setViewList(td.getViews());
-                entry.setFileHash(BUNDLED_SCRIPT);
-            });
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+            if (entry == null) entry = realm.createObject(RealmTokenScriptData.class, entryKey);
+            entry.setFilePath(asset);
+            entry.setViewList(td.getViews());
+            entry.setNames(td.getTokenNameList());
+            entry.setHasEvents(td.hasEvents());
+            entry.setViewList(td.getViews());
+            entry.setFileHash(BUNDLED_SCRIPT);
+        });
     }
 
     public TokenDefinition getTokenDefinition(File file)
@@ -1565,25 +1555,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private void storeCertificateData(String hash, XMLDsigDescriptor sig)
+    private void storeCertificateData(String hash, XMLDsigDescriptor sig) throws RealmException
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
-        {
+        realm.executeTransaction(r -> {
             //if signature present, then just update
             RealmCertificateData realmData = realm.where(RealmCertificateData.class)
                     .equalTo("instanceKey", hash)
                     .findFirst();
 
-            realm.beginTransaction();
-            if (realmData == null) realmData = realm.createObject(RealmCertificateData.class, hash);
+            if (realmData == null)
+                realmData = realm.createObject(RealmCertificateData.class, hash);
             realmData.setFromSig(sig);
-            realm.commitTransaction();
-            realm.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        });
     }
 
     private XMLDsigDescriptor getCertificateFromRealm(String hash)

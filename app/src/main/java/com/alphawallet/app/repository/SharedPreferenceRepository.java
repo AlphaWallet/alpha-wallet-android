@@ -24,6 +24,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String ACTIVE_MAINNET = "active_mainnet";
+    public static final String SHOWN_WARNING = "shown_warning";
 
     private final SharedPreferences pref;
 
@@ -156,5 +157,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean isActiveMainnet() {
         return pref.getBoolean(ACTIVE_MAINNET, true);
+    }
+
+    @Override
+    public boolean hasShownTestNetWarning() {
+        return pref.getBoolean(SHOWN_WARNING, false);
+    }
+
+    @Override
+    public void setShownTestNetWarning() {
+        pref.edit().putBoolean(SHOWN_WARNING, true).apply();
     }
 }

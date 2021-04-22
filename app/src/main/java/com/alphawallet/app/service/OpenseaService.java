@@ -92,27 +92,14 @@ public class OpenseaService {
             long updateThreshold = System.currentTimeMillis() - 3* DateUtils.MINUTE_IN_MILLIS; //Opensea usually lags behind by about 3 mins.
             for (String cAddr : foundTokens.keySet())
             {
-                if (cAddr.equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-                {
-                    System.out.println("YOLESS: Saw token in opensea");
-                }
-
                 Token t = foundTokens.get(cAddr);
                 if (t.lastTxTime > updateThreshold)
                 {
                     //reject update
-                    if (t.getAddress().equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-                    {
-                        System.out.println("YOLESS: Rejecting token update");
-                    }
                     foundTokens.remove(cAddr);
                 }
                 else
                 {
-                    if (t.getAddress().equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-                    {
-                        System.out.println("YOLESS: Allowing Token update: " + t.lastTxTime);
-                    }
                     t.lastTxTime = updateThreshold;
                 }
             }

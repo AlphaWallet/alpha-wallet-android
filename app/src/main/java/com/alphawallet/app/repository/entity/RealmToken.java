@@ -163,10 +163,6 @@ public class RealmToken extends RealmObject {
 
     public void setLastTxTime(long lastTxTime)
     {
-        if (getTokenAddress().equalsIgnoreCase("0xa567f5A165545Fa2639bBdA79991F105EADF8522"))
-        {
-            System.out.println("YOLESS: Set tx to: " + lastTxTime);
-        }
         this.lastTxTime = lastTxTime;
     }
 

@@ -236,6 +236,9 @@ public class SplashViewModel extends ViewModel
             wallet.type = WalletType.HDKEY;
             wallet.authLevel = authLevel;
             fetchWalletsInteract.storeWallet(wallet)
+                    .map(w -> { preferenceRepository.setCurrentWalletAddress(w.address); return w; })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(account -> {
                         fetchWallets();
                     }, this::onError).isDisposed();

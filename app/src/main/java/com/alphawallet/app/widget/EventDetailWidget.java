@@ -55,8 +55,8 @@ public class EventDetailWidget extends LinearLayout
                 resourceId = R.string.default_approved;
                 break;
             case "ownerApproved":
-                resourceId = R.string.default_approve;
-                break;
+                detail.setText(getContext().getString(R.string.default_approve, eventAmount, data.getDetailAddress()));
+                return;
             default:
                 resourceId = R.string.default_to;
                 break;

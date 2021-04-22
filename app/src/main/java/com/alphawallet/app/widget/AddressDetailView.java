@@ -83,8 +83,23 @@ public class AddressDetailView extends LinearLayout
     {
         setVisibility(View.VISIBLE);
         recipientDetails.setVisibility(View.GONE);
+        //shorten requesterURL if required
+        requesterUrl = abbreviateURL(requesterUrl);
         textAddressSummary.setText(requesterUrl);
         ViewGroup.LayoutParams param = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 3.4f);
         textAddressSummary.setLayoutParams(param);
+    }
+
+    private String abbreviateURL(String inputURL)
+    {
+        if (inputURL.length() > 32)
+        {
+            int index = inputURL.indexOf("/", 20);
+            return inputURL.substring(0,index);
+        }
+        else
+        {
+            return inputURL;
+        }
     }
 }

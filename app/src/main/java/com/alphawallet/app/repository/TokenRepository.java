@@ -451,7 +451,6 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setVisibilityChanged(Wallet wallet, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         localSource.setVisibilityChanged(wallet, token);
         return Completable.fromAction(() -> {});
     }

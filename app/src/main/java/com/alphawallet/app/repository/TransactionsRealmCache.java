@@ -18,6 +18,7 @@ import java.util.List;
 
 import io.reactivex.Single;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -168,25 +169,25 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
+
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                RealmResults<RealmTransaction> txs;
+                RealmQuery<RealmTransaction> rq;
                 if (fetchTime > 0)
                 {
-                    txs = instance.where(RealmTransaction.class)
+                    rq = instance.where(RealmTransaction.class)
                             .sort("timeStamp", Sort.DESCENDING)
                             .lessThan("timeStamp", fetchTime)
-                            .limit(fetchLimit)
-                            .findAll();
+                            .limit(fetchLimit);
                 }
                 else
                 {
-                    txs = instance.where(RealmTransaction.class)
+                    rq = instance.where(RealmTransaction.class)
                             .sort("timeStamp", Sort.DESCENDING)
-                            .limit(fetchLimit)
-                            .findAll();
+                            .limit(fetchLimit);
                 }
 
+                final RealmResults<RealmTransaction> txs = rq.findAll();
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
                 fixBadTXValues(instance, txs);
 
@@ -210,21 +211,21 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
     //Correct any bad value that was previously recorded in a way that wrote the wrong time value
     //TODO: Remove this after a couple more releases, but it's harmless
-    private void fixBadTXValues(Realm instance, RealmResults<RealmTransaction> txs) throws Exception
+    private void fixBadTXValues(Realm instance, final RealmResults<RealmTransaction> txs)
     {
-        long currentTime = System.currentTimeMillis()/1000L;
-        for (RealmTransaction item : txs)
-        {
-            if ((currentTime - item.getTimeStamp()) < -3000*24*60*60 && (item.getBlockNumber().equals("-1") || item.getBlockNumber().equals("0")))
+        long currentTime = System.currentTimeMillis() / 1000L;
+        instance.executeTransactionAsync(r -> {
+            for (RealmTransaction item : txs)
             {
-                // potentially incorrectly recorded tx, change to pending to re-scan
-                instance.executeTransaction(realm -> {
+                if ((currentTime - item.getTimeStamp()) < -3000 * 24 * 60 * 60 && (item.getBlockNumber().equals("-1") || item.getBlockNumber().equals("0")))
+                {
+                    // potentially incorrectly recorded tx, change to pending to re-scan
                     item.setBlockNumber("0");
                     item.setError("0");
                     item.setTimeStamp(currentTime);
-                });
+                }
             }
-        }
+        });
     }
 
     @Override

@@ -27,7 +27,7 @@ public class SelectCurrencyActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
+        setContentView(R.layout.basic_list_activity);
         toolbar();
         setTitle(getString(R.string.dialog_title_select_currency));
         currentCurrency = getIntent().getStringExtra(C.EXTRA_CURRENCY);

@@ -66,23 +66,10 @@ public class FetchTransactionsInteract {
         return transactionRepository.getRealmInstance(wallet);
     }
 
-    public Single<ActivityMeta[]> fetchTransactionMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount)
-    {
-        return transactionRepository
-                .fetchCachedTransactionMetas(wallet, chainId, tokenAddress, historyCount)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public RealmAuxData fetchEvent(String walletAddress, String eventKey)
     {
         return transactionRepository
                 .fetchCachedEvent(walletAddress, eventKey);
-    }
-
-    public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
-    {
-        return transactionRepository.storeRawTx(wallet, rawTx, timeStamp);
     }
 
     public void restartTransactionService()

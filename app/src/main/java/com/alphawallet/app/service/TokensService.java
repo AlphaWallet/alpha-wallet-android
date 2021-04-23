@@ -78,7 +78,7 @@ public class TokensService
     private boolean appHasFocus = true;
 
     @Nullable
-    private Disposable tokenCheckDisposable;
+    private Disposable openSeaCheckDisposable;
     @Nullable
     private Disposable eventTimer;
     @Nullable
@@ -408,8 +408,8 @@ public class TokensService
         }
 
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) balanceCheckDisposable.dispose();
-        if (tokenCheckDisposable != null && !tokenCheckDisposable.isDisposed()) tokenCheckDisposable.dispose();
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) erc20CheckDisposable.dispose();
+        if (openSeaCheckDisposable != null && !openSeaCheckDisposable.isDisposed()) openSeaCheckDisposable.dispose();
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
 
@@ -484,17 +484,20 @@ public class TokensService
 
     private void checkOpenSea()
     {
+        if (openSeaCheckDisposable != null && !openSeaCheckDisposable.isDisposed()) { checkERC20(); return; }
+
         openSeaCount++;
         nextOpenSeaCheck = System.currentTimeMillis() + OPENSEA_CHECK_INTERVAL;
         final Wallet wallet = new Wallet(currentAddress);
         NetworkInfo info = getOpenSeaNetwork();
         if (BuildConfig.DEBUG) Log.d("OPENSEA", "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
-        tokenCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
+        openSeaCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                 .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
                 .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::checkERC20, this::onOpenseaError);
+                .subscribe(t -> { openSeaCheckDisposable = null; checkERC20(); },
+                           e -> { openSeaCheckDisposable = null; checkERC20(); });
 
         if (openSeaCount >= OPENSEA_RINKEBY_CHECK) openSeaCount = 0;
     }
@@ -520,7 +523,7 @@ public class TokensService
                 ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
     }
 
-    private void checkERC20(Token[] checkedERC721Tokens)
+    private void checkERC20()
     {
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
@@ -556,11 +559,6 @@ public class TokensService
     {
         erc20CheckDisposable = null;
         if (BuildConfig.DEBUG) throwable.printStackTrace();
-    }
-
-    private void onOpenseaError(Throwable throwable)
-    {
-        checkERC20(null);
     }
 
     public void updateTickers()

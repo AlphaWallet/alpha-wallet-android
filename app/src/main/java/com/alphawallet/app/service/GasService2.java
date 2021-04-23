@@ -247,8 +247,8 @@ public class GasService2 implements ContractGasProvider
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
-            realm.executeTransaction(r -> {
-                RealmGasSpread rgs = realm.where(RealmGasSpread.class)
+            realm.executeTransactionAsync(r -> {
+                RealmGasSpread rgs = r.where(RealmGasSpread.class)
                         .equalTo("timeStamp", gasPriceSpread.timeStamp)
                         .findFirst();
                 if (rgs == null) rgs = realm.createObject(RealmGasSpread.class, gasPriceSpread.timeStamp);
@@ -256,7 +256,7 @@ public class GasService2 implements ContractGasProvider
                 rgs.setGasSpread(gasPriceSpread, chainId);
 
                 //remove old results
-                realm.where(RealmGasSpread.class)
+                r.where(RealmGasSpread.class)
                         .lessThan("timeStamp", gasPriceSpread.timeStamp - TWELVE_HOURS)
                         .findAll().deleteAllFromRealm();
             });

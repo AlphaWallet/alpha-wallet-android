@@ -44,7 +44,7 @@ public class ContractLocator implements Parcelable
 
     public boolean equals(Token token)
     {
-        return (token != null && address != null && address.equalsIgnoreCase(token.getAddress()) && chainId == token.tokenInfo.chainId);
+        return (token != null && address != null && chainId == token.tokenInfo.chainId && address.equalsIgnoreCase(token.getAddress()) );
     }
 
     public boolean equals(TokenCardMeta token)

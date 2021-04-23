@@ -47,9 +47,9 @@ public class FetchWalletsInteract {
      *
      * @param walletAddr
      */
-    public Disposable updateBackupTime(String walletAddr)
+    public void updateBackupTime(String walletAddr)
     {
-        return accountRepository.updateBackupTime(walletAddr);
+        accountRepository.updateBackupTime(walletAddr);
     }
 
     public Single<Wallet> updateENS(Wallet wallet)

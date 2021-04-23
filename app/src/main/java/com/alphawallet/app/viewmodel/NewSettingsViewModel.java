@@ -102,8 +102,8 @@ public class NewSettingsViewModel extends BaseViewModel {
         myAddressRouter.open(context, defaultWallet.getValue());
     }
 
-    public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
+    public void setIsDismissed(String walletAddr, boolean isDismissed)
     {
-        return genericWalletInteract.setIsDismissed(walletAddr, isDismissed);
+        genericWalletInteract.setIsDismissed(walletAddr, isDismissed);
     }
 }

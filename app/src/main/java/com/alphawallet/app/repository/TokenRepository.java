@@ -84,6 +84,8 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
+    private static final boolean LOG_CONTRACT_EXCEPTION_EVENTS = false;
+
     public static final BigInteger INTERFACE_CRYPTOKITTIES = new BigInteger ("9a20483d", 16);
     public static final BigInteger INTERFACE_OFFICIAL_ERC721 = new BigInteger ("80ac58cd", 16);
     public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
@@ -451,7 +453,6 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setVisibilityChanged(Wallet wallet, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         localSource.setVisibilityChanged(wallet, token);
         return Completable.fromAction(() -> {});
     }
@@ -513,7 +514,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 }
 
                 return hasBalanceChanged;
@@ -602,7 +603,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 return token;
             }
         });
@@ -777,7 +778,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return BigDecimal.valueOf(-1);
         }
     }
@@ -797,7 +798,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 return BigDecimal.valueOf(-1);
             }
         }).subscribeOn(Schedulers.io());
@@ -1171,7 +1172,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return null;
         }
     }
@@ -1221,7 +1222,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return null;
         }
     }

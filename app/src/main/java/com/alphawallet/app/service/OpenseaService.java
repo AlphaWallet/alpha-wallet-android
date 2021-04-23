@@ -70,7 +70,7 @@ public class OpenseaService {
                 JSONObject result = new JSONObject(jsonData);
                 JSONArray assets = result.getJSONArray("assets");
                 receivedTokens = assets.length();
-                offset++;
+                offset += assets.length();
 
                 //process this page of results
                 processOpenseaTokens(foundTokens, assets, address, networkId, networkName, tokensService);

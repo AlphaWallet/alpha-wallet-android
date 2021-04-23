@@ -149,7 +149,7 @@ public class BackupKeyViewModel extends BaseViewModel {
 
     public void backupSuccess(Wallet wallet)
     {
-        fetchWalletsInteract.updateBackupTime(wallet.address).isDisposed();
+        fetchWalletsInteract.updateBackupTime(wallet.address);
     }
 
     public void resetSignDialog()

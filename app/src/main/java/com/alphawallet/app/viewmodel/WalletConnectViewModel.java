@@ -153,24 +153,21 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     public void pruneSession(String sessionId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmWCSession item = realm.where(RealmWCSession.class)
+        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+            RealmWCSession item = r.where(RealmWCSession.class)
                     .equalTo("sessionId", sessionId)
                     .findFirst();
 
-            RealmResults<RealmWCSignElement> signItems = realm.where(RealmWCSignElement.class)
+            RealmResults<RealmWCSignElement> signItems = r.where(RealmWCSignElement.class)
                     .equalTo("sessionId", sessionId)
                     .findAll();
 
             if (item != null && signItems.size() == 0)
             {
-                realm.executeTransaction(r -> {
-                    Log.d(TAG, "Delete from realm: " + sessionId);
-                    item.deleteFromRealm();
-                });
+                Log.d(TAG, "Delete from realm: " + sessionId);
+                item.deleteFromRealm();
             }
-        }
+        });
     }
 
     public void startGasCycle(int chainId)
@@ -304,16 +301,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public WCSession getSession(String sessionId)
     {
         WCSession session = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
+        RealmWCSession sessionData = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
+                .equalTo("sessionId", sessionId)
+                .findFirst();
 
-            if (sessionData != null)
-            {
-                session = sessionData.getSession();
-            }
+        if (sessionData != null)
+        {
+            session = sessionData.getSession();
         }
 
         return session;
@@ -322,16 +316,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public WCPeerMeta getRemotePeer(String sessionId)
     {
         WCPeerMeta peerMeta = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
+        RealmWCSession sessionData = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
+                .equalTo("sessionId", sessionId)
+                .findFirst();
 
-            if (sessionData != null)
-            {
-                peerMeta = sessionData.getRemotePeerData();
-            }
+        if (sessionData != null)
+        {
+            peerMeta = sessionData.getRemotePeerData();
         }
 
         return peerMeta;
@@ -340,16 +331,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public String getRemotePeerId(String sessionId)
     {
         String remotePeerId = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
+        RealmWCSession sessionData = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
+                .equalTo("sessionId", sessionId)
+                .findFirst();
 
-            if (sessionData != null)
-            {
-                remotePeerId = sessionData.getRemotePeerId();
-            }
+        if (sessionData != null)
+        {
+            remotePeerId = sessionData.getRemotePeerId();
         }
 
         return remotePeerId;
@@ -358,16 +346,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public String getPeerId(String sessionId)
     {
         String peerId = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
+        RealmWCSession sessionData = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
+                .equalTo("sessionId", sessionId)
+                .findFirst();
 
-            if (sessionData != null)
-            {
-                peerId = sessionData.getPeerId();
-            }
+        if (sessionData != null)
+        {
+            peerId = sessionData.getPeerId();
         }
 
         return peerId;
@@ -376,16 +361,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public int getChainId(String sessionId)
     {
         int chainId = MAINNET_ID;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
+        RealmWCSession sessionData = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
+                .equalTo("sessionId", sessionId)
+                .findFirst();
 
-            if (sessionData != null)
-            {
-                chainId = sessionData.getChainId();
-            }
+        if (sessionData != null)
+        {
+            chainId = sessionData.getChainId();
         }
 
         return chainId;
@@ -394,94 +376,78 @@ public class WalletConnectViewModel extends BaseViewModel {
     public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData,
                                  String remotePeerData, int sessionChainId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            realm.executeTransaction(r -> {
-                RealmWCSession sessionAux = realm.where(RealmWCSession.class)
-                        .equalTo("sessionId", sessionId)
-                        .findFirst();
+        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+            RealmWCSession sessionAux = r.where(RealmWCSession.class)
+                    .equalTo("sessionId", sessionId)
+                    .findFirst();
 
-                if (sessionAux == null) sessionAux = realm.createObject(RealmWCSession.class, sessionId);
+            if (sessionAux == null)
+                sessionAux = r.createObject(RealmWCSession.class, sessionId);
 
-                sessionAux.setLastUsageTime(System.currentTimeMillis());
-                sessionAux.setRemotePeerId(remotePeerId);
-                sessionAux.setPeerId(peerId);
-                sessionAux.setRemotePeerData(remotePeerData);
-                sessionAux.setSessionData(sessionData);
-                sessionAux.setUsageCount(0);
-                sessionAux.setWalletAccount(defaultWallet.getValue().address);
-                sessionAux.setChainId(sessionChainId);
-            });
-        }
+            sessionAux.setLastUsageTime(System.currentTimeMillis());
+            sessionAux.setRemotePeerId(remotePeerId);
+            sessionAux.setPeerId(peerId);
+            sessionAux.setRemotePeerData(remotePeerData);
+            sessionAux.setSessionData(sessionData);
+            sessionAux.setUsageCount(0);
+            sessionAux.setWalletAccount(defaultWallet.getValue().address);
+            sessionAux.setChainId(sessionChainId);
+        });
 
         gasService.startGasPriceCycle(sessionChainId);
     }
 
     public void deleteSession(String sessionId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            realm.executeTransaction(r -> {
-                RealmWCSession sessionAux = realm.where(RealmWCSession.class)
-                        .equalTo("sessionId", sessionId)
-                        .findFirst();
+        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+            RealmWCSession sessionAux = r.where(RealmWCSession.class)
+                    .equalTo("sessionId", sessionId)
+                    .findFirst();
 
-                if (sessionAux != null)
-                {
-                    sessionAux.deleteFromRealm();
-                }
-            });
-        }
+            if (sessionAux != null)
+            {
+                sessionAux.deleteFromRealm();
+            }
+        });
     }
 
     public void recordSign(Signable signable, String sessionId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            realm.executeTransaction(r -> {
-                RealmWCSignElement signMessage = realm.createObject(RealmWCSignElement.class);
+        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+            RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
 
-                String signType = "Message";
-                if (signable instanceof EthereumTypedMessage) signType = "TypedMessage";
+            String signType = "Message";
+            if (signable instanceof EthereumTypedMessage) signType = "TypedMessage";
 
-                signMessage.setSessionId(sessionId);
-                signMessage.setSignType(signType);
-                signMessage.setSignTime(System.currentTimeMillis());
-                signMessage.setSignMessage(signable.getUserMessage());
-            });
-        }
+            signMessage.setSessionId(sessionId);
+            signMessage.setSignType(signType);
+            signMessage.setSignTime(System.currentTimeMillis());
+            signMessage.setSignMessage(signable.getUserMessage());
+        });
     }
 
     public void recordSignTransaction(Context ctx, Web3Transaction tx, int chainId, String sessionId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            realm.executeTransaction(r -> {
-                RealmWCSignElement signMessage = realm.createObject(RealmWCSignElement.class);
-
+        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+                RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
                 String signType = "Transaction";
-
                 signMessage.setSessionId(sessionId);
                 signMessage.setSignType(signType);
                 signMessage.setSignTime(System.currentTimeMillis());
                 signMessage.setSignMessage(tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)));
             });
-        }
     }
 
     public ArrayList<SignRecord> getSignRecords(String sessionId)
     {
         ArrayList<SignRecord> records = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmResults<RealmWCSignElement> sessionList = realm.where(RealmWCSignElement.class)
-                    .equalTo("sessionId", sessionId)
-                    .findAll();
+        RealmResults<RealmWCSignElement> sessionList = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSignElement.class)
+                .equalTo("sessionId", sessionId)
+                .findAll();
 
-            for (RealmWCSignElement s : sessionList)
-            {
-                records.add(new SignRecord(s));
-            }
+        for (RealmWCSignElement s : sessionList)
+        {
+            records.add(new SignRecord(s));
         }
 
         return records;
@@ -490,16 +456,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public List<WalletConnectSessionItem> getSessions()
     {
         List<WalletConnectSessionItem> sessions = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
-                    .sort("lastUsageTime", Sort.DESCENDING)
-                    .findAll();
+        RealmResults<RealmWCSession> items = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
+                .sort("lastUsageTime", Sort.DESCENDING)
+                .findAll();
 
-            for (RealmWCSession r : items)
-            {
-                sessions.add(new WalletConnectSessionItem(r));
-            }
+        for (RealmWCSession r : items)
+        {
+            sessions.add(new WalletConnectSessionItem(r));
         }
 
         return sessions;

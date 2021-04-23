@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -62,7 +63,7 @@ public class TokenScriptFile extends File
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
         }
     }

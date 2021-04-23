@@ -95,7 +95,7 @@ public class AddressDetailView extends LinearLayout
         if (inputURL.length() > 32)
         {
             int index = inputURL.indexOf("/", 20);
-            return inputURL.substring(0,index);
+            return index >= 0 ? inputURL.substring(0,index) : inputURL;
         }
         else
         {

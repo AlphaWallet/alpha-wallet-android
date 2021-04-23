@@ -38,13 +38,13 @@ public interface WalletRepositoryType {
 
     Single<String> getName(String address);
 
-    Disposable updateBackupTime(String walletAddr);
-    Disposable updateWarningTime(String walletAddr);
+    void updateBackupTime(String walletAddr);
+    void updateWarningTime(String walletAddr);
 
     Single<Boolean> getWalletBackupWarning(String walletAddr);
 
     Single<String> getWalletRequiresBackup(String walletAddr);
-    Single<String> setIsDismissed(String walletAddr, boolean isDismissed);
+    void setIsDismissed(String walletAddr, boolean isDismissed);
 
     boolean keystoreExists(String address);
 

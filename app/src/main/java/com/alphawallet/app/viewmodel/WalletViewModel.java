@@ -133,14 +133,14 @@ public class WalletViewModel extends BaseViewModel
         return defaultWallet.getValue();
     }
 
-    public Disposable setKeyBackupTime(String walletAddr)
+    public void setKeyBackupTime(String walletAddr)
     {
-        return genericWalletInteract.updateBackupTime(walletAddr);
+        genericWalletInteract.updateBackupTime(walletAddr);
     }
 
-    public Disposable setKeyWarningDismissTime(String walletAddr)
+    public void setKeyWarningDismissTime(String walletAddr)
     {
-        return genericWalletInteract.updateWarningTime(walletAddr);
+        genericWalletInteract.updateWarningTime(walletAddr);
     }
 
     public void setTokenEnabled(Token token, boolean enabled) {

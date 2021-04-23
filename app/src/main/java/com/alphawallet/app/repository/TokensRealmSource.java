@@ -134,7 +134,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             else
             {
-                realm.executeTransaction(instance -> {
+                realm.executeTransaction(r -> {
                     realmToken.setInterfaceSpec(type.ordinal());
                     realmToken.setName(token.tokenInfo.name);
                     realmToken.setSymbol(token.tokenInfo.symbol);
@@ -307,17 +307,17 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", databaseKey(token))
-                    .equalTo("chainId", token.tokenInfo.chainId)
-                    .findFirst();
+            realm.executeTransactionAsync(r -> {
+                RealmToken realmToken = r.where(RealmToken.class)
+                        .equalTo("address", databaseKey(token))
+                        .equalTo("chainId", token.tokenInfo.chainId)
+                        .findFirst();
 
-            if (realmToken != null)
-            {
-                realm.executeTransaction(r -> {
+                if (realmToken != null)
+                {
                     realmToken.setVisibilityChanged(true);
-                });
-            }
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -357,16 +357,17 @@ public class TokensRealmSource implements TokenLocalSource {
         String key = databaseKey(chainId, tokenAddress.toLowerCase());
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", key)
-                    .equalTo("chainId", chainId)
-                    .findFirst();
+            realm.executeTransactionAsync(r -> {
+                RealmToken realmToken = r.where(RealmToken.class)
+                        .equalTo("address", key)
+                        .equalTo("chainId", chainId)
+                        .findFirst();
 
-            if (realmToken != null)
-            {
-                realm.executeTransaction(instance ->
-                        realmToken.setUpdateTime(System.currentTimeMillis()));
-            }
+                if (realmToken != null)
+                {
+                    realmToken.setUpdateTime(System.currentTimeMillis());
+                }
+            });
         }
         catch (Exception e)
         {
@@ -562,8 +563,8 @@ public class TokensRealmSource implements TokenLocalSource {
         if (!Utils.isAddressValid(wallet.address)) return;
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realm.executeTransaction(instance -> {
-                saveToken(realm, token);
+            realm.executeTransaction(r -> {
+                saveToken(r, token);
             });
         }
         catch (Exception ex)
@@ -774,17 +775,16 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private void removeLocalTickers(Realm realm)
     {
-
         try
         {
-            RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
-                .findAll();
-            if (realmItems.size() > 0)
-            {
-                realm.executeTransaction(r -> {
+            realm.executeTransactionAsync(r -> {
+                RealmResults<RealmTokenTicker> realmItems = r.where(RealmTokenTicker.class)
+                        .findAll();
+                if (realmItems.size() > 0)
+                {
                     realmItems.deleteAllFromRealm();
-                });
-            }
+                }
+            });
         }
         catch (Exception e)
         {

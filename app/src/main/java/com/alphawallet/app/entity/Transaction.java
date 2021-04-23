@@ -355,6 +355,23 @@ public class Transaction implements Parcelable
 		}
 	}
 
+	public TransactionType getTransactionType(String wallet)
+	{
+		if (hasError())
+		{
+			return TransactionType.UNKNOWN;
+		}
+		else if (hasInput())
+		{
+			decodeTransactionInput(wallet);
+			return transactionInput.type;
+		}
+		else
+		{
+			return TransactionType.SEND_ETH;
+		}
+	}
+
 	/**
 	 * Supplimental info in this case is the intrinsic root value attached to a contract call
 	 * EG: Calling cryptokitties ERC721 'breedWithAuto' function requires you to call the function and also attach a small amount of ETH

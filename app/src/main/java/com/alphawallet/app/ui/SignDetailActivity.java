@@ -33,7 +33,7 @@ public class SignDetailActivity extends BaseActivity
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
+        setContentView(R.layout.basic_list_activity);
         toolbar();
         setTitle(getString(R.string.signed_transactions));
         signRecords = getIntent().getParcelableArrayListExtra(C.EXTRA_STATE);

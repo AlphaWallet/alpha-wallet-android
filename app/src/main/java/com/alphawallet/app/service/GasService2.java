@@ -245,26 +245,20 @@ public class GasService2 implements ContractGasProvider
      */
     private void updateRealm(final GasPriceSpread gasPriceSpread, final int chainId)
     {
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
-        {
-            realm.executeTransactionAsync(r -> {
-                RealmGasSpread rgs = r.where(RealmGasSpread.class)
-                        .equalTo("timeStamp", gasPriceSpread.timeStamp)
-                        .findFirst();
-                if (rgs == null) rgs = realm.createObject(RealmGasSpread.class, gasPriceSpread.timeStamp);
+        realmManager.getRealmInstance(TICKER_DB).executeTransactionAsync(r -> {
+            RealmGasSpread rgs = r.where(RealmGasSpread.class)
+                    .equalTo("timeStamp", gasPriceSpread.timeStamp)
+                    .findFirst();
+            if (rgs == null)
+                rgs = r.createObject(RealmGasSpread.class, gasPriceSpread.timeStamp);
 
-                rgs.setGasSpread(gasPriceSpread, chainId);
+            rgs.setGasSpread(gasPriceSpread, chainId);
 
-                //remove old results
-                r.where(RealmGasSpread.class)
-                        .lessThan("timeStamp", gasPriceSpread.timeStamp - TWELVE_HOURS)
-                        .findAll().deleteAllFromRealm();
-            });
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+            //remove old results
+            r.where(RealmGasSpread.class)
+                    .lessThan("timeStamp", gasPriceSpread.timeStamp - TWELVE_HOURS)
+                    .findAll().deleteAllFromRealm();
+        });
     }
 
     public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, int chainId, String toAddress, BigInteger amount, Wallet wallet)

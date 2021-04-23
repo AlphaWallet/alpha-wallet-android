@@ -1070,14 +1070,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger txGasLimit)
     {
-        if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0 && !estimate.hasError())
+        try
         {
-            return estimate.getAmountUsed();
+            if (!estimate.hasError() && estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
+            {
+                return estimate.getAmountUsed();
+            }
+            else
+            {
+                return txGasLimit;
+            }
         }
-        else
+        catch (Exception e)
         {
-            return txGasLimit;
+            //
         }
+
+        return txGasLimit;
     }
 
     private void onSignError()

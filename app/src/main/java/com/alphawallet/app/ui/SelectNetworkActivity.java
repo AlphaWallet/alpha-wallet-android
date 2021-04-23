@@ -141,15 +141,18 @@ public class SelectNetworkActivity extends BaseActivity {
             }
             else
             {
-                if (!viewModel.hasShownTestNetWarning())
-                {
-                    dialog.show();
-                    viewModel.setShownTestNetWarning();
-                }
-                else
-                {
-                    pickNewBrowserNetwork();
-                }
+                dialog.show();
+                viewModel.setShownTestNetWarning();
+                //enable if we want to be able to do a 'don't show me again'
+//                if (!viewModel.hasShownTestNetWarning())
+//                {
+//                    dialog.show();
+//                    viewModel.setShownTestNetWarning();
+//                }
+//                else
+//                {
+//                    pickNewBrowserNetwork();
+//                }
             }
         };
 

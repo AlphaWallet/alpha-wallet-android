@@ -111,15 +111,15 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Disposable updateBackupTime(String walletAddr)
+	public void updateBackupTime(String walletAddr)
 	{
-		return walletDataRealmSource.updateBackupTime(walletAddr);
+		walletDataRealmSource.updateBackupTime(walletAddr);
 	}
 
 	@Override
-	public Disposable updateWarningTime(String walletAddr)
+	public void updateWarningTime(String walletAddr)
 	{
-		return walletDataRealmSource.updateWarningTime(walletAddr);
+		walletDataRealmSource.updateWarningTime(walletAddr);
 	}
 
 	@Override
@@ -135,9 +135,9 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
+	public void setIsDismissed(String walletAddr, boolean isDismissed)
 	{
-		return walletDataRealmSource.setIsDismissed(walletAddr, isDismissed);
+		walletDataRealmSource.setIsDismissed(walletAddr, isDismissed);
 	}
 
 	@Override

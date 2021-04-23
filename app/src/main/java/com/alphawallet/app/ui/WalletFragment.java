@@ -552,7 +552,7 @@ public class WalletFragment extends BaseFragment implements
     public void remindMeLater(Wallet wallet)
     {
         handler.post(() -> {
-            if (viewModel != null) viewModel.setKeyWarningDismissTime(wallet.address).isDisposed();
+            if (viewModel != null) viewModel.setKeyWarningDismissTime(wallet.address);
             if (adapter != null) adapter.removeBackupWarning();
         });
     }
@@ -560,7 +560,7 @@ public class WalletFragment extends BaseFragment implements
     public void storeWalletBackupTime(String backedUpKey)
     {
         handler.post(() -> {
-            if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey).isDisposed();
+            if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey);
             if (adapter != null) adapter.removeBackupWarning();
         });
     }

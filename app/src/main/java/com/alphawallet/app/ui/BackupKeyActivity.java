@@ -114,17 +114,6 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    /*
-                case BACKUP_HD_KEY:
-                intent.putExtra("STATE", ENTER_BACKUP_STATE_HD);
-                break;
-            case BACKUP_KEYSTORE_KEY:
-                intent.putExtra("STATE", ENTER_JSON_BACKUP);
-                break;
-            case UPGRADE_KEY:
-                intent.putExtra("STATE", UPGRADE_KEY_SECURITY);
-     */
-
     private void initBackupState() {
         state = (BackupState) getIntent().getSerializableExtra("STATE");
 

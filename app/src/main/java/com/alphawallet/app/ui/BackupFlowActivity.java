@@ -41,12 +41,14 @@ public class BackupFlowActivity extends BaseActivity implements
     private AWalletAlertDialog alertDialog;
     private FunctionButtonBar functionButtonBar;
     private BackupOperationType type;
+    private boolean launchedBackup;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         alertDialog = null;
         lockOrientation();
+        launchedBackup = false;
 
         type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
         wallet = getIntent().getParcelableExtra(WALLET);
@@ -186,6 +188,16 @@ public class BackupFlowActivity extends BaseActivity implements
     }
 
     @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (launchedBackup) //avoid orphaned view.
+        {
+            finish();
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -196,6 +208,7 @@ public class BackupFlowActivity extends BaseActivity implements
                 finishBackupSuccess(data);
             }
         }
+        finish();
     }
 
     private void finishBackupSuccess(Intent data) {
@@ -222,6 +235,7 @@ public class BackupFlowActivity extends BaseActivity implements
     public void handleClick(String action, int id) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
+        launchedBackup = true;
 
         switch (type)
         {
@@ -236,6 +250,5 @@ public class BackupFlowActivity extends BaseActivity implements
                 break;
         }
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
-        finish();
     }
 }

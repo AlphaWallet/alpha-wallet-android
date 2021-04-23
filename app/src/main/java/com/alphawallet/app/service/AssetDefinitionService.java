@@ -934,7 +934,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return Single.fromCallable(TokenDefinition::new);
@@ -1360,11 +1360,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             String eventAddress = ev.getEventContractAddress();
             String eventName = ev.activityName != null ? ev.activityName : ev.attributeName;
             String databaseKey = TokensRealmSource.eventBlockKey(chainId, eventAddress, ev.type.name, ev.filter);
-            realm.executeTransaction(r -> {
-                RealmAuxData realmToken = realm.where(RealmAuxData.class)
+            realm.executeTransactionAsync(r -> {
+                RealmAuxData realmToken = r.where(RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .findFirst();
-                if (realmToken == null) realmToken = realm.createObject(RealmAuxData.class, databaseKey);
+                if (realmToken == null) realmToken = r.createObject(RealmAuxData.class, databaseKey);
                 realmToken.setResultTime(System.currentTimeMillis());
                 realmToken.setResult(ev.readBlock.toString(16));
                 realmToken.setFunctionId(eventName);
@@ -1399,11 +1399,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
-            realm.executeTransaction(r -> {
-                RealmAuxData realmToken = realm.where(RealmAuxData.class)
+            realm.executeTransactionAsync(r -> {
+                RealmAuxData realmToken = r.where(RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .findFirst();
-                if (realmToken == null) realmToken = realm.createObject(RealmAuxData.class, databaseKey);
+                if (realmToken == null) realmToken = r.createObject(RealmAuxData.class, databaseKey);
                 realmToken.setResultTime(blockTime);
                 realmToken.setResult(eventData);
                 realmToken.setFunctionId(activityName);
@@ -1555,7 +1555,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void storeCertificateData(String hash, XMLDsigDescriptor sig) throws RealmException
     {
-        realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransaction(r -> {
+        realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransactionAsync(r -> {
             //if signature present, then just update
             RealmCertificateData realmData = r.where(RealmCertificateData.class)
                     .equalTo("instanceKey", hash)
@@ -2065,15 +2065,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
             String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
-            RealmAuxData realmToken = realm.where(RealmAuxData.class)
-                    .equalTo("instanceKey", databaseKey)
-                    .equalTo("chainId", tResult.contractChainId)
-                    .findFirst();
+            realm.executeTransactionAsync(r -> {
+                RealmAuxData realmToken = r.where(RealmAuxData.class)
+                        .equalTo("instanceKey", databaseKey)
+                        .equalTo("chainId", tResult.contractChainId)
+                        .findFirst();
 
-            realm.executeTransaction(r -> {
                 if (realmToken == null)
                 {
-                    createAuxData(realm, tResult, databaseKey);
+                    createAuxData(r, tResult, databaseKey);
                 }
                 else if (tResult.result != null)
                 {
@@ -2120,8 +2120,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //delete all realm event/attribute result data
         try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
         {
-            realm.executeTransaction(r -> {
-                RealmResults<RealmAuxData> realmEvents = realm.where(RealmAuxData.class)
+            realm.executeTransactionAsync(r -> {
+                RealmResults<RealmAuxData> realmEvents = r.where(RealmAuxData.class)
                         .findAll();
                 realmEvents.deleteAllFromRealm();
             });
@@ -2134,13 +2134,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //Delete all tokenscript data
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
-            RealmResults<RealmTokenScriptData> rd = realm.where(RealmTokenScriptData.class)
-                    .findAll();
+            realm.executeTransactionAsync(r -> {
+                RealmResults<RealmTokenScriptData> rd = r.where(RealmTokenScriptData.class)
+                        .findAll();
 
-            RealmResults<RealmCertificateData> realmCert = realm.where(RealmCertificateData.class)
-                    .findAll();
+                RealmResults<RealmCertificateData> realmCert = r.where(RealmCertificateData.class)
+                        .findAll();
 
-            realm.executeTransaction(r -> {
                 rd.deleteAllFromRealm();
                 realmCert.deleteAllFromRealm();
             });

@@ -244,21 +244,21 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public void putTransaction(Wallet wallet, Transaction tx)
+    public void putTransaction(Wallet wallet, final Transaction tx)
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransaction(realm -> {
-                RealmTransaction realmTx = instance.where(RealmTransaction.class)
+            instance.executeTransactionAsync(realm -> {
+                RealmTransaction realmTx = realm.where(RealmTransaction.class)
                         .equalTo("hash", tx.hash)
                         .findFirst();
 
                 if (realmTx == null)
                 {
-                    realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+                    realmTx = realm.createObject(RealmTransaction.class, tx.hash);
                 }
 
-                fill(instance, realmTx, tx);
+                fill(realm, realmTx, tx);
                 realm.insertOrUpdate(realmTx);
             });
         }
@@ -280,9 +280,9 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         deleteTransaction(wallet, ethTx.getHash());
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransaction(realm -> {
-                RealmTransaction item = instance.createObject(RealmTransaction.class, ethTx.getHash());
-                fill(instance, item, tx);
+            instance.executeTransactionAsync(realm -> {
+                RealmTransaction item = realm.createObject(RealmTransaction.class, ethTx.getHash());
+                fill(realm, item, tx);
                 realm.insertOrUpdate(item);
             });
         }
@@ -299,17 +299,17 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
-                    .equalTo("hash", oldTxHash)
-                    .findFirst();
+            instance.executeTransactionAsync(realm -> {
+                RealmTransaction realmTx = realm.where(RealmTransaction.class)
+                        .equalTo("hash", oldTxHash)
+                        .findFirst();
 
-            if (realmTx != null)
-            {
-                instance.executeTransaction(realm -> {
+                if (realmTx != null)
+                {
                     //deleteOperations(realmTx);
                     realmTx.deleteFromRealm();
-                });
-            }
+                }
+            });
         }
         catch (Exception e)
         {
@@ -360,17 +360,17 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
         {
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
-                    .equalTo("hash", hash)
-                    .findFirst();
+            instance.executeTransactionAsync(realm -> {
+                RealmTransaction realmTx = realm.where(RealmTransaction.class)
+                        .equalTo("hash", hash)
+                        .findFirst();
 
-            if (realmTx != null)
-            {
-                instance.executeTransaction(realm -> {
+                if (realmTx != null)
+                {
                     realmTx.setBlockNumber(String.valueOf(blockValue));
-                    realmTx.setTimeStamp(System.currentTimeMillis()/1000); //update timestamp so it's updated on the UI
-                });
-            }
+                    realmTx.setTimeStamp(System.currentTimeMillis() / 1000); //update timestamp so it's updated on the UI
+                }
+            });
         }
         catch (Exception e)
         {

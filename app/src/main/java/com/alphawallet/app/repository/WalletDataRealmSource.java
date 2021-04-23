@@ -275,7 +275,7 @@ public class WalletDataRealmSource {
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
                 realm.executeTransaction(r -> {
-                    RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                    RealmWalletData realmWallet = r.where(RealmWalletData.class)
                             .equalTo("address", walletAddr, Case.INSENSITIVE)
                             .findFirst();
 

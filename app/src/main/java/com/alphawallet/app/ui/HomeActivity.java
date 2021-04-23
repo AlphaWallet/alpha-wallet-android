@@ -111,6 +111,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private PinAuthenticationCallbackInterface authInterface;
     private int navBarHeight;
+    private boolean isForeground;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -135,15 +136,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         Log.d("LIFE", "AlphaWallet into foreground");
         ((WalletFragment) walletFragment).walletInFocus();
         if (viewModel != null) viewModel.startTransactionUpdate();
+        isForeground = true;
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    private void onMoveToBackground()
+    {
+        Log.d("LIFE", "AW Home screen into background");
+        if (viewModel != null) viewModel.stopTransactionUpdate();
+        isForeground = false;
     }
 
     @Override
     public void onTrimMemory(int level)
     {
         super.onTrimMemory(level);
-        Log.d("LIFE", "AlphaWallet into background");
-        ((WalletFragment) walletFragment).walletOutOfFocus();
-        if (viewModel != null) viewModel.stopTransactionUpdate();
     }
 
     @Override
@@ -176,6 +183,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
+        isForeground = true;
 
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 

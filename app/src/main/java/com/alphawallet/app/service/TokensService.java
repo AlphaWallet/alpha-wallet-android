@@ -128,7 +128,7 @@ public class TokensService
                             .flatMap(contractType -> tokenRepository.addToken(new Wallet(currentAddress), tokenInfo, contractType).toObservable()))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
-                        .subscribe(this::finishAddToken, Throwable::printStackTrace, this::finishTokenCheck);
+                        .subscribe(this::finishAddToken, this::onCheckError, this::finishTokenCheck);
             }
             else if (t == null)
             {
@@ -137,6 +137,11 @@ public class TokensService
                     checkUnknownTokenCycle.dispose();
             }
         }
+    }
+
+    private void onCheckError(Throwable throwable)
+    {
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
     private void finishTokenCheck()
@@ -306,6 +311,11 @@ public class TokensService
     public void clearFocusToken()
     {
         focusToken = null;
+    }
+
+    private boolean isFocusToken(Token t)
+    {
+        return focusToken != null && focusToken.equals(t);
     }
 
     /**
@@ -642,13 +652,13 @@ public class TokensService
             long lastUpdateDiff = currentTime - check.lastUpdate;
             float weighting = check.calculateBalanceUpdateWeight();
 
-            if (!appHasFocus && !token.isEthereum()) continue; //only check chains when wallet out of focus
+            if (!appHasFocus && (!token.isEthereum() && !isFocusToken(token))) continue; //only check chains when wallet out of focus
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
             long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS; //normal minimum update frequency for token 30 seconds
 
-            if (focusToken != null && token.tokenInfo.chainId == focusToken.chainId && token.getAddress().equalsIgnoreCase(focusToken.address))
+            if (isFocusToken(token))
             {
                 updateFactor = 3.0f * (float) lastUpdateDiff;
                 cutoffCheck = 15*DateUtils.SECOND_IN_MILLIS; //focus token can be checked every 15 seconds - focus token when erc20 or chain clicked on in wallet

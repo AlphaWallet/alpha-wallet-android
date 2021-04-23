@@ -449,12 +449,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     //See if we require a refresh of transaction checks
     @Override
-    public Completable checkTransactionsForEmptyFunctions(String currentAddress)
+    public void checkTransactionsForEmptyFunctions(String currentAddress)
     {
-        return Completable.fromAction(() -> {
-            try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
-            {
-                RealmResults<RealmAuxData> checkMarkers = instance.where(RealmAuxData.class)
+        try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
+        {
+            instance.executeTransactionAsync(r -> {
+                RealmResults<RealmAuxData> checkMarkers = r.where(RealmAuxData.class)
                         .like("instanceKey", BLOCK_ENTRY + "*")
                         .findAll();
 
@@ -466,34 +466,28 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     {
                         String chainIdStr = aux.getInstanceKey().substring(BLOCK_ENTRY.length());
                         int chainId = Integer.parseInt(chainIdStr);
-                        writeNFTokenBlockRead(instance, chainId, 0); //check from start
-                        writeTokenBlockRead(instance, chainId, 0); //check from start
-
-                        instance.executeTransaction(r -> {
-                            aux.setResult(DB_RESET);
-                        });
-
+                        writeNFTokenBlockRead(r, chainId, 0); //check from start
+                        writeTokenBlockRead(r, chainId, 0); //check from start
+                        aux.setResult(DB_RESET);
                         delete = true;
                     }
                 }
 
                 if (delete)
                 {
-                    instance.beginTransaction();
-                    RealmResults<RealmAuxData> realmEvents = instance.where(RealmAuxData.class)
+                    RealmResults<RealmAuxData> realmEvents = r.where(RealmAuxData.class)
                             .findAll();
                     realmEvents.deleteAllFromRealm();
-                    RealmResults<RealmTransfer> realmTransfers = instance.where(RealmTransfer.class)
-                                .findAll();
+                    RealmResults<RealmTransfer> realmTransfers = r.where(RealmTransfer.class)
+                            .findAll();
                     realmTransfers.deleteAllFromRealm();
-                    instance.commitTransaction();
                 }
-            }
-            catch (Exception e)
-            {
-                //
-            }
-        });
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     /**
@@ -747,13 +741,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private void writeTokenBlockRead(Realm instance, int chainId, long lastBlockChecked)
     {
-        instance.executeTransaction(r -> {
-            RealmAuxData rd = instance.where(RealmAuxData.class)
+        instance.executeTransactionAsync(r -> {
+            RealmAuxData rd = r.where(RealmAuxData.class)
                     .equalTo("instanceKey", BLOCK_ENTRY + chainId)
                     .findFirst();
             if (rd == null)
             {
-                rd = instance.createObject(RealmAuxData.class, BLOCK_ENTRY + chainId);
+                rd = r.createObject(RealmAuxData.class, BLOCK_ENTRY + chainId);
                 rd.setResult(DB_RESET);
             }
             rd.setResultTime(lastBlockChecked);
@@ -762,13 +756,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private void writeNFTokenBlockRead(Realm instance, int chainId, long lastBlockChecked)
     {
-        instance.executeTransaction(r -> {
-            RealmAuxData rd = instance.where(RealmAuxData.class)
+        instance.executeTransactionAsync(r -> {
+            RealmAuxData rd = r.where(RealmAuxData.class)
                     .equalTo("instanceKey", BLOCK_ENTRY + chainId)
                     .findFirst();
             if (rd == null)
             {
-                rd = instance.createObject(RealmAuxData.class, BLOCK_ENTRY + chainId);
+                rd = r.createObject(RealmAuxData.class, BLOCK_ENTRY + chainId);
                 rd.setResult(DB_RESET);
             }
             rd.setResultReceivedTime(lastBlockChecked);
@@ -853,18 +847,18 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         try (Realm instance = realmManager.getRealmInstance(walletAddress))
         {
-            RealmToken realmToken = instance.where(RealmToken.class)
-                    .equalTo("address", databaseKey(chainId, tokenAddress))
-                    .equalTo("chainId", chainId)
-                    .findFirst();
+            instance.executeTransactionAsync(r -> {
+                RealmToken realmToken = r.where(RealmToken.class)
+                        .equalTo("address", databaseKey(chainId, tokenAddress))
+                        .equalTo("chainId", chainId)
+                        .findFirst();
 
-            if (realmToken != null)
-            {
-                instance.executeTransaction(realm -> {
+                if (realmToken != null)
+                {
                     realmToken.setLastBlock(Long.parseLong(lastBlockRead));
                     realmToken.setLastTxTime(System.currentTimeMillis());
-                });
-            }
+                }
+            });
         }
         catch (Exception e)
         {
@@ -876,17 +870,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         try
         {
-            RealmToken realmToken = instance.where(RealmToken.class)
-                    .equalTo("address", databaseKey(chainId, walletAddress))
-                    .equalTo("chainId", chainId)
-                    .findFirst();
+            instance.executeTransactionAsync(r -> {
+                RealmToken realmToken = r.where(RealmToken.class)
+                        .equalTo("address", databaseKey(chainId, walletAddress))
+                        .equalTo("chainId", chainId)
+                        .findFirst();
 
-            if (realmToken != null)
-            {
-                instance.executeTransaction(realm -> {
+                if (realmToken != null)
+                {
                     realmToken.setEarliestTransactionBlock(earliestBlock);
-                });
-            }
+                }
+            });
         }
         catch (Exception e)
         {
@@ -898,18 +892,18 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         try
         {
-            RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class)
-                    .equalTo("chainId", chainId)
-                    .findAll();
+            instance.executeTransaction(r -> {
+                RealmResults<RealmTransaction> txs = r.where(RealmTransaction.class)
+                        .equalTo("chainId", chainId)
+                        .findAll();
 
-            if (txs != null && txs.size() > 0)
-            {
-                instance.executeTransaction(realm -> {
+                if (txs != null && txs.size() > 0)
+                {
                     txs.deleteAllFromRealm();
-                });
-            }
+                }
 
-            resetBlockRead(instance, chainId, walletAddress);
+                resetBlockRead(r, chainId, walletAddress);
+            });
         }
         catch (Exception e)
         {
@@ -921,19 +915,19 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         try
         {
-            RealmToken realmToken = instance.where(RealmToken.class)
-                    .equalTo("address", databaseKey(chainId, walletAddress))
-                    .equalTo("chainId", chainId)
-                    .findFirst();
+            instance.executeTransactionAsync(r -> {
+                RealmToken realmToken = r.where(RealmToken.class)
+                        .equalTo("address", databaseKey(chainId, walletAddress))
+                        .equalTo("chainId", chainId)
+                        .findFirst();
 
-            if (realmToken != null)
-            {
-                instance.executeTransaction(realm -> {
+                if (realmToken != null)
+                {
                     realmToken.setEarliestTransactionBlock(0);
                     realmToken.setLastBlock(0);
                     realmToken.setLastTxTime(0);
-                });
-            }
+                }
+            });
         }
         catch (Exception e)
         {
@@ -1043,18 +1037,18 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private void writeTransaction(Realm instance, Transaction tx)
     {
-        instance.executeTransaction(r -> {
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+        instance.executeTransactionAsync(r -> {
+            RealmTransaction realmTx = r.where(RealmTransaction.class)
                     .equalTo("hash", tx.hash)
                     .findFirst();
             if (realmTx == null)
             {
-                realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+                realmTx = r.createObject(RealmTransaction.class, tx.hash);
             }
 
             if (realmTx.getInput() == null || realmTx.getInput().length() <= 10)
             {
-                TransactionsRealmCache.fill(instance, realmTx, tx);
+                TransactionsRealmCache.fill(r, realmTx, tx);
             }
         });
     }

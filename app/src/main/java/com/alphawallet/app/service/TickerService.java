@@ -72,12 +72,9 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 public class TickerService
 {
     private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
-    private static final String COINMARKET_API_URL = "https://pro-api.coinmarketcap.com";
     private static final String MEDIANIZER = "0x729D19f657BD0614b4985Cf1D82531c67569197B";
     private static final String BLOCKSCOUT = "https://blockscout.com/poa/[CORE]/api?module=stats&action=ethprice";
-    private static final String ETHERSCAN = "https://api.etherscan.io/api?module=stats&action=ethprice";
     private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
-    private static final String ORACLE_ETHERSCAN_API = "https://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=[ORACLE]&sort=desc&page=1&offset=1".replace("[ORACLE]", MARKET_ORACLE_CONTRACT);
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
     private static final String COINGECKO_COINS_API = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cxdai%2Cetc&vs_currencies=USD&include_24hr_change=true";
@@ -96,13 +93,6 @@ public class TickerService
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
     private boolean canUpdate = false;
-
-    public static native String getCMCKey();
-    public static native String getAmberDataKey();
-
-    static {
-        System.loadLibrary("keys");
-    }
 
     public TickerService(OkHttpClient httpClient, Gson gson, Context ctx, TokenLocalSource localSource)
     {
@@ -126,7 +116,6 @@ public class TickerService
     private void tickerUpdate()
     {
         updateCurrencyConversion()
-                .flatMap(this::fetchLastMarketContractWrite)
                 .flatMap(this::updateTickersFromOracle)
                 .flatMap(this::fetchTickersSeparatelyIfRequired)
                 .flatMap(this::addArtisTicker)
@@ -149,11 +138,13 @@ public class TickerService
                 .flatMap(count -> fetchBlockScoutTicker(POA_ID, "core", count));
     }
 
-    private Single<Integer> updateTickersFromOracle(long lastTxTime)
+    private Single<Integer> updateTickersFromOracle(double conversionRate)
     {
+        canUpdate = true;
+        currentConversionRate = conversionRate;
         return Single.fromCallable(() -> {
             int tickerSize = 0;
-            Web3j web3j = TokenRepository.getWeb3jService(RINKEBY_ID);
+            final Web3j web3j = TokenRepository.getWeb3jService(RINKEBY_ID);
             //fetch current tickers
             Function function = getTickers();
             String responseValue = callSmartContractFunction(web3j, function, MARKET_ORACLE_CONTRACT);
@@ -163,7 +154,7 @@ public class TickerService
             {
                 Type T = responseValues.get(0);
                 List<Uint256> values = (List) T.getValue();
-                long tickerUpdateTime = (lastTxTime > 0 ? lastTxTime : values.get(0).getValue().longValue()) * 1000L;
+                long tickerUpdateTime = values.get(0).getValue().longValue() * 1000L;
 
                 if ((System.currentTimeMillis() - tickerUpdateTime) < TICKER_STALE_TIMEOUT)
                 {
@@ -178,43 +169,6 @@ public class TickerService
             }
 
             return tickerSize;
-        });
-    }
-
-    private Single<Long> fetchLastMarketContractWrite(double conversionRate)
-    {
-        canUpdate = true;
-        currentConversionRate = conversionRate;
-        return Single.fromCallable(() -> {
-            Long lastTxTime = 0L;
-            try
-            {
-                Request request = new Request.Builder()
-                        .url(ORACLE_ETHERSCAN_API)
-                        .get()
-                        .build();
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-                if (response.code() / 200 == 1)
-                {
-                    String result = response.body()
-                            .string();
-
-                    EtherscanTransaction[] txs = getEtherscanTransactions(result);
-
-                    if (txs.length > 0)
-                    {
-                        Transaction tx = txs[0].createTransaction(null, RINKEBY_ID);
-                        lastTxTime = tx.timeStamp;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return lastTxTime;
         });
     }
 

@@ -11,6 +11,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.RealmManager;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.util.ArrayList;
@@ -172,24 +173,9 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                RealmQuery<RealmTransaction> rq;
-                if (fetchTime > 0)
-                {
-                    rq = instance.where(RealmTransaction.class)
-                            .sort("timeStamp", Sort.DESCENDING)
-                            .lessThan("timeStamp", fetchTime)
-                            .limit(fetchLimit);
-                }
-                else
-                {
-                    rq = instance.where(RealmTransaction.class)
-                            .sort("timeStamp", Sort.DESCENDING)
-                            .limit(fetchLimit);
-                }
-
-                final RealmResults<RealmTransaction> txs = rq.findAll();
+                final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime, fetchLimit).findAll();
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
-                fixBadTXValues(instance, txs);
+                fixBadTXValues(instance, fetchTime, fetchLimit);
 
                 for (RealmTransaction item : txs)
                 {
@@ -209,12 +195,30 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
+    private RealmQuery<RealmTransaction> generateRealmQuery(Realm instance, long fetchTime, int fetchLimit)
+    {
+        if (fetchTime > 0)
+        {
+            return instance.where(RealmTransaction.class)
+                    .sort("timeStamp", Sort.DESCENDING)
+                    .lessThan("timeStamp", fetchTime)
+                    .limit(fetchLimit);
+        }
+        else
+        {
+            return instance.where(RealmTransaction.class)
+                    .sort("timeStamp", Sort.DESCENDING)
+                    .limit(fetchLimit);
+        }
+    }
+
     //Correct any bad value that was previously recorded in a way that wrote the wrong time value
     //TODO: Remove this after a couple more releases, but it's harmless
-    private void fixBadTXValues(Realm instance, final RealmResults<RealmTransaction> txs)
+    private void fixBadTXValues(@NotNull Realm instance, final long fetchTime, final int fetchLimit)
     {
         long currentTime = System.currentTimeMillis() / 1000L;
         instance.executeTransactionAsync(r -> {
+            final RealmResults<RealmTransaction> txs = generateRealmQuery(r, fetchTime, fetchLimit).findAll();
             for (RealmTransaction item : txs)
             {
                 if ((currentTime - item.getTimeStamp()) < -3000 * 24 * 60 * 60 && (item.getBlockNumber().equals("-1") || item.getBlockNumber().equals("0")))
@@ -248,18 +252,18 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(realm -> {
-                RealmTransaction realmTx = realm.where(RealmTransaction.class)
+            instance.executeTransactionAsync(r -> {
+                RealmTransaction realmTx = r.where(RealmTransaction.class)
                         .equalTo("hash", tx.hash)
                         .findFirst();
 
                 if (realmTx == null)
                 {
-                    realmTx = realm.createObject(RealmTransaction.class, tx.hash);
+                    realmTx = r.createObject(RealmTransaction.class, tx.hash);
                 }
 
-                fill(realm, realmTx, tx);
-                realm.insertOrUpdate(realmTx);
+                fill(r, realmTx, tx);
+                r.insertOrUpdate(realmTx);
             });
         }
         catch (Exception e)
@@ -280,10 +284,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         deleteTransaction(wallet, ethTx.getHash());
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(realm -> {
-                RealmTransaction item = realm.createObject(RealmTransaction.class, ethTx.getHash());
-                fill(realm, item, tx);
-                realm.insertOrUpdate(item);
+            instance.executeTransactionAsync(r -> {
+                RealmTransaction item = r.createObject(RealmTransaction.class, ethTx.getHash());
+                fill(r, item, tx);
+                r.insertOrUpdate(item);
             });
         }
         catch (Exception e)
@@ -299,8 +303,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(realm -> {
-                RealmTransaction realmTx = realm.where(RealmTransaction.class)
+            instance.executeTransactionAsync(r -> {
+                RealmTransaction realmTx = r.where(RealmTransaction.class)
                         .equalTo("hash", oldTxHash)
                         .findFirst();
 
@@ -360,8 +364,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
         {
-            instance.executeTransactionAsync(realm -> {
-                RealmTransaction realmTx = realm.where(RealmTransaction.class)
+            instance.executeTransactionAsync(r -> {
+                RealmTransaction realmTx = r.where(RealmTransaction.class)
                         .equalTo("hash", hash)
                         .findFirst();
 

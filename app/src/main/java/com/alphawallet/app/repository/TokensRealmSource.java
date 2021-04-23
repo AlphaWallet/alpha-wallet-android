@@ -134,7 +134,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             else
             {
-                realm.executeTransaction(instance -> {
+                realm.executeTransaction(r -> {
                     realmToken.setInterfaceSpec(type.ordinal());
                     realmToken.setName(token.tokenInfo.name);
                     realmToken.setSymbol(token.tokenInfo.symbol);
@@ -357,8 +357,8 @@ public class TokensRealmSource implements TokenLocalSource {
         String key = databaseKey(chainId, tokenAddress.toLowerCase());
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realm.executeTransactionAsync(instance -> {
-                RealmToken realmToken = instance.where(RealmToken.class)
+            realm.executeTransactionAsync(r -> {
+                RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", key)
                         .equalTo("chainId", chainId)
                         .findFirst();
@@ -563,8 +563,8 @@ public class TokensRealmSource implements TokenLocalSource {
         if (!Utils.isAddressValid(wallet.address)) return;
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realm.executeTransaction(instance -> {
-                saveToken(realm, token);
+            realm.executeTransaction(r -> {
+                saveToken(r, token);
             });
         }
         catch (Exception ex)

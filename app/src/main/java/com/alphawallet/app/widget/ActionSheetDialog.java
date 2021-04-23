@@ -338,8 +338,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         try (Realm realm = tokensService.getWalletRealmInstance())
         {
-            realm.executeTransactionAsync(instance -> {
-                RealmTransaction rt = instance.where(RealmTransaction.class)
+            realm.executeTransactionAsync(r -> {
+                RealmTransaction rt = r.where(RealmTransaction.class)
                         .equalTo("hash", txHash)
                         .findFirst();
 

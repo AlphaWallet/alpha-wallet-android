@@ -142,7 +142,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private void onMoveToBackground()
     {
-        Log.d("LIFE", "AW Home screen into background");
+        Log.d("LIFE", "AlphaWallet into background");
         if (viewModel != null) viewModel.stopTransactionUpdate();
         isForeground = false;
     }
@@ -151,6 +151,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onTrimMemory(int level)
     {
         super.onTrimMemory(level);
+        if (!isForeground)
+        {
+            onMoveToBackground();
+        }
     }
 
     @Override

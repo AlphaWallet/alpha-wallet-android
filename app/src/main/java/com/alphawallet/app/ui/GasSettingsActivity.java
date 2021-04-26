@@ -192,12 +192,14 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         Intent result = new Intent();
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
-        GasSpeed custom = gasSpeeds.get(customIndex);
         result.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex);
-        result.putExtra(C.EXTRA_GAS_PRICE, custom.gasPrice.toString());
         result.putExtra(C.EXTRA_GAS_LIMIT, customGasLimit.toString());
         result.putExtra(C.EXTRA_NONCE, gasSliderView.getNonce());
         result.putExtra(C.EXTRA_AMOUNT, gs.seconds);
+        if (customIndex >= 0 && customIndex < gasSpeeds.size())
+        {
+            result.putExtra(C.EXTRA_GAS_PRICE, gasSpeeds.get(customIndex).gasPrice.toString());
+        }
         setResult(RESULT_OK, result);
         finish();
     }

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -47,9 +48,13 @@ public class BackupKeyViewModel extends BaseViewModel {
     }
 
     public void exportWallet(Wallet wallet, String keystorePassword, String storePassword) {
+        if (BuildConfig.DEBUG) Log.d("RealmDebug", "exportWallet + " + wallet.address);
         disposable = exportWalletInteract
                 .export(wallet, keystorePassword, storePassword)
-                .subscribe(exportedStore::postValue, this::onExportWalletError);
+                .subscribe(pp -> {
+                    if (BuildConfig.DEBUG) Log.d("RealmDebug", "exportedStore + " + wallet.address);
+                    exportedStore.postValue(pp);
+                }, this::onExportWalletError);
     }
 
     private void onExportWalletError(Throwable throwable) {
@@ -144,7 +149,7 @@ public class BackupKeyViewModel extends BaseViewModel {
 
     public void backupSuccess(Wallet wallet)
     {
-        fetchWalletsInteract.updateBackupTime(wallet.address).isDisposed();
+        fetchWalletsInteract.updateBackupTime(wallet.address);
     }
 
     public void resetSignDialog()

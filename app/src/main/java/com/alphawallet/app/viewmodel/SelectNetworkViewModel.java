@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TokensService;
@@ -15,11 +16,14 @@ import com.alphawallet.app.service.TokensService;
 public class SelectNetworkViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public SelectNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                                  TokensService tokensService) {
+                                  TokensService tokensService,
+                                  PreferenceRepositoryType preferenceRepository) {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
+        this.preferenceRepository = preferenceRepository;
     }
 
     public NetworkInfo[] getNetworkList() {
@@ -72,5 +76,25 @@ public class SelectNetworkViewModel extends BaseViewModel {
         {
             networkRepository.setDefaultNetworkInfo(info);
         }
+    }
+
+    public boolean isActiveMainnet()
+    {
+        return preferenceRepository.isActiveMainnet();
+    }
+
+    public void setActiveMainnet(boolean flag)
+    {
+        preferenceRepository.setActiveMainnet(flag);
+    }
+
+    public boolean hasShownTestNetWarning()
+    {
+        return preferenceRepository.hasShownTestNetWarning();
+    }
+
+    public void setShownTestNetWarning()
+    {
+        preferenceRepository.setShownTestNetWarning();
     }
 }

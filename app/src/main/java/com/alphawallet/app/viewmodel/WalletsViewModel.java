@@ -255,6 +255,8 @@ public class WalletsViewModel extends BaseViewModel
             wallet.type = WalletType.HDKEY;
             wallet.authLevel = authLevel;
             fetchWalletsInteract.storeWallet(wallet)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(account -> {
                         fetchWallets();
                         createdWallet.postValue(account);

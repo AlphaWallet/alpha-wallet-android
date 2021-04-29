@@ -129,7 +129,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.Key.TICKET, token);
-        intent.putExtra(C.EXTRA_TOKENID_LIST, token.bigIntListToString(selection, false));
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -152,7 +152,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.Key.TICKET, token);
 
-        intent.putExtra(C.EXTRA_TOKENID_LIST, token.bigIntListToString(selection, false));
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
 
         if (token.isERC721()) //skip numerical selection - ERC721 has no multiple token transfer
         {
@@ -170,7 +170,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
         if (tokenIds == null) tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
-        intent.putExtra(C.EXTRA_TOKEN_ID, token.bigIntListToString(tokenIds, true));
+        intent.putExtra(C.EXTRA_TOKEN_ID, Utils.bigIntListToString(tokenIds, true));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -346,7 +346,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.Key.TICKET, token);
-        intent.putExtra(C.EXTRA_TOKENID_LIST, token.bigIntListToString(idList, false));
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(idList, false));
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -544,5 +544,15 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void restartServices()
     {
         fetchTransactionsInteract.restartTransactionService();
+    }
+
+    public void updateTokensCheck(Token token)
+    {
+        tokensService.setFocusToken(token);
+    }
+
+    public void clearFocusToken()
+    {
+        tokensService.clearFocusToken();
     }
 }

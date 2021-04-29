@@ -5,16 +5,16 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
+import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EtherscanTransaction;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.token.entity.EthereumReadBuffer;
@@ -62,26 +62,22 @@ import okhttp3.Request;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.GOERLI_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.KOVAN_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.POA_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.RINKEBY_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.ROPSTEN_ID;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TickerService
 {
     private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
-    private static final String COINMARKET_API_URL = "https://pro-api.coinmarketcap.com";
     private static final String MEDIANIZER = "0x729D19f657BD0614b4985Cf1D82531c67569197B";
     private static final String BLOCKSCOUT = "https://blockscout.com/poa/[CORE]/api?module=stats&action=ethprice";
-    private static final String ETHERSCAN = "https://api.etherscan.io/api?module=stats&action=ethprice";
     private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
-    private static final String ORACLE_ETHERSCAN_API = "https://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=[ORACLE]&sort=desc&page=1&offset=1".replace("[ORACLE]", MARKET_ORACLE_CONTRACT);
+    private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
+    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
+    private static final String COINGECKO_COINS_API = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cxdai%2Cetc&vs_currencies=USD&include_24hr_change=true";
 
     public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
@@ -96,13 +92,7 @@ public class TickerService
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
-
-    public static native String getCMCKey();
-    public static native String getAmberDataKey();
-
-    static {
-        System.loadLibrary("keys");
-    }
+    private boolean canUpdate = false;
 
     public TickerService(OkHttpClient httpClient, Gson gson, Context ctx, TokenLocalSource localSource)
     {
@@ -126,10 +116,9 @@ public class TickerService
     private void tickerUpdate()
     {
         updateCurrencyConversion()
-                .flatMap(this::fetchLastMarketContractWrite)
                 .flatMap(this::updateTickersFromOracle)
                 .flatMap(this::fetchTickersSeparatelyIfRequired)
-                .flatMap(this::addERC20Tickers)
+                .flatMap(this::addArtisTicker)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::checkTickers, this::onTickersError).isDisposed();
@@ -144,18 +133,18 @@ public class TickerService
     private Single<Integer> fetchTickersSeparatelyIfRequired(int tickerCount)
     {
         if (tickerCount > 0) return Single.fromCallable(() -> tickerCount);
-        else return fetchEtherscanTicker(tickerCount)
+        else return fetchEthAndXdai(tickerCount)
                 .flatMap(count -> fetchBlockScoutTicker(CLASSIC_ID, "etc", count))
-                .flatMap(count -> fetchBlockScoutTicker(XDAI_ID, "xdai", count))
-                .flatMap(count -> fetchBlockScoutTicker(POA_ID, "core", count))
-                .flatMap(this::addArtisTicker);
+                .flatMap(count -> fetchBlockScoutTicker(POA_ID, "core", count));
     }
 
-    private Single<Integer> updateTickersFromOracle(long lastTxTime)
+    private Single<Integer> updateTickersFromOracle(double conversionRate)
     {
+        canUpdate = true;
+        currentConversionRate = conversionRate;
         return Single.fromCallable(() -> {
             int tickerSize = 0;
-            Web3j web3j = TokenRepository.getWeb3jService(RINKEBY_ID);
+            final Web3j web3j = TokenRepository.getWeb3jService(RINKEBY_ID);
             //fetch current tickers
             Function function = getTickers();
             String responseValue = callSmartContractFunction(web3j, function, MARKET_ORACLE_CONTRACT);
@@ -165,7 +154,7 @@ public class TickerService
             {
                 Type T = responseValues.get(0);
                 List<Uint256> values = (List) T.getValue();
-                long tickerUpdateTime = (lastTxTime > 0 ? lastTxTime : values.get(0).getValue().longValue()) * 1000L;
+                long tickerUpdateTime = values.get(0).getValue().longValue() * 1000L;
 
                 if ((System.currentTimeMillis() - tickerUpdateTime) < TICKER_STALE_TIMEOUT)
                 {
@@ -183,39 +172,56 @@ public class TickerService
         });
     }
 
-    private Single<Long> fetchLastMarketContractWrite(double conversionRate)
+    public Single<Integer> getERC20Tickers(List<TokenCardMeta> erc20Tokens)
     {
-        currentConversionRate = conversionRate;
+        if (!canUpdate || erc20Tokens.size() == 0) return Single.fromCallable(() -> 0);
+
         return Single.fromCallable(() -> {
-            Long lastTxTime = 0L;
+            int newSize = 0;
+            canUpdate = false;
             try
             {
-                Request request = new Request.Builder()
-                        .url(ORACLE_ETHERSCAN_API)
+                //build ticker header
+                StringBuilder sb = new StringBuilder();
+                boolean isFirst = true;
+                for (TokenCardMeta t : erc20Tokens)
+                {
+                    if (!isFirst) sb.append(",");
+                    sb.append(t.getAddress());
+                    isFirst = false;
+                }
+
+                 Request request = new Request.Builder()
+                        .url(COINGECKO_API.replace(CONTRACT_ADDR, sb.toString()))
                         .get()
                         .build();
+
                 okhttp3.Response response = httpClient.newCall(request)
                         .execute();
-                if (response.code() / 200 == 1)
+
+                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string());
+                newSize = tickers.size();
+
+                erc20Tickers.clear();
+
+                for (CoinGeckoTicker t : tickers)
                 {
-                    String result = response.body()
-                            .string();
+                    BigDecimal changeValue = new BigDecimal(t.usdChange);
+                    TokenTicker tTicker = new TokenTicker(String.valueOf(t.usdPrice * currentConversionRate),
+                            changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
 
-                    EtherscanTransaction[] txs = getEtherscanTransactions(result);
-
-                    if (txs.length > 0)
-                    {
-                        Transaction tx = txs[0].createTransaction(null, RINKEBY_ID);
-                        lastTxTime = tx.timeStamp;
-                    }
+                    //store ticker
+                    erc20Tickers.put(t.address, tTicker);
                 }
+
+                localSource.updateERC20Tickers(erc20Tickers);
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
 
-            return lastTxTime;
+            return newSize;
         });
     }
 
@@ -255,27 +261,45 @@ public class TickerService
         }
     }
 
-    private Single<Integer> fetchEtherscanTicker(int tickerCount)
+    private Single<Integer> fetchEthAndXdai(int tickerCount)
     {
         return Single.fromCallable(() -> {
             int newTickers = 0;
             try
             {
                 Request request = new Request.Builder()
-                        .url(ETHERSCAN)
+                        .url(COINGECKO_COINS_API)
                         .get()
                         .build();
                 okhttp3.Response response = httpClient.newCall(request)
                         .execute();
                 if (response.code() / 200 == 1)
                 {
-                    String result = response.body()
-                            .string();
-                    JSONObject stateData = new JSONObject(result);
-                    JSONObject data = stateData.getJSONObject("result");
-                    TokenTicker tt = decodeEtherscanTicker(data);
-                    ethTickers.put(MAINNET_ID, tt);
-                    newTickers = 5;
+                    List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string());
+
+                    for (CoinGeckoTicker t : tickers)
+                    {
+                        BigDecimal changeValue = new BigDecimal(t.usdChange);
+                        TokenTicker tTicker = new TokenTicker(String.valueOf(t.usdPrice * currentConversionRate),
+                                changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
+
+                        //store ticker
+                        int id = MAINNET_ID;
+                        switch (t.address)
+                        {
+                            case "ethereum":
+                                id = MAINNET_ID;
+                                break;
+                            case "xdai":
+                                id = XDAI_ID;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        ethTickers.put(id, tTicker);
+                        newTickers++;
+                    }
                 }
             }
             catch (Exception e)
@@ -347,188 +371,7 @@ public class TickerService
         return tokenTicker;
     }
 
-    public Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address, TokensService tokensService)
-    {
-        //TODO: find tokens on other networks
-        String netName = "ethereum-mainnet";
-        if (info.chainId != MAINNET_ID) return Single.fromCallable(() -> { return new Token[0]; });
-        List<Token> tokenList = new ArrayList<>();
-        final String keyAPI = getAmberDataKey();
-        return Single.fromCallable(() -> {
-            try
-            {
-                String url = "https://web3api.io/api/v2/addresses/" + address + "/balances";
-                Request request = new Request.Builder()
-                        .url(url)
-                        .get()
-                        .addHeader("x-api-key", keyAPI)
-                        .addHeader("x-amberdata-blockchain-id", netName)
-                        .build();
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-                if (response.code() / 200 == 1)
-                {
-                    String result = response.body().string();
-                    handleTokenList(info, tokenList, result, address, tokensService);
-                }
-            }
-            catch (InterruptedIOException e)
-            {
-                // silent fail, expected
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            return tokenList.toArray(new Token[0]);
-        });
-    }
-
-    private void handleTokenList(NetworkInfo network, List<Token> tokenList, String result, String currentAddress, TokensService tokensService)
-    {
-        if (result.contains("NOTOK")) return;
-
-        try
-        {
-            JSONObject   json    = new JSONObject(result);
-            JSONObject   res     = json.getJSONObject("payload");
-            JSONArray    tokens  = res.getJSONArray("tokens");
-
-            TokenFactory tf      = new TokenFactory();
-
-            for (int i = 0; i < tokens.length(); i++)
-            {
-                ContractType cType = ContractType.ERC20;
-                JSONObject t          = (JSONObject) tokens.get(i);
-                String     balanceStr = t.getString("amount");
-                if (balanceStr.length() == 0 || balanceStr.equals("0")) continue;
-                String decimalsStr   = t.getString("decimals");
-                int    decimals      = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
-                Token  existingToken = tokensService.getToken(network.chainId, t.getString("address"));
-                if (existingToken == null)
-                {
-                    cType = ContractType.OTHER; //if we haven't seen this token before mark as needing contract type check
-                }
-                else if (!existingToken.isERC20() && existingToken.getInterfaceSpec() != ContractType.OTHER) //allow tokens still classified as 'OTHER' to be updated.
-                {                                                                                            //we may be able to categorise them later
-                    continue;
-                }
-                else if (isDynamicBalanceToken(existingToken))
-                {
-                    continue;
-                }
-
-                TokenInfo info = new TokenInfo(t.getString("address"), t.getString("name"), t.getString("symbol"), decimals, true, network.chainId);
-                //now create token with balance info, only for ERC20 for now
-                BigDecimal balance  = new BigDecimal(balanceStr);
-                Token      newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), cType, network.getShortName(), System.currentTimeMillis());
-                newToken.setTokenWallet(currentAddress);
-                tokenList.add(newToken);
-            }
-        }
-        catch (JSONException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean isDynamicBalanceToken(Token existingToken)
-    {
-        for (String dynamicTokenAddress : DYNAMIC_BALANCE_TOKENS)
-        {
-            if (existingToken.getAddress().equalsIgnoreCase(dynamicTokenAddress)) return true;
-        }
-
-        return false;
-    }
-
-    private Single<Integer> addERC20Tickers(int currentSize)
-    {
-        return Single.fromCallable(() -> {
-            int newSize = currentSize;
-            try
-            {
-                Request request = new Request.Builder()
-                        .url("https://web3api.io/api/v2/tokens/rankings?type=erc20")
-                        .get()
-                        .addHeader("x-api-key", getAmberDataKey())
-                        .build();
-
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-
-                newSize += handleTokenTickers(response);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return newSize;
-        });
-    }
-
-    private int handleTokenTickers(@NotNull okhttp3.Response response) throws IOException, JSONException
-    {
-        if (response.code() / 200 == 1)
-        {
-            String result = response.body()
-                    .string();
-            JSONObject         stateData = new JSONObject(result);
-            JSONObject         payload   = stateData.getJSONObject("payload");
-            JSONArray          data      = payload.getJSONArray("data");
-            TokenTicker        ticker;
-            for (int i = 0; i < data.length(); i++)
-            {
-                JSONObject e = (JSONObject) data.get(i);
-                ticker = tickerFromAmber(e);
-                if (ticker != null) erc20Tickers.put(e.getString("address").toLowerCase(), ticker);
-            }
-        }
-
-        return erc20Tickers.size();
-    }
-
-    private TokenTicker tickerFromAmber(JSONObject e) throws JSONException
-    {
-        TokenTicker ticker = null;
-        try
-        {
-            BigDecimal change = new BigDecimal(e.getString("changeInPriceDaily"));
-            String percentChange = change.setScale(3, RoundingMode.DOWN).toString();
-            double usdPrice = e.getDouble("currentPrice");
-            double currentPrice = usdPrice * currentConversionRate;
-            String priceStr = String.valueOf(currentPrice);
-            ticker = new TokenTicker(priceStr, percentChange, currentCurrencySymbolTxt, "", System.currentTimeMillis());
-        }
-        catch (NumberFormatException nf)
-        {
-            //
-        }
-
-        return ticker;
-    }
-
     private TokenTicker decodeBlockScoutTicker(JSONObject eth)
-    {
-        TokenTicker ticker = null;
-        try
-        {
-            double usdPrice = eth.getDouble("ethusd");// getString("price");
-            String localePrice = String.valueOf(usdPrice * currentConversionRate);
-            ticker = new TokenTicker(localePrice, "0.00", currentCurrencySymbolTxt, "", System.currentTimeMillis());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            ticker = new TokenTicker();
-        }
-
-        return ticker;
-    }
-
-    private TokenTicker decodeEtherscanTicker(JSONObject eth)
     {
         TokenTicker ticker = null;
         try

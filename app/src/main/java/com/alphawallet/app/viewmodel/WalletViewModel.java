@@ -133,14 +133,14 @@ public class WalletViewModel extends BaseViewModel
         return defaultWallet.getValue();
     }
 
-    public Disposable setKeyBackupTime(String walletAddr)
+    public void setKeyBackupTime(String walletAddr)
     {
-        return genericWalletInteract.updateBackupTime(walletAddr);
+        genericWalletInteract.updateBackupTime(walletAddr);
     }
 
-    public Disposable setKeyWarningDismissTime(String walletAddr)
+    public void setKeyWarningDismissTime(String walletAddr)
     {
-        return genericWalletInteract.updateWarningTime(walletAddr);
+        genericWalletInteract.updateWarningTime(walletAddr);
     }
 
     public void setTokenEnabled(Token token, boolean enabled) {
@@ -212,5 +212,10 @@ public class WalletViewModel extends BaseViewModel
         {
             return GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE;
         }
+    }
+
+    public void notifyRefresh()
+    {
+        tokensService.clearFocusToken(); //ensure if we do a refresh there's no focus token preventing correct update
     }
 }

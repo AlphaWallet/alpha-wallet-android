@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by marat on 10/11/17.
@@ -53,7 +52,7 @@ public class QRParser {
         String address;
         try
         {
-            if (isValidAddress(str))
+            if (Utils.isAddressValid(str))
             {
                 return str;
             }
@@ -62,7 +61,7 @@ public class QRParser {
             address = split.length > 0 ? split[0] : null;
 
             //is it a valid ethereum Address?
-            if (address == null || isValidAddress(address))
+            if (Utils.isAddressValid(address))
                 return address;
 
             if (couldBeENS(address))
@@ -79,7 +78,7 @@ public class QRParser {
             return null;
         }
 
-        return (isValidAddress(address) || ENSHandler.canBeENSName(address)) ? address : null;
+        return (Utils.isAddressValid(address) || ENSHandler.canBeENSName(address)) ? address : null;
     }
 
     public QRResult parse(String url) {

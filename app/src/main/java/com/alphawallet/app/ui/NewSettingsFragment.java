@@ -393,7 +393,8 @@ public class NewSettingsFragment extends BaseFragment {
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
         popupView.setOnClickListener(v -> {
-            viewModel.setIsDismissed(walletAddress, true).subscribe(this::backedUp);
+            viewModel.setIsDismissed(walletAddress, true);
+            backedUp(walletAddress);
             popupWindow.dismiss();
         });
         popupWindow.showAsDropDown(view, 0, 0);

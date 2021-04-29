@@ -70,7 +70,7 @@ public class WalletConnectSessionActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         AndroidInjection.inject(this);
 
-        setContentView(R.layout.activity_list);
+        setContentView(R.layout.basic_list_activity);
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
         wallet = getIntent().getParcelableExtra(WALLET);

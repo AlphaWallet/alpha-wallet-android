@@ -705,7 +705,7 @@
     <string name="default_to">Sent %1$s %2$s to %3$s</string>
     <string name="default_from">Received %1$s %2$s from %3$s</string>
     <string name="default_approved">You have received approval to move %1$s %2$s from %3$s</string>
-    <string name="default_approve">Approved %3$s to move %1$s %2$s</string>
+    <string name="default_approve">Approved %2$s to move %1$s</string>
     <string name="contract_call">合约调用</string>
     <string name="insufficient_gas">资金不够</string>
     <string name="not_enough_gas_message">We estimate this transaction will fail due to insufficient funds. Do you wish to try to send?</string>
@@ -725,6 +725,8 @@
     <string name="action_buy_crypto">Buy %1$s</string>
     <string name="fullscreen">全屏</string>
     <string name="disconnect_title">Do you want to disconnect from %1$s Network?</string>
+    <string name="change_network_title">Select new Dapp Browser Network</string>
+    <string name="change_network_message">Disconnected browser from %1$s, please select a new network for Browser</string>
     <string name="disconnect_body">You are connected to %1$s Network in the Browser but you have just disabled %1$s Network in Active Networks. Do you want to connect to %1$s Network?</string>
     <string name="disconnect">Disconnect</string>
     <string name="keep_connect">Keep Connected</string>
@@ -736,4 +738,9 @@
     <string name="action_allow_webkit_camera">Allow</string>
     <string name="action_deny_webkit_camera">Deny</string>
     <string name="message_permission_request_webkit_camera">%s wants to use your camera</string>
+    <string name="mainnet">Mainnet</string>
+    <string name="title_dialog_what_testnet">What is Testnet?</string>
+    <string name="action_enable_testnet">Got it, enable Testnet</string>
+    <string name="message_dialog_testnet">Testnets tokens are like \'Monopoly\' money. They have zero financial worth but are used by developers to try out new designs without needing to spend valuable coins.</string>
+    <string name="select_dappbrowser_network">Pick Browser Network</string>
 </resources>

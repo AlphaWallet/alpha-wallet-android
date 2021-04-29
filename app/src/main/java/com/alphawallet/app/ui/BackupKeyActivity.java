@@ -137,11 +137,6 @@ public class BackupKeyActivity extends BaseActivity implements
             case ENTER_JSON_BACKUP:
                 JSONBackup();
                 break;
-            case SET_JSON_PASSWORD:
-                inputView = findViewById(R.id.input_password);
-                keystorePassword = inputView.getText().toString();
-                viewModel.getPasswordForKeystore(wallet, this, this);
-                break;
             case UPGRADE_KEY_SECURITY:
                 //first open authentication
                 setupUpgradeKey(false);
@@ -748,9 +743,8 @@ public class BackupKeyActivity extends BaseActivity implements
                 case SEED_PHRASE_INVALID:
                     break;
                 case ENTER_JSON_BACKUP:
-                    viewModel.getPasswordForKeystore(wallet, this, this);
-                    break;
                 case SET_JSON_PASSWORD:
+                    viewModel.getPasswordForKeystore(wallet, this, this);
                     break;
                 case SHOW_SEED_PHRASE_SINGLE:
                 case SHOW_SEED_PHRASE:
@@ -905,7 +899,8 @@ public class BackupKeyActivity extends BaseActivity implements
         keystorePassword = inputView.getText().toString();
         if (keystorePassword.length() > 5)
         {
-            viewModel.getPasswordForKeystore(wallet, this, this);
+            //get authentication
+            viewModel.getAuthentication(wallet, this, this);
         }
         else
         {
@@ -948,8 +943,7 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
             case SET_JSON_PASSWORD:
                 inputView = findViewById(R.id.input_password);
-                keystorePassword = inputView.getText().toString();
-                viewModel.getPasswordForKeystore(wallet, this, this);
+                onInputDoneClick(inputView);
                 break;
             case UPGRADE_KEY_SECURITY:
                 //first open authentication

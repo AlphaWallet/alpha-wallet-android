@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -69,7 +70,7 @@ public class OpenseaService {
                 JSONObject result = new JSONObject(jsonData);
                 JSONArray assets = result.getJSONArray("assets");
                 receivedTokens = assets.length();
-                offset++;
+                offset += assets.length();
 
                 //process this page of results
                 processOpenseaTokens(foundTokens, assets, address, networkId, networkName, tokensService);
@@ -85,6 +86,22 @@ public class OpenseaService {
                     tokensService.addTokenImageUrl(networkId, keyAddr, imageUrls.get(keyAddr));
                 }
                 imageUrls.clear();
+            }
+
+            //check if the token was updated recently
+            long updateThreshold = System.currentTimeMillis() - 3* DateUtils.MINUTE_IN_MILLIS; //Opensea usually lags behind by about 3 mins.
+            for (String cAddr : foundTokens.keySet())
+            {
+                Token t = foundTokens.get(cAddr);
+                if (t.lastTxTime > updateThreshold)
+                {
+                    //reject update
+                    foundTokens.remove(cAddr);
+                }
+                else
+                {
+                    t.lastTxTime = updateThreshold;
+                }
             }
 
             return foundTokens.values().toArray(new Token[0]);
@@ -108,11 +125,13 @@ public class OpenseaService {
                 {
                     TokenInfo tInfo;
                     ContractType type;
+                    long lastCheckTime = 0;
                     Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
-                    if (checkToken != null && checkClassification(checkToken, asset) && (checkToken.isERC721() || checkToken.isERC721Ticket()))
+                    if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
                     {
                         tInfo = checkToken.tokenInfo;
                         type = checkToken.getInterfaceSpec();
+                        lastCheckTime = checkToken.lastTxTime;
                     }
                     else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
                     {
@@ -122,6 +141,7 @@ public class OpenseaService {
 
                     token = tf.createToken(tInfo, type, networkName);
                     token.setTokenWallet(address);
+                    token.lastTxTime = lastCheckTime;
                     foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
                 token.addAssetToTokenBalanceAssets(asset);
@@ -153,17 +173,6 @@ public class OpenseaService {
         {
             // no action
         }
-    }
-
-    /**
-     * See if Token has been incorrectly classified as ERC721Ticket. Some ERC721 have no 'name' function and this is only retrieved from opensea
-     * If name and symbol are empty then re-check the classification; most likely the token was misclassified
-     */
-    private boolean checkClassification(Token checkToken, Asset asset)
-    {
-        if (TextUtils.isEmpty(checkToken.tokenInfo.name + checkToken.tokenInfo.symbol)) return false; //empty token name; suspicious
-        if (checkToken.isERC721() && asset.getTraits().size() == 0 && TextUtils.isEmpty(asset.getDescription())) return false; //ERC721 with no traits or description; could be erc721 ticket
-        return !checkToken.isERC721Ticket() || asset.getTraits().size() == 0 || TextUtils.isEmpty(asset.getDescription()); //ERC721Ticket with traits or description
     }
 
     private boolean verifyData(String jsonData)

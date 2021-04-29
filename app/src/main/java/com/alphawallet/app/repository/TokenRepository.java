@@ -84,6 +84,8 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
+    private static final boolean LOG_CONTRACT_EXCEPTION_EVENTS = false;
+
     public static final BigInteger INTERFACE_CRYPTOKITTIES = new BigInteger ("9a20483d", 16);
     public static final BigInteger INTERFACE_OFFICIAL_ERC721 = new BigInteger ("80ac58cd", 16);
     public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
@@ -160,9 +162,10 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721:
                         case ERC721_LEGACY:
-                            List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            Map<Long, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
                             t = new ERC721Token(tInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
+                            t.lastTxTime = tokens[i].lastTxTime;
                             tokens[i] = t;
                             break;
                         case ERC721_TICKET:
@@ -286,6 +289,19 @@ public class TokenRepository implements TokenRepositoryType {
         return updateBalance(wallet, chainId, tokenAddress, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<Token> addToken(Wallet wallet, Token token)
+    {
+        if (!token.isERC721())
+        {
+            return addToken(wallet, token.tokenInfo, token.getInterfaceSpec());
+        }
+        else
+        {
+            return localSource.saveToken(wallet, token); //store token directly
+        }
     }
 
     @Override
@@ -437,7 +453,6 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setVisibilityChanged(Wallet wallet, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         localSource.setVisibilityChanged(wallet, token);
         return Completable.fromAction(() -> {});
     }
@@ -499,7 +514,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 }
 
                 return hasBalanceChanged;
@@ -588,7 +603,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 return token;
             }
         });
@@ -763,7 +778,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return BigDecimal.valueOf(-1);
         }
     }
@@ -783,7 +798,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 return BigDecimal.valueOf(-1);
             }
         }).subscribeOn(Schedulers.io());
@@ -1157,7 +1172,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return null;
         }
     }
@@ -1207,7 +1222,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return null;
         }
     }

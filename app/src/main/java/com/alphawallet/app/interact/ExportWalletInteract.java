@@ -1,5 +1,8 @@
 package com.alphawallet.app.interact;
 
+import android.util.Log;
+
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.entity.Wallet;
 
@@ -15,6 +18,7 @@ public class ExportWalletInteract {
     }
 
     public Single<String> export(Wallet wallet, String keystorePassword, String backupPassword) {
+        if (BuildConfig.DEBUG) Log.d("RealmDebug", "export + " + wallet.address);
         return walletRepository
                     .exportWallet(wallet, keystorePassword, backupPassword)
                 .observeOn(AndroidSchedulers.mainThread());

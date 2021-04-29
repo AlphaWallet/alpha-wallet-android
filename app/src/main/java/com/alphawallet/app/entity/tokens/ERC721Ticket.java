@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
@@ -84,7 +85,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return bigIntListToString(balanceArray, true);
+        else return Utils.bigIntListToString(balanceArray, true);
     }
 
     @Override
@@ -132,7 +133,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(bigIntListToString(balanceArray, true));
+        realmToken.setBalance(Utils.bigIntListToString(balanceArray, true));
     }
 
     @Override

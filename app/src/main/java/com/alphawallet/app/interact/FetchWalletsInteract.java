@@ -1,8 +1,11 @@
 package com.alphawallet.app.interact;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -22,10 +25,7 @@ public class FetchWalletsInteract {
                 .fetchWallets()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
 
-    public Single<Wallet[]> storeWallets(Wallet[] wallets) {
-        return accountRepository.storeWallets(wallets);
     }
 
     public Single<Wallet> getWallet(String keyAddress)
@@ -47,8 +47,14 @@ public class FetchWalletsInteract {
      *
      * @param walletAddr
      */
-    public Disposable updateBackupTime(String walletAddr)
+    public void updateBackupTime(String walletAddr)
     {
-        return accountRepository.updateBackupTime(walletAddr);
+        accountRepository.updateBackupTime(walletAddr);
+    }
+
+    public Single<Wallet> updateENS(Wallet wallet)
+    {
+        if (TextUtils.isEmpty(wallet.ENSname)) return Single.fromCallable(() -> wallet);
+        return storeWallet(wallet);
     }
 }

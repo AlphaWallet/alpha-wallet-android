@@ -226,7 +226,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         Asset asset = null;
         BigInteger tokenId = new BigInteger(hexTokenId, 16);
 
-        for (Asset a : token.getTokenAssets())
+        for (Asset a : token.getTokenAssets().values())
         {
             BigInteger assetTokenId = new BigInteger(a.getTokenId());
             if (assetTokenId.equals(tokenId))

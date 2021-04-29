@@ -297,81 +297,13 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public List<Asset> getTokenAssets() {
+    public Map<Long, Asset> getTokenAssets() {
         return null;
     }
 
     public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
         return null;
-    }
-
-    /**
-     * Produce a string CSV of integer IDs given an input list of values
-     * @param idList
-     * @param keepZeros
-     * @return
-     */
-    public static String bigIntListToString(List<BigInteger> idList, boolean keepZeros)
-    {
-        if (idList == null) return "";
-        String displayIDs = "";
-        boolean first = true;
-        StringBuilder sb = new StringBuilder();
-        for (BigInteger id : idList)
-        {
-            if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
-            if (!first)
-            {
-                sb.append(",");
-            }
-            first = false;
-
-            sb.append(Numeric.toHexStringNoPrefix(id));
-            displayIDs = sb.toString();
-        }
-
-        return displayIDs;
-    }
-
-    public List<Integer> stringIntsToIntegerList(String userList)
-    {
-        List<Integer> idList = new ArrayList<>();
-
-        try
-        {
-            String[] ids = userList.split(",");
-
-            for (String id : ids)
-            {
-                //remove whitespace
-                String trim = id.trim();
-                Integer intId = Integer.parseInt(trim);
-                idList.add(intId);
-            }
-        }
-        catch (Exception e)
-        {
-            idList = new ArrayList<>();
-        }
-
-        return idList;
-    }
-
-    public String integerListToString(List<Integer> intList, boolean keepZeros)
-    {
-        if (intList == null) return "";
-        boolean first = true;
-        StringBuilder sb = new StringBuilder();
-        for (Integer id : intList)
-        {
-            if (!keepZeros && id == 0) continue;
-            if (!first)sb.append(",");
-            sb.append(String.valueOf(id));
-            first = false;
-        }
-
-        return sb.toString();
     }
 
     public int getTicketCount()
@@ -1076,5 +1008,10 @@ public class Token implements Parcelable, Comparable<Token>
     public BigDecimal getBalanceRaw()
     {
         return balance;
+    }
+
+    public void removeBalance(String tokenID)
+    {
+        //
     }
 }

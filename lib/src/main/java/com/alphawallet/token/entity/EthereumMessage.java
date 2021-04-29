@@ -27,9 +27,9 @@ public class EthereumMessage implements Signable {
         this.messageBytes = Numeric.hexStringToByteArray(message);
         this.displayOrigin = displayOrigin;
         this.leafPosition = leafPosition;
+        this.messageType = type;
         this.prehash = getEthereumMessage(message);
         this.userMessage = message;
-        messageType = type;
     }
 
     private byte[] getEthereumMessage(String message) {
@@ -43,10 +43,18 @@ public class EthereumMessage implements Signable {
             encodedMessage = message.getBytes();
         }
 
-        byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(encodedMessage.length)).getBytes();
-        byte[] result = new byte[prefix.length + encodedMessage.length];
-        System.arraycopy(prefix, 0, result, 0, prefix.length);
-        System.arraycopy(encodedMessage, 0, result, prefix.length, encodedMessage.length);
+        byte[] result;
+        if (messageType == SignMessageType.SIGN_PERSONAL_MESSAGE)
+        {
+            byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(encodedMessage.length)).getBytes();
+            result = new byte[prefix.length + encodedMessage.length];
+            System.arraycopy(prefix, 0, result, 0, prefix.length);
+            System.arraycopy(encodedMessage, 0, result, prefix.length, encodedMessage.length);
+        }
+        else
+        {
+            result = messageBytes;
+        }
         return result;
     }
 

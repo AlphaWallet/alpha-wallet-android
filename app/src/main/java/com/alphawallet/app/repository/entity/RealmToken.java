@@ -195,5 +195,11 @@ public class RealmToken extends RealmObject {
             setSymbol(tokenInfo.symbol);
             setDecimals(tokenInfo.decimals);
         }
+
+        if (!isEnabled && tokenInfo.isEnabled)
+        {
+            isEnabled = true;
+            visibilityChanged = false;
+        }
     }
 }

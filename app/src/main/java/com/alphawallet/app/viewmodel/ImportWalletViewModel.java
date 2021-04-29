@@ -100,7 +100,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     private void onWallet(Wallet wallet) {
         progress.postValue(false);
         this.wallet.postValue(wallet);
-        track(wallet);
+        track();
     }
 
     public void onError(Throwable throwable) {
@@ -187,7 +187,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         keyService.failedAuthentication(taskCode);
     }
 
-    public void track(Wallet wallet)
+    public void track()
     {
         AnalyticsProperties analyticsProperties = new AnalyticsProperties();
         analyticsProperties.setWalletType(importWalletType);

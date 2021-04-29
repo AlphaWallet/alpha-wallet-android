@@ -12,19 +12,26 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.token.tools.Numeric;
 
+import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import wallet.core.jni.Hash;
 
 /**
  * Created by James on 3/10/2018.
@@ -32,9 +39,9 @@ import java.util.List;
  */
 public class ERC721Token extends Token implements Parcelable
 {
-    private List<Asset> tokenBalanceAssets;
+    private final Map<Long, Asset> tokenBalanceAssets;
 
-    public ERC721Token(TokenInfo tokenInfo, List<Asset> balanceList, long blancaTime, String networkName, ContractType type) {
+    public ERC721Token(TokenInfo tokenInfo, Map<Long, Asset> balanceList, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         if (balanceList != null)
         {
@@ -42,49 +49,37 @@ public class ERC721Token extends Token implements Parcelable
         }
         else
         {
-            tokenBalanceAssets = new ArrayList<>();
+            tokenBalanceAssets = new HashMap<>();
         }
         setInterfaceSpec(type);
     }
 
     @Override
-    public List<Asset> getTokenAssets() {
+    public Map<Long, Asset> getTokenAssets() {
         return tokenBalanceAssets;
     }
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
-        for (Asset a : tokenBalanceAssets) //don't add the same assets twice (should this be a map?)
-        {
-            if (a.getTokenId().equalsIgnoreCase(asset.getTokenId()))
-            {
-                return;
-            }
-        }
-        tokenBalanceAssets.add(asset);
+        Long tokenId = parseTokenId(asset.getTokenId());
+        tokenBalanceAssets.put(tokenId, asset);
     }
 
     @Override
-    public Asset getAssetForToken(String tokenId) {
-        for(Asset asset : tokenBalanceAssets)
-        {
-            if(asset.getTokenId().equals(tokenId))
-            {
-                return asset;
-            }
-        }
-        return null;
+    public Asset getAssetForToken(String tokenIdStr)
+    {
+        return tokenBalanceAssets.get(parseTokenId(tokenIdStr));
     }
 
     private ERC721Token(Parcel in) {
         super(in);
-        tokenBalanceAssets = new ArrayList<>();
+        tokenBalanceAssets = new HashMap<>();
         //read in the element list
         int size = in.readInt();
         for (; size > 0; size--)
         {
             Asset asset = in.readParcelable(Asset.class.getClassLoader());
-            tokenBalanceAssets.add(asset);
+            tokenBalanceAssets.put(parseTokenId(asset.getTokenId()), asset);
         }
     }
 
@@ -104,7 +99,7 @@ public class ERC721Token extends Token implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(tokenBalanceAssets.size());
-        for (Asset asset : tokenBalanceAssets)
+        for (Asset asset : tokenBalanceAssets.values())
         {
             dest.writeParcelable(asset, flags);
         }
@@ -170,7 +165,7 @@ public class ERC721Token extends Token implements Parcelable
     {
         boolean firstItem = true;
         StringBuilder sb = new StringBuilder();
-        for (Asset item : tokenBalanceAssets)
+        for (Asset item : tokenBalanceAssets.values())
         {
             if (!firstItem) sb.append(",");
             sb.append(item.getTokenId());
@@ -230,7 +225,7 @@ public class ERC721Token extends Token implements Parcelable
     public List<BigInteger> getArrayBalance()
     {
         List<BigInteger> balanceAsArray = new ArrayList<>();
-        for (Asset a : tokenBalanceAssets)
+        for (Asset a : tokenBalanceAssets.values())
         {
             try
             {
@@ -252,6 +247,7 @@ public class ERC721Token extends Token implements Parcelable
         if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
+        if (lastTxTime > realmToken.getLastTxTime()) return true;
         if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
         return false;
     }
@@ -271,7 +267,7 @@ public class ERC721Token extends Token implements Parcelable
     {
         boolean onlyHasTokenId = true;
         //if elements contain asset with only assetId then most likely this is a ticket.
-        for (Asset a : tokenBalanceAssets)
+        for (Asset a : tokenBalanceAssets.values())
         {
             if (!a.hasIdOnly()) onlyHasTokenId = false;
         }
@@ -314,5 +310,48 @@ public class ERC721Token extends Token implements Parcelable
     public BigDecimal getBalanceRaw()
     {
         return new BigDecimal(getArrayBalance().size());
+    }
+
+    private Long parseTokenId(String tokenIdStr)
+    {
+        Long tokenId;
+        try
+        {
+            tokenId = Long.parseLong(tokenIdStr);
+        }
+        catch (Exception e)
+        {
+            tokenId = 0L;
+        }
+
+        return tokenId;
+    }
+
+    @Override
+    public void removeBalance(String tokenID)
+    {
+        tokenBalanceAssets.remove(parseTokenId(tokenID));
+    }
+
+    private static String getHashBalance(ERC721Token token)
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try
+        {
+            for (Asset item : token.tokenBalanceAssets.values())
+            {
+                baos.write(item.getTokenId().getBytes());
+                if (item.getImagePreviewUrl() != null) baos.write(item.getImagePreviewUrl().getBytes());
+                if (item.getName() != null) baos.write(item.getName().getBytes());
+                if (item.getDescription() != null) baos.write(item.getDescription().getBytes());
+                if (item.getTraits() != null) baos.write(item.getTraits().hashCode());
+            }
+        }
+        catch (Exception e)
+        {
+            return String.valueOf(token.tokenBalanceAssets.size());
+        }
+
+        return Numeric.toHexString(Hash.keccak256(baos.toByteArray()));
     }
 }

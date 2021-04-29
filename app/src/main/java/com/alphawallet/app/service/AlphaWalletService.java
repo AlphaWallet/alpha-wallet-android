@@ -3,22 +3,26 @@ package com.alphawallet.app.service;
 import android.util.Log;
 
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import okhttp3.MediaType;
@@ -26,6 +30,7 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
@@ -158,7 +163,7 @@ public class AlphaWalletService
     private Single<int[]> generateTicketArray(String indices, Ticket ticket)
     {
         return Single.fromCallable(() -> {
-            List<Integer> ticketIndices = ticket.stringIntsToIntegerList(indices);
+            List<Integer> ticketIndices = Utils.stringIntsToIntegerList(indices);
             int[] indicesArray = new int[ticketIndices.size()];
             for (int i = 0; i < ticketIndices.size(); i++) indicesArray[i] = ticketIndices.get(i);
             return indicesArray;

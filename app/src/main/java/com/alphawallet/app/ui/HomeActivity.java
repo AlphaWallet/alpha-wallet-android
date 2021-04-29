@@ -60,20 +60,17 @@ import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.RootUtil;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.DepositView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-
-import org.web3j.crypto.WalletUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -114,6 +111,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private PinAuthenticationCallbackInterface authInterface;
     private int navBarHeight;
+    private boolean isForeground;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -138,15 +136,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         Log.d("LIFE", "AlphaWallet into foreground");
         ((WalletFragment) walletFragment).walletInFocus();
         if (viewModel != null) viewModel.startTransactionUpdate();
+        isForeground = true;
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    private void onMoveToBackground()
+    {
+        Log.d("LIFE", "AlphaWallet into background");
+        if (viewModel != null) viewModel.stopTransactionUpdate();
+        isForeground = false;
     }
 
     @Override
     public void onTrimMemory(int level)
     {
         super.onTrimMemory(level);
-        Log.d("LIFE", "AlphaWallet into background");
-        ((WalletFragment) walletFragment).walletOutOfFocus();
-        if (viewModel != null) viewModel.stopTransactionUpdate();
+        if (!isForeground)
+        {
+            onMoveToBackground();
+        }
     }
 
     @Override
@@ -179,6 +187,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
+        isForeground = true;
 
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
@@ -309,7 +318,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onBackup(String address)
     {
-        if (address != null && WalletUtils.isValidAddress(address))
+        if (Utils.isAddressValid(address))
         {
             Toast.makeText(this, getString(R.string.postponed_backup_warning), Toast.LENGTH_LONG).show();
         }
@@ -810,7 +819,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void backupSuccess(String keyAddress)
     {
-        if (WalletUtils.isValidAddress(keyAddress)) backupWalletSuccess(keyAddress);
+        if (Utils.isAddressValid(keyAddress)) backupWalletSuccess(keyAddress);
     }
 
     @Override

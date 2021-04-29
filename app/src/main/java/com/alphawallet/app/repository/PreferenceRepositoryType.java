@@ -43,4 +43,10 @@ public interface PreferenceRepositoryType {
 
     void setFullScreenState(boolean state);
     boolean getFullScreenState();
+
+    void setActiveMainnet(boolean state);
+    boolean isActiveMainnet();
+
+    boolean hasShownTestNetWarning();
+    void setShownTestNetWarning();
 }

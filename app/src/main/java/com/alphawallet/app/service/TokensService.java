@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
@@ -68,7 +69,7 @@ public class TokensService
     private final Context context;
     private final TickerService tickerService;
     private final OpenseaService openseaService;
-    private final AnalyticsServiceType analyticsService;
+    private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
@@ -77,7 +78,7 @@ public class TokensService
     private boolean appHasFocus = true;
 
     @Nullable
-    private Disposable tokenCheckDisposable;
+    private Disposable openSeaCheckDisposable;
     @Nullable
     private Disposable eventTimer;
     @Nullable
@@ -97,7 +98,7 @@ public class TokensService
                          Context context,
                          TickerService tickerService,
                          OpenseaService openseaService,
-                         AnalyticsServiceType analyticsService) {
+                         AnalyticsServiceType<AnalyticsProperties> analyticsService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.context = context;
@@ -127,7 +128,7 @@ public class TokensService
                             .flatMap(contractType -> tokenRepository.addToken(new Wallet(currentAddress), tokenInfo, contractType).toObservable()))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
-                        .subscribe(this::finishAddToken, Throwable::printStackTrace, this::finishTokenCheck);
+                        .subscribe(this::finishAddToken, this::onCheckError, this::finishTokenCheck);
             }
             else if (t == null)
             {
@@ -136,6 +137,11 @@ public class TokensService
                     checkUnknownTokenCycle.dispose();
             }
         }
+    }
+
+    private void onCheckError(Throwable throwable)
+    {
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
     private void finishTokenCheck()
@@ -195,7 +201,7 @@ public class TokensService
             Token t = tokenStoreList.get(key);
             Wallet wallet = new Wallet(t.getWallet());
             tokenStoreList.remove(key);
-            tokenRepository.addToken(wallet, t.tokenInfo, t.getInterfaceSpec())
+            tokenRepository.addToken(wallet, t)
                     .flatMap(token -> tokenRepository.checkInterface(new Token[]{token}, wallet)) //if ERC721 determine the specific contract type
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -296,11 +302,20 @@ public class TokensService
     public void setFocusToken(Token token)
     {
         focusToken = new ContractLocator(token.getAddress(), token.tokenInfo.chainId);
+        if (token.isERC721())
+        {
+            nextOpenSeaCheck = 0;
+        }
     }
 
     public void clearFocusToken()
     {
         focusToken = null;
+    }
+
+    private boolean isFocusToken(Token t)
+    {
+        return focusToken != null && focusToken.equals(t);
     }
 
     /**
@@ -393,8 +408,8 @@ public class TokensService
         }
 
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) balanceCheckDisposable.dispose();
-        if (tokenCheckDisposable != null && !tokenCheckDisposable.isDisposed()) tokenCheckDisposable.dispose();
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) erc20CheckDisposable.dispose();
+        if (openSeaCheckDisposable != null && !openSeaCheckDisposable.isDisposed()) openSeaCheckDisposable.dispose();
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
 
@@ -429,7 +444,12 @@ public class TokensService
                     .subscribe(balanceChange -> onBalanceChange(balanceChange, t.tokenInfo.chainId), this::onError);
         }
 
-        if (System.currentTimeMillis() > nextOpenSeaCheck && focusToken == null) checkOpenSea();
+        if (System.currentTimeMillis() > nextOpenSeaCheck &&
+                (focusToken == null || getToken(focusToken.chainId, focusToken.address).isERC721()))
+        {
+            checkOpenSea();
+        }
+
         checkPendingChains();
     }
 
@@ -464,37 +484,73 @@ public class TokensService
 
     private void checkOpenSea()
     {
+        if (openSeaCheckDisposable != null && !openSeaCheckDisposable.isDisposed()) { checkERC20(); return; }
+
         openSeaCount++;
         nextOpenSeaCheck = System.currentTimeMillis() + OPENSEA_CHECK_INTERVAL;
         final Wallet wallet = new Wallet(currentAddress);
-        NetworkInfo info = openSeaCount != OPENSEA_RINKEBY_CHECK ? ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+        NetworkInfo info = getOpenSeaNetwork();
         if (BuildConfig.DEBUG) Log.d("OPENSEA", "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
-        tokenCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
+        openSeaCheckDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                 .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
                 .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::checkERC20, this::onOpenseaError);
+                .subscribe(t -> { openSeaCheckDisposable = null; checkERC20(); },
+                           e -> { openSeaCheckDisposable = null; checkERC20(); });
 
         if (openSeaCount >= OPENSEA_RINKEBY_CHECK) openSeaCount = 0;
     }
 
-    private void checkERC20(Token[] checkedERC721Tokens)
+    // If focus token is ERC721, only query that chain
+    private NetworkInfo getOpenSeaNetwork()
+    {
+        if (focusToken != null)
+        {
+            Token t = getToken(focusToken.chainId, focusToken.address);
+            if (t.isERC721())
+            {
+                switch (t.tokenInfo.chainId)
+                {
+                    case MAINNET_ID:
+                        return ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
+                    case RINKEBY_ID:
+                        return ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+                }
+            }
+        }
+        return openSeaCount != OPENSEA_RINKEBY_CHECK ?
+                ethereumNetworkRepository.getNetworkByChain(MAINNET_ID) : ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+    }
+
+    private void checkERC20()
     {
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
-            final String walletAddress = currentAddress;
-
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
-            erc20CheckDisposable = tickerService.getTokensOnNetwork(info, walletAddress, this)
-                    .flatMap(tokens -> tokenRepository.addERC20(new Wallet(walletAddress), tokens))
+            //get mainnet ERC20 token tickers
+            erc20CheckDisposable = tickerService.getERC20Tickers(getAllERC20(MAINNET_ID))
+                    .subscribeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::finishCheckChain, this::onERC20Error);
         }
     }
 
-    private void finishCheckChain(Token[] updatedMarketTokens)
+    private List<TokenCardMeta> getAllERC20(int chainId)
+    {
+        TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), Collections.singletonList(chainId));
+        List<TokenCardMeta> allERC20 = new ArrayList<>();
+        for (TokenCardMeta tcm : tokenList)
+        {
+            if (tcm.type == ContractType.ERC20)
+            {
+                allERC20.add(tcm);
+            }
+        }
+        return allERC20;
+    }
+
+    private void finishCheckChain(int updated)
     {
         erc20CheckDisposable = null;
     }
@@ -503,11 +559,6 @@ public class TokensService
     {
         erc20CheckDisposable = null;
         if (BuildConfig.DEBUG) throwable.printStackTrace();
-    }
-
-    private void onOpenseaError(Throwable throwable)
-    {
-        checkERC20(null);
     }
 
     public void updateTickers()
@@ -599,13 +650,13 @@ public class TokensService
             long lastUpdateDiff = currentTime - check.lastUpdate;
             float weighting = check.calculateBalanceUpdateWeight();
 
-            if (!appHasFocus && !token.isEthereum()) continue; //only check chains when wallet out of focus
+            if (!appHasFocus && (!token.isEthereum() && !isFocusToken(token))) continue; //only check chains when wallet out of focus
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
             long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS; //normal minimum update frequency for token 30 seconds
 
-            if (focusToken != null && token.tokenInfo.chainId == focusToken.chainId && token.getAddress().equalsIgnoreCase(focusToken.address))
+            if (isFocusToken(token))
             {
                 updateFactor = 3.0f * (float) lastUpdateDiff;
                 cutoffCheck = 15*DateUtils.SECOND_IN_MILLIS; //focus token can be checked every 15 seconds - focus token when erc20 or chain clicked on in wallet

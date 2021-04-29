@@ -4,6 +4,7 @@ package com.alphawallet.app.entity.opensea;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.entity.tokens.Token;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -32,12 +33,12 @@ public class AssetContract implements Parcelable {
         schemaName = in.readString();
     }
 
-    public AssetContract(String address, String name, String symbol, String schemaName)
+    public AssetContract(Token token)
     {
-        this.address = address;
-        this.name = name;
-        this.symbol = symbol;
-        this.schemaName = schemaName;
+        this.address = token.tokenInfo.address;
+        this.name = token.tokenInfo.name;
+        this.symbol = token.tokenInfo.symbol;
+        this.schemaName = token.getInterfaceSpec().toString();
     }
 
     public static final Creator<AssetContract> CREATOR = new Creator<AssetContract>() {

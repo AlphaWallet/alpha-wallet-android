@@ -1,5 +1,4 @@
 buildscript {
-    ext.kotlin_version = '1.4.10'
     repositories {
         // don't add anything here until you read to the bottom of this bracket
         google()
@@ -13,13 +12,13 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.4' //NB - there is an issue with newer versions of gradle. The APK balloons out, so far haven't diagnosed why.
         //If you want to try upgrading gradle plugin past 3.5.4 you will need to also diagnose the APK ballooning issue.
-        classpath "io.realm:realm-gradle-plugin:7.0.8"
+        classpath "io.realm:realm-gradle-plugin:10.4.0"
         // WARNING WARNING WARNING
         // you are about to add here a dependency to be used in the Android app
         // don't do that. add that dependency to app/build.gradle
-        classpath 'com.google.gms:google-services:4.3.4'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+        classpath 'com.google.gms:google-services:4.3.5'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.31'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2'
     }
 }
 

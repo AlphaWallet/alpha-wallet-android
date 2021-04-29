@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.Wallet;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import java.math.BigDecimal;
@@ -25,14 +26,8 @@ public class GenericWalletInteract
 	}
 
 	public Single<Wallet> find() {
-		return walletRepository
-				.getDefaultWallet()
-				.onErrorResumeNext(walletRepository
-						.fetchWallets()
-						.to(single -> Flowable.fromArray(single.blockingGet()))
-						.firstOrError()
-						.flatMapCompletable(walletRepository::setDefaultWallet)
-						.andThen(walletRepository.getDefaultWallet()))
+		return walletRepository.getDefaultWallet()
+				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread());
 	}
 
@@ -42,9 +37,9 @@ public class GenericWalletInteract
 	 *
 	 * @param walletAddr
 	 */
-	public Disposable updateBackupTime(String walletAddr)
+	public void updateBackupTime(String walletAddr)
 	{
-		return walletRepository.updateBackupTime(walletAddr);
+		walletRepository.updateBackupTime(walletAddr);
 	}
 
 	/**
@@ -53,9 +48,9 @@ public class GenericWalletInteract
 	 *
 	 * @param walletAddr
 	 */
-	public Disposable updateWarningTime(String walletAddr)
+	public void updateWarningTime(String walletAddr)
 	{
-		return walletRepository.updateWarningTime(walletAddr);
+		walletRepository.updateWarningTime(walletAddr);
 	}
 
 	public Single<String> getWalletNeedsBackup(String walletAddr)
@@ -63,9 +58,9 @@ public class GenericWalletInteract
 		return walletRepository.getWalletRequiresBackup(walletAddr);
 	}
 
-	public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
+	public void setIsDismissed(String walletAddr, boolean isDismissed)
 	{
-		return walletRepository.setIsDismissed(walletAddr, isDismissed);
+		walletRepository.setIsDismissed(walletAddr, isDismissed);
 	}
 
 	/**
@@ -77,11 +72,6 @@ public class GenericWalletInteract
 	{
 		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
-
-    public Single<Wallet> getWallet(String keyAddress)
-    {
-    	return walletRepository.findWallet(keyAddress);
-    }
 
 	private boolean hasBalance(Wallet wallet)
 	{

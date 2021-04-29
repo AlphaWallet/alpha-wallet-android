@@ -2,7 +2,6 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -23,6 +22,7 @@ import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -45,9 +45,8 @@ public class TokenIcon extends ConstraintLayout
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
-    private CustomViewTarget viewTarget;
+    private CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
-    private AssetDefinitionService assetDefinition;
     private boolean showStatus = false;
     private boolean largeIcon = false;
     private StatusType currentStatus;
@@ -112,20 +111,18 @@ public class TokenIcon extends ConstraintLayout
         if (token == null) return;
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
-        this.assetDefinition = assetDefinition;
 
-        viewTarget = new CustomViewTarget<ImageView, BitmapDrawable>(icon) {
+        final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
+
+        viewTarget = new CustomViewTarget<ImageView, Drawable>(icon) {
             @Override
             protected void onResourceCleared(@Nullable Drawable placeholder) { }
 
             @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable)
-            {
-                setupTextIcon(token);
-            }
+            public void onLoadFailed(@Nullable Drawable errorDrawable) { }
 
             @Override
-            public void onResourceReady(@NotNull BitmapDrawable bitmap, Transition<? super BitmapDrawable> transition)
+            public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
             {
                 textIcon.setVisibility(View.GONE);
                 icon.setVisibility(View.VISIBLE);
@@ -133,13 +130,13 @@ public class TokenIcon extends ConstraintLayout
             }
         };
 
-        displayTokenIcon();
+        displayTokenIcon(iconItem);
     }
 
     /**
      * Try to fetch Token Icon from the Token URL.
      */
-    private void displayTokenIcon()
+    private void displayTokenIcon(IconItem iconItem)
     {
         int chainIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
 
@@ -157,12 +154,20 @@ public class TokenIcon extends ConstraintLayout
         else
         {
             setupTextIcon(token);
-            IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
+            RequestBuilder<Drawable> rb = null;
+
+            //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
+            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME) && !iconItem.onlyFetchFromCache())
+            {
+                rb = Glide.with(getContext().getApplicationContext())
+                        .load(Utils.getAWIconRepo(token.getAddress()));
+            }
 
             Glide.with(getContext().getApplicationContext())
                     .load(iconItem.getUrl())
                     .signature(iconItem.getSignature())
                     .onlyRetrieveFromCache(iconItem.onlyFetchFromCache()) //reduce URL checking, only check once per session
+                    .error(rb)
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(chainIcon))
                     .listener(requestListener)
@@ -174,16 +179,7 @@ public class TokenIcon extends ConstraintLayout
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
         String tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
-        return new IconItem(tURL, false, correctedAddr, token.tokenInfo.chainId);
-    }
-
-    /**
-     * This method is used to set Custom image to the Token Icon
-     * @param imageResource Drawable resource identifier
-     */
-    public void setTokenImage(int imageResource)
-    {
-        icon.setImageResource(imageResource);
+        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
     public void setStatusIcon(StatusType type)
@@ -275,6 +271,7 @@ public class TokenIcon extends ConstraintLayout
     private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            setupTextIcon(token);
             return false;
         }
 
@@ -283,7 +280,7 @@ public class TokenIcon extends ConstraintLayout
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);
-            return true;
+            return false;
         }
     };
 

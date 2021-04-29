@@ -35,6 +35,7 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SendViewModel;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
@@ -70,7 +71,6 @@ import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
@@ -517,7 +517,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     {
         sendAddress = address;
         ensAddress = ensName;
-        if (TextUtils.isEmpty(address) || !isValidAddress(address))
+        if (!Utils.isAddressValid(address))
         {
             //show address error
             addressInput.setError(getString(R.string.error_invalid_address));
@@ -530,7 +530,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void calculateTransactionCost()
     {
-        if (sendAmount.compareTo(NEGATIVE) > 0 && sendAddress != null && isValidAddress(sendAddress))
+        if (sendAmount.compareTo(NEGATIVE) > 0 && Utils.isAddressValid(sendAddress))
         {
             final String txSendAddress = sendAddress;
             sendAddress = null;

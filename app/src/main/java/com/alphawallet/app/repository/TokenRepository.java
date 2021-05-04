@@ -445,7 +445,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled)
     {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
         localSource.setEnable(network, wallet, token, isEnabled);
         return Completable.fromAction(() -> {});
     }

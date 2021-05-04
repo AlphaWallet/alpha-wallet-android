@@ -176,7 +176,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     public void onResume()
     {
         super.onResume();
-        viewModel.prepare();
     }
 
     @Override

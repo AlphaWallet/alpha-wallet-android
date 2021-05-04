@@ -93,7 +93,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         initViewModel();
         overrideNetwork = 0;
         getInfo();
-        viewModel.prepare();
         getPreviousMode();
     }
 
@@ -139,21 +138,12 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViewModel() {
         viewModel = new ViewModelProvider(this, myAddressViewModelFactory)
                 .get(MyAddressViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        if (token != null && overrideNetwork == 0)
-        {
-            this.networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(token.tokenInfo.chainId);
-        }
-        else
-        {
-            this.networkInfo = networkInfo;
-        }
-
-        currentNetwork.setText(this.networkInfo.name);
-        Utils.setChainColour(networkIcon, this.networkInfo.chainId);
+    private void setNetworkUi(NetworkInfo networkInfo)
+    {
+        currentNetwork.setText(networkInfo.name);
+        Utils.setChainColour(networkIcon, networkInfo.chainId);
     }
 
     @Override
@@ -245,12 +235,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         amountInput.setupToken(token, null, viewModel.getTokenService(), this);
         updateCryptoAmount(BigDecimal.ZERO);
         selectNetworkLayout.setVisibility(View.VISIBLE);
-
-        if (networkInfo != null)
-        {
-            currentNetwork.setText(networkInfo.name);
-            Utils.setChainColour(networkIcon, networkInfo.chainId);
-        }
+        setNetworkUi(networkInfo);
     }
 
     private void showAddress()
@@ -352,8 +337,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         if (requestCode == C.REQUEST_SELECT_NETWORK) {
             if (resultCode == RESULT_OK) {
                 int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
-                NetworkInfo info = viewModel.setNetwork(networkId);
-
+                NetworkInfo info = viewModel.getNetworkByChain(networkId);
                 if (info != null)
                 {
                     getInfo();

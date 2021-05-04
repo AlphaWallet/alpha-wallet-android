@@ -18,14 +18,12 @@ class NewSettingsModule {
     NewSettingsViewModelFactory provideNewSettingsViewModelFactory(
             GenericWalletInteract genericWalletInteract,
             MyAddressRouter myAddressRouter,
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
             PreferenceRepositoryType preferenceRepository
     ) {
         return new NewSettingsViewModelFactory(
                 genericWalletInteract,
                 myAddressRouter,
-                ethereumNetworkRepository,
                 manageWalletsRouter,
                 preferenceRepository);
     }

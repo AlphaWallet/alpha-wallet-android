@@ -168,11 +168,10 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	TransactionsService provideTransactionsService(TokensService tokensService,
-												   PreferenceRepositoryType preferenceRepository,
 												   EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
 												   TransactionsNetworkClientType transactionsNetworkClientType,
 												   TransactionLocalSource transactionLocalSource) {
-		return new TransactionsService(tokensService, preferenceRepository, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
+		return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
 	}
 
 	@Singleton

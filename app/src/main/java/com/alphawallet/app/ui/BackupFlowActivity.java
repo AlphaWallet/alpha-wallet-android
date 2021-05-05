@@ -112,6 +112,8 @@ public class BackupFlowActivity extends BaseActivity implements
         //hide seed phrase and any visible words
         if (layoutWordHolder != null) layoutWordHolder.removeAllViews();
 
+        if (state == null) return;
+
         switch (state) {
             case WRITE_DOWN_SEED_PHRASE:
             case SHOW_SEED_PHRASE:

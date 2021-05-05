@@ -6,14 +6,8 @@ import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.entity.CoinGeckoTicker;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EtherscanTransaction;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
@@ -21,7 +15,6 @@ import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,12 +31,10 @@ import org.web3j.protocol.core.methods.response.EthCall;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;

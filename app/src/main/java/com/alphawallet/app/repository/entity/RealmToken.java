@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository.entity;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 
@@ -189,7 +191,9 @@ public class RealmToken extends RealmObject {
     public void updateTokenInfoIfRequired(TokenInfo tokenInfo)
     {
         //check decimal integrity, if received a non-18 decimals, this is most likely an update correction from etherscan
-        if (tokenInfo.decimals != decimals && (tokenInfo.decimals > 0 && (decimals == 0 || decimals == 18)))
+        if (tokenInfo.decimals != decimals && (tokenInfo.decimals > 0 && (decimals == 0 || decimals == 18))
+                || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(name))
+                || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(symbol)))
         {
             setName(tokenInfo.name);
             setSymbol(tokenInfo.symbol);

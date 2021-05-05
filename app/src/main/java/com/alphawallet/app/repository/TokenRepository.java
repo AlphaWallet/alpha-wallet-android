@@ -184,7 +184,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
 
             return tokens;
-        });
+        }).flatMap(this::checkTokenData);
     }
 
     @Override
@@ -208,6 +208,13 @@ public class TokenRepository implements TokenRepositoryType {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
                 .fetchAllTokenMetas(wallet, networkFilters, searchTerm);
+    }
+
+    @Override
+    public Single<Token[]> fetchTokensThatMayNeedUpdating(String walletAddress, List<Integer> networkFilters) {
+        if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
+        return localSource
+                .fetchAllTokensWithNameIssue(walletAddress, networkFilters);
     }
 
     @Override
@@ -445,8 +452,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled)
     {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        localSource.setEnable(network, wallet, token, isEnabled);
+        localSource.setEnable(wallet, token, isEnabled);
         return Completable.fromAction(() -> {});
     }
 
@@ -491,6 +497,7 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
+                        case MAYBE_ERC20:
                             balance = checkUint256Balance(wallet, chainId, tokenAddress);
                             break;
                         case NOT_SET:
@@ -1327,6 +1334,33 @@ public class TokenRepository implements TokenRepositoryType {
                     getDecimals(address, network),
                     true, chainId);
         });
+    }
+
+    private Single<Token[]> checkTokenData(Token[] tokens)
+    {
+        return Single.fromCallable(() -> {
+            for (int i = 0; i < tokens.length; i++)
+            {
+                tokens[i] = updateTokenNameIfRequired(tokens[i]).blockingGet();
+            }
+
+            return tokens;
+        });
+    }
+
+    private Single<Token> updateTokenNameIfRequired(final Token t)
+    {
+        if (t.mayRequireRefresh())
+        {
+            return setupTokensFromLocal(t.getAddress(), t.tokenInfo.chainId)
+                    .map(updatedInfo -> new Token(updatedInfo, BigDecimal.ZERO, 0,
+                            ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId).getShortName(),
+                            t.getInterfaceSpec()));
+        }
+        else
+        {
+            return Single.fromCallable(() -> t);
+        }
     }
 
     @Override

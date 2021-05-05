@@ -24,7 +24,6 @@ public class HomeReceiver extends BroadcastReceiver
         ctx.registerReceiver(this, new IntentFilter(C.RESET_WALLET));
         ctx.registerReceiver(this, new IntentFilter(C.ADDED_TOKEN));
         ctx.registerReceiver(this, new IntentFilter(C.CHANGED_LOCALE));
-        ctx.registerReceiver(this, new IntentFilter(C.CHANGED_NETWORK));
         ctx.registerReceiver(this, new IntentFilter(C.RESET_TRANSACTIONS));
         ctx.registerReceiver(this, new IntentFilter(C.WALLET_CONNECT_REQUEST));
         this.homeCommsInterface = homeCommsInterface;
@@ -64,9 +63,6 @@ public class HomeReceiver extends BroadcastReceiver
                 break;
             case C.RESET_TRANSACTIONS:
                 homeCommsInterface.resetTransactions();
-                break;
-            case C.CHANGED_NETWORK:
-                homeCommsInterface.changedNetwork(intent);
                 break;
             case C.WALLET_CONNECT_REQUEST:
                 String sessionId = bundle.getString("sessionid");

@@ -78,6 +78,7 @@ import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface
 {
     private static final String TAG = "WCClient";
+    private static final String DEFAULT_IDON = "https://example.walletconnect.org/favicon.ico";
     public static final String WC_LOCAL_PREFIX = "wclocal:";
     public static final String WC_INTENT = "wcintent:";
 
@@ -554,10 +555,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onSessionRequest(Long id, WCPeerMeta peer, int chainIdHint)
     {
+        if (peer == null) { finish(); }
+
         String[] accounts = {viewModel.getWallet().address};
+        String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
 
         Glide.with(this)
-                .load(peer.getIcons().get(0))
+                .load(displayIcon)
                 .into(icon);
         peerName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());

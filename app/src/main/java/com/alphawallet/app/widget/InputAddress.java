@@ -245,7 +245,10 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     @Override
     public void onItemClick(String url)
     {
-        ensHandler.handleHistoryItemClick(url);
+        if (ensHandler != null)
+        {
+            ensHandler.handleHistoryItemClick(url);
+        }
     }
 
     @Override
@@ -309,7 +312,14 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
      */
     public void getAddress()
     {
-        ensHandler.getAddress();
+        if (ensHandler != null)
+        {
+            ensHandler.getAddress();
+        }
+        else
+        {
+            ENSComplete();
+        }
     }
 
     @Override

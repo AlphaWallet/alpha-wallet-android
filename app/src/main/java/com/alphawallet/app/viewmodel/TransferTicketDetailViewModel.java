@@ -10,7 +10,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -19,16 +18,13 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.ENSInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
@@ -37,9 +33,13 @@ import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
 import com.alphawallet.token.tools.ParseMagicLink;
 
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -57,13 +57,10 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final AssetDisplayRouter assetDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
-    private final GasService gasService;
+    private final GasService2 gasService;
     private final AnalyticsServiceType analyticsService;
-    private final ENSInteract ensInteract;
     private final TokensService tokensService;
 
     private ParseMagicLink parser;
@@ -74,24 +71,18 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     TransferTicketDetailViewModel(GenericWalletInteract genericWalletInteract,
                                   KeyService keyService,
                                   CreateTransactionInteract createTransactionInteract,
-                                  TransferTicketDetailRouter transferTicketDetailRouter,
                                   FetchTransactionsInteract fetchTransactionsInteract,
-                                  AssetDisplayRouter assetDisplayRouter,
                                   AssetDefinitionService assetDefinitionService,
-                                  GasService gasService,
-                                  ENSInteract ensInteract,
+                                  GasService2 gasService,
                                   AnalyticsServiceType analyticsService,
                                   TokensService tokensService) {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
-        this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.gasService = gasService;
         this.analyticsService = analyticsService;
-        this.ensInteract = ensInteract;
         this.tokensService = tokensService;
     }
 
@@ -124,11 +115,16 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
 
-        gasService.startGasListener(token.tokenInfo.chainId);
+        gasService.startGasPriceCycle(token.tokenInfo.chainId);
     }
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
+    }
+
+    public Wallet getWallet()
+    {
+       return defaultWallet.getValue();
     }
 
     public void setWallet(Wallet wallet)
@@ -210,10 +206,10 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         else
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            GasSettings settings = gasService.getGasSettings(data, true, token.tokenInfo.chainId);
-            disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
-                    .subscribe(this::onCreateTransaction, this::onError);
+            //GasSettings settings = gasService.getGasSettings(data, true, token.tokenInfo.chainId);
+            //disposable = createTransactionsInteract
+            //       .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), data, token.tokenInfo.chainId)
+            //       .subscribe(this::onCreateTransaction, this::onError);
         }
     }
 
@@ -247,13 +243,13 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         if (asset != null)
         {
 
-            // confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
+             //confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
         }
     }
 
     public void stopGasSettingsFetch()
     {
-        gasService.stopGasListener();
+        gasService.stopGasPriceCycle();
     }
 
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
@@ -272,6 +268,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void completeAuthentication(Operation signData)
     {
         keyService.completeAuthentication(signData);
+    }
+
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    {
+        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
 
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)

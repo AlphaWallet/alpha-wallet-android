@@ -14,7 +14,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.token.entity.ContractAddress;
@@ -43,7 +42,6 @@ public class TransactionsService
 {
     private static final String NO_TRANSACTION_EXCEPTION = "NoSuchElementException";
     private final TokensService tokensService;
-    private final PreferenceRepositoryType preferenceRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
     private final TransactionLocalSource transactionsCache;
@@ -65,13 +63,11 @@ public class TransactionsService
     private Disposable pendingTransactionFetch;
 
     public TransactionsService(TokensService tokensService,
-                               PreferenceRepositoryType preferenceRepositoryType,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
                                TransactionLocalSource transactionsCache)
     {
         this.tokensService = tokensService;
-        this.preferenceRepository = preferenceRepositoryType;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;

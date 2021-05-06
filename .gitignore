@@ -28,6 +28,7 @@ app/noAnalytics
 # Generated files
 bin/
 gen/
+app/noAnalytics/release/output.json
 
 # Gradle files
 .gradle/

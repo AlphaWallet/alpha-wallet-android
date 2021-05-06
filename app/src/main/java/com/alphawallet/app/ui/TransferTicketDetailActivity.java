@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +34,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -40,22 +42,25 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
+import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-
-import org.web3j.abi.datatypes.Address;
+import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -71,20 +76,23 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.alphawallet.app.C.BURN_ADDRESS;
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback
-{
+public class TransferTicketDetailActivity extends BaseActivity
+        implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
 
     @Inject
@@ -97,6 +105,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
 
     private FinishReceiver finishReceiver;
 
+    private Wallet wallet;
     private Token token;
     private NonFungibleTokenAdapter adapter;
 
@@ -108,7 +117,10 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     private DisplayState transferStatus;
 
     private InputAddress addressInput;
+    private String sendAddress;
+    private String ensAddress;
 
+    private ActionSheetDialog actionDialog;
     private AWalletConfirmationDialog confirmationDialog;
 
     private AppCompatRadioButton pickLink;
@@ -134,6 +146,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
+        wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(TICKET);
 
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
@@ -149,6 +162,9 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
 
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
+
+        sendAddress = null;
+        ensAddress = null;
 
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
@@ -761,31 +777,149 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     }
 
     @Override
-    public void handleClick(String action, int id)
+    public void handleClick(String action, int actionId)
     {
-        viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
+        //clicked the next button
+        if (actionId == R.string.action_next)
+        {
+            KeyboardUtils.hideKeyboard(getCurrentFocus());
+            addressInput.getAddress();
+        }
+
     }
 
     @Override
     public void addressReady(String address, String ensName)
     {
+        sendAddress = address;
+        ensAddress = ensName;
         //complete the transfer
-        if (!Utils.isAddressValid(address))
+        if (TextUtils.isEmpty(address) || !isValidAddress(address))
         {
             //show address error
             addressInput.setError(getString(R.string.error_invalid_address));
         }
         else
         {
+
             if (token instanceof ERC721Token)
             {
-                viewModel.openConfirm(this, address, token, Utils.bigIntListToString(selection, true), ensName);
+                calculateTransactionCost();
             }
             else
             {
                 handleERC875Transfer(address, ensName);
             }
+
         }
     }
-}
 
+    private void calculateTransactionCost()
+    {
+        final String txSendAddress = sendAddress;
+        sendAddress = null;
+
+        final byte[] transactionBytes = viewModel.getERC721TransferBytes(txSendAddress,token.getAddress(),ticketIds,token.tokenInfo.chainId);
+        System.out.println("hell");
+        Web3Transaction w3tx = new Web3Transaction(
+                new com.alphawallet.app.web3.entity.Address(txSendAddress),
+                new Address(token.getAddress()),
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                -1,
+                Numeric.toHexString(transactionBytes),
+                -1);
+
+        if (dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
+
+        actionDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
+                txSendAddress, viewModel.getTokenService(), this);
+        actionDialog.setCanceledOnTouchOutside(false);
+        actionDialog.show();
+
+        //checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);
+    }
+
+    /**
+     * Called to check if we're ready to send user to confirm screen / activity sheet popup
+     */
+    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress) {
+
+        Web3Transaction w3tx = new Web3Transaction(
+                new com.alphawallet.app.web3.entity.Address(txSendAddress),
+                new Address(token.getAddress()),
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                sendGasLimit,
+                -1,
+                Numeric.toHexString(transactionBytes),
+                -1);
+        if (dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
+
+        actionDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
+                resolvedAddress, viewModel.getTokenService(), this);
+        actionDialog.setCanceledOnTouchOutside(false);
+        actionDialog.show();
+    }
+
+    /**
+     * ActionSheetCallback, comms hooks for the ActionSheetDialog to trigger authentication & send transactions
+     *
+     * @param callback
+     */
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, wallet, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        //ActionSheet was dismissed
+        if (!TextUtils.isEmpty(txHash)) {
+            Intent intent = new Intent();
+            intent.putExtra("tx_hash", txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
+
+    private void txWritten(TransactionData transactionData)
+    {
+        actionDialog.transactionWritten(transactionData.txHash);
+    }
+
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+
+        confirmationDialog.dismiss();
+    }
+}

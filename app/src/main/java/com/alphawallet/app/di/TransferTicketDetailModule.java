@@ -8,11 +8,12 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 
 import dagger.Module;
@@ -35,11 +36,20 @@ public class TransferTicketDetailModule {
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService,
             GasService gasService,
-            ConfirmationRouter confirmationRouter,
-            ENSInteract ensInteract) {
-        return new TransferTicketDetailViewModelFactory(
-                genericWalletInteract, keyService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
-                assetDisplayRouter, assetDefinitionService, gasService, confirmationRouter, ensInteract);
+            ENSInteract ensInteract,
+            AnalyticsServiceType analyticsService,
+            TokensService tokensService) {
+        return new TransferTicketDetailViewModelFactory(genericWalletInteract,
+                keyService,
+                createTransactionInteract,
+                transferTicketDetailRouter,
+                fetchTransactionsInteract,
+                assetDisplayRouter,
+                assetDefinitionService,
+                gasService,
+                ensInteract,
+                analyticsService,
+                tokensService);
     }
 
     @Provides
@@ -60,11 +70,6 @@ public class TransferTicketDetailModule {
     @Provides
     AssetDisplayRouter provideAssetDisplayRouter() {
         return new AssetDisplayRouter();
-    }
-
-    @Provides
-    ConfirmationRouter provideConfirmationRouter() {
-        return new ConfirmationRouter();
     }
 
     @Provides

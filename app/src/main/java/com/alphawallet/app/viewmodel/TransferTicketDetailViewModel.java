@@ -1,18 +1,19 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -24,13 +25,14 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.ConfirmationRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -49,6 +51,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
+    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
 
     private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
@@ -58,8 +62,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final AssetDisplayRouter assetDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final GasService gasService;
-    private final ConfirmationRouter confirmationRouter;
+    private final AnalyticsServiceType analyticsService;
     private final ENSInteract ensInteract;
+    private final TokensService tokensService;
 
     private ParseMagicLink parser;
     private Token token;
@@ -74,8 +79,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   AssetDisplayRouter assetDisplayRouter,
                                   AssetDefinitionService assetDefinitionService,
                                   GasService gasService,
-                                  ConfirmationRouter confirmationRouter,
-                                  ENSInteract ensInteract) {
+                                  ENSInteract ensInteract,
+                                  AnalyticsServiceType analyticsService,
+                                  TokensService tokensService) {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
@@ -84,17 +90,25 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.gasService = gasService;
-        this.confirmationRouter = confirmationRouter;
+        this.analyticsService = analyticsService;
         this.ensInteract = ensInteract;
+        this.tokensService = tokensService;
     }
 
-    public LiveData<Wallet> defaultWallet() {
+
+    public MutableLiveData<TransactionData> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<String> userTransaction() { return userTransaction; }
-
     private void initParser()
     {
         if (parser == null)
@@ -183,11 +197,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         universalLinkReady.postValue(universalLink);
     }
 
-    public void openTransferState(Context context, Token token, String ticketIds, DisplayState transferStatus)
-    {
-        if (transferStatus != DisplayState.NO_ACTION) transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus.ordinal());
-    }
-
     public void createTicketTransfer(String to, Token token, List<BigInteger> transferList)
     {
         if (!token.contractTypeValid())
@@ -227,7 +236,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         BigInteger tokenId = new BigInteger(hexTokenId, 16);
 
         for (Asset a : token.getTokenAssets().values())
-        {
+    {
             BigInteger assetTokenId = new BigInteger(a.getTokenId());
             if (assetTokenId.equals(tokenId))
             {
@@ -235,10 +244,10 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                 break;
             }
         }
-
         if (asset != null)
         {
-            confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
+
+            // confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
         }
     }
 
@@ -265,8 +274,48 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         keyService.completeAuthentication(signData);
     }
 
+    public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
     public void failedAuthentication(Operation signData)
     {
         keyService.completeAuthentication(signData);
+    }
+
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId)
+    {
+        disposable = createTransactionInteract
+                .createWithSig(wallet, finalTx, chainId)
+                .subscribe(transactionFinalised::postValue,
+                        transactionError::postValue);
+    }
+
+    public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit, int chainId)
+    {
+        final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId, chainId);
+        disposable = createTransactionInteract
+                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
+
+    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, int chainId) {
+        Token token = tokensService.getToken(chainId, contractAddress);
+        List<BigInteger> tokenIds = token.stringHexToBigIntegerList(tokenId);
+        return TokenRepository.createERC721TransferFunction(to, token, tokenIds);
+    }
+
+    public void actionSheetConfirm(String mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(mode);
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
+
+    public TokensService getTokenService() {
+        return tokensService;
     }
 }

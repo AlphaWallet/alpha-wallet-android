@@ -3,10 +3,10 @@ package com.alphawallet.app.viewmodel;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.SelectNetworkActivity;
@@ -43,17 +43,25 @@ public class SelectNetworkViewModel extends BaseViewModel {
     }
 
     public void setFilterNetworks(Integer[] selectedItems) {
+        NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
+        int activeNetworkId = -99;
+        if (activeNetwork != null) {
+            activeNetworkId = networkRepository.getActiveBrowserNetwork().chainId;
+        }
+        boolean deselected = true;
+
         int[] selectedIds = new int[selectedItems.length];
         int index = 0;
         for (Integer selectedId : selectedItems) {
+            if (activeNetworkId == selectedId) {
+                deselected = false;
+            }
             selectedIds[index++] = selectedId;
         }
+
+        if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
         tokensService.setupFilter();
-    }
-
-    public List<Integer> getActiveNetworks() {
-        return networkRepository.getFilterNetworkList();
     }
 
     public void openFilterSelect(Activity ctx)
@@ -64,30 +72,6 @@ public class SelectNetworkViewModel extends BaseViewModel {
         ctx.startActivity(intent);
     }
 
-    public NetworkInfo getDefaultNetwork()
-    {
-        return networkRepository.getDefaultNetwork();
-    }
-
-    public void setActiveNetwork(int networkId)
-    {
-        NetworkInfo info = networkRepository.getNetworkByChain(networkId);
-        if (info != null)
-        {
-            networkRepository.setDefaultNetworkInfo(info);
-        }
-    }
-
-    public boolean isActiveMainnet()
-    {
-        return preferenceRepository.isActiveMainnet();
-    }
-
-    public void setActiveMainnet(boolean flag)
-    {
-        preferenceRepository.setActiveMainnet(flag);
-    }
-
     public boolean hasShownTestNetWarning()
     {
         return preferenceRepository.hasShownTestNetWarning();
@@ -96,5 +80,14 @@ public class SelectNetworkViewModel extends BaseViewModel {
     public void setShownTestNetWarning()
     {
         preferenceRepository.setShownTestNetWarning();
+    }
+
+    public NetworkInfo getNetworkByChain(int chainId)
+    {
+        return networkRepository.getNetworkByChain(chainId);
+    }
+
+    public boolean isMainNet(int networkId) {
+        return EthereumNetworkBase.hasRealValue(networkId);
     }
 }

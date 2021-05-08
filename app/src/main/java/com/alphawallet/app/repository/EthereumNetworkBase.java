@@ -169,7 +169,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     };
 
     final PreferenceRepositoryType preferences;
-    NetworkInfo defaultNetwork;
+    NetworkInfo activeNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
 
     EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, NetworkInfo[] additionalNetworks, boolean useTestNets)
@@ -191,10 +191,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         /* then store the result list in a network variable */
         NETWORKS = networks.toArray(new NetworkInfo[0]);
 
-        defaultNetwork = getByName(preferences.getDefaultNetwork());
-        if (defaultNetwork == null) {
-            defaultNetwork = NETWORKS[0];
-        }
+        activeNetwork = getByName(preferences.getActiveBrowserNetwork());
+//        Removed code below to allow null value for defaultNetwork
+//        if (defaultNetwork == null) {
+//            defaultNetwork = NETWORKS[0];
+//        }
 
         networkMap = new ConcurrentHashMap<>();
         for (NetworkInfo network : NETWORKS)
@@ -212,7 +213,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     private NetworkInfo getByName(String name) {
-        if (name != null && name != "") {
+        if (name != null && !name.isEmpty()) {
             for (NetworkInfo NETWORK : NETWORKS) {
                 if (name.equals(NETWORK.name)) {
                     return NETWORK;
@@ -230,8 +231,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public NetworkInfo getDefaultNetwork() {
-        return defaultNetwork;
+    public NetworkInfo getActiveBrowserNetwork() {
+        return activeNetwork;
     }
 
     @Override
@@ -264,40 +265,27 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public List<Integer> getFilterNetworkList()
     {
         String filterList = preferences.getNetworkFilterList();
-        boolean mainNets = preferences.isActiveMainnet();
         List<Integer> storedIds = Utils.intListToArray(filterList);
         List<Integer> networkIds = new ArrayList<>();
 
-        for (Integer filterId : storedIds)
-        {
-            if (mainNets && hasRealValue(filterId)
-                    || !mainNets && !hasRealValue(filterId))
-            {
-                networkIds.add(filterId);
+        for (int id : storedIds) {
+            // Check if the stored ids are either a valid mainnet or testnet id
+            if (hasRealValue(id) && !isTestNet(id) || !hasRealValue(id) && isTestNet(id)) {
+                networkIds.add(id);
             }
         }
 
-        if (networkIds.size() == 0)
+        // Simplified this block of code.
+        // An empty list will only happen on fresh install or when storage data is cleared,
+        // which means it is safe to return the default networks
+        if (storedIds.size() == 0)
         {
-            //add the first network we find as empty list is very bad
-            if (mainNets)
-            {
-                networkIds = EthereumNetworkRepository.addDefaultNetworks();
-            }
-            else
-            {
-                for (NetworkInfo info : getAvailableNetworkList())
-                {
-                    if (!hasRealValue(info.chainId))
-                    {
-                        networkIds.add(info.chainId);
-                        break;
-                    }
-                }
-            }
+            return EthereumNetworkRepository.addDefaultNetworks();
         }
-
-        return networkIds;
+        else
+        {
+            return networkIds;
+        }
     }
 
     @Override
@@ -308,12 +296,20 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public void setDefaultNetworkInfo(NetworkInfo networkInfo) {
-        defaultNetwork = networkInfo;
-        preferences.setDefaultNetwork(defaultNetwork.name);
-
-        for (OnNetworkChangeListener listener : onNetworkChangedListeners) {
-            listener.onNetworkChanged(networkInfo);
+    public void setActiveBrowserNetwork(NetworkInfo networkInfo)
+    {
+        activeNetwork = networkInfo;
+        if (networkInfo != null)
+        {
+            preferences.setActiveBrowserNetwork(activeNetwork.name);
+            for (OnNetworkChangeListener listener : onNetworkChangedListeners)
+            {
+                listener.onNetworkChanged(networkInfo);
+            }
+        }
+        else
+        {
+            preferences.setActiveBrowserNetwork("");
         }
     }
 
@@ -338,6 +334,25 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
             case EthereumNetworkRepository.BINANCE_MAIN_ID:
             case EthereumNetworkRepository.HECO_ID:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private boolean isTestNet(int chainId)
+    {
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.KOVAN_ID:
+            case EthereumNetworkRepository.ROPSTEN_ID:
+            case EthereumNetworkRepository.SOKOL_ID:
+            case EthereumNetworkRepository.RINKEBY_ID:
+            case EthereumNetworkRepository.GOERLI_ID:
+            case EthereumNetworkRepository.ARTIS_TAU1_ID:
+            case EthereumNetworkRepository.HECO_TEST_ID:
+            case EthereumNetworkRepository.BINANCE_TEST_ID:
                 return true;
 
             default:

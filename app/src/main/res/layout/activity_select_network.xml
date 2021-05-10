@@ -14,30 +14,24 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/include3" >
+        android:layout_below="@id/include3">
 
         <LinearLayout
             android:id="@+id/layout_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/alabaster"
             android:descendantFocusability="blocksDescendants"
             android:orientation="vertical">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
 
             <FrameLayout
                 android:id="@+id/mainnet_frame"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="50dp"
+                android:background="@drawable/background_top_border_header">
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@color/alabaster"
+                    android:layout_height="match_parent"
                     android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
@@ -51,39 +45,30 @@
                     android:id="@+id/mainnet_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
                     android:layout_marginEnd="16dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:layout_gravity="center_vertical|end"
                     android:theme="@style/SettingsItemSwitchAppearance"
                     android:visibility="visible" />
 
             </FrameLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/main_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_top_border" />
 
             <FrameLayout
                 android:id="@+id/testnet_frame"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_top_border_header">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@color/alabaster"
                     android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
@@ -97,24 +82,20 @@
                     android:id="@+id/testnet_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
                     android:layout_marginEnd="16dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:layout_gravity="center_vertical|end"
                     android:theme="@style/SettingsItemSwitchAppearance"
                     android:visibility="visible" />
 
             </FrameLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/test_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/background_top_border"
                 android:visibility="gone" />
 
         </LinearLayout>

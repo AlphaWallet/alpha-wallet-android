@@ -266,14 +266,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         String filterList = preferences.getNetworkFilterList();
         List<Integer> storedIds = Utils.intListToArray(filterList);
-        List<Integer> networkIds = new ArrayList<>();
-
-        for (int id : storedIds) {
-            // Check if the stored ids are either a valid mainnet or testnet id
-            if (hasRealValue(id) && !isTestNet(id) || !hasRealValue(id) && isTestNet(id)) {
-                networkIds.add(id);
-            }
-        }
 
         // Simplified this block of code.
         // An empty list will only happen on fresh install or when storage data is cleared,
@@ -284,7 +276,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            return networkIds;
+            return storedIds;
         }
     }
 
@@ -334,25 +326,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
             case EthereumNetworkRepository.BINANCE_MAIN_ID:
             case EthereumNetworkRepository.HECO_ID:
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
-    private boolean isTestNet(int chainId)
-    {
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.KOVAN_ID:
-            case EthereumNetworkRepository.ROPSTEN_ID:
-            case EthereumNetworkRepository.SOKOL_ID:
-            case EthereumNetworkRepository.RINKEBY_ID:
-            case EthereumNetworkRepository.GOERLI_ID:
-            case EthereumNetworkRepository.ARTIS_TAU1_ID:
-            case EthereumNetworkRepository.HECO_TEST_ID:
-            case EthereumNetworkRepository.BINANCE_TEST_ID:
                 return true;
 
             default:

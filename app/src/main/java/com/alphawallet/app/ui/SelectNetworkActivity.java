@@ -78,7 +78,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             {
                 setTitle(getString(R.string.select_dappbrowser_network));
 
-                if (CustomViewSettings.allowAllNetworks())
+                if (CustomViewSettings.showAllNetworks())
                 {
                     List<NetworkInfo> allNetworks = Arrays.asList(viewModel.getNetworkList());
                     setupList(selectedChainId, allNetworks);
@@ -171,7 +171,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (!localSelectionMode)
+        if (!localSelectionMode && !CustomViewSettings.showAllNetworks())
         {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_filter_network, menu);

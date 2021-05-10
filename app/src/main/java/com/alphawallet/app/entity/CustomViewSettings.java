@@ -104,4 +104,7 @@ public class CustomViewSettings
 
     //Allow showing token management view
     public static boolean showManageTokens() { return true; }
+
+    //Allow Dapp Browser to switch to any network
+    public static boolean allowAllNetworks() { return false; }
 }

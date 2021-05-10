@@ -262,7 +262,11 @@
             android:label="Add DApp" />
 
         <activity
-            android:name=".ui.SelectNetworkActivity"
+            android:name=".ui.SelectBrowserNetworkActivity"
+            android:label="Select DApp Browser Network" />
+
+        <activity
+            android:name=".ui.SelectNetworkFilterActivity"
             android:label="Select Network Filters" />
 
         <activity

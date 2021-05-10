@@ -415,9 +415,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     private void selectNetwork() {
-        Intent intent = new Intent(AddTokenActivity.this, SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
-        intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(networkInfo.chainId));
+        Intent intent = new Intent(AddTokenActivity.this, SelectBrowserNetworkActivity.class);
+        intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
     }
 

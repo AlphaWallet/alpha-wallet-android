@@ -1,26 +1,20 @@
 package com.alphawallet.app.viewmodel;
 
-import java.util.List;
-
-import android.app.Activity;
-import android.content.Intent;
-
-import com.alphawallet.app.C;
-import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.ui.SelectNetworkActivity;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TokensService;
 
-public class SelectNetworkViewModel extends BaseViewModel {
+import java.util.List;
+
+public class SelectNetworkFilterViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
 
-    public SelectNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                                  TokensService tokensService,
-                                  PreferenceRepositoryType preferenceRepository) {
+    public SelectNetworkFilterViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                                        TokensService tokensService,
+                                        PreferenceRepositoryType preferenceRepository) {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;
@@ -64,14 +58,6 @@ public class SelectNetworkViewModel extends BaseViewModel {
         tokensService.setupFilter();
     }
 
-    public void openFilterSelect(Activity ctx)
-    {
-        Intent intent = new Intent(ctx, SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ctx.startActivity(intent);
-    }
-
     public boolean hasShownTestNetWarning()
     {
         return preferenceRepository.hasShownTestNetWarning();
@@ -85,9 +71,5 @@ public class SelectNetworkViewModel extends BaseViewModel {
     public NetworkInfo getNetworkByChain(int chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
-    }
-
-    public boolean isMainNet(int networkId) {
-        return EthereumNetworkBase.hasRealValue(networkId);
     }
 }

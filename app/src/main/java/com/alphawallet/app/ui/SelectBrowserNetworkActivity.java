@@ -36,8 +36,8 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
 
     @Inject
     SelectBrowserNetworkViewModelFactory viewModelFactory;
+    boolean localSelectionMode;
     private SelectBrowserNetworkViewModel viewModel;
-
     private SingleSelectNetworkAdapter mainNetAdapter;
     private SingleSelectNetworkAdapter testNetAdapter;
 
@@ -61,7 +61,9 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
         Intent intent = getIntent();
         if (intent != null)
         {
+            localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
             int selectedChainId = intent.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+
             if (selectedChainId == -1)
             {
                 selectedChainId = Utils.intListToArray(viewModel.getFilterNetworkList()).get(0);
@@ -69,8 +71,9 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
 
             List<NetworkInfo> availableNetworks;
 
-            if (CustomViewSettings.allowAllNetworks())
+            if (localSelectionMode || CustomViewSettings.allowAllNetworks())
             {
+                setTitle(getString(R.string.choose_network_preference));
                 availableNetworks = Arrays.asList(viewModel.getNetworkList());
             } else
             {
@@ -153,8 +156,11 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_filter_network, menu);
+        if (!localSelectionMode)
+        {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_filter_network, menu);
+        }
         return true;
     }
 

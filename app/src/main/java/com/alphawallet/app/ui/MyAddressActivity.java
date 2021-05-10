@@ -327,6 +327,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     private void selectNetwork() {
         Intent intent = new Intent(MyAddressActivity.this, SelectBrowserNetworkActivity.class);
+        intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
     }

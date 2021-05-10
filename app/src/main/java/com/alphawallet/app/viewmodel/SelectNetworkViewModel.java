@@ -12,14 +12,14 @@ import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 
 import java.util.List;
 
-public class SelectBrowserNetworkViewModel extends BaseViewModel {
+public class SelectNetworkViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
 
-    public SelectBrowserNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                                         TokensService tokensService,
-                                         PreferenceRepositoryType preferenceRepository)
+    public SelectNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                                  TokensService tokensService,
+                                  PreferenceRepositoryType preferenceRepository)
     {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;

@@ -19,7 +19,7 @@ import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.NewSettingsFragment;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.RedeemSignatureDisplayActivity;
-import com.alphawallet.app.ui.SelectBrowserNetworkActivity;
+import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
@@ -163,8 +163,8 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
 	abstract TokenActivity bindTokenActivity();
 
-	@ContributesAndroidInjector(modules = SelectBrowserNetworkModule.class)
-	abstract SelectBrowserNetworkActivity bindSelectBrowserNetworkActivity();
+	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
+	abstract SelectNetworkActivity bindSelectNetworkActivity();
 
 	@ContributesAndroidInjector(modules = SelectNetworkFilterModule.class)
 	abstract SelectNetworkFilterActivity bindSelectNetworkFilterActivity();

@@ -19,8 +19,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.SelectBrowserNetworkViewModel;
-import com.alphawallet.app.viewmodel.SelectBrowserNetworkViewModelFactory;
+import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
+import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
 import com.alphawallet.app.widget.TestNetDialog;
 
 import java.util.ArrayList;
@@ -31,13 +31,13 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
+public class SelectNetworkActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
     private static final int REQUEST_SELECT_ACTIVE_NETWORKS = 2000;
 
     @Inject
-    SelectBrowserNetworkViewModelFactory viewModelFactory;
+    SelectNetworkViewModelFactory viewModelFactory;
     boolean localSelectionMode;
-    private SelectBrowserNetworkViewModel viewModel;
+    private SelectNetworkViewModel viewModel;
     private SingleSelectNetworkAdapter mainNetAdapter;
     private SingleSelectNetworkAdapter testNetAdapter;
 
@@ -48,10 +48,8 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
 
         super.onCreate(savedInstanceState);
 
-        setTitle(getString(R.string.select_dappbrowser_network));
-
         viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(SelectBrowserNetworkViewModel.class);
+                .get(SelectNetworkViewModel.class);
 
         prepare();
     }
@@ -64,30 +62,45 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
             localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
             int selectedChainId = intent.getIntExtra(C.EXTRA_CHAIN_ID, -1);
 
+            // Previous active network was deselected, get the first item in filtered networks
             if (selectedChainId == -1)
             {
                 selectedChainId = Utils.intListToArray(viewModel.getFilterNetworkList()).get(0);
             }
 
-            List<NetworkInfo> availableNetworks;
-
-            if (localSelectionMode || CustomViewSettings.allowAllNetworks())
+            if (localSelectionMode)
             {
                 setTitle(getString(R.string.choose_network_preference));
-                availableNetworks = Arrays.asList(viewModel.getNetworkList());
-            } else
+                List<NetworkInfo> allNetworks = Arrays.asList(viewModel.getNetworkList());
+                setupList(selectedChainId, allNetworks);
+            }
+            else
             {
-                hideSwitches();
-                availableNetworks = new ArrayList<>();
-                for (Integer chainId : Utils.intListToArray(viewModel.getFilterNetworkList()))
+                setTitle(getString(R.string.select_dappbrowser_network));
+
+                if (CustomViewSettings.allowAllNetworks())
                 {
-                    availableNetworks.add(viewModel.getNetworkByChain(chainId));
+                    List<NetworkInfo> allNetworks = Arrays.asList(viewModel.getNetworkList());
+                    setupList(selectedChainId, allNetworks);
+                }
+                else
+                {
+                    hideSwitches();
+                    List<NetworkInfo> filteredNetworks = new ArrayList<>();
+                    for (Integer chainId : Utils.intListToArray(viewModel.getFilterNetworkList()))
+                    {
+                        filteredNetworks.add(viewModel.getNetworkByChain(chainId));
+                    }
+
+                    setupList(selectedChainId, filteredNetworks);
                 }
             }
 
-            setupList(selectedChainId, availableNetworks);
-
             initTestNetDialog(this);
+        }
+        else
+        {
+            finish();
         }
     }
 
@@ -116,7 +129,8 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
             if (!checked)
             {
                 mainNetAdapter.selectDefault();
-            } else
+            }
+            else
             {
                 testnetDialog.show();
             }
@@ -140,7 +154,8 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
             if (EthereumNetworkRepository.hasRealValue(info.chainId))
             {
                 mainNetList.add(new NetworkItem(info.name, info.chainId, selectedNetwork.equals(info.chainId)));
-            } else
+            }
+            else
             {
                 testNetList.add(new NetworkItem(info.name, info.chainId, selectedNetwork.equals(info.chainId)));
             }
@@ -170,7 +185,8 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
         if (item.getItemId() == R.id.action_filter)
         {
             viewModel.openSelectNetworkFilters(this, REQUEST_SELECT_ACTIVE_NETWORKS);
-        } else
+        }
+        else
         {
             super.onOptionsItemSelected(item);
         }
@@ -186,7 +202,8 @@ public class SelectBrowserNetworkActivity extends SelectNetworkBaseActivity impl
             {
                 prepare();
             }
-        } else
+        }
+        else
         {
             super.onActivityResult(requestCode, resultCode, data);
         }

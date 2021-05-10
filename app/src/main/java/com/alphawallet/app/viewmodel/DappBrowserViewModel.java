@@ -34,7 +34,7 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.SelectBrowserNetworkActivity;
+import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
@@ -321,7 +321,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void openNetworkSelection(Fragment fragment, NetworkInfo networkInfo)
     {
-        Intent intent = new Intent(fragment.getContext(), SelectBrowserNetworkActivity.class);
+        Intent intent = new Intent(fragment.getContext(), SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         if (networkInfo != null) intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         fragment.startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);

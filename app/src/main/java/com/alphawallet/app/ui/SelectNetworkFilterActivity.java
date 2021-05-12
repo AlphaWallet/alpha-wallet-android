@@ -129,7 +129,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         {
             viewModel.setFilterNetworks(filterList);
             sendBroadcast(new Intent(C.RESET_WALLET));
-            setResult(RESULT_OK);
+            setResult(RESULT_OK, new Intent());
             finish();
         }
     }

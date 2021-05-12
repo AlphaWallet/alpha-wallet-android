@@ -51,12 +51,11 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(SelectNetworkViewModel.class);
 
-        prepare();
+        prepare(getIntent());
     }
 
-    void prepare()
+    void prepare(Intent intent)
     {
-        Intent intent = getIntent();
         if (intent != null)
         {
             localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
@@ -200,7 +199,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         {
             if (resultCode == RESULT_OK)
             {
-                prepare();
+                prepare(data);
             }
         }
         else

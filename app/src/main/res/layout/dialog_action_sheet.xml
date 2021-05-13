@@ -80,6 +80,12 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"/>
 
+    <com.alphawallet.app.widget.AssetDetailView
+        android:id="@+id/asset_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

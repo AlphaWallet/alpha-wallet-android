@@ -52,6 +52,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
     private final AmountDisplayWidget amountDisplay;
+    private final AssetDetailView assetDetailView;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
 
@@ -81,6 +82,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget = findViewById(R.id.detail_widget);
         addressDetail = findViewById(R.id.recipient);
         amountDisplay = findViewById(R.id.amount_display);
+        assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
         if (activity instanceof HomeActivity)
         {
@@ -128,6 +130,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.requester);
         amountDisplay = findViewById(R.id.amount_display);
+        assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
         detailWidget = null;
         mode = ActionSheetMode.SIGN_MESSAGE;

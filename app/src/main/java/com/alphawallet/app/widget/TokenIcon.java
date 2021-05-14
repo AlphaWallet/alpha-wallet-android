@@ -3,6 +3,7 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -249,7 +250,15 @@ public class TokenIcon extends ConstraintLayout
         icon.setVisibility(View.GONE);
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
-        textIcon.setText(Utils.getIconisedText(tokenName));
+        //try symbol first
+        if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.length() > 1)
+        {
+            textIcon.setText(Utils.getIconisedText(token.tokenInfo.symbol));
+        }
+        else
+        {
+            textIcon.setText(Utils.getIconisedText(tokenName));
+        }
     }
 
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)

@@ -26,7 +26,6 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.tools.Convert;
 
 import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
@@ -34,16 +33,12 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.hasRealValue;
 
 public class Token implements Parcelable, Comparable<Token>
 {
@@ -1013,5 +1008,11 @@ public class Token implements Parcelable, Comparable<Token>
     public void removeBalance(String tokenID)
     {
         //
+    }
+
+    public boolean mayRequireRefresh()
+    {
+        return (!TextUtils.isEmpty(tokenInfo.name) && tokenInfo.name.contains("?"))
+                || (!TextUtils.isEmpty(tokenInfo.symbol) && tokenInfo.symbol.contains("?"));
     }
 }

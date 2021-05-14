@@ -7,12 +7,13 @@ public interface PreferenceRepositoryType {
 
     void setCurrentWalletAddress(String address);
 
-    String getDefaultNetwork();
+    String getActiveBrowserNetwork();
 
-    void setDefaultNetwork(String netName);
+    void setActiveBrowserNetwork(String netName);
+
+    String getNetworkFilterList();
 
     void setNetworkFilterList(String filters);
-    String getNetworkFilterList();
 
     boolean getNotificationsState();
 
@@ -34,19 +35,23 @@ public interface PreferenceRepositoryType {
 
     void setFindWalletAddressDialogShown(boolean isShown);
 
-    void setDefaultCurrency(CurrencyItem currency);
-
     String getDefaultCurrency();
 
+    void setDefaultCurrency(CurrencyItem currency);
+
     String getUserPreferenceLocale();
+
     void setUserPreferenceLocale(String locale);
 
-    void setFullScreenState(boolean state);
     boolean getFullScreenState();
 
-    void setActiveMainnet(boolean state);
+    void setFullScreenState(boolean state);
+
     boolean isActiveMainnet();
 
+    void setActiveMainnet(boolean state);
+
     boolean hasShownTestNetWarning();
+
     void setShownTestNetWarning();
 }

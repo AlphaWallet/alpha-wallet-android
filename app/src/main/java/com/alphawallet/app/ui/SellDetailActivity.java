@@ -4,7 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,7 +33,6 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
 
-import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;

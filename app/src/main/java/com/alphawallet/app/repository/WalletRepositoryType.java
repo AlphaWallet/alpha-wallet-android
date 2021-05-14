@@ -29,8 +29,6 @@ public interface WalletRepositoryType {
 
     Single<Wallet> getDefaultWallet();
 
-    Single<BigDecimal> balanceInWei(Wallet wallet);
-
     Single<Wallet[]> storeWallets(Wallet[] wallets);
 
     Single<Wallet> storeWallet(Wallet wallet);

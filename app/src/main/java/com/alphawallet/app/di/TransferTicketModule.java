@@ -1,8 +1,6 @@
 package com.alphawallet.app.di;
 
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -23,17 +21,10 @@ public class TransferTicketModule
     TransferTicketViewModelFactory transferTicketViewModelFactory(
             TokensService tokensService,
             GenericWalletInteract genericWalletInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         return new TransferTicketViewModelFactory(
-                tokensService, genericWalletInteract, findDefaultNetworkInteract, transferTicketDetailRouter, assetDefinitionService);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType networkRepository) {
-        return new FindDefaultNetworkInteract(networkRepository);
+                tokensService, genericWalletInteract, transferTicketDetailRouter, assetDefinitionService);
     }
 
     @Provides

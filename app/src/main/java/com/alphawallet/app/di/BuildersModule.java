@@ -20,6 +20,7 @@ import com.alphawallet.app.ui.NewSettingsFragment;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.RedeemSignatureDisplayActivity;
 import com.alphawallet.app.ui.SelectNetworkActivity;
+import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.SplashActivity;
@@ -164,6 +165,9 @@ public abstract class BuildersModule {
 
 	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
 	abstract SelectNetworkActivity bindSelectNetworkActivity();
+
+	@ContributesAndroidInjector(modules = SelectNetworkFilterModule.class)
+	abstract SelectNetworkFilterActivity bindSelectNetworkFilterActivity();
 
 	@ContributesAndroidInjector(modules = TokenManagementModule.class)
 	abstract TokenManagementActivity bindTokenManagementActivity();

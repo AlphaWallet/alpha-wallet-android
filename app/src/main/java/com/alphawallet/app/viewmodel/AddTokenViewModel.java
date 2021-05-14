@@ -202,24 +202,6 @@ public class AddTokenViewModel extends BaseViewModel {
         ctx.startActivity(intent);
     }
 
-    public NetworkInfo[] getNetworkList() {
-        return ethereumNetworkRepository.getAvailableNetworkList();
-    }
-
-    public NetworkInfo getNetwork(int chainId)
-    {
-        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (networkInfo != null)
-        {
-            ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
-            return networkInfo;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     private List<Integer> getNetworkIds()
     {
         List<Integer> networkIds = new ArrayList<>();

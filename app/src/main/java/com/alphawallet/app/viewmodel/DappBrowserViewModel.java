@@ -8,6 +8,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -23,7 +24,6 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -34,6 +34,7 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
+import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
@@ -57,12 +58,10 @@ import io.realm.Realm;
 import static com.alphawallet.app.C.Key.WALLET;
 
 public class DappBrowserViewModel extends BaseViewModel  {
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
+    private final MutableLiveData<NetworkInfo> activeNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -75,7 +74,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private Disposable balanceTimerDisposable;
 
     DappBrowserViewModel(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
@@ -83,7 +81,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GasService2 gasService) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -97,46 +94,23 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return assetDefinitionService;
     }
 
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
+    public LiveData<NetworkInfo> activeNetwork() {
+        return activeNetwork;
     }
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
 
-    public String getNetworkName()
-    {
-        if (defaultNetwork.getValue().chainId == 1)
-        {
-            return "";
-        }
-        else
-        {
-            return defaultNetwork.getValue().name;
-        }
+    public void findWallet() {
+            disposable = genericWalletInteract
+                    .find()
+                    .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void prepare(Context context) {
-
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
+    public void checkForNetworkChanges()
     {
-        //are we allowed this network?
-        if (!tokensService.getNetworkFilters().contains(networkInfo.chainId))
-        {
-            //not allowed it. Switch to first entry in filter list
-            networkInfo = ethereumNetworkRepository.getNetworkByChain(tokensService.getNetworkFilters().get(0));
-        }
-
-        defaultNetwork.postValue(networkInfo);
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
+        activeNetwork.postValue(ethereumNetworkRepository.getActiveBrowserNetwork());
     }
 
     private void onDefaultWallet(final Wallet wallet) {
@@ -147,9 +121,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void checkBalance(final Wallet wallet)
     {
-        if (defaultNetwork.getValue() != null && wallet != null)
+        if (activeNetwork.getValue() != null && wallet != null)
         {
-            disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), defaultNetwork.getValue().chainId)
+            disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), activeNetwork.getValue().chainId)
                             .subscribeOn(Schedulers.io())
                             .observeOn(Schedulers.io())
                             .subscribe(w -> { }, e -> { });
@@ -160,14 +134,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
         if (defaultWallet().getValue() != null) {
             return Observable.fromCallable(() -> defaultWallet().getValue());
         } else
-            return findDefaultNetworkInteract.find()
-                    .flatMap(networkInfo -> genericWalletInteract
-                            .find()).toObservable();
+            return genericWalletInteract.find().toObservable();
     }
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
-                defaultNetwork.getValue().chainId)
+                activeNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
@@ -211,19 +183,14 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return DappBrowserUtils.getDappsList(context);
     }
 
-    public int getActiveFilterCount() {
-        return ethereumNetworkRepository.getFilterNetworkList().size();
-    }
-
     public void setNetwork(int chainId)
     {
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
         if (info != null)
         {
-            ethereumNetworkRepository.setDefaultNetworkInfo(info);
-            onDefaultNetwork(info);
+            ethereumNetworkRepository.setActiveBrowserNetwork(info);
             gasService.startGasPriceCycle(chainId);
-            defaultNetwork.postValue(info);
+            activeNetwork.postValue(info);
         }
     }
 
@@ -350,5 +317,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public String getNetworkNodeRPC(int chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
+    }
+
+    public void openNetworkSelection(Fragment fragment, NetworkInfo networkInfo)
+    {
+        Intent intent = new Intent(fragment.getContext(), SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        if (networkInfo != null) intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
+        fragment.startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
     }
 }

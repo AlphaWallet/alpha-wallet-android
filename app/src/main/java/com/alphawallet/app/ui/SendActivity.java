@@ -190,7 +190,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             {
                 int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
                 long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
+                BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
+                        new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
                 BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
                 long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
                 confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);

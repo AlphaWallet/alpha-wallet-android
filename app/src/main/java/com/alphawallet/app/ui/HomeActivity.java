@@ -849,12 +849,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void changedNetwork(Intent data)
-    {
-        ((DappBrowserFragment)dappBrowserFragment).handleSelectNetwork(RESULT_OK, data);
-    }
-
-    @Override
     public void resetTransactions()
     {
         ((ActivityFragment) activityFragment).resetTransactions();
@@ -1037,9 +1031,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             case DAPP_BARCODE_READER_REQUEST_CODE:
                 ((DappBrowserFragment) dappBrowserFragment).handleQRCode(resultCode, data, this);
-                break;
-            case C.REQUEST_SELECT_NETWORK:
-                ((DappBrowserFragment) dappBrowserFragment).handleSelectNetwork(resultCode, data);
                 break;
             case C.REQUEST_BACKUP_WALLET:
                 String keyBackup = null;

@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
 
-import com.alphawallet.app.interact.FetchTokensInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -17,7 +15,6 @@ import com.alphawallet.app.service.TokensService;
 
 public class TransferTicketViewModelFactory implements ViewModelProvider.Factory {
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final TokensService tokensService;
     private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
@@ -26,12 +23,10 @@ public class TransferTicketViewModelFactory implements ViewModelProvider.Factory
     public TransferTicketViewModelFactory(
             TokensService tokensService,
             GenericWalletInteract genericWalletInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         this.tokensService = tokensService;
         this.genericWalletInteract = genericWalletInteract;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
     }
@@ -39,6 +34,6 @@ public class TransferTicketViewModelFactory implements ViewModelProvider.Factory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketViewModel(tokensService, genericWalletInteract, findDefaultNetworkInteract, transferTicketDetailRouter, assetDefinitionService);
+        return (T) new TransferTicketViewModel(tokensService, genericWalletInteract, transferTicketDetailRouter, assetDefinitionService);
     }
 }

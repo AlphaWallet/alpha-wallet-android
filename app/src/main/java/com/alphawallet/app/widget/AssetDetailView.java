@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.AssetDefinitionService;
 
 /**
  * Created by Jenny Jingjing Li on 13/05/2021
@@ -16,6 +18,7 @@ import com.alphawallet.app.R;
 public class AssetDetailView extends LinearLayout
 {
     private TextView asset;
+    private AssetDefinitionService assetDefinitionService;
 
     public AssetDetailView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -23,8 +26,8 @@ public class AssetDetailView extends LinearLayout
         asset = findViewById(R.id.text_asset_name);
     }
 
-    public void setAssetName(String name)
+    public void setupAssetDetail(Token token)
     {
-        asset.setText(name);
+        token.getFullName();
     }
 }

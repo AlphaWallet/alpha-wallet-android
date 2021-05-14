@@ -116,6 +116,14 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         updateAmount();
 
         addressDetail.setupAddress(destAddress, destName);
+
+        if (token.isNonFungible())
+        {
+            assetDetailView.setupAssetDetail(token);
+            assetDetailView.setVisibility(View.VISIBLE);
+            balanceDisplay.setVisibility(View.GONE);
+        }
+
         setupCancelListeners();
     }
 

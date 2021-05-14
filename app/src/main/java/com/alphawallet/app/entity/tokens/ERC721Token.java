@@ -297,6 +297,17 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getTransferValue(TransactionInput txInput, int precision)
     {
+        //return the tokenId from the transfer if possible
+        try
+        {
+            BigInteger tokenId = new BigInteger(txInput.miscData.get(0));
+            return "#" + tokenId.toString();
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
         return getTransferValueRaw(txInput).toString();
     }
 

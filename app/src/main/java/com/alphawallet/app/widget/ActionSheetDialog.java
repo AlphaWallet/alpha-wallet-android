@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -257,6 +258,29 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         return txAmount;
+    }
+
+    private String getERC721TokenId()
+    {
+        if (!token.isERC721()) return "";
+
+        TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
+        return token.getTransferValue(transactionInput, 0);
+    }
+
+    private String getERC721TokenName()
+    {
+        try
+        {
+            Asset asset = token.getAssetForToken(getERC721TokenId());
+            return asset.getName();
+        }
+        catch (Exception e)
+        {
+            //will throw if token is anything other than erc721. Harmlessly drop through
+        }
+
+        return "";
     }
 
     private void signMessage()

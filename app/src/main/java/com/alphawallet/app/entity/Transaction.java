@@ -404,6 +404,10 @@ public class Transaction implements Parcelable
 			{
 				return "";
 			}
+			else if (token.isERC721())
+			{
+				return "";
+			}
 		}
 
 		boolean isSent = token.getIsSent(this);

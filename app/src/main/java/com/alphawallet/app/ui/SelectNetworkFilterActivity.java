@@ -123,7 +123,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
 
         if (filterList.length <= 0)
         {
-            Toast.makeText(this, "Please select at least one network.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_select_at_least_one_network), Toast.LENGTH_SHORT).show();
         }
         else
         {

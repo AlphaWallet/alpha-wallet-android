@@ -59,10 +59,11 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     }
 
     public void selectDefault() {
-        if (!hasSelection) {
+        //make user pick testnet filters; we have a lock to prevent exit without any filters set
+        /*if (!hasSelection) {
             networkList.get(0).setSelected(true);
             notifyItemChanged(0);
-        }
+        }*/
     }
 
     @Override

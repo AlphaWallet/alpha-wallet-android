@@ -5,10 +5,8 @@ import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -23,13 +21,11 @@ import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final TokensService tokensService;
     private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
 
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Token> token = new MutableLiveData<>();
 
@@ -39,14 +35,25 @@ public class TransferTicketViewModel extends BaseViewModel {
     TransferTicketViewModel(
             TokensService tokensService,
             GenericWalletInteract genericWalletInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         this.tokensService = tokensService;
         this.genericWalletInteract = genericWalletInteract;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
+    }
+
+    public void prepare(Token t) {
+        token.setValue(t);
+        disposable = genericWalletInteract
+                .find()
+                .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    private void onDefaultWallet(Wallet wallet) {
+        progress.postValue(false);
+        defaultWallet.setValue(wallet);
+        fetchCurrentTicketBalance();
     }
 
     @Override
@@ -57,9 +64,6 @@ public class TransferTicketViewModel extends BaseViewModel {
         }
     }
 
-    public LiveData<Wallet> defaultWallet() {
-        return defaultWallet;
-    }
     public LiveData<Token> token() {
         return token;
     }
@@ -72,30 +76,9 @@ public class TransferTicketViewModel extends BaseViewModel {
                 }).subscribe(l -> {}, t -> {});
     }
 
-    public void prepare(Token t) {
-        token.setValue(t);
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
     private void onToken(Token t)
     {
         token.postValue(t);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    private void onDefaultWallet(Wallet wallet) {
-        //TODO: switch on 'use' button
-        progress.postValue(false);
-        defaultWallet.setValue(wallet);
-        fetchCurrentTicketBalance();
     }
 
     public void openSellDialog(Context context, String ticketIDs)

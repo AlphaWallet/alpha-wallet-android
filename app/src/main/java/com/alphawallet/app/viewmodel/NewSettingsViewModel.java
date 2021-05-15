@@ -5,16 +5,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 
-import io.reactivex.Single;
 
 public class NewSettingsViewModel extends BaseViewModel {
 
@@ -23,35 +20,22 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final MyAddressRouter myAddressRouter;
-    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ManageWalletsRouter manageWalletsRouter;
     private final PreferenceRepositoryType preferenceRepository;
 
     NewSettingsViewModel(
             GenericWalletInteract genericWalletInteract,
             MyAddressRouter myAddressRouter,
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
             PreferenceRepositoryType preferenceRepository) {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
-        this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
     }
 
     public void showManageWallets(Context context, boolean clearStack) {
         manageWalletsRouter.open(context, clearStack);
-    }
-
-    public void setNetwork(String selectedRpcServer) {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        for (NetworkInfo networkInfo : networks) {
-            if (networkInfo.name.equals(selectedRpcServer)) {
-                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
-                return;
-            }
-        }
     }
 
     public boolean getNotificationState()

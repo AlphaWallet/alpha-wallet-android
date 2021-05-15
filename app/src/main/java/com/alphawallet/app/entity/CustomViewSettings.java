@@ -104,4 +104,7 @@ public class CustomViewSettings
 
     //Allow showing token management view
     public static boolean showManageTokens() { return true; }
+
+    //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
+    public static boolean showAllNetworks() { return false; }
 }

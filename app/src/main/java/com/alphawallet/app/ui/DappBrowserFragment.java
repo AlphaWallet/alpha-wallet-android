@@ -5,12 +5,10 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -47,7 +45,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -137,7 +134,6 @@ import io.realm.RealmResults;
 import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
@@ -185,7 +181,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private AutoCompleteTextView urlTv;
     private ProgressBar progressBar;
     private Wallet wallet;
-    private NetworkInfo networkInfo;
+    private NetworkInfo activeNetwork;
     private AWalletAlertDialog resultDialog;
     private DappBrowserSuggestionsAdapter adapter;
     private String loadOnInit;
@@ -261,7 +257,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         initViewModel();
         initView(view);
         setupAddressBar();
-        viewModel.prepare(getContext());
+
         loadOnInit = null;
 
         // Load url from a link within the app
@@ -371,11 +367,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             urlTv.getText().clear();
         if (web3 != null)
         {
-            web3.clearHistory();
-            web3.stopLoading();
-
-            web3.loadUrl(EthereumNetworkRepository.defaultDapp(), getWeb3Headers());
-            setUrlText(EthereumNetworkRepository.defaultDapp());
+            resetDappBrowser();
         }
 
         //blank forward / backward arrows
@@ -518,7 +510,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
 
         currentNetworkClicker = view.findViewById(R.id.network_holder);
-        currentNetworkClicker.setOnClickListener(v -> selectNetwork());
+        currentNetworkClicker.setOnClickListener(v -> openNetworkSelection());
         currentNetwork = view.findViewById(R.id.network_text);
         currentNetworkCircle = view.findViewById(R.id.network_colour);
         balance = view.findViewById(R.id.balance);
@@ -542,11 +534,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         resultDialog.show();
     }
 
-    private void selectNetwork() {
-        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
-        intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(networkInfo.chainId));
-        if (getActivity() != null) getActivity().startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+    private void openNetworkSelection() {
+        viewModel.openNetworkSelection(this, activeNetwork);
     }
 
     private void clearAddressBar() {
@@ -746,18 +735,18 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void initViewModel() {
         viewModel = new ViewModelProvider(this, dappBrowserViewModelFactory)
                 .get(DappBrowserViewModel.class);
-        viewModel.defaultNetwork().observe(getViewLifecycleOwner(), this::onDefaultNetwork);
+        viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
     }
 
     private void startBalanceListener()
     {
-        if (wallet == null || networkInfo == null) return;
+        if (wallet == null || activeNetwork == null) return;
 
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
         realmUpdate = viewModel.getRealmInstance(wallet).where(RealmToken.class)
-                .equalTo("address", TokensRealmSource.databaseKey(networkInfo.chainId, "eth"))
-                .equalTo("chainId", networkInfo.chainId).findAllAsync();
+                .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth"))
+                .equalTo("chainId", activeNetwork.chainId).findAllAsync();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance
             if (realmTokens.size() == 0) return;
@@ -766,7 +755,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             symbol.setVisibility(View.VISIBLE);
             String newBalanceStr = BalanceUtils.getScaledValueFixed(new BigDecimal(realmToken.getBalance()), ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
             balance.setText(newBalanceStr);
-            symbol.setText(networkInfo.getShortName());
+            symbol.setText(activeNetwork.getShortName());
         });
     }
 
@@ -776,24 +765,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         startBalanceListener();
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        int oldChain = this.networkInfo != null ? this.networkInfo.chainId : -1;
-        this.networkInfo = networkInfo;
-        currentNetwork.setText(networkInfo.getShortName());
-        startBalanceListener();
-        //select resource
-        Utils.setChainCircle(currentNetworkCircle, networkInfo.chainId);
-        //reset the pane if required
-        if (oldChain > 0 && oldChain != this.networkInfo.chainId)
+    private void onNetworkChanged(NetworkInfo networkInfo) {
+        this.activeNetwork = networkInfo;
+        if (networkInfo != null)
         {
-            web3.reload();
+            currentNetwork.setText(networkInfo.getShortName());
+            Utils.setChainCircle(currentNetworkCircle, networkInfo.chainId);
+            viewModel.findWallet();
+        } else {
+            viewModel.openNetworkSelection(this, null);
+            resetDappBrowser();
         }
     }
 
     private void setupWeb3() {
         web3.setActivity(getActivity());
-        web3.setChainId(networkInfo.chainId);
-        web3.setRpcUrl(viewModel.getNetworkNodeRPC(networkInfo.chainId));
+        web3.setChainId(activeNetwork.chainId);
+        web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {
@@ -957,7 +945,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         Single.fromCallable(() -> {
             //let's make the call
-            Web3j web3j = TokenRepository.getWeb3jService(networkInfo.chainId);
+            Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
             //construct call
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(wallet.address, call.to.toString(), call.payload);
@@ -1008,14 +996,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         try
         {
-            viewModel.updateGasPrice(networkInfo.chainId); //start updating gas price right before we open
+            viewModel.updateGasPrice(activeNetwork.chainId); //start updating gas price right before we open
             //TODO: Ensure we have received gas price before continuing
             //minimum for transaction to be valid: recipient and value or payload
             if ((confirmationDialog == null || !confirmationDialog.isShowing()) &&
                     (transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
-                Token token = viewModel.getTokenService().getTokenOrBase(networkInfo.chainId, transaction.recipient.toString());
+                Token token = viewModel.getTokenService().getTokenOrBase(activeNetwork.chainId, transaction.recipient.toString());
                 confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token,
                         "", transaction.recipient.toString(), viewModel.getTokenService(), this);
                 confirmationDialog.setURL(url);
@@ -1023,7 +1011,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 confirmationDialog.show();
 
                 viewModel.calculateGasEstimate(wallet, Numeric.hexStringToByteArray(transaction.payload),
-                        networkInfo.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value))
+                        activeNetwork.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value))
                         .map(limit -> convertToGasLimit(limit, transaction.gasLimit))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -1418,19 +1406,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    public void handleSelectNetwork(int resultCode, Intent data) {
-        if (getActivity() == null) return;
-        if (resultCode == RESULT_OK)
-        {
-            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
-            if (networkInfo.chainId != networkId)
-            {
-                balance.setVisibility(View.GONE);
-                symbol.setVisibility(View.GONE);
-                viewModel.setNetwork(networkId);
-                if (getActivity() != null) getActivity().sendBroadcast(new Intent(RESET_WALLET));
-            }
-        }
+    private void resetDappBrowser()
+    {
+        web3.clearHistory();
+        web3.stopLoading();
+        web3.loadUrl(EthereumNetworkRepository.defaultDapp(), getWeb3Headers());
+        setUrlText(EthereumNetworkRepository.defaultDapp());
     }
 
     public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)
@@ -1550,6 +1531,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            viewModel.checkForNetworkChanges();
+        }
     }
 
     @Override
@@ -1672,23 +1656,37 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
-        }
-        else if (requestCode == UPLOAD_FILE && uploadMessage != null)
+        if (requestCode == C.REQUEST_SELECT_NETWORK)
         {
             if (resultCode == RESULT_OK)
             {
-                uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+                int networkId = intent.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
+
+                if (activeNetwork == null || activeNetwork.chainId != networkId) {
+                    balance.setVisibility(View.GONE);
+                    symbol.setVisibility(View.GONE);
+                    viewModel.setNetwork(networkId);
+                }
             }
-            uploadMessage = null;
         }
-        else if (requestCode == REQUEST_FILE_ACCESS)
+        else
         {
-            if (resultCode == RESULT_OK)
+            if (confirmationDialog != null && confirmationDialog.isShowing())
             {
-                requestUpload();
+                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            } else if (requestCode == UPLOAD_FILE && uploadMessage != null)
+            {
+                if (resultCode == RESULT_OK)
+                {
+                    uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+                }
+                uploadMessage = null;
+            } else if (requestCode == REQUEST_FILE_ACCESS)
+            {
+                if (resultCode == RESULT_OK)
+                {
+                    requestUpload();
+                }
             }
         }
     }
@@ -1758,7 +1756,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
         };
 
-        viewModel.sendTransaction(finalTx, networkInfo.chainId, callback);
+        viewModel.sendTransaction(finalTx, activeNetwork.chainId, callback);
     }
 
     @Override
@@ -1800,9 +1798,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void selected()
     {
         //start gas update cycle when user selects Dapp browser
-        if (viewModel != null && networkInfo != null)
+        if (viewModel != null && activeNetwork != null)
         {
-            viewModel.updateGasPrice(networkInfo.chainId);
+            viewModel.updateGasPrice(activeNetwork.chainId);
         }
     }
 }

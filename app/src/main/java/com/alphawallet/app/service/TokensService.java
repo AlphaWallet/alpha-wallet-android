@@ -201,8 +201,8 @@ public class TokensService
             Token t = tokenStoreList.get(key);
             Wallet wallet = new Wallet(t.getWallet());
             tokenStoreList.remove(key);
-            tokenRepository.addToken(wallet, t)
-                    .flatMap(token -> tokenRepository.checkInterface(new Token[]{token}, wallet)) //if ERC721 determine the specific contract type
+            tokenRepository.checkInterface(new Token[]{t}, wallet) //if ERC721 determine the specific contract type
+                    .flatMap(tkns -> tokenRepository.storeTokens(wallet, tkns))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedToken, Throwable::printStackTrace)
@@ -412,9 +412,26 @@ public class TokensService
         if (openSeaCheckDisposable != null && !openSeaCheckDisposable.isDisposed()) openSeaCheckDisposable.dispose();
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
+        checkIssueTokens();
 
         eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkTokensBalance()).subscribe();
+    }
+
+    private void checkIssueTokens()
+    {
+        tokenRepository.fetchTokensThatMayNeedUpdating(currentAddress, networkFilter)
+                .map(tokens -> {
+                    for (Token t : tokens)
+                    {
+                        storeToken(t);
+                    }
+                    return tokens;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+                .isDisposed();
     }
 
     private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
@@ -437,7 +454,7 @@ public class TokensService
 
         if (t != null)
         {
-            if (BuildConfig.DEBUG) Log.d("TOKEN", "Updating: " + t.tokenInfo.chainId + (t.isEthereum()? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
+            if (BuildConfig.DEBUG) Log.d("TOKEN", "Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
             balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

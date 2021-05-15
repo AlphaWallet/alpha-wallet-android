@@ -108,6 +108,7 @@ public abstract class C {
     public static final String EXTRA_NONCE = "_NONCE";
     public static final String EXTRA_TXHASH = "_TXHASH";
     public static final String DAPP_URL_LOAD = "DAPP_URL";
+    public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";
@@ -118,8 +119,6 @@ public abstract class C {
             "com.stormbird.wallet.ADDED";
     public static final String CHANGED_LOCALE =
             "com.stormbird.wallet.CHANGED_LOCALE";
-    public static final String CHANGED_NETWORK=
-            "com.stormbird.wallet.CHANGED_NETWORK";
     public static final String DOWNLOAD_READY =
             "com.stormbird.wallet.DOWNLOAD_READY";
     public static final String PAGE_LOADED =

@@ -121,6 +121,7 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public Token updateTokenType(Token token, Wallet wallet, ContractType type)
     {
+        token.setInterfaceSpec(type);
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -134,10 +135,14 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             else
             {
-                realm.executeTransaction(r -> {
-                    realmToken.setInterfaceSpec(type.ordinal());
-                    realmToken.setName(token.tokenInfo.name);
-                    realmToken.setSymbol(token.tokenInfo.symbol);
+                realm.executeTransactionAsync(r -> {
+                    RealmToken rToken = r.where(RealmToken.class)
+                            .equalTo("address", dbKey, Case.INSENSITIVE)
+                            .findFirst();
+
+                    rToken.setInterfaceSpec(type.ordinal());
+                    rToken.setName(token.tokenInfo.name);
+                    rToken.setSymbol(token.tokenInfo.symbol);
                 });
             }
 
@@ -180,6 +185,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case ERC721_TICKET:
             case ERC721:
             case ERC721_LEGACY:
+            case MAYBE_ERC20:
                 saveToken(wallet, token, now);
                 break;
             //No save
@@ -212,12 +218,9 @@ public class TokensRealmSource implements TokenLocalSource {
                 realm.beginTransaction();
                 saveToken(realm, t);
                 realm.commitTransaction();
-                return t;
             }
-            else
-            {
-                return t;
-            }
+
+            return t;
         }
     }
 
@@ -236,7 +239,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled) {
+    public void setEnable(Wallet wallet, Token token, boolean isEnabled) {
         Realm realm = null;
         try {
             token.tokenInfo.isEnabled = isEnabled;
@@ -865,6 +868,31 @@ public class TokensRealmSource implements TokenLocalSource {
             }
 
             return tokenMetas.toArray(new TokenCardMeta[0]);
+        });
+    }
+
+    @Override
+    public Single<Token[]> fetchAllTokensWithNameIssue(String walletAddress, List<Integer> networkFilters) {
+        List<Token> tokens = new ArrayList<>();
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(walletAddress))
+            {
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class) //TODO: Work out how to specify '?' in a Realm filter
+                        .findAll();
+
+                TokenFactory tf = new TokenFactory();
+                for (RealmToken realmItem : realmItems)
+                {
+                    if (networkFilters.size() > 0 && !networkFilters.contains(realmItem.getChainId())) continue;
+                    if ((!TextUtils.isEmpty(realmItem.getName()) && realmItem.getName().contains("??"))
+                        || (!TextUtils.isEmpty(realmItem.getSymbol()) && realmItem.getSymbol().contains("??")))
+                    {
+                        tokens.add(convertSingle(realmItem, realm, tf, new Wallet(walletAddress)));
+                    }
+                }
+            }
+
+            return tokens.toArray(new Token[0]);
         });
     }
 

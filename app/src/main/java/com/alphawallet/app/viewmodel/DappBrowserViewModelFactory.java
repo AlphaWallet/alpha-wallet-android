@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -15,7 +14,6 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
 public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -25,7 +23,6 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final GasService2 gasService;
 
     public DappBrowserViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
@@ -33,7 +30,6 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GasService2 gasService) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -47,7 +43,6 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new DappBrowserViewModel(
-                findDefaultNetworkInteract,
                 genericWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,

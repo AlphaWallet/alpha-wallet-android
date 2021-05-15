@@ -1008,4 +1008,10 @@ public class Token implements Parcelable, Comparable<Token>
     {
         //
     }
+
+    public boolean mayRequireRefresh()
+    {
+        return (!TextUtils.isEmpty(tokenInfo.name) && tokenInfo.name.contains("?"))
+                || (!TextUtils.isEmpty(tokenInfo.symbol) && tokenInfo.symbol.contains("?"));
+    }
 }

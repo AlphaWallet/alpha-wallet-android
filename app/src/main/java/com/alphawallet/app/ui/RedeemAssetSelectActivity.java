@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,7 +17,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
-import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
@@ -152,7 +150,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
     }
 
     private void onNext() {

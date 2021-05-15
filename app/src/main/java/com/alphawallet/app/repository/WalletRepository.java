@@ -148,24 +148,6 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<BigDecimal> balanceInWei(Wallet wallet)
-	{
-		return Single.fromCallable(() -> {
-			try
-			{
-				return new BigDecimal(getWeb3jService(networkRepository.getDefaultNetwork().chainId)
-											  .ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
-											  .send()
-											  .getBalance());
-			}
-			catch (IOException e)
-			{
-				return BigDecimal.valueOf(-1);
-			}
-		}).subscribeOn(Schedulers.io());
-	}
-
-	@Override
 	public Single<Wallet[]> storeWallets(Wallet[] wallets)
 	{
 		return walletDataRealmSource.storeWallets(wallets);

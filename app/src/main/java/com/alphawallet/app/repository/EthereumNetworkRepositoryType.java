@@ -14,29 +14,33 @@ import java.util.List;
 import io.reactivex.Single;
 
 public interface EthereumNetworkRepositoryType {
+    NetworkInfo getActiveBrowserNetwork();
 
-	NetworkInfo getDefaultNetwork();
-	NetworkInfo getNetworkByChain(int chainId);
+    void setActiveBrowserNetwork(NetworkInfo networkInfo);
 
-	Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
+    NetworkInfo getNetworkByChain(int chainId);
 
-	void setDefaultNetworkInfo(NetworkInfo networkInfo);
+    Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
 
-	NetworkInfo[] getAvailableNetworkList();
+    NetworkInfo[] getAvailableNetworkList();
 
-	void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
+    void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
-	String getNameById(int id);
+    String getNameById(int id);
 
     List<Integer> getFilterNetworkList();
+
     void setFilterNetworkList(int[] networkList);
 
-	List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters);
-	Single<Token[]> getBlankOverrideTokens(Wallet wallet);
-	Token getBlankOverrideToken();
-	Token getBlankOverrideToken(NetworkInfo networkInfo);
+    List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters);
 
-	KnownContract readContracts();
+    Single<Token[]> getBlankOverrideTokens(Wallet wallet);
+
+    Token getBlankOverrideToken();
+
+    Token getBlankOverrideToken(NetworkInfo networkInfo);
+
+    KnownContract readContracts();
 
     boolean getIsPopularToken(int chain, String address);
 }

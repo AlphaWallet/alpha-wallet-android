@@ -19,7 +19,6 @@ import dagger.Provides;
 public class DappBrowserModule {
     @Provides
     DappBrowserViewModelFactory provideWalletViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
@@ -28,7 +27,6 @@ public class DappBrowserModule {
             KeyService keyService,
             GasService2 gasService) {
         return new DappBrowserViewModelFactory(
-                findDefaultNetworkInteract,
                 genericWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
@@ -36,12 +34,6 @@ public class DappBrowserModule {
                 ethereumNetworkRepository,
                 keyService,
                 gasService);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
-        return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
     }
 
     @Provides

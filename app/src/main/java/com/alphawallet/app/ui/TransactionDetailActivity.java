@@ -18,7 +18,6 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -39,8 +38,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface
 {

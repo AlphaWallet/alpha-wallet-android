@@ -7,8 +7,6 @@ import java.math.BigInteger;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
-
 /**
  * Created by JB on 19/11/2020.
  */

@@ -10,10 +10,9 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
             String rpcServerUrl,
             String etherscanUrl,
             int chainId,
-            boolean isMainNetwork,
             String backupNodeUrl,
             String etherscanTxUrl) {
-        super(name, symbol, rpcServerUrl, etherscanUrl, chainId, isMainNetwork);
+        super(name, symbol, rpcServerUrl, etherscanUrl, chainId);
         this.backupNodeUrl = backupNodeUrl;
         this.etherscanTxUrl = etherscanTxUrl;
     }

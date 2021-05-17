@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
     private final Context context;
@@ -28,19 +31,9 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         context = ctx;
     }
 
-    public static void setChainColour(View view, int chainId)
-    {
-        view.setBackgroundResource(R.drawable.background_mainnet);
-    }
-
-    public static void setChainCircle(View view, int chainId)
-    {
-        view.setBackgroundResource(R.drawable.item_eth_circle);
-    }
-
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(Arrays.asList(EthereumNetworkRepository.MAINNET_ID, EthereumNetworkRepository.XDAI_ID));
+        return new ArrayList<>(Arrays.asList(MAINNET_ID, XDAI_ID));
     }
 
     public static String getNodeURLByNetworkId(int networkId) {
@@ -77,18 +70,18 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     {
         KnownContract knownContract = readContracts();
 
-        if (networkFilters == null || networkFilters.contains(EthereumNetworkRepository.MAINNET_ID))
+        if (networkFilters == null || networkFilters.contains(MAINNET_ID))
         {
             for (UnknownToken unknownToken: knownContract.getMainNet())
             {
-                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, EthereumNetworkRepository.MAINNET_ID));
+                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, MAINNET_ID));
             }
         }
-        if (networkFilters == null || networkFilters.contains(EthereumNetworkRepository.XDAI_ID))
+        if (networkFilters == null || networkFilters.contains(XDAI_ID))
         {
             for (UnknownToken unknownToken: knownContract.getXDAI())
             {
-                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, EthereumNetworkRepository.XDAI_ID));
+                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, XDAI_ID));
             }
         }
     }

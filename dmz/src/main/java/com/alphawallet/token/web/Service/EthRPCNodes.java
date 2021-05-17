@@ -1,16 +1,7 @@
 package com.alphawallet.token.web.Service;
 
-import static com.alphawallet.token.entity.MagicLinkInfo.ARTIS_SIGMA1_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.ARTIS_TAU1_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.CLASSIC_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.GOERLI_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.KOVAN_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.MAINNET_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.POA_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.RINKEBY_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.ROPSTEN_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.SOKOL_NETWORK_ID;
-import static com.alphawallet.token.entity.MagicLinkInfo.XDAI_NETWORK_ID;
+import com.alphawallet.ethereum.EthereumNetworkBase;
+
 import static com.alphawallet.token.web.AppSiteController.getInfuraKey;
 
 public class EthRPCNodes
@@ -30,27 +21,27 @@ public class EthRPCNodes
 
     public static String getNodeURLByNetworkId(int networkId) {
         switch (networkId) {
-            case MAINNET_NETWORK_ID:
+            case EthereumNetworkBase.MAINNET_ID:
                 return MAINNET_RPC_URL;
-            case KOVAN_NETWORK_ID:
+            case EthereumNetworkBase.KOVAN_ID:
                 return KOVAN_RPC_URL;
-            case ROPSTEN_NETWORK_ID:
+            case EthereumNetworkBase.ROPSTEN_ID:
                 return ROPSTEN_RPC_URL;
-            case RINKEBY_NETWORK_ID:
+            case EthereumNetworkBase.RINKEBY_ID:
                 return RINKEBY_RPC_URL;
-            case POA_NETWORK_ID:
+            case EthereumNetworkBase.POA_ID:
                 return POA_RPC_URL;
-            case SOKOL_NETWORK_ID:
+            case EthereumNetworkBase.SOKOL_ID:
                 return SOKOL_RPC_URL;
-            case CLASSIC_NETWORK_ID:
+            case EthereumNetworkBase.CLASSIC_ID:
                 return CLASSIC_RPC_URL;
-            case XDAI_NETWORK_ID:
+            case EthereumNetworkBase.XDAI_ID:
                 return XDAI_RPC_URL;
-            case GOERLI_NETWORK_ID:
+            case EthereumNetworkBase.GOERLI_ID:
                 return GOERLI_RPC_URL;
-            case ARTIS_SIGMA1_NETWORK_ID:
+            case EthereumNetworkBase.ARTIS_SIGMA1_ID:
                 return ARTIS_SIGMA1_RPC_URL;
-            case ARTIS_TAU1_NETWORK_ID:
+            case EthereumNetworkBase.ARTIS_TAU1_ID:
                 return ARTIS_TAU1_RPC_URL;
             default:
                 return MAINNET_RPC_URL;

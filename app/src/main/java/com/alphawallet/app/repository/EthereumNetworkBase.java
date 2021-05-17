@@ -14,7 +14,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
-import com.alphawallet.token.entity.MagicLinkInfo;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
@@ -26,16 +25,46 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MUMBAI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
+    public static final String COVALENT = "[COVALENT]";
+
     private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
@@ -83,125 +112,102 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
 
-    public static final int MAINNET_ID = 1;
-    public static final int CLASSIC_ID = 61;
-    public static final int POA_ID = 99;
-    public static final int KOVAN_ID = 42;
-    public static final int ROPSTEN_ID = 3;
-    public static final int SOKOL_ID = 77;
-    public static final int RINKEBY_ID = 4;
-    public static final int XDAI_ID = 100;
-    public static final int HECO_ID = 128;
-    public static final int HECO_TEST_ID = 256;
-    public static final int GOERLI_ID = 5;
-    public static final int ARTIS_SIGMA1_ID = 246529;
-    public static final int ARTIS_TAU1_ID = 246785;
-    public static final int BINANCE_TEST_ID = 97;
-    public static final int BINANCE_MAIN_ID = 56;
+    //This optional list creates a defined order in which tokens are displayed
+    static final int[] orderList = {
+            MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, KOVAN_ID, ROPSTEN_ID, SOKOL_ID,
+            RINKEBY_ID, GOERLI_ID, ARTIS_TAU1_ID, BINANCE_TEST_ID, BINANCE_MAIN_ID, HECO_ID, HECO_TEST_ID,
+            AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID
+    };
 
-    final Map<Integer, NetworkInfo> networkMap;
-
-    final NetworkInfo[] NETWORKS;
-    static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
-            new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
+    static final Map<Integer, NetworkInfo> networkMap = new HashMap<Integer, NetworkInfo>() {
+        {
+            put(MAINNET_ID, new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
-                    "https://cn.etherscan.com/tx/",MAINNET_ID, true,
-                    MAINNET_FALLBACK_RPC_URL,
-                    "https://api-cn.etherscan.com/"),
-            new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
+                    "https://cn.etherscan.com/tx/", MAINNET_ID,
+                    MAINNET_FALLBACK_RPC_URL, "https://api-cn.etherscan.com/"));
+            put(CLASSIC_ID, new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://blockscout.com/etc/mainnet/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/"),
-            new NetworkInfo(C.XDAI_NETWORK_NAME,
-                    C.xDAI_SYMBOL,
-                    XDAI_RPC_URL,
-                    "https://blockscout.com/poa/dai/tx/",
-                    XDAI_ID,
-                    false,
-                    "https://dai.poa.network",
-                    "https://blockscout.com/poa/dai/"),
-            new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
-                    POA_RPC_URL,
-                    "https://blockscout.com/poa/core/tx/", POA_ID, false, POA_RPC_URL, "https://blockscout.com/poa/core/"),
-            new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
-                    "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID, false,
-                    ARTIS_SIGMA1_RPC_URL,
-                    "https://explorer.sigma1.artis.network/"),
-            new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
-                    "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
-                    KOVAN_FALLBACK_RPC_URL,
-                    "https://api-kovan.etherscan.io/"),
-            new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
-                    ROPSTEN_RPC_URL,
-                    "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
-                    ROPSTEN_FALLBACK_RPC_URL,
-                    "https://api-ropsten.etherscan.io/"),
-            new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
-                    SOKOL_RPC_URL,
-                    "https://blockscout.com/poa/sokol/tx/",SOKOL_ID, false, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/"),
-            new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
-                    "https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
-                    RINKEBY_FALLBACK_RPC_URL,
-                    "https://api-rinkeby.etherscan.io/"),
-            new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
-                    "https://goerli.etherscan.io/tx/",GOERLI_ID, false,
-                    GOERLI_FALLBACK_RPC_URL,
-                    "https://api-goerli.etherscan.io/"),
-            new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
-                    "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID, false,
-                    ARTIS_TAU1_RPC_URL,
-                    "https://explorer.tau1.artis.network/"),
-            new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
-                    "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID, false,
-                    BINANCE_TEST_FALLBACK_RPC_URL,
-                    "https://api-testnet.bscscan.com/"),
-            new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
-                    "https://bscscan.com/tx/", BINANCE_MAIN_ID, false,
-                    BINANCE_MAIN_FALLBACK_RPC_URL,
-                    "https://api.bscscan.com/"),
-            new NetworkInfo(C.HECO_MAIN_NETWORK, C.HECO_SYMBOL, HECO_RPC_URL,
-                    "https://hecoinfo.com/tx/", HECO_ID, false,
-                    HECO_RPC_URL,
-                    "https://api.hecoinfo.com/"),
-            new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL, HECO_TEST_RPC_URL,
-                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID, false,
-                    HECO_TEST_RPC_URL,
-                    "https://testnet.hecoinfo.com/"),
+                    "https://blockscout.com/etc/mainnet/tx/", CLASSIC_ID, CLASSIC_RPC_URL,
+                    "https://blockscout.com/etc/mainnet/"));
+            put(XDAI_ID, new NetworkInfo(C.XDAI_NETWORK_NAME,
+                            C.xDAI_SYMBOL, XDAI_RPC_URL,
+                            "https://blockscout.com/poa/dai/tx/", XDAI_ID,
+                            "https://dai.poa.network", "https://blockscout.com/poa/dai/"));
+            put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
+                            POA_RPC_URL,
+                            "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,
+                    "https://blockscout.com/poa/core/"));
+            put(ARTIS_SIGMA1_ID, new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
+                            "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID,
+                            ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/"));
+            put(KOVAN_ID, new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
+                            "https://kovan.etherscan.io/tx/", KOVAN_ID,
+                            KOVAN_FALLBACK_RPC_URL, "https://api-kovan.etherscan.io/"));
+            put(ROPSTEN_ID, new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
+                            ROPSTEN_RPC_URL,
+                            "https://ropsten.etherscan.io/tx/", ROPSTEN_ID,
+                            ROPSTEN_FALLBACK_RPC_URL, "https://api-ropsten.etherscan.io/"));
+            put(SOKOL_ID, new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
+                            SOKOL_RPC_URL,
+                            "https://blockscout.com/poa/sokol/tx/", SOKOL_ID, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/"));
+            put(RINKEBY_ID, new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
+                            "https://rinkeby.etherscan.io/tx/", RINKEBY_ID,
+                            RINKEBY_FALLBACK_RPC_URL,
+                            "https://api-rinkeby.etherscan.io/"));
+            put(GOERLI_ID, new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
+                            "https://goerli.etherscan.io/tx/", GOERLI_ID,
+                            GOERLI_FALLBACK_RPC_URL,
+                            "https://api-goerli.etherscan.io/"));
+            put(ARTIS_TAU1_ID, new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
+                            "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID,
+                            ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/"));
+            put(BINANCE_TEST_ID, new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
+                            "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
+                            BINANCE_TEST_FALLBACK_RPC_URL,
+                            "https://api-testnet.bscscan.com/"));
+            put(BINANCE_MAIN_ID, new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
+                            "https://bscscan.com/tx/", BINANCE_MAIN_ID,
+                            BINANCE_MAIN_FALLBACK_RPC_URL,
+                            "https://api.bscscan.com/"));
+            put(HECO_ID, new NetworkInfo(C.HECO_MAIN_NETWORK, C.HECO_SYMBOL, HECO_RPC_URL,
+                            "https://hecoinfo.com/tx/", HECO_ID,
+                            HECO_RPC_URL, "https://api.hecoinfo.com/"));
+            put(HECO_TEST_ID, new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL, HECO_TEST_RPC_URL,
+                            "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID,
+                            HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/"));
+            put(AVALANCHE_ID, new NetworkInfo(C.AVALANCHE_NETWORK, C.AVALANCHE_SYMBOL, AVALANCHE_RPC_URL,
+                            "https://cchain.explorer.avax.network/tx/", AVALANCHE_ID,
+                            AVALANCHE_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT));
+            put(FUJI_TEST_ID, new NetworkInfo(C.FUJI_TEST_NETWORK, C.AVALANCHE_SYMBOL, FUJI_TEST_RPC_URL,
+                            "https://cchain.explorer.avax-test.network/tx/", FUJI_TEST_ID,
+                            FUJI_TEST_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT));
+            put(FANTOM_ID, new NetworkInfo(C.FANTOM_NETWORK, C.FANTOM_SYMBOL, FANTOM_RPC_URL,
+                            "https://ftmscan.com/tx/", FANTOM_ID,
+                            FANTOM_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT));
+            put(FANTOM_TEST_ID, new NetworkInfo(C.FANTOM_TEST_NETWORK, C.FANTOM_SYMBOL, FANTOM_TEST_RPC_URL,
+                            "https://explorer.testnet.fantom.network/tx/", FANTOM_TEST_ID,
+                            FANTOM_TEST_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT)); //NB: Fantom testnet not yet supported by Covalent
+            put(MATIC_ID, new NetworkInfo(C.MATIC_NETWORK, C.MATIC_SYMBOL, MATIC_RPC_URL,
+                            "https://explorer.matic.network/tx/", MATIC_ID,
+                            MATIC_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT));
+            put(MATIC_TEST_ID, new NetworkInfo(C.MATIC_TEST_NETWORK, C.MATIC_SYMBOL, MUMBAI_TEST_RPC_URL,
+                            "https://mumbai-explorer.matic.today/tx/", MATIC_TEST_ID,
+                            MUMBAI_TEST_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT));
+        }
     };
 
     final PreferenceRepositoryType preferences;
     NetworkInfo activeNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
+    final boolean useTestNets;
+    final NetworkInfo[] additionalNetworks;
 
     EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, NetworkInfo[] additionalNetworks, boolean useTestNets)
     {
         this.preferences = preferenceRepository;
-
-        /* merging static compile time network list with runtime network list */
-        List<NetworkInfo> networks = new ArrayList<>();
-
-        /* the order is passed to the uesr interface. So if a user has a token on one
-         * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
-         * test nets, they are displayed by that order.
-         */
-        addNetworks(additionalNetworks, networks, true);
-        addNetworks(DEFAULT_NETWORKS, networks, true);
-        addNetworks(additionalNetworks, networks, false);
-        if (useTestNets) addNetworks(DEFAULT_NETWORKS, networks, false);
-
-        /* then store the result list in a network variable */
-        NETWORKS = networks.toArray(new NetworkInfo[0]);
-
+        this.additionalNetworks = additionalNetworks;
+        this.useTestNets = useTestNets;
         activeNetwork = getByName(preferences.getActiveBrowserNetwork());
-//        Removed code below to allow null value for defaultNetwork
-//        if (defaultNetwork == null) {
-//            defaultNetwork = NETWORKS[0];
-//        }
-
-        networkMap = new ConcurrentHashMap<>();
-        for (NetworkInfo network : NETWORKS)
-        {
-            networkMap.put(network.chainId, network);
-        }
     }
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
@@ -212,9 +218,26 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    private void addNetworks(List<NetworkInfo> result, boolean withValue)
+    {
+        for (int networkId : orderList)
+        {
+            if (EthereumNetworkRepository.hasRealValue(networkId) == withValue) result.add(networkMap.get(networkId));
+        }
+
+        //Add in case no order was specified
+        for (NetworkInfo info : networkMap.values())
+        {
+            if (EthereumNetworkRepository.hasRealValue(info.chainId) == withValue && !result.contains(info))
+            {
+                result.add(info);
+            }
+        }
+    }
+
     private NetworkInfo getByName(String name) {
         if (name != null && !name.isEmpty()) {
-            for (NetworkInfo NETWORK : NETWORKS) {
+            for (NetworkInfo NETWORK : networkMap.values()) {
                 if (name.equals(NETWORK.name)) {
                     return NETWORK;
                 }
@@ -306,8 +329,22 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public NetworkInfo[] getAvailableNetworkList() {
-        return NETWORKS;
+    public NetworkInfo[] getAvailableNetworkList()
+    {
+        //construct on demand, and give in order
+        /* merging static compile time network list with runtime network list */
+        List<NetworkInfo> networks = new ArrayList<>();
+
+        /* the order is passed to the user interface. So if a user has a token on one
+         * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
+         * test nets, they are displayed by that order.
+         */
+
+        addNetworks(additionalNetworks, networks, true);
+        addNetworks(networks, true);
+        addNetworks(additionalNetworks, networks, false);
+        if (useTestNets) addNetworks(networks, false);
+        return networks.toArray(new NetworkInfo[0]);
     }
 
     @Override
@@ -319,13 +356,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         switch (chainId)
         {
-            case EthereumNetworkRepository.MAINNET_ID:
-            case EthereumNetworkRepository.POA_ID:
-            case EthereumNetworkRepository.CLASSIC_ID:
-            case EthereumNetworkRepository.XDAI_ID:
-            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
-            case EthereumNetworkRepository.BINANCE_MAIN_ID:
-            case EthereumNetworkRepository.HECO_ID:
+            case MAINNET_ID:
+            case POA_ID:
+            case CLASSIC_ID:
+            case XDAI_ID:
+            case ARTIS_SIGMA1_ID:
+            case BINANCE_MAIN_ID:
+            case HECO_ID:
+            case AVALANCHE_ID:
+            case FANTOM_ID:
+            case MATIC_ID:
                 return true;
 
             default:
@@ -333,44 +373,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static String getSecondaryNodeURL(int networkId) {
-        switch (networkId)
-        {
-            case MAINNET_ID:
-                return MAINNET_FALLBACK_RPC_URL;
-            case KOVAN_ID:
-                return KOVAN_RPC_URL;
-            case ROPSTEN_ID:
-                return ROPSTEN_RPC_URL;
-            case RINKEBY_ID:
-                return RINKEBY_FALLBACK_RPC_URL;
-            case POA_ID:
-                return POA_RPC_URL;
-            case SOKOL_ID:
-                return SOKOL_RPC_URL;
-            case CLASSIC_ID:
-                return CLASSIC_RPC_URL;
-            case XDAI_ID:
-                return XDAI_RPC_URL;
-            case GOERLI_ID:
-                return GOERLI_RPC_URL;
-            case ARTIS_SIGMA1_ID:
-                return ARTIS_SIGMA1_RPC_URL;
-            case ARTIS_TAU1_ID:
-                return ARTIS_TAU1_RPC_URL;
-            case BINANCE_MAIN_ID:
-                return BINANCE_MAIN_FALLBACK_RPC_URL;
-            case BINANCE_TEST_ID:
-                return BINANCE_TEST_FALLBACK_RPC_URL;
-            case HECO_ID:
-                return HECO_RPC_URL;
-            case HECO_TEST_ID:
-                return HECO_TEST_RPC_URL;
-            default:
-                return MAINNET_RPC_URL;
-        }
+    public static String getSecondaryNodeURL(int networkId)
+    {
+        NetworkInfo info = networkMap.get(networkId);
+        if (info != null) { return info.backupNodeUrl; }
+        else { return ""; }
     }
 
+    //TODO: Fold this into file and add to database
     public static int getChainLogo(int networkId) {
         switch (networkId)
         {
@@ -403,47 +413,28 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case HECO_ID:
             case HECO_TEST_ID:
                 return R.drawable.ic_heco_logo;
+            case FANTOM_ID:
+                return R.drawable.ic_fantom;
+            case FANTOM_TEST_ID:
+                return R.drawable.ic_icons_fantom_test;
+            case AVALANCHE_ID:
+                return R.drawable.ic_icons_tokens_avalanche;
+            case FUJI_TEST_ID:
+                return R.drawable.ic_icons_tokens_avalanche_testnet;
+            case MATIC_ID:
+                return R.drawable.ic_icons_polygon;
+            case MATIC_TEST_ID:
+                return R.drawable.ic_icons_matic;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
     }
 
-    public static String getNodeURLByNetworkId(int networkId) {
-        switch (networkId)
-        {
-            case MAINNET_ID:
-                return MAINNET_RPC_URL;
-            case KOVAN_ID:
-                return KOVAN_RPC_URL;
-            case ROPSTEN_ID:
-                return ROPSTEN_RPC_URL;
-            case RINKEBY_ID:
-                return RINKEBY_RPC_URL;
-            case POA_ID:
-                return POA_RPC_URL;
-            case SOKOL_ID:
-                return SOKOL_RPC_URL;
-            case CLASSIC_ID:
-                return CLASSIC_RPC_URL;
-            case XDAI_ID:
-                return XDAI_RPC_URL;
-            case GOERLI_ID:
-                return GOERLI_RPC_URL;
-            case ARTIS_SIGMA1_ID:
-                return ARTIS_SIGMA1_RPC_URL;
-            case ARTIS_TAU1_ID:
-                return ARTIS_TAU1_RPC_URL;
-            case BINANCE_MAIN_ID:
-                return BINANCE_MAIN_RPC_URL;
-            case BINANCE_TEST_ID:
-                return BINANCE_TEST_RPC_URL;
-            case HECO_ID:
-                return HECO_RPC_URL;
-            case HECO_TEST_ID:
-                return HECO_TEST_RPC_URL;
-            default:
-                return MAINNET_RPC_URL;
-        }
+    public static String getNodeURLByNetworkId(int networkId)
+    {
+        NetworkInfo info = networkMap.get(networkId);
+        if (info != null) { return info.rpcServerUrl; }
+        else { return MAINNET_RPC_URL; }
     }
 
     /**
@@ -469,14 +460,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static String getMagicLinkDomainFromNetworkId(int networkId)
-    {
-        return MagicLinkInfo.getMagicLinkDomainFromNetworkId(networkId);
-    }
-
     public static String getEtherscanURLbyNetwork(int networkId)
     {
-        return MagicLinkInfo.getEtherscanURLbyNetwork(networkId);
+        NetworkInfo info = networkMap.get(networkId);
+        if (info != null)
+        {
+            return info.etherscanTxUrl;
+        }
+        else
+        {
+            return networkMap.get(MAINNET_ID).etherscanTxUrl;
+        }
     }
 
     public static boolean hasGasOverride(int chainId)
@@ -501,12 +495,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
+        return new ArrayList<>(Collections.singletonList(MAINNET_ID));
     }
 
     public static ContractLocator getOverrideToken()
     {
-        return new ContractLocator("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);
+        return new ContractLocator("", MAINNET_ID, ContractType.ETHEREUM);
     }
 
     public static boolean isPriorityToken(Token token)

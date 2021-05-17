@@ -37,7 +37,7 @@ import java.math.RoundingMode;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 

@@ -31,10 +31,10 @@ import com.alphawallet.token.tools.TokenDefinition;
 import java.math.BigInteger;
 import java.util.Map;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 17/12/2020.

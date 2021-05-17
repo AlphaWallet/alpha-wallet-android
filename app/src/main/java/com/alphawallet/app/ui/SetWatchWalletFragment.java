@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 /**
  * Created by James on 26/07/2019.
  * Stormbird in Sydney
@@ -191,7 +193,7 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     {
         ensProgress();
         if (ensResolver == null)
-            ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), getContext());
+            ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), getContext());
         ensResolver.resolveENSAddress(name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

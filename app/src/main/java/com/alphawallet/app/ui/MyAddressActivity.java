@@ -26,7 +26,6 @@ import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
@@ -49,6 +48,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class MyAddressActivity extends BaseActivity implements AmountReadyCallback
 {
@@ -269,7 +270,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
         {
-            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), getApplicationContext())
+            new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), getApplicationContext())
                     .resolveEnsName(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
@@ -377,7 +378,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        int fallBackChainId = token != null ? token.tokenInfo.chainId : EthereumNetworkBase.MAINNET_ID;
+        int fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
 
         if (wallet == null)

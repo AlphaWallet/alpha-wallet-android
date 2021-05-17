@@ -41,9 +41,9 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokensRealmSource implements TokenLocalSource {
 

@@ -12,16 +12,17 @@
  */
 package com.alphawallet.app.web3j;
 
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
+
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * This class is here due to a bug in Web3j which prevented EIP712 working for some structures
@@ -66,7 +67,7 @@ public class StructuredData {
                 @JsonProperty(value = "salt") String salt) {
             this.name = name;
             this.version = version;
-            this.chainId = chainId != null ? new Uint256(new BigInteger(chainId)) : new Uint256(EthereumNetworkRepository.MAINNET_ID);
+            this.chainId = chainId != null ? new Uint256(new BigInteger(chainId)) : new Uint256(MAINNET_ID);
             this.verifyingContract = verifyingContract;
             this.salt = salt;
         }

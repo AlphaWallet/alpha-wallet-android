@@ -52,7 +52,7 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {

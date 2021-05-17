@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@drawable/item_eth_circle" />
+            android:background="@drawable/item_white_circle" />
 
         <ImageView
             android:id="@+id/refresh"

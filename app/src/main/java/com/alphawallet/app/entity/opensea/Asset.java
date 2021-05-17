@@ -77,6 +77,16 @@ public class Asset implements Parcelable {
         this.assetContract = contract;
     }
 
+    public static Asset blankFromToken(Token token, String tokenId)
+    {
+        AssetContract contract = new AssetContract(token);
+        Asset asset = new Asset(tokenId, contract);
+        asset.name = "";
+        asset.description = "";
+        asset.imagePreviewUrl = "";
+        return asset;
+    }
+
     public static Asset fromMetaData(JSONObject metaData, String tokenId, Token token)
     {
         AssetContract contract = new AssetContract(token);

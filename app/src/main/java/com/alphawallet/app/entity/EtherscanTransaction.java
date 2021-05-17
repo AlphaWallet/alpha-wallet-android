@@ -1,10 +1,6 @@
 package com.alphawallet.app.entity;
 
 
-import android.content.Context;
-
-import com.alphawallet.token.tools.Numeric;
-
 /**
  * Created by James on 26/03/2018.
  */
@@ -47,4 +43,26 @@ public class EtherscanTransaction
     }
 
     public String getHash() { return hash; }
+
+    public EtherscanTransaction(CovalentTransaction transaction, Transaction tx)
+    {
+        blockNumber = tx.blockNumber;
+        timeStamp = tx.timeStamp;
+        hash = transaction.tx_hash;
+        nonce = tx.nonce;
+        blockHash = "";
+        transactionIndex = transaction.tx_offset;
+        from = transaction.from_address;
+        to = transaction.to_address;
+        value = transaction.value;
+        gas = transaction.gas_spent;
+        gasPrice = transaction.gas_price;
+        isError = transaction.successful ? "0" : "1";
+        txreceipt_status = "";
+        input = tx.input;
+        contractAddress = "";
+        cumulativeGasUsed = "";
+        gasUsed = transaction.gas_spent;
+        confirmations = 0;
+    }
 }

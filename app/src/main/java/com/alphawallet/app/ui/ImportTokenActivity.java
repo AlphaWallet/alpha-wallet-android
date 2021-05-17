@@ -50,6 +50,7 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.IMPORT_STRING;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
@@ -158,7 +159,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             {
                 case currencyLink:
                     //for currency drop link, check xDai first, then other networks
-                    viewModel.switchNetwork(EthereumNetworkRepository.XDAI_ID);
+                    viewModel.switchNetwork(XDAI_ID);
                     viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
                     break;
                 default:

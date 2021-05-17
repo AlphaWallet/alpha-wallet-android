@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -35,6 +34,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by James on 4/12/2018.
@@ -345,7 +345,7 @@ public class ENSHandler implements Runnable
     {
         if (ensResolver == null)
         {
-            this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getContext());
+            this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext());
         }
     }
 }

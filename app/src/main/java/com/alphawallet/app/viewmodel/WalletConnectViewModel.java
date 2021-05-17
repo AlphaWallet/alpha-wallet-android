@@ -57,11 +57,10 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class WalletConnectViewModel extends BaseViewModel {
     private static final String WC_SESSION_DB = "wc_data-db.realm";

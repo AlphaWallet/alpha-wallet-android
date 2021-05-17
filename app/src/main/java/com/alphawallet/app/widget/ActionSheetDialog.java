@@ -118,19 +118,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         addressDetail.setupAddress(destAddress, destName);
 
-        if (token.isNonFungible())
+        if (token.isERC721())
         {
-            assetDetailView.setupAssetDetail(token);
+            assetDetailView.setupAssetDetail(token, getERC721TokenId());
             assetDetailView.setVisibility(View.VISIBLE);
             balanceDisplay.setVisibility(View.GONE);
+            amountDisplay.setVisibility(View.GONE);
         }
 
         setupCancelListeners();
-
-        String tokenId = getERC721TokenId();
-        String name = getERC721TokenName();
-
-        System.out.println("Yo: " + tokenId + " --> " + name);
     }
 
     public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, SignAuthenticationCallback sCallback, Signable message)

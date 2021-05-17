@@ -9,9 +9,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
-import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTokenScriptData;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 
@@ -22,18 +19,14 @@ import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.tx.gas.ContractGasProvider;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -41,10 +34,10 @@ import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
 import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_TAU1_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 18/11/2020.

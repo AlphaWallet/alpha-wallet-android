@@ -1,9 +1,7 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -23,17 +21,13 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.widget.entity.StatusType;
-import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.ContractAddress;
 
-import java.math.BigDecimal;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TransactionHolder extends BinderViewHolder<TransactionMeta> implements View.OnClickListener
 {

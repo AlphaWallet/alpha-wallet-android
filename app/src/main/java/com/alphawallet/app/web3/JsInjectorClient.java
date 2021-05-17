@@ -1,14 +1,17 @@
 package com.alphawallet.app.web3;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
-import androidx.annotation.RawRes;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.alphawallet.app.repository.EthereumNetworkBase;
+import androidx.annotation.Nullable;
+import androidx.annotation.RawRes;
+
+import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
+
+import org.web3j.crypto.Keys;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,15 +21,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.alphawallet.app.R;
-
-import org.web3j.crypto.Keys;
-
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class JsInjectorClient {
 
@@ -42,7 +43,7 @@ public class JsInjectorClient {
     private int chainId = 1;
     private Address walletAddress;
     //Note: this default RPC is overriden before injection
-    private String rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(EthereumNetworkBase.MAINNET_ID);
+    private String rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(MAINNET_ID);
 
     public JsInjectorClient(Context context) {
         this.context = context;

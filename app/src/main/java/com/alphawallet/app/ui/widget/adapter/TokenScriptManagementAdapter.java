@@ -2,8 +2,6 @@ package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +9,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.token.entity.ContractInfo;
@@ -32,6 +31,8 @@ import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScriptManagementAdapter.TokenSciptCardHolder> {
 
@@ -68,9 +69,9 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             String address;
 
             //sweep to see if there's a mainnet holding contract
-            if (originContract.addresses.get(EthereumNetworkBase.MAINNET_ID) != null)
+            if (originContract.addresses.get(MAINNET_ID) != null)
             {
-                chainId = EthereumNetworkBase.MAINNET_ID;
+                chainId = MAINNET_ID;
                 address = originContract.addresses.get(chainId).get(0);
             }
             else

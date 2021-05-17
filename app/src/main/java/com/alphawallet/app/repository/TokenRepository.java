@@ -71,6 +71,7 @@ import io.realm.Realm;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -445,7 +446,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<String> resolveENS(int chainId, String ensName)
     {
-        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
+        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         return ensResolver.resolveENSAddress(ensName);
     }
 

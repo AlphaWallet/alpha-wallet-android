@@ -33,6 +33,12 @@ public abstract class C {
     public static final String BINANCE_MAIN_NETWORK = "Binance";
     public static final String HECO_MAIN_NETWORK = "Heco";
     public static final String HECO_TEST_NETWORK = "Heco (Test)";
+    public static final String FANTOM_NETWORK = "Fantom Opera";
+    public static final String FANTOM_TEST_NETWORK = "Fantom (Test)";
+    public static final String AVALANCHE_NETWORK = "Avalanche";
+    public static final String FUJI_TEST_NETWORK = "Avalanche FUJI (Test)";
+    public static final String MATIC_NETWORK = "Polygon";
+    public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -53,6 +59,9 @@ public abstract class C {
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
     public static final String BINANCE_SYMBOL = "BNB";
     public static final String HECO_SYMBOL = "HT";
+    public static final String FANTOM_SYMBOL = "FTM";
+    public static final String AVALANCHE_SYMBOL = "AVAX";
+    public static final String MATIC_SYMBOL = "MATIC";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -201,7 +210,7 @@ public abstract class C {
         DEFAULT, PENDING, INCOMPLETE
     }
 
-    public static final String GOOGLE_SEARCH_PREFIX = "https://www.google.com/search?q=";
+    public static final String INTERNET_SEARCH_PREFIX = "https://duckduckgo.com/?q=";
     public static final String HTTPS_PREFIX = "https://";
 
     // Settings Badge Keys

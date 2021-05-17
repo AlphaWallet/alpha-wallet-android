@@ -1,25 +1,22 @@
 package com.alphawallet.app.entity;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class CustomViewSettings
 {
-    private static int primaryChain = EthereumNetworkRepository.MAINNET_ID;
-    private static String primaryChainName = C.ETHEREUM_NETWORK_NAME;
+    private static final int primaryChain = MAINNET_ID;
+    private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
     public static boolean filterToken(TokenCardMeta token, boolean filterResult, Context context)
     {

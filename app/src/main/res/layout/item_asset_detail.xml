@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_holder"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -36,10 +37,48 @@
             android:textColor="@color/black"
             android:fontFamily="@font/font_semibold"
             android:gravity="start"
-            tools:text="Genesis"
+            tools:text="Self Portrait (2021)"
             android:textSize="@dimen/sp16"/>
-
-
+        <ImageView
+            android:id="@+id/image_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:src="@drawable/ic_expand_more"
+            android:padding="3dp"
+            android:layout_gravity="start"
+            android:background="@color/transparent"
+            android:scaleType="fitCenter"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:padding="18dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_details"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/image_asset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/abc_vector_test"/>
+        <TextView
+            android:id="@+id/text_asset_name_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:textColor="@color/black"
+            android:fontFamily="@font/font_semibold"
+            tools:text="Self Portrait (2021)"
+            android:textSize="@dimen/sp16"/>
+        <TextView
+            android:id="@+id/text_asset_description"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            tools:text="A narcissist drew herself."
+            android:textSize="@dimen/sp15"
+            android:textColor="@color/dove"
+            android:fontFamily="@font/font_regular"/>
+    </LinearLayout>
 </LinearLayout>

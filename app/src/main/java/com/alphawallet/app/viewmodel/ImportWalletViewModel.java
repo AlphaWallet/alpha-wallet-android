@@ -1,18 +1,24 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.service.AnalyticsServiceType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.ImportWalletCallback;
+import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.interact.ImportWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.OnSetWatchWalletListener;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -23,12 +29,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.ImportWalletCallback;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.interact.ImportWalletInteract;
-import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.KeyService;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
 {
@@ -46,7 +47,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
                           GasService gasService, AnalyticsServiceType analyticsService) {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), keyService.getContext());
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), keyService.getContext());
         this.analyticsService = analyticsService;
     }
 

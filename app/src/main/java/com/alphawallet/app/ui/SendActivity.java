@@ -67,10 +67,10 @@ import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {

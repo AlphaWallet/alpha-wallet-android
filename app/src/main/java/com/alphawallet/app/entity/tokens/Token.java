@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import androidx.annotation.NonNull;

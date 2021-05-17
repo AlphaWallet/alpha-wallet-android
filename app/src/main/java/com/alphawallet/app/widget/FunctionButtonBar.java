@@ -33,7 +33,6 @@ import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
@@ -56,6 +55,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, OnTokenClickListener, View.OnClickListener {
     private final Context context;
@@ -617,7 +618,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         switch (chainId)
         {
-            case EthereumNetworkBase.MAINNET_ID:
+            case MAINNET_ID:
                 switch (address.toLowerCase())
                 {
                     case C.DAI_TOKEN:
@@ -699,8 +700,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         switch (token.tokenInfo.chainId)
         {
-            case EthereumNetworkBase.MAINNET_ID:
-            case EthereumNetworkBase.XDAI_ID:
+            case MAINNET_ID:
+            case XDAI_ID:
                 addPurchaseVerb(token, onRampRepository);
         }
     }

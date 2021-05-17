@@ -209,7 +209,7 @@ public abstract class C {
         DEFAULT, PENDING, INCOMPLETE
     }
 
-    public static final String GOOGLE_SEARCH_PREFIX = "https://www.google.com/search?q=";
+    public static final String INTERNET_SEARCH_PREFIX = "https://duckduckgo.com/?q=";
     public static final String HTTPS_PREFIX = "https://";
 
     // Settings Badge Keys

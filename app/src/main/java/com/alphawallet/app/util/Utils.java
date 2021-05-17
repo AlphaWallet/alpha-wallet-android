@@ -89,7 +89,7 @@ public class Utils {
             if (isValidUrl(url)) {
                 return C.HTTPS_PREFIX + url;
             } else {
-                return C.GOOGLE_SEARCH_PREFIX + url;
+                return C.INTERNET_SEARCH_PREFIX + url;
             }
         }
     }

@@ -146,7 +146,7 @@ public class TransactionsService
 
     private void readTokenMoves(int chainId, boolean isNFT)
     {
-        eventFetch = transactionsClient.readTransactions(tokensService.getCurrentAddress(), ethereumNetworkRepository.getNetworkByChain(chainId), tokensService, isNFT)
+        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), ethereumNetworkRepository.getNetworkByChain(chainId), tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(count -> { eventFetch = null; System.out.println("Received: " + count); });

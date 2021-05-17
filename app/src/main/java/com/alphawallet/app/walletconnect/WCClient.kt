@@ -1,10 +1,10 @@
 package com.alphawallet.app.walletconnect
 
 import android.util.Log
-import com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
+import com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder

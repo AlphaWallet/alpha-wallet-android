@@ -1,10 +1,10 @@
 package com.alphawallet.app.entity.walletconnect;
 
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 10/09/2020.
@@ -28,7 +28,7 @@ public class WCRequest
         type = SignType.MESSAGE;
         tx = null;
         peer = null;
-        chainId = EthereumNetworkBase.MAINNET_ID;
+        chainId = MAINNET_ID;
         throwable = null;
     }
 

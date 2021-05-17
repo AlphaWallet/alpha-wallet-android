@@ -39,6 +39,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class WalletsViewModel extends BaseViewModel
 {
@@ -91,7 +92,7 @@ public class WalletsViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.assetService = assetService;
 
-        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
+        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
     }
 
     public LiveData<Wallet[]> wallets()

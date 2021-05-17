@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
@@ -37,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -48,8 +46,8 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
 public class TokensService
 {

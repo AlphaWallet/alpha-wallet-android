@@ -69,9 +69,9 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 
 /**

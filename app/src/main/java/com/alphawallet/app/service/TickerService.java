@@ -52,12 +52,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.POA_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.RINKEBY_ID;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.XDAI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TickerService

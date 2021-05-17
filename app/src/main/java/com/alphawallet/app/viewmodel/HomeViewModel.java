@@ -57,6 +57,8 @@ import java.util.UUID;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
@@ -270,7 +272,7 @@ public class HomeViewModel extends BaseViewModel {
         {
             walletName.postValue("");
             //check for ENS name
-            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
+            new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
                     .resolveEnsName(wallet.address)
                     .map(ensName -> { wallet.ENSname = ensName; return wallet; })
                     .flatMap(fetchWalletsInteract::updateENS) //store the ENS name

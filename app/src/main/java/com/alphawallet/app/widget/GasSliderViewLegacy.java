@@ -2,14 +2,7 @@ package com.alphawallet.app.widget;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import androidx.fragment.app.FragmentActivity;
-import androidx.appcompat.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -20,6 +13,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatSeekBar;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -40,7 +41,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class GasSliderViewLegacy extends RelativeLayout implements LifecycleObserver {
 

@@ -11,11 +11,11 @@ import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
 
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
@@ -41,6 +41,28 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class Utils {
 
@@ -160,36 +182,48 @@ public class Utils {
     {
         switch (chainId)
         {
-            case EthereumNetworkRepository.MAINNET_ID:
+            case MAINNET_ID:
                 return R.color.mainnet;
-            case EthereumNetworkRepository.CLASSIC_ID:
+            case CLASSIC_ID:
                 return R.color.classic;
-            case EthereumNetworkRepository.POA_ID:
+            case POA_ID:
                 return R.color.poa;
-            case EthereumNetworkRepository.KOVAN_ID:
+            case KOVAN_ID:
                 return R.color.kovan;
-            case EthereumNetworkRepository.ROPSTEN_ID:
+            case ROPSTEN_ID:
                 return R.color.ropsten;
-            case EthereumNetworkRepository.SOKOL_ID:
+            case SOKOL_ID:
                 return R.color.sokol;
-            case EthereumNetworkRepository.RINKEBY_ID:
+            case RINKEBY_ID:
                 return R.color.rinkeby;
-            case EthereumNetworkRepository.GOERLI_ID:
+            case GOERLI_ID:
                 return R.color.goerli;
-            case EthereumNetworkRepository.XDAI_ID:
+            case XDAI_ID:
                 return R.color.xdai;
-            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
+            case ARTIS_SIGMA1_ID:
                 return R.color.artis_sigma1;
-            case EthereumNetworkRepository.ARTIS_TAU1_ID:
+            case ARTIS_TAU1_ID:
                 return R.color.artis_tau1;
-            case EthereumNetworkRepository.BINANCE_MAIN_ID:
+            case BINANCE_MAIN_ID:
                 return R.color.binance_main;
-            case EthereumNetworkRepository.BINANCE_TEST_ID:
+            case BINANCE_TEST_ID:
                 return R.color.binance_test;
-            case EthereumNetworkBase.HECO_ID:
+            case HECO_ID:
                 return R.color.heco_main;
-            case EthereumNetworkBase.HECO_TEST_ID:
+            case HECO_TEST_ID:
                 return R.color.heco_test;
+            case FANTOM_ID:
+                return R.color.fantom_main;
+            case FANTOM_TEST_ID:
+                return R.color.fantom_test;
+            case AVALANCHE_ID:
+                return R.color.avalanche_main;
+            case FUJI_TEST_ID:
+                return R.color.avalanche_test;
+            case MATIC_ID:
+                return R.color.polygon_main;
+            case MATIC_TEST_ID:
+                return R.color.polygon_test;
             default:
                 return R.color.mine;
         }
@@ -197,107 +231,7 @@ public class Utils {
 
     public static void setChainColour(View view, int chainId)
     {
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.MAINNET_ID:
-                view.setBackgroundResource(R.drawable.background_mainnet);
-                break;
-            case EthereumNetworkRepository.CLASSIC_ID:
-                view.setBackgroundResource(R.drawable.background_classic);
-                break;
-            case EthereumNetworkRepository.POA_ID:
-                view.setBackgroundResource(R.drawable.background_poa);
-                break;
-            case EthereumNetworkRepository.KOVAN_ID:
-                view.setBackgroundResource(R.drawable.background_kovan);
-                break;
-            case EthereumNetworkRepository.ROPSTEN_ID:
-                view.setBackgroundResource(R.drawable.background_ropsten);
-                break;
-            case EthereumNetworkRepository.SOKOL_ID:
-                view.setBackgroundResource(R.drawable.background_sokol);
-                break;
-            case EthereumNetworkRepository.RINKEBY_ID:
-                view.setBackgroundResource(R.drawable.background_rinkeby);
-                break;
-            case EthereumNetworkRepository.GOERLI_ID:
-                view.setBackgroundResource(R.drawable.background_goerli);
-                break;
-            case EthereumNetworkRepository.XDAI_ID:
-                view.setBackgroundResource(R.drawable.background_xdai);
-                break;
-            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
-                view.setBackgroundResource(R.drawable.background_artis_sigma1);
-                break;
-            case EthereumNetworkRepository.ARTIS_TAU1_ID:
-                view.setBackgroundResource(R.drawable.background_artis_tau1);
-                break;
-            case EthereumNetworkRepository.BINANCE_MAIN_ID:
-                view.setBackgroundResource(R.drawable.background_binance_main);
-                break;
-            case EthereumNetworkRepository.BINANCE_TEST_ID:
-                view.setBackgroundResource(R.drawable.background_binance_test);
-                break;
-            case EthereumNetworkRepository.HECO_ID:
-                view.setBackgroundResource(R.drawable.background_heco_main);
-                break;
-            case EthereumNetworkRepository.HECO_TEST_ID:
-                view.setBackgroundResource(R.drawable.background_heco_test);
-                break;
-            default:
-                EthereumNetworkRepository.setChainColour(view, chainId);
-                break;
-        }
-    }
-
-    public static void setChainCircle(View view, int chainId)
-    {
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.CLASSIC_ID:
-                view.setBackgroundResource(R.drawable.item_etc_circle);
-                break;
-            case EthereumNetworkRepository.POA_ID:
-                view.setBackgroundResource(R.drawable.item_poa_circle);
-                break;
-            case EthereumNetworkRepository.KOVAN_ID:
-                view.setBackgroundResource(R.drawable.item_kovan_circle);
-                break;
-            case EthereumNetworkRepository.ROPSTEN_ID:
-                view.setBackgroundResource(R.drawable.item_ropsten_circle);
-                break;
-            case EthereumNetworkRepository.SOKOL_ID:
-                view.setBackgroundResource(R.drawable.item_sokol_circle);
-                break;
-            case EthereumNetworkRepository.RINKEBY_ID:
-                view.setBackgroundResource(R.drawable.item_rinkeby_circle);
-                break;
-            case EthereumNetworkRepository.GOERLI_ID:
-                view.setBackgroundResource(R.drawable.item_goerli_circle);
-                break;
-            case EthereumNetworkRepository.XDAI_ID:
-                view.setBackgroundResource(R.drawable.item_xdai_circle);
-                break;
-            case EthereumNetworkRepository.MAINNET_ID:
-                view.setBackgroundResource(R.drawable.item_eth_circle);
-                break;
-            case EthereumNetworkRepository.BINANCE_MAIN_ID:
-                view.setBackgroundResource(R.drawable.item_binance_main_circle);
-                break;
-            case EthereumNetworkRepository.BINANCE_TEST_ID:
-                view.setBackgroundResource(R.drawable.item_binance_test_circle);
-                break;
-            case EthereumNetworkRepository.HECO_ID:
-                view.setBackgroundResource(R.drawable.item_heco_main_circle);
-                break;
-            case EthereumNetworkRepository.HECO_TEST_ID:
-                view.setBackgroundResource(R.drawable.item_heco_test_circle);
-                break;
-            default:
-                EthereumNetworkRepository.setChainCircle(view, chainId);
-                break;
-
-        }
+        view.getBackground().setTint(ContextCompat.getColor(view.getContext(), getChainColour(chainId)));
     }
 
     /**
@@ -815,19 +749,30 @@ public class Utils {
         String repoChain;
         switch (chainId)
         {
-            case EthereumNetworkRepository.CLASSIC_ID:
+            case CLASSIC_ID:
                 repoChain = "classic";
                 break;
-            case EthereumNetworkRepository.XDAI_ID:
+            case XDAI_ID:
                 repoChain = "xdai";
                 break;
-            case EthereumNetworkRepository.POA_ID:
+            case POA_ID:
                 repoChain = "poa";
                 break;
-            case EthereumNetworkBase.KOVAN_ID:
-            case EthereumNetworkBase.RINKEBY_ID:
-            case EthereumNetworkBase.SOKOL_ID:
-            case EthereumNetworkBase.ROPSTEN_ID:
+            case BINANCE_MAIN_ID:
+                repoChain = "binance";
+                break;
+            case AVALANCHE_ID:
+                repoChain = "avalanche";
+                break;
+            case MATIC_ID:
+                repoChain = "polygon";
+                break;
+            case KOVAN_ID:
+            case RINKEBY_ID:
+            case SOKOL_ID:
+            case ROPSTEN_ID:
+            case ARTIS_SIGMA1_ID:
+            case ARTIS_TAU1_ID:
                 tURL = ALPHAWALLET_ICON_REPO;
                 repoChain = "";
                 break;

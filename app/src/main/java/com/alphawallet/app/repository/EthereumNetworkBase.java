@@ -34,8 +34,38 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MUMBAI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
+    public static final String COVALENT = "[COVALENT]";
+
     private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
@@ -83,89 +113,96 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
 
-    public static final int MAINNET_ID = 1;
-    public static final int CLASSIC_ID = 61;
-    public static final int POA_ID = 99;
-    public static final int KOVAN_ID = 42;
-    public static final int ROPSTEN_ID = 3;
-    public static final int SOKOL_ID = 77;
-    public static final int RINKEBY_ID = 4;
-    public static final int XDAI_ID = 100;
-    public static final int HECO_ID = 128;
-    public static final int HECO_TEST_ID = 256;
-    public static final int GOERLI_ID = 5;
-    public static final int ARTIS_SIGMA1_ID = 246529;
-    public static final int ARTIS_TAU1_ID = 246785;
-    public static final int BINANCE_TEST_ID = 97;
-    public static final int BINANCE_MAIN_ID = 56;
-
     final Map<Integer, NetworkInfo> networkMap;
 
     final NetworkInfo[] NETWORKS;
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
             new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
-                    "https://cn.etherscan.com/tx/",MAINNET_ID, true,
+                    "https://cn.etherscan.com/tx/",MAINNET_ID,
                     MAINNET_FALLBACK_RPC_URL,
                     "https://api-cn.etherscan.com/"),
             new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://blockscout.com/etc/mainnet/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/"),
+                    "https://blockscout.com/etc/mainnet/tx/",CLASSIC_ID, CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/"),
             new NetworkInfo(C.XDAI_NETWORK_NAME,
                     C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
                     "https://blockscout.com/poa/dai/tx/",
                     XDAI_ID,
-                    false,
                     "https://dai.poa.network",
                     "https://blockscout.com/poa/dai/"),
             new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
-                    "https://blockscout.com/poa/core/tx/", POA_ID, false, POA_RPC_URL, "https://blockscout.com/poa/core/"),
+                    "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL, "https://blockscout.com/poa/core/"),
             new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
-                    "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID, false,
+                    "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID,
                     ARTIS_SIGMA1_RPC_URL,
                     "https://explorer.sigma1.artis.network/"),
             new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
-                    "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
+                    "https://kovan.etherscan.io/tx/", KOVAN_ID,
                     KOVAN_FALLBACK_RPC_URL,
                     "https://api-kovan.etherscan.io/"),
             new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
                     ROPSTEN_RPC_URL,
-                    "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
+                    "https://ropsten.etherscan.io/tx/",ROPSTEN_ID,
                     ROPSTEN_FALLBACK_RPC_URL,
                     "https://api-ropsten.etherscan.io/"),
             new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
                     SOKOL_RPC_URL,
-                    "https://blockscout.com/poa/sokol/tx/",SOKOL_ID, false, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/"),
+                    "https://blockscout.com/poa/sokol/tx/",SOKOL_ID,  SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/"),
             new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
-                    "https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
+                    "https://rinkeby.etherscan.io/tx/",RINKEBY_ID,
                     RINKEBY_FALLBACK_RPC_URL,
                     "https://api-rinkeby.etherscan.io/"),
             new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
-                    "https://goerli.etherscan.io/tx/",GOERLI_ID, false,
+                    "https://goerli.etherscan.io/tx/",GOERLI_ID,
                     GOERLI_FALLBACK_RPC_URL,
                     "https://api-goerli.etherscan.io/"),
             new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
-                    "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID, false,
+                    "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID,
                     ARTIS_TAU1_RPC_URL,
                     "https://explorer.tau1.artis.network/"),
             new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
-                    "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID, false,
+                    "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
                     BINANCE_TEST_FALLBACK_RPC_URL,
                     "https://api-testnet.bscscan.com/"),
             new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
-                    "https://bscscan.com/tx/", BINANCE_MAIN_ID, false,
+                    "https://bscscan.com/tx/", BINANCE_MAIN_ID,
                     BINANCE_MAIN_FALLBACK_RPC_URL,
                     "https://api.bscscan.com/"),
             new NetworkInfo(C.HECO_MAIN_NETWORK, C.HECO_SYMBOL, HECO_RPC_URL,
-                    "https://hecoinfo.com/tx/", HECO_ID, false,
+                    "https://hecoinfo.com/tx/", HECO_ID,
                     HECO_RPC_URL,
                     "https://api.hecoinfo.com/"),
             new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL, HECO_TEST_RPC_URL,
-                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID, false,
+                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID,
                     HECO_TEST_RPC_URL,
                     "https://testnet.hecoinfo.com/"),
+            new NetworkInfo(C.AVALANCHE_NETWORK, C.AVALANCHE_SYMBOL, AVALANCHE_RPC_URL,
+                    "https://cchain.explorer.avax.network/tx/", AVALANCHE_ID,
+                    AVALANCHE_RPC_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT),
+            new NetworkInfo(C.FUJI_TEST_NETWORK, C.AVALANCHE_SYMBOL, FUJI_TEST_RPC_URL,
+                    "https://cchain.explorer.avax-test.network/tx/", FUJI_TEST_ID,
+                    FUJI_TEST_RPC_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT),
+            new NetworkInfo(C.FANTOM_NETWORK, C.FANTOM_SYMBOL, FANTOM_RPC_URL,
+                    "https://ftmscan.com/tx/", FANTOM_ID,
+                    FANTOM_RPC_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT),
+            new NetworkInfo(C.FANTOM_TEST_NETWORK, C.FANTOM_SYMBOL, FANTOM_TEST_RPC_URL,
+                    "https://explorer.testnet.fantom.network/tx/", FANTOM_TEST_ID,
+                    FANTOM_TEST_RPC_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT), //NB: Fantom testnet not yet supported by Covalent
+            new NetworkInfo(C.MATIC_NETWORK, C.MATIC_SYMBOL, MATIC_RPC_URL,
+                    "https://explorer.matic.network/tx/", MATIC_ID,
+                    MATIC_RPC_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT),
+            new NetworkInfo(C.MATIC_TEST_NETWORK, C.MATIC_SYMBOL, MUMBAI_TEST_RPC_URL,
+                    "https://mumbai-explorer.matic.today/tx/", MATIC_TEST_ID,
+                    MUMBAI_TEST_RPC_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT),
     };
 
     final PreferenceRepositoryType preferences;
@@ -319,13 +356,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         switch (chainId)
         {
-            case EthereumNetworkRepository.MAINNET_ID:
-            case EthereumNetworkRepository.POA_ID:
-            case EthereumNetworkRepository.CLASSIC_ID:
-            case EthereumNetworkRepository.XDAI_ID:
-            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
-            case EthereumNetworkRepository.BINANCE_MAIN_ID:
-            case EthereumNetworkRepository.HECO_ID:
+            case MAINNET_ID:
+            case POA_ID:
+            case CLASSIC_ID:
+            case XDAI_ID:
+            case ARTIS_SIGMA1_ID:
+            case BINANCE_MAIN_ID:
+            case HECO_ID:
+            case AVALANCHE_ID:
+            case FANTOM_ID:
+            case MATIC_ID:
                 return true;
 
             default:
@@ -366,6 +406,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return HECO_RPC_URL;
             case HECO_TEST_ID:
                 return HECO_TEST_RPC_URL;
+            case FANTOM_ID:
+                return FANTOM_RPC_URL;
+            case FANTOM_TEST_ID:
+                return FANTOM_TEST_RPC_URL;
+            case AVALANCHE_ID:
+                return AVALANCHE_RPC_URL;
+            case FUJI_TEST_ID:
+                return FUJI_TEST_RPC_URL;
+            case MATIC_ID:
+                return MATIC_RPC_URL;
+            case MATIC_TEST_ID:
+                return MUMBAI_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -403,6 +455,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case HECO_ID:
             case HECO_TEST_ID:
                 return R.drawable.ic_heco_logo;
+            case FANTOM_ID:
+                return R.drawable.ic_fantom;
+            case FANTOM_TEST_ID:
+                return R.drawable.ic_icons_fantom_test;
+            case AVALANCHE_ID:
+                return R.drawable.ic_icons_tokens_avalanche;
+            case FUJI_TEST_ID:
+                return R.drawable.ic_icons_tokens_avalanche_testnet;
+            case MATIC_ID:
+                return R.drawable.ic_icons_polygon;
+            case MATIC_TEST_ID:
+                return R.drawable.ic_icons_matic;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
@@ -441,6 +505,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return HECO_RPC_URL;
             case HECO_TEST_ID:
                 return HECO_TEST_RPC_URL;
+            case FANTOM_ID:
+                return FANTOM_RPC_URL;
+            case FANTOM_TEST_ID:
+                return FANTOM_TEST_RPC_URL;
+            case AVALANCHE_ID:
+                return AVALANCHE_RPC_URL;
+            case FUJI_TEST_ID:
+                return FUJI_TEST_RPC_URL;
+            case MATIC_ID:
+                return MATIC_RPC_URL;
+            case MATIC_TEST_ID:
+                return MUMBAI_TEST_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -501,12 +577,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
+        return new ArrayList<>(Collections.singletonList(MAINNET_ID));
     }
 
     public static ContractLocator getOverrideToken()
     {
-        return new ContractLocator("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);
+        return new ContractLocator("", MAINNET_ID, ContractType.ETHEREUM);
     }
 
     public static boolean isPriorityToken(Token token)

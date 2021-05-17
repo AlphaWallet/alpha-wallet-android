@@ -1,6 +1,7 @@
 package com.alphawallet.token.entity;
 
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.ethereum.NetworkInfo;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
@@ -66,76 +67,15 @@ public class MagicLinkInfo
     private static final String artisSigma1Etherscan = "https://explorer.sigma1.artis.network/";
     private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
 
-
-    //network names
-    private static final String ETHEREUM_NETWORK = "Ethereum";
-    private static final String CLASSIC_NETWORK = "Ethereum Classic";
-    private static final String KOVAN_NETWORK = "Kovan";
-    private static final String ROPSTEN_NETWORK = "Ropsten";
-    private static final String RINKEBY_NETWORK = "Rinkeby";
-    private static final String POA_NETWORK = "POA";
-    private static final String SOKOL_NETWORK = "Sokol";
-    private static final String XDAI_NETWORK = "xDAI";
-    private static final String GOERLI_NETWORK = "Görli";
-    private static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
-    private static final String ARTIS_TAU1_NETWORK = "ARTIS tau1";
-    private static final String BINANCE_TEST_NETWORK = "BSC TestNet";
-    private static final String BINANCE_MAIN_NETWORK = "Binance";
-    private static final String HECO_MAIN_NETWORK = "Heco";
-    private static final String HECO_TEST_NETWORK = "Heco (Test)";
-    private static final String FANTOM_NETWORK = "Fantom Opera";
-    private static final String FANTOM_TEST_NETWORK = "Fantom (Test)";
-    private static final String AVALANCHE_NETWORK = "Avalanche";
-    private static final String FUJI_TEST_NETWORK = "Avalanche FUJI (Test)";
-    private static final String MATIC_NETWORK = "Polygon";
-    private static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
-
     public static String getNetworkNameById(int networkId) {
-        switch (networkId) {
-            case EthereumNetworkBase.MAINNET_ID:
-                return ETHEREUM_NETWORK;
-            case EthereumNetworkBase.KOVAN_ID:
-                return KOVAN_NETWORK;
-            case EthereumNetworkBase.ROPSTEN_ID:
-                return ROPSTEN_NETWORK;
-            case EthereumNetworkBase.RINKEBY_ID:
-                return RINKEBY_NETWORK;
-            case EthereumNetworkBase.POA_ID:
-                return POA_NETWORK;
-            case EthereumNetworkBase.SOKOL_ID:
-                return SOKOL_NETWORK;
-            case EthereumNetworkBase.CLASSIC_ID:
-                return CLASSIC_NETWORK;
-            case EthereumNetworkBase.XDAI_ID:
-                return XDAI_NETWORK;
-            case EthereumNetworkBase.GOERLI_ID:
-                return GOERLI_NETWORK;
-            case EthereumNetworkBase.ARTIS_SIGMA1_ID:
-                return ARTIS_SIGMA1_NETWORK;
-            case EthereumNetworkBase.ARTIS_TAU1_ID:
-                return ARTIS_TAU1_NETWORK;
-            case BINANCE_MAIN_ID:
-                return BINANCE_MAIN_NETWORK;
-            case BINANCE_TEST_ID:
-                return BINANCE_TEST_NETWORK;
-            case HECO_ID:
-                return HECO_MAIN_NETWORK;
-            case HECO_TEST_ID:
-                return HECO_TEST_NETWORK;
-            case FANTOM_ID:
-                return FANTOM_NETWORK;
-            case FANTOM_TEST_ID:
-                return FANTOM_TEST_NETWORK;
-            case AVALANCHE_ID:
-                return AVALANCHE_NETWORK;
-            case FUJI_TEST_ID:
-                return FUJI_TEST_NETWORK;
-            case MATIC_ID:
-                return MATIC_NETWORK;
-            case MATIC_TEST_ID:
-                return MATIC_TEST_NETWORK;
-            default:
-                return ETHEREUM_NETWORK;
+        NetworkInfo info = EthereumNetworkBase.getNetworkByChain(networkId);
+        if (info != null)
+        {
+            return info.name;
+        }
+        else
+        {
+            return EthereumNetworkBase.getNetworkByChain(MAINNET_ID).name;
         }
     }
 
@@ -201,6 +141,7 @@ public class MagicLinkInfo
         }
     }
 
+    //TODO: Refactor to use the centralised source
     public static String getEtherscanURLbyNetwork(int networkId) {
         switch (networkId) {
             case MAINNET_ID:

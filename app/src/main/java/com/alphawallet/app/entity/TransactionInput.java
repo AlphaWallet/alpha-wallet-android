@@ -570,7 +570,7 @@ public class TransactionInput
             case TRANSFER_FROM:
             case RECEIVED:
             case SEND:
-                operationValue = token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
+                operationValue = token.isERC721() ? "#" : "" + token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
                 break;
 
             case LOAD_NEW_TOKENS:

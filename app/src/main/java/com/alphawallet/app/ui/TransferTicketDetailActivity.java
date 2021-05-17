@@ -888,7 +888,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress) {
 
         Web3Transaction w3tx = new Web3Transaction(
-                new com.alphawallet.app.web3.entity.Address(txSendAddress),
+                new Address(txSendAddress),
                 new Address(token.getAddress()),
                 BigInteger.ZERO,
                 BigInteger.ZERO,

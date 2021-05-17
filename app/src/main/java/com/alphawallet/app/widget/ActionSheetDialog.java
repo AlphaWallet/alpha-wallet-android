@@ -126,6 +126,11 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         setupCancelListeners();
+
+        String tokenId = getERC721TokenId();
+        String name = getERC721TokenName();
+
+        System.out.println("Yo: " + tokenId + " --> " + name);
     }
 
     public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, SignAuthenticationCallback sCallback, Signable message)
@@ -263,7 +268,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private String getERC721TokenId()
     {
         if (!token.isERC721()) return "";
-
         TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
         return token.getTransferValue(transactionInput, 0);
     }

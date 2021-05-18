@@ -48,6 +48,16 @@
         <item name="colorControlNormal">@color/text_black</item>
     </style>
 
+    <style name="TokenInfoTabLayoutStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/colorHighlight</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabPaddingStart">5dp</item>
+        <item name="tabPaddingEnd">5dp</item>
+        <item name="tabBackground">@color/colorPrimary</item>
+        <item name="tabTextAppearance">@style/WalletTabTextAppearance</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+    </style>
+
     <style name="WalletTabLayoutStyle" parent="Widget.Design.TabLayout">
         <item name="tabIndicatorColor">@color/colorHighlight</item>
         <item name="tabIndicatorHeight">3dp</item>

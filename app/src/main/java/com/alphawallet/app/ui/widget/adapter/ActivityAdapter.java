@@ -234,7 +234,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         items.beginBatchedUpdates();
         if (itemLimit != 0)
         {
-            items.add(new LabelSortedItem(new Date(Long.MAX_VALUE))); //always at top of list
+//            items.add(new LabelSortedItem(new Date(Long.MAX_VALUE))); //always at top of list
         }
 
         for (ActivityMeta item : activityItems)

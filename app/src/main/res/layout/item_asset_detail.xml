@@ -56,7 +56,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/layout_details"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/image_asset"
@@ -64,15 +65,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/abc_vector_test"/>
         <TextView
-            android:id="@+id/text_asset_name_details"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="3.5"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_semibold"
-            tools:text="Self Portrait (2021)"
-            android:textSize="@dimen/sp16"/>
-        <TextView
+            android:paddingTop="18dp"
             android:id="@+id/text_asset_description"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"

@@ -35,7 +35,6 @@ import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -86,7 +85,6 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.TICKET;
-import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -150,7 +148,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        //wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(TICKET);
 
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
@@ -744,19 +741,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         sendIntent.setType("text/plain");
         startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
-//
-//    private boolean isAddressValid(String address)
-//    {
-//        try
-//        {
-//            new Address(address);
-//            return true;
-//        }
-//        catch (Exception e)
-//        {
-//            return false;
-//        }
-//    }
 
     private void initDatePicker()
     {

@@ -203,14 +203,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
         }
-        else
-        {
-            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            //GasSettings settings = gasService.getGasSettings(data, true, token.tokenInfo.chainId);
-            //disposable = createTransactionsInteract
-            //       .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), data, token.tokenInfo.chainId)
-            //       .subscribe(this::onCreateTransaction, this::onError);
-        }
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)
@@ -223,28 +215,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
-    }
-
-    public void openConfirm(Context ctx, String to, Token token, String hexTokenId, String ensDetails)
-    {
-        //first find the asset within the token
-        Asset asset = null;
-        BigInteger tokenId = new BigInteger(hexTokenId, 16);
-
-        for (Asset a : token.getTokenAssets().values())
-    {
-            BigInteger assetTokenId = new BigInteger(a.getTokenId());
-            if (assetTokenId.equals(tokenId))
-            {
-                asset = a;
-                break;
-            }
-        }
-        if (asset != null)
-        {
-
-             //confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
-        }
     }
 
     public void stopGasSettingsFetch()

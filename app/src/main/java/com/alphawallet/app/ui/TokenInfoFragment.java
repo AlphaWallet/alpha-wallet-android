@@ -17,17 +17,25 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenPerformance;
 import com.alphawallet.app.entity.tokens.TokenPortfolio;
 import com.alphawallet.app.entity.tokens.TokenStats;
+import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.TokenInfoViewModel;
 import com.alphawallet.app.viewmodel.TokenInfoViewModelFactory;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoHeaderView;
 import com.alphawallet.app.widget.TokenInfoView;
+import com.google.android.material.tabs.TabLayout;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
 public class TokenInfoFragment extends BaseFragment {
+    public static final int CHART_1D = 0;
+    public static final int CHART_1W = 1;
+    public static final int CHART_1M = 2;
+    public static final int CHART_3M = 3;
+    public static final int CHART_1Y = 4;
+
     @Inject
     TokenInfoViewModelFactory viewModelFactory;
     private TokenInfoViewModel viewModel;
@@ -69,6 +77,7 @@ public class TokenInfoFragment extends BaseFragment {
         {
             token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
 
+            initTabLayout(view);
             tokenInfoHeaderLayout = view.findViewById(R.id.layout_token_header);
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
 
@@ -116,10 +125,43 @@ public class TokenInfoFragment extends BaseFragment {
                     .get(TokenInfoViewModel.class);
 
             viewModel.marketPrice().observe(getViewLifecycleOwner(), this::onMarketPriceChanged);
+            // TODO: Create entity for chart data
+            // viewModel.chartData().observe(getViewLifecycleOwner(), this::onChartDataFetched);
             viewModel.portfolio().observe(getViewLifecycleOwner(), this::onPortfolioUpdated);
             viewModel.performance().observe(getViewLifecycleOwner(), this::onPerformanceUpdated);
             viewModel.stats().observe(getViewLifecycleOwner(), this::onStatsUpdated);
         }
+    }
+
+    private void initTabLayout(View view)
+    {
+        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+
+        tabLayout.addTab(tabLayout.newTab().setText("1D"));
+        tabLayout.addTab(tabLayout.newTab().setText("1W"));
+        tabLayout.addTab(tabLayout.newTab().setText("1M"));
+        tabLayout.addTab(tabLayout.newTab().setText("3M"));
+        tabLayout.addTab(tabLayout.newTab().setText("1Y"));
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab)
+            {
+                viewModel.fetchChartData(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab)
+            {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab)
+            {
+            }
+        });
+
+        TabUtils.setHighlightedTabColor(getContext(), tabLayout);
     }
 
     private void onMarketPriceChanged(String value)
@@ -127,6 +169,11 @@ public class TokenInfoFragment extends BaseFragment {
         tokenInfoHeaderView.setMarketValue(value);
         // TODO: Compute price change
         // tokenInfoHeaderView.setPriceChange();
+    }
+
+    private void onChartDataFetched()
+    {
+
     }
 
     private void onPortfolioUpdated(TokenPortfolio tokenPortfolio)

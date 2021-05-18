@@ -58,6 +58,22 @@
         <item name="tabSelectedTextColor">@android:color/white</item>
     </style>
 
+    <style name="ChartTabLayoutStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/mine</item>
+        <item name="tabIndicatorHeight">0dp</item>
+        <item name="tabPaddingStart">@dimen/dp23</item>
+        <item name="tabPaddingEnd">@dimen/dp23</item>
+        <item name="tabTextAppearance">@style/ChartTabTextAppearance</item>
+    </style>
+
+    <style name="ChartTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/dove</item>
+        <item name="android:padding">@dimen/dp10</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
     <style name="WalletTabLayoutStyle" parent="Widget.Design.TabLayout">
         <item name="tabIndicatorColor">@color/colorHighlight</item>
         <item name="tabIndicatorHeight">3dp</item>

@@ -2,12 +2,6 @@ package com.alphawallet.app.ui;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -17,6 +11,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
 import com.alphawallet.app.ui.widget.OnSuggestionClickListener;
@@ -24,15 +25,14 @@ import com.alphawallet.app.ui.widget.adapter.SuggestionsAdapter;
 import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener, OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
@@ -268,7 +268,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     }
 
     private void filterList(String lastWord) {
-        List<String> filteredList = Lists.newArrayList(Collections2.filter(suggestions, input -> input.startsWith(lastWord)));
+        List<String> filteredList = new ArrayList<String>(Collections2.filter(suggestions, input -> input.startsWith(lastWord)));
         suggestionsAdapter.setData(filteredList, lastWord);
     }
 

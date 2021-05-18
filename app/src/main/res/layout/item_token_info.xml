@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/dp24"
+        android:paddingTop="@dimen/dp18"
+        android:paddingEnd="@dimen/dp24"
+        android:paddingBottom="@dimen/dp18">
+
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:layout_weight="0.4"
+            android:ellipsize="end"
+            android:fontFamily="@font/font_regular"
+            android:singleLine="true"
+            android:text="Balance"
+            android:textColor="@color/dove"
+            android:textSize="@dimen/sp15" />
+
+        <TextView
+            android:id="@+id/value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:ellipsize="end"
+            android:fontFamily="@font/font_bold"
+            android:gravity="end|center_vertical"
+            android:singleLine="true"
+            android:text="-"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="@dimen/dp16"
+        android:layout_marginEnd="@dimen/dp16"
+        android:background="@color/mercury" />
+</LinearLayout>

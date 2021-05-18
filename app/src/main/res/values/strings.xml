@@ -771,4 +771,5 @@
     <string name="select_dappbrowser_network">Connect to Network</string>
     <string name="choose_network_preference">Choose Network Preference</string>
     <string name="please_select_at_least_one_network">Please select at least one network.</string>
+    <string name="token_info_portfolio">Portfolio</string>
 </resources>

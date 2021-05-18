@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/greyf9"
+    android:background="@color/alabaster"
     android:gravity="center">
 
     <View
@@ -21,12 +21,12 @@
         android:fontFamily="@font/font_semibold"
         android:textAllCaps="true"
         android:gravity="center_vertical"
-        android:textColor="@color/grey76"
-        android:textSize="15sp"
-        tools:text="Jan, 09 2017" />
+        android:textColor="@color/dove"
+        android:textSize="@dimen/sp15"
+        tools:text="Jan 09, 2017" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/greye5"/>
+        android:background="@color/mercury"/>
 </LinearLayout>

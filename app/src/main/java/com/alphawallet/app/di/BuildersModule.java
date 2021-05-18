@@ -25,8 +25,11 @@ import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.TokenActivityFragment;
+import com.alphawallet.app.ui.TokenAlertsFragment;
 import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.TokenFunctionActivity;
+import com.alphawallet.app.ui.TokenInfoFragment;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
@@ -186,4 +189,16 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletConnectModule.class)
 	abstract WalletConnectSessionActivity bindWalletConnectSessionActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TokenInfoModule.class)
+	abstract TokenInfoFragment bindTokenInfoFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TokenActivityModule.class)
+	abstract TokenActivityFragment bindTokenActivityFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TokenAlertsModule.class)
+	abstract TokenAlertsFragment bindTokenAlertsFragment();
 }

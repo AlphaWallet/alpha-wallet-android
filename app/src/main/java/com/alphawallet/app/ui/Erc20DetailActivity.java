@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -9,18 +8,20 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BuyCryptoInterface;
-import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -28,14 +29,17 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
+import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
+import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
-import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.google.android.material.tabs.TabLayout;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -48,14 +52,11 @@ import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
-public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
-{
+public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface {
+    public static final int HISTORY_LENGTH = 5;
     @Inject
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
-
-    public static final int HISTORY_LENGTH = 5;
-
     private String symbol;
     private Wallet wallet;
     private Token token;
@@ -63,12 +64,18 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private FunctionButtonBar functionBar;
     private RecyclerView tokenView;
-    private CertifiedToolbarView toolbarView;
 
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
+
+    private FrameLayout frame;
+    private ViewPager viewPager;
+
+    private TokenInfoFragment tokenInfoFragment;
+    private TokenActivityFragment tokenActivityFragment;
+    private TokenAlertsFragment tokenAlertsFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -77,23 +84,95 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
         toolbar();
-        setTitle("");
+
+//        token = getTokenInfo(getIntent());
+        getIntentData();
+
+        initViews();
+        setTitle(token.tokenInfo.name + " (" + token.tokenInfo.symbol + ")");
+    }
+
+    private void initViews()
+    {
+        tokenInfoFragment = new TokenInfoFragment();
+        tokenActivityFragment = new TokenActivityFragment();
+        tokenAlertsFragment = new TokenAlertsFragment();
+
+        List<Pair<String, Fragment>> pages = new ArrayList<>();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(C.EXTRA_TOKEN_ID, token);
+        bundle.putParcelable(WALLET, wallet);
+        tokenInfoFragment.setArguments(bundle);
+        tokenActivityFragment.setArguments(bundle);
+        tokenAlertsFragment.setArguments(bundle);
+
+        pages.add(0, new Pair<>("Info", tokenInfoFragment));
+        pages.add(1, new Pair<>("Activity", tokenActivityFragment));
+        pages.add(2, new Pair<>("Alerts", tokenAlertsFragment));
+
+        viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+//                currentPage = ImportWalletActivity.ImportType.values()[position];
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state)
+            {
+            }
+        });
+
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+
+        tabLayout.setupWithViewPager(viewPager);
+
+        // TODO: addOnTabSelectedListener if you need to refresh values when switching tabs
+
+        TabUtils.decorateTabLayout(this, tabLayout);
+    }
+
+    private Token getTokenInfo(Intent intent)
+    {
+        if (intent != null)
+        {
+            return intent.getParcelableExtra(C.EXTRA_TOKEN_ID);
+        }
+        return null;
+    }
+
+    private void setupButtons()
+    {
+        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
+        {
+            functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
+            functionBar.revealButtons();
+            functionBar.setWalletType(wallet.type);
+        }
     }
 
     private void setupViewModel()
     {
-        toolbarView = findViewById(R.id.toolbar);
-
         if (viewModel == null)
         {
             viewModel = new ViewModelProvider(this, erc20DetailViewModelFactory)
                     .get(Erc20DetailViewModel.class);
-            viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
             viewModel.newScriptFound().observe(this, this::onNewScript);
-            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
+//            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
             viewModel.checkForNewScript(token);
         }
     }
+
 
     private void onNewScript(Boolean hasNewScript)
     {
@@ -123,7 +202,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         tokenView = findViewById(R.id.token_view);
         tokenView.setLayoutManager(new LinearLayoutManager(this) {
             @Override
-            public boolean canScrollVertically() {
+            public boolean canScrollVertically()
+            {
                 return false;
             }
         });
@@ -136,17 +216,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewModel.checkTokenScriptValidity(token);
     }
 
-    private void setupButtons()
-    {
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
-        {
-            functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
-            functionBar.revealButtons();
-            functionBar.setWalletType(wallet.type);
-        }
-    }
 
     private void getIntentData()
     {
@@ -162,7 +231,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (realm == null) realm = viewModel.getRealmInstance(wallet);
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
-                .greaterThan("addedTime", System.currentTimeMillis()- 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
+                .greaterThan("addedTime", System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.size() == 0) return;
             for (RealmToken t : realmTokens)
@@ -188,8 +257,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(this, notification);
             r.play();
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             //empty
         }
@@ -198,7 +266,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_qr, menu);
+//        getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -208,8 +276,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (item.getItemId() == android.R.id.home)
         {
             finish();
-        }
-        else if (item.getItemId() == R.id.action_qr)
+        } else if (item.getItemId() == R.id.action_qr)
         {
             viewModel.showContractInfo(this, wallet, token);
         }
@@ -217,7 +284,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         super.onDestroy();
         if (activityHistoryList != null) activityHistoryList.onDestroy();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();

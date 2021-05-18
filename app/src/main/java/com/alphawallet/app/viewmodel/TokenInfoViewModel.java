@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.tokens.TokenPortfolio;
 import com.alphawallet.app.entity.tokens.TokenStats;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.TokenInfoFragment;
 
 public class TokenInfoViewModel extends BaseViewModel {
     private final MutableLiveData<String> marketPrice = new MutableLiveData<>();
@@ -70,5 +71,39 @@ public class TokenInfoViewModel extends BaseViewModel {
         // TODO: Do calculations here
 
         stats.postValue(tokenStats);
+    }
+
+    public void fetchChartData(int position)
+    {
+        switch (position)
+        {
+            case TokenInfoFragment.CHART_1D:
+            {
+                // TODO
+                break;
+            }
+            case TokenInfoFragment.CHART_1W:
+            {
+                // TODO
+                break;
+            }
+            case TokenInfoFragment.CHART_1M:
+            {
+                // TODO
+                break;
+            }
+            case TokenInfoFragment.CHART_3M:
+            {
+                // TODO
+                break;
+            }
+            case TokenInfoFragment.CHART_1Y:
+            {
+                // TODO
+                break;
+            }
+            default:
+                break;
+        }
     }
 }

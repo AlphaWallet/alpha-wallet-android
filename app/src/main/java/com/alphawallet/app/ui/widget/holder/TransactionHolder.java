@@ -44,7 +44,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView value;
     private final ChainName chainName;
     private final TextView supplemental;
-    //private final TextView symbol;
     private final TokensService tokensService;
     private final LinearLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
@@ -65,7 +64,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         chainName = findViewById(R.id.chain_name);
         supplemental = findViewById(R.id.supplimental);
         transactionBackground = findViewById(R.id.layout_background);
-        //symbol = findViewById(R.id.symbol);
         tokensService = service;
         transactionsInteract = interact;
         assetService = svs;

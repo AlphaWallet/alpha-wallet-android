@@ -5,29 +5,35 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_add_new_price_alert" />
-
-    <LinearLayout
-        android:id="@+id/layout_no_alerts"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_no_alerts" />
+        <include layout="@layout/layout_add_new_price_alert" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/alerts_will_appear_here"
-            android:textColor="@color/mine"
-            android:textSize="@dimen/sp17" />
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_no_alerts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_no_alerts" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/alerts_will_appear_here"
+                android:textColor="@color/mine"
+                android:textSize="@dimen/sp17" />
+        </LinearLayout>
+
+    </RelativeLayout>
+    
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"

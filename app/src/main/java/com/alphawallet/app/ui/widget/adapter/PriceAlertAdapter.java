@@ -15,12 +15,13 @@ import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.PriceAlertViewHolder> {
-    private ArrayList<PriceAlert> items;
+    private List<PriceAlert> items;
     private Context context;
 
-    public PriceAlertAdapter(Context context, ArrayList<PriceAlert> items)
+    public PriceAlertAdapter(Context context, List<PriceAlert> items)
     {
         this.items = items;
         this.context = context;
@@ -63,6 +64,21 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
     public void add(PriceAlert item) {
         items.add(item);
         notifyItemChanged(items.size()-1);
+    }
+
+    public void remove(int position) {
+        items.remove(position);
+        notifyDataSetChanged();
+    }
+
+    public List<PriceAlert> getItems()
+    {
+        return items;
+    }
+
+    public void setItems(ArrayList<PriceAlert> items)
+    {
+        this.items = items;
     }
 
     public static class PriceAlertViewHolder extends RecyclerView.ViewHolder {

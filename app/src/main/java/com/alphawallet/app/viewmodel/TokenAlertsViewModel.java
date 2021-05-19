@@ -25,7 +25,7 @@ public class TokenAlertsViewModel extends BaseViewModel {
     private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
 
-    private final MutableLiveData<ArrayList<PriceAlert>> priceAlerts = new MutableLiveData<>();
+    private final MutableLiveData<List<PriceAlert>> priceAlerts = new MutableLiveData<>();
 
     public TokenAlertsViewModel(AssetDefinitionService assetDefinitionService,
                                 PreferenceRepositoryType preferenceRepository,
@@ -36,7 +36,7 @@ public class TokenAlertsViewModel extends BaseViewModel {
         this.tokensService = tokensService;
     }
 
-    public LiveData<ArrayList<PriceAlert>> priceAlerts()
+    public LiveData<List<PriceAlert>> priceAlerts()
     {
         return priceAlerts;
     }
@@ -58,6 +58,13 @@ public class TokenAlertsViewModel extends BaseViewModel {
         priceAlerts.postValue(list);
     }
 
+    public void openAddPriceAlertMenu(Fragment fragment, Token token, int requestCode)
+    {
+        Intent intent = new Intent(fragment.getContext(), SetPriceAlertActivity.class);
+        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        fragment.startActivityForResult(intent, requestCode);
+    }
+
     public void saveAlert(PriceAlert priceAlert)
     {
         Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
@@ -71,12 +78,18 @@ public class TokenAlertsViewModel extends BaseViewModel {
         String updatedJson = new Gson().toJson(list, listType);
 
         preferenceRepository.setPriceAlerts(updatedJson);
+
+        priceAlerts.postValue(list);
     }
 
-    public void openAddPriceAlertMenu(Fragment fragment, Token token, int requestCode)
+    public void updateStoredAlerts(List<PriceAlert> items)
     {
-        Intent intent = new Intent(fragment.getContext(), SetPriceAlertActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
-        fragment.startActivityForResult(intent, requestCode);
+        Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
+
+        String updatedJson = items.isEmpty()? "" : new Gson().toJson(items, listType);
+
+        preferenceRepository.setPriceAlerts(updatedJson);
+
+        priceAlerts.postValue(items);
     }
 }

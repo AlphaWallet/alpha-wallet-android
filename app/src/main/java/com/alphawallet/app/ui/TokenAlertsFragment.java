@@ -3,6 +3,9 @@ package com.alphawallet.app.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +14,9 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,7 +28,7 @@ import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModel;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModelFactory;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -65,21 +70,34 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             recyclerView = view.findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback());
+            itemTouchHelper.attachToRecyclerView(recyclerView);
+
             noAlertsLayout = view.findViewById(R.id.layout_no_alerts);
 
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(TokenAlertsViewModel.class);
-            viewModel.priceAlerts().observe(getViewLifecycleOwner(), this::onPriceAlertsFetched);
-
+            viewModel.priceAlerts().observe(getViewLifecycleOwner(), this::onPriceAlertsUpdated);
             viewModel.fetchStoredPriceAlerts();
         }
     }
 
-    private void onPriceAlertsFetched(ArrayList<PriceAlert> priceAlerts)
+    private void onPriceAlertsUpdated(List<PriceAlert> priceAlerts)
     {
         adapter = new PriceAlertAdapter(getContext(), priceAlerts);
         recyclerView.setAdapter(adapter);
         noAlertsLayout.setVisibility(priceAlerts.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void addAlert(PriceAlert alert)
+    {
+        viewModel.saveAlert(alert);
+    }
+
+    private void removeAlert(int position)
+    {
+        adapter.remove(position);
+        viewModel.updateStoredAlerts(adapter.getItems());
     }
 
     @Override
@@ -100,16 +118,86 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             {
                 if (data != null)
                 {
-                    PriceAlert alert = data.getParcelableExtra(C.EXTRA_PRICE_ALERT);
-                    adapter.add(alert);
-                    noAlertsLayout.setVisibility(View.GONE);
-                    viewModel.saveAlert(alert);
+                    addAlert(data.getParcelableExtra(C.EXTRA_PRICE_ALERT));
                 }
             }
         }
         else
         {
             super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
+        private Drawable icon;
+        private ColorDrawable background;
+
+        SwipeCallback()
+        {
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+            if (getActivity() != null)
+            {
+                icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_hide_token);
+                if (icon != null)
+                {
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
+                }
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.cancel_red));
+            }
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1)
+        {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i)
+        {
+            removeAlert(viewHolder.getAbsoluteAdapterPosition());
+        }
+
+        @Override
+        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder)
+        {
+            return super.getSwipeDirs(recyclerView, viewHolder);
+        }
+
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive)
+        {
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            View itemView = viewHolder.itemView;
+            int offset = 20;
+            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconBottom = iconTop + icon.getIntrinsicHeight();
+
+            if (dX > 0)
+            {
+                int iconLeft = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
+                int iconRight = itemView.getLeft() + iconMargin;
+                icon.setBounds(iconRight, iconTop, iconLeft, iconBottom);
+                background.setBounds(itemView.getLeft(), itemView.getTop(),
+                        itemView.getLeft() + ((int) dX) + offset,
+                        itemView.getBottom());
+            }
+            else if (dX < 0)
+            {
+                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
+                int iconRight = itemView.getRight() - iconMargin;
+                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                background.setBounds(itemView.getRight() + ((int) dX) - offset,
+                        itemView.getTop(), itemView.getRight(), itemView.getBottom());
+            }
+            else
+            {
+                background.setBounds(0, 0, 0, 0);
+            }
+
+            background.draw(c);
+            icon.draw(c);
         }
     }
 }

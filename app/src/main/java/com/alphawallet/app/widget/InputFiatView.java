@@ -117,4 +117,8 @@ public class InputFiatView extends LinearLayout {
         icon.setImageResource(CurrencyRepository.getFlagByISO(symbol));
         symbolText.setText(symbol);
     }
+
+    public void showKeyboard() {
+        amountInput.requestFocus();
+    }
 }

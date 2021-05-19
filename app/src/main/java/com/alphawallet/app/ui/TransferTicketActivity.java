@@ -92,7 +92,7 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     {
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), null, this);
         adapter.addQuantitySelector();
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);

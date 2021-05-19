@@ -172,8 +172,8 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @Override
-    public void showTokenList(Context context, Token token) {
-        assetDisplayRouter.open(context, token, defaultWallet.getValue());
+    public void showTokenList(Activity activity, Token token) {
+        assetDisplayRouter.open(activity, token, defaultWallet.getValue());
     }
 
     public void checkBackup()

@@ -10,9 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.bumptech.glide.Glide;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Jenny Jingjing Li on 13/05/2021
@@ -39,7 +42,7 @@ public class AssetDetailView extends LinearLayout
         layoutHolder = findViewById(R.id.layout_holder);
     }
 
-    public void setupAssetDetail(Token token, String tokenId)
+    public void setupAssetDetail(Token token, String tokenId, ActionSheetInterface actionSheetInterface)
     {
         Asset asset = token.getAssetForToken(tokenId);
         assetName.setText(asset.getName());
@@ -55,6 +58,7 @@ public class AssetDetailView extends LinearLayout
             {
                 layoutDetails.setVisibility(View.VISIBLE);
                 assetDetails.setImageResource(R.drawable.ic_expand_less_black);
+                actionSheetInterface.fullExpand();
             }
             else
             {
@@ -62,7 +66,6 @@ public class AssetDetailView extends LinearLayout
                 assetDetails.setImageResource(R.drawable.ic_expand_more);
             }
         });
-
     }
 
 }

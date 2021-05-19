@@ -35,7 +35,6 @@ import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -86,7 +85,6 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.TICKET;
-import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -182,7 +180,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.transactionError().observe(this, this::txError);
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -507,20 +505,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
     }
 
-    private void onENSProgress(boolean shouldShowProgress)
-    {
-        hideDialog();
-        if (shouldShowProgress)
-        {
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.NONE);
-            dialog.setTitle(R.string.title_dialog_check_ens);
-            dialog.setProgressMode();
-            dialog.setCancelable(false);
-            dialog.show();
-        }
-    }
-
     private void onError(ErrorEnvelope error)
     {
         hideDialog();
@@ -639,6 +623,12 @@ public class TransferTicketDetailActivity extends BaseActivity
                     actionDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
                 }
                 break;
+            case C.COMPLETED_TRANSACTION:
+                Intent i = new Intent();
+                i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
+                setResult(RESULT_OK, new Intent());
+                finish();
+                break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
@@ -744,19 +734,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         sendIntent.setType("text/plain");
         startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
-//
-//    private boolean isAddressValid(String address)
-//    {
-//        try
-//        {
-//            new Address(address);
-//            return true;
-//        }
-//        catch (Exception e)
-//        {
-//            return false;
-//        }
-//    }
 
     private void initDatePicker()
     {
@@ -799,7 +776,6 @@ public class TransferTicketDetailActivity extends BaseActivity
             KeyboardUtils.hideKeyboard(getCurrentFocus());
             addressInput.getAddress();
         }
-
     }
 
     @Override
@@ -815,7 +791,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
         else
         {
-
             if (token instanceof ERC721Token)
             {
                 calculateTransactionCost();
@@ -824,7 +799,6 @@ public class TransferTicketDetailActivity extends BaseActivity
             {
                 handleERC875Transfer(address, ensName);
             }
-
         }
     }
 
@@ -912,7 +886,6 @@ public class TransferTicketDetailActivity extends BaseActivity
             actionDialog.setCanceledOnTouchOutside(false);
             actionDialog.show();
         }
-
     }
 
     /**

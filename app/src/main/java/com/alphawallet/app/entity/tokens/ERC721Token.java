@@ -61,7 +61,7 @@ public class ERC721Token extends Token implements Parcelable
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
-        Long tokenId = parseTokenId(asset.getTokenId());
+        long tokenId = parseTokenId(asset.getTokenId());
         tokenBalanceAssets.put(tokenId, asset);
     }
 
@@ -149,9 +149,9 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public void clickReact(BaseViewModel viewModel, Activity context)
+    public void clickReact(BaseViewModel viewModel, Activity activity)
     {
-        viewModel.showTokenList(context, this);
+        viewModel.showTokenList(activity, this);
     }
 
     @Override
@@ -323,9 +323,9 @@ public class ERC721Token extends Token implements Parcelable
         return new BigDecimal(getArrayBalance().size());
     }
 
-    private Long parseTokenId(String tokenIdStr)
+    private long parseTokenId(String tokenIdStr)
     {
-        Long tokenId;
+        long tokenId;
         try
         {
             tokenId = Long.parseLong(tokenIdStr);

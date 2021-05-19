@@ -56,6 +56,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final AssetDetailView assetDetailView;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
+    private final Activity activity;
 
     private final Token token;
     private final TokensService tokensService;
@@ -85,6 +86,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         amountDisplay = findViewById(R.id.amount_display);
         assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
+        this.activity = activity;
         if (activity instanceof HomeActivity)
         {
             mode = ActionSheetMode.SEND_TRANSACTION_DAPP;
@@ -120,7 +122,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         if (token.isERC721())
         {
-            assetDetailView.setupAssetDetail(token, getERC721TokenId());
+            assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
             assetDetailView.setVisibility(View.VISIBLE);
             balanceDisplay.setVisibility(View.GONE);
             amountDisplay.setVisibility(View.GONE);
@@ -145,6 +147,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget = null;
         mode = ActionSheetMode.SIGN_MESSAGE;
         callbackId = message.getCallbackId();
+        this.activity = activity;
 
         actionSheetCallback = aCallback;
         signCallback = sCallback;
@@ -353,7 +356,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
                 intent.putExtra(C.EXTRA_TXHASH, txHash);
                 intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                getContext().startActivity(intent);
+                activity.startActivityForResult(intent, C.COMPLETED_TRANSACTION);
                 dismiss();
                 break;
 
@@ -508,6 +511,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
             if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
         }
+    }
+
+    @Override
+    public void fullExpand()
+    {
+        FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     public void setGasEstimate(BigInteger estimate)

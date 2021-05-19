@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.token.entity.TicketRange;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.util.KittyUtils;
@@ -46,8 +48,9 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private final AppCompatRadioButton itemSelect;
     private Handler handler;
     private boolean activeClick;
+    private final Activity activity;
 
-    public OpenseaHolder(int resId, ViewGroup parent, Token token) {
+    public OpenseaHolder(int resId, ViewGroup parent, Token token, Activity activity) {
         super(resId, parent);
         titleText = findViewById(R.id.name);
         image = findViewById(R.id.image_view);
@@ -57,6 +60,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         layoutToken = findViewById(R.id.layout_token);
         itemSelect = findViewById(R.id.radioBox);
         this.token = token;
+        this.activity = activity;
     }
 
     @Override
@@ -163,7 +167,14 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
             Intent intent = new Intent(getContext(), TokenDetailActivity.class);
             intent.putExtra("asset", getAsset(data));
             intent.putExtra("token", token);
-            getContext().startActivity(intent);
+            if (activity != null)
+            {
+                activity.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
+            }
+            else
+            {
+                getContext().startActivity(intent);
+            }
         }
     }
 

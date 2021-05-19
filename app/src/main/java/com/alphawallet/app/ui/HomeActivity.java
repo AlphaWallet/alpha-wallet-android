@@ -1086,6 +1086,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     showPage(DAPP_BROWSER);
                 }
                 break;
+            case C.TERMINATE_ACTIVITY:
+                if (data != null && resultCode == Activity.RESULT_OK)
+                {
+                    showPage(ACTIVITY);
+                }
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

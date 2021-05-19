@@ -225,28 +225,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public void openConfirm(Context ctx, String to, Token token, String hexTokenId, String ensDetails)
-    {
-        //first find the asset within the token
-        Asset asset = null;
-        BigInteger tokenId = new BigInteger(hexTokenId, 16);
-
-        for (Asset a : token.getTokenAssets().values())
-    {
-            BigInteger assetTokenId = new BigInteger(a.getTokenId());
-            if (assetTokenId.equals(tokenId))
-            {
-                asset = a;
-                break;
-            }
-        }
-        if (asset != null)
-        {
-
-             //confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
-        }
-    }
-
     public void stopGasSettingsFetch()
     {
         gasService.stopGasPriceCycle();

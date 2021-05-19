@@ -1,13 +1,9 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.gridlayout.widget.GridLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,21 +11,24 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.gridlayout.widget.GridLayout;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.opensea.Trait;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.TSAction;
 import com.bumptech.glide.Glide;
-import com.alphawallet.app.util.KittyUtils;
-
-import com.alphawallet.app.R;
-
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
-import com.alphawallet.app.entity.opensea.Trait;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -248,7 +247,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId(16));
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivity(intent);
+        startActivityForResult(intent, C.TERMINATE_ACTIVITY);
     }
 
     @Override
@@ -261,5 +260,25 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode)
+        {
+            case C.TERMINATE_ACTIVITY:
+                if (resultCode == RESULT_OK && data != null)
+                {
+                    Intent i = new Intent();
+                    i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
+                    setResult(RESULT_OK, new Intent());
+                    finish();
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

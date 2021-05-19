@@ -532,13 +532,13 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
 
     @Override
-    public void showTokenList(Context context, Token token)
+    public void showTokenList(Activity activity, Token token)
     {
-        Intent intent = new Intent(context, AssetDisplayActivity.class);
+        Intent intent = new Intent(activity, AssetDisplayActivity.class);
         intent.putExtra(C.Key.TICKET, token);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        context.startActivity(intent);
+        activity.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
     }
 
     public void restartServices()

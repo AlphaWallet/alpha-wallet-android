@@ -324,6 +324,11 @@
             android:name=".ui.TransactionSuccessActivity"
             android:label="Transaction Success" />
 
+        <activity
+            android:name=".ui.SetPriceAlertActivity"
+            android:label="Set New Alert"
+            android:windowSoftInputMode="adjustResize"/>
+
     </application>
 
 </manifest>

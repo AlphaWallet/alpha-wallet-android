@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,20 +25,10 @@
             android:gravity="center_vertical|end"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="@string/amount"
+            android:text="@string/enter_target_price"
             android:textAllCaps="true"
             android:textColor="@color/dove"
             android:textSize="15sp" />
-
-
-        <com.alphawallet.app.widget.ChainName
-            android:id="@+id/chain_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/dp10" />
 
     </RelativeLayout>
 
@@ -67,24 +56,24 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <com.alphawallet.app.widget.TokenIcon
-                    android:id="@+id/token_icon"
+                <ImageView
+                    android:id="@+id/icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="@dimen/dp8"
-                    app:showStatus="false" />
+                    android:src="@drawable/ic_flags_usa" />
 
                 <TextView
-                    android:id="@+id/text_token_symbol"
+                    android:id="@+id/symbol"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_regular"
                     android:textAllCaps="true"
                     android:textColor="@color/black"
                     android:textSize="@dimen/sp32"
-                    tools:text="ETH" />
+                    tools:text="USD" />
 
                 <ImageView
                     android:id="@+id/expand_more"
@@ -96,16 +85,6 @@
                     android:src="@drawable/ic_expand_more" />
 
             </LinearLayout>
-
-            <ProgressBar
-                android:id="@+id/gas_fetch_progress"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="end"
-                android:indeterminateTint="@color/azure"
-                android:paddingTop="@dimen/dp8"
-                android:paddingBottom="@dimen/dp8"
-                android:visibility="gone" />
 
             <com.alphawallet.app.ui.widget.entity.NumericInput
                 android:id="@+id/amount_entry"
@@ -138,57 +117,18 @@
                 android:id="@+id/subtext_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/available"
+                android:text="Current Price: "
                 android:textColor="@color/dove"
                 android:textSize="12sp" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=":"
-                android:textColor="@color/dove"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/text_available"
+                android:id="@+id/subtext_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="3dp"
                 android:textColor="@color/dove"
                 android:textSize="12sp"
-                tools:text="4.4328" />
-
-            <TextView
-                android:id="@+id/text_symbol"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/dove"
-                android:textSize="12sp"
-                tools:text="ETH" />
-
-            <TextView
-                android:id="@+id/text_error"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="end"
-                android:text="@string/error_insufficient_funds"
-                android:textColor="@color/design_default_color_error"
-                android:textSize="@dimen/sp17"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/text_all_funds"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="end"
-                android:lines="1"
-                android:text="@string/all_funds"
-                android:textColor="@color/azure"
-                android:textSize="@dimen/sp17"
-                android:visibility="visible" />
+                tools:text="$4444.43" />
 
         </LinearLayout>
 

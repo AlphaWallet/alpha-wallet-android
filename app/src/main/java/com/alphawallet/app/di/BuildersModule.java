@@ -23,6 +23,7 @@ import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.app.ui.SetPriceAlertActivity;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.TokenActivityFragment;
@@ -201,4 +202,8 @@ public abstract class BuildersModule {
 	@FragmentScope
 	@ContributesAndroidInjector(modules = TokenAlertsModule.class)
 	abstract TokenAlertsFragment bindTokenAlertsFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SetPriceAlertModule.class)
+	abstract SetPriceAlertActivity bindSetPriceAlertActivity();
 }

@@ -772,4 +772,7 @@
     <string name="choose_network_preference">Choose Network Preference</string>
     <string name="please_select_at_least_one_network">Please select at least one network.</string>
     <string name="token_info_portfolio">Portfolio</string>
+    <string name="enter_target_price">Enter Target Price</string>
+    <string name="title_set_new_alert">Set New Alert</string>
+    <string name="action_save_alert">Save Alert</string>
 </resources>

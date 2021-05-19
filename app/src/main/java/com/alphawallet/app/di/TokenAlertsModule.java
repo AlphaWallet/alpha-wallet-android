@@ -1,9 +1,9 @@
 package com.alphawallet.app.di;
 
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModelFactory;
-import com.alphawallet.app.viewmodel.TokenInfoViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -12,10 +12,12 @@ import dagger.Provides;
 class TokenAlertsModule {
     @Provides
     TokenAlertsViewModelFactory provideTokenAlertsViewModelFactory(AssetDefinitionService assetDefinitionService,
-                                                                 TokensService tokensService)
+                                                                   PreferenceRepositoryType preferenceRepository,
+                                                                   TokensService tokensService)
     {
         return new TokenAlertsViewModelFactory(
                 assetDefinitionService,
+                preferenceRepository,
                 tokensService);
     }
 }

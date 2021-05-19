@@ -148,7 +148,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        //wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(TICKET);
 
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);

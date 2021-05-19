@@ -271,21 +271,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         return token.getTransferValue(transactionInput, 0);
     }
 
-    private String getERC721TokenName()
-    {
-        try
-        {
-            Asset asset = token.getAssetForToken(getERC721TokenId());
-            return asset.getName();
-        }
-        catch (Exception e)
-        {
-            //will throw if token is anything other than erc721. Harmlessly drop through
-        }
-
-        return "";
-    }
-
     private void signMessage()
     {
         //get authentication

@@ -136,18 +136,18 @@ public class ActivityHistoryList extends LinearLayout
 
     private void initViews(boolean isEth)
     {
-        TextView noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
-
-        if (isEth)
-        {
-            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
-                    context.getString(R.string.no_recent_transactions_subtext_ether)));
-        }
-        else
-        {
-            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
-                    context.getString(R.string.no_recent_transactions_subtext_tokens)));
-        }
+//        TextView noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
+//
+//        if (isEth)
+//        {
+//            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
+//                    context.getString(R.string.no_recent_transactions_subtext_ether)));
+//        }
+//        else
+//        {
+//            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
+//                    context.getString(R.string.no_recent_transactions_subtext_tokens)));
+//        }
     }
 
     private RealmQuery<RealmTransaction> getContractListener(int chainId, String tokenAddress, int count)

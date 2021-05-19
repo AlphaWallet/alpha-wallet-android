@@ -24,8 +24,8 @@ public class TokenAlertsViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
-
     private final MutableLiveData<List<PriceAlert>> priceAlerts = new MutableLiveData<>();
+    private Token token;
 
     public TokenAlertsViewModel(AssetDefinitionService assetDefinitionService,
                                 PreferenceRepositoryType preferenceRepository,
@@ -41,24 +41,33 @@ public class TokenAlertsViewModel extends BaseViewModel {
         return priceAlerts;
     }
 
-    public void fetchStoredPriceAlerts()
+    public void fetchStoredPriceAlerts(Token token)
     {
+        this.token = token;
+
         Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
 
-        ArrayList<PriceAlert> list;
         String json = preferenceRepository.getPriceAlerts();
-        if (!json.isEmpty())
-        {
-            list = new Gson().fromJson(json, listType);
-        }
-        else
-        {
-            list = new ArrayList<>();
-        }
-        priceAlerts.postValue(list);
+
+        List<PriceAlert> list = json.isEmpty() ? new ArrayList<>() : new Gson().fromJson(json, listType);
+
+        priceAlerts.postValue(getFilteredList(list));
     }
 
-    public void openAddPriceAlertMenu(Fragment fragment, Token token, int requestCode)
+    private List<PriceAlert> getFilteredList(List<PriceAlert> source)
+    {
+        List<PriceAlert> filteredList = new ArrayList<>();
+        for (PriceAlert p : source)
+        {
+            if (p.getToken().equals(token.tokenInfo.name))
+            {
+                filteredList.add(p);
+            }
+        }
+        return filteredList;
+    }
+
+    public void openAddPriceAlertMenu(Fragment fragment, int requestCode)
     {
         Intent intent = new Intent(fragment.getContext(), SetPriceAlertActivity.class);
         intent.putExtra(C.EXTRA_TOKEN_ID, token);
@@ -71,7 +80,7 @@ public class TokenAlertsViewModel extends BaseViewModel {
 
         String json = preferenceRepository.getPriceAlerts();
 
-        ArrayList<PriceAlert> list = json.isEmpty()? new ArrayList<>() : new Gson().fromJson(json, listType);;
+        ArrayList<PriceAlert> list = json.isEmpty() ? new ArrayList<>() : new Gson().fromJson(json, listType);
 
         list.add(priceAlert);
 
@@ -79,17 +88,17 @@ public class TokenAlertsViewModel extends BaseViewModel {
 
         preferenceRepository.setPriceAlerts(updatedJson);
 
-        priceAlerts.postValue(list);
+        priceAlerts.postValue(getFilteredList(list));
     }
 
     public void updateStoredAlerts(List<PriceAlert> items)
     {
         Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
 
-        String updatedJson = items.isEmpty()? "" : new Gson().toJson(items, listType);
+        String updatedJson = items.isEmpty() ? "" : new Gson().toJson(items, listType);
 
         preferenceRepository.setPriceAlerts(updatedJson);
 
-        priceAlerts.postValue(items);
+        priceAlerts.postValue(getFilteredList(items));
     }
 }

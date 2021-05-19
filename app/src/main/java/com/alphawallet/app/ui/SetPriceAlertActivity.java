@@ -57,7 +57,7 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(SetPriceAlertViewModel.class);
 
-            newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.address);
+            newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.name);
 
             inputView.showKeyboard();
         }

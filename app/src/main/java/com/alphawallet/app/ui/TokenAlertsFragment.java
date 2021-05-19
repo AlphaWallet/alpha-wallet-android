@@ -34,15 +34,12 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
 
     @Inject
     TokenAlertsViewModelFactory viewModelFactory;
-
     private TokenAlertsViewModel viewModel;
 
-    private RecyclerView recyclerView;
-
-    private PriceAlertAdapter adapter;
-
     private LinearLayout layoutAddPriceAlert;
-
+    private LinearLayout noAlertsLayout;
+    private RecyclerView recyclerView;
+    private PriceAlertAdapter adapter;
     private Token token;
 
     @Nullable
@@ -64,8 +61,11 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
 
             layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
             layoutAddPriceAlert.setOnClickListener(this);
+
             recyclerView = view.findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+            noAlertsLayout = view.findViewById(R.id.layout_no_alerts);
 
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(TokenAlertsViewModel.class);
@@ -77,15 +77,16 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
 
     private void onPriceAlertsFetched(ArrayList<PriceAlert> priceAlerts)
     {
-        // TODO: populate recylerView
         adapter = new PriceAlertAdapter(getContext(), priceAlerts);
         recyclerView.setAdapter(adapter);
+        noAlertsLayout.setVisibility(priceAlerts.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public void onClick(View v)
     {
-        if (v.getId() == R.id.layout_add_new_price_alert) {
+        if (v.getId() == R.id.layout_add_new_price_alert)
+        {
             viewModel.openAddPriceAlertMenu(this, token, REQUEST_SET_PRICE_ALERT);
         }
     }
@@ -93,11 +94,15 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
     {
-        if (requestCode == REQUEST_SET_PRICE_ALERT) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data != null) {
+        if (requestCode == REQUEST_SET_PRICE_ALERT)
+        {
+            if (resultCode == Activity.RESULT_OK)
+            {
+                if (data != null)
+                {
                     PriceAlert alert = data.getParcelableExtra(C.EXTRA_PRICE_ALERT);
                     adapter.add(alert);
+                    noAlertsLayout.setVisibility(View.GONE);
                     viewModel.saveAlert(alert);
                 }
             }

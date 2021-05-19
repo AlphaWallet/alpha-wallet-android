@@ -54,4 +54,8 @@ public interface PreferenceRepositoryType {
     boolean hasShownTestNetWarning();
 
     void setShownTestNetWarning();
+
+    void setPriceAlerts(String json);
+
+    String getPriceAlerts();
 }

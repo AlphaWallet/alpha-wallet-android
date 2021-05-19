@@ -25,6 +25,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String ACTIVE_MAINNET = "active_mainnet";
     public static final String SHOWN_WARNING = "shown_warning";
+    public static final String PRICE_ALERTS = "price_alerts";
 
     private final SharedPreferences pref;
 
@@ -167,5 +168,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setShownTestNetWarning() {
         pref.edit().putBoolean(SHOWN_WARNING, true).apply();
+    }
+
+    @Override
+    public void setPriceAlerts(String json)
+    {
+        pref.edit().putString(PRICE_ALERTS, json).apply();
+    }
+
+    @Override
+    public String getPriceAlerts()
+    {
+        return pref.getString(PRICE_ALERTS, "");
     }
 }

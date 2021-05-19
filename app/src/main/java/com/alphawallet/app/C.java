@@ -16,6 +16,8 @@ public abstract class C {
     public static final int BARCODE_READER_REQUEST_CODE = 1;
     public static final int SET_GAS_SETTINGS = 2;
     public static final int COMPLETED_TRANSACTION = 3;
+    public static final int SEND_INTENT_REQUEST_CODE = 4;
+    public static final int TERMINATE_ACTIVITY = 5;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";

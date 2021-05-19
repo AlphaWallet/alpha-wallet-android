@@ -4,12 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -29,12 +27,10 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;

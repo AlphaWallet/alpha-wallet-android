@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -18,13 +19,15 @@ import java.util.Collections;
  */
 public class TransactionSuccessActivity extends BaseActivity implements StandardFunctionInterface
 {
+    private String transactionHash;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_success);
 
-        String transactionHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
+        transactionHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
         CopyTextView hashText = findViewById(R.id.tx_hash);
         hashText.setText(transactionHash);
 
@@ -36,6 +39,9 @@ public class TransactionSuccessActivity extends BaseActivity implements Standard
     @Override
     public void handleClick(String action, int actionId)
     {
+        Intent intent = new Intent();
+        intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+        setResult(RESULT_OK, intent);
         finish();
     }
 }

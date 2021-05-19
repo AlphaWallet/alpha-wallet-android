@@ -8,7 +8,6 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService2;

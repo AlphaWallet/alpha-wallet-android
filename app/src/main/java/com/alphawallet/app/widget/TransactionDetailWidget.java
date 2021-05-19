@@ -7,9 +7,7 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -18,7 +16,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
-import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 public class TransactionDetailWidget extends LinearLayout

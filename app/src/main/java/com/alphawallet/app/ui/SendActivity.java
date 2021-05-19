@@ -456,7 +456,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     @Override
     protected void onDestroy() {
-        if (dialog != null && dialog.isShowing()) {
+        if (dialog != null && dialog.isShowing())
+        {
             dialog.dismiss();
         }
         super.onDestroy();

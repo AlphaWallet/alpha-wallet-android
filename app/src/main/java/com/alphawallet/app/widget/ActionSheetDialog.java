@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -52,8 +53,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
     private final AmountDisplayWidget amountDisplay;
+    private final AssetDetailView assetDetailView;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
+    private final Activity activity;
 
     private final Token token;
     private final TokensService tokensService;
@@ -81,7 +84,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget = findViewById(R.id.detail_widget);
         addressDetail = findViewById(R.id.recipient);
         amountDisplay = findViewById(R.id.amount_display);
+        assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
+        this.activity = activity;
         if (activity instanceof HomeActivity)
         {
             mode = ActionSheetMode.SEND_TRANSACTION_DAPP;
@@ -114,6 +119,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         updateAmount();
 
         addressDetail.setupAddress(destAddress, destName);
+
+        if (token.isERC721())
+        {
+            assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
+            assetDetailView.setVisibility(View.VISIBLE);
+            balanceDisplay.setVisibility(View.GONE);
+            amountDisplay.setVisibility(View.GONE);
+        }
+
         setupCancelListeners();
     }
 
@@ -128,10 +142,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.requester);
         amountDisplay = findViewById(R.id.amount_display);
+        assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
         detailWidget = null;
         mode = ActionSheetMode.SIGN_MESSAGE;
         callbackId = message.getCallbackId();
+        this.activity = activity;
 
         actionSheetCallback = aCallback;
         signCallback = sCallback;
@@ -248,6 +264,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         return txAmount;
     }
 
+    private String getERC721TokenId()
+    {
+        if (!token.isERC721()) return "";
+        TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
+        return token.getTransferValue(transactionInput, 0);
+    }
+
     private void signMessage()
     {
         //get authentication
@@ -318,7 +341,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 Intent intent = new Intent(getContext(), TransactionSuccessActivity.class);
                 intent.putExtra(C.EXTRA_TXHASH, txHash);
                 intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                getContext().startActivity(intent);
+                activity.startActivityForResult(intent, C.COMPLETED_TRANSACTION);
                 dismiss();
                 break;
 
@@ -473,6 +496,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
             if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
         }
+    }
+
+    @Override
+    public void fullExpand()
+    {
+        FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     public void setGasEstimate(BigInteger estimate)

@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.ViewGroup;
 
@@ -52,23 +53,28 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     private boolean clickThrough = false;
     protected int assetCount;
     private FunctionCallback functionCallback;
+    private final Activity activity;
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service,
+                                   OpenseaService opensea, Activity activity) {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
         clickThrough = true;
         openseaService = opensea;
         setToken(t);
+        this.activity = activity;
     }
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, List<BigInteger> tokenSelection, AssetDefinitionService service, OpenseaService opensea)
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, List<BigInteger> tokenSelection,
+                                   AssetDefinitionService service)
     {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        openseaService = opensea;
+        openseaService = null;
         setTokenRange(token, tokenSelection);
+        this.activity = null;
     }
     
     @Override
@@ -86,7 +92,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService, assetCount);
                 break;
             case OpenseaHolder.VIEW_TYPE:
-                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token);
+                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token, activity);
                 holder.setOnTokenClickListener(onTokenClickListener);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:

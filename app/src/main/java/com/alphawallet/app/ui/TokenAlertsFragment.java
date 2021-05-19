@@ -25,6 +25,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.PriceAlertAdapter;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
+import com.alphawallet.app.ui.widget.entity.PriceAlertCallback;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModel;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModelFactory;
 
@@ -34,7 +35,7 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
-public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener {
+public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener, PriceAlertCallback {
     public static final int REQUEST_SET_PRICE_ALERT = 4000;
 
     @Inject
@@ -45,7 +46,6 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     private LinearLayout noAlertsLayout;
     private RecyclerView recyclerView;
     private PriceAlertAdapter adapter;
-    private Token token;
 
     @Nullable
     @Override
@@ -59,10 +59,9 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            Token token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
 
             layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
             layoutAddPriceAlert.setOnClickListener(this);
@@ -78,13 +77,13 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(TokenAlertsViewModel.class);
             viewModel.priceAlerts().observe(getViewLifecycleOwner(), this::onPriceAlertsUpdated);
-            viewModel.fetchStoredPriceAlerts();
+            viewModel.fetchStoredPriceAlerts(token);
         }
     }
 
     private void onPriceAlertsUpdated(List<PriceAlert> priceAlerts)
     {
-        adapter = new PriceAlertAdapter(getContext(), priceAlerts);
+        adapter = new PriceAlertAdapter(getContext(), priceAlerts, this);
         recyclerView.setAdapter(adapter);
         noAlertsLayout.setVisibility(priceAlerts.isEmpty() ? View.VISIBLE : View.GONE);
     }
@@ -105,7 +104,7 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     {
         if (v.getId() == R.id.layout_add_new_price_alert)
         {
-            viewModel.openAddPriceAlertMenu(this, token, REQUEST_SET_PRICE_ALERT);
+            viewModel.openAddPriceAlertMenu(this, REQUEST_SET_PRICE_ALERT);
         }
     }
 
@@ -126,6 +125,12 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    @Override
+    public void onCheckChanged(boolean checked, int position)
+    {
+        viewModel.updateStoredAlerts(adapter.getItems());
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {

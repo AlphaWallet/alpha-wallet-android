@@ -29,8 +29,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:background="@drawable/background_tab_layout"
-            android:paddingStart="12dp"
             app:layout_scrollFlags="enterAlways"
             app:tabGravity="center"
             app:tabIndicatorColor="@color/colorHighlight"

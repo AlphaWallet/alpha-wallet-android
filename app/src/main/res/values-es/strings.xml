@@ -750,4 +750,5 @@
     <string name="enter_target_price">Enter Target Price</string>
     <string name="title_set_new_alert">Set New Alert</string>
     <string name="action_save_alert">Save Alert</string>
+    <string name="alerts_will_appear_here">Alerts will appear here</string>
 </resources>

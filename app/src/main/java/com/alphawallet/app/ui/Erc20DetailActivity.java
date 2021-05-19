@@ -31,6 +31,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
+import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
@@ -70,8 +71,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
 
-    private FrameLayout frame;
-    private ViewPager viewPager;
+    private ScrollControlViewPager viewPager;
 
     private TokenInfoFragment tokenInfoFragment;
     private TokenActivityFragment tokenActivityFragment;
@@ -84,10 +84,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
         toolbar();
-
-//        token = getTokenInfo(getIntent());
         getIntentData();
-
         initViews();
         setTitle(token.tokenInfo.name + " (" + token.tokenInfo.symbol + ")");
     }
@@ -122,7 +119,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             @Override
             public void onPageSelected(int position)
             {
-//                currentPage = ImportWalletActivity.ImportType.values()[position];
             }
 
             @Override

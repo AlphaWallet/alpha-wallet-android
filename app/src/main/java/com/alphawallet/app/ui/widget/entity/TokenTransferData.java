@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.alphawallet.app.R;
@@ -16,7 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Created by JB on 17/12/2020.
  */
-public class TokenTransferData extends ActivityMeta
+public class TokenTransferData extends ActivityMeta implements Parcelable
 {
     public final int chainId;
     public final String tokenAddress;
@@ -52,6 +54,44 @@ public class TokenTransferData extends ActivityMeta
         }
     }
 
+    protected TokenTransferData(Parcel in)
+    {
+        super(in.readLong(), in.readString(), true);
+        chainId = in.readInt();
+        tokenAddress = in.readString();
+        eventName = in.readString();
+        transferDetail = in.readString();
+    }
+
+    public static final Creator<TokenTransferData> CREATOR = new Creator<TokenTransferData>() {
+        @Override
+        public TokenTransferData createFromParcel(Parcel in) {
+            return new TokenTransferData(in);
+        }
+
+        @Override
+        public TokenTransferData[] newArray(int size) {
+            return new TokenTransferData[size];
+        }
+    };
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeLong(timeStamp);
+        dest.writeString(hash);
+        dest.writeInt(chainId);
+        dest.writeString(tokenAddress);
+        dest.writeString(eventName);
+        dest.writeString(transferDetail);
+    }
+
     private enum ResultState
     {
         NAME,
@@ -60,6 +100,11 @@ public class TokenTransferData extends ActivityMeta
     }
 
     public String getDetail(Context ctx, Transaction tx, final String itemView)
+    {
+        return getDetail(ctx, tx, itemView, true);
+    }
+
+    public String getDetail(Context ctx, Transaction tx, final String itemView, boolean shrinkAddress)
     {
         Map<String, EventResult> resultMap = getEventResultMap();
         if (tx != null) tx.addTransactionElements(resultMap);
@@ -86,19 +131,21 @@ public class TokenTransferData extends ActivityMeta
         {
             case "sent":
                 if (resultMap.containsKey("to"))
-                    return ctx.getString(R.string.sent_to, ENSHandler.displayAddressOrENS(ctx, resultMap.get("to").value));
+                    return shrinkAddress ? ctx.getString(R.string.sent_to, ENSHandler.displayAddressOrENS(ctx, resultMap.get("to").value))
+                            : ENSHandler.displayAddressOrENS(ctx, resultMap.get("to").value, false);
                 break;
             case "received":
                 if (resultMap.containsKey("from"))
-                    return ctx.getString(R.string.from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("from").value));
+                    return shrinkAddress ? ctx.getString(R.string.from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("from").value))
+                            : ENSHandler.displayAddressOrENS(ctx, resultMap.get("from").value, false);
                 break;
             case "ownerApproved":
                 if (resultMap.containsKey("spender"))
-                    return ctx.getString(R.string.approval_granted_to, ENSHandler.displayAddressOrENS(ctx, resultMap.get("spender").value));
+                    return ctx.getString(R.string.approval_granted_to, ENSHandler.displayAddressOrENS(ctx, resultMap.get("spender").value, shrinkAddress));
                 break;
             case "approvalObtained":
                 if (resultMap.containsKey("owner"))
-                    return ctx.getString(R.string.approval_obtained_from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("owner").value));
+                    return ctx.getString(R.string.approval_obtained_from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("owner").value, shrinkAddress));
                 break;
             default:
                 //use name of event

@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -196,7 +197,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
             long fetchTxCompletionTime = transactionsInteract.fetchTxCompletionTime(defaultAddress, transaction.hash);
             tokenIcon.startPendingSpinner(transaction.timeStamp, fetchTxCompletionTime/1000);
-            //symbol.setVisibility(View.GONE);
             chainName.setVisibility(View.GONE);
         }
         else if (transactionBackground != null)

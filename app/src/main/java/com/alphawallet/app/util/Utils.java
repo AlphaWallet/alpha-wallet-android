@@ -141,13 +141,15 @@ public class Utils {
     }
 
     private static String getFirstWord(String text) {
+        if (TextUtils.isEmpty(text)) return "";
         text = text.trim();
-        int index = text.indexOf(' ');
-        if (index > -1) {
-            return text.substring(0, index).trim();
-        } else {
-            return text.trim();
+        int index;
+        for (index = 0; index < text.length(); index++)
+        {
+            if (!Character.isLetterOrDigit(text.charAt(index))) break;
         }
+
+        return text.substring(0, index).trim();
     }
 
     public static String getIconisedText(String text)
@@ -308,7 +310,7 @@ public class Utils {
 
     public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
     {
-        String symbol = token != null ? token.getShortSymbol() : "";
+        String symbol = token != null ? token.getSymbolOrShortName() : "";
         boolean needsBreak = false;
 
         if ((symbol.length() + operationName.length()) > 16 && symbol.length() > 0)

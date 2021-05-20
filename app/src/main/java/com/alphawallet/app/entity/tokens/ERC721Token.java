@@ -255,7 +255,15 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String convertValue(String value, int precision)
     {
-        return value;
+        precision += 1;
+        if (value.length() > precision)
+        {
+            return "…" + value.substring(value.length() - precision);
+        }
+        else
+        {
+            return value;
+        }
     }
 
     /**

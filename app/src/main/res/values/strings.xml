@@ -93,7 +93,7 @@
     <string name="no_transactions_yet">Activities will appear here</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
-    <string name="title_dialog_sending">Sending...</string>
+    <string name="title_dialog_sending">Sending…</string>
     <string name="scan_qr">Get address from QR Code</string>
     <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your transaction will be processed by the Ethereum network.</string>
     <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
@@ -776,4 +776,5 @@
     <string name="title_set_new_alert">Set New Alert</string>
     <string name="action_save_alert">Save Alert</string>
     <string name="alerts_will_appear_here">Alerts will appear here</string>
+    <string name="token_text">Token</string>
 </resources>

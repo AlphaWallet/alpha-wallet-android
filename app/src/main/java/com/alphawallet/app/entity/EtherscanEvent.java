@@ -10,6 +10,7 @@ import java.math.BigInteger;
 /**
  * Created by JB on 21/10/2020.
  */
+
 public class EtherscanEvent
 {
     public String blockNumber;
@@ -25,6 +26,7 @@ public class EtherscanEvent
     public String tokenName;
     public String tokenSymbol;
     public String tokenDecimal;
+    public String input;
     String gas;
     String gasPrice;
     String gasUsed;

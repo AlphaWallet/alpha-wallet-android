@@ -61,7 +61,7 @@ public class ERC721Token extends Token implements Parcelable
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
-        Long tokenId = parseTokenId(asset.getTokenId());
+        long tokenId = parseTokenId(asset.getTokenId());
         tokenBalanceAssets.put(tokenId, asset);
     }
 
@@ -149,9 +149,9 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public void clickReact(BaseViewModel viewModel, Activity context)
+    public void clickReact(BaseViewModel viewModel, Activity activity)
     {
-        viewModel.showTokenList(context, this);
+        viewModel.showTokenList(activity, this);
     }
 
     @Override
@@ -255,7 +255,15 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String convertValue(String value, int precision)
     {
-        return value;
+        precision += 1;
+        if (value.length() > precision)
+        {
+            return "…" + value.substring(value.length() - precision);
+        }
+        else
+        {
+            return value;
+        }
     }
 
     /**
@@ -297,6 +305,17 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getTransferValue(TransactionInput txInput, int precision)
     {
+        //return the tokenId from the transfer if possible
+        try
+        {
+            BigInteger tokenId = new BigInteger(txInput.miscData.get(0), 16);
+            return tokenId.toString();
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
         return getTransferValueRaw(txInput).toString();
     }
 
@@ -312,9 +331,9 @@ public class ERC721Token extends Token implements Parcelable
         return new BigDecimal(getArrayBalance().size());
     }
 
-    private Long parseTokenId(String tokenIdStr)
+    private long parseTokenId(String tokenIdStr)
     {
-        Long tokenId;
+        long tokenId;
         try
         {
             tokenId = Long.parseLong(tokenIdStr);

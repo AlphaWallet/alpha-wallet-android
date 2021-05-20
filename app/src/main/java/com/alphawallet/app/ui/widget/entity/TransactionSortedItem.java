@@ -4,6 +4,7 @@ import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.ui.widget.holder.EventHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
+import com.alphawallet.app.ui.widget.holder.TransferHolder;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -65,11 +66,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
                 TransactionMeta newTx = (TransactionMeta) other.value;
                 return value.isPending == newTx.isPending;
             }
-            else if (other.viewType == EventHolder.VIEW_TYPE)
-            {
-                return false;
-            }
-            else
+            else //allow other types to override the lowly Transaction item
             {
                 return false;
             }
@@ -90,7 +87,7 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
                 TransactionMeta oldTx = (TransactionMeta) other.value;
                 return value.hash.equals(oldTx.hash);
             }
-            else if (other.viewType == EventHolder.VIEW_TYPE)
+            else if (other.viewType == EventHolder.VIEW_TYPE || other.viewType == TransferHolder.VIEW_TYPE) //allow both Event and Transfer to override
             {
                 return true;
             }

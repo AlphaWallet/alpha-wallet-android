@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -42,7 +43,7 @@ public class TokenIcon extends ConstraintLayout
     private final ImageView icon;
     private final TextView textIcon;
     private final ImageView statusIcon;
-    private final ProgressKnobkerry pendingProgress;
+    private final ProgressBar pendingProgress;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -197,7 +198,7 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(R.drawable.ic_receive_small);
                 break;
             case PENDING:
-                statusIcon.setImageResource(R.drawable.ic_timer_small);
+                //statusIcon.setImageResource(R.drawable.ic_timer_small);
                 pendingProgress.setVisibility(View.VISIBLE);
                 break;
             case FAILED:
@@ -228,7 +229,7 @@ public class TokenIcon extends ConstraintLayout
 
     public void startPendingSpinner(long startTime, long completionTime)
     {
-        pendingProgress.startAnimation(startTime, completionTime);
+        //pendingProgress.startAnimation(startTime, completionTime);
     }
 
     /**

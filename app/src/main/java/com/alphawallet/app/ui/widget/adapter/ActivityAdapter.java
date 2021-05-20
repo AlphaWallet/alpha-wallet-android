@@ -5,6 +5,7 @@ package com.alphawallet.app.ui.widget.adapter;
  */
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -48,9 +49,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> implements AdapterCallback
+public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> implements AdapterCallback
 {
-    private final ActivitySortedList<SortedItem> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem>() {
+    private final ActivitySortedList<SortedItem<?>> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem<?>>() {
         @Override
         public int compare(SortedItem left, SortedItem right)
         {
@@ -173,7 +174,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder> impl
 
     private Runnable checkData = () -> {
         //get final position time
-        SortedItem item = items.get(items.size() - 1);
+        SortedItem<?> item = items.get(items.size() - 1);
         long earliestDate = 0;
         if (item instanceof TimestampSortedItem)
         {

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -33,30 +34,37 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
+import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.tools.Numeric;
 
-import org.web3j.abi.datatypes.Address;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,21 +78,25 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.TICKET;
-import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback
-{
+public class TransferTicketDetailActivity extends BaseActivity
+        implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
 
     @Inject
@@ -96,7 +108,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     private FunctionButtonBar functionBar;
 
     private FinishReceiver finishReceiver;
-
     private Token token;
     private NonFungibleTokenAdapter adapter;
 
@@ -108,7 +119,10 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     private DisplayState transferStatus;
 
     private InputAddress addressInput;
+    private String sendAddress;
+    private String ensAddress;
 
+    private ActionSheetDialog actionDialog;
     private AWalletConfirmationDialog confirmationDialog;
 
     private AppCompatRadioButton pickLink;
@@ -136,7 +150,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
 
         token = getIntent().getParcelableExtra(TICKET);
 
-        Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = DisplayState.values()[getIntent().getIntExtra(EXTRA_STATE, 0)];
         selection = token.stringHexToBigIntegerList(ticketIds);
@@ -150,9 +163,11 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
 
+        sendAddress = null;
+        ensAddress = null;
+
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
-        viewModel.setWallet(wallet);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -160,10 +175,11 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.userTransaction().observe(this, this::onUserTransaction);
-
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -488,20 +504,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         }
     }
 
-    private void onENSProgress(boolean shouldShowProgress)
-    {
-        hideDialog();
-        if (shouldShowProgress)
-        {
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.NONE);
-            dialog.setTitle(R.string.title_dialog_check_ens);
-            dialog.setProgressMode();
-            dialog.setCancelable(false);
-            dialog.show();
-        }
-    }
-
     private void onError(ErrorEnvelope error)
     {
         hideDialog();
@@ -599,16 +601,33 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
                         break;
                     default:
                         Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                    "Code: " + String.valueOf(resultCode)
+                                                    "Code: " + resultCode
                         ));
                         break;
                 }
                 break;
 
-            case SEND_INTENT_REQUEST_CODE:
+            case C.SEND_INTENT_REQUEST_CODE:
                 sendBroadcast(new Intent(PRUNE_ACTIVITY));
                 break;
-
+            case C.SET_GAS_SETTINGS:
+                if (data != null && actionDialog != null)
+                {
+                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+                    BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
+                            new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
+                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+                    actionDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+                }
+                break;
+            case C.COMPLETED_TRANSACTION:
+                Intent i = new Intent();
+                i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
+                setResult(RESULT_OK, new Intent());
+                finish();
+                break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
@@ -715,19 +734,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
 
-    private boolean isAddressValid(String address)
-    {
-        try
-        {
-            new Address(address);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
     private void initDatePicker()
     {
         String dateFormat = "dd/MM/yyyy";
@@ -761,16 +767,23 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
     }
 
     @Override
-    public void handleClick(String action, int id)
+    public void handleClick(String action, int actionId)
     {
-        viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
+        //clicked the next button
+        if (actionId == R.string.action_next)
+        {
+            KeyboardUtils.hideKeyboard(getCurrentFocus());
+            addressInput.getAddress();
+        }
     }
 
     @Override
     public void addressReady(String address, String ensName)
     {
+        sendAddress = address;
+        ensAddress = ensName;
         //complete the transfer
-        if (!Utils.isAddressValid(address))
+        if (TextUtils.isEmpty(address) || !isValidAddress(address))
         {
             //show address error
             addressInput.setError(getString(R.string.error_invalid_address));
@@ -779,7 +792,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
         {
             if (token instanceof ERC721Token)
             {
-                viewModel.openConfirm(this, address, token, Utils.bigIntListToString(selection, true), ensName);
+                calculateTransactionCost();
             }
             else
             {
@@ -787,5 +800,164 @@ public class TransferTicketDetailActivity extends BaseActivity implements OnToke
             }
         }
     }
-}
 
+    private void calculateTransactionCost()
+    {
+        final String txSendAddress = sendAddress;
+        sendAddress = null;
+
+        final byte[] transactionBytes = viewModel.getERC721TransferBytes(txSendAddress,token.getAddress(),ticketIds,token.tokenInfo.chainId);
+        if (token.isEthereum())
+        {
+            checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);
+        }
+        else
+        {
+            calculateEstimateDialog();
+            //form payload and calculate tx cost
+            viewModel.calculateGasEstimate(viewModel.getWallet(), transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
+                    .map(this::convertToGasLimit)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
+                            error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress))
+                    .isDisposed();
+        }
+    }
+
+    private BigInteger convertToGasLimit(EthEstimateGas estimate)
+    {
+        if (estimate.hasError())
+        {
+            return BigInteger.ZERO;
+        }
+        else
+        {
+            return estimate.getAmountUsed();
+        }
+    }
+
+    private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    {
+        Log.w(this.getLocalClassName(), throwable.getMessage());
+        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
+    }
+
+
+    private void calculateEstimateDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.calc_gas_limit));
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    /**
+     * Called to check if we're ready to send user to confirm screen / activity sheet popup
+     */
+    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress) {
+
+        Web3Transaction w3tx = new Web3Transaction(
+                new Address(txSendAddress),
+                new Address(token.getAddress()),
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                sendGasLimit,
+                -1,
+                Numeric.toHexString(transactionBytes),
+                -1);
+        if (sendGasLimit.equals(BigInteger.ZERO))
+        {
+            estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
+        }
+        else
+        {
+            if (dialog != null && dialog.isShowing())
+            {
+                dialog.dismiss();
+            }
+
+            actionDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
+                    resolvedAddress, viewModel.getTokenService(), this);
+            actionDialog.setCanceledOnTouchOutside(false);
+            actionDialog.show();
+        }
+    }
+
+    /**
+     * ActionSheetCallback, comms hooks for the ActionSheetDialog to trigger authentication & send transactions
+     *
+     * @param callback
+     */
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, viewModel.getWallet(), callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        //ActionSheet was dismissed
+        if (!TextUtils.isEmpty(txHash)) {
+            Intent intent = new Intent();
+            intent.putExtra("tx_hash", txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
+
+    private void txWritten(TransactionData transactionData)
+    {
+        actionDialog.transactionWritten(transactionData.txHash);
+    }
+
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+        actionDialog.dismiss();
+    }
+
+    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.confirm_transaction);
+        dialog.setMessage(R.string.error_transaction_may_fail);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setButtonListener(v -> {
+            BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
+            checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
+        });
+
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+}

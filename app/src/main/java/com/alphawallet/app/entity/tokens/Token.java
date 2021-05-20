@@ -264,6 +264,19 @@ public class Token implements Parcelable, Comparable<Token>
         else return tokenInfo.symbol.toUpperCase();
     }
 
+    public String getSymbolOrShortName()
+    {
+        String shortSymbol = getShortSymbol();
+        if (TextUtils.isEmpty(shortSymbol))
+        {
+            return Utils.getShortSymbol(tokenInfo.name);
+        }
+        else
+        {
+            return shortSymbol;
+        }
+    }
+
     public void clickReact(BaseViewModel viewModel, Activity context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);

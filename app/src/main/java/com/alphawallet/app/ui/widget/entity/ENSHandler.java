@@ -300,9 +300,9 @@ public class ENSHandler implements Runnable
         }
     }
 
-    public static String displayAddressOrENS(Context ctx, String ethAddress)
+    public static String displayAddressOrENS(Context ctx, String ethAddress, boolean shrinkAddress)
     {
-        String returnAddress = Utils.formatAddress(ethAddress);
+        String returnAddress = shrinkAddress ? Utils.formatAddress(ethAddress) : ethAddress;
         if (!TextUtils.isEmpty(ethAddress) && Utils.isAddressValid(ethAddress))
         {
             HashMap<String, String> ensMap = getENSHistoryFromPrefs(ctx);
@@ -311,6 +311,11 @@ public class ENSHandler implements Runnable
         }
 
         return returnAddress;
+    }
+
+    public static String displayAddressOrENS(Context ctx, String ethAddress)
+    {
+        return displayAddressOrENS(ctx, ethAddress, true);
     }
 
     /**

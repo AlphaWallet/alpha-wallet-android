@@ -17,13 +17,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionDecoder;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.TransactionMeta;
+import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
@@ -45,8 +46,6 @@ import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
-
 /**
  * Created by JB on 26/06/2020.
  */
@@ -61,7 +60,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private RecyclerView listView;
     private Realm realm;
     private RealmResults<RealmTransaction> realmUpdates;
-    private RealmResults<RealmAuxData> auxRealmUpdates;
+    private RealmResults<RealmTransfer> auxRealmUpdates;
     private String realmId;
     private long eventTimeFilter;
     private final Handler handler = new Handler();
@@ -108,7 +107,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private void startTxListener(long lastUpdateTime)
     {
         String walletAddress = viewModel.defaultWallet().getValue() != null ? viewModel.defaultWallet().getValue().address : "";
-        eventTimeFilter = lastUpdateTime;
+        eventTimeFilter = 0;
         if (realmId == null || !realmId.equalsIgnoreCase(walletAddress))
         {
             if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
@@ -136,31 +135,38 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                 }
             });
 
-            auxRealmUpdates = realm.where(RealmAuxData.class)
-                    .endsWith("instanceKey", EVENT_CARDS)
-                    .greaterThan("resultReceivedTime", lastUpdateTime)
+            auxRealmUpdates = realm.where(RealmTransfer.class)
                     .findAllAsync();
             auxRealmUpdates.addChangeListener(realmEvents -> {
-                List<ActivityMeta> metas = new ArrayList<>();
                 if (realmEvents.size() == 0) return;
-                for (RealmAuxData item : realmEvents)
+                List<TransactionMeta> updates = new ArrayList<>();
+                for (RealmTransfer item : realmEvents)
                 {
-                    if (item.getResultReceivedTime() >= eventTimeFilter && viewModel.getTokensService().getNetworkFilters().contains(item.getChainId()))
-                    {
-                        EventMeta newMeta = new EventMeta(item.getTransactionHash(), item.getEventName(), item.getFunctionId(), item.getResultTime(), item.getChainId());
-                        metas.add(newMeta);
-                    }
+                    RealmTransaction rt = getRealmTransaction(item.getHash());
+                    if (rt == null || !viewModel.getTokensService().getNetworkFilters().contains(rt.getChainId())) { continue; }
+                    updates.add(new TransactionMeta(rt.getHash(), rt.getTimeStamp(), rt.getTo(), rt.getChainId(), rt.getBlockNumber()));
                 }
 
-                eventTimeFilter = System.currentTimeMillis() - DateUtils.SECOND_IN_MILLIS; // allow for async; may receive many event updates
-
-                if (metas.size() > 0)
+                if (updates.size() > 0)
                 {
-                    adapter.updateActivityItems(metas.toArray(new ActivityMeta[0]));
+                    handler.post(() -> {
+                        TransactionMeta[] metaArray = updates.toArray(new TransactionMeta[0]);
+                        adapter.updateActivityItems(buildTransactionList(metaArray).toArray(new ActivityMeta[0]));
+                        systemView.hide();
+                    });
+
                     systemView.hide();
                 }
             });
         }
+    }
+
+    private RealmTransaction getRealmTransaction(String hash)
+    {
+        if (realm == null) return null;
+        return realm.where(RealmTransaction.class)
+                .equalTo("hash", hash)
+                .findFirst();
     }
 
     private List<ActivityMeta> buildTransactionList(ActivityMeta[] activityItems)

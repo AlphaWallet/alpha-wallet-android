@@ -148,9 +148,9 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void clickReact(BaseViewModel viewModel, Activity context)
+    public void clickReact(BaseViewModel viewModel, Activity activity)
     {
-        viewModel.showTokenList(context, this);
+        viewModel.showTokenList(activity, this);
     }
 
     @Override

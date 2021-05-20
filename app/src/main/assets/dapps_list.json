@@ -1,4 +1,5 @@
 [ 
+  {"name": "Tbull", "description": "A Utility Token on Binance Smart Chain for Payments for Services", "url": "tbull.live", "category": "Utility"},
   {"name": "Rare Coin", "description": "Free Crypto Faucet & Yeild Farming", "url": "make.rare.claims", "category": "Tool"},
   {"name": "Eporio", "description": "The cheaper marketplace for NFT - Non Fungible Tokens", "url": "https://epor.io", "category": "Marketplace"},
   {"name": "DeFiBox", "description": "one-stop DeFi asset, data and protocols aggregation platform", "url": "https://www.defibox.com/index?utm_source=2189969", "category": "Tool"},
@@ -67,6 +68,7 @@
   {"name": "GG Copyright EX", "description": "GeekGit Copyright Exchange for Music & Web Literature", "url": "https://crex.geekgit.com", "category": "Exchange"},
   {"name": "DerivaDEX | Insurance Fund", "description": "DerivaDEX is the next generation of crypto derivatives. Begin earning DDX by bootstrapping the insurance fund.", "url": "https://insurance.derivadex.com", "category": "Finance"},
   {"name": "SCV.Finance", "description": "Get a big picture of all your digital assets locked inside various DeFi projects across multiple blockchains.", "url": "https://scv.finance", "category": "Tool"},
-  {"name": "Mushrooms Finance", "description": "Sustainable crypto earning in DeFi", "url": "https://mushrooms.finance/", "category": "Finance"}
+  {"name": "Mushrooms Finance", "description": "Sustainable crypto earning in DeFi", "url": "https://mushrooms.finance/", "category": "Finance"},
+  {"name": "Levinswap", "description": "Decentralized exchange for trading crypto and serurities tokens", "url": "https://app.levinswap.org/", "category": "Exchange"}
 ]
 

@@ -215,20 +215,6 @@ public class WalletConnectViewModel extends BaseViewModel {
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void confirmTransaction(Activity context, WCEthereumTransaction transaction, String requesterURL, int chainId, Long callbackId)
-    {
-        Web3Transaction w3tx = new Web3Transaction(transaction, callbackId);
-
-        Intent intent = new Intent(context, ConfirmationActivity.class);
-        intent.putExtra(C.EXTRA_WEB3TRANSACTION, w3tx);
-        intent.putExtra(C.EXTRA_AMOUNT, Convert.fromWei(w3tx.value.toString(), Convert.Unit.WEI).toString());
-        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.WEB3TRANSACTION.ordinal());
-        intent.putExtra(C.EXTRA_ACTION_NAME, requesterURL);
-        intent.putExtra(C.EXTRA_NETWORKID, chainId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        context.startActivityForResult(intent, C.REQUEST_TRANSACTION_CALLBACK);
-    }
-
     public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, int chainId)
     {
         resetSignDialog();

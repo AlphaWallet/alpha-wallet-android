@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -115,6 +116,27 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     {
         //refresh the WalletHolder
         setENSText();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        if (isNewWallet) {
+            viewModel.showHome(this);
+            finish(); //drop back to home screen, no need to recreate everything
+        }
     }
 
     private void onBackupWallet(String keystore) {

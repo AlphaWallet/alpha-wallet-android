@@ -28,6 +28,7 @@ import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
@@ -100,12 +101,14 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     private final Handler handler = new Handler();
     private boolean isFromTokenHistory = false;
     private long pendingStart = 0;
+    private TokenTransferData transferData;
 
     @Nullable
     private Disposable pendingTxUpdate = null;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_activity);
@@ -113,6 +116,8 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         eventKey = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
         transactionHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
         isFromTokenHistory = getIntent().getBooleanExtra(C.EXTRA_STATE, false);
+        transferData = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        //TODO: Send event details
         icon = findViewById(R.id.token_icon);
 
         SystemView systemView = findViewById(R.id.system_view);
@@ -263,6 +268,10 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         {
             eventDetail.setupTransactionView(transaction, token, viewModel.getAssetDefinitionService(), supplementalTxt);
         }
+        else if (transferData != null)
+        {
+            eventDetail.setupTransferData(transaction, token, transferData);
+        }
 
         setChainName(transaction);
     }
@@ -321,6 +330,10 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     {
         String operationAddress = tx.getOperationTokenAddress();
         Token operationToken = viewModel.getTokensService().getToken(tx.chainId, operationAddress);
+        if (operationToken == null && transferData != null)
+        {
+            operationToken = viewModel.getTokensService().getToken(tx.chainId, transferData.tokenAddress);
+        }
 
         if (operationToken == null)
         {

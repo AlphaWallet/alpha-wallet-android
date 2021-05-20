@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class ActivityMeta
 {
-    private final long timeStamp;
+    protected final long timeStamp;
     public final String hash;
 
     public ActivityMeta(long ts, String txHash)

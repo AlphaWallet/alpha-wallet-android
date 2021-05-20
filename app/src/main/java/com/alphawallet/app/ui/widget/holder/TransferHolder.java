@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EventResult;
@@ -52,6 +53,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
 
     private final AssetDefinitionService assetDefinition;
     private Token token;
+    private TokenTransferData transferData;
 
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
@@ -81,15 +83,13 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     public void bind(@Nullable TokenTransferData data, @NonNull Bundle addition)
     {
         fromTokenView = false;
+        transferData = data;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         //pull event details from DB
         Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
         token = tokensService.getToken(data.chainId, data.tokenAddress);
 
-        if (tx == null)
-        {
-            return;
-        }
+        if (tx == null) { return; }
 
         if (token == null)
         {
@@ -130,7 +130,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data), token);
 
         type.setText(typeValue);
-        address.setText(data.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
+        address.setText(data.getDetail(getContext(), tx, itemView));
         tokenIcon.setStatusIcon(data.getEventStatusType());
 
         //timestamp
@@ -158,6 +158,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
 
     private String getEventAmount(TokenTransferData eventData, Transaction tx)
     {
+        tx.getDestination(token); //build decoded input
         Map<String, EventResult> resultMap = eventData.getEventResultMap();
         String value = "";
         switch (eventData.eventName)
@@ -166,7 +167,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             case "sent":
                 if (resultMap.get("amount") != null)
                 {
-                    value = eventData.eventName.equals("sent") ? "- " : "+ ";
+                    value = token.isERC721() ? "#" : (eventData.eventName.equals("sent") ? "- " : "+ "); //"#" for ERC721, "- " or "+ " for ERC20
                     value += token.convertValue(resultMap.get("amount").value, TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
@@ -178,7 +179,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
                 }
                 break;
             default:
-                if (token != null && tx != null)
+                if (token != null)
                 {
                     value = token.isEthereum() ? token.getTransactionValue(tx, TRANSACTION_BALANCE_PRECISION) : tx.getOperationResult(token, TRANSACTION_BALANCE_PRECISION);
                 }
@@ -222,6 +223,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         Intent intent = new Intent(getContext(), TokenActivity.class);
         intent.putExtra(C.EXTRA_TXHASH, hashKey);
         intent.putExtra(C.EXTRA_STATE, fromTokenView);
+        intent.putExtra(C.EXTRA_TOKEN_ID, transferData);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
     }

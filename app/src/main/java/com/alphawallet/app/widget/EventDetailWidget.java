@@ -9,8 +9,14 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
+
+import java.util.Map;
+
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
 /**
  * Created by JB on 8/12/2020.
@@ -78,6 +84,39 @@ public class EventDetailWidget extends LinearLayout
         else
         {
             detail.setText(getContext().getString(R.string.default_from, supplimentalInfo.substring(2), "", token.getFullName()));
+        }
+    }
+
+    public void setupTransferData(Transaction transaction, Token token, TokenTransferData transferData)
+    {
+        holdingView.setVisibility(View.VISIBLE);
+        icon.setVisibility(View.GONE);
+        symbol.setText(token.getSymbolOrShortName());
+
+        title.setVisibility(View.GONE);
+
+        transaction.getDestination(token); //build decoded input
+        Map<String, EventResult> resultMap = transferData.getEventResultMap();
+        String value = "";
+        if (resultMap.get("amount") != null)
+        {
+            value = token.isNonFungible() ? "#" : (transferData.eventName.equals("sent") ? "- " : "+ "); //"#" for ERC721, "- " or "+ " for ERC20
+            value += token.convertValue(resultMap.get("amount").value, token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
+        }
+
+        //get 'from'
+        String addressDetail = transferData.getDetail(getContext(), transaction, "", false);
+
+        switch (transferData.eventName)
+        {
+            case "received":
+                detail.setText(getContext().getString(R.string.default_from, value, "", addressDetail));
+                break;
+            case "sent":
+                detail.setText(getContext().getString(R.string.default_to, value, "", addressDetail));
+                break;
+            default:
+                break;
         }
     }
 }

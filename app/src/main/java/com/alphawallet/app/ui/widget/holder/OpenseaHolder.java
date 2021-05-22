@@ -49,8 +49,9 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private Handler handler;
     private boolean activeClick;
     private final Activity activity;
+    private final boolean clickThrough;
 
-    public OpenseaHolder(int resId, ViewGroup parent, Token token, Activity activity) {
+    public OpenseaHolder(int resId, ViewGroup parent, Token token, Activity activity, boolean clickThrough) {
         super(resId, parent);
         titleText = findViewById(R.id.name);
         image = findViewById(R.id.image_view);
@@ -61,6 +62,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         itemSelect = findViewById(R.id.radioBox);
         this.token = token;
         this.activity = activity;
+        this.clickThrough = clickThrough;
     }
 
     @Override
@@ -144,6 +146,8 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
 
     public void handleClick(View v, TicketRange data)
     {
+        if (!clickThrough) { return; }
+
         if (data.exposeRadio)
         {
             if (!data.isChecked)

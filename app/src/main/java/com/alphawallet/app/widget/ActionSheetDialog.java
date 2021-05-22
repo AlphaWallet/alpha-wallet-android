@@ -268,7 +268,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         if (!token.isERC721()) return "";
         TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
-        return token.getTransferValue(transactionInput, 0);
+        return token.getTransferValueRaw(transactionInput).toString();
     }
 
     private void signMessage()

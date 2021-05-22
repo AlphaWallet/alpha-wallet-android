@@ -179,7 +179,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.transactionError().observe(this, this::txError);
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -629,7 +629,8 @@ public class TransferTicketDetailActivity extends BaseActivity
                 finish();
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                signCallback.gotAuthorisation(resultCode == RESULT_OK);
+                if (actionDialog != null && actionDialog.isShowing()) actionDialog.completeSignRequest(resultCode == RESULT_OK);
+                //signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:

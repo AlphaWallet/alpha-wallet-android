@@ -52,7 +52,7 @@ public interface TokenRepositoryType {
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
 
-    Disposable addImageUrl(int networkId, String address, String imageUrl);
+    void addImageUrl(int networkId, String address, String imageUrl);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                             AssetDefinitionService svs);

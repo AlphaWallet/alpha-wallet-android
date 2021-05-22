@@ -893,11 +893,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         switch (failType)
         {
-            case AUTHENTICATION_DIALOG_CANCELLED:
+            case AUTHENTICATION_DIALOG_CANCELLED: //user dialog cancel
                 cancelAuthentication();
                 if (signDialog != null && signDialog.isShowing())
                     signDialog.dismiss();
                 break;
+            case FINGERPRINT_ERROR_CANCELED:
+                //can be called when swapping between Fingerprint and PIN, may not be a cancel event
+                return;
             case FINGERPRINT_NOT_VALIDATED:
                 vibrate();
                 Toast.makeText(context, R.string.fingerprint_authentication_failed, Toast.LENGTH_SHORT).show();

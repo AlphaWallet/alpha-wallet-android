@@ -24,7 +24,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int HECO_ID = 128;
     public static final int HECO_TEST_ID = 256;
     public static final int FANTOM_ID = 250;
-    public static final int FANTOM_TEST_ID = 0xfa2;
+    public static final int FANTOM_TEST_ID = 4002;
     public static final int AVALANCHE_ID = 43114;
     public static final int FUJI_TEST_ID = 43113;
     public static final int MATIC_ID = 137;

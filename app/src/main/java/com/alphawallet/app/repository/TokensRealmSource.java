@@ -465,47 +465,26 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable storeTokenUrl(int networkId, String address, String imageUrl)
+    public void storeTokenUrl(int networkId, String address, String imageUrl)
     {
-        return Completable.complete()
-                .subscribeWith(new DisposableCompletableObserver()
+        try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                String instanceKey = address.toLowerCase() + "-" + networkId;
+
+                RealmAuxData instance = r.where(RealmAuxData.class)
+                        .equalTo("instanceKey", instanceKey)
+                        .findFirst();
+
+                if (instance == null)
                 {
-                    Realm realm;
-                    @Override
-                    public void onStart()
-                    {
-                        String instanceKey = address.toLowerCase() + "-" + networkId;
-                        realm = realmManager.getRealmInstance(IMAGES_DB);
-                        RealmAuxData instance = realm.where(RealmAuxData.class)
-                                .equalTo("instanceKey", instanceKey)
-                                .findFirst();
+                    instance = r.createObject(RealmAuxData.class, instanceKey);
+                }
 
-                        realm.beginTransaction();
-                        if (instance == null)
-                        {
-                            instance = realm.createObject(RealmAuxData.class, instanceKey);
-                        }
-
-                        instance.setResult(imageUrl);
-                        instance.setResultTime(System.currentTimeMillis());
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        if (realm.isInTransaction()) realm.commitTransaction();
-                        realm.close();
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        if (realm != null && !realm.isClosed())
-                        {
-                            realm.close();
-                        }
-                    }
-                });
+                instance.setResult(imageUrl);
+                instance.setResultTime(System.currentTimeMillis());
+            });
+        }
     }
 
     private void saveToken(Realm realm, Token token) throws RealmException
@@ -897,77 +876,39 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers)
+    public void updateEthTickers(Map<Integer, TokenTicker> ethTickers)
     {
-        return Completable.complete()
-                .subscribeWith(new DisposableCompletableObserver()
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                for (int chainId : ethTickers.keySet())
                 {
-                    Realm realm;
-
-                    @Override
-                    public void onStart()
-                    {
-                        realm = realmManager.getRealmInstance(TICKER_DB);
-                        realm.beginTransaction();
-                        for (int chainId : ethTickers.keySet())
-                        {
-                            writeTickerToRealm(realm, ethTickers.get(chainId), chainId, "eth");
-                        }
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        if (realm.isInTransaction()) realm.commitTransaction();
-                        realm.close();
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        if (realm != null && !realm.isClosed())
-                        {
-                            realm.close();
-                        }
-                    }
-                });
+                    writeTickerToRealm(r, ethTickers.get(chainId), chainId, "eth");
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     @Override
-    public Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers)
+    public void updateERC20Tickers(Map<String, TokenTicker> erc20Tickers)
     {
-        return Completable.complete()
-                .subscribeWith(new DisposableCompletableObserver()
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                for (String tokenAddress : erc20Tickers.keySet())
                 {
-                    Realm realm;
-
-                    @Override
-                    public void onStart()
-                    {
-                        realm = realmManager.getRealmInstance(TICKER_DB);
-                        realm.beginTransaction();
-                        for (String tokenAddress : erc20Tickers.keySet())
-                        {
-                            writeTickerToRealm(realm, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);
-                        }
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        if (realm.isInTransaction()) realm.commitTransaction();
-                        realm.close();
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        if (realm != null && !realm.isClosed())
-                        {
-                            realm.close();
-                        }
-                    }
-                });
+                    writeTickerToRealm(r, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     @Override
@@ -991,45 +932,25 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable removeOutdatedTickers()
+    public void removeOutdatedTickers()
     {
-        return Completable.complete()
-                .subscribeWith(new DisposableCompletableObserver()
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmResults<RealmTokenTicker> realmItems = r.where(RealmTokenTicker.class)
+                        .lessThan("updatedTime", System.currentTimeMillis() - TICKER_TIMEOUT)
+                        .findAll();
+
+                for (RealmTokenTicker data : realmItems)
                 {
-                    Realm realm;
-
-                    @Override
-                    public void onStart()
-                    {
-                        realm = realmManager.getRealmInstance(TICKER_DB);
-                        realm.beginTransaction();
-                        //get all tickers
-                        RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
-                                .lessThan("updatedTime", System.currentTimeMillis() - TICKER_TIMEOUT)
-                                .findAll();
-
-                        for (RealmTokenTicker data : realmItems)
-                        {
-                            data.deleteFromRealm();
-                        }
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        if (realm.isInTransaction()) realm.commitTransaction();
-                        realm.close();
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        if (realm != null && !realm.isClosed())
-                        {
-                            realm.close();
-                        }
-                    }
-                });
+                    data.deleteFromRealm();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     private void writeTickerToRealm(Realm realm, final TokenTicker ticker, int chainId, String tokenAddress)

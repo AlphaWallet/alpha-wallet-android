@@ -15,38 +15,25 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
-import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthCall;
 
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,11 +47,9 @@ import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -79,6 +64,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
     private final String BLOCKSCOUT_API = "blockscout";
+    private final String MATIC_API = "maticvigil.com/api/v2/transactions";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -319,6 +305,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private EtherscanTransaction[] readTransactions(NetworkInfo networkInfo, String walletAddress, String tokenAddress, String firstBlock, boolean ascending, int page, int pageSize) throws JSONException
     {
+        if (networkInfo == null) return new EtherscanTransaction[0];
         if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransactions(walletAddress, tokenAddress, networkInfo, ascending, page, pageSize); }
         okhttp3.Response response;
         String result = null;
@@ -327,16 +314,24 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String sort = "asc";
         if (!ascending) sort = "desc";
 
-        if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanTxUrl))
+        if (!TextUtils.isEmpty(networkInfo.etherscanTxUrl))
         {
             StringBuilder sb = new StringBuilder();
             sb.append(networkInfo.etherscanTxUrl);
-            if (!networkInfo.etherscanTxUrl.endsWith("/"))
+
+            if (networkInfo.etherscanTxUrl.contains(MATIC_API))
             {
-                sb.append("/");
+                sb.append("?module=account&action=txlist&address=");
+            }
+            else
+            {
+                if (!networkInfo.etherscanTxUrl.endsWith("/"))
+                {
+                    sb.append("/");
+                }
+                sb.append("api?module=account&action=txlist&address=");
             }
 
-            sb.append("api?module=account&action=txlist&address=");
             sb.append(tokenAddress);
             if (ascending)
             {
@@ -451,7 +446,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     @Override
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
-        final boolean nftCheck = isNFTCheck && (!networkInfo.etherscanTxUrl.contains(BLOCKSCOUT_API)); //override NFT check if blockscout
+        final boolean nftCheck = isNFTCheck && (!networkInfo.etherscanTxUrl.contains(BLOCKSCOUT_API) && !networkInfo.etherscanTxUrl.contains(MATIC_API)); //override NFT check if blockscout
         return Single.fromCallable(() -> {
             //get latest block read
             int eventCount = 0;
@@ -505,11 +500,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     if (TextUtils.isEmpty(aux.getResult()) || !aux.getResult().equals(DB_RESET))
                     {
                         String chainIdStr = aux.getInstanceKey().substring(BLOCK_ENTRY.length());
-                        int chainId = Integer.parseInt(chainIdStr);
-                        writeTokenBlockRead(r, chainId, 0, true); //check from start
-                        writeTokenBlockRead(r, chainId, 0, false); //check from start
-                        aux.setResult(DB_RESET);
-                        delete = true;
+                        if (!TextUtils.isEmpty(chainIdStr))
+                        {
+                            int chainId = Integer.parseInt(chainIdStr);
+                            writeTokenBlockRead(r, chainId, 0, true); //check from start
+                            writeTokenBlockRead(r, chainId, 0, false); //check from start
+                            aux.setResult(DB_RESET);
+                            delete = true;
+                        }
                     }
                 }
 
@@ -592,7 +590,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 }
                 //added a token
                 //need to fetch metadata
-                Asset asset = parseTokenMetadata(token, tokenId);
+                Asset asset = token.fetchTokenMetadata(tokenId);
                 if (asset != null)
                 {
                     if (token.getInterfaceSpec() != ContractType.ERC721)
@@ -625,7 +623,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         final String ETHERSCAN = "[ETHERSCAN]";
         final String QUERY_TYPE = "[QUERY_TYPE]";
         final String APIKEY_TOKEN = "[APIKEY]";
-        String fullUrl = ETHERSCAN + "api?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
+        String fullUrl;
+        if (networkInfo.etherscanTxUrl.contains(MATIC_API))
+        {
+             fullUrl = ETHERSCAN + "?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
+        }
+        else
+        {
+            fullUrl = ETHERSCAN + "api?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
+        }
         fullUrl = fullUrl.replace(QUERY_TYPE, queryType).replace(ETHERSCAN, networkInfo.etherscanTxUrl).replace(START_BLOCK, String.valueOf(lastBlockChecked + 1)).replace(WALLET_ADDR, walletAddress);
         if (networkInfo.etherscanTxUrl.contains("etherscan"))
         {
@@ -665,8 +671,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return result;
     }
 
+    //TODO: Instead of reading transfers we can read balances and track changes for ERC20 tokens
     private String readCovalentTransfers(String walletAddress, NetworkInfo networkInfo, long lastBlockChecked, String queryType)
     {
+        //update token balances from covalent
         return ""; //Currently, covalent doesn't support fetching transfer events
     }
 
@@ -1035,57 +1043,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return eventMap;
     }
 
-    private Asset parseTokenMetadata(Token newToken, BigInteger tokenId)
-    {
-        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
-        Web3j web3j = TokenRepository.getWeb3jService(newToken.tokenInfo.chainId);
-        String responseValue = callSmartContractFunction(web3j, getTokenURI(tokenId), newToken.getAddress(), newToken.getWallet());
-        if (responseValue == null) responseValue = callSmartContractFunction(web3j, getTokenURI2(tokenId), newToken.getAddress(), newToken.getWallet());
-        JSONObject metaData = loadMetaData(responseValue);
-        if (metaData != null)
-        {
-            return Asset.fromMetaData(metaData, tokenId.toString(), newToken);
-        }
-
-        return null;
-    }
-
-    private JSONObject loadMetaData(String tokenURI)
-    {
-        JSONObject metaData = null;
-
-        try
-        {
-            Request request = new Request.Builder()
-                    .url(Utils.parseIPFS(tokenURI))
-                    .get()
-                    .build();
-
-            okhttp3.Response response = httpClient.newCall(request).execute();
-            metaData = new JSONObject(response.body().string());
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return metaData;
-    }
-
-    private static Function getTokenURI(BigInteger tokenId)
-    {
-        return new Function("tokenURI",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-    }
-
-    private static Function getTokenURI2(BigInteger tokenId)
-    {
-        return new Function("uri",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-    }
-
     private BigInteger getTokenId(String tokenID)
     {
         BigInteger tokenIdBI;
@@ -1107,31 +1064,5 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), knownERC721 ? ContractType.ERC721 : ContractType.ERC721_UNDETERMINED);
         newToken.setTokenWallet(walletAddress);
         return newToken;
-    }
-
-    private String callSmartContractFunction(Web3j web3j,
-                                             Function function, String contractAddress, String walletAddr)
-    {
-        String encodedFunction = FunctionEncoder.encode(function);
-
-        try
-        {
-            org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
-            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
-
-            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
-
-            if (!responseValues.isEmpty())
-            {
-                return responseValues.get(0).getValue().toString();
-            }
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return null;
     }
 }

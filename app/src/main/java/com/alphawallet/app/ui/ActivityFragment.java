@@ -325,4 +325,9 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         //called when we just refreshed the database
         refreshTransactionList();
     }
+
+    public void scrollToTop()
+    {
+        if (listView != null) listView.smoothScrollToPosition(0);
+    }
 }

@@ -49,8 +49,8 @@ import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_V
 public class NonFungibleTokenAdapter extends TokensAdapter {
     TicketRange currentRange = null;
     final Token token;
-    protected OpenseaService openseaService;
-    private boolean clickThrough = false;
+    protected final OpenseaService openseaService;
+    private final boolean clickThrough;
     protected int assetCount;
     private FunctionCallback functionCallback;
     private final Activity activity;
@@ -72,6 +72,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
+        clickThrough = false;
         openseaService = null;
         setTokenRange(token, tokenSelection);
         this.activity = null;
@@ -92,7 +93,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService, assetCount);
                 break;
             case OpenseaHolder.VIEW_TYPE:
-                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token, activity);
+                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token, activity, clickThrough);
                 holder.setOnTokenClickListener(onTokenClickListener);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:

@@ -236,6 +236,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
         String operationName = token.getOperationName(transaction, this);
 
+        transaction.getDestination(token);
         eventAction.setText(operationName);
         eventActionSymbol.setText(sym);
         //amount
@@ -268,9 +269,9 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         {
             eventDetail.setupTransactionView(transaction, token, viewModel.getAssetDefinitionService(), supplementalTxt);
         }
-        else if (transferData != null)
+        else if (token.isERC721())
         {
-            eventDetail.setupTransferData(transaction, token, transferData);
+            setupERC721TokenDetail(transaction);
         }
 
         setChainName(transaction);
@@ -649,6 +650,18 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
                 //same as if you clicked on it in the wallet view
                 token.clickReact(viewModel, this);
             }
+        }
+    }
+
+    private void setupERC721TokenDetail(Transaction transaction)
+    {
+        if (transferData != null)
+        {
+            eventDetail.setupTransferData(transaction, token, transferData);
+        }
+        else if (transaction.hasInput() && transaction.transactionInput.isSendOrReceive(transaction))
+        {
+            eventDetail.setupERC721TokenView(token, token.getTransferValueRaw(transaction.transactionInput).toString(), true);
         }
     }
 }

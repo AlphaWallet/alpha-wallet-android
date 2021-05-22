@@ -602,6 +602,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
     }
 
+    public void dropFocus()
+    {
+        if (web3 != null) web3.clearFocus();
+        if (urlTv != null) urlTv.clearFocus();
+    }
+
     // TODO: Move all nav stuff to widget
     private void openURLInputView() {
         urlTv.setAdapter(null);
@@ -988,6 +994,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             confirmationDialog = new ActionSheetDialog(getActivity(), this, this, message);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
+            confirmationDialog.fullExpand();
         }
     }
 

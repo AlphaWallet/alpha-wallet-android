@@ -7,6 +7,7 @@
     android:layout_height="wrap_content">
 
     <View
+        android:id="@+id/spacing_line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/mercury" />

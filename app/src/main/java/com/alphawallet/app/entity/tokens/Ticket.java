@@ -423,9 +423,9 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public String convertValue(String value, int precision)
+    public String convertValue(String prefix, String value, int precision)
     {
-        return value;
+        return prefix + value;
     }
 
     @Override

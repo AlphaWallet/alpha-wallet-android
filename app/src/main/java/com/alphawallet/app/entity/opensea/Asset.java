@@ -65,6 +65,11 @@ public class Asset implements Parcelable {
         traits = in.createTypedArrayList(Trait.CREATOR);
     }
 
+    public Asset()
+    {
+        tokenId = null;
+    }
+
     public Asset(String tokenId, AssetContract contract)
     {
         if (Utils.isHex(tokenId))
@@ -173,7 +178,8 @@ public class Asset implements Parcelable {
     }
 
     public String getDescription() {
-        return description;
+        if (TextUtils.isEmpty(description) || description.equals("null")) return "";
+        else return description;
     }
 
     public void setDescription(String description) {

@@ -31,7 +31,7 @@ public interface TokenLocalSource {
     void deleteRealmToken(int chainId, Wallet wallet, String address);
 
     Token updateTokenType(Token token, Wallet wallet, ContractType type);
-    Disposable storeTokenUrl(int networkId, String address, String imageUrl);
+    void storeTokenUrl(int networkId, String address, String imageUrl);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                             AssetDefinitionService svs);
@@ -45,9 +45,9 @@ public interface TokenLocalSource {
 
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 
-    Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers);
-    Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers);
-    Disposable removeOutdatedTickers();
+    void updateEthTickers(Map<Integer, TokenTicker> ethTickers);
+    void updateERC20Tickers(Map<String, TokenTicker> erc20Tickers);
+    void removeOutdatedTickers();
 
     Realm getRealmInstance(Wallet wallet);
     Realm getTickerRealmInstance();

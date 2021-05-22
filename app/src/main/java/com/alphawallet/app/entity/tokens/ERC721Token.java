@@ -10,16 +10,25 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.tools.Numeric;
 
 import org.bouncycastle.jcajce.provider.digest.SHA3;
+import org.json.JSONObject;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthCall;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -30,8 +39,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import wallet.core.jni.Hash;
+
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
  * Created by James on 3/10/2018.
@@ -40,6 +54,7 @@ import wallet.core.jni.Hash;
 public class ERC721Token extends Token implements Parcelable
 {
     private final Map<Long, Asset> tokenBalanceAssets;
+    private static OkHttpClient client;
 
     public ERC721Token(TokenInfo tokenInfo, Map<Long, Asset> balanceList, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
@@ -253,16 +268,16 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String convertValue(String value, int precision)
+    public String convertValue(String prefix, String value, int precision)
     {
-        precision += 1;
+        precision++;
         if (value.length() > precision)
         {
-            return "…" + value.substring(value.length() - precision);
+            return prefix + "1";
         }
         else
         {
-            return value;
+            return "#" + value;
         }
     }
 
@@ -305,11 +320,20 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getTransferValue(TransactionInput txInput, int precision)
     {
+        precision++;
         //return the tokenId from the transfer if possible
         try
         {
             BigInteger tokenId = new BigInteger(txInput.miscData.get(0), 16);
-            return tokenId.toString();
+            String tokenIdStr = tokenId.toString();
+            if (tokenIdStr.length() > precision)
+            {
+                return "1";
+            }
+            else
+            {
+                return "#" + tokenId.toString();
+            }
         }
         catch (Exception e)
         {
@@ -322,6 +346,16 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public BigInteger getTransferValueRaw(TransactionInput txInput)
     {
+        //return the tokenId from the transfer if possible
+        try
+        {
+            return new BigInteger(txInput.miscData.get(0), 16);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
         return BigInteger.ONE;
     }
 
@@ -372,5 +406,99 @@ public class ERC721Token extends Token implements Parcelable
         }
 
         return Numeric.toHexString(Hash.keccak256(baos.toByteArray()));
+    }
+
+    @Override
+    public Asset fetchTokenMetadata(BigInteger tokenId)
+    {
+        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
+        Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+        String responseValue = callSmartContractFunction(web3j, getTokenURI(tokenId), getAddress(), getWallet());
+        if (responseValue == null) responseValue = callSmartContractFunction(web3j, getTokenURI2(tokenId), getAddress(), getWallet());
+        JSONObject metaData = loadMetaData(responseValue);
+        if (metaData != null)
+        {
+            return Asset.fromMetaData(metaData, tokenId.toString(), this);
+        }
+        else
+        {
+            return new Asset();
+        }
+    }
+
+    private String callSmartContractFunction(Web3j web3j,
+                                             Function function, String contractAddress, String walletAddr)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+
+            if (!responseValues.isEmpty())
+            {
+                return responseValues.get(0).getValue().toString();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return null;
+    }
+
+    private static Function getTokenURI(BigInteger tokenId)
+    {
+        return new Function("tokenURI",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static Function getTokenURI2(BigInteger tokenId)
+    {
+        return new Function("uri",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private JSONObject loadMetaData(String tokenURI)
+    {
+        JSONObject metaData = null;
+        setupClient();
+
+        try
+        {
+            Request request = new Request.Builder()
+                    .url(Utils.parseIPFS(tokenURI))
+                    .get()
+                    .build();
+
+            okhttp3.Response response = client.newCall(request).execute();
+            metaData = new JSONObject(response.body().string());
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return metaData;
+    }
+
+    private static void setupClient()
+    {
+        if (client == null)
+        {
+            client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
+                    .build();
+        }
     }
 }

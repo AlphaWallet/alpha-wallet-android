@@ -532,6 +532,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void showPage(WalletPage page)
     {
+        ((DappBrowserFragment) dappBrowserFragment).dropFocus();
         switch (page)
         {
             case DAPP_BROWSER:
@@ -1089,6 +1090,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.TERMINATE_ACTIVITY:
                 if (data != null && resultCode == Activity.RESULT_OK)
                 {
+                    ((ActivityFragment)activityFragment).scrollToTop();
                     showPage(ACTIVITY);
                 }
                 break;

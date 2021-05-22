@@ -30,7 +30,7 @@ public class OpenseaSelectHolder extends OpenseaHolder
 
     public OpenseaSelectHolder(int resId, ViewGroup parent, Token token)
     {
-        super(resId, parent, token, null);
+        super(resId, parent, token, null, true);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         select = findViewById(R.id.radioBox);
     }

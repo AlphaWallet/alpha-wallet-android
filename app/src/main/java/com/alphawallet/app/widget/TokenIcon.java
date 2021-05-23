@@ -108,13 +108,13 @@ public class TokenIcon extends ConstraintLayout
      * @param token Token object
      * @param assetDefinition Asset Definition Service for Icons
      */
-    public void bindData(Token token, AssetDefinitionService assetDefinition)
+    public void bindData(Token token, AssetDefinitionService assetDefinition, String parentClassName)
     {
         if (token == null) return;
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
 
-        final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
+        final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token, parentClassName) : getIconUrl(token, parentClassName);
 
         viewTarget = new CustomViewTarget<ImageView, Drawable>(icon) {
             @Override
@@ -177,11 +177,11 @@ public class TokenIcon extends ConstraintLayout
         }
     }
 
-    private IconItem getIconUrl(Token token)
+    private IconItem getIconUrl(Token token, String parentClass)
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
         String tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
-        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
+        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId, parentClass);
     }
 
     public void setStatusIcon(StatusType type)

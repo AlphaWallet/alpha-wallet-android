@@ -2512,7 +2512,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return url;
     }
 
-    public IconItem fetchIconForToken(Token token)
+    public IconItem fetchIconForToken(Token token, String parentClassName)
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
 
@@ -2522,7 +2522,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
         }
 
-        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
+        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId, parentClassName);
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)

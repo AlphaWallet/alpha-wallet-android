@@ -2525,6 +2525,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
+    public void storeImageUrl(int chainId, String tokenAddress)
+    {
+        String imageUrl = Utils.getAWIconRepo(tokenAddress);
+        tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
+    }
+
     public Single<Integer> fetchViewHeight(int chainId, String address)
     {
         return Single.fromCallable(() -> {

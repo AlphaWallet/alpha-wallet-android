@@ -53,6 +53,7 @@ public class TokenIcon extends ConstraintLayout
     private boolean showStatus = false;
     private boolean largeIcon = false;
     private StatusType currentStatus;
+    private AssetDefinitionService assetSvs;
 
     public TokenIcon(Context context, AttributeSet attrs)
     {
@@ -114,6 +115,7 @@ public class TokenIcon extends ConstraintLayout
         if (token == null) return;
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
+        this.assetSvs = assetDefinition;
 
         final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
 
@@ -158,22 +160,28 @@ public class TokenIcon extends ConstraintLayout
         {
             setupTextIcon(token);
             RequestBuilder<Drawable> rb = null;
+            RequestOptions circleCrop;
 
             //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
-            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME) && !iconItem.onlyFetchFromCache())
+            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME))
             {
+                circleCrop = new RequestOptions().circleCrop();
+                if (!iconItem.onlyFetchFromCache()) {
                 rb = Glide.with(getContext().getApplicationContext())
                         .load(Utils.getAWIconRepo(token.getAddress()))
-                        .addListener(requestListenerAW);
+                        .addListener(requestListenerAW); }
+            }
+            else
+            {
+                circleCrop = new RequestOptions().sizeMultiplier(1.0f); // Placeholder NOP to avoid null
             }
 
             Glide.with(getContext().getApplicationContext())
                     .load(iconItem.getUrl())
                     .signature(iconItem.getSignature())
                     .onlyRetrieveFromCache(iconItem.onlyFetchFromCache()) //reduce URL checking, only check once per session
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .error(rb)
-                    .apply(new RequestOptions().circleCrop())
+                    .apply(circleCrop) //only crop if not from AW iconassets repo
                     .apply(new RequestOptions().placeholder(chainIcon))
                     .listener(requestListener)
                     .into(viewTarget);
@@ -306,7 +314,8 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
             //got icon from AW iconasset repo, now load from this repo, so invalidate the cache
-            if (token != null) IconItem.invalidateCheck(Keys.toChecksumAddress(token.getAddress()));
+            if (assetSvs != null) { assetSvs.storeImageUrl(token.tokenInfo.chainId, token.getAddress()); }
+            else if (token != null) IconItem.invalidateCheck(Keys.toChecksumAddress(token.getAddress()));
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);

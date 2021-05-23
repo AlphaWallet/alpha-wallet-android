@@ -14,13 +14,15 @@ public class IconItem {
     private final String correctedAddress;
     private final int chainId;
 
-    private final static Map<String, ConcurrentLinkedQueue<String>> iconCheck = new ConcurrentHashMap<>();
+    private final static Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
 
-    public IconItem(String url, String correctedAddress, int chainId, String parentClassName) {
+    public IconItem(String url, String correctedAddress, int chainId) {
         this.url = url;
-        this.fetchFromCache = hasBeenChecked(correctedAddress, parentClassName);
+        this.fetchFromCache = iconCheck.containsKey(correctedAddress);
         this.correctedAddress = correctedAddress;
         this.chainId = chainId;
+
+        iconCheck.put(correctedAddress, true);
     }
 
     public String getUrl() {
@@ -35,23 +37,8 @@ public class IconItem {
         return new ObjectKey(correctedAddress + "-" + chainId);
     }
 
-    private boolean hasBeenChecked(String addr, String className)
+    public static void invalidateCheck(String address)
     {
-        ConcurrentLinkedQueue<String> checkedAddrs = iconCheck.get(className);
-        if (checkedAddrs == null)
-        {
-            checkedAddrs = new ConcurrentLinkedQueue<>();
-            iconCheck.put(className, checkedAddrs);
-        }
-
-        if (checkedAddrs.contains(addr))
-        {
-            return true;
-        }
-        else
-        {
-            checkedAddrs.add(addr);
-            return false;
-        }
+        iconCheck.remove(address);
     }
 }

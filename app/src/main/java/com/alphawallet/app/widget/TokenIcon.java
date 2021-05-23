@@ -26,6 +26,7 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -108,13 +109,13 @@ public class TokenIcon extends ConstraintLayout
      * @param token Token object
      * @param assetDefinition Asset Definition Service for Icons
      */
-    public void bindData(Token token, AssetDefinitionService assetDefinition, String parentClassName)
+    public void bindData(Token token, AssetDefinitionService assetDefinition)
     {
         if (token == null) return;
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
 
-        final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token, parentClassName) : getIconUrl(token, parentClassName);
+        final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
 
         viewTarget = new CustomViewTarget<ImageView, Drawable>(icon) {
             @Override
@@ -162,13 +163,15 @@ public class TokenIcon extends ConstraintLayout
             if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME) && !iconItem.onlyFetchFromCache())
             {
                 rb = Glide.with(getContext().getApplicationContext())
-                        .load(Utils.getAWIconRepo(token.getAddress()));
+                        .load(Utils.getAWIconRepo(token.getAddress()))
+                        .addListener(requestListenerAW);
             }
 
             Glide.with(getContext().getApplicationContext())
                     .load(iconItem.getUrl())
                     .signature(iconItem.getSignature())
                     .onlyRetrieveFromCache(iconItem.onlyFetchFromCache()) //reduce URL checking, only check once per session
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .error(rb)
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(chainIcon))
@@ -177,11 +180,11 @@ public class TokenIcon extends ConstraintLayout
         }
     }
 
-    private IconItem getIconUrl(Token token, String parentClass)
+    private IconItem getIconUrl(Token token)
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
         String tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
-        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId, parentClass);
+        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
     public void setStatusIcon(StatusType type)
@@ -198,7 +201,6 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(R.drawable.ic_receive_small);
                 break;
             case PENDING:
-                //statusIcon.setImageResource(R.drawable.ic_timer_small);
                 pendingProgress.setVisibility(View.VISIBLE);
                 break;
             case FAILED:
@@ -287,6 +289,24 @@ public class TokenIcon extends ConstraintLayout
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            textIcon.setVisibility(View.GONE);
+            icon.setVisibility(View.VISIBLE);
+            icon.setImageDrawable(resource);
+            return false;
+        }
+    };
+
+    private final RequestListener<Drawable> requestListenerAW = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            setupTextIcon(token);
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            //got icon from AW iconasset repo, now load from this repo, so invalidate the cache
+            if (token != null) IconItem.invalidateCheck(Keys.toChecksumAddress(token.getAddress()));
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);

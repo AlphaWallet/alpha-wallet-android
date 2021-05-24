@@ -123,7 +123,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         titleView = findViewById(R.id.title_my_address);
         currentNetwork = findViewById(R.id.current_network);
         selectNetworkLayout = findViewById(R.id.select_network_layout);
-        selectNetworkLayout.setOnClickListener(v -> selectNetwork());
+        if (selectNetworkLayout != null) selectNetworkLayout.setOnClickListener(v -> selectNetwork());
         layoutInputAmount = findViewById(R.id.layout_define_request);
         selectAddress = findViewById(R.id.layout_select_address);
         address =  findViewById(R.id.address);
@@ -235,7 +235,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         amountInput = findViewById(R.id.input_amount);
         amountInput.setupToken(token, null, viewModel.getTokenService(), this);
         updateCryptoAmount(BigDecimal.ZERO);
-        selectNetworkLayout.setVisibility(View.VISIBLE);
         setNetworkUi(networkInfo);
     }
 
@@ -259,7 +258,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         setTitle(getString(R.string.my_wallet_address));
         copyAddress.setText(displayAddress);
         currentMode = MODE_ADDRESS;
-        selectNetworkLayout.setVisibility(View.GONE);
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }

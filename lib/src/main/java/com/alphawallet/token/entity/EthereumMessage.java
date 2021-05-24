@@ -73,7 +73,14 @@ public class EthereumMessage implements Signable {
         }
         else
         {
-            return hexToUtf8(userMessage);
+            try
+            {
+                return hexToUtf8(userMessage);
+            }
+            catch (NumberFormatException e)
+            {
+                return userMessage;
+            }
         }
     }
 

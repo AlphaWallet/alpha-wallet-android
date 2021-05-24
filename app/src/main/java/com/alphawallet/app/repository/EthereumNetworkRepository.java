@@ -69,6 +69,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     private void buildPopularTokenMap(List<Integer> networkFilters)
     {
         KnownContract knownContract = readContracts();
+        if (knownContract == null) return;
 
         if (networkFilters == null || networkFilters.contains(MAINNET_ID))
         {

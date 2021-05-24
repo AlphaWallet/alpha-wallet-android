@@ -286,6 +286,7 @@ public class ENSHandler implements Runnable
 
     public static String matchENSOrFormat(Context ctx, String ethAddress)
     {
+        if (ethAddress == null) return "";
         String checkSumAddr = Keys.toChecksumAddress(ethAddress);
         if (!TextUtils.isEmpty(ethAddress) && Utils.isAddressValid(ethAddress))
         {

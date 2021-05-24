@@ -104,7 +104,7 @@ public class InputAmount extends LinearLayout
      * @param svs
      */
     public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService,
-                           @Nullable TokensService svs, @NotNull AmountReadyCallback amountCallback)
+                           @NotNull TokensService svs, @NotNull AmountReadyCallback amountCallback)
     {
         this.token = token;
         this.tokensService = svs;
@@ -114,12 +114,9 @@ public class InputAmount extends LinearLayout
         chainName.setChainID(token.tokenInfo.chainId);
         updateAvailableBalance();
 
-        if (tokensService != null)
-        {
-            this.realm = tokensService.getWalletRealmInstance();
-            this.tickerRealm = tokensService.getTickerRealmInstance();
-            bindDataSource();
-        }
+        this.realm = tokensService.getWalletRealmInstance();
+        this.tickerRealm = tokensService.getTickerRealmInstance();
+        bindDataSource();
         setupAllFunds();
     }
 
@@ -217,6 +214,8 @@ public class InputAmount extends LinearLayout
 
         clickMore.setOnClickListener(v -> {
             //on down caret clicked - switch to fiat currency equivalent if there's a ticker
+            if (getTickerQuery() == null) return;
+
             RealmTokenTicker rtt = getTickerQuery().findFirst();
             if (showingCrypto && rtt != null)
             {
@@ -272,12 +271,20 @@ public class InputAmount extends LinearLayout
 
     private RealmQuery<RealmTokenTicker> getTickerQuery()
     {
-        return tickerRealm.where(RealmTokenTicker.class)
-                .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
+        if (tickerRealm != null)
+        {
+            return tickerRealm.where(RealmTokenTicker.class)
+                    .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private void startTickerListener()
     {
+        if (getTickerQuery() == null) return;
         realmTickerUpdate = getTickerQuery().findFirstAsync();
         realmTickerUpdate.addChangeListener(realmTicker -> {
             updateAvailableBalance();

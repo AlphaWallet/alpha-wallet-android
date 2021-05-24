@@ -7,7 +7,7 @@
     android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_network_switch_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_holder"
@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Contract Address"
+                android:text="@string/contract_address"
                 android:textSize="@dimen/sp15" />
 
         </LinearLayout>

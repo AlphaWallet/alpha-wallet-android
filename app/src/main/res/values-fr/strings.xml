@@ -255,7 +255,7 @@
     <string name="place_tickets_marketplace">Lister sur la marketplace</string>
     <string name="hint_time">--:--</string>
     <string name="link_expiry_time">Date d\'expiration du lien Magique</string>
-    <string name="error_time">Veuillez selectionner l'heure d\'expiration</string>
+    <string name="error_time">Veuillez selectionner l\'heure d\'expiration</string>
     <string name="error_date">Veuillez selectionner la date d\'expiration</string>
     <string name="error_invalid_quantity">L\'entrée doit être supérieur à 0</string>
     <string name="link_expiry_date">Date d\'expiration du lien Magique</string>
@@ -285,7 +285,7 @@
     <string name="what_is_eth">Ethereum est une plate-forme informatique distribuée et un système d\'exploitation open source, public et basé sur la blockchain, avec une fonctionnalité de contrat intelligent (script). C\'est l\'infrastructure des produits et services blockchain.\n\nETH/Ether est une crypto-monnaie dont la blockchain est générée par la plateforme Ethereum. L\'éther peut être transféré entre comptes et utilisé pour compenser les nœuds de minage des participants pour les calculs effectués. Ethereum fournit une machine virtuelle décentralisée complète de Turing, la machine virtuelle Ethereum (EVM), peut exécuter des scripts à l\'aide d\'un réseau international de nœuds publics. «Gas», un mécanisme interne de tarification des transactions, est utilisé pour atténuer le spam et allouer des ressources sur le réseau.</string>
     <string name="why_alphawallet_eth">Actuellement, Ethereum est la meilleure et la plus grande blockchain pour le développement d\'applications et de services de contrats intelligents. AlphaWallet supporte la blockchain Ethereum et aide à améliorer sa technologie.</string>
     <string name="how_i_get_money">Vous pouvez convertir votre Ethereum en monnaie fiat et les tranférer sur votre compte bancaire avec n\'importe quel échange crypto.</string>
-    <string name="how_i_transfer_into_wallet">Vous pouvez fournir l\'adresse de votre portefeuille à l\'envoyeur. Ils peuvent vous transférer de l'ETH avec votre adresse de portefeuille.</string>
+    <string name="how_i_transfer_into_wallet">Vous pouvez fournir l\'adresse de votre portefeuille à l\'envoyeur. Ils peuvent vous transférer de l\'ETH avec votre adresse de portefeuille.</string>
     <string name="ticket_import_valid">Tickets Valides pour l\'Import</string>
     <string name="ticket_already_imported">Les tickets sont déja importés</string>
     <string name="ticket_range_inavlid">Les tickets sont partiellement importés</string>

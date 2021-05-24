@@ -27,6 +27,7 @@ import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +65,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private final MutableLiveData<Boolean> signRequest = new MutableLiveData<>();
 
     private Disposable memPoolSubscription;
-    private List<BigInteger> tickets;
+    private final List<BigInteger> tickets = new ArrayList<>();
     private Token token;
 
     @Nullable
@@ -226,13 +227,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public void prepare(String address, Token ticket, TicketRange ticketRange) {
         this.address = address;
         token = ticket;
+        tickets.clear();
         if(ticket instanceof Ticket)
         {
-            this.tickets = ((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds);
+            this.tickets.addAll(((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds));
         }
         else
         {
-            this.tickets = ticketRange.tokenIds;
+            this.tickets.addAll(ticketRange.tokenIds);
         }
         disposable = genericWalletInteract
                 .find()
@@ -249,7 +251,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     {
         signatureGenerateInteract
                 .getMessage(tickets, token.getAddress(), this.token.getInterfaceSpec())
-                .subscribe(pair -> onSignMessage(pair, wallet), this::onError);
+                .subscribe(pair -> onSignMessage(pair, wallet), this::onError)
+                .isDisposed();
     }
 
     private void startMemoryPoolListener() {

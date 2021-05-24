@@ -128,11 +128,18 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
 
     private void updateButtonState(boolean enabled)
     {
-        importButton.setActivated(enabled);
-        importButton.setClickable(enabled);
-        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
-        if (getContext() != null)
-            importButton.setBackgroundColor(getContext().getColor(colorId));
+        try
+        {
+            importButton.setActivated(enabled);
+            importButton.setClickable(enabled);
+            int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
+            if (getContext() != null)
+                importButton.setBackgroundColor(getContext().getColor(colorId));
+        }
+        catch (Exception e)
+        {
+            // Couldn't update state
+        }
     }
 
     public void setOnSetWatchWalletListener(OnSetWatchWalletListener onSetWatchWalletListener)

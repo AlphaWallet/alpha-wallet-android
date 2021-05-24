@@ -471,7 +471,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                                     return;
                                 }
                             }
-                            catch (SalesOrderMalformed e)
+                            catch (Exception e)
                             {
                                 e.printStackTrace();
                             }

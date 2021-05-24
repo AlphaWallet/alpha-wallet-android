@@ -5,7 +5,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 

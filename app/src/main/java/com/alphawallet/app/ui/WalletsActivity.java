@@ -2,33 +2,27 @@ package com.alphawallet.app.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
-
-import com.alphawallet.app.viewmodel.ActivityViewModel;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.KeyService;
@@ -40,6 +34,9 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.snackbar.Snackbar;
 
 import javax.inject.Inject;
 
@@ -286,6 +283,8 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onChangeDefaultWallet(Wallet wallet) {
+        if (adapter == null) return;
+
         if (selectedWallet != null && !wallet.sameAddress(selectedWallet.address))
         {
             requiresHomeRefresh = true;
@@ -304,7 +303,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onFetchWallets(Wallet[] wallets)
     {
         enableDisplayHomeAsUp();
-        adapter.setWallets(wallets);
+        if (adapter != null) adapter.setWallets(wallets);
         invalidateOptionsMenu();
     }
 

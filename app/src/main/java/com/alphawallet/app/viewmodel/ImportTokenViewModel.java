@@ -19,7 +19,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;

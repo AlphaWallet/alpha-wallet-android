@@ -1,4 +1,4 @@
-package com.alphawallet.app.entity.tokens;
+package com.alphawallet.app.entity.tokendata;
 
 public class TokenPerformance {
     private String day;

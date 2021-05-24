@@ -41,8 +41,8 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
+        android:background="@color/logo_grey"
         android:contentDescription="@string/empty"
-<<<<<<< HEAD
         android:gravity="center"
         android:visibility="visible"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
@@ -55,10 +55,8 @@
         android:layout_gravity="center"
         android:background="@color/transparent"
         android:contentDescription="@string/empty"
-=======
->>>>>>> 12f908e9e... Initial commit for Samoa Update
         android:gravity="center"
-        android:src="@drawable/ic_token_eth"
+        android:src="@drawable/ropsten_logo"
         android:visibility="visible"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom" />

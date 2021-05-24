@@ -3,9 +3,9 @@ package com.alphawallet.app.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.entity.tokens.TokenPerformance;
-import com.alphawallet.app.entity.tokens.TokenPortfolio;
-import com.alphawallet.app.entity.tokens.TokenStats;
+import com.alphawallet.app.entity.tokendata.TokenPerformance;
+import com.alphawallet.app.entity.tokendata.TokenPortfolio;
+import com.alphawallet.app.entity.tokendata.TokenStats;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenInfoFragment;

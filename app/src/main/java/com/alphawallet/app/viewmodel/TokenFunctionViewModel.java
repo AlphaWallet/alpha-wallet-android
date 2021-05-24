@@ -456,8 +456,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void updateTokenScriptViewSize(Token token, int itemViewHeight)
     {
-        assetDefinitionService.storeTokenViewHeight(token.tokenInfo.chainId, token.getAddress(), itemViewHeight)
-                .isDisposed();
+        assetDefinitionService.storeTokenViewHeight(token.tokenInfo.chainId, token.getAddress(), itemViewHeight);
     }
 
     public void checkForNewScript(Token token)

@@ -26,6 +26,7 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -52,6 +53,7 @@ public class TokenIcon extends ConstraintLayout
     private boolean showStatus = false;
     private boolean largeIcon = false;
     private StatusType currentStatus;
+    private AssetDefinitionService assetSvs;
 
     public TokenIcon(Context context, AttributeSet attrs)
     {
@@ -113,6 +115,7 @@ public class TokenIcon extends ConstraintLayout
         if (token == null) return;
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
+        this.assetSvs = assetDefinition;
 
         final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
 
@@ -157,12 +160,20 @@ public class TokenIcon extends ConstraintLayout
         {
             setupTextIcon(token);
             RequestBuilder<Drawable> rb = null;
+            RequestOptions circleCrop;
 
             //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
-            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME) && !iconItem.onlyFetchFromCache())
+            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME))
             {
+                circleCrop = new RequestOptions().circleCrop();
+                if (!iconItem.onlyFetchFromCache()) {
                 rb = Glide.with(getContext().getApplicationContext())
-                        .load(Utils.getAWIconRepo(token.getAddress()));
+                        .load(Utils.getAWIconRepo(token.getAddress()))
+                        .addListener(requestListenerAW); }
+            }
+            else
+            {
+                circleCrop = new RequestOptions().sizeMultiplier(1.0f); // Placeholder NOP to avoid null
             }
 
             Glide.with(getContext().getApplicationContext())
@@ -170,7 +181,7 @@ public class TokenIcon extends ConstraintLayout
                     .signature(iconItem.getSignature())
                     .onlyRetrieveFromCache(iconItem.onlyFetchFromCache()) //reduce URL checking, only check once per session
                     .error(rb)
-                    .apply(new RequestOptions().circleCrop())
+                    .apply(circleCrop) //only crop if not from AW iconassets repo
                     .apply(new RequestOptions().placeholder(chainIcon))
                     .listener(requestListener)
                     .into(viewTarget);
@@ -198,7 +209,6 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(R.drawable.ic_receive_small);
                 break;
             case PENDING:
-                //statusIcon.setImageResource(R.drawable.ic_timer_small);
                 pendingProgress.setVisibility(View.VISIBLE);
                 break;
             case FAILED:
@@ -287,6 +297,25 @@ public class TokenIcon extends ConstraintLayout
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            textIcon.setVisibility(View.GONE);
+            icon.setVisibility(View.VISIBLE);
+            icon.setImageDrawable(resource);
+            return false;
+        }
+    };
+
+    private final RequestListener<Drawable> requestListenerAW = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            setupTextIcon(token);
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            //got icon from AW iconasset repo, now load from this repo, so invalidate the cache
+            if (assetSvs != null) { assetSvs.storeImageUrl(token.tokenInfo.chainId, token.getAddress()); }
+            else if (token != null) IconItem.invalidateCheck(Keys.toChecksumAddress(token.getAddress()));
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);

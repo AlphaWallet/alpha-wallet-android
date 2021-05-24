@@ -570,9 +570,9 @@ public class Token implements Parcelable, Comparable<Token>
         return idList;
     }
 
-    public String convertValue(String value, int precision)
+    public String convertValue(String prefix, String value, int precision)
     {
-        return BalanceUtils.getScaledValueFixed(new BigDecimal(value),
+        return prefix + BalanceUtils.getScaledValueFixed(new BigDecimal(value),
                 tokenInfo.decimals, precision);
     }
 
@@ -1027,5 +1027,10 @@ public class Token implements Parcelable, Comparable<Token>
     {
         return (!TextUtils.isEmpty(tokenInfo.name) && tokenInfo.name.contains("?"))
                 || (!TextUtils.isEmpty(tokenInfo.symbol) && tokenInfo.symbol.contains("?"));
+    }
+
+    public Asset fetchTokenMetadata(BigInteger tokenId)
+    {
+        return null;
     }
 }

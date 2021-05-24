@@ -35,11 +35,24 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.92" />
 
+
+    <ImageView
+        android:foreground="@drawable/white_circle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/empty"
+        android:gravity="center"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"/>
+
     <ImageView
         android:id="@+id/icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
+        android:background="@color/transparent"
         android:contentDescription="@string/empty"
         android:gravity="center"
         android:src="@drawable/ic_token_eth"

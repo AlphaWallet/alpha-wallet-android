@@ -164,18 +164,20 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         switch (eventData.eventName)
         {
             case "received":
+                value = "+ ";
+                //drop through
             case "sent":
+                if (value.length() == 0) value = "- ";
                 if (resultMap.get("amount") != null)
                 {
-                    value = token.isERC721() ? "#" : (eventData.eventName.equals("sent") ? "- " : "+ "); //"#" for ERC721, "- " or "+ " for ERC20
-                    value += token.convertValue(resultMap.get("amount").value, TRANSACTION_BALANCE_PRECISION);
+                    value = token.convertValue(value, resultMap.get("amount").value, TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
             case "approvalObtained":
             case "ownerApproved":
                 if (resultMap.get("value") != null)
                 {
-                    value = token.convertValue(resultMap.get("value").value, TRANSACTION_BALANCE_PRECISION);
+                    value = token.convertValue(value, resultMap.get("value").value, TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
             default:

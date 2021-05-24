@@ -2463,54 +2463,30 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Disposable storeTokenViewHeight(int chainId, String address, int listViewHeight)
+    public void storeTokenViewHeight(int chainId, String address, int listViewHeight)
     {
-        return Completable.complete()
-                .subscribeWith(new DisposableCompletableObserver()
+        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        {
+            realm.executeTransactionAsync(r -> {
+                TokenScriptFile tsf = getTokenScriptFile(chainId, address);
+                if (tsf == null || !tsf.exists()) return;
+                String hash = tsf.calcMD5();
+                String databaseKey = tokenSizeDBKey(chainId, address);
+
+                RealmAuxData realmToken = r.where(RealmAuxData.class)
+                        .equalTo("instanceKey", databaseKey)
+                        .equalTo("chainId", chainId)
+                        .findFirst();
+
+                if (realmToken == null)
                 {
-                    Realm realm;
-                    @Override
-                    public void onStart()
-                    {
-                        realm = realmManager.getRealmInstance(tokensService.getCurrentAddress());
-                        //determine hash
-                        TokenScriptFile tsf = getTokenScriptFile(chainId, address);
-                        if (tsf == null || !tsf.exists()) return;
-                        String hash = tsf.calcMD5();
-                        String databaseKey = tokenSizeDBKey(chainId, address);
-
-                        RealmAuxData realmToken = realm.where(RealmAuxData.class)
-                                .equalTo("instanceKey", databaseKey)
-                                .equalTo("chainId", chainId)
-                                .findFirst();
-
-                        realm.beginTransaction();
-
-                        if (realmToken == null)
-                        {
-                            realmToken = realm.createObject(RealmAuxData.class, databaseKey);
-                        }
-                        realmToken.setChainId(chainId);
-                        realmToken.setResult(hash);
-                        realmToken.setResultTime(listViewHeight);
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        if (realm.isInTransaction()) realm.commitTransaction();
-                        realm.close();
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        if (realm != null && !realm.isClosed())
-                        {
-                            realm.close();
-                        }
-                    }
-                });
+                    realmToken = r.createObject(RealmAuxData.class, databaseKey);
+                }
+                realmToken.setChainId(chainId);
+                realmToken.setResult(hash);
+                realmToken.setResultTime(listViewHeight);
+            });
+        }
     }
 
     public String getTokenImageUrl(int networkId, String address)
@@ -2547,6 +2523,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
+    }
+
+    public void storeImageUrl(int chainId, String tokenAddress)
+    {
+        String imageUrl = Utils.getAWIconRepo(tokenAddress);
+        tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)

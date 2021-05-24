@@ -17,6 +17,12 @@ import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigInteger;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Created by Jenny Jingjing Li on 13/05/2021
  */
@@ -42,9 +48,29 @@ public class AssetDetailView extends LinearLayout
         layoutHolder = findViewById(R.id.layout_holder);
     }
 
-    public void setupAssetDetail(Token token, String tokenId, ActionSheetInterface actionSheetInterface)
+    public void setupAssetDetail(Token token, String tokenId, final ActionSheetInterface actionSheetInterface)
     {
         Asset asset = token.getAssetForToken(tokenId);
+        if (asset == null)
+        {
+            layoutHolder.setVisibility(View.GONE);
+            fetchAsset(token, tokenId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(fetchedAsset -> setupAssetDetail(fetchedAsset, actionSheetInterface), error -> {  })
+                    .isDisposed();
+        }
+        else
+        {
+            setupAssetDetail(asset, actionSheetInterface);
+        }
+    }
+
+    private void setupAssetDetail(Asset asset, ActionSheetInterface actionSheetInterface)
+    {
+        if (asset.getTokenId() == null) { return; }
+
+        layoutHolder.setVisibility(View.VISIBLE);
         assetName.setText(asset.getName());
 
         Glide.with(this)
@@ -53,19 +79,36 @@ public class AssetDetailView extends LinearLayout
 
         assetDescription.setText(asset.getDescription());
 
-        layoutHolder.setOnClickListener(v -> {
-            if (layoutDetails.getVisibility() == View.GONE)
-            {
-                layoutDetails.setVisibility(View.VISIBLE);
-                assetDetails.setImageResource(R.drawable.ic_expand_less_black);
-                actionSheetInterface.fullExpand();
-            }
-            else
-            {
-                layoutDetails.setVisibility(View.GONE);
-                assetDetails.setImageResource(R.drawable.ic_expand_more);
-            }
+        if (assetDetails.getVisibility() != View.GONE)
+        {
+            layoutHolder.setOnClickListener(v -> {
+                if (layoutDetails.getVisibility() == View.GONE)
+                {
+                    layoutDetails.setVisibility(View.VISIBLE);
+                    assetDetails.setImageResource(R.drawable.ic_expand_less_black);
+                    if (actionSheetInterface != null) actionSheetInterface.fullExpand();
+                }
+                else
+                {
+                    layoutDetails.setVisibility(View.GONE);
+                    assetDetails.setImageResource(R.drawable.ic_expand_more);
+                }
+            });
+        }
+    }
+
+    private Single<Asset> fetchAsset(Token token, String tokenId)
+    {
+        return Single.fromCallable(() -> {
+            return token.fetchTokenMetadata(new BigInteger(tokenId)); //fetch directly from token
         });
     }
 
+    public void setFullyExpanded()
+    {
+        layoutDetails.setVisibility(View.VISIBLE);
+        assetDetails.setVisibility(View.GONE);
+        findViewById(R.id.spacing_line).setVisibility(View.GONE);
+        layoutHolder.setOnClickListener(null);
+    }
 }

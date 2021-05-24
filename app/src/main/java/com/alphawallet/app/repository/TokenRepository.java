@@ -1494,9 +1494,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Disposable addImageUrl(int networkId, String address, String imageUrl)
+    public void addImageUrl(int networkId, String address, String imageUrl)
     {
-        return localSource.storeTokenUrl(networkId, address, imageUrl);
+        localSource.storeTokenUrl(networkId, address, imageUrl);
     }
 
     public static Web3j getWeb3jService(int chainId)

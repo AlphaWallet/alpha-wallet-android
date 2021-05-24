@@ -261,7 +261,11 @@ public class Transaction implements Parcelable
 		if (hasInput())
 		{
 			decodeTransactionInput(token.getWallet());
-			return getPrefix(token) + transactionInput.getOperationValue(token, this);
+			String value = transactionInput.getOperationValue(token, this);
+			boolean isSendOrReceive = !from.equalsIgnoreCase(to) && transactionInput.isSendOrReceive(this);
+			String prefix = (value.length() > 0 && value.startsWith("#") || !isSendOrReceive) ? "" :
+					(token.getIsSent(this) ? "- " : "+ ");
+			return prefix + value;
 		}
 		else
 		{

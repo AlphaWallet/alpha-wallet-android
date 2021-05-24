@@ -27,6 +27,7 @@ public class EventDetailWidget extends LinearLayout
     private final TextView symbol;
     private final TextView detail;
     private final LinearLayout holdingView;
+    private final AssetDetailView tokenView;
     private final TokenIcon icon;
 
     public EventDetailWidget(Context context, AttributeSet attrs)
@@ -37,6 +38,7 @@ public class EventDetailWidget extends LinearLayout
         detail = findViewById(R.id.text_detail);
         symbol = findViewById(R.id.text_title_symbol);
         holdingView = findViewById(R.id.layout_default_event);
+        tokenView = findViewById(R.id.asset_detail);
         icon = findViewById(R.id.token_icon);
 
         if (isInEditMode()) holdingView.setVisibility(View.VISIBLE);
@@ -97,11 +99,12 @@ public class EventDetailWidget extends LinearLayout
 
         transaction.getDestination(token); //build decoded input
         Map<String, EventResult> resultMap = transferData.getEventResultMap();
+        setupERC721TokenView(token, resultMap.get("amount").value, false);
         String value = "";
         if (resultMap.get("amount") != null)
         {
-            value = token.isNonFungible() ? "#" : (transferData.eventName.equals("sent") ? "- " : "+ "); //"#" for ERC721, "- " or "+ " for ERC20
-            value += token.convertValue(resultMap.get("amount").value, token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
+            value = transferData.eventName.equals("sent") ? "- " : "+ ";
+            value = token.convertValue(value, resultMap.get("amount").value, token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
         }
 
         //get 'from'
@@ -117,6 +120,29 @@ public class EventDetailWidget extends LinearLayout
                 break;
             default:
                 break;
+        }
+    }
+
+    public void setupERC721TokenView(Token token, String tokenId, boolean minimise)
+    {
+        if (token.isERC721())
+        {
+            tokenView.setupAssetDetail(token, tokenId, null);
+            tokenView.setVisibility(View.VISIBLE);
+            tokenView.setFullyExpanded();
+        }
+        else
+        {
+            tokenView.setVisibility(View.GONE);
+        }
+
+        if (minimise)
+        {
+            findViewById(R.id.detail_layer).setVisibility(View.GONE);
+            holdingView.setVisibility(View.VISIBLE);
+            icon.setVisibility(View.GONE);
+            title.setVisibility(View.GONE);
+            symbol.setVisibility(View.GONE);
         }
     }
 }

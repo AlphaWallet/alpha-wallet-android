@@ -42,6 +42,7 @@ public class SignTransactionDialog extends BottomSheetDialog
     private final String unlockTitle;
     private final String unlockDetail;
     private AuthenticationCallback authCallback;
+    private CancellationSignal cancellationSignal;
 
     public SignTransactionDialog(@NonNull Activity activity, Operation callBackId, String msg, String desc)
     {
@@ -70,6 +71,7 @@ public class SignTransactionDialog extends BottomSheetDialog
 
         cancel.setOnClickListener(v -> {
             authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callBackId);
+            if (cancellationSignal != null) cancellationSignal.cancel();
         });
     }
 
@@ -118,7 +120,6 @@ public class SignTransactionDialog extends BottomSheetDialog
     }
 
     private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback, final Operation callbackId) {
-        CancellationSignal cancellationSignal;
         cancellationSignal = new CancellationSignal();
         fpManager.authenticate(null, cancellationSignal, 0, new FingerprintManager.AuthenticationCallback() {
             @Override
@@ -130,8 +131,8 @@ public class SignTransactionDialog extends BottomSheetDialog
                         removeFingerprintGraphic();
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_CANCELED:
-                        authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
                         cancellationSignal.cancel();
+                        authCallback.authenticateFail("Cancelled", AuthenticationFailType.FINGERPRINT_ERROR_CANCELED, callbackId);
                         break;
                     case FingerprintManager.FINGERPRINT_ERROR_HW_NOT_PRESENT:
                     case FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE:
@@ -177,6 +178,7 @@ public class SignTransactionDialog extends BottomSheetDialog
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
+                cancellationSignal.cancel();
                 authCallback.authenticateFail("Authentication Failure", AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);
             }
         }, null);

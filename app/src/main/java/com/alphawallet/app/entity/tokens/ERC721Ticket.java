@@ -221,16 +221,16 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public String convertValue(String value, int precision)
+    public String convertValue(String prefix, String value, int precision)
     {
         precision += 1;
         if (value.length() > precision)
         {
-            return "…" + value.substring(value.length() - precision);
+            return prefix + "1";
         }
         else
         {
-            return value;
+            return "#" + value;
         }
     }
 

@@ -2,8 +2,11 @@ package com.alphawallet.app.ui.widget.entity;
 
 import com.bumptech.glide.signature.ObjectKey;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class IconItem {
     private final String url;
@@ -32,5 +35,10 @@ public class IconItem {
 
     public ObjectKey getSignature() {
         return new ObjectKey(correctedAddress + "-" + chainId);
+    }
+
+    public static void invalidateCheck(String address)
+    {
+        iconCheck.remove(address);
     }
 }

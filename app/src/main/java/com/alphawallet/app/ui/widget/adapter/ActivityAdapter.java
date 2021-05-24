@@ -5,11 +5,9 @@ package com.alphawallet.app.ui.widget.adapter;
  */
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -23,7 +21,6 @@ import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.AdapterCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.EventMeta;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ActivityDataInteract;
@@ -47,7 +44,6 @@ import com.alphawallet.app.ui.widget.holder.TransferHolder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> implements AdapterCallback
 {

@@ -55,6 +55,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MUMBAI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
@@ -111,12 +113,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
+    public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
+    public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
 
     //This optional list creates a defined order in which tokens are displayed
     static final int[] orderList = {
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, KOVAN_ID, ROPSTEN_ID, SOKOL_ID,
             RINKEBY_ID, GOERLI_ID, ARTIS_TAU1_ID, BINANCE_TEST_ID, BINANCE_MAIN_ID, HECO_ID, HECO_TEST_ID,
-            AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID
+            AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID, OPTIMISTIC_MAIN_ID,
+            OPTIMISTIC_TEST_ID
     };
 
     static final Map<Integer, NetworkInfo> networkMap = new HashMap<Integer, NetworkInfo>() {
@@ -193,6 +198,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MATIC_TEST_ID, new NetworkInfo(C.MATIC_TEST_NETWORK, C.MATIC_SYMBOL, MUMBAI_TEST_RPC_URL,
                             "https://mumbai-explorer.matic.today/tx/", MATIC_TEST_ID,
                             MUMBAI_TEST_RPC_URL,"https://explorer-mumbai.maticvigil.com/api/v2/transactions"));
+            put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK,C.ETH_SYMBOL, OPTIMISTIC_MAIN_URL,
+                    "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_URL,
+                    "https://optimistic.etherscan.io"));
+            put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK,C.ETH_SYMBOL, OPTIMISTIC_TEST_URL,
+                    "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_URL,
+                    "https://kovan-optimistic.etherscan.io"));
         }
     };
 
@@ -366,6 +377,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case AVALANCHE_ID:
             case FANTOM_ID:
             case MATIC_ID:
+            case OPTIMISTIC_MAIN_ID:
                 return true;
 
             default:
@@ -425,6 +437,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return R.drawable.ic_icons_polygon;
             case MATIC_TEST_ID:
                 return R.drawable.ic_icons_matic;
+            case OPTIMISTIC_MAIN_ID:
+                return R.drawable.optimistic_logo;
+            case OPTIMISTIC_TEST_ID:
+                return R.drawable.optimistic_test_logo;
             default:
                 return R.drawable.ic_ethereum_logo;
         }

@@ -71,6 +71,7 @@ public class GasWidget extends LinearLayout implements Runnable
     private long customNonce = -1;
     private boolean isSendingAll;
     private boolean forceCustomGas;
+    private BigInteger resendGasPrice = BigInteger.ZERO;
 
     public GasWidget(Context ctx, AttributeSet attrs)
     {
@@ -98,6 +99,7 @@ public class GasWidget extends LinearLayout implements Runnable
             intent.putExtra(C.EXTRA_AMOUNT, transactionValue.toString());
             intent.putExtra(C.EXTRA_GAS_PRICE, gasSpeeds.get(customGasSpeedIndex).gasPrice.toString());
             intent.putExtra(C.EXTRA_NONCE, customNonce);
+            intent.putExtra(C.EXTRA_MIN_GAS_PRICE, resendGasPrice.longValue());
             baseActivity.startActivityForResult(intent, C.SET_GAS_SETTINGS);
         });
     }
@@ -113,6 +115,7 @@ public class GasWidget extends LinearLayout implements Runnable
         adjustedValue = tx.value;
         isSendingAll = isSendingAll(tx);
         initialGasPrice = tx.gasPrice;
+        customNonce = tx.nonce;
 
         if (tx.gasLimit.equals(BigInteger.ZERO)) //dapp didn't specify a limit, use default limits until node returns an estimate (see setGasEstimate())
         {
@@ -168,6 +171,23 @@ public class GasWidget extends LinearLayout implements Runnable
             customSpeedTitle = getContext().getString(R.string.speed_custom);
         }
         return new GasSpeed(customSpeedTitle, expectedTxTime, newGasPrice, true);
+    }
+
+    public void setupResendSettings(ActionSheetMode mode, BigInteger minGas)
+    {
+        resendGasPrice = minGas;
+        TextView speedupNote = findViewById(R.id.text_speedup_note);
+        //If user wishes to cancel transaction, otherwise default is speed it up.
+        if (mode == ActionSheetMode.CANCEL_TRANSACTION)
+        {
+            speedupNote.setText(R.string.text_cancel_note);
+        }
+        else
+        {
+            speedupNote.setText(R.string.text_speedup_note);
+        }
+        speedupNote.setVisibility(View.VISIBLE);
+
     }
 
     public void onDestroy()

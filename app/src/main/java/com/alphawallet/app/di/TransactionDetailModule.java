@@ -1,5 +1,6 @@
 package com.alphawallet.app.di;
 
+import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -8,6 +9,9 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 
@@ -23,9 +27,13 @@ public class TransactionDetailModule {
             ExternalBrowserRouter externalBrowserRouter,
             TokenRepositoryType tokenRepository,
             TokensService tokensService,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract,
+            KeyService keyService,
+            GasService2 gasService,
+            CreateTransactionInteract createTransactionInteract,
+            AnalyticsServiceType analyticsService) {
         return new TransactionDetailViewModelFactory(
-                findDefaultNetworkInteract, externalBrowserRouter, tokenRepository, tokensService, fetchTransactionsInteract);
+                findDefaultNetworkInteract, externalBrowserRouter, tokenRepository, tokensService, fetchTransactionsInteract, keyService, gasService, createTransactionInteract, analyticsService);
     }
 
     @Provides
@@ -48,5 +56,11 @@ public class TransactionDetailModule {
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
                                                                TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
+    }
+
+    @Provides
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository)
+    {
+        return new CreateTransactionInteract(transactionRepository);
     }
 }

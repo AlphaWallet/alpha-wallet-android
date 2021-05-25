@@ -7,7 +7,9 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
@@ -15,15 +17,12 @@ import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.GasTransactionResponse;
 import com.alphawallet.app.ui.widget.entity.GasSettingsCallback;
-import com.alphawallet.app.ui.widget.entity.GasSpeed;
 import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.Currency;
 
 public class GasSliderView extends RelativeLayout
 {
@@ -37,10 +36,11 @@ public class GasSliderView extends RelativeLayout
     private final AppCompatSeekBar gasLimitSlider;
 
     private float scaleFactor; //used to convert slider value (0-100) into gas price
-    private final float minimumPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(C.GAS_PRICE_MIN)).multiply(BigDecimal.TEN).floatValue(); //minimum for slider
+    private float minimumPrice;  //minimum for slider
     private float gasLimitScaleFactor;
     private boolean limitInit = false;
     private final Handler handler = new Handler();
+    private FrameLayout note;
 
     private GasSettingsCallback gasCallback;
 
@@ -49,13 +49,13 @@ public class GasSliderView extends RelativeLayout
         inflate(context, R.layout.item_gas_slider, this);
 
         calculateStaticScaleFactor();
-
         gasPriceSlider = findViewById(R.id.gas_price_slider);
         gasLimitSlider = findViewById(R.id.gas_limit_slider);
         gasLimitValue = findViewById(R.id.gas_limit_entry);
         gasPriceValue = findViewById(R.id.gas_price_entry);
         nonceValue = findViewById(R.id.nonce_entry);
-
+        note = findViewById(R.id.layout_resend_note);
+        minimumPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(C.GAS_PRICE_MIN)).multiply(BigDecimal.TEN).floatValue();
         bindViews();
     }
 
@@ -152,6 +152,22 @@ public class GasSliderView extends RelativeLayout
 
         gasLimitValue.addTextChangedListener(tw);
         gasPriceValue.addTextChangedListener(tw);
+    }
+
+    public void setupResendSettings(long minPrice)
+    {
+
+        float candidateMinPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(minPrice)).multiply(BigDecimal.TEN).floatValue();
+        if (candidateMinPrice > minimumPrice)
+        {
+            minimumPrice = candidateMinPrice;
+            calculateStaticScaleFactor();
+        }
+        //nonce must be fixed
+        nonceValue.setEnabled(false);
+
+        note.setVisibility(View.VISIBLE);
+        bindViews();
     }
 
     private void updateGasControl()
@@ -253,7 +269,7 @@ public class GasSliderView extends RelativeLayout
 
     public long getNonce()
     {
-        String nonce = nonceValue.getText().toString();
+            String nonce = nonceValue.getText().toString();
         if (!TextUtils.isEmpty(nonce) && TextUtils.isDigitsOnly(nonce))
         {
             return Long.parseLong(nonce);

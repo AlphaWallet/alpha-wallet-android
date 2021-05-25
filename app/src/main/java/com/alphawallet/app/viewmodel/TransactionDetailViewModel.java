@@ -1,34 +1,46 @@
 package com.alphawallet.app.viewmodel;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
+import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.router.ExternalBrowserRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.ConfirmationActivity;
+import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -41,18 +53,29 @@ import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
 public class TransactionDetailViewModel extends BaseViewModel {
     private final ExternalBrowserRouter externalBrowserRouter;
-    private final TokensService tokenService;
+
     private final FindDefaultNetworkInteract networkInteract;
     private final TokenRepositoryType tokenRepository;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final CreateTransactionInteract createTransactionInteract;
 
-    private final MutableLiveData<BigInteger> lastestBlock = new MutableLiveData<>();
-    private final MutableLiveData<Transaction> lastestTx = new MutableLiveData<>();
+    private final KeyService keyService;
+    private final TokensService tokenService;
+    private final GasService2 gasService;
+    private final AnalyticsServiceType analyticsService;
+
+    private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
+    private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
+    private final MutableLiveData<Transaction> latestTx = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+
     public LiveData<BigInteger> latestBlock() {
-        return lastestBlock;
+        return latestBlock;
     }
-    public LiveData<Transaction> lastestTx() { return lastestTx; }
+    public LiveData<Transaction> latestTx() { return latestTx; }
     public LiveData<Transaction> onTransaction() { return transaction; }
     private String walletAddress;
 
@@ -66,14 +89,28 @@ public class TransactionDetailViewModel extends BaseViewModel {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             ExternalBrowserRouter externalBrowserRouter,
             TokenRepositoryType tokenRepository,
-            TokensService service,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            TokensService tokenService,
+            FetchTransactionsInteract fetchTransactionsInteract,
+            KeyService keyService,
+            GasService2 gasService,
+            CreateTransactionInteract createTransactionInteract,
+            AnalyticsServiceType analyticsService) {
         this.networkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
-        this.tokenService = service;
+        this.tokenService = tokenService;
         this.tokenRepository = tokenRepository;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.keyService = keyService;
+        this.gasService = gasService;
+        this.createTransactionInteract = createTransactionInteract;
+        this.analyticsService = analyticsService;
     }
+
+    public MutableLiveData<TransactionData> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+    public MutableLiveData<Throwable> transactionError() { return transactionError; }
 
     public void prepare(final int chainId, final String walletAddr)
     {
@@ -83,7 +120,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     disposable = tokenRepository.fetchLatestBlockNumber(chainId)
                             .subscribeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe(lastestBlock::postValue, t -> { this.lastestBlock.postValue(BigInteger.ZERO); });
+                            .subscribe(latestBlock::postValue, t -> { this.latestBlock.postValue(BigInteger.ZERO); });
                 }).subscribe();
     }
 
@@ -107,7 +144,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, txHash);
         if (tx != null)
         {
-            lastestTx.postValue(tx);
+            latestTx.postValue(tx);
             if (!tx.isPending())
             {
                 if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed())
@@ -163,27 +200,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
         if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed()) currentBlockUpdateDisposable.dispose();
     }
 
-    public void reSendTransaction(Transaction tx, Context ctx, Token token, ConfirmationType type)
-    {
-        Intent intent = new Intent(ctx, ConfirmationActivity.class);
-        intent.putExtra(C.EXTRA_TXHASH, tx.hash);
-        intent.putExtra(C.EXTRA_TRANSACTION_DATA, tx.input);
-        intent.putExtra(C.EXTRA_TO_ADDRESS, tx.to);
-        intent.putExtra(C.EXTRA_AMOUNT, tx.value);
-        intent.putExtra(C.EXTRA_NONCE, tx.nonce);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, tx.to);
-        intent.putExtra(C.EXTRA_GAS_PRICE, tx.gasPrice);
-        intent.putExtra(C.EXTRA_GAS_LIMIT, tx.gasUsed);
-        String symbol = token != null ? token.tokenInfo.symbol : "";
-        intent.putExtra(C.EXTRA_SYMBOL, symbol);
-        //TODO: reverse resolve 'tx.to' ENS
-        //intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
-        intent.putExtra(C.EXTRA_NETWORKID, tx.chainId);
-        intent.putExtra(C.TOKEN_TYPE, type.ordinal());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ctx.startActivity(intent);
-    }
 
     public void fetchTransaction(Wallet wallet, String txHash, int chainId)
     {
@@ -242,8 +258,70 @@ public class TransactionDetailViewModel extends BaseViewModel {
         return tx;
     }
 
+    public void startGasCycle(int chainId)
+    {
+        gasService.startGasPriceCycle(chainId);
+    }
+
+    public void onDestroy()
+    {
+        gasService.stopGasPriceCycle();
+    }
+
+
     public void restartServices()
     {
         fetchTransactionsInteract.restartTransactionService();
     }
+
+    public TokensService getTokenService()
+    {
+        return tokenService;
+    }
+
+    private void onCreateTransaction(String transaction) {
+        progress.postValue(false);
+        newTransaction.postValue(transaction);
+    }
+
+
+    public void sendOverrideTransaction(String transactionHex, String to, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, int chainId)
+    {
+        byte[] data = Numeric.hexStringToByteArray(transactionHex);
+        disposable = createTransactionInteract
+                .resend(defaultWallet.getValue(), nonce, to, value, gasPrice, gasLimit, data, chainId)
+                .subscribe(this::onCreateTransaction,
+                        this::onError);
+    }
+
+    public BigInteger calculateMinGasPrice(BigInteger oldGasPrice)
+    {
+
+        BigInteger candidateGasOverridePrice = new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).toBigInteger();
+        BigInteger checkGasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
+
+        return checkGasPrice.max(candidateGasOverridePrice); //highest price between adding 2 gwei or 10%
+    }
+
+
+    public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId)
+    {
+        disposable = createTransactionInteract
+                .createWithSig(wallet, finalTx, chainId)
+                .subscribe(transactionFinalised::postValue,
+                        transactionError::postValue);
+    }
+    public void actionSheetConfirm(String mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(mode);
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
 }

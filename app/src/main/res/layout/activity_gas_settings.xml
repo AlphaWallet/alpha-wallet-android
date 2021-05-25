@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    android:id="@+id/setting_scroll"
+<ScrollView android:id="@+id/setting_scroll"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -23,6 +21,26 @@
             android:id="@+id/gasSliderView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+
+        <FrameLayout
+            android:id="@+id/layout_resend_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/sp17"
+            android:visibility="gone">
+            <TextView
+                android:background="@drawable/background_round_azure_16dp_filled"
+                android:id="@+id/text_resend_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:lineHeight="29sp"
+                android:padding="26dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp17"
+                android:text="@string/text_resend_gas_note" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/text_notice"
@@ -140,5 +158,7 @@
                     android:textSize="15sp"/>
             </LinearLayout>
         </com.alphawallet.app.ui.widget.entity.GasWarningLayout>
+
+
     </LinearLayout>
 </ScrollView>

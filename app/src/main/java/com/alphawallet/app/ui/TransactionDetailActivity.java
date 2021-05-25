@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,19 +15,25 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.SignTransactionDialog;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -39,9 +47,10 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
-public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface
+public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
     @Inject
     TransactionDetailViewModelFactory transactionDetailViewModelFactory;
@@ -52,7 +61,9 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private Token token;
     private String chainName;
     private Wallet wallet;
+    private AWalletAlertDialog dialog;
     private FunctionButtonBar functionBar;
+    private ActionSheetDialog confirmationDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +75,9 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
                 .get(TransactionDetailViewModel.class);
         viewModel.latestBlock().observe(this, this::onLatestBlock);
         viewModel.onTransaction().observe(this, this::onTransaction);
+
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
 
         String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
         int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
@@ -95,7 +109,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
             functionBar.setupFunctions(this, functionList);
             viewModel.startPendingTimeDisplay(transaction.hash);
-            viewModel.lastestTx().observe(this, this::onTxUpdated);
+            viewModel.latestTx().observe(this, this::onTxUpdated);
         }
         else
         {
@@ -280,17 +294,118 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     {
         if (id == R.string.speedup_transaction)
         {
-            //resend the transaction to speedup
-            viewModel.reSendTransaction(transaction, this, token, ConfirmationType.RESEND);
+            checkConfirm(false);
         }
         else if (id == R.string.cancel_transaction)
         {
-            //cancel the transaction
-            viewModel.reSendTransaction(transaction, this, token, ConfirmationType.CANCEL_TX);
+            checkConfirm(true);
         }
         else if (id == R.string.action_open_etherscan)
         {
             viewModel.showMoreDetails(this, transaction);
         }
     }
+
+    /**
+     * Called to check if we're ready to send user to confirm screen / activity sheet popup
+     *
+     */
+    private void checkConfirm(boolean isCancelling) {
+
+        BigInteger minGasPrice = viewModel.calculateMinGasPrice(new BigInteger(transaction.gasPrice));
+
+        Web3Transaction w3tx = new Web3Transaction(transaction, isCancelling, minGasPrice);
+
+        if (dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
+
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, null,
+                transaction.to, viewModel.getTokenService(), this);
+        confirmationDialog.setupResendTransaction(isCancelling);
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == C.SET_GAS_SETTINGS)
+        {
+            //will either be an index, or if using custom then it will contain a price and limit
+            if (data != null && confirmationDialog != null)
+            {
+                int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+                long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+                BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
+                        new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
+                BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+                long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+                confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+            }
+        }
+        else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+        }
+        else
+        {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    /**
+     * ActionSheetCallback, comms hooks for the ActionSheetDialog to trigger authentication & send transactions
+     *
+     * @param callback
+     */
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, wallet, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        //ActionSheet was dismissed
+        if (!TextUtils.isEmpty(txHash)) {
+            Intent intent = new Intent();
+            intent.putExtra("tx_hash", txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
+
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash);
+    }
+
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+        confirmationDialog.dismiss();
+    }
+
 }

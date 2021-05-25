@@ -128,12 +128,10 @@ public class TransactionsService
     {
         List<Integer> filters = tokensService.getNetworkFilters();
         if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
-                (eventFetch != null && !eventFetch.isDisposed())) { return; }
+                (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
 
-        readTokenMoves(filters.get(currentChainIndex), nftCheck);
-
-        if (!nftCheck)
+        if (readTokenMoves(filters.get(currentChainIndex), nftCheck) && !nftCheck) //check NFTs for same chain on next iteration or advance to next chain
         {
             nftCheck = true;
         }
@@ -144,12 +142,16 @@ public class TransactionsService
         }
     }
 
-    private void readTokenMoves(int chainId, boolean isNFT)
+    private boolean readTokenMoves(int chainId, boolean isNFT)
     {
-        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), ethereumNetworkRepository.getNetworkByChain(chainId), tokensService, isNFT)
+        //check if this route has combined NFT
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(count -> { eventFetch = null; System.out.println("Received: " + count); });
+
+        return info.usesSeparateNFTTransferQuery();
     }
 
     private void checkTransactionQueue()

@@ -40,11 +40,6 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
     }
 
-    public static String getEtherscanURLbyNetwork(int networkId)
-    {
-        return EthereumNetworkBase.getEtherscanURLbyNetwork(networkId);
-    }
-
     public boolean getIsPopularToken(int chain, String address)
     {
         return popularTokens.containsKey(address.toLowerCase());

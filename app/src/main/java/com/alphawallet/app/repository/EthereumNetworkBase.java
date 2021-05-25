@@ -133,77 +133,77 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(CLASSIC_ID, new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
                     "https://blockscout.com/etc/mainnet/tx/", CLASSIC_ID, CLASSIC_RPC_URL,
-                    "https://blockscout.com/etc/mainnet/"));
+                    "https://blockscout.com/etc/mainnet/api?"));
             put(XDAI_ID, new NetworkInfo(C.XDAI_NETWORK_NAME,
-                            C.xDAI_SYMBOL, XDAI_RPC_URL,
-                            "https://blockscout.com/poa/dai/tx/", XDAI_ID,
-                            "https://dai.poa.network", "https://blockscout.com/poa/dai/"));
+                    C.xDAI_SYMBOL, XDAI_RPC_URL,
+                    "https://blockscout.com/poa/dai/tx/", XDAI_ID,
+                    "https://dai.poa.network", "https://blockscout.com/poa/dai/api?"));
             put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
-                            POA_RPC_URL,
-                            "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,
-                    "https://blockscout.com/poa/core/"));
+                    POA_RPC_URL,
+                    "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,
+                    "https://blockscout.com/poa/core/api?"));
             put(ARTIS_SIGMA1_ID, new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
-                            "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID,
-                            ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/"));
+                    "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID,
+                    ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/api?"));
             put(KOVAN_ID, new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
-                            "https://kovan.etherscan.io/tx/", KOVAN_ID,
-                            KOVAN_FALLBACK_RPC_URL, "https://api-kovan.etherscan.io/"));
+                    "https://kovan.etherscan.io/tx/", KOVAN_ID,
+                    KOVAN_FALLBACK_RPC_URL, "https://api-kovan.etherscan.io/api?"));
             put(ROPSTEN_ID, new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
-                            ROPSTEN_RPC_URL,
-                            "https://ropsten.etherscan.io/tx/", ROPSTEN_ID,
-                            ROPSTEN_FALLBACK_RPC_URL, "https://api-ropsten.etherscan.io/"));
+                    ROPSTEN_RPC_URL,
+                    "https://ropsten.etherscan.io/tx/", ROPSTEN_ID,
+                    ROPSTEN_FALLBACK_RPC_URL, "https://api-ropsten.etherscan.io/api?"));
             put(SOKOL_ID, new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
-                            SOKOL_RPC_URL,
-                            "https://blockscout.com/poa/sokol/tx/", SOKOL_ID, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/"));
+                    SOKOL_RPC_URL,
+                    "https://blockscout.com/poa/sokol/tx/", SOKOL_ID, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/api?"));
             put(RINKEBY_ID, new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
-                            "https://rinkeby.etherscan.io/tx/", RINKEBY_ID,
-                            RINKEBY_FALLBACK_RPC_URL,
-                            "https://api-rinkeby.etherscan.io/"));
+                    "https://rinkeby.etherscan.io/tx/", RINKEBY_ID,
+                    RINKEBY_FALLBACK_RPC_URL,
+                    "https://api-rinkeby.etherscan.io/api?"));
             put(GOERLI_ID, new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
-                            "https://goerli.etherscan.io/tx/", GOERLI_ID,
-                            GOERLI_FALLBACK_RPC_URL,
-                            "https://api-goerli.etherscan.io/"));
+                    "https://goerli.etherscan.io/tx/", GOERLI_ID,
+                    GOERLI_FALLBACK_RPC_URL,
+                    "https://api-goerli.etherscan.io/api?"));
             put(ARTIS_TAU1_ID, new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
-                            "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID,
-                            ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/"));
+                    "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID,
+                    ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/api?"));
             put(BINANCE_TEST_ID, new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL, BINANCE_TEST_RPC_URL,
-                            "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
-                            BINANCE_TEST_FALLBACK_RPC_URL,
-                            "https://api-testnet.bscscan.com/"));
+                    "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
+                    BINANCE_TEST_FALLBACK_RPC_URL,
+                    "https://api-testnet.bscscan.com/api?"));
             put(BINANCE_MAIN_ID, new NetworkInfo(C.BINANCE_MAIN_NETWORK, C.BINANCE_SYMBOL, BINANCE_MAIN_RPC_URL,
-                            "https://bscscan.com/tx/", BINANCE_MAIN_ID,
-                            BINANCE_MAIN_FALLBACK_RPC_URL,
-                            "https://api.bscscan.com/"));
+                    "https://bscscan.com/tx/", BINANCE_MAIN_ID,
+                    BINANCE_MAIN_FALLBACK_RPC_URL,
+                    "https://api.bscscan.com/api?"));
             put(HECO_ID, new NetworkInfo(C.HECO_MAIN_NETWORK, C.HECO_SYMBOL, HECO_RPC_URL,
-                            "https://hecoinfo.com/tx/", HECO_ID,
-                            HECO_RPC_URL, "https://api.hecoinfo.com/"));
+                    "https://hecoinfo.com/tx/", HECO_ID,
+                    HECO_RPC_URL, "https://api.hecoinfo.com/api?"));
             put(HECO_TEST_ID, new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL, HECO_TEST_RPC_URL,
-                            "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID,
-                            HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/"));
+                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID,
+                    HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/api?"));
             put(AVALANCHE_ID, new NetworkInfo(C.AVALANCHE_NETWORK, C.AVALANCHE_SYMBOL, AVALANCHE_RPC_URL,
-                            "https://cchain.explorer.avax.network/tx/", AVALANCHE_ID,
-                            AVALANCHE_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT));
+                    "https://cchain.explorer.avax.network/tx/", AVALANCHE_ID,
+                    AVALANCHE_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT));
             put(FUJI_TEST_ID, new NetworkInfo(C.FUJI_TEST_NETWORK, C.AVALANCHE_SYMBOL, FUJI_TEST_RPC_URL,
-                            "https://cchain.explorer.avax-test.network/tx/", FUJI_TEST_ID,
-                            FUJI_TEST_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT));
+                    "https://cchain.explorer.avax-test.network/tx/", FUJI_TEST_ID,
+                    FUJI_TEST_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT));
             put(FANTOM_ID, new NetworkInfo(C.FANTOM_NETWORK, C.FANTOM_SYMBOL, FANTOM_RPC_URL,
-                            "https://ftmscan.com/tx/", FANTOM_ID,
-                            FANTOM_RPC_URL,"https://api.ftmscan.com/"));
+                    "https://ftmscan.com/tx/", FANTOM_ID,
+                    FANTOM_RPC_URL, "https://api.ftmscan.com/api?"));
             put(FANTOM_TEST_ID, new NetworkInfo(C.FANTOM_TEST_NETWORK, C.FANTOM_SYMBOL, FANTOM_TEST_RPC_URL,
-                            "https://explorer.testnet.fantom.network/tx/", FANTOM_TEST_ID,
-                            FANTOM_TEST_RPC_URL,"https://api.covalenthq.com/v1/" + COVALENT)); //NB: Fantom testnet not yet supported by Covalent
+                    "https://explorer.testnet.fantom.network/tx/", FANTOM_TEST_ID,
+                    FANTOM_TEST_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT)); //NB: Fantom testnet not yet supported by Covalent
             put(MATIC_ID, new NetworkInfo(C.MATIC_NETWORK, C.MATIC_SYMBOL, MATIC_RPC_URL,
-                            "https://explorer.matic.network/tx/", MATIC_ID,
-                            MATIC_RPC_URL,"https://explorer-mainnet.maticvigil.com/api/v2/transactions"));
+                    "https://explorer.matic.network/tx/", MATIC_ID,
+                    MATIC_RPC_URL, "https://explorer-mainnet.maticvigil.com/api/v2/transactions?"));
             put(MATIC_TEST_ID, new NetworkInfo(C.MATIC_TEST_NETWORK, C.MATIC_SYMBOL, MUMBAI_TEST_RPC_URL,
-                            "https://mumbai-explorer.matic.today/tx/", MATIC_TEST_ID,
-                            MUMBAI_TEST_RPC_URL,"https://explorer-mumbai.maticvigil.com/api/v2/transactions"));
-            put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK,C.ETH_SYMBOL, OPTIMISTIC_MAIN_URL,
+                    "https://mumbai-explorer.matic.today/tx/", MATIC_TEST_ID,
+                    MUMBAI_TEST_RPC_URL, "https://explorer-mumbai.maticvigil.com/api/v2/transactions?"));
+            put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK, C.ETH_SYMBOL, OPTIMISTIC_MAIN_URL,
                     "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_URL,
-                    "https://api-optimistic.etherscan.io"));
-            put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK,C.ETH_SYMBOL, OPTIMISTIC_TEST_URL,
+                    "https://api-optimistic.etherscan.io/api?"));
+            put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK, C.ETH_SYMBOL, OPTIMISTIC_TEST_URL,
                     "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_URL,
-                    "https://api-kovan-optimistic.etherscan.io"));
+                    "https://api-kovan-optimistic.etherscan.io/api?"));
         }
     };
 
@@ -476,16 +476,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static String getEtherscanURLbyNetwork(int networkId)
+    public static String getEtherscanURLbyNetworkAndHash(int networkId, String txHash)
     {
         NetworkInfo info = networkMap.get(networkId);
         if (info != null)
         {
-            return info.etherscanTxUrl;
+            return info.getEtherscanUri(txHash).toString();
         }
         else
         {
-            return networkMap.get(MAINNET_ID).etherscanTxUrl;
+            return networkMap.get(MAINNET_ID).getEtherscanUri(txHash).toString();
         }
     }
 

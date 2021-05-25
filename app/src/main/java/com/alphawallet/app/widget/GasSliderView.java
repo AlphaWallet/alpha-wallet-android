@@ -49,7 +49,6 @@ public class GasSliderView extends RelativeLayout
         inflate(context, R.layout.item_gas_slider, this);
 
         calculateStaticScaleFactor();
-
         gasPriceSlider = findViewById(R.id.gas_price_slider);
         gasLimitSlider = findViewById(R.id.gas_limit_slider);
         gasLimitValue = findViewById(R.id.gas_limit_entry);
@@ -270,7 +269,7 @@ public class GasSliderView extends RelativeLayout
 
     public long getNonce()
     {
-        String nonce = nonceValue.getText().toString();
+            String nonce = nonceValue.getText().toString();
         if (!TextUtils.isEmpty(nonce) && TextUtils.isDigitsOnly(nonce))
         {
             return Long.parseLong(nonce);

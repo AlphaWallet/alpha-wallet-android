@@ -236,7 +236,7 @@ public class TransactionsService
             if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
             {
                 Token token = tokensService.getToken(tx.chainId, tx.to);
-                if (token == null)
+                if (token == null && tx.to != null)
                     tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
             }
         }

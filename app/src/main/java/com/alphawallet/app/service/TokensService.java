@@ -341,7 +341,7 @@ public class TokensService
     {
         for (ContractAddress check : unknownTokens)
         {
-            if (check.chainId == cAddr.chainId && check.address.equalsIgnoreCase(cAddr.address))
+            if (check.chainId == cAddr.chainId && (check.address == null || check.address.equalsIgnoreCase(cAddr.address)))
             {
                 return;
             }

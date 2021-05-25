@@ -50,6 +50,7 @@ import okhttp3.Request;
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -60,7 +61,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 6; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 7; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
     private final String BLOCKSCOUT_API = "blockscout";
@@ -519,6 +520,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     RealmResults<RealmTransfer> realmTransfers = r.where(RealmTransfer.class)
                             .findAll();
                     realmTransfers.deleteAllFromRealm();
+
+                    //delete all Fuji
+                    RealmResults<RealmTransaction> txs = r.where(RealmTransaction.class)
+                            .equalTo("chainId", FUJI_TEST_ID)
+                            .findAll();
+
+                    txs.deleteAllFromRealm();
                 }
             });
         }

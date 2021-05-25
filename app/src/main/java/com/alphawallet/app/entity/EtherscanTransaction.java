@@ -64,5 +64,11 @@ public class EtherscanTransaction
         cumulativeGasUsed = "";
         gasUsed = transaction.gas_spent;
         confirmations = 0;
+
+        if (tx.isConstructor)
+        {
+            to = tx.to;
+            contractAddress = tx.to;
+        }
     }
 }

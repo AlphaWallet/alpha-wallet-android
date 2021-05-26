@@ -64,7 +64,6 @@ public class TokenActivityFragment extends BaseFragment {
         }
     }
 
-    //Realm realm, Wallet wallet, Token token, TokensService svs, BigInteger tokenId, final int historyCount
     private void setUpRecentTransactionsView()
     {
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),

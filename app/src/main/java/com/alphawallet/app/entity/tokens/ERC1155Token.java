@@ -1,6 +1,5 @@
 package com.alphawallet.app.entity.tokens;
 
-
 import android.os.Parcelable;
 
 import com.alphawallet.app.entity.ContractType;

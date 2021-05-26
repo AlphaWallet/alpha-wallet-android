@@ -48,25 +48,25 @@ import dagger.android.ContributesAndroidInjector;
 
 @Module
 public abstract class BuildersModule {
-    @ActivityScope
-    @ContributesAndroidInjector(modules = SplashModule.class)
-    abstract SplashActivity bindSplashModule();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SplashModule.class)
+	abstract SplashActivity bindSplashModule();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = AccountsManageModule.class)
-    abstract WalletsActivity bindManageWalletsModule();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = AccountsManageModule.class)
+	abstract WalletsActivity bindManageWalletsModule();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = ImportModule.class)
-    abstract ImportWalletActivity bindImportWalletModule();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = ImportModule.class)
+	abstract ImportWalletActivity bindImportWalletModule();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TransactionDetailModule.class)
-    abstract TransactionDetailActivity bindTransactionDetailModule();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TransactionDetailModule.class)
+	abstract TransactionDetailActivity bindTransactionDetailModule();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = SendModule.class)
-    abstract SendActivity bindSendModule();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SendModule.class)
+	abstract SendActivity bindSendModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = GasSettingsModule.class)
@@ -76,113 +76,113 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = AddTokenModule.class)
 	abstract AddTokenActivity bindAddTokenActivity();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = RedeemSignatureDisplayModule.class)
-    abstract RedeemSignatureDisplayActivity bindSignatureDisplayActivity();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = RedeemSignatureDisplayModule.class)
+	abstract RedeemSignatureDisplayActivity bindSignatureDisplayActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract AssetDisplayActivity bindAssetDisplayActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SellDetailModule.class)
+	abstract SellDetailActivity bindSellDetailsActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = NewSettingsModule.class)
+	abstract NewSettingsFragment bindNewSettingsFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = ActivityModule.class)
+	abstract ActivityFragment bindActivityFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
+	abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = WalletModule.class)
+	abstract WalletFragment bindWalletFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = HomeModule.class)
+	abstract HomeActivity bindHomeActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = ImportTokenModule.class)
+	abstract ImportTokenActivity bindImportTokenActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TransferTicketDetailModule.class)
+	abstract TransferTicketDetailActivity bindTransferTicketDetailActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TransferTicketModule.class)
+	abstract TransferTicketActivity bindTransferTicketActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = HelpModule.class)
+	abstract HelpActivity bindHelpActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = DappBrowserModule.class)
+	abstract DappBrowserFragment bindDappBrowserFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = Erc20DetailModule.class)
+	abstract Erc20DetailActivity bindErc20DetailActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletActionsModule.class)
+	abstract WalletActionsActivity bindWalletActionsActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = BackupKeyModule.class)
+	abstract BackupKeyActivity bindBackupKeyActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = MyAddressModule.class)
+	abstract MyAddressActivity bindMyAddressActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract TokenFunctionActivity bindTokenFunctionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract FunctionActivity bindFunctionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract TokenDetailActivity bindTokenDetailActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract TokenActivity bindTokenActivity();
+
+	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
+	abstract SelectNetworkActivity bindSelectNetworkActivity();
+
+	@ContributesAndroidInjector(modules = SelectNetworkFilterModule.class)
+	abstract SelectNetworkFilterActivity bindSelectNetworkFilterActivity();
+
+	@ContributesAndroidInjector(modules = TokenManagementModule.class)
+	abstract TokenManagementActivity bindTokenManagementActivity();
+
+	@ContributesAndroidInjector(modules = AdvancedSettingsModule.class)
+	abstract AdvancedSettingsActivity bindAdvancedSettingsActivity();
 
     @ActivityScope
-    @ContributesAndroidInjector(modules = TokenFunctionModule.class)
-    abstract AssetDisplayActivity bindAssetDisplayActivity();
+	@ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
+	abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = SellDetailModule.class)
-    abstract SellDetailActivity bindSellDetailsActivity();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletConnectModule.class)
+	abstract WalletConnectActivity bindWalletConnectActivity();
 
-    @FragmentScope
-    @ContributesAndroidInjector(modules = NewSettingsModule.class)
-    abstract NewSettingsFragment bindNewSettingsFragment();
-
-    @FragmentScope
-    @ContributesAndroidInjector(modules = ActivityModule.class)
-    abstract ActivityFragment bindActivityFragment();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
-    abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
-
-    @FragmentScope
-    @ContributesAndroidInjector(modules = WalletModule.class)
-    abstract WalletFragment bindWalletFragment();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = HomeModule.class)
-    abstract HomeActivity bindHomeActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = ImportTokenModule.class)
-    abstract ImportTokenActivity bindImportTokenActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TransferTicketDetailModule.class)
-    abstract TransferTicketDetailActivity bindTransferTicketDetailActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TransferTicketModule.class)
-    abstract TransferTicketActivity bindTransferTicketActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = HelpModule.class)
-    abstract HelpActivity bindHelpActivity();
-
-    @FragmentScope
-    @ContributesAndroidInjector(modules = DappBrowserModule.class)
-    abstract DappBrowserFragment bindDappBrowserFragment();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = Erc20DetailModule.class)
-    abstract Erc20DetailActivity bindErc20DetailActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = WalletActionsModule.class)
-    abstract WalletActionsActivity bindWalletActionsActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = BackupKeyModule.class)
-    abstract BackupKeyActivity bindBackupKeyActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = MyAddressModule.class)
-    abstract MyAddressActivity bindMyAddressActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TokenFunctionModule.class)
-    abstract TokenFunctionActivity bindTokenFunctionActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TokenFunctionModule.class)
-    abstract FunctionActivity bindFunctionActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TokenFunctionModule.class)
-    abstract TokenDetailActivity bindTokenDetailActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TokenFunctionModule.class)
-    abstract TokenActivity bindTokenActivity();
-
-    @ContributesAndroidInjector(modules = SelectNetworkModule.class)
-    abstract SelectNetworkActivity bindSelectNetworkActivity();
-
-    @ContributesAndroidInjector(modules = SelectNetworkFilterModule.class)
-    abstract SelectNetworkFilterActivity bindSelectNetworkFilterActivity();
-
-    @ContributesAndroidInjector(modules = TokenManagementModule.class)
-    abstract TokenManagementActivity bindTokenManagementActivity();
-
-    @ContributesAndroidInjector(modules = AdvancedSettingsModule.class)
-    abstract AdvancedSettingsActivity bindAdvancedSettingsActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
-    abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = WalletConnectModule.class)
-    abstract WalletConnectActivity bindWalletConnectActivity();
-
-    @ActivityScope
-    @ContributesAndroidInjector(modules = WalletConnectModule.class)
-    abstract WalletConnectSessionActivity bindWalletConnectSessionActivity();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletConnectModule.class)
+	abstract WalletConnectSessionActivity bindWalletConnectSessionActivity();
 
     @ActivityScope
     @ContributesAndroidInjector(modules = Erc1155Module.class)

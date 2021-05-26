@@ -2,17 +2,16 @@ package com.alphawallet.app.router;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.ui.Erc20DetailActivity;
+import com.alphawallet.app.ui.Erc1155Activity;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 
 public class Erc20DetailRouter {
     public void open(Activity context, String address, String symbol, int decimals, boolean isToken, Wallet wallet, Token token, boolean hasDefinition) {
-        Intent intent = new Intent(context, Erc20DetailActivity.class);
+        Intent intent = new Intent(context, Erc1155Activity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, isToken);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
         intent.putExtra(C.EXTRA_SYMBOL, symbol);

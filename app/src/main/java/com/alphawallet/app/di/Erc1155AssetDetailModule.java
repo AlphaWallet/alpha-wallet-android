@@ -1,0 +1,19 @@
+package com.alphawallet.app.di;
+
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModelFactory;
+
+import dagger.Module;
+import dagger.Provides;
+
+@Module
+class Erc1155AssetDetailModule {
+    @Provides
+    Erc1155AssetDetailViewModelFactory provideErc1155AssetDetailViewModelFactory(
+            AssetDefinitionService assetDefinitionService,
+            TokensService tokensService)
+    {
+        return new Erc1155AssetDetailViewModelFactory(assetDefinitionService, tokensService);
+    }
+}

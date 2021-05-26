@@ -317,6 +317,22 @@
             android:name=".ui.TransactionSuccessActivity"
             android:label="Transaction Success" />
 
+        <activity
+            android:name=".ui.Erc1155Activity"
+            android:label="ERC1155 Master Activity" />
+
+        <activity
+            android:name=".ui.Erc1155AssetSelectActivity"
+            android:label="ERC1155 Asset Selection" />
+
+        <activity
+            android:name=".ui.Erc1155AssetDetailActivity"
+            android:label="ERC1155 Asset Details" />
+
+        <activity
+            android:name=".ui.Erc1155AssetListActivity"
+            android:label="ERC1155 Asset Details" />
+
     </application>
 
 </manifest>

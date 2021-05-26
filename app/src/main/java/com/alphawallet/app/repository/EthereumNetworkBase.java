@@ -438,7 +438,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case MATIC_TEST_ID:
                 return R.drawable.ic_icons_matic;
             case OPTIMISTIC_MAIN_ID:
-                return R.drawable.optimistic_logo;
+                return R.drawable.ic_optimistic_eth;
             case OPTIMISTIC_TEST_ID:
                 return R.drawable.optimistic_test_logo;
             default:

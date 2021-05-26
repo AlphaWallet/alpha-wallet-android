@@ -36,6 +36,7 @@ public class WalletConnectService extends Service
     private final ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
 
     private final ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
+    private WCRequest currentRequest = null;
 
     private static final String TAG = "WCClientSvs";
 
@@ -56,6 +57,10 @@ public class WalletConnectService extends Service
             signRequests.add(request); // not for this client, put it back on the stack, at the back
             request = null;
         }
+        else if (request != null)
+        {
+            currentRequest = request;
+        }
 
         return request;
     }
@@ -63,6 +68,11 @@ public class WalletConnectService extends Service
     public int getConnectionCount()
     {
         return clientMap.size();
+    }
+
+    public WCRequest getCurrentRequest()
+    {
+        return currentRequest;
     }
 
     public class LocalBinder extends Binder

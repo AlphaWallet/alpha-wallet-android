@@ -459,6 +459,12 @@ public class WalletConnectViewModel extends BaseViewModel {
         else return null;
     }
 
+    public WCRequest getCurrentRequest()
+    {
+        if (walletConnectService != null) return walletConnectService.getCurrentRequest();
+        else return null;
+    }
+
     public void rejectRequest(String sessionId, long id, String message)
     {
         if (walletConnectService != null) walletConnectService.rejectRequest(sessionId, id, message);

@@ -200,10 +200,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                             MUMBAI_TEST_RPC_URL,"https://explorer-mumbai.maticvigil.com/api/v2/transactions"));
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK,C.ETH_SYMBOL, OPTIMISTIC_MAIN_URL,
                     "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_URL,
-                    "https://optimistic.etherscan.io"));
+                    "https://api-optimistic.etherscan.io"));
             put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK,C.ETH_SYMBOL, OPTIMISTIC_TEST_URL,
                     "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_URL,
-                    "https://kovan-optimistic.etherscan.io"));
+                    "https://api-kovan-optimistic.etherscan.io"));
         }
     };
 

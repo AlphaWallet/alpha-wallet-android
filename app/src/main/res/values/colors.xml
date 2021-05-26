@@ -99,7 +99,7 @@
 	<color name="optimistic_main">#FF0420</color>
 	<color name="optimistic_test">#FF5624</color>
 
-	<!-- Fiji Colour Pallette -->
+	<!-- Fiji Colour Palette -->
 	<color name="black">#000000</color>
 	<color name="mine">#2f2f2f</color>
 	<color name="dove">#727272</color>
@@ -123,7 +123,7 @@
 	<color name="radical">#fc3159</color>
 	<color name="pumpkin">#fd9426</color>
 	<color name="indigo">#595ad5</color>
-	<!-- End Fiji Colour Pallette -->
+	<!-- End Fiji Colour Palette -->
 
 	<color name="red">#f7506c</color>
 	<color name="water_blue">#1899c2</color>

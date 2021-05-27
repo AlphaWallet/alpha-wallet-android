@@ -16,6 +16,7 @@ public class RealmERC721Asset extends RealmObject
     @PrimaryKey
     private String tokenIdAddr;
     private String imagePreviewUrl;
+    private String imageOriginalUrl;
     private String name;
     private String description;
     private String externalLink;
@@ -43,6 +44,16 @@ public class RealmERC721Asset extends RealmObject
     public void setImagePreviewUrl(String imagePreviewUrl)
     {
         this.imagePreviewUrl = imagePreviewUrl;
+    }
+
+    public String getImageOriginalUrl()
+    {
+        return imageOriginalUrl;
+    }
+
+    public void setImageOriginalUrl(String imageOriginalUrl)
+    {
+        this.imageOriginalUrl = imageOriginalUrl;
     }
 
     public String getName()

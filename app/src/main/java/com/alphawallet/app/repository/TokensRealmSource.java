@@ -587,18 +587,15 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmAsset.setDescription(asset.getDescription());
                 realmAsset.setExternalLink(asset.getExternalLink());
                 realmAsset.setImagePreviewUrl(asset.getImagePreviewUrl());
+                realmAsset.setImageOriginalUrl(asset.getImageOriginalUrl());
                 realmAsset.setBackgroundColor(asset.getBackgroundColor());
                 realmAsset.setTraits(asset.getTraits());
             }
-            else
+            else if (!asset.noUpdate(realmAsset) && !asset.equals(realmAsset))
             {
-                //see if traits have changed
-                List<Trait> traits = realmAsset.getTraits();
-                if (traits.size() != asset.getTraits().size() || traitsDifferent(traits, asset.getTraits()))
-                {
-                    realmAsset.setImagePreviewUrl(asset.getImagePreviewUrl());
-                    realmAsset.setTraits(asset.getTraits());
-                }
+                realmAsset.setImagePreviewUrl(asset.getImagePreviewUrl());
+                realmAsset.setImageOriginalUrl(asset.getImageOriginalUrl());
+                realmAsset.setTraits(asset.getTraits());
             }
         }
     }
@@ -615,20 +612,6 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             asset.deleteFromRealm();
         }
-    }
-
-    private boolean traitsDifferent(List<Trait> traits, List<Trait> traits1)
-    {
-        for (int i = 0; i < traits.size(); i++)
-        {
-            if (!traits.get(i).getTraitType().equals(traits1.get(i).getTraitType())
-                || !traits.get(i).getValue().equals(traits1.get(i).getValue()))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private List<Asset> getERC721Assets(List<String> keys, Realm realm, Token token)
@@ -651,6 +634,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 asset.setDescription(realmAsset.getDescription());
                 asset.setExternalLink(realmAsset.getExternalLink());
                 asset.setImagePreviewUrl(realmAsset.getImagePreviewUrl());
+                asset.setImageOriginalUrl(realmAsset.getImageOriginalUrl());
                 asset.setTraits(realmAsset.getTraits());
                 asset.setName(realmAsset.getName());
 

@@ -3,6 +3,7 @@ package com.alphawallet.app.util;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
@@ -10,6 +11,7 @@ import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
+import android.widget.ImageView;
 
 import androidx.core.content.ContextCompat;
 
@@ -19,6 +21,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;

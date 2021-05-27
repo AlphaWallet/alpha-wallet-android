@@ -1,12 +1,18 @@
 
 package com.alphawallet.app.entity.opensea;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.widget.ImageView;
 
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.util.Utils;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -51,12 +57,15 @@ public class Asset implements Parcelable {
     @Expose
     private List<Trait> traits = null;
 
+    private String metadataImageUrl;
+
     public boolean isChecked = false;
     public boolean exposeRadio = false;
 
     protected Asset(Parcel in) {
         tokenId = in.readString();
         imagePreviewUrl = in.readString();
+        metadataImageUrl = in.readString();
         name = in.readString();
         description = in.readString();
         externalLink = in.readString();
@@ -99,7 +108,7 @@ public class Asset implements Parcelable {
         try
         {
             if (metaData.has("name")) asset.name = metaData.getString("name");
-            if (metaData.has("image")) asset.imagePreviewUrl = Utils.parseIPFS(metaData.getString("image"));
+            if (metaData.has("image")) asset.metadataImageUrl = Utils.parseIPFS(metaData.getString("image"));
             if (metaData.has("description")) asset.description = metaData.getString("description");
             if (metaData.has("external_link")) asset.externalLink = metaData.getString("external_link");
             if (metaData.has("background_color")) asset.backgroundColor = metaData.getString("background_color");
@@ -109,7 +118,7 @@ public class Asset implements Parcelable {
             e.printStackTrace();
         }
 
-        if (asset.name == null && asset.imagePreviewUrl == null) asset = null;
+        if (asset.name == null && asset.metadataImageUrl == null) asset = null;
 
         return asset;
     }
@@ -152,9 +161,10 @@ public class Asset implements Parcelable {
         this.imagePreviewUrl = imagePreviewUrl;
     }
 
-    public Asset withImagePreviewUrl(String imagePreviewUrl) {
-        this.imagePreviewUrl = imagePreviewUrl;
-        return this;
+    public String getImageOriginalUrl() { return metadataImageUrl; }
+
+    public void setImageOriginalUrl(String imageOriginalUrl) {
+        this.metadataImageUrl = imageOriginalUrl;
     }
 
     public String getName()
@@ -252,6 +262,7 @@ public class Asset implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(tokenId);
         dest.writeString(imagePreviewUrl);
+        dest.writeString(metadataImageUrl);
         dest.writeString(name);
         dest.writeString(description);
         dest.writeString(externalLink);
@@ -275,5 +286,37 @@ public class Asset implements Parcelable {
                  && TextUtils.isEmpty(name)
                  && TextUtils.isEmpty(description)
                  && (traits == null || traits.size() == 0);
+    }
+
+    public boolean equals(RealmERC721Asset realmAsset)
+    {
+        List<Trait> traits = realmAsset.getTraits();
+        if (traits.size() != realmAsset.getTraits().size() || traitsDifferent(traits, realmAsset.getTraits())) return false;
+        else if (realmAsset.getImagePreviewUrl() == null && imagePreviewUrl != null
+                || realmAsset.getImagePreviewUrl().equalsIgnoreCase(imagePreviewUrl)) return false;
+        else return true;
+    }
+
+    private boolean traitsDifferent(List<Trait> traits, List<Trait> traits1)
+    {
+        for (int i = 0; i < traits.size(); i++)
+        {
+            if (!traits.get(i).getTraitType().equals(traits1.get(i).getTraitType())
+                    || !traits.get(i).getValue().equals(traits1.get(i).getValue()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void loadNFTImage(Context context, RequestListener<Drawable> requestListener, ImageView image)
+    {
+        String url = imagePreviewUrl != null ? imagePreviewUrl : metadataImageUrl;
+        Glide.with(context)
+                .load(url)
+                .listener(requestListener)
+                .into(image);
     }
 }

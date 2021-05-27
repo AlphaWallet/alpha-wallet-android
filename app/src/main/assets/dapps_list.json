@@ -71,5 +71,7 @@
   {"name": "SCV.Finance", "description": "Get a big picture of all your digital assets locked inside various DeFi projects across multiple blockchains.", "url": "https://scv.finance", "category": "Tool"},
   {"name": "Mushrooms Finance", "description": "Sustainable crypto earning in DeFi", "url": "https://mushrooms.finance/", "category": "Finance"},
   {"name": "Levinswap", "description": "Decentralized exchange for trading crypto and serurities tokens", "url": "https://app.levinswap.org/", "category": "Exchange"}
+  {"name": "Matic Testnet Faucet", "description": "Matic Faucet to access Mumbai and Goerli testnet tokens", "url": "https://faucet.matic.network/", "category": "Tool"}
+
 ]
 

@@ -58,6 +58,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
@@ -226,6 +228,10 @@ public class Utils {
                 return R.color.polygon_main;
             case MATIC_TEST_ID:
                 return R.color.polygon_test;
+            case OPTIMISTIC_MAIN_ID:
+                return R.color.optimistic_main;
+            case OPTIMISTIC_TEST_ID:
+                return R.color.optimistic_test;
             default:
                 return R.color.mine;
         }

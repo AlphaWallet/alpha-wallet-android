@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -536,22 +535,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
     }
 
-    /*
-            switch (message.getType())
-        {
-            case MESSAGE:
-                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_MESSAGE);
-                break;
-            case PERSONAL_MESSAGE:
-                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_PERSONAL_MESSAGE);
-                break;
-            case TYPED_MESSAGE:
-                signable = new EthereumTypedMessage(message.getData(), peerUrl.getText().toString(), id, new CryptoFunctions());
-                break;
-        }
-
-        String message, String displayOrigin, long leafPosition, SignMessageType type
-     */
     @Override
     protected void onSaveInstanceState(@NotNull Bundle state)
     {
@@ -568,22 +551,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         super.onResume();
         startMessageCheck();
         Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        int rotation = display.getRotation();
-        if (orientation == -1)
-        {
-            orientation = rotation;
-        }
-        else if (orientation != rotation)
-        {
-            System.out.println("YOLESS!: " + rotation);
-            if (confirmationDialog != null && !confirmationDialog.isShowing())
-            {
-                //should we be doing anything here?
-                System.out.println("YOLESS2: Yo");
-            }
-        }
-
-        orientation = rotation;
+        orientation = display.getRotation();
     }
 
     private void displaySessionStatus(String sessionId)

@@ -557,17 +557,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     public void success()
     {
-        if (activity.isFinishing() || activity.isDestroyed())
-        {
-            System.out.println("YOLESS: Caught2");
-        }
-        else if (isAttached)
+        if (!activity.isFinishing() && !activity.isDestroyed() && isAttached)
         {
             confirmationWidget.completeProgressMessage(".", this::dismiss);
-        }
-        else
-        {
-            System.out.println("YOLESS: Caught");
         }
     }
 }

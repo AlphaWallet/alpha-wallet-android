@@ -129,6 +129,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         setupCancelListeners();
+        isAttached = true;
     }
 
     public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, SignAuthenticationCallback sCallback, Signable message)
@@ -168,6 +169,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
         setupCancelListeners();
+        isAttached = true;
     }
 
     public void setSignOnly()
@@ -547,8 +549,17 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         balanceDisplay.setNewBalanceText(token, getTransactionAmount(), networkFee, balanceAfterTransaction);
     }
 
+    private boolean isAttached;
+    public void closingActionSheet()
+    {
+        isAttached = false;
+    }
+
     public void success()
     {
-        confirmationWidget.completeProgressMessage(".", this::dismiss);
+        if (!activity.isFinishing() && !activity.isDestroyed() && isAttached)
+        {
+            confirmationWidget.completeProgressMessage(".", this::dismiss);
+        }
     }
 }

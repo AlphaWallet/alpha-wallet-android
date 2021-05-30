@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import androidx.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -136,11 +135,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Nullable
     private Uri buildEtherscanUri(Transaction transaction) {
         NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId);
-        if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanUrl)) {
-            return Uri.parse(networkInfo.etherscanUrl)
-                    .buildUpon()
-                    .appendEncodedPath(transaction.hash)
-                    .build();
+        if (networkInfo != null) {
+            return networkInfo.getEtherscanUri(transaction.hash);
         }
         return null;
     }
@@ -148,7 +144,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public boolean hasEtherscanDetail(Transaction tx)
     {
         NetworkInfo networkInfo = networkInteract.getNetworkInfo(tx.chainId);
-        return networkInfo.etherscanUrl != null && networkInfo.etherscanUrl.length() != 0;
+        return networkInfo != null && !networkInfo.getEtherscanUri(tx.hash).equals(Uri.EMPTY);
     }
 
     public String getNetworkName(int chainId)

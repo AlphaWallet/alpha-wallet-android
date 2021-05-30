@@ -460,7 +460,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
-                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + hash);
+                    EthereumNetworkBase.getEtherscanURLbyNetworkAndHash(token.tokenInfo.chainId, hash));
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
             sendBroadcast(new Intent(PRUNE_ACTIVITY));

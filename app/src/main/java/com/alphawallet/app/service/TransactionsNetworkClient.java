@@ -63,8 +63,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final int AUX_DATABASE_ID = 6; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
-    private final String BLOCKSCOUT_API = "blockscout";
-    private final String MATIC_API = "maticvigil.com/api/v2/transactions";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -318,20 +316,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             StringBuilder sb = new StringBuilder();
             sb.append(networkInfo.etherscanTxUrl);
-
-            if (networkInfo.etherscanTxUrl.contains(MATIC_API))
-            {
-                sb.append("?module=account&action=txlist&address=");
-            }
-            else
-            {
-                if (!networkInfo.etherscanTxUrl.endsWith("/"))
-                {
-                    sb.append("/");
-                }
-                sb.append("api?module=account&action=txlist&address=");
-            }
-
+            sb.append("module=account&action=txlist&address=");
             sb.append(tokenAddress);
             if (ascending)
             {
@@ -446,7 +431,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     @Override
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
-        final boolean nftCheck = isNFTCheck && (!networkInfo.etherscanTxUrl.contains(BLOCKSCOUT_API) && !networkInfo.etherscanTxUrl.contains(MATIC_API)); //override NFT check if blockscout
+        final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
         return Single.fromCallable(() -> {
             //get latest block read
             int eventCount = 0;
@@ -454,14 +439,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 //get last tokencheck
                 long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, nftCheck);
-                //fetch erc20 tx from Etherscan
+                //fetch transfers from end point
                 String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, nftCheck ? ERC721_QUERY : ERC20_QUERY);
 
                 if (fetchTransactions != null && fetchTransactions.length() > 100)
                 {
                     //convert to gson
                     EtherscanEvent[] events = getEtherscanEvents(fetchTransactions);
-                    //we know all these events are relevant to the wallet, and they are all ERC20 events
+                    //we know all these events are relevant to the wallet; they could be any type of token
                     writeEvents(instance, events, walletAddress, networkInfo, svs, nftCheck);
 
                     //Now update tokens if we don't already know this token
@@ -624,14 +609,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         final String QUERY_TYPE = "[QUERY_TYPE]";
         final String APIKEY_TOKEN = "[APIKEY]";
         String fullUrl;
-        if (networkInfo.etherscanTxUrl.contains(MATIC_API))
-        {
-             fullUrl = ETHERSCAN + "?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
-        }
-        else
-        {
-            fullUrl = ETHERSCAN + "api?module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
-        }
+        fullUrl = ETHERSCAN + "module=account&action=" + QUERY_TYPE + "&startBlock=" + START_BLOCK + "&address=" + WALLET_ADDR + "&page=1&offset=100&sort=asc" + APIKEY_TOKEN;
         fullUrl = fullUrl.replace(QUERY_TYPE, queryType).replace(ETHERSCAN, networkInfo.etherscanTxUrl).replace(START_BLOCK, String.valueOf(lastBlockChecked + 1)).replace(WALLET_ADDR, walletAddress);
         if (networkInfo.etherscanTxUrl.contains("etherscan"))
         {

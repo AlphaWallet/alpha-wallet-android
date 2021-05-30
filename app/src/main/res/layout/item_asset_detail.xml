@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_holder"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -60,11 +61,13 @@
         android:visibility="gone"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/image_asset"
+        <com.alphawallet.app.widget.ERC721ImageView
+            android:id="@+id/asset_image"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/abc_vector_test"/>
+            android:layout_height="250dp"
+            custom:webview_height="250"
+            android:gravity="center"/>
+
         <TextView
             android:id="@+id/text_asset_name_details"
             android:layout_width="wrap_content"

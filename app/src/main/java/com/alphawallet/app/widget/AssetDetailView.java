@@ -1,8 +1,11 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,14 +17,22 @@ import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.app.util.Utils.loadFile;
 
 /**
  * Created by Jenny Jingjing Li on 13/05/2021
@@ -30,22 +41,25 @@ import io.reactivex.schedulers.Schedulers;
 public class AssetDetailView extends LinearLayout
 {
     private final TextView assetName;
-    private final ImageView assetImage;
     private final TextView assetDescription;
     private final LinearLayout layoutDetails;
     private final ImageView assetDetails;
     private final LinearLayout layoutHolder;
+    private final ERC721ImageView imageView;
+
+    @Nullable
+    private Disposable disposable;
 
     public AssetDetailView(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
         inflate(context, R.layout.item_asset_detail, this);
         assetName = findViewById(R.id.text_asset_name);
-        assetImage = findViewById(R.id.image_asset);
         assetDescription = findViewById(R.id.text_asset_description);
         assetDetails = findViewById(R.id.image_more);
         layoutDetails = findViewById(R.id.layout_details);
         layoutHolder = findViewById(R.id.layout_holder);
+        imageView = findViewById(R.id.asset_image);
     }
 
     public void setupAssetDetail(Token token, String tokenId, final ActionSheetInterface actionSheetInterface)
@@ -54,11 +68,10 @@ public class AssetDetailView extends LinearLayout
         if (asset == null)
         {
             layoutHolder.setVisibility(View.GONE);
-            fetchAsset(token, tokenId)
+            disposable = fetchAsset(token, tokenId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(fetchedAsset -> setupAssetDetail(fetchedAsset, actionSheetInterface), error -> {  })
-                    .isDisposed();
+                    .subscribe(fetchedAsset -> setupAssetDetail(fetchedAsset, actionSheetInterface), error -> {  });
         }
         else
         {
@@ -72,10 +85,7 @@ public class AssetDetailView extends LinearLayout
 
         layoutHolder.setVisibility(View.VISIBLE);
         assetName.setText(asset.getName());
-
-        Glide.with(this)
-                .load(asset.getImagePreviewUrl())
-                .into(assetImage);
+        imageView.setupTokenImage(asset);
 
         assetDescription.setText(asset.getDescription());
 
@@ -110,5 +120,10 @@ public class AssetDetailView extends LinearLayout
         assetDetails.setVisibility(View.GONE);
         findViewById(R.id.spacing_line).setVisibility(View.GONE);
         layoutHolder.setOnClickListener(null);
+    }
+
+    public void onDestroy()
+    {
+        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 }

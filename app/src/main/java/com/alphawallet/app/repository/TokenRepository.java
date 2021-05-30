@@ -163,7 +163,7 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721:
                         case ERC721_LEGACY:
-                            Map<Long, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            Map<BigInteger, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
                             t = new ERC721Token(tInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             t.lastTxTime = tokens[i].lastTxTime;
@@ -390,6 +390,18 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public void updateAssets(String wallet, Token erc721Token)
+    {
+        localSource.updateERC721Assets(wallet, erc721Token);
+    }
+
+    @Override
+    public void storeAsset(String wallet, Token token, Asset asset)
+    {
+        localSource.storeAsset(wallet, token, asset);
+    }
+
+    @Override
     public Single<Token[]> addERC20(Wallet wallet, Token[] tokens)
     {
         List<Token> updateList = determineTokenTypes(wallet, tokens);
@@ -587,7 +599,9 @@ public class TokenRepository implements TokenRepositoryType {
                         balanceArray = checkERC875BalanceArray(wallet, tInfo, token);
                         break;
                     case ERC721_LEGACY:
+                        break;
                     case ERC721:
+                        balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address);
                         break;
                     case ERC721_TICKET:
                         balanceArray = checkERC721TicketBalanceArray(wallet, tInfo, token);
@@ -1333,7 +1347,7 @@ public class TokenRepository implements TokenRepositoryType {
                     getContractData(network, address, nameOf(), ""),
                     getContractData(network, address, symbolOf(), ""),
                     getDecimals(address, network),
-                    true, chainId);
+                    false, chainId);
         });
     }
 

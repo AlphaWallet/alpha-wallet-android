@@ -37,6 +37,10 @@ public class TokenFactory
                     tokenInfo = new TokenInfo(tokenInfo.address, tokenInfo.name, tokenInfo.symbol, 0, tokenInfo.isEnabled, tokenInfo.chainId);
                 }
                 thisToken = new ERC721Token(tokenInfo, new HashMap<>(), updateBlancaTime, networkName, type);
+                if (balance.compareTo(BigDecimal.ZERO) >=0)
+                {
+                    thisToken.balance = balance;
+                }
                 break;
             case NOT_SET:
             case ERC20:
@@ -97,11 +101,6 @@ public class TokenFactory
                 thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
                 break;
 
-            case OTHER:
-                balance = new BigDecimal(0);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
-                break;
-
             case CURRENCY:
                 if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
                 balance = new BigDecimal(realmBalance);
@@ -113,9 +112,9 @@ public class TokenFactory
             case ERC721_LEGACY:
                 if (realmBalance == null) realmBalance = "";
                 thisToken = new ERC721Token(tokenInfo, null, updateBlancaTime, networkName, type);
-
                 break;
 
+            case OTHER:
             default:
                 balance = new BigDecimal(0);
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);

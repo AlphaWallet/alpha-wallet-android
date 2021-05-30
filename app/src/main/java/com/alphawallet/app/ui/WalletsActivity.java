@@ -120,7 +120,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsAdapter(this, this::onSetWalletDefault, viewModel.getRealmManager());
+        adapter = new WalletsAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract());
         list.setAdapter(adapter);
         list.addItemDecoration(new ListDivider(this));
 
@@ -166,6 +166,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (adapter != null) adapter.onDestroy();
     }
 
     @Override

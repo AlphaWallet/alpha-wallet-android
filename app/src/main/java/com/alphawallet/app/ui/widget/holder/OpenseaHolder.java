@@ -2,34 +2,35 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.alphawallet.app.C;
-import com.alphawallet.token.entity.TicketRange;
-import com.bumptech.glide.Glide;
-import com.alphawallet.app.util.KittyUtils;
-
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.AssetDisplayActivity;
+import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.alphawallet.app.util.KittyUtils;
+import com.alphawallet.app.widget.ERC721ImageView;
+import com.alphawallet.token.entity.TicketRange;
 
 import java.math.BigInteger;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by James on 3/10/2018.
@@ -39,27 +40,34 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     public static final int VIEW_TYPE = 1302;
     protected final Token token;
     private final TextView titleText;
-    private final ImageView image;
     private final TextView generation;
     private final TextView cooldown;
     private final TextView statusText;
-    private final LinearLayout layoutToken;
+    private final LinearLayout layoutDetails;
+    private final LinearLayout clickLayer;
+    private final ProgressBar loadingSpinner;
+    private final ERC721ImageView tokenImageView;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private boolean activeClick;
     private final Activity activity;
     private final boolean clickThrough;
 
+    @Nullable
+    private Disposable assetLoader;
+
     public OpenseaHolder(int resId, ViewGroup parent, Token token, Activity activity, boolean clickThrough) {
         super(resId, parent);
         titleText = findViewById(R.id.name);
-        image = findViewById(R.id.image_view);
         generation = findViewById(R.id.generation);
         cooldown = findViewById(R.id.cooldown);
         statusText = findViewById(R.id.status);
-        layoutToken = findViewById(R.id.layout_token);
         itemSelect = findViewById(R.id.radioBox);
+        layoutDetails = findViewById(R.id.layout_details);
+        loadingSpinner = findViewById(R.id.loading_spinner);
+        tokenImageView = findViewById(R.id.asset_detail);
+        clickLayer = findViewById(R.id.click_layer);
         this.token = token;
         this.activity = activity;
         this.clickThrough = clickThrough;
@@ -68,17 +76,75 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        String assetName;
         activeClick = false;
-        handler = new Handler();
         //retrieve asset from token
         Asset asset = getAsset(data);
 
+        layoutDetails.setVisibility(View.GONE);
+        tokenImageView.blankViews();
+
+        if (assetLoader != null && !assetLoader.isDisposed())
+        {
+            assetLoader.dispose();
+        }
+
+        if (asset.needsLoading())
+        {
+            loadingSpinner.setVisibility(View.VISIBLE);
+            titleText.setText(asset.getName());
+            assetLoader = Single.fromCallable(() -> {
+                    return token.fetchTokenMetadata(data.tokenIds.get(0));//fetch directly from token
+                })
+                .map(newAsset -> storeAsset(newAsset, asset))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(a -> displayAsset(data, a), e -> handleError(e, data));
+        }
+        else
+        {
+            displayAsset(data, asset);
+        }
+
+        clickLayer.setOnClickListener(v -> handleClick(v, data));
+        clickLayer.setOnLongClickListener(v -> handleLongClick(v, data));
+    }
+
+    private Asset storeAsset(Asset fetchedAsset, Asset oldAsset)
+    {
+        fetchedAsset.updateFromRaw(oldAsset);
+        if (activity != null && activity instanceof AssetDisplayActivity)
+        {
+            ((AssetDisplayActivity)activity).storeAsset(fetchedAsset);
+        }
+
+        token.addAssetToTokenBalanceAssets(fetchedAsset);
+        return fetchedAsset;
+    }
+
+    private void handleError(Throwable e, TicketRange data)
+    {
+        e.printStackTrace();
+        Asset asset = getAsset(data);
+        loadingSpinner.setVisibility(View.GONE);
+        String assetName;
         if (asset.getName() != null && !asset.getName().equals("null")) {
             assetName = asset.getName();
         } else {
             assetName = "ID# " + String.valueOf(asset.getTokenId());
         }
+        loadingSpinner.setVisibility(View.GONE);
+        titleText.setText(assetName);
+    }
+
+    private void displayAsset(TicketRange data, Asset asset)
+    {
+        String assetName;
+        if (asset.getName() != null && !asset.getName().equals("null")) {
+            assetName = asset.getName();
+        } else {
+            assetName = "ID# " + String.valueOf(asset.getTokenId());
+        }
+        loadingSpinner.setVisibility(View.GONE);
         titleText.setText(assetName);
 
         if (data.exposeRadio)
@@ -96,9 +162,11 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         if (asset.getTraitFromType("generation") != null) {
             generation.setText(String.format("Gen %s",
                     asset.getTraitFromType("generation").getValue()));
+            layoutDetails.setVisibility(View.VISIBLE);
         } else if (asset.getTraitFromType("gen") != null){
             generation.setText(String.format("Gen %s",
                     asset.getTraitFromType("gen").getValue()));
+            layoutDetails.setVisibility(View.VISIBLE);
         } else {
             generation.setVisibility(View.GONE);
         }
@@ -107,36 +175,20 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
             cooldown.setText(String.format("%s Cooldown",
                     KittyUtils.parseCooldownIndex(
                             asset.getTraitFromType("cooldown_index").getValue())));
+            layoutDetails.setVisibility(View.VISIBLE);
         } else if (asset.getTraitFromType("cooldown") != null) { // Non-CK
             cooldown.setText(String.format("%s Cooldown",
                     asset.getTraitFromType("cooldown").getValue()));
+            layoutDetails.setVisibility(View.VISIBLE);
         } else {
             cooldown.setVisibility(View.GONE);
         }
 
-        Glide.with(getContext())
-                .load(asset.getImagePreviewUrl())
-                .listener(requestListener)
-                .into(image);
-
-        layoutToken.setOnClickListener(v -> handleClick(v, data));
-        layoutToken.setOnLongClickListener(v -> handleLongClick(v, data));
+        if (!((Activity)getContext()).isDestroyed())
+        {
+            tokenImageView.setupTokenImage(asset);
+        }
     }
-
-    /**
-     * Prevent glide dumping log errors - it is expected that load will fail
-     */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
-        @Override
-        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            return false;
-        }
-
-        @Override
-        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            return false;
-        }
-    };
 
     private Asset getAsset(TicketRange data)
     {

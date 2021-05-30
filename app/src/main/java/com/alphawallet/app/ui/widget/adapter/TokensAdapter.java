@@ -476,10 +476,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void onDestroy(RecyclerView recyclerView)
     {
         //ensure all holders have their realm listeners cleaned up
-        for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
+        if (recyclerView != null)
         {
-            ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
+            for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
+            {
+                ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
+            }
         }
+
+        if (realm != null) realm.close();
     }
 
     public void setDebug()

@@ -4,6 +4,7 @@ import io.reactivex.disposables.Disposable;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
@@ -58,4 +59,7 @@ public interface TokenLocalSource {
 
     boolean hasVisibilityBeenChanged(Token token);
     boolean getEnabled(Token token);
+
+    void updateERC721Assets(String wallet, Token erc721Token);
+    void storeAsset(String wallet, Token token, Asset asset);
 }

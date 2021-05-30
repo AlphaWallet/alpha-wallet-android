@@ -30,6 +30,9 @@
     <declare-styleable name="ChainName" />
     <declare-styleable name="InputAddressView" />
     <declare-styleable name="InputAddress" />
+    <declare-styleable name="ERC721ImageView">
+        <attr name="webview_height" format="integer"/>
+    </declare-styleable>
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
         <attr name="imeOptions" format="string" />

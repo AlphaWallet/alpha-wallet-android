@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RawRes;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -14,7 +13,6 @@ import com.alphawallet.app.web3.entity.Address;
 import org.web3j.crypto.Keys;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static com.alphawallet.app.util.Utils.loadFile;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class JsInjectorClient {
@@ -220,21 +219,6 @@ public class JsInjectorClient {
                 "<body>\n";
         // the opening of the following </div> is in injectWeb3TokenInit();
         return injectHeader + style + view + "</div></body>";
-    }
-
-    private static String loadFile(Context context, @RawRes int rawRes) {
-        byte[] buffer = new byte[0];
-        try {
-            InputStream in = context.getResources().openRawResource(rawRes);
-            buffer = new byte[in.available()];
-            int len = in.read(buffer);
-            if (len < 1) {
-                throw new IOException("Nothing is read.");
-            }
-        } catch (Exception ex) {
-            Log.d("READ_JS_TAG", "Ex", ex);
-        }
-        return new String(buffer);
     }
 
     private String getMimeType(String contentType) {

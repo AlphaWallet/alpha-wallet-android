@@ -7,12 +7,14 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.ImageView;
 
+import androidx.annotation.RawRes;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.C;
@@ -818,5 +820,20 @@ public class Utils {
         }
 
         return parsed;
+    }
+
+    public static String loadFile(Context context, @RawRes int rawRes) {
+        byte[] buffer = new byte[0];
+        try {
+            InputStream in = context.getResources().openRawResource(rawRes);
+            buffer = new byte[in.available()];
+            int len = in.read(buffer);
+            if (len < 1) {
+                throw new IOException("Nothing is read.");
+            }
+        } catch (Exception ex) {
+            Log.d("READ_JS_TAG", "Ex", ex);
+        }
+        return new String(buffer);
     }
 }

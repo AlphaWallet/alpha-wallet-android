@@ -163,7 +163,8 @@ public class InputAmount extends LinearLayout
         }
         else
         {
-            errorText.setText(R.string.error_insufficient_funds);
+            String error = String.valueOf(R.string.error_insufficient_funds)  + " " + token.getSymbolOrShortName().toUpperCase();
+            errorText.setText(error);
         }
 
         if (showError)

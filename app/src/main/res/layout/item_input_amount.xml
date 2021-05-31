@@ -174,7 +174,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="end"
                 android:fontFamily="@font/font_semibold"
-                android:textColor="@color/design_default_color_error"
+                android:textColor="@color/danger"
                 android:textSize="@dimen/sp17"
                 android:text="@string/error_insufficient_funds"
                 android:visibility="gone" />

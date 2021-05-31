@@ -15,7 +15,6 @@ import static com.alphawallet.token.tools.Numeric.cleanHexPrefix;
 */
 public class EthereumMessage implements Signable {
 
-    public final byte[] messageBytes;
     private final CharSequence userMessage;
     public final String displayOrigin;
     public final long leafPosition;
@@ -24,7 +23,6 @@ public class EthereumMessage implements Signable {
     private final SignMessageType messageType;
 
     public EthereumMessage(String message, String displayOrigin, long leafPosition, SignMessageType type) {
-        this.messageBytes = Numeric.hexStringToByteArray(message);
         this.displayOrigin = displayOrigin;
         this.leafPosition = leafPosition;
         this.messageType = type;
@@ -34,9 +32,9 @@ public class EthereumMessage implements Signable {
 
     private byte[] getEthereumMessage(String message) {
         byte[] encodedMessage;
-        if (message.startsWith("0x"))
+        if (isHex(Numeric.cleanHexPrefix(message)))
         {
-            encodedMessage = messageBytes;
+            encodedMessage = Numeric.hexStringToByteArray(message);
         }
         else
         {
@@ -46,14 +44,15 @@ public class EthereumMessage implements Signable {
         byte[] result;
         if (messageType == SignMessageType.SIGN_PERSONAL_MESSAGE)
         {
-            byte[] prefix = MESSAGE_PREFIX.concat(String.valueOf(encodedMessage.length)).getBytes();
+            byte[] prefix = getEthereumMessagePrefix(encodedMessage.length);
+
             result = new byte[prefix.length + encodedMessage.length];
             System.arraycopy(prefix, 0, result, 0, prefix.length);
             System.arraycopy(encodedMessage, 0, result, prefix.length, encodedMessage.length);
         }
         else
         {
-            result = messageBytes;
+            result = encodedMessage;
         }
         return result;
     }
@@ -67,7 +66,7 @@ public class EthereumMessage implements Signable {
     @Override
     public CharSequence getUserMessage()
     {
-        if (messageType != SignMessageType.SIGN_PERSONAL_MESSAGE || !StandardCharsets.UTF_8.newEncoder().canEncode(userMessage))
+        if (!StandardCharsets.UTF_8.newEncoder().canEncode(userMessage))
         {
             return userMessage;
         }
@@ -98,6 +97,12 @@ public class EthereumMessage implements Signable {
         return this.leafPosition;
     }
 
+    @Override
+    public SignMessageType getMessageType()
+    {
+        return messageType;
+    }
+
     private String hexToUtf8(CharSequence hexData) {
         String hex = cleanHexPrefix(hexData.toString());
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
@@ -108,9 +113,17 @@ public class EthereumMessage implements Signable {
         return cb.toString();
     }
 
-    @Override
-    public SignMessageType getMessageType()
+    private boolean isHex(String testMsg)
     {
-        return messageType;
+        for (int i = 0; i < testMsg.length(); i++)
+        {
+            if (Character.digit(testMsg.charAt(i), 16) == -1) { return false; }
+        }
+
+        return true;
+    }
+
+    private byte[] getEthereumMessagePrefix(int messageLength) {
+        return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
     }
 }

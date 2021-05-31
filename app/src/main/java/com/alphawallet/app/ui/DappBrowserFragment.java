@@ -980,11 +980,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
 
-                if (BuildConfig.DEBUG && message.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE)
-                {
-                    testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
-                }
-
                 confirmationDialog.success();
             }
         };
@@ -1375,13 +1370,13 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         //headers
         return new HashMap<String, String>() {{
-            put("Connection", "close");
+            /*put("Connection", "close");
             put("Content-Type", "text/plain");
             put("Access-Control-Allow-Origin", "*");
             put("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
             put("Access-Control-Max-Age", "600");
             put("Access-Control-Allow-Credentials", "true");
-            put("Access-Control-Allow-Headers", "accept, authorization, Content-Type");
+            put("Access-Control-Allow-Headers", "accept, authorization, Content-Type");*/
         }};
     }
 

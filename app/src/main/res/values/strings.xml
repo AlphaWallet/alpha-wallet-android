@@ -389,7 +389,7 @@
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Invalid Transaction</string>
     <string name="contains_no_data">DApp transaction contains no data</string>
-    <string name="error_insufficient_funds">Insufficient</string>
+    <string name="error_insufficient_funds">Insufficient %1$s</string>
     <string name="ssl_cert_invalid">Invalid SSL Certificate. This site may be unsafe. Proceed?</string>
     <string name="import_spawnable">Import Tokens</string>
     <string name="currency_drop">Take Currency Drop</string>

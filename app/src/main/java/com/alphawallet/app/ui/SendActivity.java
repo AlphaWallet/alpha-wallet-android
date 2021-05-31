@@ -496,7 +496,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             sendAmount = NEGATIVE;
             //insufficient balance
-            amountInput.showError(true, R.string.error_insufficient_funds);
+            amountInput.showError(true, 0);
             //if currently resolving ENS, stop
             addressInput.stopNameCheck();
         }

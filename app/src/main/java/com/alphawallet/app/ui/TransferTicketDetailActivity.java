@@ -31,7 +31,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
@@ -79,6 +78,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.EXTRA_STATE;
@@ -107,7 +107,6 @@ public class TransferTicketDetailActivity extends BaseActivity
     private AWalletAlertDialog dialog;
     private FunctionButtonBar functionBar;
 
-    private FinishReceiver finishReceiver;
     private Token token;
     private NonFungibleTokenAdapter adapter;
 
@@ -140,6 +139,9 @@ public class TransferTicketDetailActivity extends BaseActivity
     private TimePickerDialog timePickerDialog;
 
     private SignAuthenticationCallback signCallback;
+
+    @Nullable
+    private Disposable calcGasCost;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -239,8 +241,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         functionBar.revealButtons();
 
         setupScreen();
-
-        finishReceiver = new FinishReceiver(this);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -540,7 +540,6 @@ public class TransferTicketDetailActivity extends BaseActivity
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
         viewModel.stopGasSettingsFetch();
         if (confirmationDialog != null && confirmationDialog.isShowing())
         {
@@ -804,6 +803,9 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void calculateTransactionCost()
     {
+        if ((calcGasCost != null && !calcGasCost.isDisposed()) ||
+                (actionDialog != null && actionDialog.isShowing())) return;
+
         final String txSendAddress = sendAddress;
         sendAddress = null;
 
@@ -816,13 +818,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             calculateEstimateDialog();
             //form payload and calculate tx cost
-            viewModel.calculateGasEstimate(viewModel.getWallet(), transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
+            calcGasCost = viewModel.calculateGasEstimate(viewModel.getWallet(), transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
                     .map(this::convertToGasLimit)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
-                            error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress))
-                    .isDisposed();
+                            error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
         }
     }
 

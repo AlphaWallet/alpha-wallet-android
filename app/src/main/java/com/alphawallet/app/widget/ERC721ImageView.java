@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -56,6 +58,8 @@ public class ERC721ImageView extends LinearLayout
     public void setupTokenImage(Asset asset)
     {
         image.setVisibility(View.VISIBLE);
+        if (getContext() == null ||
+                (getContext() instanceof Activity && ((Activity)getContext()).isDestroyed())) return;
         Glide.with(getContext())
                 .load(asset.getBestImageUrl())
                 .listener(requestListener)
@@ -94,7 +98,6 @@ public class ERC721ImageView extends LinearLayout
         handler.post(() -> {
             image.setVisibility(View.GONE);
             webLayout.setVisibility(View.VISIBLE);
-            webView.setVisibility(View.VISIBLE);
             webView.loadData(base64, "text/html; charset=utf-8", "base64");
         });
     }
@@ -123,6 +126,5 @@ public class ERC721ImageView extends LinearLayout
     {
         image.setVisibility(View.INVISIBLE);
         webLayout.setVisibility(View.GONE);
-        webView.setVisibility(View.GONE);
     }
 }

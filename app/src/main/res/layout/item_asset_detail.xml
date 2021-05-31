@@ -61,6 +61,14 @@
         android:visibility="gone"
         android:orientation="vertical">
 
+        <ProgressBar
+            android:id="@+id/loading_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp30"
+            android:layout_margin="@dimen/dp30"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
         <com.alphawallet.app.widget.ERC721ImageView
             android:id="@+id/asset_image"
             android:layout_width="match_parent"

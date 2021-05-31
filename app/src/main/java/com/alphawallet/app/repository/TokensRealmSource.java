@@ -62,12 +62,18 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public Single<Token[]> saveTokens(Wallet wallet, Token[] items)
     {
-        return Single.fromCallable(() -> {
-            for (Token token : items) {
-                if (token.tokenInfo != null && token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT) && token.tokenInfo.symbol != null)
-                {
-                    saveTokenLocal(wallet, token);
-                }
+        if (!Utils.isAddressValid(wallet.address)) { return Single.fromCallable(() -> items); }
+        else return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                realm.executeTransactionAsync(r -> {
+                    for (Token token : items) {
+                        if (token.tokenInfo != null && token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT) && token.tokenInfo.symbol != null)
+                        {
+                            saveTokenLocal(r, token);
+                        }
+                    }
+                });
             }
             return items;
         });
@@ -160,13 +166,17 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public Single<Token> saveToken(Wallet wallet, Token token)
     {
-        return Single.fromCallable(() -> {
-            saveTokenLocal(wallet, token);
+        if (!Utils.isAddressValid(wallet.address)) { return Single.fromCallable(() -> token); }
+        else return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                realm.executeTransactionAsync(r -> saveTokenLocal(r, token));
+            }
             return token;
         });
     }
 
-    private void saveTokenLocal(Wallet wallet, Token token)
+    private void saveTokenLocal(Realm r, Token token)
     {
         switch (token.getInterfaceSpec())
         {
@@ -180,11 +190,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case ERC721:
             case ERC721_LEGACY:
             case MAYBE_ERC20:
-                if (!Utils.isAddressValid(wallet.address)) return;
-                try (Realm realm = realmManager.getRealmInstance(wallet))
-                {
-                    realm.executeTransactionAsync(r -> saveToken(r, token));
-                }
+                saveToken(r, token);
                 break;
             //No save
             case NOT_SET:

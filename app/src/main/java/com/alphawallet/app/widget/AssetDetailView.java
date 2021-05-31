@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -32,6 +33,7 @@ public class AssetDetailView extends LinearLayout
     private final LinearLayout layoutDetails;
     private final ImageView assetDetails;
     private final LinearLayout layoutHolder;
+    private final ProgressBar loadingSpinner;
     private final ERC721ImageView imageView;
 
     @Nullable
@@ -47,6 +49,7 @@ public class AssetDetailView extends LinearLayout
         layoutDetails = findViewById(R.id.layout_details);
         layoutHolder = findViewById(R.id.layout_holder);
         imageView = findViewById(R.id.asset_image);
+        loadingSpinner = findViewById(R.id.loading_spinner);
     }
 
     public void setupAssetDetail(Token token, String tokenId, final ActionSheetInterface actionSheetInterface)
@@ -54,7 +57,7 @@ public class AssetDetailView extends LinearLayout
         Asset asset = token.getAssetForToken(tokenId);
         if (asset == null)
         {
-            layoutHolder.setVisibility(View.GONE);
+            loadingSpinner.setVisibility(View.VISIBLE);
             disposable = fetchAsset(token, tokenId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -68,6 +71,7 @@ public class AssetDetailView extends LinearLayout
 
     private void setupAssetDetail(Asset asset, ActionSheetInterface actionSheetInterface)
     {
+        loadingSpinner.setVisibility(View.GONE);
         if (asset.getTokenId() == null) { return; }
 
         layoutHolder.setVisibility(View.VISIBLE);

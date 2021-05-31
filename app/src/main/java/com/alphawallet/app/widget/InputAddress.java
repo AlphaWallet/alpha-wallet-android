@@ -254,7 +254,12 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     @Override
     public void ENSResolved(String address, String ens)
     {
-        addressReadyCallback.resolvedAddress(address, ens);
+        errorText.setVisibility(View.GONE);
+        setWaitingSpinner(false);
+        if (addressReadyCallback != null)
+        {
+            addressReadyCallback.resolvedAddress(address, ens);
+        }
     }
 
     @Override

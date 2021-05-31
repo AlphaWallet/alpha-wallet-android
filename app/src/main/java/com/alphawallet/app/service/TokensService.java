@@ -72,7 +72,7 @@ public class TokensService
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private long nextTokenCheck;
-    private boolean openSeaStart = false;
+    private boolean openSeaChecked = false;
     private boolean appHasFocus = true;
 
     @Nullable
@@ -244,6 +244,7 @@ public class TokensService
     {
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
+            openSeaChecked = false;
             currentAddress = newWalletAddr.toLowerCase();
             tokenValueMap.clear();
             pendingChainMap.clear();
@@ -453,7 +454,7 @@ public class TokensService
         if (System.currentTimeMillis() > nextTokenCheck)
         {
             checkERC20();
-            if (!openSeaStart) checkOpenSea(MAINNET_ID);
+            if (!openSeaChecked) checkOpenSea(MAINNET_ID);
         }
 
         checkPendingChains();
@@ -490,7 +491,7 @@ public class TokensService
 
     private void checkOpenSea(final int networkId)
     {
-        openSeaStart = true;
+        openSeaChecked = true;
         if (networkFilter.contains(networkId))
         {
             NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(networkId);

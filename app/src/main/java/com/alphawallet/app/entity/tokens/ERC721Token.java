@@ -257,6 +257,11 @@ public class ERC721Token extends Token implements Parcelable
         if (currentState == null) return true;
         if (lastTxTime > realmToken.getLastTxTime()) return true;
         if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
+        //check balances
+        for (Asset a : tokenBalanceAssets.values())
+        {
+            if (!a.needsLoading() && !a.requiresReplacement()) return true;
+        }
         return false;
     }
 

@@ -10,6 +10,7 @@
         android:id="@+id/image_asset"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="visible"
         tools:src="@drawable/ic_token_eth"/>
 
     <LinearLayout
@@ -22,8 +23,7 @@
         <WebView
             android:id="@+id/image_web_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"/>
+            android:layout_height="match_parent"/>
 
     </LinearLayout>
 </LinearLayout>

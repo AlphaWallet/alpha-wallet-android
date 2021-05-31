@@ -504,16 +504,15 @@ public class Utils {
 
     public static boolean isHex(String hexStr)
     {
-        if (hexStr == null) return false;
-        for (Character c : hexStr.toCharArray())
+        if (hexStr == null || hexStr.length() == 0) return false;
+        hexStr = Numeric.cleanHexPrefix(hexStr);
+
+        for (int i = 0; i < hexStr.length(); i++)
         {
-            if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
-            {
-                return true;
-            }
+            if (Character.digit(hexStr.charAt(i), 16) == -1) { return false; }
         }
 
-        return false;
+        return true;
     }
 
     public static String isolateNumeric(String valueFromInput)

@@ -32,7 +32,7 @@ public class EthereumMessage implements Signable {
 
     private byte[] getEthereumMessage(String message) {
         byte[] encodedMessage;
-        if (isHex(Numeric.cleanHexPrefix(message)))
+        if (isHex(message))
         {
             encodedMessage = Numeric.hexStringToByteArray(message);
         }
@@ -115,6 +115,9 @@ public class EthereumMessage implements Signable {
 
     private boolean isHex(String testMsg)
     {
+        if (testMsg == null || testMsg.length() == 0) return false;
+        testMsg = Numeric.cleanHexPrefix(testMsg);
+
         for (int i = 0; i < testMsg.length(); i++)
         {
             if (Character.digit(testMsg.charAt(i), 16) == -1) { return false; }

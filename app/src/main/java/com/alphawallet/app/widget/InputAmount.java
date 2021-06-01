@@ -163,13 +163,13 @@ public class InputAmount extends LinearLayout
         }
         else
         {
-            errorText.setText(R.string.error_insufficient_funds);
+            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getSymbolOrShortName()));
         }
 
         if (showError)
         {
             errorText.setVisibility(View.VISIBLE);
-            editText.setTextColor(context.getColor(R.color.design_default_color_error));
+            editText.setTextColor(context.getColor(R.color.danger));
         }
         else
         {

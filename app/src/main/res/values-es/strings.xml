@@ -375,7 +375,7 @@
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Transacción no válida</string>
     <string name="contains_no_data">La transacción DApp no contiene datos</string>
-    <string name="error_insufficient_funds">Fondos insuficientes</string>
+    <string name="error_insufficient_funds">%1$s insuficientes</string>
     <string name="ssl_cert_invalid">Certificado SSL no válido. Este sitio puede ser peligroso. ¿Continuar?</string>
     <string name="import_spawnable">Importar tokens</string>
     <string name="currency_drop">Reclamar criptomoneda gratuita</string>

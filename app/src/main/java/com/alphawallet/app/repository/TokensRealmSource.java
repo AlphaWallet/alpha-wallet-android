@@ -640,7 +640,8 @@ public class TokensRealmSource implements TokenLocalSource {
             try
             {
                 //grab all assets for this tokenId
-                Asset asset = new Asset(realmAsset.getTokenId(), contract);
+                BigInteger tokenId = new BigInteger(realmAsset.getTokenId());
+                Asset asset = new Asset(tokenId, contract);
                 asset.setBackgroundColor(realmAsset.getBackgroundColor());
                 asset.setDescription(realmAsset.getDescription());
                 asset.setExternalLink(realmAsset.getExternalLink());
@@ -649,7 +650,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 asset.setImageThumbnailUrl(realmAsset.getImageThumbnailUrl());
                 asset.setTraits(realmAsset.getTraits());
                 asset.setName(realmAsset.getName());
-                assets.put(new BigInteger(realmAsset.getTokenId()), asset);
+                assets.put(tokenId, asset);
             }
             catch (NumberFormatException e)
             {

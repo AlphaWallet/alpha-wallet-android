@@ -388,7 +388,7 @@
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Transaction Invalide</string>
     <string name="contains_no_data">La transaction DApp ne contient aucune donnée</string>
-    <string name="error_insufficient_funds">Fonds Insuffisants</string>
+    <string name="error_insufficient_funds">%1$s Insuffisants</string>
     <string name="ssl_cert_invalid">Certificat SSL Invalide. Ce site est peut être dangeureux. Continuer?</string>
     <string name="import_spawnable">Importer Tokens</string>
     <string name="currency_drop">Accepter baisse de devises</string>

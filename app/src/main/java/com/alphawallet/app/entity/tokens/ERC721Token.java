@@ -417,7 +417,7 @@ public class ERC721Token extends Token implements Parcelable
         JSONObject metaData = loadMetaData(responseValue);
         if (metaData != null)
         {
-            return Asset.fromMetaData(metaData, tokenId.toString(), this);
+            return Asset.fromMetaData(metaData, tokenId, this);
         }
         else
         {

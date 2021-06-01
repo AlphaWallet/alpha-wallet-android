@@ -85,30 +85,13 @@ public class Asset implements Parcelable {
         this.imageOriginalUrl = null;
     }
 
-    public Asset(String tokenId, AssetContract contract)
+    public Asset(BigInteger tokenId, AssetContract contract)
     {
-        if (Utils.isHex(tokenId))
-        {
-            //tokenId in hex - convert to decimal
-            BigInteger bi = new BigInteger(tokenId, 16);
-            tokenId = bi.toString(10);
-        }
-        this.tokenId = tokenId;
+        this.tokenId = tokenId.toString();
         this.assetContract = contract;
     }
 
-    public static Asset blankFromToken(Token token, String tokenId)
-    {
-        AssetContract contract = new AssetContract(token);
-        Asset asset = new Asset(tokenId, contract);
-        asset.name = "";
-        asset.description = "";
-        asset.imagePreviewUrl = "";
-        asset.imageOriginalUrl = "";
-        return asset;
-    }
-
-    public static Asset fromMetaData(JSONObject metaData, String tokenId, Token token)
+    public static Asset fromMetaData(JSONObject metaData, BigInteger tokenId, Token token)
     {
         AssetContract contract = new AssetContract(token);
         Asset asset = new Asset(tokenId, contract);

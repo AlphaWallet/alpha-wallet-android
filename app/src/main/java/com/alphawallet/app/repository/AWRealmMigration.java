@@ -242,6 +242,20 @@ public class AWRealmMigration implements RealmMigration
             if (realmData != null && !realmData.hasField("chainId")) realmData.addField("chainId", int.class);
             oldVersion++;
         }
+
+        if (oldVersion == 22)
+        {
+            RealmObjectSchema realmData = schema.get("RealmERC721Asset");
+            if (realmData != null && !realmData.hasField("imageOriginalUrl")) realmData.addField("imageOriginalUrl", String.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 23)
+        {
+            RealmObjectSchema realmData = schema.get("RealmERC721Asset");
+            if (realmData != null && !realmData.hasField("imageThumbnailUrl")) realmData.addField("imageThumbnailUrl", String.class);
+            oldVersion++;
+        }
     }
 
     @Override

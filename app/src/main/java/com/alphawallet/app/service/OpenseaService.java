@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,22 +89,6 @@ public class OpenseaService {
                 imageUrls.clear();
             }
 
-            //check if the token was updated recently
-            long updateThreshold = System.currentTimeMillis() - 3* DateUtils.MINUTE_IN_MILLIS; //Opensea usually lags behind by about 3 mins.
-            for (String cAddr : foundTokens.keySet())
-            {
-                Token t = foundTokens.get(cAddr);
-                if (t.lastTxTime > updateThreshold)
-                {
-                    //reject update
-                    foundTokens.remove(cAddr);
-                }
-                else
-                {
-                    t.lastTxTime = updateThreshold;
-                }
-            }
-
             return foundTokens.values().toArray(new Token[0]);
         });
     }
@@ -111,6 +96,7 @@ public class OpenseaService {
     private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address,
                                       int networkId, String networkName, TokensService tokensService) throws Exception
     {
+        final Map<String, Map<BigInteger, Asset>> assetList = new HashMap<>();
         TokenFactory tf = new TokenFactory();
         for (int i = 0; i < assets.length(); i++)
         {
@@ -127,6 +113,7 @@ public class OpenseaService {
                     ContractType type;
                     long lastCheckTime = 0;
                     Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
+                    assetList.put(asset.getAssetContract().getAddress(), checkToken.getTokenAssets());
                     if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
                     {
                         tInfo = checkToken.tokenInfo;
@@ -144,6 +131,7 @@ public class OpenseaService {
                     token.lastTxTime = lastCheckTime;
                     foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
+                asset.updateAsset(assetList.get(token.getAddress()));
                 token.addAssetToTokenBalanceAssets(asset);
             }
         }

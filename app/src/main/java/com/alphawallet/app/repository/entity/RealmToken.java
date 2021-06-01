@@ -90,14 +90,6 @@ public class RealmToken extends RealmObject {
         return balance;
     }
 
-    public List<String> getTokenIdList()
-    {
-        String[] list = balance.split(",");
-        List<String> tokens = new ArrayList<>();
-        Collections.addAll(tokens, list);
-        return tokens;
-    }
-
     public void setBalance(String balance) {
         this.balance = balance;
     }

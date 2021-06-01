@@ -27,8 +27,8 @@ repositories {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '29.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.3'
     sourceSets {
         main {
 
@@ -40,13 +40,13 @@ android {
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion 30
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
-        buildConfigField 'int', 'DB_VERSION', '22'
+        buildConfigField 'int', 'DB_VERSION', '24'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -176,8 +176,8 @@ dependencies {
     implementation "com.google.dagger:dagger-android:2.22"
 
     // Image Loader
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
 

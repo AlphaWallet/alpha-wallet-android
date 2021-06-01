@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -53,10 +54,10 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
  */
 public class ERC721Token extends Token implements Parcelable
 {
-    private final Map<Long, Asset> tokenBalanceAssets;
+    private final Map<BigInteger, Asset> tokenBalanceAssets;
     private static OkHttpClient client;
 
-    public ERC721Token(TokenInfo tokenInfo, Map<Long, Asset> balanceList, long blancaTime, String networkName, ContractType type) {
+    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, Asset> balanceList, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         if (balanceList != null)
         {
@@ -70,13 +71,13 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public Map<Long, Asset> getTokenAssets() {
+    public Map<BigInteger, Asset> getTokenAssets() {
         return tokenBalanceAssets;
     }
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
-        long tokenId = parseTokenId(asset.getTokenId());
+        BigInteger tokenId = parseTokenId(asset.getTokenId());
         tokenBalanceAssets.put(tokenId, asset);
     }
 
@@ -178,15 +179,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getFullBalance()
     {
-        boolean firstItem = true;
-        StringBuilder sb = new StringBuilder();
-        for (Asset item : tokenBalanceAssets.values())
-        {
-            if (!firstItem) sb.append(",");
-            sb.append(item.getTokenId());
-            firstItem = false;
-        }
-        return sb.toString();
+        return String.valueOf(tokenBalanceAssets.size());
     }
 
     @Override
@@ -264,6 +257,11 @@ public class ERC721Token extends Token implements Parcelable
         if (currentState == null) return true;
         if (lastTxTime > realmToken.getLastTxTime()) return true;
         if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
+        //check balances
+        for (Asset a : tokenBalanceAssets.values())
+        {
+            if (!a.needsLoading() && !a.requiresReplacement()) return true;
+        }
         return false;
     }
 
@@ -362,19 +360,19 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public BigDecimal getBalanceRaw()
     {
-        return new BigDecimal(getArrayBalance().size());
+        return new BigDecimal(tokenBalanceAssets.size());
     }
 
-    private long parseTokenId(String tokenIdStr)
+    private BigInteger parseTokenId(String tokenIdStr)
     {
-        long tokenId;
+        BigInteger tokenId;
         try
         {
-            tokenId = Long.parseLong(tokenIdStr);
+            tokenId = new BigInteger(tokenIdStr);
         }
         catch (Exception e)
         {
-            tokenId = 0L;
+            tokenId = BigInteger.ZERO;
         }
 
         return tokenId;
@@ -395,6 +393,7 @@ public class ERC721Token extends Token implements Parcelable
             {
                 baos.write(item.getTokenId().getBytes());
                 if (item.getImagePreviewUrl() != null) baos.write(item.getImagePreviewUrl().getBytes());
+                if (item.getImageOriginalUrl() != null) baos.write(item.getImageOriginalUrl().getBytes());
                 if (item.getName() != null) baos.write(item.getName().getBytes());
                 if (item.getDescription() != null) baos.write(item.getDescription().getBytes());
                 if (item.getTraits() != null) baos.write(item.getTraits().hashCode());
@@ -422,7 +421,7 @@ public class ERC721Token extends Token implements Parcelable
         }
         else
         {
-            return new Asset();
+            return new Asset(tokenId);
         }
     }
 
@@ -452,14 +451,14 @@ public class ERC721Token extends Token implements Parcelable
         return null;
     }
 
-    private static Function getTokenURI(BigInteger tokenId)
+    private Function getTokenURI(BigInteger tokenId)
     {
         return new Function("tokenURI",
                 Arrays.asList(new Uint256(tokenId)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
-    private static Function getTokenURI2(BigInteger tokenId)
+    private Function getTokenURI2(BigInteger tokenId)
     {
         return new Function("uri",
                 Arrays.asList(new Uint256(tokenId)),

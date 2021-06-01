@@ -17,7 +17,6 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -181,6 +180,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void onDestroy()
     {
         gasWidget.onDestroy();
+        assetDetailView.onDestroy();
     }
 
     public void setURL(String url)

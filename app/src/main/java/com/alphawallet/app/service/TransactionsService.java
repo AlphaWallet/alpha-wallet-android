@@ -40,6 +40,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class TransactionsService
 {
+    public static final int TRANSFER_RESULT_MAX = 150;
+
     private static final String NO_TRANSACTION_EXCEPTION = "NoSuchElementException";
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -149,9 +151,25 @@ public class TransactionsService
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> { eventFetch = null; System.out.println("Received: " + count); });
+                .subscribe(count -> handleMoveCheck(count, chainId, isNFT), this::gotReadErr);
 
         return info.usesSeparateNFTTransferQuery();
+    }
+
+    private void gotReadErr(Throwable e)
+    {
+        e.printStackTrace();
+    }
+
+    private void handleMoveCheck(int count, int chainId, boolean isNFT)
+    {
+        if (count == TRANSFER_RESULT_MAX)
+        {
+            //there's more moves to fetch
+            currentChainIndex = chainId;
+            nftCheck = isNFT;
+        }
+        eventFetch = null;
     }
 
     private void checkTransactionQueue()
@@ -164,8 +182,8 @@ public class TransactionsService
             if (t != null)
             {
                 String tick = (t.isEthereum() && getPendingChains().contains(t.tokenInfo.chainId)) ? "*" : "";
-                if (t.isEthereum())
-                    System.out.println("Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
+                if (t.isEthereum() && BuildConfig.DEBUG)
+                    Log.d("TRANSACTION","Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
                         transactionsClient.storeNewTransactions(tokensService.getCurrentAddress(), network, t.getAddress(), t.lastBlockCheck)
@@ -217,7 +235,7 @@ public class TransactionsService
         fetchTransactionDisposable = null;
         if (transactions.length == 0) return;
 
-        Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
+        if (BuildConfig.DEBUG) Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
         //should we only check here for chain moves?
 
@@ -283,7 +301,7 @@ public class TransactionsService
 
     public void markPending(Transaction tx)
     {
-        System.out.println("Marked Pending Tx Chain: " + tx.chainId);
+        if (BuildConfig.DEBUG) Log.d("TRANSACTION","Marked Pending Tx Chain: " + tx.chainId);
         tokensService.markChainPending(tx.chainId);
     }
 

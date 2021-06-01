@@ -980,11 +980,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
 
-                if (BuildConfig.DEBUG && message.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE)
-                {
-                    testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
-                }
-
                 confirmationDialog.success();
             }
         };

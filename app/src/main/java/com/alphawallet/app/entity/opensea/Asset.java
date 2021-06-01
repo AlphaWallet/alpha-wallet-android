@@ -362,7 +362,6 @@ public class Asset implements Parcelable {
         return !TextUtils.isEmpty(imageThumbnailUrl) ? imageThumbnailUrl : getPreviewImageUrl();
     }
 
-    //From Opensea API call
     public void updateAsset(Map<BigInteger, Asset> oldAssets)
     {
         Asset oldAsset = oldAssets != null ? oldAssets.get(new BigInteger(tokenId)) : null;

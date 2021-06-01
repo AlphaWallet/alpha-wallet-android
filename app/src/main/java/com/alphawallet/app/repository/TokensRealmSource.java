@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -560,6 +561,9 @@ public class TokensRealmSource implements TokenLocalSource {
         if (!token.isERC721()) return;
         String dbKey = databaseKey(token);
 
+        //load all the old assets
+        Map<BigInteger, Asset> assetMap = getERC721Assets(realm, token);
+
         deleteAssets(realm, dbKey);
 
         RealmToken realmToken = realm.where(RealmToken.class)
@@ -583,6 +587,8 @@ public class TokensRealmSource implements TokenLocalSource {
         //now create the assets inside this
         for (Asset asset : token.getTokenAssets().values())
         {
+            //check against existing assets; did the existing asset have better details?
+            asset.updateAsset(assetMap);
             writeAsset(realm, asset, token);
         }
     }
@@ -620,9 +626,9 @@ public class TokensRealmSource implements TokenLocalSource {
         realmAssets.deleteAllFromRealm();
     }
 
-    private List<Asset> getERC721Assets(Realm realm, Token token)
+    private Map<BigInteger, Asset> getERC721Assets(Realm realm, Token token)
     {
-        List<Asset> assets = new ArrayList<>();
+        Map<BigInteger, Asset> assets = new HashMap<>();
         AssetContract contract = new AssetContract(token);
 
         RealmResults<RealmERC721Asset> results = realm.where(RealmERC721Asset.class)
@@ -631,17 +637,24 @@ public class TokensRealmSource implements TokenLocalSource {
 
         for (RealmERC721Asset realmAsset : results)
         {
-            //grab all assets for this tokenId
-            Asset asset = new Asset(realmAsset.getTokenId(), contract);
-            asset.setBackgroundColor(realmAsset.getBackgroundColor());
-            asset.setDescription(realmAsset.getDescription());
-            asset.setExternalLink(realmAsset.getExternalLink());
-            asset.setImagePreviewUrl(realmAsset.getImagePreviewUrl());
-            asset.setImageOriginalUrl(realmAsset.getImageOriginalUrl());
-            asset.setImageThumbnailUrl(realmAsset.getImageThumbnailUrl());
-            asset.setTraits(realmAsset.getTraits());
-            asset.setName(realmAsset.getName());
-            assets.add(asset);
+            try
+            {
+                //grab all assets for this tokenId
+                Asset asset = new Asset(realmAsset.getTokenId(), contract);
+                asset.setBackgroundColor(realmAsset.getBackgroundColor());
+                asset.setDescription(realmAsset.getDescription());
+                asset.setExternalLink(realmAsset.getExternalLink());
+                asset.setImagePreviewUrl(realmAsset.getImagePreviewUrl());
+                asset.setImageOriginalUrl(realmAsset.getImageOriginalUrl());
+                asset.setImageThumbnailUrl(realmAsset.getImageThumbnailUrl());
+                asset.setTraits(realmAsset.getTraits());
+                asset.setName(realmAsset.getName());
+                assets.put(new BigInteger(realmAsset.getTokenId()), asset);
+            }
+            catch (NumberFormatException e)
+            {
+                // Just in case tokenId got corrupted
+            }
         }
 
         return assets;
@@ -1022,23 +1035,6 @@ public class TokensRealmSource implements TokenLocalSource {
         return "0";
     }
 
-    private Token[] convertMulti(RealmResults<RealmToken> realmItems, long now, Wallet wallet, Realm realm)
-    {
-        TokenFactory tf        = new TokenFactory();
-        List<Token>  tokenList = new ArrayList<>();
-        for (RealmToken realmItem : realmItems)
-        {
-            Token t = convertSingle(realmItem, realm, tf, wallet);
-
-            if (t != null)
-            {
-                tokenList.add(t);
-            }
-        }
-
-        return tokenList.toArray(new Token[0]);
-    }
-
     private Token convertSingle(RealmToken realmItem, Realm realm, TokenFactory tf, Wallet wallet)
     {
         if (realmItem == null) return null;
@@ -1051,9 +1047,11 @@ public class TokensRealmSource implements TokenLocalSource {
 
         if (result.isERC721()) //add erc721 assets
         {
-            List<Asset>  assets       = getERC721Assets(realm, result);
-            for (Asset asset : assets)
+            Map<BigInteger, Asset>  assets = getERC721Assets(realm, result);
+            for (Asset asset : assets.values())
+            {
                 result.addAssetToTokenBalanceAssets(asset);
+            }
         }
         return result;
     }

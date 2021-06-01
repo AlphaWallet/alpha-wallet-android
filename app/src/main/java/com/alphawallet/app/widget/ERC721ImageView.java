@@ -55,13 +55,25 @@ public class ERC721ImageView extends LinearLayout
         setAttrs(context, attrs);
     }
 
+    public void setupTokenImageThumbnail(Asset asset)
+    {
+        loadTokenImage(asset, asset.getPreviewImageUrl());
+    }
+
     public void setupTokenImage(Asset asset)
     {
-        image.setVisibility(View.VISIBLE);
+        loadTokenImage(asset, asset.getBestImageUrl());
+    }
+
+    private void loadTokenImage(Asset asset, String imageUrl)
+    {
         if (getContext() == null ||
                 (getContext() instanceof Activity && ((Activity)getContext()).isDestroyed())) return;
+
+        image.setVisibility(View.VISIBLE);
+
         Glide.with(getContext())
-                .load(asset.getBestImageUrl())
+                .load(imageUrl)
                 .listener(requestListener)
                 .into(image);
 

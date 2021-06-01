@@ -184,10 +184,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
             cooldown.setVisibility(View.GONE);
         }
 
-        if (!((Activity)getContext()).isDestroyed())
-        {
-            tokenImageView.setupTokenImage(asset);
-        }
+        tokenImageView.setupTokenImageThumbnail(asset);
     }
 
     private Asset getAsset(TicketRange data)

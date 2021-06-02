@@ -606,9 +606,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             token.removeBalance(tokenId.toString());
         }
 
+        if (token.getAddress().equalsIgnoreCase("0x00000D5B7AaBD11768CC14f8474e5B34f8D39F2B"))
+        {
+            System.out.println("YOLESS");
+        }
+
         for (BigInteger tokenId : additions)
         {
-            Asset asset = token.fetchTokenMetadata(tokenId);
+            Asset asset = token.getAssetForToken(tokenId.toString());// .fetchTokenMetadata(tokenId);
             if (asset == null || asset.requiresReplacement())
             {
                 token.addAssetToTokenBalanceAssets(Asset.blankLoading(tokenId));

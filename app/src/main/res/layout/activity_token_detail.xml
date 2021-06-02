@@ -31,7 +31,7 @@
                 android:id="@+id/layout_asset"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp">
+                android:padding="10dp">
 
                 <LinearLayout
                     android:id="@+id/layout_token_title"
@@ -41,8 +41,8 @@
                     android:layout_marginBottom="23dp"
                     android:layout_marginTop="13dp"
                     android:orientation="vertical"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:paddingLeft="25dp"
+                    android:paddingRight="25dp">
 
                     <TextView
                         android:id="@+id/title"
@@ -67,10 +67,10 @@
                     android:id="@+id/layout_image"
                     android:layout_below="@id/layout_token_title"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    custom:webview_height="300"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
+                    android:layout_height="350dp"
+                    custom:webview_height="350"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
                     android:gravity="center"/>
 
                 <LinearLayout

@@ -26,6 +26,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
@@ -212,10 +213,7 @@ public class TokensService
 
     private void storedToken(Token[] tokens)
     {
-        if (tokens.length > 0)
-        {
-            //token is stored
-        }
+
     }
 
     public TokenTicker getTokenTicker(Token token)
@@ -245,6 +243,7 @@ public class TokensService
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
             openSeaChecked = false;
+            IconItem.resetCheck();
             currentAddress = newWalletAddr.toLowerCase();
             tokenValueMap.clear();
             pendingChainMap.clear();

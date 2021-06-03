@@ -41,6 +41,8 @@ import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
 import com.alphawallet.app.widget.GasSliderView;
 
+import org.w3c.dom.Text;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -78,6 +80,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private BigInteger customGasPriceFromWidget;
     private GasWarningLayout gasWarning;
     private GasWarningLayout insufficientWarning;
+    private FrameLayout resendNote;
     private ScrollView scroll;
     private final Handler handler = new Handler();
     private long minGasPrice;
@@ -97,6 +100,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         recyclerView = findViewById(R.id.list);
         gasWarning = findViewById(R.id.gas_warning_bubble);
         insufficientWarning = findViewById(R.id.insufficient_bubble);
+        resendNote = findViewById(R.id.layout_resend_note);
         scroll = findViewById(R.id.setting_scroll);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -231,6 +235,17 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         if (customIndex < 0) return;
         updateCustomElement(gasPrice, gasLimit);
         adapter.notifyItemChanged(customIndex);
+    }
+
+    public void setupResend(boolean cancel)
+    {
+        TextView note = findViewById(R.id.text_resend_note);
+        //If user wishes to cancel transaction, otherwise default is speed it up.
+        if (cancel)
+        {
+            note.setText(R.string.text_cancel_gas_note);
+        }
+        resendNote.setVisibility(View.VISIBLE);
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>

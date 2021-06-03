@@ -100,6 +100,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             mode = ActionSheetMode.SEND_TRANSACTION;
         }
 
+
         signCallback = null;
 
         actionSheetCallback = aCallBack;
@@ -231,14 +232,23 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         amountDisplay.setVisibility(View.GONE);
     }
 
+<<<<<<< HEAD
     public void setupResendTransaction(boolean cancel)
     {
         gasWidget.setupResendSettings(cancel, candidateTransaction.gasPrice);
+=======
+    public void setupSpeedupTransaction(boolean cancel)
+    {
+>>>>>>> 5cc209b06 (updated ActionSheetDialog for speeding up and cancelling transactions)
         balanceDisplay.setVisibility(View.GONE);
         addressDetail.setVisibility(View.GONE);
         detailWidget.setVisibility(View.GONE);
         amountDisplay.setVisibility(View.GONE);
+<<<<<<< HEAD
 
+=======
+        gasWidget.setupResend(cancel);
+>>>>>>> 5cc209b06 (updated ActionSheetDialog for speeding up and cancelling transactions)
     }
 
     @Override

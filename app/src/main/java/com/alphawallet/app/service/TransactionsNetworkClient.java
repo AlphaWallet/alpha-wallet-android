@@ -52,12 +52,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
+    public static final int TRANSFER_RESULT_MAX = 100;
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 10; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 11; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -406,7 +407,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
                     //now re-read last blocks from DB
                     txList = fetchOlderThan(walletAddress, lastTxTime, network.chainId);
-
                 }
                 catch (Exception e)
                 {
@@ -436,9 +436,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
                 //get last tokencheck
-                long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, nftCheck);
+                long pageRead = getTokenBlockRead(instance, networkInfo.chainId, nftCheck);
                 //fetch transfers from end point
-                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, nftCheck ? ERC721_QUERY : ERC20_QUERY);
+                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, pageRead, nftCheck ? ERC721_QUERY : ERC20_QUERY);
 
                 if (fetchTransactions != null && fetchTransactions.length() > 100)
                 {
@@ -451,11 +451,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     //we know all these events are relevant to the wallet, and they are all ERC20 events
                     writeEvents(instance, events, walletAddress, networkInfo, svs, nftCheck);
 
-                    lastBlockChecked = Long.parseLong(events[events.length - 1].blockNumber);
-
                     //and update the top block read
-                    writeTokenBlockRead(instance, networkInfo.chainId, lastBlockChecked, nftCheck);
                     eventCount = events.length;
+
+                    if (eventCount == TRANSFER_RESULT_MAX) //move to next page
+                    {
+                        writeTokenBlockRead(instance, networkInfo.chainId, pageRead + 1, nftCheck);
+                    }
                 }
             }
             catch (Exception e)
@@ -578,11 +580,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         List<BigInteger> additions = new ArrayList<>();
         List<BigInteger> removals = new ArrayList<>();
 
-        /*if (newToken)
-        {
-            svs.storeToken(token);
-        }*/
-
         for (EtherscanEvent ev : eventMap.get(contractAddress))
         {
             BigInteger tokenId = getTokenId(ev.tokenID);
@@ -609,17 +606,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         svs.updateAssets(token, additions, removals);
     }
 
-    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long lastBlockChecked, String queryType)
+    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentPage, String queryType)
     {
-        if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, lastBlockChecked, queryType); }
+        if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentPage, queryType); }
         okhttp3.Response response;
         String result = null;
 
         String APIKEY_TOKEN = networkInfo.etherscanTxUrl.contains("etherscan") ? ETHERSCAN_API_KEY : "";
         String fullUrl = networkInfo.etherscanTxUrl + "module=account&action=" + queryType +
-                "&startBlock=" + String.valueOf(lastBlockChecked + 1) +
+                "&startBlock=1&endBlock=9999999999" +
                 "&address=" + walletAddress +
-                "&page=1&offset=" + TransactionsService.TRANSFER_RESULT_MAX +
+                "&page=" + currentPage + "&offset=" + TRANSFER_RESULT_MAX +
                 "&sort=asc" + APIKEY_TOKEN;
 
         try

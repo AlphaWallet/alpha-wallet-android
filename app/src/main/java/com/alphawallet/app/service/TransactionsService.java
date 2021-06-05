@@ -35,13 +35,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RESULT_MAX;
+
 /**
  * Created by JB on 8/07/2020.
  */
 public class TransactionsService
 {
-    public static final int TRANSFER_RESULT_MAX = 150;
-
     private static final String NO_TRANSACTION_EXCEPTION = "NoSuchElementException";
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;

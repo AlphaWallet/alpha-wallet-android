@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CovalentTransaction;
 import com.alphawallet.app.entity.EtherscanEvent;
@@ -397,7 +398,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     long oldestBlockRead = getOldestBlockRead(instance, network.chainId, oldestTxTime);
                     long oldestPossibleBlock = getFirstTransactionBlock(instance, network.chainId, walletAddress);
-                    System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
+                    if (BuildConfig.DEBUG) System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
                     {
                         syncDownwards(null, instance, walletAddress, network, walletAddress, oldestBlockRead);
@@ -547,7 +548,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             if (token.isERC721())
             {
-                writeAssets(eventMap, token, walletAddress, contract, networkInfo, svs, newToken);
+                writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
             }
             else //not ERC721
             {
@@ -572,15 +573,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     }
 
     private void writeAssets(Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
-                             String contractAddress, NetworkInfo networkInfo, TokensService svs, boolean newToken)
+                             String contractAddress, TokensService svs, boolean newToken)
     {
         List<BigInteger> additions = new ArrayList<>();
         List<BigInteger> removals = new ArrayList<>();
 
-        if (newToken)
+        /*if (newToken)
         {
             svs.storeToken(token);
-        }
+        }*/
 
         for (EtherscanEvent ev : eventMap.get(contractAddress))
         {
@@ -600,27 +601,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
         }
 
-        //populate tokens
-        for (BigInteger tokenId : removals)
+        if (additions.size() > 0 && newToken)
         {
-            token.removeBalance(tokenId.toString());
+            token.setInterfaceSpec(ContractType.ERC721);
         }
 
-        if (token.getAddress().equalsIgnoreCase("0x00000D5B7AaBD11768CC14f8474e5B34f8D39F2B"))
-        {
-            System.out.println("YOLESS");
-        }
-
-        for (BigInteger tokenId : additions)
-        {
-            Asset asset = token.getAssetForToken(tokenId.toString());// .fetchTokenMetadata(tokenId);
-            if (asset == null || asset.requiresReplacement())
-            {
-                token.addAssetToTokenBalanceAssets(Asset.blankLoading(tokenId));
-            }
-        }
-
-        svs.storeAssets(token);
+        svs.updateAssets(token, additions, removals);
     }
 
     private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long lastBlockChecked, String queryType)
@@ -949,7 +935,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else
         {
-            System.out.println("Prevented collision: " + tokenAddress);
+            if (BuildConfig.DEBUG) System.out.println("Prevented collision: " + tokenAddress);
         }
     }
 
@@ -1015,7 +1001,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private ERC721Token createNewERC721Token(EtherscanEvent ev, NetworkInfo networkInfo, String walletAddress, boolean knownERC721)
     {
         TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, 0, false, networkInfo.chainId);
-        ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), knownERC721 ? ContractType.ERC721 : ContractType.ERC721_UNDETERMINED);
+        ERC721Token newToken = new ERC721Token(info, null, BigDecimal.ZERO, 0, networkInfo.getShortName(), knownERC721 ? ContractType.ERC721 : ContractType.ERC721_UNDETERMINED);
         newToken.setTokenWallet(walletAddress);
         return newToken;
     }

@@ -30,6 +30,7 @@ import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -240,9 +241,9 @@ public class TokensService
 
     public void setCurrentAddress(String newWalletAddr)
     {
+        openSeaChecked = false;
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
-            openSeaChecked = false;
             IconItem.resetCheck();
             currentAddress = newWalletAddr.toLowerCase();
             tokenValueMap.clear();
@@ -502,6 +503,7 @@ public class TokensService
             openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                     .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
                     .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
+                    .map(tokens -> tokenRepository.initERC721Assets(wallet, tokens))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(t -> checkNextOpenseaNetwork(networkId),
@@ -817,9 +819,9 @@ public class TokensService
         return token;
     }
 
-    public void storeAssets(Token token)
+    public void updateAssets(Token token, List<BigInteger> additions, List<BigInteger> removals)
     {
-        tokenRepository.updateAssets(currentAddress, token);
+        tokenRepository.updateAssets(currentAddress, token, additions, removals);
     }
 
     public void storeAsset(Token token, Asset asset)

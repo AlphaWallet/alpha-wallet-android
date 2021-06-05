@@ -1,8 +1,11 @@
 package com.alphawallet.app.entity.tokens;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.util.Utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -36,7 +39,7 @@ public class TokenFactory
                 {
                     tokenInfo = new TokenInfo(tokenInfo.address, tokenInfo.name, tokenInfo.symbol, 0, tokenInfo.isEnabled, tokenInfo.chainId);
                 }
-                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), updateBlancaTime, networkName, type);
+                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), balance, updateBlancaTime, networkName, type);
                 if (balance.compareTo(BigDecimal.ZERO) >=0)
                 {
                     thisToken.balance = balance;
@@ -72,52 +75,54 @@ public class TokenFactory
 
         ContractType type = ContractType.values()[typeOrdinal];
         String realmBalance = realmItem.getBalance();
+        BigDecimal decimalBalance;
+        if (TextUtils.isEmpty(realmBalance)) realmBalance = "0";
+        if (Utils.isNumeric(realmBalance))
+        {
+            decimalBalance = new BigDecimal(realmBalance);
+        }
+        else
+        {
+            decimalBalance = BigDecimal.ZERO;
+        }
 
         switch (type)
         {
             case ETHEREUM_INVISIBLE:
                 tokenInfo.isEnabled = false;
-                if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
-                BigDecimal balance = new BigDecimal(realmBalance);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
-                thisToken.pendingBalance = balance;
+                thisToken = new Token(tokenInfo, decimalBalance, updateBlancaTime, networkName, type);
+                thisToken.pendingBalance = decimalBalance;
                 break;
             case ETHEREUM:
                 tokenInfo.isEnabled = true; //native eth always enabled
             case ERC20:
             case DYNAMIC_CONTRACT:
-                if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
-                balance = new BigDecimal(realmBalance);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
-                thisToken.pendingBalance = balance;
+                thisToken = new Token(tokenInfo, decimalBalance, updateBlancaTime, networkName, type);
+                thisToken.pendingBalance = decimalBalance;
                 break;
             case ERC721_TICKET:
-                if (realmBalance == null) realmBalance = "";
+                if (realmBalance.equals("0")) realmBalance = "";
                 thisToken = new ERC721Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
                 break;
             case ERC875:
             case ERC875_LEGACY:
-                if (realmBalance == null) realmBalance = "";
+                if (realmBalance.equals("0")) realmBalance = "";
                 thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
                 break;
 
             case CURRENCY:
-                if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
-                balance = new BigDecimal(realmBalance);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, ContractType.ETHEREUM);
-                thisToken.pendingBalance = balance;
+                thisToken = new Token(tokenInfo, decimalBalance, updateBlancaTime, networkName, ContractType.ETHEREUM);
+                thisToken.pendingBalance = decimalBalance;
                 break;
 
             case ERC721:
             case ERC721_LEGACY:
-                if (realmBalance == null) realmBalance = "";
-                thisToken = new ERC721Token(tokenInfo, null, updateBlancaTime, networkName, type);
+                thisToken = new ERC721Token(tokenInfo, null, decimalBalance, updateBlancaTime, networkName, type);
                 break;
 
             case OTHER:
             default:
-                balance = new BigDecimal(0);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
+                thisToken = new Token(tokenInfo, BigDecimal.ZERO, updateBlancaTime, networkName, type);
                 break;
 
         }
@@ -143,7 +148,7 @@ public class TokenFactory
             case ERC721:
             case ERC721_LEGACY:
             case ERC721_UNDETERMINED:
-                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), currentTime, networkName, type);
+                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), BigDecimal.ZERO, currentTime, networkName, type);
                 break;
             case ETHEREUM:
                 String[] split = tokenInfo.address.split("-");

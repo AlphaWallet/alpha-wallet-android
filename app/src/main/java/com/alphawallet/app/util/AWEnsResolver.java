@@ -4,6 +4,7 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.Wallet;
@@ -132,7 +133,7 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() -> {
-            System.out.println("Verify: " + ensName);
+            if (BuildConfig.DEBUG) System.out.println("Verify: " + ensName);
             String address = "";
             if (!isValidEnsName(ensName)) return "";
             try

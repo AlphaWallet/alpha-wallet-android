@@ -113,9 +113,9 @@ public class OpenseaService {
                     ContractType type;
                     long lastCheckTime = 0;
                     Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
-                    assetList.put(asset.getAssetContract().getAddress(), checkToken.getTokenAssets());
                     if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
                     {
+                        assetList.put(asset.getAssetContract().getAddress(), checkToken.getTokenAssets());
                         tInfo = checkToken.tokenInfo;
                         type = checkToken.getInterfaceSpec();
                         lastCheckTime = checkToken.lastTxTime;

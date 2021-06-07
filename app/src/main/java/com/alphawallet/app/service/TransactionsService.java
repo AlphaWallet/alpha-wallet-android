@@ -36,6 +36,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RESULT_MAX;
+import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RESULT_STEP;
 
 /**
  * Created by JB on 8/07/2020.
@@ -43,6 +44,7 @@ import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RES
 public class TransactionsService
 {
     private static final String NO_TRANSACTION_EXCEPTION = "NoSuchElementException";
+    private static final String TAG = "TRANSACTION";
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
@@ -133,7 +135,7 @@ public class TransactionsService
                 (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
 
-        if (readTokenMoves(filters.get(currentChainIndex), nftCheck) && !nftCheck) //check NFTs for same chain on next iteration or advance to next chain
+        if (readTokenMoves(filters.get(currentChainIndex), nftCheck, false) && !nftCheck) //check NFTs for same chain on next iteration or advance to next chain
         {
             nftCheck = true;
         }
@@ -144,32 +146,35 @@ public class TransactionsService
         }
     }
 
-    private boolean readTokenMoves(int chainId, boolean isNFT)
+    private boolean readTokenMoves(int chainId, boolean isNFT, boolean largeCheck)
     {
         //check if this route has combined NFT
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
+        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT, largeCheck)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(count, chainId, isNFT), this::gotReadErr);
+                .subscribe(count -> handleMoveCheck(count, chainId, isNFT, largeCheck), this::gotReadErr);
 
         return info.usesSeparateNFTTransferQuery();
     }
 
     private void gotReadErr(Throwable e)
     {
-        e.printStackTrace();
+        eventFetch = null;
+        if (BuildConfig.DEBUG) e.printStackTrace();
     }
 
-    private void handleMoveCheck(int count, int chainId, boolean isNFT)
+    private void handleMoveCheck(int count, int chainId, boolean isNFT, boolean largeCheck)
     {
-        if (count == TRANSFER_RESULT_MAX)
+        if ((!largeCheck && count == TRANSFER_RESULT_STEP) || (largeCheck && count == TRANSFER_RESULT_MAX))
         {
             //there's more moves to fetch
-            currentChainIndex = chainId;
-            nftCheck = isNFT;
+            readTokenMoves(chainId, isNFT, true);
         }
-        eventFetch = null;
+        else
+        {
+            eventFetch = null;
+        }
     }
 
     private void checkTransactionQueue()
@@ -183,7 +188,7 @@ public class TransactionsService
             {
                 String tick = (t.isEthereum() && getPendingChains().contains(t.tokenInfo.chainId)) ? "*" : "";
                 if (t.isEthereum() && BuildConfig.DEBUG)
-                    Log.d("TRANSACTION","Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
+                    Log.d(TAG,"Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
                         transactionsClient.storeNewTransactions(tokensService.getCurrentAddress(), network, t.getAddress(), t.lastBlockCheck)
@@ -235,7 +240,7 @@ public class TransactionsService
         fetchTransactionDisposable = null;
         if (transactions.length == 0) return;
 
-        if (BuildConfig.DEBUG) Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
+        if (BuildConfig.DEBUG) Log.d(TAG, "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
         //should we only check here for chain moves?
 
@@ -301,7 +306,7 @@ public class TransactionsService
 
     public void markPending(Transaction tx)
     {
-        if (BuildConfig.DEBUG) Log.d("TRANSACTION","Marked Pending Tx Chain: " + tx.chainId);
+        if (BuildConfig.DEBUG) Log.d(TAG,"Marked Pending Tx Chain: " + tx.chainId);
         tokensService.markChainPending(tx.chainId);
     }
 
@@ -309,7 +314,7 @@ public class TransactionsService
     {
         final String currentWallet = tokensService.getCurrentAddress();
         Transaction[] pendingTxs = fetchPendingTransactions();
-        if (BuildConfig.DEBUG) Log.d("TRANSACTION", "Checking " + pendingTxs.length + " Transactions");
+        if (BuildConfig.DEBUG) Log.d(TAG, "Checking " + pendingTxs.length + " Transactions");
         for (final Transaction tx : pendingTxs)
         {
             Web3j web3j = TokenRepository.getWeb3jService(tx.chainId);
@@ -378,8 +383,8 @@ public class TransactionsService
                 case TRANSFER_FROM:
                 case RECEIVED:
                 case SEND:
-                    if (BuildConfig.DEBUG) Log.d("TRANSACTION", "Checking Token moves for " + t.getFullName());
-                    readTokenMoves(transaction.chainId, t.isERC721());
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Checking Token moves for " + t.getFullName());
+                    readTokenMoves(transaction.chainId, t.isERC721(), false);
                 default:
                     break;
             }

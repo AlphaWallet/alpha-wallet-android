@@ -13,7 +13,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -52,13 +51,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
-    public static final int TRANSFER_RESULT_MAX = 100;
+    public static final int TRANSFER_RESULT_STEP = 5;
+    public static final int TRANSFER_RESULT_MAX = 200; //check 200 records when we first get a new account
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 11; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 12; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -357,7 +357,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 response = httpClient.newCall(request).execute();
 
                 result = response.body().string();
-                if (result != null && result.length() < 80 && result.contains("No transactions found"))
+                if (result.length() < 80 && result.contains("No transactions found"))
                 {
                     result = "0";
                 }
@@ -427,7 +427,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @return
      */
     @Override
-    public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
+    public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck, boolean lCheck)
     {
         final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
         return Single.fromCallable(() -> {
@@ -436,9 +436,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
                 //get last tokencheck
-                long pageRead = getTokenBlockRead(instance, networkInfo.chainId, nftCheck);
+                long incrementalRead = getTokenBlockRead(instance, networkInfo.chainId, nftCheck);
+                long pageRead = lCheck ? ((incrementalRead * TRANSFER_RESULT_STEP) / TRANSFER_RESULT_MAX) + 1 : incrementalRead; //Calc page read based on increased page size
+                boolean largeCheck = lCheck || pageRead == 1;
                 //fetch transfers from end point
-                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, pageRead, nftCheck ? ERC721_QUERY : ERC20_QUERY);
+                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, pageRead, nftCheck ? ERC721_QUERY : ERC20_QUERY, largeCheck);
 
                 if (fetchTransactions != null && fetchTransactions.length() > 100)
                 {
@@ -454,9 +456,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     //and update the top block read
                     eventCount = events.length;
 
-                    if (eventCount == TRANSFER_RESULT_MAX) //move to next page
+                    long nextPageRead = incrementalRead + (eventCount / TRANSFER_RESULT_STEP); //next read will be in this page. Eg if TX_MAX = 5 and we read 5 events
+
+                    if (nextPageRead > pageRead) //move to next page
                     {
-                        writeTokenBlockRead(instance, networkInfo.chainId, pageRead + 1, nftCheck);
+                        writeTokenBlockRead(instance, networkInfo.chainId, nextPageRead, nftCheck);
                     }
                 }
             }
@@ -606,17 +610,19 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         svs.updateAssets(token, additions, removals);
     }
 
-    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentPage, String queryType)
+    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentPage, String queryType, boolean largeCheck)
     {
         if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentPage, queryType); }
         okhttp3.Response response;
         String result = null;
+        int resultSize = largeCheck ? TRANSFER_RESULT_MAX : TRANSFER_RESULT_STEP; //is this a big (catchup) or small (maintain) check
 
         String APIKEY_TOKEN = networkInfo.etherscanTxUrl.contains("etherscan") ? ETHERSCAN_API_KEY : "";
         String fullUrl = networkInfo.etherscanTxUrl + "module=account&action=" + queryType +
                 "&startBlock=1&endBlock=9999999999" +
                 "&address=" + walletAddress +
-                "&page=" + currentPage + "&offset=" + TRANSFER_RESULT_MAX +
+                "&page=" + currentPage +
+                "&offset=" + resultSize +
                 "&sort=asc" + APIKEY_TOKEN;
 
         try

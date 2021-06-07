@@ -500,7 +500,8 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             for (Token t : tokens)
             {
-                if (t.isERC721()) t.balance = checkUint256Balance(wallet, t.tokenInfo.chainId, t.getAddress());
+                //get balance of any token here
+                if (t.isERC721() || t.isERC20()) t.balance = checkUint256Balance(wallet, t.tokenInfo.chainId, t.getAddress());
             }
             return tokens;
         });

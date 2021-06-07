@@ -9,6 +9,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
 
@@ -44,6 +46,27 @@ public class WalletConnectService extends Service
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         Log.d(TAG, "SERVICE STARTING");
+        try
+        {
+            int actionVal = Integer.parseInt(intent.getAction());
+            WalletConnectActions action = WalletConnectActions.values()[actionVal];
+
+            switch (action)
+            {
+                case CONNECT:
+                    Log.d(TAG, "SERVICE CONNECT");
+                    break;
+                case DISCONNECT:
+                    Log.d(TAG, "SERVICE DISCONNECT");
+                    //kill any active connection
+                    disconnectCurrentSessions();
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
         return START_STICKY;
     }
 
@@ -73,6 +96,17 @@ public class WalletConnectService extends Service
     public WCRequest getCurrentRequest()
     {
         return currentRequest;
+    }
+
+    private void disconnectCurrentSessions()
+    {
+        for (WCClient client : clientMap.values())
+        {
+            if (client.isConnected())
+            {
+                client.killSession();
+            }
+        }
     }
 
     public class LocalBinder extends Binder

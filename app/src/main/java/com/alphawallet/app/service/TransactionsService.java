@@ -36,7 +36,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RESULT_MAX;
-import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RESULT_STEP;
 
 /**
  * Created by JB on 8/07/2020.
@@ -135,7 +134,7 @@ public class TransactionsService
                 (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
 
-        if (readTokenMoves(filters.get(currentChainIndex), nftCheck, false) && !nftCheck) //check NFTs for same chain on next iteration or advance to next chain
+        if (readTokenMoves(filters.get(currentChainIndex), nftCheck) && !nftCheck) //check NFTs for same chain on next iteration or advance to next chain
         {
             nftCheck = true;
         }
@@ -146,14 +145,14 @@ public class TransactionsService
         }
     }
 
-    private boolean readTokenMoves(int chainId, boolean isNFT, boolean largeCheck)
+    private boolean readTokenMoves(int chainId, boolean isNFT)
     {
         //check if this route has combined NFT
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT, largeCheck)
+        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(count, chainId, isNFT, largeCheck), this::gotReadErr);
+                .subscribe(count -> handleMoveCheck(count, chainId, isNFT), this::gotReadErr);
 
         return info.usesSeparateNFTTransferQuery();
     }
@@ -164,12 +163,12 @@ public class TransactionsService
         if (BuildConfig.DEBUG) e.printStackTrace();
     }
 
-    private void handleMoveCheck(int count, int chainId, boolean isNFT, boolean largeCheck)
+    private void handleMoveCheck(int count, int chainId, boolean isNFT)
     {
-        if ((!largeCheck && count == TRANSFER_RESULT_STEP) || (largeCheck && count == TRANSFER_RESULT_MAX))
+        if (count == TRANSFER_RESULT_MAX)
         {
             //there's more moves to fetch
-            readTokenMoves(chainId, isNFT, true);
+            readTokenMoves(chainId, isNFT);
         }
         else
         {
@@ -384,7 +383,7 @@ public class TransactionsService
                 case RECEIVED:
                 case SEND:
                     if (BuildConfig.DEBUG) Log.d(TAG, "Checking Token moves for " + t.getFullName());
-                    readTokenMoves(transaction.chainId, t.isERC721(), false);
+                    readTokenMoves(transaction.chainId, t.isERC721());
                 default:
                     break;
             }

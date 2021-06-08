@@ -11,30 +11,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
-    private ArrayList<NetworkItem> networkList;
-    private boolean hasSelection;
+    private final ArrayList<NetworkItem> networkList;
 
     public MultiSelectNetworkAdapter(ArrayList<NetworkItem> selectedNetworks)
     {
         networkList = selectedNetworks;
-
-        for (NetworkItem item : selectedNetworks)
-        {
-            // Permanently select Ethereum (when on main net)
-            if (CustomViewSettings.isPrimaryNetwork(item))
-            {
-                item.setSelected(true);
-                hasSelection = true;
-                break;
-            }
-        }
     }
 
     public Integer[] getSelectedItems()
@@ -76,23 +63,12 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.checkbox.setSelected(item.isSelected());
-
-            if (networkList.get(position).getName().equals(CustomViewSettings.primaryNetworkName()))
-            {
-                holder.checkbox.setAlpha(0.5f);
-            } else
-            {
-                holder.checkbox.setAlpha(1.0f);
-            }
         }
     }
 
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)
     {
-        if (!networkList.get(position).getName().equals(CustomViewSettings.primaryNetworkName()))
-        {
-            networkList.get(position).setSelected(!networkList.get(position).isSelected());
-        }
+        networkList.get(position).setSelected(!networkList.get(position).isSelected());
         holder.checkbox.setSelected(networkList.get(position).isSelected());
     }
 

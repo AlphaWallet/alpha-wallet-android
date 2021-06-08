@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CovalentTransaction;
 import com.alphawallet.app.entity.EtherscanEvent;
@@ -12,7 +13,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -51,12 +51,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
+    public static final int TRANSFER_RESULT_MAX = 200; //check 200 records when we first get a new account
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 10; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 12; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -355,7 +356,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 response = httpClient.newCall(request).execute();
 
                 result = response.body().string();
-                if (result != null && result.length() < 80 && result.contains("No transactions found"))
+                if (result.length() < 80 && result.contains("No transactions found"))
                 {
                     result = "0";
                 }
@@ -397,7 +398,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     long oldestBlockRead = getOldestBlockRead(instance, network.chainId, oldestTxTime);
                     long oldestPossibleBlock = getFirstTransactionBlock(instance, network.chainId, walletAddress);
-                    System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
+                    if (BuildConfig.DEBUG) System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
                     {
                         syncDownwards(null, instance, walletAddress, network, walletAddress, oldestBlockRead);
@@ -405,7 +406,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
                     //now re-read last blocks from DB
                     txList = fetchOlderThan(walletAddress, lastTxTime, network.chainId);
-
                 }
                 catch (Exception e)
                 {
@@ -450,10 +450,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     //we know all these events are relevant to the wallet, and they are all ERC20 events
                     writeEvents(instance, events, walletAddress, networkInfo, svs, nftCheck);
 
-                    lastBlockChecked = Long.parseLong(events[events.length - 1].blockNumber);
-
                     //and update the top block read
-                    writeTokenBlockRead(instance, networkInfo.chainId, lastBlockChecked, nftCheck);
+                    lastBlockChecked = Long.parseLong(events[events.length - 1].blockNumber);
+                    writeTokenBlockRead(instance, networkInfo.chainId, lastBlockChecked + 1, nftCheck);
+
                     eventCount = events.length;
                 }
             }
@@ -547,7 +547,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             if (token.isERC721())
             {
-                writeAssets(eventMap, token, walletAddress, contract, networkInfo, svs, newToken);
+                writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
             }
             else //not ERC721
             {
@@ -572,15 +572,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     }
 
     private void writeAssets(Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
-                             String contractAddress, NetworkInfo networkInfo, TokensService svs, boolean newToken)
+                             String contractAddress, TokensService svs, boolean newToken)
     {
         List<BigInteger> additions = new ArrayList<>();
         List<BigInteger> removals = new ArrayList<>();
-
-        if (newToken)
-        {
-            svs.storeToken(token);
-        }
 
         for (EtherscanEvent ev : eventMap.get(contractAddress))
         {
@@ -600,35 +595,26 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
         }
 
-        //populate tokens
-        for (BigInteger tokenId : removals)
+        if (additions.size() > 0 && newToken)
         {
-            token.removeBalance(tokenId.toString());
+            token.setInterfaceSpec(ContractType.ERC721);
         }
 
-        for (BigInteger tokenId : additions)
-        {
-            Asset asset = token.fetchTokenMetadata(tokenId);
-            if (asset == null || asset.requiresReplacement())
-            {
-                token.addAssetToTokenBalanceAssets(Asset.blankLoading(tokenId));
-            }
-        }
-
-        svs.storeAssets(token);
+        svs.updateAssets(token, additions, removals);
     }
 
-    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long lastBlockChecked, String queryType)
+    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)
     {
-        if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, lastBlockChecked, queryType); }
+        if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
         okhttp3.Response response;
-        String result = null;
+        String result = "0";
+        if (currentBlock == 0) currentBlock = 1;
 
         String APIKEY_TOKEN = networkInfo.etherscanTxUrl.contains("etherscan") ? ETHERSCAN_API_KEY : "";
         String fullUrl = networkInfo.etherscanTxUrl + "module=account&action=" + queryType +
-                "&startBlock=" + String.valueOf(lastBlockChecked + 1) +
+                "&startblock=" + currentBlock + "&endblock=9999999999" +
                 "&address=" + walletAddress +
-                "&page=1&offset=" + TransactionsService.TRANSFER_RESULT_MAX +
+                "&page=1&offset=" + TRANSFER_RESULT_MAX +
                 "&sort=asc" + APIKEY_TOKEN;
 
         try
@@ -641,7 +627,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             response = httpClient.newCall(request).execute();
 
             result = response.body().string();
-            if (result != null && result.length() < 80 && result.contains("No transactions found"))
+            if (result.length() < 80 && result.contains("No transactions found"))
             {
                 result = "0";
             }
@@ -712,7 +698,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         if (rd == null)
         {
-            return 1L;
+            return 0L;
         }
         else
         {
@@ -722,7 +708,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private void writeTokenBlockRead(Realm instance, int chainId, long lastBlockChecked, boolean isNFT)
     {
-        instance.executeTransactionAsync(r -> {
+        instance.executeTransaction(r -> {
             RealmAuxData rd = r.where(RealmAuxData.class)
                     .equalTo("instanceKey", BLOCK_ENTRY + chainId)
                     .findFirst();
@@ -944,7 +930,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else
         {
-            System.out.println("Prevented collision: " + tokenAddress);
+            if (BuildConfig.DEBUG) System.out.println("Prevented collision: " + tokenAddress);
         }
     }
 
@@ -1010,7 +996,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private ERC721Token createNewERC721Token(EtherscanEvent ev, NetworkInfo networkInfo, String walletAddress, boolean knownERC721)
     {
         TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, 0, false, networkInfo.chainId);
-        ERC721Token newToken = new ERC721Token(info, null, 0, networkInfo.getShortName(), knownERC721 ? ContractType.ERC721 : ContractType.ERC721_UNDETERMINED);
+        ERC721Token newToken = new ERC721Token(info, null, BigDecimal.ZERO, 0, networkInfo.getShortName(), knownERC721 ? ContractType.ERC721 : ContractType.ERC721_UNDETERMINED);
         newToken.setTokenWallet(walletAddress);
         return newToken;
     }

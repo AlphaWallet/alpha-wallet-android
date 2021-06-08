@@ -1408,7 +1408,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            System.out.println("Recovered: " + addressRecovered);
+            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {

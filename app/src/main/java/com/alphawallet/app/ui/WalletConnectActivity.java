@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -273,7 +274,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
         this.qrCode = wcCode;
         session = WCSession.Companion.from(qrCode);
-        System.out.println("WCClient: " + qrCode);
+        if (BuildConfig.DEBUG) System.out.println("WCClient: " + qrCode);
     }
 
     private void initViewModel()
@@ -359,7 +360,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     WCRequest rq = viewModel.getCurrentRequest();
                     if (rq != null && rq.id == requestId)
                     {
-                        System.out.println("WC: " + rq.sessionId);
+                        if (BuildConfig.DEBUG) System.out.println("WC: " + rq.sessionId);
                         actionMessage(rq);
                     }
                 }

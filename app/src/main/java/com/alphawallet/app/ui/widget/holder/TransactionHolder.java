@@ -195,8 +195,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
-            long fetchTxCompletionTime = transactionsInteract.fetchTxCompletionTime(defaultAddress, transaction.hash);
-            tokenIcon.startPendingSpinner(transaction.timeStamp, fetchTxCompletionTime/1000);
             chainName.setVisibility(View.GONE);
         }
         else if (transactionBackground != null)

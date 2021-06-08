@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.EtherscanTransaction;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -336,7 +337,7 @@ public class TickerService
 
     private void checkTickers(int tickerSize)
     {
-        System.out.println("Tickers received: " + tickerSize);
+        if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
         localSource.updateEthTickers(ethTickers);
         localSource.updateERC20Tickers(erc20Tickers);

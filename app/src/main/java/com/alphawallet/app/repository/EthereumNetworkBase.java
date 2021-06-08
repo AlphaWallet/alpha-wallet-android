@@ -129,7 +129,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MAINNET_ID, new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
                     "https://cn.etherscan.com/tx/", MAINNET_ID,
-                    MAINNET_FALLBACK_RPC_URL, "https://api-cn.etherscan.com/"));
+                    MAINNET_FALLBACK_RPC_URL, "https://api-cn.etherscan.com/api?"));
             put(CLASSIC_ID, new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
                     "https://blockscout.com/etc/mainnet/tx/", CLASSIC_ID, CLASSIC_RPC_URL,

@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.tools.Numeric;
@@ -57,8 +58,8 @@ public class ERC721Token extends Token implements Parcelable
     private final Map<BigInteger, Asset> tokenBalanceAssets;
     private static OkHttpClient client;
 
-    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, Asset> balanceList, long blancaTime, String networkName, ContractType type) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
+    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, Asset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type) {
+        super(tokenInfo, balance, blancaTime, networkName, type);
         if (balanceList != null)
         {
             tokenBalanceAssets = balanceList;
@@ -134,8 +135,10 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String getStringBalance() {
-        return String.valueOf(tokenBalanceAssets.size());
+    public String getStringBalance()
+    {
+        if (balance.compareTo(BigDecimal.ZERO) > 0) { return balance.toString(); }
+        else { return "0"; }
     }
 
     @Override
@@ -179,7 +182,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getFullBalance()
     {
-        return String.valueOf(tokenBalanceAssets.size());
+        return balance.toString();
     }
 
     @Override
@@ -202,7 +205,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(getFullBalance());
+        realmToken.setBalance(balance.toString());
     }
 
     public boolean isERC721() { return true; }
@@ -256,7 +259,7 @@ public class ERC721Token extends Token implements Parcelable
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
         if (lastTxTime > realmToken.getLastTxTime()) return true;
-        if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
+        if (!currentState.equals(balance.toString())) return true;
         //check balances
         for (Asset a : tokenBalanceAssets.values())
         {
@@ -360,7 +363,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public BigDecimal getBalanceRaw()
     {
-        return new BigDecimal(tokenBalanceAssets.size());
+        return balance;
     }
 
     private BigInteger parseTokenId(String tokenIdStr)

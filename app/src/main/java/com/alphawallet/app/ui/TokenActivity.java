@@ -261,7 +261,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             //listen for token completion
             setupPendingListener(wallet);
             pendingStart = transaction.timeStamp;
-            icon.startPendingSpinner(transaction.timeStamp, viewModel.fetchExpectedTxTime(transactionHash)/1000);
         }
 
         String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), viewModel.getTokensService().getNetworkName(token.tokenInfo.chainId));

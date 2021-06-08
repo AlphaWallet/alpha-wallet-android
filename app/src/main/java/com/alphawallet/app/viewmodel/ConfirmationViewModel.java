@@ -271,13 +271,8 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void showMoreDetails(Activity ctx, String toAddress, int chainId)
     {
-        Uri etherscanLink = Uri.parse(EthereumNetworkRepository.getEtherscanURLbyNetwork(chainId))
-                .buildUpon()
-                .appendEncodedPath("address")
-                .appendEncodedPath(toAddress)
-                .build();
-
-        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, etherscanLink);
+        NetworkInfo networkInfo = findDefaultNetworkInteract.getNetworkInfo(chainId);
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, networkInfo.getEtherscanAddressUri(toAddress));
         ctx.startActivity(launchBrowser);
     }
 

@@ -30,7 +30,7 @@
     <string name="no_tokens">Pas de tokens trouvés.</string>
 
     <!-- Titles -->
-    <string name="title_my_adresse">Mon adresse</string>
+    <string name="title_my_address">Mon adresse</string>
     <string name="title_activity_send">Envoyer</string>
     <string name="title_activity_confirmation">Confirmer</string>
     <string name="title_transaction_details">Details de la Transaction</string>
@@ -44,7 +44,7 @@
     <!-- Dialog messages-->
     <string name="toast_message_wallet_imported">Ce portefeuille a été importé</string>
     <string name="toast_message_wallet_exported">Une sauvegarde a été crée</string>
-    <string name="toast_qr_code_no_adresse">Le code QR ne contient pas d\'adresse valide</string>
+    <string name="toast_qr_code_no_address">Le code QR ne contient pas d\'adresse valide</string>
 
     <!-- Labels -->
     <string name="label_from">De</string>
@@ -78,10 +78,9 @@
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly (Acheter avec une carte de crédit)</string>
-    <!-- Subject -->
     <string name="subject_transaction_detail">Détail de la Transaction </string>
     <string name="error_fail_generate_qr">Impossible de générer le code QR.</string>
-    <string name="error_invalid_adresse">adressee invalide</string>
+    <string name="error_invalid_address">Adressee invalide</string>
     <string name="error_invalid_amount">Montant invalide</string>
     <string name="error_transaction_failed">Erreur de transaction</string>
     <string name="error_transaction_may_fail">Le noud indique que la transaction peut échouer. Continuer?</string>
@@ -109,7 +108,7 @@
     <string name="all">Tous</string>
     <string name="currency">Devises</string>
     <string name="advanced">Options avancées</string>
-    <string name="copy_wallet_adresse">Copier l\'adresse du portefeuille</string>
+    <string name="copy_wallet_address">Copier l\'adresse du portefeuille</string>
     <string name="hint_contract_name">Nom</string>
     <string name="hint_contract_venue">Lieu</string>
     <string name="hint_contract_date">Date</string>
@@ -118,7 +117,7 @@
     <string name="action_use">Racheter</string>
     <string name="action_sell">Vendre</string>
     <string name="action_transfer">Transférer</string>
-    <string name="adresse">adressee</string>
+    <string name="address">Adressee</string>
     <string name="action_redeem">Racheter</string>
     <string name="add_ids_to_redeem">Tickets Rachetés</string>
     <string name="title_use_token">Utiliser Token</string>
@@ -133,7 +132,7 @@
     <string name="toolbar_header_settings">Paramètres</string>
     <string name="toolbar_header_help">Aide \u0026 FAQ</string>
     <string name="toolbar_header_transactions">Transactions</string>
-    <string name="settings_my_wallet_adresse">Mon adresse de portefeuille</string>
+    <string name="settings_my_wallet_address">Mon adresse de portefeuille</string>
     <string name="settings_notification">Notifications</string>
     <string name="title_redeem">Racheter Ticket</string>
     <string name="waiting_for_blockchain">En attente de la blockchain …</string>
@@ -264,7 +263,7 @@
     <string name="advanced_settings">Paramètres avancés</string>
     <string name="action_confirm">Confirmer</string>
     <string name="scan_qr_label">Scanner le code QR ou copier le texte ci-dessous:</string>
-    <string name="my_wallet_adresse">L\'adresse de mon portefeuilleadresse</string>
+    <string name="my_wallet_address">L\'Adresse de mon portefeuilleadresse</string>
     <string name="copied_to_clipboard">Copié dans le presse-papier</string>
     <string name="universal_link_expiry_on">Le lien magique expire le:</string>
     <string name="confirm_sale_total">Total: %s</string>
@@ -293,7 +292,7 @@
     <string name="title_select_ticket_quantity">Selectionner %1$s Quantité:</string>
     <string name="title_select_transfer_method">Selectionner Méthode de Transfert:</string>
     <string name="title_set_universal_link_expiry">Définir date d\'expiration du lien Magique:</string>
-    <string name="title_input_wallet_adresse">Entrer l\'adresse de Transfert:</string>
+    <string name="title_input_wallet_address">Entrer l\'adresse de Transfert:</string>
     <string name="title_import">Importer Portefeuille</string>
     <string name="action_import">Importer</string>
     <string name="prompt_password">Mot de passe</string>
@@ -330,8 +329,8 @@
     <string name="action_next">Suivant</string>
     <string name="action_save">Sauvegarder</string>
     <string name="action_contract_info">Info du contrat</string>
-    <string name="contract_adresse">adressee du contrat</string>
-    <string name="input_adresse">adressee Ethereum ou nom ENS</string>
+    <string name="contract_address">Adressee du contrat</string>
+    <string name="input_address">Adressee Ethereum ou nom ENS</string>
     <string name="ens_name">Nom ENS</string>
     <string name="enter_ens">Votre nom ENS</string>
     <string name="ticket_range_expired">Lien Magique Expiré</string>
@@ -351,7 +350,7 @@
     <string name="label_contract">Contrat</string>
     <string name="toolbar_header_browser">Navigateur DApp</string>
     <string name="message_to_sign">Message</string>
-    <string name="signer_adresse">Adresse</string>
+    <string name="signer_address">Adresse</string>
     <string name="requester_url">Demandeur</string>
     <string name="dialog_title_sign_message">Signer message</string>
     <string name="dialog_title_sign_personal_message">Signer un message personnel</string>
@@ -371,7 +370,7 @@
     <string name="action_reload">Recharger</string>
     <string name="free_import_with_gas">Importation gratuite (avec frais gas)</string>
     <string name="confirm_dapp_transaction">Confirmer la transaction DApp"</string>
-    <string name="ens_adresse">Adresse résolue</string>
+    <string name="ens_address">Adresse résolue</string>
     <string name="confirm_erc721_transfer">Confirmer le transfer du Token</string>
     <string name="title_dialog_check_ens">Vérification du nom de la blockchain</string>
     <string name="allocate_to">Alloué à</string>
@@ -389,7 +388,7 @@
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Transaction Invalide</string>
     <string name="contains_no_data">La transaction DApp ne contient aucune donnée</string>
-    <string name="error_insufficient_funds">Fonds Insuffisants</string>
+    <string name="error_insufficient_funds">%1$s Insuffisants</string>
     <string name="ssl_cert_invalid">Certificat SSL Invalide. Ce site est peut être dangeureux. Continuer?</string>
     <string name="import_spawnable">Importer Tokens</string>
     <string name="currency_drop">Accepter baisse de devises</string>
@@ -398,8 +397,8 @@
     <string name="dust_value"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Scannez le code QR</string>
     <string name="toast_invalid_code">Résultat du scan Invalide</string>
-    <string name="adresse_found">Adresse Ethereum</string>
-    <string name="is_adresse">Vous venez de scanner une adresse Ethereum. Voulez-vous essayer de la charger en tant que token?</string>
+    <string name="address_found">Adresse Ethereum</string>
+    <string name="is_address">Vous venez de scanner une adresse Ethereum. Voulez-vous essayer de la charger en tant que token?</string>
     <string name="dialog_load_as_contract">Chargement de token</string>
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00">0.00 %s</string>
@@ -433,8 +432,8 @@
     <string name="add_to_my_dapps">Ajouter à mes DApps</string>
     <string name="edit_dapp">Modifier DApp</string>
     <string name="dapp_title">Titre</string>
-    <string name="dapp_adresse">Adresse</string>
-    <string name="search_or_type_web_adresse">Chercher ou taper une adresse web</string>
+    <string name="dapp_address">Adresse</string>
+    <string name="search_or_type_web_address">Chercher ou taper une adresse web</string>
     <string name="network">Réseaux</string>
     <string name="select_active_networks">Selectionner Réseaux Actifs</string>
     <string name="collectibles">Objects de Collections</string>
@@ -444,7 +443,7 @@
     <string name="confirm_tokenscript_transaction">Confirmer la transaction TokenScript</string>
     <string name="tokenscript_send_native">Envoyer %1$s %2$s to %3$s (%4$s)</string>
     <string name="current_funds">Fonds actuels: %1$s %2$s</string>
-    <string name="invalid_adresse_explain">%1$s n\'est pas une adresse Ethereum valide</string>
+    <string name="invalid_address_explain">%1$s n\'est pas une adresse Ethereum valide</string>
     <string name="select_single_network">Réseau Actif</string>
     <string name="searching_for_token">Recherche de Token</string>
     <string name="token_selection">Selection de Token</string>
@@ -505,8 +504,8 @@
     <string name="watch">REGARDER</string>
     <string name="already_have_a_wallet">J\'ai déja un portefeuille:</string>
     <string name="watch_wallet">Regarder-seulement portefeuilles</string>
-    <string name="suggestion_adresse">Entrer votre adresse Ethereum</string>
-    <string name="ethereum_adresse_hint">Ethereum adresse: 0x puis 40 charactères de 0–9 a-f A-F</string>
+    <string name="suggestion_address">Entrer votre adresse Ethereum</string>
+    <string name="ethereum_address_hint">Ethereum adresse: 0x puis 40 charactères de 0–9 a-f A-F</string>
     <string name="action_watch_account">Regarder Portefeuille</string>
     <string name="receive_payment">Recevoir Paiement</string>
     <string name="title_back_up_your_wallet">Sauvegarder votre portefeuille</string>
@@ -551,7 +550,7 @@
     <string name="unable_to_handle_tx">La Charge utile de Transaction est trop grande</string>
     <string name="show_token_contract">Voir le Contrat du Token</string>
     <string name="signature_details">Détails Signature</string>
-    <string name="copy_contract_adresse">Copier l\'adresse du Contrat</string>
+    <string name="copy_contract_address">Copier l\'adresse du Contrat</string>
     <string name="self">Soi</string>
     <string name="ERC721T">ERC721T</string>
     <string name="fail_sign">Échec de la signature du message d\'échange</string>
@@ -583,7 +582,7 @@
     <string name="system">Système</string>
 
     <!-- Settings -->
-    <string name="title_show_wallet_adresse">Montrer mon adresse de Portefeuille</string>
+    <string name="title_show_wallet_address">Montrer mon adresse de Portefeuille</string>
     <string name="title_change_add_wallet">Changer / Ajouter Portefeuille</string>
     <string name="title_back_up_wallet">Savegarder Ce Portefeuille</string>
     <string name="title_notifications">Notifications</string>
@@ -700,9 +699,9 @@
     <string name="popular_tokens">Tokens Populaires</string>
     <string name="unable_to_get_biometrics">Impossible d\'obtenir le déverrouillage biométrique</string>
     <string name="all_funds">Tous les Fonds</string>
-    <string name="recipient_adresse">Adresse du destinataire</string>
+    <string name="recipient_address">Adresse du destinataire</string>
 
-    <string name="adresse_separator" translatable="false">%1$s | %2$s</string>
+    <string name="address_separator" translatable="false">%1$s | %2$s</string>
     <string name="bracketed" translatable="false">(%1$s)</string>
     <string name="ens_resolved" translatable="false">ENS: %1$s</string>
     <string name="fiat_format" translatable="false">%1$s %2$s ≈ %3$s %4$s</string>
@@ -726,7 +725,7 @@
     <string name="set_your_speed">Définir Le Votre</string>
     <string name="nonce_optional">Nonce (optionnel)</string>
     <string name="calc_gas_limit">Calcul de la Limite de Gas</string>
-    <string name="wallet_adresse">Adresse du Portefeuille</string>
+    <string name="wallet_address">Adresse du Portefeuille</string>
     <string name="transaction_in_progress">Transaction en Cours</string>
     <string name="transaction_progress_detail">La transaction est envoyée à la Blockchain Ethereum. Cela peut prendre quelques minutes pour être confirmé par les mineurs.</string>
     <string name="action_show_tx_details">Voir les détails de la Transaction</string>
@@ -771,4 +770,5 @@
        <string name="select_dappbrowser_network">Se Connecter au Réseau</string>
     <string name="choose_network_preference">Choisir la Préférence du Réseau</string>
     <string name="please_select_at_least_one_network">Veuillez choisir au moins un réseau.</string>
+    <string name="token_text">Token</string>
 </resources>

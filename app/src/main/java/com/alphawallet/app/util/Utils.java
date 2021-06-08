@@ -6,11 +6,13 @@ import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
 
+import androidx.annotation.RawRes;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.C;
@@ -58,6 +60,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
@@ -226,6 +230,10 @@ public class Utils {
                 return R.color.polygon_main;
             case MATIC_TEST_ID:
                 return R.color.polygon_test;
+            case OPTIMISTIC_MAIN_ID:
+                return R.color.optimistic_main;
+            case OPTIMISTIC_TEST_ID:
+                return R.color.optimistic_test;
             default:
                 return R.color.mine;
         }
@@ -496,18 +504,29 @@ public class Utils {
         return sb.toString();
     }
 
-    public static boolean isHex(String hexStr)
+    public static boolean isNumeric(String numString)
     {
-        if (hexStr == null) return false;
-        for (Character c : hexStr.toCharArray())
+        if (numString == null || numString.length() == 0) return false;
+
+        for (int i = 0; i < numString.length(); i++)
         {
-            if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
-            {
-                return true;
-            }
+            if (Character.digit(numString.charAt(i), 10) == -1) { return false; }
         }
 
-        return false;
+        return true;
+    }
+
+    public static boolean isHex(String hexStr)
+    {
+        if (hexStr == null || hexStr.length() == 0) return false;
+        hexStr = Numeric.cleanHexPrefix(hexStr);
+
+        for (int i = 0; i < hexStr.length(); i++)
+        {
+            if (Character.digit(hexStr.charAt(i), 16) == -1) { return false; }
+        }
+
+        return true;
     }
 
     public static String isolateNumeric(String valueFromInput)
@@ -808,5 +827,20 @@ public class Utils {
         }
 
         return parsed;
+    }
+
+    public static String loadFile(Context context, @RawRes int rawRes) {
+        byte[] buffer = new byte[0];
+        try {
+            InputStream in = context.getResources().openRawResource(rawRes);
+            buffer = new byte[in.available()];
+            int len = in.read(buffer);
+            if (len < 1) {
+                throw new IOException("Nothing is read.");
+            }
+        } catch (Exception ex) {
+            Log.d("READ_JS_TAG", "Ex", ex);
+        }
+        return new String(buffer);
     }
 }

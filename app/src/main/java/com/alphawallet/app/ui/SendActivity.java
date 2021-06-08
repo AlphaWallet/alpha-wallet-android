@@ -63,6 +63,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
@@ -94,6 +95,9 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private BigDecimal sendAmount;
     private BigDecimal sendGasPrice;
     private ActionSheetDialog confirmationDialog;
+
+    @Nullable
+    private Disposable calcGasCost;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -496,7 +500,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             sendAmount = NEGATIVE;
             //insufficient balance
-            amountInput.showError(true, R.string.error_insufficient_funds);
+            amountInput.showError(true, 0);
             //if currently resolving ENS, stop
             addressInput.stopNameCheck();
         }
@@ -532,6 +536,9 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void calculateTransactionCost()
     {
+        if ((calcGasCost != null && !calcGasCost.isDisposed()) ||
+                (confirmationDialog != null && confirmationDialog.isShowing())) return;
+
         if (sendAmount.compareTo(NEGATIVE) > 0 && Utils.isAddressValid(sendAddress))
         {
             final String txSendAddress = sendAddress;
@@ -547,13 +554,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             {
                 calculateEstimateDialog();
                 //form payload and calculate tx cost
-                viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
+                calcGasCost = viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
                         .map(this::convertToGasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
-                                error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress))
-                        .isDisposed();
+                                error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
             }
         }
     }

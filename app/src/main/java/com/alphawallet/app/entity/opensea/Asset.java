@@ -6,8 +6,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.util.Utils;
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -16,8 +16,11 @@ import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public class Asset implements Parcelable {
+
+    private static final String LOADING_TOKEN = "*Loading*";
 
     @SerializedName("token_id")
     @Expose
@@ -47,6 +50,14 @@ public class Asset implements Parcelable {
     @Expose
     private String backgroundColor;
 
+    @SerializedName("image_original_url")
+    @Expose
+    private String imageOriginalUrl;
+
+    @SerializedName("image_thumbnail_url")
+    @Expose
+    private String imageThumbnailUrl;
+
     @SerializedName("traits")
     @Expose
     private List<Trait> traits = null;
@@ -57,6 +68,8 @@ public class Asset implements Parcelable {
     protected Asset(Parcel in) {
         tokenId = in.readString();
         imagePreviewUrl = in.readString();
+        imageOriginalUrl = in.readString();
+        imageThumbnailUrl = in.readString();
         name = in.readString();
         description = in.readString();
         externalLink = in.readString();
@@ -65,41 +78,29 @@ public class Asset implements Parcelable {
         traits = in.createTypedArrayList(Trait.CREATOR);
     }
 
-    public Asset()
+    public Asset(BigInteger tokenId)
     {
-        tokenId = null;
+        this.tokenId = tokenId.toString();
+        this.name = getGenericName();
+        this.description = null;
+        this.imagePreviewUrl = null;
+        this.imageOriginalUrl = null;
     }
 
-    public Asset(String tokenId, AssetContract contract)
+    public Asset(BigInteger tokenId, AssetContract contract)
     {
-        if (Utils.isHex(tokenId))
-        {
-            //tokenId in hex - convert to decimal
-            BigInteger bi = new BigInteger(tokenId, 16);
-            tokenId = bi.toString(10);
-        }
-        this.tokenId = tokenId;
+        this.tokenId = tokenId.toString();
         this.assetContract = contract;
     }
 
-    public static Asset blankFromToken(Token token, String tokenId)
-    {
-        AssetContract contract = new AssetContract(token);
-        Asset asset = new Asset(tokenId, contract);
-        asset.name = "";
-        asset.description = "";
-        asset.imagePreviewUrl = "";
-        return asset;
-    }
-
-    public static Asset fromMetaData(JSONObject metaData, String tokenId, Token token)
+    public static Asset fromMetaData(JSONObject metaData, BigInteger tokenId, Token token)
     {
         AssetContract contract = new AssetContract(token);
         Asset asset = new Asset(tokenId, contract);
         try
         {
             if (metaData.has("name")) asset.name = metaData.getString("name");
-            if (metaData.has("image")) asset.imagePreviewUrl = Utils.parseIPFS(metaData.getString("image"));
+            if (metaData.has("image")) asset.imageOriginalUrl = Utils.parseIPFS(metaData.getString("image"));
             if (metaData.has("description")) asset.description = metaData.getString("description");
             if (metaData.has("external_link")) asset.externalLink = metaData.getString("external_link");
             if (metaData.has("background_color")) asset.backgroundColor = metaData.getString("background_color");
@@ -109,7 +110,7 @@ public class Asset implements Parcelable {
             e.printStackTrace();
         }
 
-        if (asset.name == null && asset.imagePreviewUrl == null) asset = null;
+        if (asset.name == null && asset.imageOriginalUrl == null) asset = null;
 
         return asset;
     }
@@ -125,6 +126,19 @@ public class Asset implements Parcelable {
             return new Asset[size];
         }
     };
+
+    public static Asset blankLoading(BigInteger tokenId)
+    {
+        Asset asset = new Asset(tokenId);
+        asset.backgroundColor = LOADING_TOKEN;
+        return asset;
+    }
+
+    public boolean needsLoading()
+    {
+        return (!TextUtils.isEmpty(backgroundColor) && backgroundColor.equals(LOADING_TOKEN)
+                || TextUtils.isEmpty(imageOriginalUrl));
+    }
 
     public String getTokenId() {
         return tokenId;
@@ -152,9 +166,14 @@ public class Asset implements Parcelable {
         this.imagePreviewUrl = imagePreviewUrl;
     }
 
-    public Asset withImagePreviewUrl(String imagePreviewUrl) {
-        this.imagePreviewUrl = imagePreviewUrl;
-        return this;
+    public String getImageOriginalUrl() { return imageOriginalUrl; }
+
+    public void setImageOriginalUrl(String imageOriginalUrl) {
+        this.imageOriginalUrl = imageOriginalUrl;
+    }
+
+    public void setImageThumbnailUrl(String thumbnailUrl) {
+        this.imageThumbnailUrl = thumbnailUrl;
     }
 
     public String getName()
@@ -163,7 +182,7 @@ public class Asset implements Parcelable {
         if (name != null && !name.equals("null")) {
             assetName = name;
         } else {
-            assetName = "ID# " + String.valueOf(tokenId);
+            assetName = getGenericName();
         }
         return assetName;
     }
@@ -252,6 +271,8 @@ public class Asset implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(tokenId);
         dest.writeString(imagePreviewUrl);
+        dest.writeString(imageOriginalUrl);
+        dest.writeString(imageThumbnailUrl);
         dest.writeString(name);
         dest.writeString(description);
         dest.writeString(externalLink);
@@ -261,9 +282,14 @@ public class Asset implements Parcelable {
     }
 
     public Trait getTraitFromType(String key) {
-        for (Trait trait : this.traits) {
-            if (trait.getTraitType() != null && trait.getTraitType().equals(key)) {
-                return trait;
+        if (this.traits != null)
+        {
+            for (Trait trait : this.traits)
+            {
+                if (trait.getTraitType() != null && trait.getTraitType().equals(key))
+                {
+                    return trait;
+                }
             }
         }
         return null;
@@ -275,5 +301,81 @@ public class Asset implements Parcelable {
                  && TextUtils.isEmpty(name)
                  && TextUtils.isEmpty(description)
                  && (traits == null || traits.size() == 0);
+    }
+
+    public boolean equals(RealmERC721Asset realmAsset)
+    {
+        List<Trait> traits = realmAsset.getTraits();
+        if (traits.size() != realmAsset.getTraits().size() || traitsDifferent(traits, realmAsset.getTraits())) return false;
+        else if (realmAsset.getName() == null && name != null
+                || !realmAsset.getName().equalsIgnoreCase(name)) return false;
+        else if (realmAsset.getImagePreviewUrl() == null && imagePreviewUrl != null
+                || (imagePreviewUrl != null && !realmAsset.getImagePreviewUrl().equalsIgnoreCase(imagePreviewUrl))) return false;
+        else if (realmAsset.getImageOriginalUrl() == null && imageOriginalUrl != null
+                || (imageOriginalUrl != null && !realmAsset.getImageOriginalUrl().equalsIgnoreCase(imageOriginalUrl))) return false;
+        else if (realmAsset.getDescription() == null && description != null
+                || (description != null && !realmAsset.getDescription().equalsIgnoreCase(description))) return false;
+        else return true;
+    }
+
+    private boolean traitsDifferent(List<Trait> traits, List<Trait> traits1)
+    {
+        for (int i = 0; i < traits.size(); i++)
+        {
+            if (!traits.get(i).getTraitType().equals(traits1.get(i).getTraitType())
+                    || !traits.get(i).getValue().equals(traits1.get(i).getValue()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String getGenericName()
+    {
+        return "ID# " + tokenId;
+    }
+
+    public String getPreviewImageUrl()
+    {
+        return TextUtils.isEmpty(imagePreviewUrl) ? imageOriginalUrl : imagePreviewUrl;
+    }
+
+    public String getBestImageUrl()
+    {
+        return !TextUtils.isEmpty(imageOriginalUrl) ? imageOriginalUrl : imagePreviewUrl;
+    }
+
+    public String getThumbnailUrl()
+    {
+        return !TextUtils.isEmpty(imageThumbnailUrl) ? imageThumbnailUrl : getPreviewImageUrl();
+    }
+
+    public void updateAsset(Map<BigInteger, Asset> oldAssets)
+    {
+        Asset oldAsset = oldAssets != null ? oldAssets.get(new BigInteger(tokenId)) : null;
+        if (oldAsset != null)
+        {
+            if (TextUtils.isEmpty(name) || name.equals(getGenericName()) && oldAsset.name != null) name = oldAsset.name;
+            if (TextUtils.isEmpty(imageOriginalUrl) && oldAsset.imageOriginalUrl != null) imageOriginalUrl = oldAsset.imageOriginalUrl;
+            if (TextUtils.isEmpty(imagePreviewUrl) && oldAsset.imagePreviewUrl != null) imagePreviewUrl = oldAsset.imagePreviewUrl;
+            if (TextUtils.isEmpty(imageThumbnailUrl) && oldAsset.imageThumbnailUrl != null) imageThumbnailUrl = oldAsset.imageThumbnailUrl;
+            if (TextUtils.isEmpty(description) && oldAsset.description != null) description = oldAsset.description;
+        }
+    }
+
+    public void updateFromRaw(Asset oldAsset)
+    {
+        imageThumbnailUrl = oldAsset.imageThumbnailUrl;
+        imagePreviewUrl = oldAsset.imagePreviewUrl;
+        traits = oldAsset.traits;
+    }
+
+    public boolean requiresReplacement()
+    {
+        return (!TextUtils.isEmpty(backgroundColor) && backgroundColor.equals(LOADING_TOKEN) ||
+                TextUtils.isEmpty(name) || TextUtils.isEmpty(imagePreviewUrl) ||
+                name.equals(getGenericName()));
     }
 }

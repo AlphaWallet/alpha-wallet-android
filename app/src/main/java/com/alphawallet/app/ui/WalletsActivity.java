@@ -24,8 +24,10 @@ import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
@@ -120,7 +122,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsAdapter(this, this::onSetWalletDefault, viewModel.getRealmManager());
+        adapter = new WalletsAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract());
         list.setAdapter(adapter);
         list.addItemDecoration(new ListDivider(this));
 
@@ -166,6 +168,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (adapter != null) adapter.onDestroy();
     }
 
     @Override
@@ -290,14 +293,20 @@ public class WalletsActivity extends BaseActivity implements
             requiresHomeRefresh = true;
         }
 
-        selectedWallet = wallet;
         adapter.setDefaultWallet(wallet);
         if (requiresHomeRefresh)
         {
             viewModel.stopUpdates();
             requiresHomeRefresh = false;
             viewModel.showHome(this);
+
+            Intent bIntent = new Intent(this, WalletConnectService.class);
+            bIntent.setAction(String.valueOf(WalletConnectActions.DISCONNECT.ordinal()));
+            bIntent.putExtra("wallet", selectedWallet);
+            startService(bIntent);
         }
+
+        selectedWallet = wallet;
     }
 
     private void onFetchWallets(Wallet[] wallets)

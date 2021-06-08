@@ -70,9 +70,9 @@
   {"name": "DerivaDEX | Insurance Fund", "description": "DerivaDEX is the next generation of crypto derivatives. Begin earning DDX by bootstrapping the insurance fund.", "url": "https://insurance.derivadex.com", "category": "Finance"},
   {"name": "SCV.Finance", "description": "Get a big picture of all your digital assets locked inside various DeFi projects across multiple blockchains.", "url": "https://scv.finance", "category": "Tool"},
   {"name": "Mushrooms Finance", "description": "Sustainable crypto earning in DeFi", "url": "https://mushrooms.finance/", "category": "Finance"},
-  {"name": "Levinswap", "description": "Decentralized exchange for trading crypto and serurities tokens", "url": "https://app.levinswap.org/", "category": "Exchange"}
-  {"name": "Eth Gas Station", "description": "Consumer oriented metrics for Eth Gas Market", "url": "https://ethgasstation.info", "category": "Tool"}
-  {"name": "Gas Now", "description": "Eth Gas Price forecast system", "url": "https://www.gasnow.org/", "category": "Tool"}
-
+  {"name": "Levinswap", "description": "Decentralized exchange for trading crypto and serurities tokens", "url": "https://app.levinswap.org/", "category": "Exchange"},
+  {"name": "Eth Gas Station", "description": "Consumer oriented metrics for Eth Gas Market", "url": "https://ethgasstation.info", "category": "Tool"},
+  {"name": "Gas Now", "description": "Eth Gas Price forecast system", "url": "https://www.gasnow.org/", "category": "Tool"},
+  {"name": "Matic Testnet Faucet", "description": "Matic Faucet to access Mumbai and Goerli testnet tokens", "url": "https://faucet.matic.network/", "category": "Tool"}
 ]
 

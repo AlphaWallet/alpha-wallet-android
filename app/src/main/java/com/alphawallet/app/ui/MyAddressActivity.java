@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -404,7 +405,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         {
             //generate payment request link
             //EIP681 format
-            System.out.println("AMT: " + weiAmount.toString());
+            if (BuildConfig.DEBUG) System.out.println("AMT: " + weiAmount.toString());
             EIP681Request request;
             String eip681String;
             if (token.isEthereum())

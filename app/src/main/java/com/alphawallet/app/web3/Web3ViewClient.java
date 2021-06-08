@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.http.SslError;
-import android.os.Build;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.webkit.SslErrorHandler;
@@ -15,14 +12,17 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
+import androidx.fragment.app.FragmentActivity;
+
+import com.alphawallet.app.R;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
-import android.widget.Toast;
-import com.alphawallet.app.R;
-import com.alphawallet.app.widget.AWalletAlertDialog;
 import okhttp3.HttpUrl;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -57,7 +57,6 @@ public class Web3ViewClient extends WebViewClient {
         return shouldOverrideUrlLoading(view, url, false, false);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         if (request == null || view == null) {
@@ -96,13 +95,16 @@ public class Web3ViewClient extends WebViewClient {
         return result;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         if (request == null) {
             return null;
         }
-        if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame()) {
+        else if (request.getUrl().toString().contains(".auth0.com/")) //don't inject into auth0 pages
+        {
+            return super.shouldInterceptRequest(view, request);
+        }
+        else if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame()) {
              if (request.getMethod().equalsIgnoreCase("GET")
                      && (request.getUrl().toString().contains(".js")
                         || request.getUrl().toString().contains("json")
@@ -117,9 +119,8 @@ public class Web3ViewClient extends WebViewClient {
             super.shouldInterceptRequest(view, request);
             return null;
         }
-
         //check for known extensions
-        if (handleTrustedExtension(request.getUrl().toString()))
+        else if (handleTrustedExtension(request.getUrl().toString()))
         {
             return null;
         }

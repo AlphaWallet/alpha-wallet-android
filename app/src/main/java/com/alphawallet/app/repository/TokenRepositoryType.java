@@ -2,18 +2,14 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.SubscribeWrapper;
+import com.alphawallet.app.entity.TransferFromEventResponse;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.entity.TransferFromEventResponse;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.AssetDefinitionService;
-
-import io.reactivex.ObservableSource;
-import io.reactivex.disposables.Disposable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,10 +29,8 @@ public interface TokenRepositoryType {
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Completable setVisibilityChanged(Wallet wallet, Token token);
     Single<TokenInfo> update(String address, int chainId);
-    Disposable memPoolListener(int chainId, SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
-    Single<Token> addToken(Wallet wallet, Token token);
     Single<TokenTicker> getEthTicker(int chainId);
     TokenTicker getTokenTicker(Token token);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
@@ -44,10 +38,11 @@ public interface TokenRepositoryType {
 
     Single<Token[]> storeTokens(Wallet wallet, Token[] tokens);
     Single<String> resolveENS(int chainId, String address);
+    void updateAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
+    void storeAsset(String currentAddress, Token token, Asset asset);
+    Token[] initERC721Assets(Wallet wallet, Token[] token);
 
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
-    Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
-
     Token updateTokenType(Token token, Wallet wallet, ContractType type);
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);

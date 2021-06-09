@@ -142,6 +142,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
         WebView webView = new WebView(this);
         webView.clearCache(true);
         Toast.makeText(this, getString(R.string.toast_browser_cache_cleared), Toast.LENGTH_SHORT).show();
+        viewModel.blankFilterSettings();
     }
 
     private void onTokenScriptClicked() {

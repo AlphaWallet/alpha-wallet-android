@@ -25,6 +25,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String ACTIVE_MAINNET = "active_mainnet";
     public static final String SHOWN_WARNING = "shown_warning";
+    private static final String SET_NETWORK_FILTERS = "set_filters";
 
     private final SharedPreferences pref;
 
@@ -167,5 +168,23 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setShownTestNetWarning() {
         pref.edit().putBoolean(SHOWN_WARNING, true).apply();
+    }
+
+    @Override
+    public void setHasSetNetworkFilters()
+    {
+        pref.edit().putBoolean(SET_NETWORK_FILTERS, true).apply();
+    }
+
+    @Override
+    public boolean hasSetNetworkFilters()
+    {
+        return pref.getBoolean(SET_NETWORK_FILTERS, false);
+    }
+
+    @Override
+    public void blankHasSetNetworkFilters()
+    {
+        pref.edit().putBoolean(SET_NETWORK_FILTERS, false).apply();
     }
 }

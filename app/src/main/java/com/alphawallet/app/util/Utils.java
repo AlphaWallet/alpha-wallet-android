@@ -392,7 +392,7 @@ public class Utils {
         return address != null && address.length() > 0 && WalletUtils.isValidAddress(address);
     }
 
-    public static String intArrayToString(int[] values)
+    public static String intArrayToString(Integer[] values)
     {
         StringBuilder store = new StringBuilder();
         boolean firstValue = true;

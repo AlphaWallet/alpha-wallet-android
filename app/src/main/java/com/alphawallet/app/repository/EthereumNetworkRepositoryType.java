@@ -23,6 +23,7 @@ public interface EthereumNetworkRepositoryType {
     Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
 
     NetworkInfo[] getAvailableNetworkList();
+    NetworkInfo[] getAllNetworksWithValue(boolean hasValue);
 
     void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
@@ -30,7 +31,7 @@ public interface EthereumNetworkRepositoryType {
 
     List<Integer> getFilterNetworkList();
 
-    void setFilterNetworkList(int[] networkList);
+    void setFilterNetworkList(Integer[] networkList);
 
     List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters);
 
@@ -43,4 +44,7 @@ public interface EthereumNetworkRepositoryType {
     KnownContract readContracts();
 
     boolean getIsPopularToken(int chain, String address);
+
+    String getCurrentWalletAddress();
+    boolean hasSetNetworkFilters();
 }

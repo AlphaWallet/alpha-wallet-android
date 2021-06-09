@@ -54,4 +54,8 @@ public interface PreferenceRepositoryType {
     boolean hasShownTestNetWarning();
 
     void setShownTestNetWarning();
+
+    void setHasSetNetworkFilters();
+    boolean hasSetNetworkFilters();
+    void blankHasSetNetworkFilters();
 }

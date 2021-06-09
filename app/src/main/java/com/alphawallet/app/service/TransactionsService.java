@@ -75,15 +75,7 @@ public class TransactionsService
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
 
-        checkTransactionReset();
         fetchTransactions();
-    }
-
-    private void checkTransactionReset()
-    {
-        if (tokensService.getCurrentAddress() == null) return;
-        //checks to see if we need a tx fetch reset
-        transactionsClient.checkTransactionsForEmptyFunctions(tokensService.getCurrentAddress());
     }
 
     private void fetchTransactions()
@@ -272,7 +264,6 @@ public class TransactionsService
         {
             stopAllChainUpdate();
             fetchTransactions();
-            checkTransactionReset();
         }
     }
 

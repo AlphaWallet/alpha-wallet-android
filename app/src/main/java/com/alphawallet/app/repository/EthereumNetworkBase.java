@@ -310,12 +310,34 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
+            //perform quick filter check
+            storedIds = filterMainOrTest(storedIds);
+            return storedIds;
+        }
+    }
+
+    // This allows for users who set testnet filters together with mainnet back when we allowed that
+    private List<Integer> filterMainOrTest(List<Integer> storedIds)
+    {
+        if (!preferences.hasSetNetworkFilters())
+        {
+            List<Integer> filteredIds = new ArrayList<>();
+            for (Integer i : storedIds)
+            {
+                if (hasRealValue(i)) { filteredIds.add(i); }
+            }
+
+            if (filteredIds.size() == 0) filteredIds.add(MAINNET_ID);
+            return filteredIds;
+        }
+        else
+        {
             return storedIds;
         }
     }
 
     @Override
-    public void setFilterNetworkList(int[] networkList)
+    public void setFilterNetworkList(Integer[] networkList)
     {
         String store = Utils.intArrayToString(networkList);
         preferences.setNetworkFilterList(store.toString());
@@ -355,6 +377,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         addNetworks(networks, true);
         addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(networks, false);
+        return networks.toArray(new NetworkInfo[0]);
+    }
+
+    @Override
+    public NetworkInfo[] getAllNetworksWithValue(boolean hasValue)
+    {
+        List<NetworkInfo> networks = new ArrayList<>();
+        addNetworks(networks, hasValue);
         return networks.toArray(new NetworkInfo[0]);
     }
 
@@ -578,5 +608,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public Token getBlankOverrideToken()
     {
         return null;
+    }
+
+    public String getCurrentWalletAddress()
+    {
+        return preferences.getCurrentWalletAddress();
+    }
+
+    public boolean hasSetNetworkFilters()
+    {
+        return preferences.hasSetNetworkFilters();
     }
 }

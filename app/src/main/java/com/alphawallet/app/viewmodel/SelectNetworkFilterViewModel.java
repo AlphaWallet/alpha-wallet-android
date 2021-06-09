@@ -44,7 +44,7 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         }
         boolean deselected = true;
 
-        int[] selectedIds = new int[selectedItems.length];
+        Integer[] selectedIds = new Integer[selectedItems.length];
         int index = 0;
         for (Integer selectedId : selectedItems) {
             if (activeNetworkId == selectedId) {
@@ -56,6 +56,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
         tokensService.setupFilter();
+
+        //set all tokens as having visibility changed
+        preferenceRepository.setHasSetNetworkFilters();
     }
 
     public boolean hasShownTestNetWarning()

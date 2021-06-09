@@ -465,52 +465,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }).observeOn(Schedulers.io());
     }
 
-    //See if we require a refresh of transaction checks
-    @Override
-    public void checkTransactionsForEmptyFunctions(String currentAddress)
-    {
-        try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
-        {
-            instance.executeTransactionAsync(r -> {
-                RealmResults<RealmAuxData> checkMarkers = r.where(RealmAuxData.class)
-                        .like("instanceKey", BLOCK_ENTRY + "*")
-                        .findAll();
-
-                boolean delete = false;
-
-                for (RealmAuxData aux : checkMarkers)
-                {
-                    if (TextUtils.isEmpty(aux.getResult()) || !aux.getResult().equals(DB_RESET))
-                    {
-                        String chainIdStr = aux.getInstanceKey().substring(BLOCK_ENTRY.length());
-                        if (!TextUtils.isEmpty(chainIdStr))
-                        {
-                            int chainId = Integer.parseInt(chainIdStr);
-                            writeTokenBlockRead(r, chainId, 0, true); //check from start
-                            writeTokenBlockRead(r, chainId, 0, false); //check from start
-                            aux.setResult(DB_RESET);
-                            delete = true;
-                        }
-                    }
-                }
-
-                if (delete)
-                {
-                    RealmResults<RealmAuxData> realmEvents = r.where(RealmAuxData.class)
-                            .findAll();
-                    realmEvents.deleteAllFromRealm();
-                    RealmResults<RealmTransfer> realmTransfers = r.where(RealmTransfer.class)
-                            .findAll();
-                    realmTransfers.deleteAllFromRealm();
-                }
-            });
-        }
-        catch (Exception e)
-        {
-            //
-        }
-    }
-
     private void writeTokens(String walletAddress, NetworkInfo networkInfo, EtherscanEvent[] events, TokensService svs)
     {
         Map<String, List<EtherscanEvent>> eventMap = getEventMap(events);

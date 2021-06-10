@@ -30,6 +30,7 @@ public interface EthereumNetworkRepositoryType {
     String getNameById(int id);
 
     List<Integer> getFilterNetworkList();
+    List<Integer> getSelectedFilters(boolean isMainNet);
 
     void setFilterNetworkList(Integer[] networkList);
 

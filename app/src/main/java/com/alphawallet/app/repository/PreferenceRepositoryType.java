@@ -19,17 +19,7 @@ public interface PreferenceRepositoryType {
 
     void setNotificationState(boolean state);
 
-    boolean getDefaultNetworkSet();
-
-    void setDefaultNetworkSet();
-
     String getDefaultLocale();
-
-    void setDefaultLocale(String locale);
-
-    boolean isBackupWalletDialogShown();
-
-    void setBackupWalletDialogShown(boolean isShown);
 
     boolean isFindWalletAddressDialogShown();
 
@@ -58,4 +48,6 @@ public interface PreferenceRepositoryType {
     void setHasSetNetworkFilters();
     boolean hasSetNetworkFilters();
     void blankHasSetNetworkFilters();
+
+    void commit();
 }

@@ -88,7 +88,8 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity {
         {
             testnetRecyclerView.setVisibility(View.GONE);
             mainnetRecyclerView.setVisibility(View.VISIBLE);
-        } else
+        }
+        else
         {
             testnetRecyclerView.setVisibility(View.VISIBLE);
             mainnetRecyclerView.setVisibility(View.GONE);

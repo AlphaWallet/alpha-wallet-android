@@ -101,4 +101,9 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     {
         return preferenceRepository.getFullScreenState();
     }
+
+    public void blankFilterSettings()
+    {
+        preferenceRepository.blankHasSetNetworkFilters();
+    }
 }

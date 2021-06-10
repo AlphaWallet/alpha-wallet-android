@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -25,6 +26,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String ACTIVE_MAINNET = "active_mainnet";
     public static final String SHOWN_WARNING = "shown_warning";
+    private static final String SET_NETWORK_FILTERS = "set_filters";
 
     private final SharedPreferences pref;
 
@@ -75,33 +77,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean getDefaultNetworkSet() {
-        return pref.getBoolean(DEFAULT_SET_KEY, false);
-    }
-
-    @Override
-    public void setDefaultNetworkSet() {
-        pref.edit().putBoolean(DEFAULT_SET_KEY, true).apply();
-    }
-
-    @Override
     public String getDefaultLocale() {
         return pref.getString(LOCALE_KEY, Locale.getDefault().getLanguage());
-    }
-
-    @Override
-    public void setDefaultLocale(String locale) {
-        pref.edit().putString(LOCALE_KEY, locale).apply();
-    }
-
-    @Override
-    public boolean isBackupWalletDialogShown() {
-        return pref.getBoolean(BACKUP_WALLET_SHOWN, false);
-    }
-
-    @Override
-    public void setBackupWalletDialogShown(boolean isShown) {
-        pref.edit().putBoolean(BACKUP_WALLET_SHOWN, isShown).apply();
     }
 
     @Override
@@ -167,5 +144,31 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setShownTestNetWarning() {
         pref.edit().putBoolean(SHOWN_WARNING, true).apply();
+    }
+
+    @Override
+    public void setHasSetNetworkFilters()
+    {
+        pref.edit().putBoolean(SET_NETWORK_FILTERS, true).apply();
+    }
+
+    @Override
+    public boolean hasSetNetworkFilters()
+    {
+        return pref.getBoolean(SET_NETWORK_FILTERS, false);
+    }
+
+    @Override
+    public void blankHasSetNetworkFilters()
+    {
+        pref.edit().putBoolean(SET_NETWORK_FILTERS, false).apply();
+    }
+
+    //Ensure settings are committed
+    @SuppressLint("ApplySharedPref")
+    @Override
+    public void commit()
+    {
+        pref.edit().commit();
     }
 }

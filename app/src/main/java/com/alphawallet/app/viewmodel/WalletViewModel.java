@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigDecimal;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
@@ -109,7 +108,7 @@ public class WalletViewModel extends BaseViewModel
     {
         tokens.postValue(metaTokens);
         tokensService.updateTickers();
-        tokensService.startBalanceUpdate();
+        tokensService.startUpdateCycle();
     }
 
     public AssetDefinitionService getAssetDefinitionService()

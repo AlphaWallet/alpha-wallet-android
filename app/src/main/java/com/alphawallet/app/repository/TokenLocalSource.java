@@ -25,6 +25,7 @@ public interface TokenLocalSource {
     void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress);
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
+    void createBaseNetworkTokens(String walletAddress);
 
     Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
     void deleteRealmToken(int chainId, Wallet wallet, String address);

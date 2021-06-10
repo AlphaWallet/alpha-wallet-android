@@ -254,6 +254,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public void createBaseNetworkTokens(String walletAddress)
+    {
+        localSource.createBaseNetworkTokens(walletAddress);
+    }
+
+    @Override
     public TokenTicker getTokenTicker(Token token)
     {
         return localSource.getCurrentTicker(token);
@@ -289,7 +295,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Boolean> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
+    public Single<BigDecimal> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
     {
         Wallet wallet = new Wallet(walletAddress);
         localSource.markBalanceChecked(wallet, chainId, tokenAddress);
@@ -436,14 +442,13 @@ public class TokenRepository implements TokenRepositoryType {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
-    private Single<Boolean> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
+    private Single<BigDecimal> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
     {
         return Single.fromCallable(() -> {
-                boolean hasBalanceChanged = false;
+                BigDecimal balance = BigDecimal.valueOf(-1);
                 try
                 {
                     List<BigInteger> balanceArray = null;
-                    BigDecimal balance = BigDecimal.valueOf(-1);
 
                     switch (type)
                     {
@@ -453,6 +458,7 @@ public class TokenRepository implements TokenRepositoryType {
                         case ERC875:
                         case ERC875_LEGACY:
                             balanceArray = getBalanceArray875(wallet, chainId, tokenAddress);
+                            balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
@@ -461,6 +467,7 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721_TICKET:
                             balanceArray = getBalanceArray721Ticket(wallet, chainId, tokenAddress);
+                            balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
@@ -478,7 +485,7 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
-                        hasBalanceChanged = localSource.updateTokenBalance(wallet, chainId, tokenAddress, balance, balanceArray, type);
+                        localSource.updateTokenBalance(wallet, chainId, tokenAddress, balance, balanceArray, type);
                     }
 
                     if (type != ContractType.ETHEREUM && wallet.address.equalsIgnoreCase(tokenAddress))
@@ -491,7 +498,7 @@ public class TokenRepository implements TokenRepositoryType {
                     if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
                 }
 
-                return hasBalanceChanged;
+                return balance;
             });
     }
 
@@ -1409,9 +1416,8 @@ public class TokenRepository implements TokenRepositoryType {
         }).flatMap(type -> additionalHandling(type, tokenInfo));
     }
 
-    private Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
+    private Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
     {
-        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
         ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.chainId, tokenInfo.address);
         if (tokenInfo.name == null && tokenInfo.symbol == null)
         {
@@ -1435,7 +1441,7 @@ public class TokenRepository implements TokenRepositoryType {
                 return Single.fromCallable(() -> type);
             case ERC875:
                 //requires additional handling to determine if it's Legacy type, but safe to return ERC875 for now:
-                queryInterfaceSpec(tokenInfo.address, tokenInfo)
+                queryInterfaceSpec(tokenInfo)
                         .subscribeOn(Schedulers.io())
                         .subscribe(actualType -> TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, actualType)).isDisposed();
                 return Single.fromCallable(() -> type);

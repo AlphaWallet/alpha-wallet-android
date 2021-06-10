@@ -13,13 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
-    private final ArrayList<NetworkItem> networkList;
+    private final List<NetworkItem> networkList;
 
-    public MultiSelectNetworkAdapter(ArrayList<NetworkItem> selectedNetworks)
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks)
     {
         networkList = selectedNetworks;
     }
@@ -35,8 +37,9 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         return enabledIds.toArray(new Integer[0]);
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         int buttonTypeId = R.layout.item_simple_check;
         View itemView = LayoutInflater.from(parent.getContext())

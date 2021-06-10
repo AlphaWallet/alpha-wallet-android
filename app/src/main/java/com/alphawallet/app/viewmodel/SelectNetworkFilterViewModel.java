@@ -1,10 +1,15 @@
 package com.alphawallet.app.viewmodel;
 
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SelectNetworkFilterViewModel extends BaseViewModel {
@@ -24,30 +29,28 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public String getFilterNetworkList() {
-        List<Integer> networkIds = networkRepository.getFilterNetworkList();
-        StringBuilder sb = new StringBuilder();
-        boolean firstValue = true;
-        for (int networkId : networkIds) {
-            if (!firstValue) sb.append(",");
-            sb.append(networkId);
-            firstValue = false;
-        }
-        return sb.toString();
+    public List<Integer> getFilterNetworkList() {
+        return networkRepository.getFilterNetworkList();
     }
 
-    public void setFilterNetworks(Integer[] selectedItems) {
+    public List<Integer> getSelectedFilters(boolean isMainNet) {
+        return networkRepository.getSelectedFilters(isMainNet);
+    }
+
+    public void setFilterNetworks(List<Integer> selectedItems, boolean mainnetActive) {
+        preferenceRepository.setActiveMainnet(mainnetActive);
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         int activeNetworkId = -99;
         if (activeNetwork != null) {
             activeNetworkId = networkRepository.getActiveBrowserNetwork().chainId;
         }
-        boolean deselected = true;
 
-        int[] selectedIds = new int[selectedItems.length];
+        //Mark dappbrowser network as deselected if appropriate
+        boolean deselected = true;
+        Integer[] selectedIds = new Integer[selectedItems.size()];
         int index = 0;
         for (Integer selectedId : selectedItems) {
-            if (activeNetworkId == selectedId) {
+            if (EthereumNetworkRepository.hasRealValue(selectedId) == mainnetActive && activeNetworkId == selectedId) {
                 deselected = false;
             }
             selectedIds[index++] = selectedId;
@@ -56,6 +59,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
         tokensService.setupFilter();
+
+        //set all tokens as having visibility changed
+        preferenceRepository.setHasSetNetworkFilters();
+        preferenceRepository.commit();
     }
 
     public boolean hasShownTestNetWarning()
@@ -71,5 +78,26 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
     public NetworkInfo getNetworkByChain(int chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
+    }
+
+    public boolean mainNetActive()
+    {
+        return preferenceRepository.isActiveMainnet();
+    }
+
+    public List<NetworkItem> getNetworkList(boolean isMainNet)
+    {
+        List<NetworkItem> networkList = new ArrayList<>();
+        List<Integer> filterIds = networkRepository.getSelectedFilters(isMainNet);
+
+        for (NetworkInfo info : getNetworkList())
+        {
+            if (EthereumNetworkRepository.hasRealValue(info.chainId) == isMainNet)
+            {
+                networkList.add(new NetworkItem(info.name, info.chainId, filterIds.contains(info.chainId)));
+            }
+        }
+
+        return networkList;
     }
 }

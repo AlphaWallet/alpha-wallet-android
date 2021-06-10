@@ -224,7 +224,7 @@ public class TokensRealmSource implements TokenLocalSource {
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
             realm.executeTransactionAsync(r -> {
-                NetworkInfo[] allMainNetworks = ethereumNetworkRepository.getAllNetworksWithValue(true);
+                NetworkInfo[] allMainNetworks = ethereumNetworkRepository.getAllActiveNetworks();
                 for (NetworkInfo info : allMainNetworks)
                 {
                     RealmToken realmItem = r.where(RealmToken.class)

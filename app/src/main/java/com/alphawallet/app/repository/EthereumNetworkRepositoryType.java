@@ -23,7 +23,7 @@ public interface EthereumNetworkRepositoryType {
     Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
 
     NetworkInfo[] getAvailableNetworkList();
-    NetworkInfo[] getAllNetworksWithValue(boolean hasValue);
+    NetworkInfo[] getAllActiveNetworks();
 
     void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 

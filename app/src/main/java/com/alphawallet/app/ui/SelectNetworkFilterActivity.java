@@ -104,17 +104,10 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<Integer> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
 
-        if (filterList.size() <= 0)
-        {
-            Toast.makeText(this, getString(R.string.please_select_at_least_one_network), Toast.LENGTH_SHORT).show();
-        }
-        else
-        {
-            viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked());
-            sendBroadcast(new Intent(C.RESET_WALLET));
-            setResult(RESULT_OK, new Intent());
-            finish();
-        }
+        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked());
+        sendBroadcast(new Intent(C.RESET_WALLET));
+        setResult(RESULT_OK, new Intent());
+        finish();
     }
 
     @Override

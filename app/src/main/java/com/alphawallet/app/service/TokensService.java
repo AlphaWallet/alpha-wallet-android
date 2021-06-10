@@ -724,7 +724,7 @@ public class TokensService
 
         if (!ethereumNetworkRepository.hasSetNetworkFilters()) //add all networks to a check list to check balances at wallet startup and refresh
         {
-            NetworkInfo[] networks = ethereumNetworkRepository.getAllNetworksWithValue(true);
+            NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
             for (NetworkInfo info : networks) { baseTokenCheck.add(info.chainId); }
         }
         else

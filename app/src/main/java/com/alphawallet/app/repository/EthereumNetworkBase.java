@@ -379,10 +379,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public NetworkInfo[] getAllNetworksWithValue(boolean hasValue)
+    public NetworkInfo[] getAllActiveNetworks()
     {
         List<NetworkInfo> networks = new ArrayList<>();
-        addNetworks(networks, hasValue);
+        addNetworks(networks, preferences.isActiveMainnet());
         return networks.toArray(new NetworkInfo[0]);
     }
 

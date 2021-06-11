@@ -46,7 +46,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
     @Override
     public int getActiveBrowserNetwork() {
-        return pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+        int selectedNetwork;
+        try
+        {
+            selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+        }
+        catch (ClassCastException e) //previously we used string
+        {
+            selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
+            setActiveBrowserNetwork(selectedNetwork);
+        }
+
+        return selectedNetwork;
     }
 
     @Override

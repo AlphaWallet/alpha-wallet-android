@@ -3,6 +3,8 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -489,6 +491,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return networkMap.get(MAINNET_ID).getEtherscanUri(txHash).toString();
         }
+    }
+
+    public static int getNetworkIdFromName(String name)
+    {
+        if (!TextUtils.isEmpty(name)) {
+            for (NetworkInfo NETWORK : networkMap.values()) {
+                if (name.equals(NETWORK.name)) {
+                    return NETWORK.chainId;
+                }
+            }
+        }
+        return 0;
     }
 
     public static boolean hasGasOverride(int chainId)

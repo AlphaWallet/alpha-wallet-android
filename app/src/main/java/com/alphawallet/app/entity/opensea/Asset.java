@@ -101,6 +101,7 @@ public class Asset implements Parcelable {
         {
             if (metaData.has("name")) asset.name = metaData.getString("name");
             if (metaData.has("image")) asset.imageOriginalUrl = Utils.parseIPFS(metaData.getString("image"));
+            else if (metaData.has("image_url")) asset.imageOriginalUrl = Utils.parseIPFS(metaData.getString("image_url"));
             if (metaData.has("description")) asset.description = metaData.getString("description");
             if (metaData.has("external_link")) asset.externalLink = metaData.getString("external_link");
             if (metaData.has("background_color")) asset.backgroundColor = metaData.getString("background_color");

@@ -6,10 +6,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
-import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SelectNetworkFilterViewModel extends BaseViewModel {
@@ -27,14 +25,6 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
     public NetworkInfo[] getNetworkList() {
         return networkRepository.getAvailableNetworkList();
-    }
-
-    public List<Integer> getFilterNetworkList() {
-        return networkRepository.getFilterNetworkList();
-    }
-
-    public List<Integer> getSelectedFilters(boolean isMainNet) {
-        return networkRepository.getSelectedFilters(isMainNet);
     }
 
     public void setFilterNetworks(List<Integer> selectedItems, boolean mainnetActive) {

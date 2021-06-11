@@ -146,6 +146,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         //      - no - proceed to home activity
         if (wallets.length == 0)
         {
+            splashViewModel.setDefaultBrowser();
             findViewById(R.id.layout_new_wallet).setVisibility(View.VISIBLE);
             findViewById(R.id.button_create).setOnClickListener(v -> {
                 splashViewModel.createNewWallet(this, this);

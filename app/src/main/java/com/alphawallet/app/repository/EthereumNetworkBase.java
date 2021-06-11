@@ -3,6 +3,8 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -220,7 +222,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     };
 
     final PreferenceRepositoryType preferences;
-    NetworkInfo activeNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
     final boolean useTestNets;
     final NetworkInfo[] additionalNetworks;
@@ -230,7 +231,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         this.preferences = preferenceRepository;
         this.additionalNetworks = additionalNetworks;
         this.useTestNets = useTestNets;
-        activeNetwork = getByName(preferences.getActiveBrowserNetwork());
     }
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
@@ -258,17 +258,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    private NetworkInfo getByName(String name) {
-        if (name != null && !name.isEmpty()) {
-            for (NetworkInfo NETWORK : networkMap.values()) {
-                if (name.equals(NETWORK.name)) {
-                    return NETWORK;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public String getNameById(int id)
     {
@@ -278,7 +267,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     @Override
     public NetworkInfo getActiveBrowserNetwork() {
-        return activeNetwork;
+        return networkMap.get(preferences.getActiveBrowserNetwork());
     }
 
     @Override
@@ -344,10 +333,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public void setActiveBrowserNetwork(NetworkInfo networkInfo)
     {
-        activeNetwork = networkInfo;
         if (networkInfo != null)
         {
-            preferences.setActiveBrowserNetwork(activeNetwork.name);
+            preferences.setActiveBrowserNetwork(networkInfo.chainId);
             for (OnNetworkChangeListener listener : onNetworkChangedListeners)
             {
                 listener.onNetworkChanged(networkInfo);
@@ -355,7 +343,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            preferences.setActiveBrowserNetwork("");
+            preferences.setActiveBrowserNetwork(0);
         }
     }
 
@@ -503,6 +491,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return networkMap.get(MAINNET_ID).getEtherscanUri(txHash).toString();
         }
+    }
+
+    public static int getNetworkIdFromName(String name)
+    {
+        if (!TextUtils.isEmpty(name)) {
+            for (NetworkInfo NETWORK : networkMap.values()) {
+                if (name.equals(NETWORK.name)) {
+                    return NETWORK.chainId;
+                }
+            }
+        }
+        return 0;
     }
 
     public static boolean hasGasOverride(int chainId)

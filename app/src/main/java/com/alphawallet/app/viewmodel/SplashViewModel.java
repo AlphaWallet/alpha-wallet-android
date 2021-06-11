@@ -1,9 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +8,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import androidx.core.content.FileProvider;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -23,11 +23,6 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.tools.TokenDefinition;
-import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -50,6 +45,7 @@ import io.reactivex.schedulers.Schedulers;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 import static com.alphawallet.app.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class SplashViewModel extends ViewModel
 {
@@ -360,5 +356,10 @@ public class SplashViewModel extends ViewModel
         }
 
         fp.delete();
+    }
+
+    public void setDefaultBrowser()
+    {
+        preferenceRepository.setActiveBrowserNetwork(MAINNET_ID);
     }
 }

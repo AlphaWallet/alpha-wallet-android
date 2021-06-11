@@ -7,9 +7,9 @@ public interface PreferenceRepositoryType {
 
     void setCurrentWalletAddress(String address);
 
-    String getActiveBrowserNetwork();
+    int getActiveBrowserNetwork();
 
-    void setActiveBrowserNetwork(String netName);
+    void setActiveBrowserNetwork(int networkId);
 
     String getNetworkFilterList();
 

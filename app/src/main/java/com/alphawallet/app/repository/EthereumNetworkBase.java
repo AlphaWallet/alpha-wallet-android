@@ -220,7 +220,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     };
 
     final PreferenceRepositoryType preferences;
-    NetworkInfo activeNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
     final boolean useTestNets;
     final NetworkInfo[] additionalNetworks;
@@ -230,7 +229,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         this.preferences = preferenceRepository;
         this.additionalNetworks = additionalNetworks;
         this.useTestNets = useTestNets;
-        activeNetwork = getByName(preferences.getActiveBrowserNetwork());
     }
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
@@ -258,17 +256,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    private NetworkInfo getByName(String name) {
-        if (name != null && !name.isEmpty()) {
-            for (NetworkInfo NETWORK : networkMap.values()) {
-                if (name.equals(NETWORK.name)) {
-                    return NETWORK;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public String getNameById(int id)
     {
@@ -278,7 +265,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     @Override
     public NetworkInfo getActiveBrowserNetwork() {
-        return activeNetwork;
+        return networkMap.get(preferences.getActiveBrowserNetwork());
     }
 
     @Override
@@ -344,10 +331,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public void setActiveBrowserNetwork(NetworkInfo networkInfo)
     {
-        activeNetwork = networkInfo;
         if (networkInfo != null)
         {
-            preferences.setActiveBrowserNetwork(activeNetwork.name);
+            preferences.setActiveBrowserNetwork(networkInfo.chainId);
             for (OnNetworkChangeListener listener : onNetworkChangedListeners)
             {
                 listener.onNetworkChanged(networkInfo);
@@ -355,7 +341,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            preferences.setActiveBrowserNetwork("");
+            preferences.setActiveBrowserNetwork(0);
         }
     }
 

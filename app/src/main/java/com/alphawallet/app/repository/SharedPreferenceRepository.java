@@ -45,13 +45,13 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public String getActiveBrowserNetwork() {
-        return pref.getString(DEFAULT_NETWORK_NAME_KEY, null);
+    public int getActiveBrowserNetwork() {
+        return pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
     }
 
     @Override
-    public void setActiveBrowserNetwork(String netName) {
-        pref.edit().putString(DEFAULT_NETWORK_NAME_KEY, netName).apply();
+    public void setActiveBrowserNetwork(int networkId) {
+        pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
     }
 
     @Override

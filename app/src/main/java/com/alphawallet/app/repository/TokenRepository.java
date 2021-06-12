@@ -527,10 +527,11 @@ public class TokenRepository implements TokenRepositoryType {
         TokenInfo tInfo = new TokenInfo("eth", network.name, network.symbol, 18, true, network.chainId);
         BigDecimal balance = getEthBalance(wallet, chainId);
         //get current balance
-        Token dbToken = fetchToken(chainId, wallet.address, wallet.address);
+        Token dbToken = fetchToken(chainId, wallet.address, "eth");
         if (!balance.equals(BigDecimal.valueOf(-1)) && (dbToken == null || !dbToken.balance.equals(balance)))
         {
             if (dbToken == null) dbToken = tFactory.createToken(tInfo, balance, null, System.currentTimeMillis(), ContractType.ETHEREUM, network.getShortName(), System.currentTimeMillis());
+            else dbToken.balance = balance;
             localSource.updateTokenBalance(network, wallet, dbToken);
         }
 

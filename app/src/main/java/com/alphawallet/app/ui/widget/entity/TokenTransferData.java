@@ -8,12 +8,15 @@ import android.text.TextUtils;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EventResult;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 /**
  * Created by JB on 17/12/2020.
@@ -34,23 +37,30 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         this.transferDetail = transferDetail;
     }
 
-    public String getTitle(Context ctx)
+    public int getTitle(Transaction tx)
     {
         //TODO: pick up item-view
         //catch standard Token events
         switch (eventName)
         {
             case "sent":
-                return ctx.getString(R.string.activity_sent);
+                return R.string.activity_sent;
             case "received":
-                return ctx.getString(R.string.activity_received);
+                String from = getDetailAddress();
+                if (!TextUtils.isEmpty(from) && from.equals(ZERO_ADDRESS))
+                {
+                    return R.string.token_mint;
+                }
+                else
+                {
+                    return R.string.activity_received;
+                }
             case "ownerApproved":
-                return ctx.getString(R.string.activity_approved);
+                return R.string.activity_approved;
             case "approvalObtained":
-                return ctx.getString(R.string.activity_approval_granted);
+                return R.string.activity_approval_granted;
             default:
-                //already set up
-                return eventName;
+                return 0;
         }
     }
 
@@ -99,12 +109,12 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         RESULT
     }
 
-    public String getDetail(Context ctx, Transaction tx, final String itemView)
+    public String getDetail(Context ctx, Transaction tx, Token t, final String itemView)
     {
-        return getDetail(ctx, tx, itemView, true);
+        return getDetail(ctx, tx, itemView, t, true);
     }
 
-    public String getDetail(Context ctx, Transaction tx, final String itemView, boolean shrinkAddress)
+    public String getDetail(Context ctx, Transaction tx, final String itemView, Token t, boolean shrinkAddress)
     {
         Map<String, EventResult> resultMap = getEventResultMap();
         if (tx != null) tx.addTransactionElements(resultMap);
@@ -135,9 +145,19 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
                             : ENSHandler.displayAddressOrENS(ctx, resultMap.get("to").value, false);
                 break;
             case "received":
-                if (resultMap.containsKey("from"))
-                    return shrinkAddress ? ctx.getString(R.string.from, ENSHandler.displayAddressOrENS(ctx, resultMap.get("from").value))
-                            : ENSHandler.displayAddressOrENS(ctx, resultMap.get("from").value, false);
+                EventResult eResult = resultMap.get("from");
+                if (eResult != null)
+                {
+                    if (tx != null && eResult.value.equals(ZERO_ADDRESS))
+                    {
+                        return t.getFullName();
+                    }
+                    else
+                    {
+                        return shrinkAddress ? ctx.getString(R.string.from, ENSHandler.displayAddressOrENS(ctx, eResult.value))
+                                : ENSHandler.displayAddressOrENS(ctx, eResult.value, false);
+                    }
+                }
                 break;
             case "ownerApproved":
                 if (resultMap.containsKey("spender"))

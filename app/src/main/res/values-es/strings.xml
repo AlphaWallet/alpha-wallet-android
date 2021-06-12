@@ -313,6 +313,7 @@
     <!-- transfer out of our wallet by magiclink -->
     <string name="ticket_magiclink_sale">Vendido a través de MagicLink</string>
     <string name="ticket_magiclink_purchase">Compra con MagicLink</string>
+    <string name="token_mint">Acuñar</string>
     <string name="action_next">Siguiente</string>
     <string name="action_save">Guardar</string>
     <string name="action_contract_info">Información del contrato</string>

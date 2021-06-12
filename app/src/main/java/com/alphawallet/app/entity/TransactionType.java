@@ -28,5 +28,6 @@ public enum TransactionType
     WITHDRAW,
     DEPOSIT,
     CONTRACT_CALL,
+    REMIX,
     ILLEGAL_VALUE;
 }

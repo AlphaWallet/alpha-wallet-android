@@ -127,10 +127,10 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data), token);
+        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data, tx), token);
 
         type.setText(typeValue);
-        address.setText(data.getDetail(getContext(), tx, itemView));
+        address.setText(data.getDetail(getContext(), tx, token, itemView));
         tokenIcon.setStatusIcon(data.getEventStatusType());
 
         //timestamp
@@ -191,10 +191,18 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         return value;
     }
 
-    private String getTitle(TokenTransferData eventData)
+    private String getTitle(TokenTransferData eventData, Transaction tx)
     {
         //TODO: pick up item-view
-        return eventData.getTitle(getContext());
+        int titleResource = eventData.getTitle(tx);
+        if (titleResource == 0)
+        {
+            return eventData.eventName;
+        }
+        else
+        {
+            return getContext().getString(titleResource);
+        }
     }
 
     private BigInteger getTokenId(TokenDefinition td, RealmAuxData eventData)

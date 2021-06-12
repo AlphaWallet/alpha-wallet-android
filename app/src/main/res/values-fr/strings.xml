@@ -325,6 +325,7 @@
     <string name="ticket_magiclink_transfer">Transférer Lien Magique</string> <!-- transfer out of our wallet by magiclink -->
     <string name="ticket_magiclink_sale">Vendu via Lien Magique</string>
     <string name="ticket_magiclink_purchase">Acheter un lien Magique</string>
+    <string name="token_mint">Battre</string>
 
     <string name="action_next">Suivant</string>
     <string name="action_save">Sauvegarder</string>

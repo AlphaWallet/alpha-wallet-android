@@ -82,6 +82,8 @@ public class TransactionLookup
             typeMapping.put(TransactionType.DEPOSIT, R.string.deposit);
             typeMapping.put(TransactionType.CONTRACT_CALL, R.string.contract_call);
             typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
+            typeMapping.put(TransactionType.MINT, R.string.token_mint);
+            typeMapping.put(TransactionType.BURN, R.string.token_burn);
         }
     }
 }

@@ -271,6 +271,10 @@ public class TransactionInput
                 break;
             case REMIX:
                 break;
+            case BURN:
+            case MINT:
+                address = t.getFullName();
+                break;
             case ALLOCATE_TO:
                 address = getFirstAddress();
                 break;
@@ -396,6 +400,8 @@ public class TransactionInput
                 type = interpretTradeData(tx, walletAddress);
                 break;
             case "safeTransferFrom":
+                type = interpretSafeTransferFrom(walletAddress);
+                break;
             case "transferFrom":
                 type = interpretTransferFrom(walletAddress);
                 break;
@@ -489,6 +495,32 @@ public class TransactionInput
         }
     }
 
+    private TransactionType interpretSafeTransferFrom(String walletAddr)
+    {
+        String destinationAddr = getDestinationAddress();
+        String fromAddr = getFirstAddress();
+        if (walletAddr == null)
+        {
+            return TransactionType.TRANSFER_FROM;
+        }
+        else if (destinationAddr.equals(C.BURN_ADDRESS))
+        {
+            return TransactionType.BURN;
+        }
+        else if (fromAddr.equals(BURN_ADDRESS))
+        {
+            return TransactionType.MINT;
+        }
+        else if (!destinationAddr.equalsIgnoreCase(walletAddr)) //otherparty in this case will be the first address, the previous owner of the token(s)
+        {
+            return TransactionType.TRANSFER_FROM;
+        }
+        else
+        {
+            return TransactionType.TRANSFER_TO;
+        }
+    }
+
     private TransactionType interpretTransferFrom(String walletAddr)
     {
         String destinationAddr = getDestinationAddress();
@@ -575,6 +607,10 @@ public class TransactionInput
             case TRANSFER_FROM:
             case RECEIVED:
             case SEND:
+                operationValue = token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
+                break;
+            case BURN:
+            case MINT:
                 operationValue = token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
                 break;
 
@@ -682,6 +718,10 @@ public class TransactionInput
                 return StatusType.RECEIVE;
             case ALLOCATE_TO:
                 return StatusType.SENT;
+            case BURN:
+                return StatusType.SENT;
+            case MINT:
+                return StatusType.RECEIVE;
             case REMIX:
                 return StatusType.NONE;
             case LOAD_NEW_TOKENS:
@@ -714,11 +754,12 @@ public class TransactionInput
         {
             case SEND:
             case TRANSFER_FROM:
+            case BURN:
                 return "sent";
             case TRANSFER_TO:
                 return "received";
             case RECEIVE_FROM:
-                return "received";
+            case MINT:
             case RECEIVED:
                 return "received";
             case APPROVE:
@@ -756,10 +797,12 @@ public class TransactionInput
             case MAGICLINK_PICKUP: //received ticket from a magic link (from ->)
                 return false;
             case TRANSFER_TO:
+            case MINT:
                 return false;
             case RECEIVE_FROM:
                 return true;
             case TRANSFER_FROM:
+            case BURN:
                 return true;
             case APPROVE:
                 return true;
@@ -787,6 +830,8 @@ public class TransactionInput
             case MAGICLINK_PICKUP: //received ticket from a magic link (from ->)
             case TRANSFER_TO:
             case RECEIVE_FROM:
+            case MINT:
+            case BURN:
             case TRANSFER_FROM:
             case RECEIVED:
             case REMIX:

@@ -44,7 +44,15 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         switch (eventName)
         {
             case "sent":
-                return R.string.activity_sent;
+                String to = getDetailAddress();
+                if (!TextUtils.isEmpty(to) && to.equals(ZERO_ADDRESS))
+                {
+                    return R.string.token_burn;
+                }
+                else
+                {
+                    return R.string.activity_sent;
+                }
             case "received":
                 String from = getDetailAddress();
                 if (!TextUtils.isEmpty(from) && from.equals(ZERO_ADDRESS))

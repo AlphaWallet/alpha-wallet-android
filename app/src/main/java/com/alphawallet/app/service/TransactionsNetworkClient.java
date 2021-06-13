@@ -360,6 +360,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     result = "0";
                 }
+                else
+                {
+                    return getEtherscanTransactions(result);
+                }
             }
             catch (InterruptedIOException e)
             {
@@ -373,7 +377,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
         }
 
-        return getEtherscanTransactions(result);
+        return new EtherscanTransaction[0];
     }
 
     /**
@@ -448,7 +452,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     writeTokens(walletAddress, networkInfo, events, svs);
 
                     //we know all these events are relevant to the wallet, and they are all ERC20 events
-                    writeEvents(instance, events, walletAddress, networkInfo, svs, nftCheck);
+                    writeEvents(instance, events, walletAddress, networkInfo, nftCheck);
 
                     //and update the top block read
                     lastBlockChecked = Long.parseLong(events[events.length - 1].blockNumber);
@@ -841,7 +845,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     }
 
     private void writeEvents(Realm instance, EtherscanEvent[] events, String walletAddress,
-                             @NonNull NetworkInfo networkInfo, TokensService svs, final boolean isNFT) throws Exception
+                             @NonNull NetworkInfo networkInfo, final boolean isNFT) throws Exception
     {
         String TO_TOKEN = "[TO_ADDRESS]";
         String FROM_TOKEN = "[FROM_ADDRESS]";
@@ -853,7 +857,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             for (EtherscanEvent ev : events)
             {
                 boolean scanAsNFT = isNFT || (ev.tokenDecimal.length() == 0 && ev.tokenID.length() > 0);
-                Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
+                Transaction tx = formTransaction(scanAsNFT, networkInfo, ev);
 
                 //find tx name
                 String activityName = tx.getEventName(walletAddress);
@@ -863,6 +867,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 writeTransaction(r, tx);
             }
         });
+    }
+
+    private Transaction formTransaction(boolean scanAsNFT, NetworkInfo networkInfo, EtherscanEvent ev)
+    {
+        //scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
+        return scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
     }
 
     private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress)
@@ -893,6 +903,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         RealmTransaction realmTx = instance.where(RealmTransaction.class)
                 .equalTo("hash", tx.hash)
                 .findFirst();
+
         if (realmTx == null)
         {
             realmTx = instance.createObject(RealmTransaction.class, tx.hash);

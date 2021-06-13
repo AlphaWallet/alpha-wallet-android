@@ -314,6 +314,7 @@
     <string name="ticket_magiclink_sale">经MagicLink售出</string>
     <string name="ticket_magiclink_purchase">经MagicLink买入</string>
     <string name="token_mint">铸币</string>
+    <string name="token_burn">烧伤</string>
     <string name="action_next">下一步</string>
     <string name="action_save">保存</string>
     <string name="action_contract_info">智能合约信息</string>

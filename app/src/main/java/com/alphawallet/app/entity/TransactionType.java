@@ -29,5 +29,7 @@ public enum TransactionType
     DEPOSIT,
     CONTRACT_CALL,
     REMIX,
+    BURN,
+    MINT,
     ILLEGAL_VALUE;
 }

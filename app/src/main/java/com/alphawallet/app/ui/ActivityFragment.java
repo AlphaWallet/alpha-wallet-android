@@ -17,11 +17,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionDecoder;
-import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.TransactionMeta;
-import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
@@ -36,9 +32,7 @@ import com.alphawallet.app.widget.EmptyTransactionsView;
 import com.alphawallet.app.widget.SystemView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 

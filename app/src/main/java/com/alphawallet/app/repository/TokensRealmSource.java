@@ -972,7 +972,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void updateERC20Tickers(Map<String, TokenTicker> erc20Tickers)
+    public void updateERC20Tickers(final Map<String, TokenTicker> erc20Tickers)
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {

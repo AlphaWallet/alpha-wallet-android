@@ -145,6 +145,13 @@ public class TransactionDecoder
                 if (argData.equals("0")) break;
                 switch (type)
                 {
+                    case "bytes":
+                        sb.setLength(0);
+                        argData = read256bits(input);
+                        BigInteger dataCount = Numeric.toBigInt(argData);
+                        String stuff = readBytes(input, dataCount.intValue());
+                        thisData.miscData.add(stuff);
+                        break;
                     case "string":
                         count = new BigInteger(argData, 16);
                         sb.setLength(0);
@@ -314,10 +321,26 @@ public class TransactionDecoder
         addFunction("mixGenes(uint256,uint256,uint256)", ContractType.ERC721, false);
         addFunction("tokensOfOwner(address)", ContractType.ERC721, false);
         addFunction("store(uint256)", ContractType.ERC721, false);
-        addFunction("remix(uint256, bytes)", ContractType.ERC721, false);
+        addFunction("remix(uint256,bytes)", ContractType.ERC721, false);
 
         addFunction("dropCurrency(uint32,uint32,uint32,uint8,bytes32,bytes32,address)", ContractType.CURRENCY, true);
         addFunction("withdraw(uint256)", ContractType.CURRENCY, false); //0x2e1a7d4d0000000000000000000000000000000000000000000000000000000000000001
+
+        addFunctionImmediate("commitNFT()", "0x521d83f0", ContractType.ERC721, false);
+    }
+
+    private void addFunctionImmediate(String functionBody, String functionHash, ContractType type, boolean hasSig)
+    {
+        FunctionData data = functionList.get(functionHash);
+        if (data != null)
+        {
+            data.addType(type);
+        }
+        else
+        {
+            data = new FunctionData(functionBody, type, hasSig);
+            functionList.put(functionHash, data);
+        }
     }
 
     public void addScanFunction(String methodSignature, boolean hasSig)

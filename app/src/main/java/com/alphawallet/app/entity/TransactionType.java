@@ -31,5 +31,6 @@ public enum TransactionType
     REMIX,
     BURN,
     MINT,
+    COMMIT_NFT,
     ILLEGAL_VALUE;
 }

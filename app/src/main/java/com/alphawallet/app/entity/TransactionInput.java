@@ -270,6 +270,7 @@ public class TransactionInput
                 address = tx.from;
                 break;
             case REMIX:
+            case COMMIT_NFT:
                 break;
             case BURN:
             case MINT:
@@ -433,6 +434,18 @@ public class TransactionInput
                 break;
             case "deposit":
                 type = TransactionType.DEPOSIT;
+                break;
+            case "remix":
+                type = TransactionType.REMIX;
+                break;
+            case "mint":
+                type = TransactionType.MINT;
+                break;
+            case "burn":
+                type = TransactionType.BURN;
+                break;
+            case "commitNFT":
+                type = TransactionType.COMMIT_NFT;
                 break;
             default:
                 type = TransactionType.CONTRACT_CALL;
@@ -612,6 +625,12 @@ public class TransactionInput
             case BURN:
             case MINT:
                 operationValue = token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
+                break;
+
+            case REMIX:
+            case COMMIT_NFT:
+                operationValue = "";
+                addSymbol = false;
                 break;
 
             case LOAD_NEW_TOKENS:

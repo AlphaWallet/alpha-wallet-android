@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -27,6 +28,8 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
@@ -45,6 +48,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
@@ -57,7 +61,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 12; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 13; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -852,6 +856,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String AMOUNT_TOKEN = "[AMOUNT_TOKEN]";
         String VALUES = "from,address," + FROM_TOKEN + ",to,address," + TO_TOKEN + ",amount,uint256," + AMOUNT_TOKEN;
 
+        Map<String, Transaction> txFetches = new HashMap<>();
+
         instance.executeTransaction(r -> {
             //write event list
             for (EtherscanEvent ev : events)
@@ -864,9 +870,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, scanAsNFT ? ev.tokenID : ev.value); //Etherscan sometimes interprets NFT transfers as FT's
                 storeTransferData(r, tx.hash, valueList, activityName, ev.contractAddress);
                 //ensure we have fetched the transaction for each hash
-                writeTransaction(r, tx);
+                writeTransaction(r, tx, txFetches);
             }
         });
+
+        fetchRequiredTransactions(instance, networkInfo.chainId, txFetches);
     }
 
     private Transaction formTransaction(boolean scanAsNFT, NetworkInfo networkInfo, EtherscanEvent ev)
@@ -898,7 +906,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeTransaction(Realm instance, Transaction tx)
+    /**
+     * Write the transaction to Realm
+     *
+     * @param instance Realm
+     * @param tx Transaction formed initially procedurally from the event, then from Ethereum node if we didn't already have it
+     * @param txFetches build list of transactions that need fetching
+     */
+    private void writeTransaction(Realm instance, Transaction tx, Map<String, Transaction> txFetches)
     {
         RealmTransaction realmTx = instance.where(RealmTransaction.class)
                 .equalTo("hash", tx.hash)
@@ -907,14 +922,46 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         if (realmTx == null)
         {
             realmTx = instance.createObject(RealmTransaction.class, tx.hash);
+
+            //fetch the actual transaction here
+            if (txFetches != null) txFetches.put(tx.hash, tx);
         }
 
-        if (realmTx.getInput() == null || realmTx.getInput().length() <= 10)
+        if (realmTx.getInput() == null || realmTx.getInput().length() <= 10 || txFetches == null)
         {
             TransactionsRealmCache.fill(instance, realmTx, tx);
         }
     }
 
+    /**
+     * This thread will execute in the background filling in transactions.
+     * It doesn't have to be cancelled if we switch wallets because these transactions need to be fetched anyway
+     * @param instance instance of realm
+     * @param chainId networkId
+     * @param txFetches map of transactions that need writing. Note we use a map to de-duplicate
+     */
+    private void fetchRequiredTransactions(Realm instance, int chainId, Map<String, Transaction> txFetches)
+    {
+        instance.executeTransactionAsync(r -> {
+            Web3j web3j = getWeb3jService(chainId);
+            for (Transaction tx : txFetches.values())
+            {
+                try
+                {
+                    EthTransaction etx = EventUtils.getTransactionDetails(tx.hash, web3j).blockingGet();
+                    Transaction newTx = new Transaction(etx.getResult(), tx.chainId, true, tx.timeStamp);
+                    if (!TextUtils.isEmpty(newTx.input) && newTx.input.length() > 2)
+                    {
+                        writeTransaction(r, newTx, null);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // No override of previously fetched tx
+                }
+            }
+        });
+    }
 
     /**
      * These functions are experimental, for discovering and populating NFT's without opensea.

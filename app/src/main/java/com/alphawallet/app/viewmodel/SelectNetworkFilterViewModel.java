@@ -27,8 +27,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public void setFilterNetworks(List<Integer> selectedItems, boolean mainnetActive) {
+    public void setFilterNetworks(List<Integer> selectedItems, boolean mainnetActive, boolean hasSelected) {
         preferenceRepository.setActiveMainnet(mainnetActive);
+        if (hasSelected) preferenceRepository.setHasSetNetworkFilters();
+
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         int activeNetworkId = -99;
         if (activeNetwork != null) {
@@ -50,8 +52,6 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         networkRepository.setFilterNetworkList(selectedIds);
         tokensService.setupFilter();
 
-        //set all tokens as having visibility changed
-        preferenceRepository.setHasSetNetworkFilters();
         preferenceRepository.commit();
     }
 

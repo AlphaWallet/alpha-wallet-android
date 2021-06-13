@@ -12,7 +12,10 @@ public class TransactionLookup
     public static int typeToName(TransactionType type)
     {
         setupTypes();
-        if (type.ordinal() > typeMapping.size()) return typeMapping.get(TransactionType.UNKNOWN);
+        if (type.ordinal() > typeMapping.size())
+        {
+            return typeMapping.get(TransactionType.UNKNOWN);
+        }
         else return typeMapping.get(type);
     }
 
@@ -81,9 +84,12 @@ public class TransactionLookup
             typeMapping.put(TransactionType.WITHDRAW, R.string.action_withdraw);
             typeMapping.put(TransactionType.DEPOSIT, R.string.deposit);
             typeMapping.put(TransactionType.CONTRACT_CALL, R.string.contract_call);
-            typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
+            typeMapping.put(TransactionType.REMIX, R.string.remix);
             typeMapping.put(TransactionType.MINT, R.string.token_mint);
             typeMapping.put(TransactionType.BURN, R.string.token_burn);
+            typeMapping.put(TransactionType.COMMIT_NFT, R.string.commit_nft);
+
+            typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
         }
     }
 }

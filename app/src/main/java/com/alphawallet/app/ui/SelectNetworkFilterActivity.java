@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -68,11 +67,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
 
             toggleListVisibility(!checked);
 
-            if (!checked)
-            {
-                mainNetAdapter.selectDefault();
-            }
-            else
+            if (checked)
             {
                 testnetDialog.show();
             }
@@ -103,8 +98,9 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     {
         List<Integer> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
+        boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
 
-        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked());
+        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked(), hasClicked);
         sendBroadcast(new Intent(C.RESET_WALLET));
         setResult(RESULT_OK, new Intent());
         finish();
@@ -121,7 +117,6 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     public void onTestNetDialogConfirmed()
     {
         testnetDialog.dismiss();
-        testNetAdapter.selectDefault();
     }
 
     @Override

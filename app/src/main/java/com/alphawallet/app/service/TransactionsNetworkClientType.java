@@ -4,7 +4,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 
-import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public interface TransactionsNetworkClientType {

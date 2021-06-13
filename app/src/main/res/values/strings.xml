@@ -328,6 +328,8 @@
     <string name="ticket_magiclink_purchase">Magiclink Purchase</string>
     <string name="token_mint">Mint</string>
     <string name="token_burn">Burn</string>
+    <string name="remix" translatable="false">Remix</string>
+    <string name="commit_nft" translatable="false">Commit NFT</string>
 
     <string name="action_next">Next</string>
     <string name="action_save">Save</string>

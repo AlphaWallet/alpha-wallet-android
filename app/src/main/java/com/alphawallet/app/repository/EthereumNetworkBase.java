@@ -318,6 +318,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             selectedIds.add(isMainNet ? MAINNET_ID : RINKEBY_ID);
             preferences.blankHasSetNetworkFilters();
+            preferences.commit();
         }
 
         return selectedIds;
@@ -604,5 +605,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public boolean hasSetNetworkFilters()
     {
         return preferences.hasSetNetworkFilters();
+    }
+
+    public boolean isMainNetSelected()
+    {
+        return preferences.isActiveMainnet();
     }
 }

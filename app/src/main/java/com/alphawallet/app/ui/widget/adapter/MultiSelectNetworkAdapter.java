@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
@@ -20,6 +19,7 @@ import java.util.List;
 
 public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
     private final List<NetworkItem> networkList;
+    private boolean hasClicked = false;
 
     public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks)
     {
@@ -37,6 +37,11 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         return enabledIds.toArray(new Integer[0]);
     }
 
+    public boolean hasSelectedItems()
+    {
+        return hasClicked;
+    }
+
     @NotNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
@@ -46,14 +51,6 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
                 .inflate(buttonTypeId, parent, false);
 
         return new MultiSelectNetworkAdapter.ViewHolder(itemView);
-    }
-
-    public void selectDefault() {
-        //make user pick testnet filters; we have a lock to prevent exit without any filters set
-        /*if (!hasSelection) {
-            networkList.get(0).setSelected(true);
-            notifyItemChanged(0);
-        }*/
     }
 
     @Override
@@ -73,6 +70,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     {
         networkList.get(position).setSelected(!networkList.get(position).isSelected());
         holder.checkbox.setSelected(networkList.get(position).isSelected());
+        hasClicked = true;
     }
 
     @Override

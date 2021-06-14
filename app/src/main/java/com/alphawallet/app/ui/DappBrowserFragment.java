@@ -1292,7 +1292,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void setBackForwardButtons()
     {
-        WebBackForwardList sessionHistory = null;
+        WebBackForwardList sessionHistory;
         boolean canBrowseBack = false;
         boolean canBrowseForward = false;
 

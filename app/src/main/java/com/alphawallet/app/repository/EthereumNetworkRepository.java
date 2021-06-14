@@ -30,11 +30,6 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         context = ctx;
     }
 
-    public static List<Integer> addDefaultNetworks()
-    {
-        return new ArrayList<>(Arrays.asList(MAINNET_ID, XDAI_ID, MATIC_ID));
-    }
-
     public static String getNodeURLByNetworkId(int networkId) {
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
     }

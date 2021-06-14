@@ -108,7 +108,7 @@ public class EventDetailWidget extends LinearLayout
         }
 
         //get 'from'
-        String addressDetail = transferData.getDetail(getContext(), transaction, "", false);
+        String addressDetail = transferData.getDetail(getContext(), transaction, "", token, false);
 
         switch (transferData.eventName)
         {

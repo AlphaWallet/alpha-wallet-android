@@ -77,6 +77,7 @@ public class TokensService
     private long nextTokenCheck;
     private boolean openSeaChecked = false;
     private boolean appHasFocus = true;
+    private boolean mainNetActive = true;
 
     @Nullable
     private Disposable eventTimer;
@@ -106,9 +107,9 @@ public class TokensService
         networkFilter = new ArrayList<>();
         setupFilter();
         focusToken = null;
-        setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         this.unknownTokens = new ConcurrentLinkedDeque<>();
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
+        setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
     }
 
@@ -245,11 +246,7 @@ public class TokensService
         openSeaChecked = false;
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
-            IconItem.resetCheck();
             currentAddress = newWalletAddr.toLowerCase();
-            tokenValueMap.clear();
-            pendingChainMap.clear();
-            tokenStoreList.clear();
             stopUpdateCycle();
         }
     }
@@ -284,6 +281,12 @@ public class TokensService
             eventTimer.dispose();
             eventTimer = null;
         }
+
+        IconItem.resetCheck();
+        tokenValueMap.clear();
+        pendingChainMap.clear();
+        tokenStoreList.clear();
+        baseTokenCheck.clear();
     }
 
     public String getCurrentAddress() { return currentAddress; }
@@ -475,7 +478,8 @@ public class TokensService
         if (balanceChange && BuildConfig.DEBUG) Log.d(TAG, "Change Registered: * " + t.getFullName());
 
         //Switch this token chain on
-        if (t.isEthereum() && !networkFilter.contains(t.tokenInfo.chainId) && newBalance.compareTo(BigDecimal.ZERO) > 0)
+        if (t.isEthereum() && !networkFilter.contains(t.tokenInfo.chainId) &&
+                newBalance.compareTo(BigDecimal.ZERO) > 0 && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId) == this.mainNetActive)
         {
             if (BuildConfig.DEBUG) Log.d(TAG, "Detected balance");
             //activate this filter
@@ -720,16 +724,14 @@ public class TokensService
 
     private void populateTokenCheck()
     {
+        mainNetActive = ethereumNetworkRepository.isMainNetSelected();
+        baseTokenCheck.clear();
         tokenRepository.createBaseNetworkTokens(currentAddress);
 
         if (!ethereumNetworkRepository.hasSetNetworkFilters()) //add all networks to a check list to check balances at wallet startup and refresh
         {
             NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
             for (NetworkInfo info : networks) { baseTokenCheck.add(info.chainId); }
-        }
-        else
-        {
-            baseTokenCheck.clear();
         }
     }
 

@@ -61,7 +61,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 13; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 14; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -77,6 +77,34 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         this.httpClient = httpClient;
         this.gson = gson;
         this.realmManager = realmManager;
+    }
+
+    @Override
+    public void checkRequiresAuxReset(String walletAddr)
+    {
+        //See if we require a refresh of transaction checks
+        try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddr)))
+        {
+            instance.executeTransactionAsync(r -> {
+                RealmAuxData checkMarker = r.where(RealmAuxData.class)
+                        .like("instanceKey", BLOCK_ENTRY + "*")
+                        .findFirst();
+
+                if (checkMarker != null && checkMarker.getResult() != null && !checkMarker.getResult().equals(DB_RESET))
+                {
+                    RealmResults<RealmAuxData> realmEvents = r.where(RealmAuxData.class)
+                            .findAll();
+                    realmEvents.deleteAllFromRealm();
+                    RealmResults<RealmTransfer> realmTransfers = r.where(RealmTransfer.class)
+                            .findAll();
+                    realmTransfers.deleteAllFromRealm();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     /**
@@ -863,7 +891,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             for (EtherscanEvent ev : events)
             {
                 boolean scanAsNFT = isNFT || (ev.tokenDecimal.length() == 0 && ev.tokenID.length() > 0);
-                Transaction tx = formTransaction(scanAsNFT, networkInfo, ev);
+                Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
 
                 //find tx name
                 String activityName = tx.getEventName(walletAddress);
@@ -875,12 +903,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         });
 
         fetchRequiredTransactions(instance, networkInfo.chainId, txFetches);
-    }
-
-    private Transaction formTransaction(boolean scanAsNFT, NetworkInfo networkInfo, EtherscanEvent ev)
-    {
-        //scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
-        return scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
     }
 
     private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress)

@@ -80,8 +80,12 @@ public class TransactionsService
 
     private void fetchTransactions()
     {
+        if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return;
+
         currentChainIndex = 0;
         nftCheck = true; //check nft first to filter out NFT tokens
+
+        transactionsClient.checkRequiresAuxReset(tokensService.getCurrentAddress());
 
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
             fetchTransactionDisposable.dispose();

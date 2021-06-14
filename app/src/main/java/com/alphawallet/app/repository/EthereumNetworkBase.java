@@ -204,8 +204,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.testnet.fantom.network/tx/", FANTOM_TEST_ID,
                     FANTOM_TEST_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT)); //NB: Fantom testnet not yet supported by Covalent
             put(MATIC_ID, new NetworkInfo(C.MATIC_NETWORK, C.MATIC_SYMBOL, MATIC_RPC_URL,
-                    "https://explorer.matic.network/tx/", MATIC_ID,
-                    MATIC_RPC_URL, "https://explorer-mainnet.maticvigil.com/api/v2/transactions?"));
+                    "https://polygonscan.com/tx/", MATIC_ID,
+                    MATIC_RPC_URL, "https://api.polygonscan.com/api?"));
             put(MATIC_TEST_ID, new NetworkInfo(C.MATIC_TEST_NETWORK, C.MATIC_SYMBOL,
                     MUMBAI_TEST_RPC_URL,
                     "https://mumbai-explorer.matic.today/tx/", MATIC_TEST_ID,

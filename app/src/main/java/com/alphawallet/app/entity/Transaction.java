@@ -20,8 +20,17 @@ import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
 
+import org.web3j.crypto.Hash;
+import org.web3j.crypto.Keys;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
+
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Map;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
 
 /**
  *
@@ -134,9 +143,16 @@ public class Transaction implements Parcelable
 			isConstructor = true;
 			input = CONSTRUCTOR;
 		}
+		else if (ethTx.getTo() == null && ethTx.getInput() != null && ethTx.getInput().startsWith("0x60"))
+		{
+			// some clients don't populate the 'creates' data for constructors. Note: Ethereum constructor always starts with a 'PUSH' 0x60 instruction
+			input = CONSTRUCTOR;
+			isConstructor = true;
+			to = calculateContractAddress(ethTx.getFrom(), nonce);
+		}
 		else
 		{
-			this.to = ethTx.getTo();
+			this.to = ethTx.getTo() != null ? ethTx.getTo() : "";
 			this.input = ethTx.getInput();
 		}
 
@@ -263,7 +279,7 @@ public class Transaction implements Parcelable
 			decodeTransactionInput(token.getWallet());
 			String value = transactionInput.getOperationValue(token, this);
 			boolean isSendOrReceive = !from.equalsIgnoreCase(to) && transactionInput.isSendOrReceive(this);
-			String prefix = (value.length() > 0 && value.startsWith("#") || !isSendOrReceive) ? "" :
+			String prefix = (value.length() == 0 || (value.startsWith("#") || !isSendOrReceive)) ? "" :
 					(token.getIsSent(this) ? "- " : "+ ");
 			return prefix + value;
 		}
@@ -574,5 +590,18 @@ public class Transaction implements Parcelable
 		{
 			return true;
 		}
+	}
+
+	private String calculateContractAddress(String account, long nonce){
+		byte[] addressAsBytes = org.web3j.utils.Numeric.hexStringToByteArray(account);
+		byte[] calculatedAddressAsBytes =
+				Hash.sha3(RlpEncoder.encode(
+						new RlpList(
+								RlpString.create(addressAsBytes),
+								RlpString.create((nonce)))));
+
+		calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
+				12, calculatedAddressAsBytes.length);
+		return org.web3j.utils.Numeric.toHexString(calculatedAddressAsBytes);
 	}
 }

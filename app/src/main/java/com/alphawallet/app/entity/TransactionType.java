@@ -28,5 +28,9 @@ public enum TransactionType
     WITHDRAW,
     DEPOSIT,
     CONTRACT_CALL,
+    REMIX,
+    BURN,
+    MINT,
+    COMMIT_NFT,
     ILLEGAL_VALUE;
 }

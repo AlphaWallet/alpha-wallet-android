@@ -326,6 +326,10 @@
     <string name="ticket_magiclink_transfer">Magiclink Transfer</string> <!-- transfer out of our wallet by magiclink -->
     <string name="ticket_magiclink_sale">Sold via Magiclink</string>
     <string name="ticket_magiclink_purchase">Magiclink Purchase</string>
+    <string name="token_mint">Mint</string>
+    <string name="token_burn">Burn</string>
+    <string name="remix" translatable="false">Remix</string>
+    <string name="commit_nft" translatable="false">Commit NFT</string>
 
     <string name="action_next">Next</string>
     <string name="action_save">Save</string>
@@ -389,7 +393,7 @@
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Invalid Transaction</string>
     <string name="contains_no_data">DApp transaction contains no data</string>
-    <string name="error_insufficient_funds">Insufficient Funds</string>
+    <string name="error_insufficient_funds">Insufficient %1$s</string>
     <string name="ssl_cert_invalid">Invalid SSL Certificate. This site may be unsafe. Proceed?</string>
     <string name="import_spawnable">Import Tokens</string>
     <string name="currency_drop">Take Currency Drop</string>
@@ -777,9 +781,4 @@
     <string name="action_save_alert">Save Alert</string>
     <string name="alerts_will_appear_here">Alerts will appear here</string>
     <string name="token_text">Token</string>
-    <string name="token_info_portfolio">Portfolio</string>
-    <string name="enter_target_price">Enter Target Price</string>
-    <string name="title_set_new_alert">Set New Alert</string>
-    <string name="action_save_alert">Save Alert</string>
-    <string name="alerts_will_appear_here">Alerts will appear here</string>
 </resources>

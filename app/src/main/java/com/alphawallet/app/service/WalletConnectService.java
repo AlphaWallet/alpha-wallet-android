@@ -9,6 +9,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
 
@@ -36,6 +38,7 @@ public class WalletConnectService extends Service
     private final ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
 
     private final ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
+    private WCRequest currentRequest = null;
 
     private static final String TAG = "WCClientSvs";
 
@@ -43,6 +46,27 @@ public class WalletConnectService extends Service
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         Log.d(TAG, "SERVICE STARTING");
+        try
+        {
+            int actionVal = Integer.parseInt(intent.getAction());
+            WalletConnectActions action = WalletConnectActions.values()[actionVal];
+
+            switch (action)
+            {
+                case CONNECT:
+                    Log.d(TAG, "SERVICE CONNECT");
+                    break;
+                case DISCONNECT:
+                    Log.d(TAG, "SERVICE DISCONNECT");
+                    //kill any active connection
+                    disconnectCurrentSessions();
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
         return START_STICKY;
     }
 
@@ -56,6 +80,10 @@ public class WalletConnectService extends Service
             signRequests.add(request); // not for this client, put it back on the stack, at the back
             request = null;
         }
+        else if (request != null)
+        {
+            currentRequest = request;
+        }
 
         return request;
     }
@@ -63,6 +91,22 @@ public class WalletConnectService extends Service
     public int getConnectionCount()
     {
         return clientMap.size();
+    }
+
+    public WCRequest getCurrentRequest()
+    {
+        return currentRequest;
+    }
+
+    private void disconnectCurrentSessions()
+    {
+        for (WCClient client : clientMap.values())
+        {
+            if (client.isConnected())
+            {
+                client.killSession();
+            }
+        }
     }
 
     public class LocalBinder extends Binder

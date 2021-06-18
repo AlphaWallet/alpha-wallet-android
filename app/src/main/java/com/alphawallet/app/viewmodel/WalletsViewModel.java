@@ -286,9 +286,9 @@ public class WalletsViewModel extends BaseViewModel
         balanceTimerDisposable = null;
     }
 
-    public Realm getRealmManager()
+    public GenericWalletInteract getWalletInteract()
     {
-        return genericWalletInteract.getWalletRealm();
+        return genericWalletInteract;
     }
 
     public void stopUpdates()

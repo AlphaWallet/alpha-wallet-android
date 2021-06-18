@@ -15,7 +15,8 @@ public class LocaleRepository implements LocaleRepositoryType {
     private static final String[] LOCALES = {
             "en",
             "zh",
-            "es"
+            "es",
+            "fr"
     };
 
     private final PreferenceRepositoryType preferences;

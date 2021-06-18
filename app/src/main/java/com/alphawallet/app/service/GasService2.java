@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.text.format.DateUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.Wallet;
@@ -112,7 +113,8 @@ public class GasService2 implements ContractGasProvider
         updateCurrentGasPrices()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(updated -> System.out.println("Updated gas prices: " + updated), Throwable::printStackTrace)
+                .subscribe(updated -> { if (BuildConfig.DEBUG) System.out.println("Updated gas prices: " + updated); },
+                        Throwable::printStackTrace)
                 .isDisposed();
     }
 

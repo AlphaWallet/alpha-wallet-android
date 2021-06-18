@@ -7,9 +7,9 @@ public interface PreferenceRepositoryType {
 
     void setCurrentWalletAddress(String address);
 
-    String getActiveBrowserNetwork();
+    int getActiveBrowserNetwork();
 
-    void setActiveBrowserNetwork(String netName);
+    void setActiveBrowserNetwork(int networkId);
 
     String getNetworkFilterList();
 
@@ -19,17 +19,7 @@ public interface PreferenceRepositoryType {
 
     void setNotificationState(boolean state);
 
-    boolean getDefaultNetworkSet();
-
-    void setDefaultNetworkSet();
-
     String getDefaultLocale();
-
-    void setDefaultLocale(String locale);
-
-    boolean isBackupWalletDialogShown();
-
-    void setBackupWalletDialogShown(boolean isShown);
 
     boolean isFindWalletAddressDialogShown();
 
@@ -58,4 +48,9 @@ public interface PreferenceRepositoryType {
     void setPriceAlerts(String json);
 
     String getPriceAlerts();
+    void setHasSetNetworkFilters();
+    boolean hasSetNetworkFilters();
+    void blankHasSetNetworkFilters();
+
+    void commit();
 }

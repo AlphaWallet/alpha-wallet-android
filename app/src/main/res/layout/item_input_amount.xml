@@ -174,7 +174,7 @@
                 android:fontFamily="@font/font_semibold"
                 android:gravity="end"
                 android:text="@string/error_insufficient_funds"
-                android:textColor="@color/design_default_color_error"
+                android:textColor="@color/danger"
                 android:textSize="@dimen/sp17"
                 android:visibility="gone" />
 

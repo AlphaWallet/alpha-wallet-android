@@ -14,6 +14,7 @@
         android:background="@drawable/chain_name_background_lozenge"
         android:text="@string/ethereum"
         android:textColor="@color/white"
+        android:maxLines="1"
         android:textSize="12sp"
         android:visibility="visible" />
 

@@ -313,6 +313,8 @@
     <!-- transfer out of our wallet by magiclink -->
     <string name="ticket_magiclink_sale">经MagicLink售出</string>
     <string name="ticket_magiclink_purchase">经MagicLink买入</string>
+    <string name="token_mint">铸币</string>
+    <string name="token_burn">烧伤</string>
     <string name="action_next">下一步</string>
     <string name="action_save">保存</string>
     <string name="action_contract_info">智能合约信息</string>
@@ -375,7 +377,7 @@
     <string name="no_recent_transactions_subtext_tokens">通证</string>
     <string name="invalid_transaction">无效交易</string>
     <string name="contains_no_data">DApp 交易未包含任何数据</string>
-    <string name="error_insufficient_funds">资金不够</string>
+    <string name="error_insufficient_funds">%1$s 不够</string>
     <string name="ssl_cert_invalid">无效的 SSL 证书。此站点可能不安全。是否继续？</string>
     <string name="import_spawnable">创建可生成通证</string>
     <string name="currency_drop">领取加密货币</string>
@@ -751,9 +753,4 @@
     <string name="action_save_alert">Save Alert</string>
     <string name="alerts_will_appear_here">Alerts will appear here</string>
     <string name="token_text">Token</string>
-    <string name="token_info_portfolio">Portfolio</string>
-    <string name="enter_target_price">Enter Target Price</string>
-    <string name="title_set_new_alert">Set New Alert</string>
-    <string name="action_save_alert">Save Alert</string>
-    <string name="alerts_will_appear_here">Alerts will appear here</string>
 </resources>

@@ -14,11 +14,9 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
 import com.alphawallet.app.widget.TestNetDialog;
@@ -64,7 +62,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             // Previous active network was deselected, get the first item in filtered networks
             if (selectedChainId == -1)
             {
-                selectedChainId = Utils.intListToArray(viewModel.getFilterNetworkList()).get(0);
+                selectedChainId = viewModel.getFilterNetworkList().get(0);
             }
 
             if (localSelectionMode)
@@ -77,22 +75,14 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             {
                 setTitle(getString(R.string.select_dappbrowser_network));
 
-                if (CustomViewSettings.showAllNetworks())
+                hideSwitches();
+                List<NetworkInfo> filteredNetworks = new ArrayList<>();
+                for (Integer chainId : viewModel.getFilterNetworkList())
                 {
-                    List<NetworkInfo> allNetworks = Arrays.asList(viewModel.getNetworkList());
-                    setupList(selectedChainId, allNetworks);
+                    filteredNetworks.add(viewModel.getNetworkByChain(chainId));
                 }
-                else
-                {
-                    hideSwitches();
-                    List<NetworkInfo> filteredNetworks = new ArrayList<>();
-                    for (Integer chainId : Utils.intListToArray(viewModel.getFilterNetworkList()))
-                    {
-                        filteredNetworks.add(viewModel.getNetworkByChain(chainId));
-                    }
 
-                    setupList(selectedChainId, filteredNetworks);
-                }
+                setupList(selectedChainId, filteredNetworks);
             }
 
             initTestNetDialog(this);
@@ -105,10 +95,10 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
     void setupList(Integer selectedNetwork, List<NetworkInfo> availableNetworks)
     {
+        boolean isMainNetActive = viewModel.mainNetActive();
+
         mainnetSwitch.setOnCheckedChangeListener(null);
         testnetSwitch.setOnCheckedChangeListener(null);
-
-        boolean isMainNetActive = EthereumNetworkBase.hasRealValue(selectedNetwork);
 
         mainnetSwitch.setChecked(isMainNetActive);
         testnetSwitch.setChecked(!isMainNetActive);

@@ -980,11 +980,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
 
-                if (BuildConfig.DEBUG && message.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE)
-                {
-                    testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
-                }
-
                 confirmationDialog.success();
             }
         };
@@ -1297,7 +1292,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void setBackForwardButtons()
     {
-        WebBackForwardList sessionHistory = null;
+        WebBackForwardList sessionHistory;
         boolean canBrowseBack = false;
         boolean canBrowseForward = false;
 
@@ -1413,7 +1408,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            System.out.println("Recovered: " + addressRecovered);
+            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {

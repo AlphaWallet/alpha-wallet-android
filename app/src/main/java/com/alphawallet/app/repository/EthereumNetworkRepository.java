@@ -1,9 +1,7 @@
 package com.alphawallet.app.repository;
 
 import android.content.Context;
-import android.view.View;
 
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -18,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
@@ -31,18 +30,8 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         context = ctx;
     }
 
-    public static List<Integer> addDefaultNetworks()
-    {
-        return new ArrayList<>(Arrays.asList(MAINNET_ID, XDAI_ID));
-    }
-
     public static String getNodeURLByNetworkId(int networkId) {
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
-    }
-
-    public static String getEtherscanURLbyNetwork(int networkId)
-    {
-        return EthereumNetworkBase.getEtherscanURLbyNetwork(networkId);
     }
 
     public boolean getIsPopularToken(int chain, String address)

@@ -43,6 +43,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 public class ENSHandler implements Runnable
 {
     public  static final int ENS_RESOLVE_DELAY = 750; //In milliseconds
+    public  static final int ENS_TIMEOUT_DELAY = 8000;
     private final InputAddress host;
     private TextWatcher ensTextWatcher;
     private final Handler handler;
@@ -140,7 +141,7 @@ public class ENSHandler implements Runnable
         {
             host.displayCheckingDialog(true);
             hostCallbackAfterENS = true;
-            handler.postDelayed(this::checkIfWaitingForENS, 5000);
+            handler.postDelayed(this::checkIfWaitingForENS, ENS_TIMEOUT_DELAY);
         }
         else
         {
@@ -206,6 +207,7 @@ public class ENSHandler implements Runnable
         handler.removeCallbacksAndMessages(null);
         if (hostCallbackAfterENS)
         {
+            if (disposable != null && !disposable.isDisposed()) disposable.dispose();
             hostCallbackAfterENS = false;
             host.ENSComplete();
         }

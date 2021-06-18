@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TextHolder;
@@ -22,18 +23,17 @@ import io.realm.Realm;
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback
 {
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
-    private ArrayList<Wallet> wallets;
+    private final ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
     private final Context context;
     private final Realm realm;
 
     public WalletsAdapter(Context ctx,
-            OnSetWalletDefaultListener onSetWalletDefaultListener,
-                          Realm realm) {
+            OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
         this.wallets = new ArrayList<>();
         this.context = ctx;
-        this.realm = realm;
+        this.realm = genericWalletInteract.getWalletRealm();
     }
 
     @NotNull
@@ -167,6 +167,11 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     public void onWalletClicked(Wallet wallet)
     {
         onSetWalletDefaultListener.onSetDefault(wallet);
+    }
+
+    public void onDestroy()
+    {
+        realm.close();
     }
 
     public interface OnSetWalletDefaultListener {

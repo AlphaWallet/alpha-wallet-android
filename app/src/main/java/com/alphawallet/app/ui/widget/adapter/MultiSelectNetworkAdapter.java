@@ -7,34 +7,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
-    private ArrayList<NetworkItem> networkList;
-    private boolean hasSelection;
+    private final List<NetworkItem> networkList;
+    private boolean hasClicked = false;
 
-    public MultiSelectNetworkAdapter(ArrayList<NetworkItem> selectedNetworks)
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks)
     {
         networkList = selectedNetworks;
-
-        for (NetworkItem item : selectedNetworks)
-        {
-            // Permanently select Ethereum (when on main net)
-            if (CustomViewSettings.isPrimaryNetwork(item))
-            {
-                item.setSelected(true);
-                hasSelection = true;
-                break;
-            }
-        }
     }
 
     public Integer[] getSelectedItems()
@@ -48,22 +37,20 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         return enabledIds.toArray(new Integer[0]);
     }
 
+    public boolean hasSelectedItems()
+    {
+        return hasClicked;
+    }
+
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         int buttonTypeId = R.layout.item_simple_check;
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(buttonTypeId, parent, false);
 
         return new MultiSelectNetworkAdapter.ViewHolder(itemView);
-    }
-
-    public void selectDefault() {
-        //make user pick testnet filters; we have a lock to prevent exit without any filters set
-        /*if (!hasSelection) {
-            networkList.get(0).setSelected(true);
-            notifyItemChanged(0);
-        }*/
     }
 
     @Override
@@ -76,24 +63,14 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.checkbox.setSelected(item.isSelected());
-
-            if (networkList.get(position).getName().equals(CustomViewSettings.primaryNetworkName()))
-            {
-                holder.checkbox.setAlpha(0.5f);
-            } else
-            {
-                holder.checkbox.setAlpha(1.0f);
-            }
         }
     }
 
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)
     {
-        if (!networkList.get(position).getName().equals(CustomViewSettings.primaryNetworkName()))
-        {
-            networkList.get(position).setSelected(!networkList.get(position).isSelected());
-        }
+        networkList.get(position).setSelected(!networkList.get(position).isSelected());
         holder.checkbox.setSelected(networkList.get(position).isSelected());
+        hasClicked = true;
     }
 
     @Override

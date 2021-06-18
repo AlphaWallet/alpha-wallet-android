@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
@@ -24,12 +25,14 @@ public interface TokenLocalSource {
     void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress);
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
+    void createBaseNetworkTokens(String walletAddress);
 
     Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
     void deleteRealmToken(int chainId, Wallet wallet, String address);
 
     Token updateTokenType(Token token, Wallet wallet, ContractType type);
     void storeTokenUrl(int networkId, String address, String imageUrl);
+    Token[] initERC721Assets(Wallet wallet, Token[] tokens);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                             AssetDefinitionService svs);
@@ -56,4 +59,7 @@ public interface TokenLocalSource {
 
     boolean hasVisibilityBeenChanged(Token token);
     boolean getEnabled(Token token);
+
+    void updateERC721Assets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
+    void storeAsset(String wallet, Token token, Asset asset);
 }

@@ -498,7 +498,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         aDialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
-                    viewModel.getNetwork().etherscanTxUrl + hash);
+                    viewModel.getNetwork().getEtherscanUri(hash).toString());
             clipboard.setPrimaryClip(clip);
             aDialog.dismiss();
             new HomeRouter().open(this, true);

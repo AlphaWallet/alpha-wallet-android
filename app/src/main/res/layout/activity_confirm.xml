@@ -174,17 +174,17 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="center_vertical"
                             android:autoLink="web"
-                            android:background="@drawable/background_round_primary"
+                            android:background="@drawable/button_default"
                             android:clickable="true"
                             android:focusable="true"
                             android:fontFamily="@font/font_regular"
                             android:linksClickable="true"
-                            android:paddingLeft="50dp"
-                            android:paddingRight="50dp"
+                            android:paddingLeft="5dp"
+                            android:paddingRight="5dp"
                             android:text="@string/action_more_details"
                             android:textAllCaps="false"
                             android:textColor="@color/white"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:visibility="gone" />
 
                     </LinearLayout>

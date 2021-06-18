@@ -1,14 +1,10 @@
 package com.alphawallet.app.ui;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -26,9 +22,9 @@ import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ERC721ImageView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.TSAction;
-import com.bumptech.glide.Glide;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -51,8 +47,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
-    private ImageView image;
-    private LinearLayout layoutImage;
+    private ERC721ImageView assetImage;
     private TextView title;
     private TextView name;
     private TextView desc;
@@ -68,8 +63,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
 
     private void initViews() {
         title = findViewById(R.id.title);
-        image = findViewById(R.id.image);
-        layoutImage = findViewById(R.id.layout_image);
+        assetImage = findViewById(R.id.layout_image);
         name = findViewById(R.id.name);
         desc = findViewById(R.id.description);
         id = findViewById(R.id.id);
@@ -112,7 +106,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     }
 
     private void setupPage() {
-        setImage(asset);
+        assetImage.setupTokenImage(asset);
         setDetails(asset);
         setNameAndDesc(asset);
         setExternalLink(asset);
@@ -211,22 +205,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         } else {
             cooldown.setVisibility(View.GONE);
         }
-    }
-
-    private void setImage(Asset asset) {
-        layoutImage.setBackgroundResource(R.drawable.background_round_default);
-        GradientDrawable drawable = (GradientDrawable) layoutImage.getBackground();
-
-        if (asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null")) {
-            int color = Color.parseColor("#" + asset.getBackgroundColor());
-            drawable.setColor(color);
-        } else {
-            drawable.setColor(getResources().getColor(R.color.transparent));
-        }
-
-        Glide.with(this)
-                .load(asset.getImagePreviewUrl())
-                .into(image);
     }
 
     @Override

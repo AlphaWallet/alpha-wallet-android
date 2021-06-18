@@ -1,7 +1,7 @@
 package com.alphawallet.ethereum;
 
 /* Weiwu 12 Jan 2020: This class eventually will replace the EthereumNetworkBase class in :app
- * one all inteface methods are implemented.
+ * one all interface methods are implemented.
  */
 
 import java.util.LinkedHashMap;
@@ -29,6 +29,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int FUJI_TEST_ID = 43113;
     public static final int MATIC_ID = 137;
     public static final int MATIC_TEST_ID = 80001;
+    public static final int OPTIMISTIC_MAIN_ID = 10;
+    public static final int OPTIMISTIC_TEST_ID = 69;
+
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
@@ -51,6 +54,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network/";
     public static final String MATIC_RPC_URL = "https://rpc-mainnet.maticvigil.com/";
     public static final String MUMBAI_TEST_RPC_URL = "https://rpc-mumbai.maticvigil.com/";
+    public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
+    public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
 
     static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
@@ -99,6 +104,12 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     MATIC_ID));
             put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai-explorer.matic.today/tx/",
                     MATIC_TEST_ID));
+
+            put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_URL, "https://optimistic.etherscan.io/tx/",
+                    OPTIMISTIC_MAIN_ID));
+            put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
+                    OPTIMISTIC_TEST_ID));
+
         }
     };
 

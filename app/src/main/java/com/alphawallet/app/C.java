@@ -40,6 +40,8 @@ public abstract class C {
     public static final String FUJI_TEST_NETWORK = "Avalanche FUJI (Test)";
     public static final String MATIC_NETWORK = "Polygon";
     public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
+    public static final String OPTIMISTIC_NETWORK = "Optimistic";
+    public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";

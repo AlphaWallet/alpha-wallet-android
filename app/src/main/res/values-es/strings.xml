@@ -313,6 +313,8 @@
     <!-- transfer out of our wallet by magiclink -->
     <string name="ticket_magiclink_sale">Vendido a través de MagicLink</string>
     <string name="ticket_magiclink_purchase">Compra con MagicLink</string>
+    <string name="token_mint">Acuñar</string>
+    <string name="token_burn">Quemar</string>
     <string name="action_next">Siguiente</string>
     <string name="action_save">Guardar</string>
     <string name="action_contract_info">Información del contrato</string>
@@ -375,7 +377,7 @@
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Transacción no válida</string>
     <string name="contains_no_data">La transacción DApp no contiene datos</string>
-    <string name="error_insufficient_funds">Fondos insuficientes</string>
+    <string name="error_insufficient_funds">%1$s insuficientes</string>
     <string name="ssl_cert_invalid">Certificado SSL no válido. Este sitio puede ser peligroso. ¿Continuar?</string>
     <string name="import_spawnable">Importar tokens</string>
     <string name="currency_drop">Reclamar criptomoneda gratuita</string>
@@ -751,9 +753,4 @@
     <string name="action_save_alert">Save Alert</string>
     <string name="alerts_will_appear_here">Alerts will appear here</string>
     <string name="token_text">Token</string>
-    <string name="token_info_portfolio">Portfolio</string>
-    <string name="enter_target_price">Enter Target Price</string>
-    <string name="title_set_new_alert">Set New Alert</string>
-    <string name="action_save_alert">Save Alert</string>
-    <string name="alerts_will_appear_here">Alerts will appear here</string>
 </resources>

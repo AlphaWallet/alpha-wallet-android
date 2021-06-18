@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static com.alphawallet.app.C.BURN_ADDRESS;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
 /**
@@ -267,6 +269,13 @@ public class TransactionInput
             case TRANSFER_FROM:
                 address = tx.from;
                 break;
+            case REMIX:
+            case COMMIT_NFT:
+                break;
+            case BURN:
+            case MINT:
+                address = t.getFullName();
+                break;
             case ALLOCATE_TO:
                 address = getFirstAddress();
                 break;
@@ -392,6 +401,8 @@ public class TransactionInput
                 type = interpretTradeData(tx, walletAddress);
                 break;
             case "safeTransferFrom":
+                type = interpretSafeTransferFrom(walletAddress);
+                break;
             case "transferFrom":
                 type = interpretTransferFrom(walletAddress);
                 break;
@@ -423,6 +434,18 @@ public class TransactionInput
                 break;
             case "deposit":
                 type = TransactionType.DEPOSIT;
+                break;
+            case "remix":
+                type = TransactionType.REMIX;
+                break;
+            case "mint":
+                type = TransactionType.MINT;
+                break;
+            case "burn":
+                type = TransactionType.BURN;
+                break;
+            case "commitNFT":
+                type = TransactionType.COMMIT_NFT;
                 break;
             default:
                 type = TransactionType.CONTRACT_CALL;
@@ -485,9 +508,36 @@ public class TransactionInput
         }
     }
 
+    private TransactionType interpretSafeTransferFrom(String walletAddr)
+    {
+        String destinationAddr = getDestinationAddress();
+        String fromAddr = getFirstAddress();
+        if (walletAddr == null)
+        {
+            return TransactionType.TRANSFER_FROM;
+        }
+        else if (destinationAddr.equals(C.BURN_ADDRESS))
+        {
+            return TransactionType.BURN;
+        }
+        else if (fromAddr.equals(BURN_ADDRESS))
+        {
+            return TransactionType.MINT;
+        }
+        else if (!destinationAddr.equalsIgnoreCase(walletAddr)) //otherparty in this case will be the first address, the previous owner of the token(s)
+        {
+            return TransactionType.TRANSFER_FROM;
+        }
+        else
+        {
+            return TransactionType.TRANSFER_TO;
+        }
+    }
+
     private TransactionType interpretTransferFrom(String walletAddr)
     {
         String destinationAddr = getDestinationAddress();
+        String fromAddr = getFirstAddress();
         if (walletAddr == null)
         {
             return TransactionType.TRANSFER_FROM;
@@ -572,13 +622,22 @@ public class TransactionInput
             case SEND:
                 operationValue = token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
                 break;
+            case BURN:
+            case MINT:
+                operationValue = token.getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
+                break;
+
+            case REMIX:
+            case COMMIT_NFT:
+                operationValue = "";
+                addSymbol = false;
+                break;
 
             case LOAD_NEW_TOKENS:
                 operationValue = String.valueOf(arrayValues.size());
                 break;
             case CONSTRUCTOR:
             case TERMINATE_CONTRACT:
-                operationValue = "";
                 break;
             case CONTRACT_CALL:
                 addSymbol = false;
@@ -590,18 +649,23 @@ public class TransactionInput
                 addSymbol = false;
                 break;
             case DEPOSIT:
-                addSymbol = false;
+                //base value of tx
+                operationValue = token.getTransactionValue(tx, TRANSACTION_BALANCE_PRECISION);// .getTransferValue(tx.transactionInput, TRANSACTION_BALANCE_PRECISION);
+                addSymbol = true;
                 break;
             case UNKNOWN_FUNCTION:
             case INVALID_OPERATION:
             default:
-                operationValue = "";
                 break;
         }
 
         if (addSymbol)
         {
             if (!token.isEthereum())
+            {
+                operationValue = operationValue + " " + token.getSymbol();
+            }
+            else if (!TextUtils.isEmpty(operationValue))
             {
                 operationValue = operationValue + " " + token.getSymbol();
             }
@@ -673,7 +737,12 @@ public class TransactionInput
                 return StatusType.RECEIVE;
             case ALLOCATE_TO:
                 return StatusType.SENT;
-
+            case BURN:
+                return StatusType.SENT;
+            case MINT:
+                return StatusType.RECEIVE;
+            case REMIX:
+                return StatusType.NONE;
             case LOAD_NEW_TOKENS:
             case CONSTRUCTOR:
             case TERMINATE_CONTRACT:
@@ -704,11 +773,12 @@ public class TransactionInput
         {
             case SEND:
             case TRANSFER_FROM:
+            case BURN:
                 return "sent";
             case TRANSFER_TO:
                 return "received";
             case RECEIVE_FROM:
-                return "received";
+            case MINT:
             case RECEIVED:
                 return "received";
             case APPROVE:
@@ -746,10 +816,12 @@ public class TransactionInput
             case MAGICLINK_PICKUP: //received ticket from a magic link (from ->)
                 return false;
             case TRANSFER_TO:
+            case MINT:
                 return false;
             case RECEIVE_FROM:
                 return true;
             case TRANSFER_FROM:
+            case BURN:
                 return true;
             case APPROVE:
                 return true;
@@ -777,8 +849,11 @@ public class TransactionInput
             case MAGICLINK_PICKUP: //received ticket from a magic link (from ->)
             case TRANSFER_TO:
             case RECEIVE_FROM:
+            case MINT:
+            case BURN:
             case TRANSFER_FROM:
             case RECEIVED:
+            case REMIX:
                 return true;
             default:
                 return !tx.value.equals("0");

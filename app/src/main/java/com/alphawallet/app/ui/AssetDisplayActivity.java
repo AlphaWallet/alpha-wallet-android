@@ -23,6 +23,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -247,15 +248,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         super.onDestroy();
         unregisterReceiver(finishReceiver);
         viewModel.clearFocusToken();
-    }
-
-    private void onTokenUpdate(Token t)
-    {
-        if (adapter != null)
-        {
-            token = t;
-            adapter.setToken(token);
-        }
+        if (adapter != null) adapter.onDestroy(tokenView);
     }
 
     /**
@@ -400,6 +393,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         functionBar.setWalletType(wallet.type);
         tokenView.setAdapter(adapter);
+    }
+
+    public void storeAsset(Asset asset)
+    {
+        viewModel.getTokensService().storeAsset(token, asset);
     }
 
     private void errorInsufficientFunds(Token currency)

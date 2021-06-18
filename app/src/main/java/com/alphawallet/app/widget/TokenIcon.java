@@ -124,7 +124,10 @@ public class TokenIcon extends ConstraintLayout
             protected void onResourceCleared(@Nullable Drawable placeholder) { }
 
             @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable) { }
+            public void onLoadFailed(@Nullable Drawable errorDrawable)
+            {
+                if (token != null) IconItem.iconLoadFail(token.getAddress());
+            }
 
             @Override
             public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
@@ -159,6 +162,7 @@ public class TokenIcon extends ConstraintLayout
         else
         {
             setupTextIcon(token);
+            if (iconItem.useTextSymbol()) return;
             RequestBuilder<Drawable> rb = null;
             RequestOptions circleCrop;
 
@@ -166,10 +170,9 @@ public class TokenIcon extends ConstraintLayout
             if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME))
             {
                 circleCrop = new RequestOptions().circleCrop();
-                if (!iconItem.onlyFetchFromCache()) {
                 rb = Glide.with(getContext().getApplicationContext())
                         .load(Utils.getAWIconRepo(token.getAddress()))
-                        .addListener(requestListenerAW); }
+                        .addListener(requestListenerAW);
             }
             else
             {
@@ -179,7 +182,6 @@ public class TokenIcon extends ConstraintLayout
             Glide.with(getContext().getApplicationContext())
                     .load(iconItem.getUrl())
                     .signature(iconItem.getSignature())
-                    .onlyRetrieveFromCache(iconItem.onlyFetchFromCache()) //reduce URL checking, only check once per session
                     .error(rb)
                     .apply(circleCrop) //only crop if not from AW iconassets repo
                     .apply(new RequestOptions().placeholder(chainIcon))
@@ -237,11 +239,6 @@ public class TokenIcon extends ConstraintLayout
         }
     }
 
-    public void startPendingSpinner(long startTime, long completionTime)
-    {
-        //pendingProgress.startAnimation(startTime, completionTime);
-    }
-
     /**
      * This method is used to change visibility of "Status" Icon i.e. Send Or Receive.
      * @param isVisible Boolean parameter to either make Transaction icon visible or hidden
@@ -292,7 +289,8 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             setupTextIcon(token);
-            return false;
+            if (token != null) IconItem.iconLoadFail(token.getAddress());
+            return true;
         }
 
         @Override
@@ -308,6 +306,7 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             setupTextIcon(token);
+            if (token != null) IconItem.iconLoadFail(token.getAddress());
             return false;
         }
 
@@ -315,7 +314,6 @@ public class TokenIcon extends ConstraintLayout
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
             //got icon from AW iconasset repo, now load from this repo, so invalidate the cache
             if (assetSvs != null) { assetSvs.storeImageUrl(token.tokenInfo.chainId, token.getAddress()); }
-            else if (token != null) IconItem.invalidateCheck(Keys.toChecksumAddress(token.getAddress()));
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);

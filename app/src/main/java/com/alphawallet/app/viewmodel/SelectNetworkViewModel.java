@@ -31,24 +31,20 @@ public class SelectNetworkViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public String getFilterNetworkList()
+    public List<Integer> getFilterNetworkList()
     {
-        List<Integer> networkIds = networkRepository.getFilterNetworkList();
-        StringBuilder sb = new StringBuilder();
-        boolean firstValue = true;
-        for (int networkId : networkIds)
-        {
-            if (!firstValue) sb.append(",");
-            sb.append(networkId);
-            firstValue = false;
-        }
-        return sb.toString();
+        return networkRepository.getFilterNetworkList();
     }
 
     public void openSelectNetworkFilters(Activity ctx, int requestCode)
     {
         Intent intent = new Intent(ctx, SelectNetworkFilterActivity.class);
         ctx.startActivityForResult(intent, requestCode);
+    }
+
+    public boolean mainNetActive()
+    {
+        return preferenceRepository.isActiveMainnet();
     }
 
     public boolean hasShownTestNetWarning()

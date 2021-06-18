@@ -167,6 +167,10 @@ public class RealmAuxData extends RealmObject
                 return StatusType.SENT;
             case "received":
                 return StatusType.RECEIVE;
+            case "mint":
+                return StatusType.RECEIVE;
+            case "burn":
+                return StatusType.SENT;
             case "ownerApproved":
             case "approvalObtained":
             default:

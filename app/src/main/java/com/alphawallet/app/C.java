@@ -125,6 +125,7 @@ public abstract class C {
     public static final String DAPP_URL_LOAD = "DAPP_URL";
     public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
 
+
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";
 

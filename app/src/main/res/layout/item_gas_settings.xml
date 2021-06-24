@@ -138,7 +138,7 @@
         android:textSize="@dimen/sp17"
         android:textColor="@color/mine"
         android:lineHeight="29sp"
-        tools:text="@string/action_speedup_note"
+        tools:text="@string/text_speedup_note"
         android:visibility="gone"/>
 
     <TextView

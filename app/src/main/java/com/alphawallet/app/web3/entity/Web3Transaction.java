@@ -125,7 +125,7 @@ public class Web3Transaction implements Parcelable {
         description = null;
     }
 
-    public Web3Transaction(com.alphawallet.app.entity.Transaction tx, Boolean isCancelling)
+    public Web3Transaction(com.alphawallet.app.entity.Transaction tx, Boolean isCancelling, BigInteger minGas)
     {
 
         recipient = new Address(tx.to);

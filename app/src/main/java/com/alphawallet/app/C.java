@@ -117,7 +117,8 @@ public abstract class C {
     public static final String EXTRA_LOCALE = "LOCALE_STRING";
     public static final String EXTRA_PAGE_TITLE = "PTITLE";
     public static final String EXTRA_CURRENCY = "CURRENCY_STRING";
-    public static final String EXTRA_MIN_GAS_PRICE = "_MINGASPRICE";
+    public static final String EXTRA_RESENDING= "RESENDING";
+    public static final String EXTRA_MIN_GAS_PRICE = "MINIMUM_GAS_PRICE";
     public static final String EXTRA_QR_CODE = "QR_SCAN_CODE";
     public static final String EXTRA_UNIVERSAL_SCAN = "UNIVERSAL_SCAN";
     public static final String EXTRA_NONCE = "_NONCE";

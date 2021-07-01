@@ -26,6 +26,7 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
 
 import org.web3j.abi.FunctionEncoder;
@@ -215,6 +216,13 @@ public class TokenRepository implements TokenRepositoryType {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
                 .fetchAllTokensWithNameIssue(walletAddress, networkFilters);
+    }
+
+    @Override
+    public Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Integer> networkFilters) {
+        if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
+        return localSource
+                .fetchAllTokensWithBlankName(walletAddress, networkFilters);
     }
 
     @Override

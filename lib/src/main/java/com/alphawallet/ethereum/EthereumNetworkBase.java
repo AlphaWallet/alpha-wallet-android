@@ -51,9 +51,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";
     public static final String FUJI_TEST_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
     public static final String FANTOM_RPC_URL = "https://rpcapi.fantom.network";
-    public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network/";
-    public static final String MATIC_RPC_URL = "https://rpc-mainnet.maticvigil.com/";
-    public static final String MUMBAI_TEST_RPC_URL = "https://rpc-mumbai.maticvigil.com/";
+    public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network";
+    public static final String MATIC_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
+    public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
 
@@ -100,9 +100,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(FANTOM_TEST_ID, new NetworkInfo("Fantom (Test)", "FTM", FANTOM_TEST_RPC_URL, "https://explorer.testnet.fantom.network/tx/",
                     FANTOM_TEST_ID));
 
-            put(MATIC_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://explorer.matic.network/tx/",
+            put(MATIC_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://polygonscan.com/tx/",
                     MATIC_ID));
-            put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai-explorer.matic.today/tx/",
+            put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
                     MATIC_TEST_ID));
 
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_URL, "https://optimistic.etherscan.io/tx/",

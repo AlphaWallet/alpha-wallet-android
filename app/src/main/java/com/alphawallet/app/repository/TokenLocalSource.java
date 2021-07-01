@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -43,6 +44,7 @@ public interface TokenLocalSource {
     TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters);
 
     Single<Token[]> fetchAllTokensWithNameIssue(String walletAddress, List<Integer> networkFilters);
+    Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Integer> networkFilters);
 
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 

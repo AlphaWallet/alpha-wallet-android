@@ -26,6 +26,7 @@ import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
@@ -97,6 +98,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         splashViewModel.fetchWallets();
         splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
         splashViewModel.cleanAuxData(getApplicationContext());
+
+        TokensService.setWalletStartup();
     }
 
     protected Activity getThisActivity()

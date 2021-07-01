@@ -361,6 +361,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private void updateRealmTransactionFinishEstimate(String txHash)
     {
+        final long expectedTime = System.currentTimeMillis() + gasWidget.getExpectedTransactionTime() * 1000;
         try (Realm realm = tokensService.getWalletRealmInstance())
         {
             realm.executeTransactionAsync(r -> {
@@ -370,9 +371,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
                 if (rt != null)
                 {
-                    rt.setExpectedCompletion(System.currentTimeMillis() + gasWidget.getExpectedTransactionTime() * 1000);
+                    rt.setExpectedCompletion(expectedTime);
                 }
             });
+        }
+        catch (Exception e)
+        {
+            //
         }
     }
 

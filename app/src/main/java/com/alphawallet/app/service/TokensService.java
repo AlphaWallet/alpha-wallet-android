@@ -78,6 +78,7 @@ public class TokensService
     private boolean openSeaChecked = false;
     private boolean appHasFocus = true;
     private boolean mainNetActive = true;
+    private static boolean walletStartup = false;
 
     @Nullable
     private Disposable eventTimer;
@@ -118,8 +119,9 @@ public class TokensService
         if (queryUnknownTokensDisposable == null || queryUnknownTokensDisposable.isDisposed())
         {
             ContractAddress t = unknownTokens.pollFirst();
+            Token cachedToken = t != null ? getToken(t.chainId, t.address) : null;
 
-            if (t != null && getToken(t.chainId, t.address) == null)
+            if (t != null && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
             {
                 queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId).toObservable() //fetch tokenInfo
                         .filter(tokenInfo -> tokenInfo.name != null)
@@ -254,6 +256,7 @@ public class TokensService
     public void startUpdateCycle()
     {
         if (currentAddress == null) return;
+        startupPass();
         populateTokenCheck();
 
         nextTokenCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
@@ -315,6 +318,8 @@ public class TokensService
             return ContractType.NOT_SET;
         }
     }
+
+    public static void setWalletStartup() { walletStartup = true; }
 
     public void setupFilter()
     {
@@ -382,6 +387,25 @@ public class TokensService
             checkUnknownTokenCycle = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkUnknownTokens()).subscribe();
         }
+    }
+
+    private void startupPass()
+    {
+        if (!walletStartup) return;
+
+        walletStartup = false;
+
+        //one time pass over tokens with a null name
+        tokenRepository.fetchAllTokensWithBlankName(currentAddress, networkFilter)
+                .map(contractAddrs -> {
+                    for (ContractAddress addr : contractAddrs) { unknownTokens.add(addr); }
+                    startUnknownCheck();
+                    return 1;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe()
+                .isDisposed();
     }
 
     public List<Integer> getNetworkFilters()

@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -950,6 +951,31 @@ public class TokensRealmSource implements TokenLocalSource {
             }
 
             return tokens.toArray(new Token[0]);
+        });
+    }
+
+    @Override
+    public Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Integer> networkFilters) {
+        List<ContractAddress> tokens = new ArrayList<>();
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(walletAddress))
+            {
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .like("address", ADDRESS_FORMAT)
+                        .like("name", "")
+                        .findAll();
+
+                for (RealmToken realmItem : realmItems)
+                {
+                    if (networkFilters.size() > 0 && !networkFilters.contains(realmItem.getChainId())) continue;
+                    if (TextUtils.isEmpty(realmItem.getName()))
+                    {
+                        tokens.add(new ContractAddress(realmItem.getChainId(), realmItem.getTokenAddress()));
+                    }
+                }
+            }
+
+            return tokens.toArray(new ContractAddress[0]);
         });
     }
 

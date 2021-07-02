@@ -30,4 +30,6 @@ public interface TransactionLocalSource {
 	Transaction storeRawTx(Wallet wallet, int chainId, EthTransaction object, long timeStamp, boolean isSuccessful);
 
     long fetchTxCompletionTime(Wallet wallet, String hash);
+
+    Single<Boolean> deleteAllForWallet(String currentAddress);
 }

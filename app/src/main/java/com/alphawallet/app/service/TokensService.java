@@ -283,7 +283,7 @@ public class TokensService
                 .observeOn(Schedulers.newThread()).subscribe();
     }
 
-    private void stopUpdateCycle()
+    public void stopUpdateCycle()
     {
         if (eventTimer != null && !eventTimer.isDisposed())
         {

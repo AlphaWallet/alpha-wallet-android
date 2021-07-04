@@ -598,6 +598,7 @@
     <string name="title_faq">FAQ</string>
     <string name="title_console">Console</string>
     <string name="title_clear_browser_cache">Clear Browser Cache</string>
+    <string name="title_reload_token_data">Reload Token Data</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
     <string name="add_hide_tokens">Add / Hide Tokens</string>
@@ -606,6 +607,7 @@
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
+    <string name="toast_token_data_cleared">Token Data cleared</string>
     <string name="your_wallets">Your Wallets</string>
     <string name="action_copy">Copy</string>
     <string name="title_version_support_warning">Important Update</string>

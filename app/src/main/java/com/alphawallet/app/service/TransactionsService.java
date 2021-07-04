@@ -399,4 +399,13 @@ public class TransactionsService
             return new Transaction();
         }
     }
+
+    public Single<Boolean> wipeDataForWallet()
+    {
+        if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return Single.fromCallable(() -> false);
+        tokensService.stopUpdateCycle();
+        stopAllChainUpdate();
+
+        return transactionsCache.deleteAllForWallet(tokensService.getCurrentAddress());
+    }
 }

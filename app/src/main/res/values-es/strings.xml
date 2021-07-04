@@ -581,6 +581,7 @@
     <string name="title_faq">Preguntas frecuentes</string>
     <string name="title_console">Consola</string>
     <string name="title_clear_browser_cache">Borrar la caché del navegador</string>
+    <string name="title_reload_token_data">Recargar datos del Token</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Cambiar idioma</string>
     <string name="add_hide_tokens">Añadir / Ocultar tokens</string>
@@ -589,6 +590,7 @@
     <string name="dialog_title_select_currency">Seleccionar moneda FÍAT</string>
     <string name="tokenscript_file_error">Error de archivo de TokenScript</string>
     <string name="toast_browser_cache_cleared">Caché del navegador borrada</string>
+    <string name="toast_token_data_cleared">Datos del Token borrados</string>
     <string name="your_wallets">Tus monederos</string>
     <string name="action_copy">Copiar</string>
     <string name="title_version_support_warning">Actualización importante</string>

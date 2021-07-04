@@ -30,12 +30,16 @@ import com.alphawallet.app.widget.SettingsItemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_LOCALE;
 import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.RESET_WALLET;
 
 public class AdvancedSettingsActivity extends BaseActivity {
     @Inject
@@ -49,6 +53,10 @@ public class AdvancedSettingsActivity extends BaseActivity {
     private SettingsItemView tokenScriptManagement;
     private SettingsItemView changeCurrency;
     private SettingsItemView fullScreenSettings;
+    private SettingsItemView refreshTokenDatabase;
+
+    @Nullable
+    private Disposable clearTokenCache;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +74,17 @@ public class AdvancedSettingsActivity extends BaseActivity {
         initializeSettings();
 
         addSettingsToLayout();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (clearTokenCache != null && !clearTokenCache.isDisposed())
+        {
+            //terminate the thread
+            clearTokenCache.dispose();
+        }
     }
 
     private void initializeSettings() {
@@ -113,6 +132,12 @@ public class AdvancedSettingsActivity extends BaseActivity {
                         .withListener(this::onFullScreenClicked)
                         .build();
 
+        refreshTokenDatabase = new SettingsItemView.Builder(this)
+                .withIcon(R.drawable.ic_settings_reset_tokens)
+                .withTitle(R.string.title_reload_token_data)
+                .withListener(this::onReloadTokenDataClicked)
+                .build();
+
         changeLanguage.setSubtitle(LocaleUtils.getDisplayLanguage(viewModel.getActiveLocale(), viewModel.getActiveLocale()));
         fullScreenSettings.setToggleState(viewModel.getFullScreenState());
     }
@@ -134,6 +159,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
         advancedSettingsLayout.addView(changeCurrency);
         advancedSettingsLayout.addView(tokenScriptManagement);
         advancedSettingsLayout.addView(fullScreenSettings);
+        advancedSettingsLayout.addView(refreshTokenDatabase);
     }
 
     private void onConsoleClicked() {
@@ -145,6 +171,25 @@ public class AdvancedSettingsActivity extends BaseActivity {
         webView.clearCache(true);
         Toast.makeText(this, getString(R.string.toast_browser_cache_cleared), Toast.LENGTH_SHORT).show();
         viewModel.blankFilterSettings();
+    }
+
+    private void onReloadTokenDataClicked() {
+        //delete all Token data for this wallet
+        clearTokenCache = viewModel.resetTokenData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showResetResult);
+
+        viewModel.blankFilterSettings();
+    }
+
+    private void showResetResult(Boolean resetResult)
+    {
+        if (resetResult)
+        {
+            Toast.makeText(this, getString(R.string.toast_token_data_cleared), Toast.LENGTH_SHORT).show();
+            sendBroadcast(new Intent(RESET_WALLET)); // refresh token and transaction lists
+        }
     }
 
     private void onTokenScriptClicked() {

@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.gridlayout.widget.GridLayout;
 import androidx.lifecycle.ViewModelProvider;
@@ -39,6 +41,7 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
 public class TokenDetailActivity extends BaseActivity implements StandardFunctionInterface
@@ -217,6 +220,17 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         return super.onOptionsItemSelected(item);
     }
 
+    ActivityResultLauncher<Intent> transferDirectDialogResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null)
+                {
+                    Intent i = new Intent();
+                    i.putExtra(C.EXTRA_TXHASH, result.getData().getStringExtra(C.EXTRA_TXHASH));
+                    setResult(RESULT_OK, new Intent());
+                    finish();
+                }
+            });
+
     private void openTransferDirectDialog()
     {
         Intent intent = new Intent(this, TransferTicketDetailActivity.class);
@@ -225,7 +239,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId(16));
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivityForResult(intent, C.TERMINATE_ACTIVITY);
+        transferDirectDialogResult.launch(intent);
     }
 
     @Override
@@ -238,25 +252,5 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode)
-        {
-            case C.TERMINATE_ACTIVITY:
-                if (resultCode == RESULT_OK && data != null)
-                {
-                    Intent i = new Intent();
-                    i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
-                    setResult(RESULT_OK, new Intent());
-                    finish();
-                }
-                break;
-            default:
-                break;
-        }
     }
 }

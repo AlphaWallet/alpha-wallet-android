@@ -9,6 +9,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Lifecycle;
@@ -132,12 +135,20 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         });
     }
 
+    ActivityResultLauncher<String> getQRImage = registerForActivityResult(new ActivityResultContracts.GetContent(),
+            uri -> {
+                disposable = concertAndHandle(uri)
+                        .observeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onSuccess, this::onError);
+            });
+
     private void pickImage()
     {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), RC_HANDLE_IMAGE_PICKUP);
+        getQRImage.launch("image/*");
     }
 
     // Handles the requesting of the camera permission.
@@ -222,23 +233,6 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         Intent intent = new Intent();
         setResult(Activity.RESULT_CANCELED, intent);
         finish();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_HANDLE_IMAGE_PICKUP && resultCode == Activity.RESULT_OK)
-        {
-            if (data != null) {
-                Uri selectedImage = data.getData();
-
-                disposable = concertAndHandle(selectedImage)
-                        .observeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onSuccess, this::onError);
-            }
-        }
     }
 
     private void onError(Throwable throwable)

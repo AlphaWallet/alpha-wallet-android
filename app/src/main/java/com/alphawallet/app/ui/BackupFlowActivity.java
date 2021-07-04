@@ -11,6 +11,8 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
@@ -199,20 +201,6 @@ public class BackupFlowActivity extends BaseActivity implements
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == C.REQUEST_BACKUP_WALLET)
-        {
-            if (resultCode == RESULT_OK)
-            {
-                finishBackupSuccess(data);
-            }
-        }
-        finish();
-    }
-
     private void finishBackupSuccess(Intent data) {
         setResult(RESULT_OK, data);
         finish();
@@ -233,6 +221,15 @@ public class BackupFlowActivity extends BaseActivity implements
         }
     }
 
+    ActivityResultLauncher<Intent> handleBackupWallet = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    finishBackupSuccess(result.getData());
+                }
+                finish();
+            });
+
     @Override
     public void handleClick(String action, int id) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
@@ -251,6 +248,7 @@ public class BackupFlowActivity extends BaseActivity implements
                 intent.putExtra("STATE", UPGRADE_KEY_SECURITY);
                 break;
         }
-        startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+
+        handleBackupWallet.launch(intent);
     }
 }

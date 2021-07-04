@@ -14,6 +14,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -414,20 +418,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
+    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                setupNetwork(networkId);
+            });
+
     private void selectNetwork() {
         Intent intent = new Intent(AddTokenActivity.this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+        getNetwork.launch(intent);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == C.REQUEST_SELECT_NETWORK && resultCode == RESULT_OK) {
-            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1);
-            setupNetwork(networkId);
-        }
-        else if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
+        if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
                 case FullScannerFragment.SUCCESS:

@@ -195,7 +195,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.google.firebase:firebase-crashlytics:18.0.1'
+    implementation 'com.google.firebase:firebase-crashlytics:18.1.0'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 

@@ -3,6 +3,8 @@ package com.alphawallet.app.ui;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -493,13 +495,19 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         dialog.show();
     }
 
+    ActivityResultLauncher<Intent> sellLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
+            });
+
     private void sellLinkFinal(String universalLink) {
         //create share intent
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Magic Link");
         sendIntent.setType("text/plain");
-        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
+        sellLinkFinalResult.launch(Intent.createChooser(sendIntent, "Share via"));
     }
 
     @Override

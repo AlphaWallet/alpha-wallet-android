@@ -10,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
@@ -21,6 +23,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
@@ -239,22 +242,19 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         }
     }
 
+    ActivityResultLauncher<Intent> getQRCode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> handleScanQR(result.getResultCode(), result.getData()));
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                if (currentPage ==ImportType.KEYSTORE_FORM_INDEX)
-                {
-                    if (((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second).backPressed()) return true;
-                }
-                break;
-            }
-            case R.id.action_scan: {
-                //scan QR address
-                Intent intent = new Intent(this, QRScanningActivity.class);
-                startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
-            }
-            break;
+        if (item.getItemId() == android.R.id.home && currentPage ==ImportType.KEYSTORE_FORM_INDEX)
+        {
+            if (((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second).backPressed()) return true;
+        }
+        else if (item.getItemId() == R.id.action_scan)
+        {
+            Intent intent = new Intent(this, QRScanningActivity.class);
+            getQRCode.launch(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -386,11 +386,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             {
                 importWalletViewModel.failedAuthentication(taskCode);
             }
-        }
-        else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
-        {
-            //return code from scanning QR
-            handleScanQR(resultCode, data);
         }
     }
 

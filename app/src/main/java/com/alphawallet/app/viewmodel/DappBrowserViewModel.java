@@ -318,12 +318,4 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
     }
-
-    public void openNetworkSelection(Fragment fragment, NetworkInfo networkInfo)
-    {
-        Intent intent = new Intent(fragment.getContext(), SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
-        if (networkInfo != null) intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        fragment.startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
-    }
 }

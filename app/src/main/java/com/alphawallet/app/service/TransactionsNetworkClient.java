@@ -50,6 +50,7 @@ import okhttp3.Request;
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -61,7 +62,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 14; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 15; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 
@@ -107,7 +108,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    /**
+    /*
      *
      * Transaction sync strategy:
      *
@@ -464,6 +465,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     @Override
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
+        if (networkInfo.chainId == MAINNET_ID) { svs.delayOpenseaCheck(); } //prevent simultaneous checking
         final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
         return Single.fromCallable(() -> {
             //get latest block read

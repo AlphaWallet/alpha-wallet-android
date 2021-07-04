@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <include
@@ -42,21 +43,21 @@
         <TextView
             android:id="@+id/flash_button"
             style="@style/QRScannerTextView"
-            android:drawableTop="@drawable/ic_flash"
+            app:drawableTopCompat="@drawable/ic_flash"
             android:text="@string/light" />
 
         <TextView
             android:id="@+id/my_address_button"
             style="@style/QRScannerTextView"
-            android:drawableTop="@drawable/ic_qr_rounded_white"
+            app:drawableTopCompat="@drawable/ic_qr_rounded_white"
             android:text="@string/my_qr_code" />
 
         <TextView
             android:id="@+id/browse_button"
             style="@style/QRScannerTextView"
-            android:drawableTop="@drawable/ic_browse"
+            app:drawableTopCompat="@drawable/ic_browse"
             android:text="@string/browse"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
 
     </LinearLayout>
 

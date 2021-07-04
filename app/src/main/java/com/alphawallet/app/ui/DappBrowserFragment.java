@@ -42,6 +42,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -82,7 +86,6 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.DappBrowserUtils;
-import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
@@ -157,12 +160,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private static final String CURRENT_URL = "urlInBar";
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
-    private Intent picker;
     private RealmResults<RealmToken> realmUpdate;
 
     private ActionSheetDialog confirmationDialog;
 
-    private static final int UPLOAD_FILE = 1;
     public static final int REQUEST_FILE_ACCESS = 31;
     public static final int REQUEST_FINE_LOCATION = 110;
     public static final int REQUEST_CAMERA_ACCESS = 111;
@@ -535,7 +536,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void openNetworkSelection() {
-        viewModel.openNetworkSelection(this, activeNetwork);
+        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
+        getNetwork.launch(intent);
     }
 
     private void clearAddressBar() {
@@ -779,7 +783,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             Utils.setChainColour(currentNetworkCircle, networkInfo.chainId);
             viewModel.findWallet();
         } else {
-            viewModel.openNetworkSelection(this, null);
+            openNetworkSelection();
             resetDappBrowser();
         }
     }
@@ -830,8 +834,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 if (filePathCallback == null) return true;
                 uploadMessage = filePathCallback;
                 fileChooserParams = fCParams;
-                picker = fileChooserParams.createIntent();
-
                 if (checkReadPermission()) return requestUpload();
                 else return true;
             }
@@ -899,11 +901,34 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         setBackForwardButtons();
     }
 
+    ActivityResultLauncher<String> getContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
+            new ActivityResultCallback<Uri>() {
+                @Override
+                public void onActivityResult(Uri uri) {
+                    uploadMessage.onReceiveValue(new Uri[] { uri });
+                }
+            });
+
+    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>()
+            {
+                @Override
+                public void onActivityResult(ActivityResult result)
+                {
+                    int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                    if (activeNetwork == null || activeNetwork.chainId != networkId) {
+                        balance.setVisibility(View.GONE);
+                        symbol.setVisibility(View.GONE);
+                        viewModel.setNetwork(networkId);
+                    }
+                }
+            });
+
     protected boolean requestUpload()
     {
         try
         {
-            startActivityForResult(picker, UPLOAD_FILE);
+            getContent.launch(determineMimeType(fileChooserParams));
         }
         catch (ActivityNotFoundException e)
         {
@@ -1054,11 +1079,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         );
     }
 
-    private void onError(Throwable throwable)
-    {
-        throwable.printStackTrace();
-    }
-
     private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger txGasLimit)
     {
         try
@@ -1078,52 +1098,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         return txGasLimit;
-    }
-
-    private void onSignError()
-    {
-        if (getActivity() == null) return;
-        resultDialog = new AWalletAlertDialog(getActivity());
-        resultDialog.setIcon(AWalletAlertDialog.ERROR);
-        resultDialog.setTitle(getString(R.string.dialog_title_sign_message));
-        resultDialog.setMessage(getString(R.string.contains_no_data));
-        resultDialog.setButtonText(R.string.button_ok);
-        resultDialog.setButtonListener(v -> {
-            resultDialog.dismiss();
-        });
-        resultDialog.setCancelable(true);
-        resultDialog.show();
-    }
-
-    private void onSignError(String message)
-    {
-        if (getActivity() == null) return;
-        resultDialog = new AWalletAlertDialog(getActivity());
-        resultDialog.setIcon(AWalletAlertDialog.ERROR);
-        resultDialog.setTitle(getString(R.string.dialog_title_sign_message));
-        resultDialog.setMessage(message);
-        resultDialog.setButtonText(R.string.button_ok);
-        resultDialog.setButtonListener(v -> {
-            resultDialog.dismiss();
-        });
-        resultDialog.setCancelable(true);
-        resultDialog.show();
-    }
-
-    private void transactionTooLarge()
-    {
-        if (getActivity() == null) return;
-        resultDialog = new AWalletAlertDialog(getActivity());
-        resultDialog.setIcon(AWalletAlertDialog.ERROR);
-        resultDialog.setTitle(getString(R.string.transaction_too_large));
-        resultDialog.setMessage(getString(R.string.unable_to_handle_tx));
-
-        resultDialog.setButtonText(R.string.button_ok);
-        resultDialog.setButtonListener(v -> {
-            resultDialog.dismiss();
-        });
-        resultDialog.setCancelable(true);
-        resultDialog.show();
     }
 
     //Transaction failed to be sent
@@ -1633,7 +1607,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1) fileAccess = true;
         }
 
-        if (fileAccess && picker != null) requestUpload();
+        if (fileAccess) requestUpload();
     }
 
     @Override
@@ -1662,43 +1636,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public int getCurrentScrollPosition()
     {
         return web3.getScrollY();
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent)
-    {
-        if (requestCode == C.REQUEST_SELECT_NETWORK)
-        {
-            if (resultCode == RESULT_OK)
-            {
-                int networkId = intent.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
-
-                if (activeNetwork == null || activeNetwork.chainId != networkId) {
-                    balance.setVisibility(View.GONE);
-                    symbol.setVisibility(View.GONE);
-                    viewModel.setNetwork(networkId);
-                }
-            }
-        }
-        else
-        {
-            if (confirmationDialog != null && confirmationDialog.isShowing())
-            {
-                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
-            } else if (requestCode == UPLOAD_FILE && uploadMessage != null)
-            {
-                if (resultCode == RESULT_OK)
-                {
-                    uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
-                }
-                uploadMessage = null;
-            } else if (requestCode == REQUEST_FILE_ACCESS)
-            {
-                if (resultCode == RESULT_OK)
-                {
-                    requestUpload();
-                }
-            }
-        }
     }
 
     // this is called when the signing is approved by the user (e.g. fingerprint / PIN)
@@ -1812,5 +1749,62 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             viewModel.updateGasPrice(activeNetwork.chainId);
         }
+    }
+
+    private String determineMimeType(WebChromeClient.FileChooserParams fileChooserParams)
+    {
+        if (fileChooserParams == null || fileChooserParams.getAcceptTypes().length == 0) return "*/*"; // Allow anything
+        String mime;
+        String firstType = fileChooserParams.getAcceptTypes()[0];
+
+        switch (firstType)
+        {
+            case "png":
+            case "gif":
+            case "svg":
+            case "jpg":
+            case "jpeg":
+                mime = "image/";
+                break;
+
+            case "mp4":
+            case "x-msvideo":
+            case "x-ms-wmv":
+            case "mpeg4-generic":
+                mime = "video/";
+                break;
+
+            case "mpeg":
+            case "aac":
+            case "wav":
+            case "ogg":
+            case "midi":
+            case "x-ms-wma":
+                mime = "audio/";
+                break;
+
+            case "pdf":
+                mime = "application/";
+                break;
+
+            case "xml":
+            case "csv":
+                mime = "text/";
+                break;
+
+            default:
+                mime = "*/";
+        }
+
+        if (fileChooserParams.getAcceptTypes().length == 1)
+        {
+            mime += fileChooserParams.getAcceptTypes()[0];
+        }
+        else
+        {
+            mime += "*";
+        }
+
+        return mime;
     }
 }

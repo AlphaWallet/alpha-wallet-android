@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui;
 
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
@@ -39,6 +41,7 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
+import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
@@ -253,6 +256,23 @@ public class NewSettingsFragment extends BaseFragment {
         startActivity(intent);
     }
 
+    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                String keyBackup = null;
+                boolean noLockScreen = false;
+                Intent data = result.getData();
+                if (data != null) keyBackup = data.getStringExtra("Key");
+                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    ((HomeActivity)getActivity()).backupWalletSuccess(keyBackup);
+                }
+                else
+                {
+                    ((HomeActivity)getActivity()).backupWalletFail(keyBackup, noLockScreen);
+                }
+            });
+
     private void openBackupActivity(Wallet wallet) {
         Intent intent = new Intent(getContext(), BackupFlowActivity.class);
         intent.putExtra(WALLET, wallet);
@@ -284,7 +304,7 @@ public class NewSettingsFragment extends BaseFragment {
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+        handleBackupClick.launch(intent);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -458,10 +478,5 @@ public class NewSettingsFragment extends BaseFragment {
         Intent intent = new Intent(getActivity(), WalletConnectSessionActivity.class);
         intent.putExtra("wallet", wallet);
         startActivity(intent);
-
-//        Intent intent = new Intent(getActivity(), QRScanningActivity.class);
-//        intent.putExtra("wallet", wallet);
-//        intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
-//        startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 }

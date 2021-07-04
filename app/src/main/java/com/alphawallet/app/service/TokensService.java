@@ -29,11 +29,14 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.token.entity.ContractAddress;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,7 +78,7 @@ public class TokensService
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Integer> baseTokenCheck;
     private long nextTokenCheck;
-    private boolean openSeaChecked = false;
+    private static long nextOpenSeaCheck;
     private boolean appHasFocus = true;
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
@@ -92,6 +95,8 @@ public class TokensService
     private Disposable erc20CheckDisposable;
     @Nullable
     private Disposable storeErc20Tokens;
+    @Nullable
+    private Disposable openseaCheck;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
@@ -245,11 +250,11 @@ public class TokensService
 
     public void setCurrentAddress(String newWalletAddr)
     {
-        openSeaChecked = false;
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
             currentAddress = newWalletAddr.toLowerCase();
             stopUpdateCycle();
+            nextOpenSeaCheck = 0;
         }
     }
 
@@ -259,7 +264,8 @@ public class TokensService
         startupPass();
         populateTokenCheck();
 
-        nextTokenCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
+        if (nextOpenSeaCheck == 0) nextOpenSeaCheck = System.currentTimeMillis() + DateUtils.SECOND_IN_MILLIS;
+        if (nextTokenCheck == 0) nextTokenCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
 
         if (eventTimer != null && !eventTimer.isDisposed())
         {
@@ -484,7 +490,10 @@ public class TokensService
         if (System.currentTimeMillis() > nextTokenCheck)
         {
             checkERC20();
-            if (!openSeaChecked) checkOpenSea(MAINNET_ID);
+        }
+        else if (System.currentTimeMillis() > nextOpenSeaCheck)
+        {
+            checkOpenSea();
         }
 
         checkPendingChains();
@@ -530,40 +539,38 @@ public class TokensService
         if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
-    private void checkOpenSea(final int networkId)
+    private void checkOpenSea()
     {
-        openSeaChecked = true;
-        if (networkFilter.contains(networkId))
+        if (networkFilter.contains(MAINNET_ID) && (openseaCheck == null || openseaCheck.isDisposed()))
         {
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(networkId);
+            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
             final Wallet wallet = new Wallet(currentAddress);
+
+            nextOpenSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS;
 
             if (BuildConfig.DEBUG)
                 Log.d(TAG, "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
 
-            openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
+            openseaCheck = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                     .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
                     .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
                     .map(tokens -> tokenRepository.initERC721Assets(wallet, tokens))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(t -> checkNextOpenseaNetwork(networkId),
-                            this::chuckError)
-                    .isDisposed();
-        }
-        else
-        {
-            checkNextOpenseaNetwork(networkId);
+                    .subscribe(t -> checkedNetwork(),
+                            this::chuckError);
         }
     }
 
-    private void checkNextOpenseaNetwork(int previousNetworkId)
+    private void checkedNetwork()
     {
-        if (previousNetworkId == MAINNET_ID) { checkOpenSea(RINKEBY_ID); }
+        openseaCheck = null;
+        if (BuildConfig.DEBUG) Log.d(TAG, "Checked Mainnet Opensea");
     }
 
-    private void chuckError(Throwable e)
+    private void chuckError(@NotNull Throwable e)
     {
+        openseaCheck = null;
         e.printStackTrace();
     }
 
@@ -896,5 +903,11 @@ public class TokensService
     public void storeAsset(Token token, Asset asset)
     {
         tokenRepository.storeAsset(currentAddress, token, asset);
+    }
+
+    public void delayOpenseaCheck()
+    {
+        if (openseaCheck != null && !openseaCheck.isDisposed()) openseaCheck.dispose();
+        if ((nextOpenSeaCheck - System.currentTimeMillis()) < 5 * DateUtils.SECOND_IN_MILLIS) nextOpenSeaCheck += 20 * DateUtils.SECOND_IN_MILLIS;
     }
 }

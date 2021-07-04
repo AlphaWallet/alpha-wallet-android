@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -70,6 +72,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
@@ -529,6 +532,23 @@ public class WalletFragment extends BaseFragment implements
         selectedToken = null;
     }
 
+    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                String keyBackup = null;
+                boolean noLockScreen = false;
+                Intent data = result.getData();
+                if (data != null) keyBackup = data.getStringExtra("Key");
+                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    ((HomeActivity)getActivity()).backupWalletSuccess(keyBackup);
+                }
+                else
+                {
+                    ((HomeActivity)getActivity()).backupWalletFail(keyBackup, noLockScreen);
+                }
+    });
+
     @Override
     public void BackupClick(Wallet wallet)
     {
@@ -546,7 +566,7 @@ public class WalletFragment extends BaseFragment implements
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+        handleBackupClick.launch(intent);
     }
 
     @Override

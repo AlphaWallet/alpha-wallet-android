@@ -20,6 +20,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -606,9 +609,6 @@ public class TransferTicketDetailActivity extends BaseActivity
                 }
                 break;
 
-            case C.SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
-                break;
             case C.SET_GAS_SETTINGS:
                 if (data != null && actionDialog != null)
                 {
@@ -724,14 +724,20 @@ public class TransferTicketDetailActivity extends BaseActivity
         confirmationDialog.show();
     }
 
+    ActivityResultLauncher<Intent> transferLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
+            });
+
     private void transferLinkFinal(String universalLink)
     {
         //create share intent
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Magic Link");
         sendIntent.setType("text/plain");
-        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
+        transferLinkFinalResult.launch(Intent.createChooser(sendIntent, "Share via"));
     }
 
     private void initDatePicker()

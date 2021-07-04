@@ -656,7 +656,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }, 500);
     }
 
-    private void backupWalletFail(String keyBackup, boolean hasNoLock)
+    void backupWalletFail(String keyBackup, boolean hasNoLock)
     {
         //postpone backup until later
         ((NewSettingsFragment) settingsFragment).backupSeedSuccess(hasNoLock);
@@ -667,7 +667,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void backupWalletSuccess(String keyBackup)
+    void backupWalletSuccess(String keyBackup)
     {
         ((NewSettingsFragment) settingsFragment).backupSeedSuccess(false);
         ((WalletFragment) walletFragment).storeWalletBackupTime(keyBackup);

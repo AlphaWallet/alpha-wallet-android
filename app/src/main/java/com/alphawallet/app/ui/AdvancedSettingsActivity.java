@@ -10,6 +10,8 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -149,12 +151,22 @@ public class AdvancedSettingsActivity extends BaseActivity {
         showXMLOverrideDialog();
     }
 
+    ActivityResultLauncher<Intent> updateLocale = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                updateLocale(result.getData());
+            });
+
+    ActivityResultLauncher<Intent> updateCurrency = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                updateCurrency(result.getData());
+            });
+
     private void onChangeLanguageClicked() {
         Intent intent = new Intent(this, SelectLocaleActivity.class);
         String selectedLocale = viewModel.getActiveLocale();
         intent.putExtra(EXTRA_LOCALE, selectedLocale);
         intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getLocaleList(this));
-        startActivityForResult(intent, C.UPDATE_LOCALE);
+        updateLocale.launch(intent);
     }
 
     private void onChangeCurrencyClicked() {
@@ -162,7 +174,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
         String currentLocale = viewModel.getDefaultCurrency();
         intent.putExtra(EXTRA_CURRENCY, currentLocale);
         intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getCurrencyList());
-        startActivityForResult(intent, C.UPDATE_CURRENCY);
+        updateCurrency.launch(intent);
     }
 
     private void onTokenScriptManagementClicked() {
@@ -224,24 +236,6 @@ public class AdvancedSettingsActivity extends BaseActivity {
 
         //send broadcast to HomeActivity about change
         sendBroadcast(new Intent(CHANGE_CURRENCY));
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch (requestCode) {
-            case C.UPDATE_LOCALE: {
-                updateLocale(data);
-                break;
-            }
-            case C.UPDATE_CURRENCY: {
-                updateCurrency(data);
-                break;
-            }
-            default: {
-                super.onActivityResult(requestCode, resultCode, data);
-                break;
-            }
-        }
     }
 
     @Override

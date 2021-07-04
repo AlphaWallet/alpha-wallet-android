@@ -364,6 +364,7 @@ public class TransactionsService
 
     private Transaction triggerTokenMoveCheck(Transaction transaction)
     {
+        if (transaction.timeStamp == 0) return transaction;
         final String currentWallet = tokensService.getCurrentAddress();
         Token t = tokensService.getToken(transaction.chainId, transaction.to);
         if (t != null && transaction.hasInput() && (t.isERC20() || t.isERC721()))
@@ -389,13 +390,13 @@ public class TransactionsService
 
     private Transaction storeRawTx(EthBlock ethBlock, int chainId, EthGetTransactionReceipt receipt, EthTransaction txDetails, String currentWallet)
     {
-        if (ethBlock != null || ethBlock.getBlock() != null)
+        if (ethBlock != null && ethBlock.getBlock() != null && receipt != null && receipt.getResult() != null)
         {
             return transactionsCache.storeRawTx(new Wallet(currentWallet), chainId, txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1"));
         }
         else
         {
-            return null;
+            return new Transaction();
         }
     }
 }

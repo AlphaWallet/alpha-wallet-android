@@ -1,6 +1,7 @@
 package com.alphawallet.app.web3;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -35,13 +36,14 @@ public class Web3ViewClient extends WebViewClient {
     private final JsInjectorClient jsInjectorClient;
     private final UrlHandlerManager urlHandlerManager;
 
-    private Activity context;
+    private final Context context;
 
     private boolean isInjected;
 
-    public Web3ViewClient(JsInjectorClient jsInjectorClient, UrlHandlerManager urlHandlerManager) {
-        this.jsInjectorClient = jsInjectorClient;
-        this.urlHandlerManager = urlHandlerManager;
+    public Web3ViewClient(Context context) {
+        this.jsInjectorClient = new JsInjectorClient(context);
+        this.urlHandlerManager = new UrlHandlerManager();
+        this.context = context;
     }
 
     void addUrlHandler(UrlHandler urlHandler) {
@@ -50,6 +52,11 @@ public class Web3ViewClient extends WebViewClient {
 
     void removeUrlHandler(UrlHandler urlHandler) {
         urlHandlerManager.remove(urlHandler);
+    }
+
+    public JsInjectorClient getJsInjectorClient()
+    {
+        return jsInjectorClient;
     }
 
     @Override
@@ -191,11 +198,6 @@ public class Web3ViewClient extends WebViewClient {
         synchronized (lock) {
             isInjected = false;
         }
-    }
-
-    public void setActivity(FragmentActivity activity)
-    {
-        this.context = activity;
     }
 
     //Handling of trusted apps

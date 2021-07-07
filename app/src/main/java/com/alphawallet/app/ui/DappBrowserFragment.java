@@ -11,6 +11,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -111,6 +112,8 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
@@ -134,7 +137,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.RealmResults;
 
-import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
@@ -401,7 +403,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void onDappClick(DApp dapp) {
+    public void onDappClick(@NotNull DApp dapp) {
         addToBackStack(DAPP_BROWSER);
         loadUrl(dapp.getUrl());
     }
@@ -420,7 +422,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
-    private void setupMenu(View baseView)
+    private void setupMenu(@NotNull View baseView)
     {
         refresh = baseView.findViewById(R.id.refresh);
         final MenuItem reload = toolbar.getMenu().findItem(R.id.action_reload);
@@ -469,7 +471,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
     }
 
-    private void initView(View view) {
+    private void initView(@NotNull View view) {
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
@@ -518,7 +520,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         symbol = view.findViewById(R.id.symbol);
         web3.setWebLoadCallback(this);
 
-        //if (viewModel.getActiveFilterCount() == 1 && EthereumNetworkRepository.defaultDapp() != null) currentNetworkClicker.setVisibility(View.GONE);
+        webFrame.setOnApplyWindowInsetsListener(resizeListener);
     }
 
     private void displayNothingToShare()
@@ -626,7 +628,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 .subscribe(this::postBeginSearchSession);
     }
 
-    private void postBeginSearchSession(ImageView item)
+    private void postBeginSearchSession(@NotNull ImageView item)
     {
         urlTv.setAdapter(adapter);
         urlTv.showDropDown();
@@ -640,7 +642,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     /**
      * Used to expand or collapse the view
      */
-    private synchronized void expandCollapseView(View view, boolean expandView)
+    private synchronized void expandCollapseView(@NotNull View view, boolean expandView)
     {
         //detect if view is expanded or collapsed
         boolean isViewExpanded = view.getVisibility() == View.VISIBLE;
@@ -688,6 +690,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
+    @NotNull
     private ValueAnimator slideAnimator(int start, int end, final View view) {
 
         final ValueAnimator animator = ValueAnimator.ofInt(start, end);
@@ -789,7 +792,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void setupWeb3() {
-        web3.setActivity(getActivity());
         web3.setChainId(activeNetwork.chainId);
         web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
         web3.setWalletAddress(new Address(wallet.address));
@@ -920,6 +922,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                         balance.setVisibility(View.GONE);
                         symbol.setVisibility(View.GONE);
                         viewModel.setNetwork(networkId);
+                        //refresh URL page
+                        reloadPage();
                     }
                 }
             });
@@ -959,7 +963,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void onSignTypedMessage(EthereumTypedMessage message)
+    public void onSignTypedMessage(@NotNull EthereumTypedMessage message)
     {
         if (message.getPrehash() == null || message.getMessageType() == SignMessageType.SIGN_ERROR)
         {
@@ -1065,7 +1069,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
      * @param tx
      * @return
      */
-    private Web3Transaction getDebugTx(Web3Transaction tx)
+    @NotNull
+    @Contract(value = "_ -> new", pure = true)
+    private Web3Transaction getDebugTx(@NotNull Web3Transaction tx)
     {
         return new Web3Transaction(
                 tx.recipient,
@@ -1340,6 +1346,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     /* Required for CORS requests */
+    @NotNull
+    @Contract(" -> new")
     private Map<String, String> getWeb3Headers()
     {
         //headers
@@ -1369,7 +1377,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         loadUrl(url);
     }
 
-    public void testRecoverAddressFromSignature(String message, String sig)
+    public void testRecoverAddressFromSignature(@NotNull String message, String sig)
     {
         String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
         byte[] msgHash = (prefix + message).getBytes();
@@ -1560,7 +1568,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     // Handles the requesting of the camera permission.
-    private void requestCameraPermission(PermissionRequest request)
+    private void requestCameraPermission(@NotNull PermissionRequest request)
     {
         final String[] requestedResources = request.getResources();
         requestCallback = request;
@@ -1574,7 +1582,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    public void gotCameraAccess(String[] permissions, int[] grantResults)
+    public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults)
     {
         boolean cameraAccess = false;
         for (int i = 0; i < permissions.length; i++)
@@ -1588,7 +1596,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (!cameraAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
     }
 
-    public void gotGeoAccess(String[] permissions, int[] grantResults)
+    public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults)
     {
         boolean geoAccess = false;
         for (int i = 0; i < permissions.length; i++)
@@ -1599,7 +1607,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (geoCallback != null && geoOrigin != null) geoCallback.invoke(geoOrigin, geoAccess, false);
     }
 
-    public void gotFileAccess(String[] permissions, int[] grantResults)
+    public void gotFileAccess(@NotNull String[] permissions, int[] grantResults)
     {
         boolean fileAccess = false;
         for (int i = 0; i < permissions.length; i++)
@@ -1723,25 +1731,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
     }
 
-    public void softKeyboardVisible()
-    {
-        handler.postDelayed(() -> setMargin(0), 10);
-    }
-
-    public void softKeyboardGone(int bottomMarginHeight)
-    {
-        handler.postDelayed(() -> setMargin(bottomMarginHeight), 10);
-        shrinkSearchBar();
-    }
-
-    private void setMargin(int height)
-    {
-        if (webFrame == null) return;
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
-        layoutParams.bottomMargin = height;
-        webFrame.setLayoutParams(layoutParams);
-    }
-
     public void selected()
     {
         //start gas update cycle when user selects Dapp browser
@@ -1751,7 +1740,43 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    private String determineMimeType(WebChromeClient.FileChooserParams fileChooserParams)
+    // Handle resizing the browser view when the soft keyboard pops up and goes.
+    // The issue this fixes is where you need to enter data at the bottom of the webpage,
+    // and the keyboard hides the input field
+    // Need to handle the inverse event where the keyboard is hidden, and we size the page back
+    // (Remembering to allow for the navigation bar).
+    private final View.OnApplyWindowInsetsListener resizeListener = (v, insets) -> {
+        if (v == null || getActivity() == null) { return insets; }
+
+        Rect r = new Rect();
+        v.getWindowVisibleDisplayFrame(r);
+
+        int heightDifference = v.getRootView().getHeight() - (r.bottom - r.top);
+        int navBarHeight = ((HomeActivity) getActivity()).getNavBarHeight();
+
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
+
+        // check if we need to resize the webview. If we don't do this, the keyboard covers the bottom of the site
+        // and might be obscuring elements the user needs to see while typing
+        if (heightDifference > 0 && webFrame != null && layoutParams.bottomMargin != heightDifference)
+        {
+            //go into 'shrink' mode so no web site data is hidden
+            layoutParams.bottomMargin = heightDifference;
+            webFrame.setLayoutParams(layoutParams);
+        }
+        else if (heightDifference == 0 && layoutParams.bottomMargin != navBarHeight)
+        {
+            //go back into full screen mode, and expand URL bar out
+            layoutParams.bottomMargin = navBarHeight;
+            webFrame.setLayoutParams(layoutParams);
+            shrinkSearchBar();
+        }
+
+        return insets;
+    };
+
+    @NotNull
+    private String determineMimeType(@NotNull WebChromeClient.FileChooserParams fileChooserParams)
     {
         if (fileChooserParams == null || fileChooserParams.getAcceptTypes().length == 0) return "*/*"; // Allow anything
         String mime;

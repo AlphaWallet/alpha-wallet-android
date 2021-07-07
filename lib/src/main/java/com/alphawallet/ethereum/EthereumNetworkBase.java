@@ -63,7 +63,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     MAINNET_ID));
             put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
                     CLASSIC_ID));
-            put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/poa/dai/tx/",
+            put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
                     XDAI_ID));
             put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
                     POA_ID));

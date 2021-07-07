@@ -465,7 +465,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     @Override
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
-        if (networkInfo.chainId == MAINNET_ID) { svs.delayOpenseaCheck(); } //prevent simultaneous checking
         final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
         return Single.fromCallable(() -> {
             //get latest block read
@@ -592,7 +591,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             token.setInterfaceSpec(ContractType.ERC721);
         }
 
-        svs.updateAssets(token, additions, removals);
+        if (additions.size() > 0 || removals.size() > 0)
+        {
+            if (token.tokenInfo.chainId == MAINNET_ID) { svs.stopOpenseaCheck(); } //prevent simultaneous checking
+            svs.updateAssets(token, additions, removals);
+        }
     }
 
     private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)

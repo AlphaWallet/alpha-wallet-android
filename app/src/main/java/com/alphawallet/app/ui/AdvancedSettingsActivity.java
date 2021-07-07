@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 
@@ -171,24 +174,38 @@ public class AdvancedSettingsActivity extends BaseActivity {
         webView.clearCache(true);
         Toast.makeText(this, getString(R.string.toast_browser_cache_cleared), Toast.LENGTH_SHORT).show();
         viewModel.blankFilterSettings();
+        finish();
     }
 
     private void onReloadTokenDataClicked() {
-        //delete all Token data for this wallet
-        clearTokenCache = viewModel.resetTokenData()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showResetResult);
+        AlertDialog.Builder builder = new AlertDialog.Builder(AdvancedSettingsActivity.this);
+        AlertDialog dialog = builder.setTitle(R.string.title_reload_token_data)
+                .setMessage(R.string.reload_token_data_desc)
+                .setPositiveButton(R.string.action_reload, (d, w) -> {
+                    //delete all Token data for this wallet
+                    clearTokenCache = viewModel.resetTokenData()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::showResetResult);
 
-        viewModel.blankFilterSettings();
+                    viewModel.blankFilterSettings();
+                })
+                .setNegativeButton(R.string.action_cancel, (d, w) -> d.dismiss())
+                .setCancelable(true)
+                .create();
+        dialog.show();
     }
 
-    private void showResetResult(Boolean resetResult)
+    private void showResetResult(boolean resetResult)
     {
         if (resetResult)
         {
             Toast.makeText(this, getString(R.string.toast_token_data_cleared), Toast.LENGTH_SHORT).show();
             sendBroadcast(new Intent(RESET_WALLET)); // refresh token and transaction lists
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            intent.putExtra("close", true);
+            finish();
         }
     }
 

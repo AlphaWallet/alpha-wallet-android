@@ -17,11 +17,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -30,6 +28,9 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -81,6 +82,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
@@ -109,8 +111,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private String walletTitle;
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
-    private PinAuthenticationCallbackInterface authInterface;
-    private int navBarHeight;
     private boolean isForeground;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
@@ -215,9 +215,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         setContentView(R.layout.activity_home);
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
         initViews();
         toolbar();
 
@@ -281,8 +278,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             boolean isNavBarShown = intent.getBooleanExtra("showNavBar", false);
             if (!isNavBarShown) {
                 setNavBarVisibility(View.GONE);
-                //now remove the bottom margin
-                ((DappBrowserFragment)dappBrowserFragment).softKeyboardVisible();
             }
         }
 
@@ -298,20 +293,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         }
 
-        //Ensure when keyboard appears the webview gets squashed into remaining view. Also remove navigation bar to increase screen size
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         KeyboardVisibilityEvent.setEventListener(
                 this, isOpen -> {
                     if (isOpen)
                     {
-                        navBarHeight = getNavBarHeight();
                         setNavBarVisibility(View.GONE);
-                        ((DappBrowserFragment)dappBrowserFragment).softKeyboardVisible();
                     }
                     else
                     {
                         setNavBarVisibility(View.VISIBLE);
-                        ((DappBrowserFragment)dappBrowserFragment).softKeyboardGone(navBarHeight);
                     }
                 });
     }
@@ -1048,13 +1038,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ((DappBrowserFragment) dappBrowserFragment).pinAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
-                        //continue with generating the authenticated key - NB currently no flow reaches this code but in future it could
-                        if (resultCode == RESULT_OK) authInterface.completeAuthentication(taskCode);
-                        else
-                        {
-                            authInterface.failedAuthentication(taskCode);
-                            gotAuthorisation(false);
-                        }
                         break;
                 }
                 break;
@@ -1124,40 +1107,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         return super.onPrepareOptionsPanel(view, menu);
     }
 
-    public class DepthPageTransformer implements ViewPager.PageTransformer
-    {
-        private static final float MIN_SCALE = 0.75f;
-
-        public void transformPage(View view, float position)
-        {
-            int pageWidth = view.getWidth();
-
-            if (position < -1)
-            {
-                view.setAlpha(0);
-            }
-            else if (position <= 0)
-            {
-                view.setAlpha(1);
-                view.setTranslationX(0);
-                view.setScaleX(1);
-                view.setScaleY(1);
-            }
-            else if (position <= 1)
-            {
-                view.setAlpha(1 - position);
-                view.setTranslationX(pageWidth * -position);
-                float scaleFactor = MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position));
-                view.setScaleX(scaleFactor);
-                view.setScaleY(scaleFactor);
-            }
-            else
-            {
-                view.setAlpha(0);
-            }
-        }
-    }
-
     public static void setUpdatePrompt()
     {
         //TODO: periodically check this value (eg during page flipping)
@@ -1196,30 +1145,27 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
+    public void showAndRefreshWallet()
+    {
+        showPage(WALLET);
+        resetTokens();
+    }
+
     public void useActionSheet(String mode)
     {
         viewModel.actionSheetConfirm(mode);
     }
 
     private void hideSystemUI() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE
-                        // Set the content to appear under the system bars so that the
-                        // content doesn't resize when the system bars hide and show.
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        // Hide the nav bar and status bar
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat inset = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        inset.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        inset.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
     }
 
     private void showSystemUI() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | View.SYSTEM_UI_FLAG_VISIBLE);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        WindowInsetsControllerCompat inset = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        inset.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
     }
 }

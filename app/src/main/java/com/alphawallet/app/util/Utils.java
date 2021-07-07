@@ -159,6 +159,7 @@ public class Utils {
     public static String getIconisedText(String text)
     {
         if (TextUtils.isEmpty(text)) return "";
+        if (text.length() <= 4) return text;
         String firstWord = getFirstWord(text);
         if (!TextUtils.isEmpty(firstWord))
         {
@@ -816,6 +817,8 @@ public class Utils {
         return !TextUtils.isEmpty(operationName) && context.getString(R.string.contract_call).equals(operationName);
     }
 
+    private static final String IPFS_PREFIX = "ipfs://";
+
     public static String parseIPFS(String URL)
     {
         if (TextUtils.isEmpty(URL)) return URL;
@@ -824,6 +827,10 @@ public class Utils {
         if (ipfsIndex >= 0)
         {
             parsed = "https://ipfs.io" + URL.substring(ipfsIndex);
+        }
+        else if (URL.startsWith(IPFS_PREFIX))
+        {
+            parsed = "https://ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
         }
 
         return parsed;

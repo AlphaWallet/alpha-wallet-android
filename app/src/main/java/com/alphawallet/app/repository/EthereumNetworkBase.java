@@ -53,9 +53,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MUMBAI_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
@@ -114,8 +112,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
-    public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
-    public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
+    public static final String OPTIMISTIC_MAIN_URL = "https://optimism-mainnet.infura.io/v3/" + getInfuraKey();
+    public static final String OPTIMISTIC_TEST_URL = "https://optimism-kovan.infura.io/v3/" + getInfuraKey();
+    public static final String MATIC_RPC_URL = "https://polygon-mainnet.infura.io/v3/" + getInfuraKey();
+    public static final String MUMBAI_TEST_RPC_URL = "https://polygon-mumbai.infura.io/v3/" + getInfuraKey();
+    public static final String MATIC_FALLBACK_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
+    public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
+    public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
+    public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
 
     //This optional list creates a defined order in which tokens are displayed
     static final int[] orderList = {
@@ -137,8 +141,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://blockscout.com/etc/mainnet/api?"));
             put(XDAI_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
-                    "https://blockscout.com/poa/dai/tx/", XDAI_ID,
-                    "https://dai.poa.network", "https://blockscout.com/poa/dai/api?"));
+                    "https://blockscout.com/xdai/mainnet/tx/", XDAI_ID,
+                    "https://dai.poa.network", "https://blockscout.com/xdai/mainnet/api?"));
             put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
                     "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,
@@ -205,18 +209,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     FANTOM_TEST_RPC_URL, "https://api.covalenthq.com/v1/" + COVALENT)); //NB: Fantom testnet not yet supported by Covalent
             put(MATIC_ID, new NetworkInfo(C.MATIC_NETWORK, C.MATIC_SYMBOL, MATIC_RPC_URL,
                     "https://polygonscan.com/tx/", MATIC_ID,
-                    "https://rpc-mainnet.maticvigil.com", "https://api.polygonscan.com/api?"));
+                    MATIC_FALLBACK_RPC_URL, "https://api.polygonscan.com/api?"));
             put(MATIC_TEST_ID, new NetworkInfo(C.MATIC_TEST_NETWORK, C.MATIC_SYMBOL,
                     MUMBAI_TEST_RPC_URL,
                     "https://mumbai.polygonscan.com/tx/", MATIC_TEST_ID,
-                    "https://rpc-mumbai.maticvigil.com", " https://api-testnet.polygonscan.com/api?"));
+                    MUMBAI_FALLBACK_RPC_URL, " https://api-testnet.polygonscan.com/api?"));
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK, C.ETH_SYMBOL,
                     OPTIMISTIC_MAIN_URL,
-                    "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_URL,
+                    "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_FALLBACK_URL,
                     "https://api-optimistic.etherscan.io/api?"));
             put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK, C.ETH_SYMBOL,
                     OPTIMISTIC_TEST_URL,
-                    "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_URL,
+                    "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
                     "https://api-kovan-optimistic.etherscan.io/api?"));
         }
     };

@@ -23,7 +23,6 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.ui.widget.entity.IconItem;
@@ -36,7 +35,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +51,6 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
 public class TokensService
 {
@@ -78,7 +75,7 @@ public class TokensService
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Integer> baseTokenCheck;
     private long nextTokenCheck;
-    private static long nextOpenSeaCheck;
+    private static boolean openSeaCheck;
     private boolean appHasFocus = true;
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
@@ -254,7 +251,7 @@ public class TokensService
         {
             currentAddress = newWalletAddr.toLowerCase();
             stopUpdateCycle();
-            nextOpenSeaCheck = 0;
+            openSeaCheck = true;
         }
     }
 
@@ -264,7 +261,6 @@ public class TokensService
         startupPass();
         populateTokenCheck();
 
-        if (nextOpenSeaCheck == 0) nextOpenSeaCheck = System.currentTimeMillis() + DateUtils.SECOND_IN_MILLIS;
         if (nextTokenCheck == 0) nextTokenCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
 
         if (eventTimer != null && !eventTimer.isDisposed())
@@ -491,7 +487,7 @@ public class TokensService
         {
             checkERC20();
         }
-        else if (System.currentTimeMillis() > nextOpenSeaCheck)
+        else if (openSeaCheck)
         {
             checkOpenSea();
         }
@@ -546,7 +542,7 @@ public class TokensService
             NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
             final Wallet wallet = new Wallet(currentAddress);
 
-            nextOpenSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS;
+            openSeaCheck = false;
 
             if (BuildConfig.DEBUG)
                 Log.d(TAG, "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
@@ -905,9 +901,8 @@ public class TokensService
         tokenRepository.storeAsset(currentAddress, token, asset);
     }
 
-    public void delayOpenseaCheck()
+    public void stopOpenseaCheck()
     {
         if (openseaCheck != null && !openseaCheck.isDisposed()) openseaCheck.dispose();
-        if ((nextOpenSeaCheck - System.currentTimeMillis()) < 5 * DateUtils.SECOND_IN_MILLIS) nextOpenSeaCheck += 20 * DateUtils.SECOND_IN_MILLIS;
     }
 }

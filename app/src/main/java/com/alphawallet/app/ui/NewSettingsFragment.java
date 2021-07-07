@@ -43,6 +43,7 @@ import dagger.android.support.AndroidSupportInjection;
 
 import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
@@ -464,9 +465,18 @@ public class NewSettingsFragment extends BaseFragment {
         getActivity().startActivity(intent);
     }
 
+    ActivityResultLauncher<Intent> advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                if (data != null && data.getBooleanExtra("close", false))
+                {
+                    ((HomeActivity)getActivity()).showAndRefreshWallet();
+                }
+            });
+
     private void onAdvancedSettingClicked() {
         Intent intent = new Intent(getActivity(), AdvancedSettingsActivity.class);
-        startActivity(intent);
+        advancedSettingsHandler.launch(intent);
     }
 
     private void onSupportSettingClicked() {

@@ -73,6 +73,7 @@
   {"name": "Levinswap", "description": "Decentralized exchange for trading crypto and serurities tokens", "url": "https://app.levinswap.org/", "category": "Exchange"},
   {"name": "Eth Gas Station", "description": "Consumer oriented metrics for Eth Gas Market", "url": "https://ethgasstation.info", "category": "Tool"},
   {"name": "Gas Now", "description": "Eth Gas Price forecast system", "url": "https://www.gasnow.org/", "category": "Tool"},
-  {"name": "Matic Testnet Faucet", "description": "Matic Faucet to access Mumbai and Goerli testnet tokens", "url": "https://faucet.matic.network/", "category": "Tool"}
+  {"name": "Matic Testnet Faucet", "description": "Matic Faucet to access Mumbai and Goerli testnet tokens", "url": "https://faucet.matic.network/", "category": "Tool"},
+  {"name": "NAOS Finance", "description": "A DeFi lending protocol allowing lenders and SME borrowers to facilitate permissionless and borderless loaning/borrowing transactions", "url": "https://naos.finance", "category": "Finance"}
 ]
 

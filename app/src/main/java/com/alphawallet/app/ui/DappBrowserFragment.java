@@ -1782,52 +1782,54 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         String mime;
         String firstType = fileChooserParams.getAcceptTypes()[0];
 
-        switch (firstType)
-        {
-            case "png":
-            case "gif":
-            case "svg":
-            case "jpg":
-            case "jpeg":
-                mime = "image/";
-                break;
-
-            case "mp4":
-            case "x-msvideo":
-            case "x-ms-wmv":
-            case "mpeg4-generic":
-                mime = "video/";
-                break;
-
-            case "mpeg":
-            case "aac":
-            case "wav":
-            case "ogg":
-            case "midi":
-            case "x-ms-wma":
-                mime = "audio/";
-                break;
-
-            case "pdf":
-                mime = "application/";
-                break;
-
-            case "xml":
-            case "csv":
-                mime = "text/";
-                break;
-
-            default:
-                mime = "*/";
-        }
-
         if (fileChooserParams.getAcceptTypes().length == 1)
         {
-            mime += fileChooserParams.getAcceptTypes()[0];
+            mime = firstType;
         }
         else
         {
-            mime += "*";
+            //TODO: Resolve types
+            switch (firstType)
+            {
+                case "png":
+                case "gif":
+                case "svg":
+                case "jpg":
+                case "jpeg":
+                case "image/*":
+                    mime = "image/*";
+                    break;
+
+                case "mp4":
+                case "x-msvideo":
+                case "x-ms-wmv":
+                case "mpeg4-generic":
+                case "video/*":
+                    mime = "video/*";
+                    break;
+
+                case "mpeg":
+                case "aac":
+                case "wav":
+                case "ogg":
+                case "midi":
+                case "x-ms-wma":
+                case "audio/*":
+                    mime = "audio/*";
+                    break;
+
+                case "pdf":
+                    mime = "application/*";
+                    break;
+
+                case "xml":
+                case "csv":
+                    mime = "text/*";
+                    break;
+
+                default:
+                    mime = "*/*";
+            }
         }
 
         return mime;

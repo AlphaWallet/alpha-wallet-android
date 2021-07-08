@@ -259,10 +259,6 @@ public class TokenIcon extends ConstraintLayout
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
         //try symbol first
-        if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.startsWith("PD"))
-        {
-            System.out.println("YOLESS");
-        }
         if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.length() > 1)
         {
             textIcon.setText(Utils.getIconisedText(token.tokenInfo.symbol));

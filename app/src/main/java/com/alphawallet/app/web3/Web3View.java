@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.WebChromeClient;
@@ -27,11 +28,13 @@ import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
@@ -77,6 +80,13 @@ public class Web3View extends WebView {
         super.setWebViewClient(new WrapWebViewClient(webViewClient, client));
     }
 
+    @Override
+    public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders)
+    {
+        checkDOMUsage(url);
+        super.loadUrl(url, additionalHttpHeaders);
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     public void init() {
         getSettings().setJavaScriptEnabled(true);
@@ -85,6 +95,7 @@ public class Web3View extends WebView {
         getSettings().setDisplayZoomControls(false);
         getSettings().setUseWideViewPort(true);
         getSettings().setLoadWithOverviewMode(true);
+        getSettings().setDomStorageEnabled(true);
         getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         getSettings().setUserAgentString(getSettings().getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
@@ -313,6 +324,7 @@ public class Web3View extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             redirect = true;
+            if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
 
             return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, request);
@@ -333,12 +345,25 @@ public class Web3View extends WebView {
                     String injectedHtml = internalClient.getJsInjectorClient().injectJS(new String(data));
                     response.setData(new ByteArrayInputStream(injectedHtml.getBytes()));
                 } catch (IOException ex) {
-                    Log.d("INJECT AFTER_EXTRNAL", "", ex);
+                    Log.d("INJECT AFTER_EXTERNAL", "", ex);
                 }
             } else {
                 response = internalClient.shouldInterceptRequest(view, request);
             }
             return response;
+        }
+    }
+
+    // Grim hack for dapps that still use local storage
+    private void checkDOMUsage(@NotNull String url)
+    {
+        if (url.equals("https://wallet.matic.network/bridge/")) // may need other sites added
+        {
+            getSettings().setDomStorageEnabled(false);
+        }
+        else
+        {
+            getSettings().setDomStorageEnabled(true);
         }
     }
 

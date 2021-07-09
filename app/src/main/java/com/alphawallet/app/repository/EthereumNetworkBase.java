@@ -108,7 +108,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
-    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
+    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
@@ -142,7 +142,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(XDAI_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
                     "https://blockscout.com/xdai/mainnet/tx/", XDAI_ID,
-                    "https://dai.poa.network", "https://blockscout.com/xdai/mainnet/api?"));
+                    "https://rpc.xdaichain.com", "https://blockscout.com/xdai/mainnet/api?"));
             put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
                     "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,

@@ -35,7 +35,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String XDAI_RPC_URL = "https://dai.poa.network";
+    public static final String XDAI_RPC_URL = "https://rpc.xdaichain.com";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -45,7 +45,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
-    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
+    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";

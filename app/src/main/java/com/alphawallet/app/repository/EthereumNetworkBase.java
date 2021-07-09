@@ -142,7 +142,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(XDAI_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
                     "https://blockscout.com/xdai/mainnet/tx/", XDAI_ID,
-                    "https://dai.poa.network", "https://blockscout.com/xdai/mainnet/api?"));
+                    "https://rpc.xdaichain.com", "https://blockscout.com/xdai/mainnet/api?"));
             put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
                     "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,

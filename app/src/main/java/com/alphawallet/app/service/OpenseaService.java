@@ -38,7 +38,7 @@ public class OpenseaService {
     private static OkHttpClient httpClient;
     private static Map<String, Long> balanceAccess = new ConcurrentHashMap<>();
     private final Context context;
-    private static final int PAGE_SIZE = 40;
+    private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
     private final List<Integer> storedImagesForChain = new ArrayList<>();
 

@@ -32,6 +32,7 @@ public class NFTAsset implements Parcelable
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
     private static final String[] IMAGE_DESIGNATORS = { IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
+    private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE, IMAGE_URL };
     private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL };
     private static final String BACKGROUND_COLOUR = "background_color";
     private static final String EXTERNAL_LINK = "external_link";
@@ -102,6 +103,11 @@ public class NFTAsset implements Parcelable
 
     public String getThumbnail()
     {
+        String svgOverride = getSVGOverride(); //always use SVG if available
+        if (!TextUtils.isEmpty(svgOverride)) {
+            return svgOverride;
+        }
+
         for (String key : IMAGE_THUMBNAIL_DESIGNATORS)
         {
             if (assetMap.containsKey(key))
@@ -196,6 +202,23 @@ public class NFTAsset implements Parcelable
     private boolean validJSONString(String value)
     {
         return (!TextUtils.isEmpty(value) && !value.equals("null"));
+    }
+
+    /**
+     * If the image has SVG, we need to display that. Opensea's preview renderer can't handle SVG
+     * @return
+     */
+    private String getSVGOverride()
+    {
+        for (String key : SVG_OVERRIDE)
+        {
+            if (assetMap.containsKey(key) && assetMap.get(key).toLowerCase().endsWith("svg"))
+            {
+                return Utils.parseIPFS(assetMap.get(key));
+            }
+        }
+
+        return "";
     }
 
     public String jsonMetaData()

@@ -27,6 +27,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.ui.widget.entity.IconItem;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
@@ -83,6 +84,7 @@ public class TokensService
     private boolean appHasFocus = true;
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
+    private int transferCheckChain;
 
     @Nullable
     private Disposable eventTimer;
@@ -118,6 +120,7 @@ public class TokensService
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
+        transferCheckChain = 0;
     }
 
     private void checkUnknownTokens()
@@ -351,6 +354,15 @@ public class TokensService
         focusToken = null;
     }
 
+    public void onWalletRefreshSwipe()
+    {
+        long lala = Utils.timeUntil(openSeaCheck);
+        if (Utils.timeUntil(openSeaCheck) > DateUtils.MINUTE_IN_MILLIS && (openSeaQueryDisposable == null || openSeaQueryDisposable.isDisposed()))
+        {
+            openSeaCheck = System.currentTimeMillis() + 3 * DateUtils.SECOND_IN_MILLIS;
+        }
+    }
+
     private boolean isFocusToken(Token t)
     {
         return focusToken != null && focusToken.equals(t);
@@ -565,6 +577,8 @@ public class TokensService
             info = ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
         else return;
 
+        if (info.chainId == transferCheckChain) return; //currently checking this chainId
+
         final Wallet wallet = new Wallet(currentAddress);
 
         openSeaCheck = System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS;
@@ -582,6 +596,21 @@ public class TokensService
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(t -> checkedNetwork(info),
                         this::chuckError);
+    }
+
+    public boolean openseaUpdateInProgress(int chainId)
+    {
+        if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed() && openSeaCheckId == chainId)
+        {
+            return true;
+        }
+        else if (Utils.timeUntil(openSeaCheck) < 20*DateUtils.SECOND_IN_MILLIS)
+        {
+            //delay the opensea check if corresponding network
+            openSeaCheck = System.currentTimeMillis() + 20*DateUtils.SECOND_IN_MILLIS;
+        }
+
+        return false;
     }
 
     private void checkedNetwork(NetworkInfo info)
@@ -951,16 +980,6 @@ public class TokensService
         tokenRepository.storeAsset(currentAddress, token, tokenId, asset);
     }
 
-    public void stopOpenseaCheck(int chainId)
-    {
-        if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()
-            && chainId == openSeaCheckId)
-        {
-            openSeaQueryDisposable.dispose();
-            openSeaCheck = System.currentTimeMillis() + 20*DateUtils.SECOND_IN_MILLIS; // try in another 20 seconds
-        }
-    }
-
     public boolean isChainToken(int chainId, String tokenAddress)
     {
         return ethereumNetworkRepository.isChainContract(chainId, tokenAddress);
@@ -981,5 +1000,10 @@ public class TokensService
         {
             return getToken(chainId, currentAddress);
         }
+    }
+
+    public void checkingChain(int chainId)
+    {
+        transferCheckChain = chainId;
     }
 }

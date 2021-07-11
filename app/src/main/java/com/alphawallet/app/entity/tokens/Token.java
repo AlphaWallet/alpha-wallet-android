@@ -878,4 +878,9 @@ public class Token implements Parcelable
     {
         return null;
     }
+
+    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
+    {
+        return new ArrayList<>();
+    }
 }

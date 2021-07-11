@@ -1,17 +1,18 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -25,7 +26,6 @@ import com.bumptech.glide.Glide;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
 
 public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
 
@@ -57,12 +57,12 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
             Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
             if (token.isERC721()) {
                 ERC721Token tkn = (ERC721Token) token;
-                Collection<Asset> assets = tkn.getTokenAssets().values();
+                Collection<NFTAsset> assets = tkn.getTokenAssets().values();
                 if (assets != null && assets.size() > 0) {
-                    Asset firstAsset = assets.iterator().next();
+                    NFTAsset firstAsset = assets.iterator().next();
                     if (firstAsset != null) {
                         Glide.with(getContext())
-                                .load(firstAsset.getImagePreviewUrl())
+                                .load(firstAsset.getThumbnail())
                                 .override(72)
                                 .into(imageIcon);
                         name.setText(token.tokenInfo.name);

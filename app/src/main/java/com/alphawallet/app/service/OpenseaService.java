@@ -2,10 +2,10 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -16,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,70 +95,61 @@ public class OpenseaService {
     private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address,
                                       int networkId, String networkName, TokensService tokensService) throws Exception
     {
-        final Map<String, Map<BigInteger, Asset>> assetList = new HashMap<>();
+        final Map<String, Map<BigInteger, NFTAsset>> assetList = new HashMap<>();
         TokenFactory tf = new TokenFactory();
         for (int i = 0; i < assets.length(); i++)
         {
-            Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
-            if (asset != null && (asset.getAssetContract().getSchemaName() == null
-                    || asset.getAssetContract().getSchemaName().length() == 0
-                    || asset.getAssetContract().getSchemaName().equalsIgnoreCase("ERC721"))) //filter ERC721
+            NFTAsset asset = new NFTAsset(assets.getJSONObject(i).toString());
+            AssetContract assetContract = assets.getJSONObject(i).has("asset_contract") ?
+                    new Gson().fromJson(assets.getJSONObject(i).getString("asset_contract"), AssetContract.class)
+                    : null;
+
+            if (assetContract != null && !TextUtils.isEmpty(assetContract.getSchemaName())
+                && assetContract.getSchemaName().equalsIgnoreCase("ERC721"))
             {
-                addAssetImageToHashMap(imageUrls, assets.getJSONObject(i), networkId);
-                Token token = foundTokens.get(asset.getAssetContract().getAddress());
+                BigInteger tokenId = assets.getJSONObject(i).has("token_id") ? new BigInteger(assets.getJSONObject(i).getString("token_id")) : null;
+                if (tokenId == null) continue;
+
+                addAssetImageToHashMap(imageUrls, assetContract, networkId);
+                Token token = foundTokens.get(assetContract.getAddress());
                 if (token == null)
                 {
                     TokenInfo tInfo;
                     ContractType type;
                     long lastCheckTime = 0;
-                    Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
+                    Token checkToken = tokensService.getToken(networkId, assetContract.getAddress());
                     if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
                     {
-                        assetList.put(asset.getAssetContract().getAddress(), checkToken.getTokenAssets());
+                        assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
                         tInfo = checkToken.tokenInfo;
                         type = checkToken.getInterfaceSpec();
                         lastCheckTime = checkToken.lastTxTime;
                     }
                     else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
                     {
-                        tInfo = new TokenInfo(asset.getAssetContract().getAddress(), asset.getAssetContract().getName(), asset.getAssetContract().getSymbol(), 0, true, networkId);
+                        tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
                         type = ContractType.ERC721_UNDETERMINED;
                     }
 
                     token = tf.createToken(tInfo, type, networkName);
                     token.setTokenWallet(address);
                     token.lastTxTime = lastCheckTime;
-                    foundTokens.put(asset.getAssetContract().getAddress(), token);
+                    foundTokens.put(assetContract.getAddress(), token);
                 }
-                asset.updateAsset(assetList.get(token.getAddress()));
-                token.addAssetToTokenBalanceAssets(asset);
+                asset.updateAsset(tokenId, assetList.get(token.getAddress()));
+                token.addAssetToTokenBalanceAssets(tokenId, asset);
             }
         }
     }
 
-    private void addAssetImageToHashMap(Map<String, String> imageUrls, JSONObject asset, int networkId)
+    private void addAssetImageToHashMap(Map<String, String> imageUrls, AssetContract assetContract, int networkId)
     {
-        if (storedImagesForChain.contains(networkId)) return;
+        if (storedImagesForChain.contains(networkId)) return; //already recorded the image
 
-        try
+        String address = assetContract.getAddress();
+        if (!imageUrls.containsKey(address) && !TextUtils.isEmpty(assetContract.getImageUrl()))
         {
-            if (asset.has("asset_contract"))
-            {
-                JSONObject assetContract = asset.getJSONObject("asset_contract");
-                String address = assetContract.getString("address").toLowerCase();
-                if (!imageUrls.containsKey(address) && assetContract.has("image_url"))
-                {
-                    String url = assetContract.getString("image_url");
-                    if (!TextUtils.isEmpty(url) && url.startsWith("http"))
-                    {
-                        imageUrls.put(address, url);
-                    }
-                }
-            }
-        }
-        catch (JSONException e)
-        {
-            // no action
+            imageUrls.put(address, assetContract.getImageUrl());
         }
     }
 

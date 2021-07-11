@@ -20,7 +20,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -101,8 +101,6 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.internal.operators.parallel.ParallelRunOn;
-import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -2191,16 +2189,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
     {
-        Asset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
+        NFTAsset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
         if(tokenAsset == null) return;
 
         try
         {
+            //add all asset IDs
             if (tokenAsset.getBackgroundColor() != null) TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
-            if (tokenAsset.getImagePreviewUrl() != null) TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getImagePreviewUrl(), "utf-8"));
+            if (tokenAsset.getThumbnail() != null) TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getThumbnail(), "utf-8"));
             if (tokenAsset.getDescription() != null) TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
             if (tokenAsset.getExternalLink() != null) TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
-            if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+            //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
             if (tokenAsset.getName() != null) TokenScriptResult.addPair(attrs, "name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
         }
         catch (UnsupportedEncodingException e)

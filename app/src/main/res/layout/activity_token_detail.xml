@@ -63,7 +63,7 @@
                         android:textSize="11sp" />
                 </LinearLayout>
 
-                <com.alphawallet.app.widget.ERC721ImageView
+                <com.alphawallet.app.widget.NFTImageView
                     android:id="@+id/layout_image"
                     android:layout_below="@id/layout_token_title"
                     android:layout_width="match_parent"

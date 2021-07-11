@@ -4,7 +4,7 @@ package com.alphawallet.app.entity.tokens;
 import android.os.Parcelable;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -29,8 +29,8 @@ public class ERC1155Token extends Token implements Parcelable
     }
 
     @Override
-    public Map<BigInteger, Asset> getTokenAssets() {
-        return tokenBalanceAssets;
+    public Map<BigInteger, NFTAsset> getTokenAssets() {
+        return null;//tokenBalanceAssets;
     }
 
     public Map<BigInteger, ERC1155Asset> getAssets()

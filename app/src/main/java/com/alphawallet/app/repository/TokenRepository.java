@@ -12,7 +12,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -162,10 +162,10 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721:
                         case ERC721_LEGACY:
-                            Map<BigInteger, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            Map<BigInteger, NFTAsset> NFTBalance = t.getTokenAssets(); //add balance from Opensea
                             t.balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address); //get balance for wallet from contract
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
-                            t = new ERC721Token(tInfo, erc721Balance, t.balance, System.currentTimeMillis(), t.getNetworkName(), type);
+                            t = new ERC721Token(tInfo, NFTBalance, t.balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             t.lastTxTime = tokens[i].lastTxTime;
                             tokens[i] = t;
                             break;
@@ -362,59 +362,20 @@ public class TokenRepository implements TokenRepositoryType {
     public void updateAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals)
     {
         erc721Token.balance = checkUint256Balance(new Wallet(wallet), erc721Token.tokenInfo.chainId, erc721Token.getAddress());
-        localSource.updateERC721Assets(wallet, erc721Token,
+        localSource.updateNFTAssets(wallet, erc721Token,
                 additions, removals);
     }
 
     @Override
-    public void storeAsset(String wallet, Token token, Asset asset)
+    public void storeAsset(String wallet, Token token, BigInteger tokenId, NFTAsset asset)
     {
-        localSource.storeAsset(wallet, token, asset);
+        localSource.storeAsset(wallet, token, tokenId, asset);
     }
 
     @Override
     public Token[] initERC721Assets(Wallet wallet, Token[] token)
     {
-        return localSource.initERC721Assets(wallet, token);
-    }
-
-    /**
-     * Ensure all tokens received from AmberData have the correct interface.
-     * If not, determine the interface then store. This means there's no need to store again so filter out the tokens we store
-     *
-     * @param wallet
-     * @param tokens
-     * @return
-     */
-    private List<Token> determineTokenTypes(Wallet wallet, Token[] tokens)
-    {
-        List<String> removeList = new ArrayList<>();
-        //check interface spec before storing.
-        for (Token t : tokens)
-        {
-            if (ignoreToken(t))
-            {
-                removeList.add(t.tokenInfo.address);
-                continue;
-            }
-
-            Token st = localSource.fetchToken(t.tokenInfo.chainId, wallet, t.tokenInfo.address.toLowerCase());
-            if (st == null && t.getInterfaceSpec() == ContractType.OTHER)
-            {
-                t.setInterfaceSpec(determineCommonType(t.tokenInfo).blockingGet());
-                st = localSource.saveToken(wallet, t).blockingGet(); //store now so list is updated more quickly at startup
-                if (st != null) removeList.add(st.tokenInfo.address);
-            }
-        }
-
-        //only return tokens that already have their type checked
-        List<Token> updateList = new ArrayList<>();
-        for (Token t : tokens)
-        {
-            if (!removeList.contains(t.tokenInfo.address)) updateList.add(t);
-        }
-
-        return updateList;
+        return localSource.initNFTAssets(wallet, token);
     }
 
     @Override

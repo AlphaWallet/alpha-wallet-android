@@ -22,7 +22,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -440,9 +440,9 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         tokenView.setAdapter(adapter);
     }
 
-    public void storeAsset(Asset asset)
+    public void storeAsset(BigInteger tokenId, NFTAsset asset)
     {
-        viewModel.getTokensService().storeAsset(token, asset);
+        viewModel.getTokensService().storeAsset(token, tokenId, asset);
     }
 
     private void errorInsufficientFunds(Token currency)

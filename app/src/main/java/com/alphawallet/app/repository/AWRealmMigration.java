@@ -3,8 +3,10 @@ package com.alphawallet.app.repository;
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
+import io.realm.RealmObject;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
+import io.realm.annotations.PrimaryKey;
 
 
 /**
@@ -254,6 +256,24 @@ public class AWRealmMigration implements RealmMigration
         {
             RealmObjectSchema realmData = schema.get("RealmERC721Asset");
             if (realmData != null && !realmData.hasField("imageThumbnailUrl")) realmData.addField("imageThumbnailUrl", String.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 24)
+        {
+            RealmObjectSchema realmData = schema.get("RealmNFTAsset");
+            if (realmData == null)
+            {
+                schema.create("RealmNFTAsset")
+                        .addField("tokenIdAddr", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("metaData", String.class);
+            }
+            oldVersion++;
+        }
+
+        if (oldVersion == 25)
+        {
+            schema.remove("RealmERC721Asset");
             oldVersion++;
         }
     }

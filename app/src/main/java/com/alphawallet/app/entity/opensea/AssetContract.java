@@ -26,6 +26,10 @@ public class AssetContract implements Parcelable {
     @Expose
     private String schemaName;
 
+    @SerializedName("image_url")
+    @Expose
+    private String imageUrl;
+
     protected AssetContract(Parcel in) {
         address = in.readString();
         name = in.readString();
@@ -86,6 +90,8 @@ public class AssetContract implements Parcelable {
     public void setSymbol(String symbol) {
         this.symbol = symbol;
     }
+
+    public String getImageUrl() { return imageUrl; }
 
     public AssetContract withSymbol(String symbol) {
         this.symbol = symbol;

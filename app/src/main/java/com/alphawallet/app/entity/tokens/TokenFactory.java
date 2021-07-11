@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.tokens;
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 

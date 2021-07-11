@@ -166,18 +166,6 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
-    @Override
-    public int[] getTicketIndices(String ticketIds)
-    {
-        List<BigInteger> indexList = ticketIdStringToIndexList(ticketIds);
-        int[] indicies = new int[indexList.size()];
-        int i = 0;
-        for (Iterator<BigInteger> iterator = indexList.iterator(); iterator.hasNext(); i++) {
-            indicies[i] = iterator.next().intValue();
-        }
-        return indicies;
-    }
-
     /*************************************
      *
      * Conversion functions used for manipulating indices
@@ -289,12 +277,6 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public boolean isMatchedInXML()
-    {
-        return isMatchedInXML;
-    }
-
-    @Override
     public Function getTransferFunction(String to, List<BigInteger> tokenIndices) throws NumberFormatException
     {
         return new Function(
@@ -339,19 +321,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return dynArray;
-    }
-
-    @Override
-    public int interfaceOrdinal()
-    {
-        return contractType.ordinal();
-    }
-
-    @Override
-    public BigInteger getTokenID(int index)
-    {
-        if (balanceArray.size() > index && index >= 0) return balanceArray.get(index);
-        else return BigInteger.valueOf(-1);
     }
 
     @Override

@@ -15,7 +15,6 @@ import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.token.entity.MagicLinkInfo;
 
-
 import org.web3j.protocol.core.methods.request.Transaction;
 
 import java.math.BigDecimal;
@@ -125,6 +124,12 @@ public class Web3Transaction implements Parcelable {
         description = null;
     }
 
+    /**
+     * Initialise from previous Transaction for Resending
+     * @param tx
+     * @param isCancelling
+     * @param minGas
+     */
     public Web3Transaction(com.alphawallet.app.entity.Transaction tx, Boolean isCancelling, BigInteger minGas)
     {
 

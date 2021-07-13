@@ -233,11 +233,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     public void setupResendTransaction(boolean cancel)
     {
+        gasWidget.setupResendSettings(cancel, candidateTransaction.gasPrice);
         balanceDisplay.setVisibility(View.GONE);
         addressDetail.setVisibility(View.GONE);
         detailWidget.setVisibility(View.GONE);
         amountDisplay.setVisibility(View.GONE);
-        gasWidget.setupResendSettings(cancel, candidateTransaction.gasPrice);
+
     }
 
     @Override

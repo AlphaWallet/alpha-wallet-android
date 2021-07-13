@@ -131,7 +131,7 @@ public class Web3Transaction implements Parcelable {
         recipient = new Address(tx.to);
         contract = new Address (tx.to);
         value = (isCancelling) ? BigInteger.ZERO: new BigInteger(tx.value);
-        gasPrice = new BigInteger(tx.gasPrice);
+        gasPrice = minGas;
         gasLimit= new BigInteger(tx.gasUsed);
         nonce = tx.nonce;
         payload = (isCancelling) ? "0x": tx.hash;

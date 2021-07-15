@@ -49,6 +49,7 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
@@ -779,6 +780,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
             addressInput.getAddress();
+
+            if (addressInput.getVisibility() != View.VISIBLE)
+            {
+                // go to next screen
+                viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
+            }
         }
     }
 

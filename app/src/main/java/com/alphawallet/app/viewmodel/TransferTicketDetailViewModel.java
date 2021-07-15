@@ -1,6 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -9,6 +11,8 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.DisplayState;
+import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -25,6 +29,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -201,6 +206,14 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
         }
+        else
+        {
+            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
+            GasSettings settings = gasService.getERC875TransferGasLimit();
+            disposable = createTransactionInteract
+                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
+                    .subscribe(this::onCreateTransaction, this::onError);
+        }
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)
@@ -283,8 +296,21 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 
-
     public TokensService getTokenService() {
         return tokensService;
+    }
+
+    public void openTransferState(Context context, Token token, String ticketIds, DisplayState transferStatus)
+    {
+        if (transferStatus != DisplayState.NO_ACTION)
+        {
+            Intent intent = new Intent(context, TransferTicketDetailActivity.class);
+            intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
+            intent.putExtra(C.Key.TICKET, token);
+            intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIds);
+            intent.putExtra(C.EXTRA_STATE, transferStatus.ordinal());
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            context.startActivity(intent);
+        }
     }
 }

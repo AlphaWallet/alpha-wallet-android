@@ -26,7 +26,6 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -114,7 +113,7 @@ public class TokenIcon extends ConstraintLayout
     {
         if (token == null) return;
         this.token = token;
-        this.tokenName = token.getFullName(assetDefinition, token.getTicketCount());
+        this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
         this.assetSvs = assetDefinition;
 
         final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);

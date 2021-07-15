@@ -489,7 +489,7 @@ public class TokensService
         if (t != null)
         {
             if (BuildConfig.DEBUG) Log.d(TAG, "Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
-            balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec())
+            balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(newBalance -> onBalanceChange(newBalance, t), this::onError);

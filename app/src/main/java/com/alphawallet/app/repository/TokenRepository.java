@@ -91,6 +91,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
     public static final BigInteger INTERFACE_BALANCES_721_TICKET = new BigInteger ("c84aae17", 16);
     public static final BigInteger INTERFACE_SUPERRARE = new BigInteger ("5b5e139f", 16);
+    public static final BigInteger INTERFACE_ERC1155 = new BigInteger("d9b67a26", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -159,6 +160,8 @@ public class TokenRepository implements TokenRepositoryType {
                             {
                                 type = ContractType.ERC721;
                             }
+                            break;
+                        case ERC1155:
                             break;
                         case ERC721:
                         case ERC721_LEGACY:
@@ -303,11 +306,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<BigDecimal> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
+    public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
         Wallet wallet = new Wallet(walletAddress);
-        localSource.markBalanceChecked(wallet, chainId, tokenAddress);
-        return updateBalance(wallet, chainId, tokenAddress, type)
+        localSource.markBalanceChecked(wallet, token.tokenInfo.chainId, token.getAddress());
+        return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }
@@ -329,6 +332,7 @@ public class TokenRepository implements TokenRepositoryType {
                     break;
                 case ERC721_LEGACY:
                 case ERC721:
+                case ERC1155:
                     break;
                 case ERC721_TICKET:
                     balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
@@ -411,37 +415,41 @@ public class TokenRepository implements TokenRepositoryType {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
-    private Single<BigDecimal> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
+    private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
+        //final int chainId, final String tokenAddress, ContractType type
         return Single.fromCallable(() -> {
                 BigDecimal balance = BigDecimal.valueOf(-1);
                 try
                 {
                     List<BigInteger> balanceArray = null;
 
-                    switch (type)
+                    switch (token.getInterfaceSpec())
                     {
                         case ETHEREUM:
-                            balance = getEthBalance(wallet, chainId);
+                            balance = getEthBalance(wallet, token.tokenInfo.chainId);
                             break;
                         case ERC875:
                         case ERC875_LEGACY:
-                            balanceArray = getBalanceArray875(wallet, chainId, tokenAddress);
+                            balanceArray = getBalanceArray875(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
                             //checking raw balance, this only gives the count of tokens
-                            balance = checkUint256Balance(wallet, chainId, tokenAddress);
+                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
+                            break;
+                        case ERC1155:
+                            token.updateBalance(getRealmInstance(wallet));
                             break;
                         case ERC721_TICKET:
-                            balanceArray = getBalanceArray721Ticket(wallet, chainId, tokenAddress);
+                            balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
                         case MAYBE_ERC20:
-                            balance = checkUint256Balance(wallet, chainId, tokenAddress);
+                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
                             break;
                         case NOT_SET:
                             break;
@@ -454,12 +462,12 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
-                        localSource.updateTokenBalance(wallet, chainId, tokenAddress, balance, balanceArray, type);
+                        localSource.updateTokenBalance(wallet, token.tokenInfo.chainId, token.getAddress(), balance, balanceArray, token.getInterfaceSpec());
                     }
 
-                    if (type != ContractType.ETHEREUM && wallet.address.equalsIgnoreCase(tokenAddress))
+                    if (token.getInterfaceSpec() != ContractType.ETHEREUM && wallet.address.equalsIgnoreCase(token.getAddress()))
                     {
-                        updateNativeToken(wallet, chainId);
+                        updateNativeToken(wallet, token.tokenInfo.chainId);
                     }
                 }
                 catch (Exception e)
@@ -1325,21 +1333,23 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             ContractType returnType;
-            //could be ERC721, ERC721T, ERC875 or ERC20
+            //could be ERC721, ERC1155, ERC721T, ERC875 or ERC20
             //try some interface values
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             try
             {
-                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE))
-                    returnType = ContractType.ERC721_TICKET;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
+                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE))
-                    returnType = ContractType.ERC721_LEGACY;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
-                    returnType = ContractType.ERC721_LEGACY;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))
                     returnType = ContractType.ERC721;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_ERC1155), Boolean.TRUE))
+                    returnType = ContractType.ERC1155;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
+                    returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE))
+                    returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE))
+                    returnType = ContractType.ERC721_TICKET;
                 else
                     returnType = ContractType.OTHER;
             }

@@ -72,12 +72,12 @@ public class ERC721Ticket extends Token implements Parcelable {
 
     @Override
     public String getStringBalance() {
-        return String.valueOf(getTicketCount());
+        return String.valueOf(getTokenCount());
     }
 
     @Override
     public boolean hasPositiveBalance() {
-        return (getTicketCount() > 0);
+        return (getTokenCount() > 0);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public int getTicketCount()
+    public int getTokenCount()
     {
         int count = 0;
         if (balanceArray != null)

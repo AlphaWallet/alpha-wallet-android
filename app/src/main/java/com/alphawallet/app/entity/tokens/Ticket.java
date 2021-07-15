@@ -1,7 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,7 +11,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
@@ -26,7 +24,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -73,12 +70,12 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getStringBalance() {
-        return String.valueOf(getTicketCount());
+        return String.valueOf(getTokenCount());
     }
 
     @Override
     public boolean hasPositiveBalance() {
-        return (getTicketCount() > 0);
+        return (getTokenCount() > 0);
     }
 
     @Override
@@ -128,7 +125,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public int getTicketCount()
+    public int getTokenCount()
     {
         int count = 0;
         if (balanceArray != null)

@@ -31,6 +31,8 @@ import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.token.entity.TicketRange;
 import com.bumptech.glide.Glide;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,9 +79,10 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         this.activity = null;
     }
     
+    @NotNull
     @Override
-    public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        BinderViewHolder holder = null;
+    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+        BinderViewHolder<?> holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
@@ -141,7 +144,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
-        assetCount = t.getTicketCount();
+        assetCount = t.getTokenCount();
         int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
 
         //TokenScript view for ERC721 overrides OpenSea display

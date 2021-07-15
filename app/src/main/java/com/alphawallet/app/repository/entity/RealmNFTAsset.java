@@ -3,6 +3,7 @@ package com.alphawallet.app.repository.entity;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import io.realm.RealmObject;
@@ -17,6 +18,7 @@ public class RealmNFTAsset extends RealmObject
     private String tokenIdAddr; //format is addr-chainId-tokenId
 
     private String metaData; //store as a JSON blob
+    private String balance;  //for ERC1155
 
     public String getTokenId()
     {
@@ -37,5 +39,22 @@ public class RealmNFTAsset extends RealmObject
     public static String databaseKey(Token token, BigInteger tokenId)
     {
         return TokensRealmSource.databaseKey(token) + "-" + tokenId.toString();
+    }
+
+    public void setBalance(BigDecimal balance)
+    {
+        this.balance = balance.toString();
+    }
+
+    public BigDecimal getBalance()
+    {
+        if (this.balance != null)
+        {
+            return new BigDecimal(balance);
+        }
+        else
+        {
+            return BigDecimal.ZERO;
+        }
     }
 }

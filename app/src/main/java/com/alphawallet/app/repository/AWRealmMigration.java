@@ -276,6 +276,26 @@ public class AWRealmMigration implements RealmMigration
             schema.remove("RealmERC721Asset");
             oldVersion++;
         }
+
+        if (oldVersion == 26)
+        {
+            RealmObjectSchema realmData = schema.get("RealmNFTAsset");
+            if (realmData != null && !realmData.hasField("balance")) realmData.addField("balance", String.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 27)
+        {
+            RealmObjectSchema realmData = schema.get("RealmNFTAsset");
+            if (realmData != null && !realmData.hasField("balance")) realmData.addField("balance", String.class);
+            RealmObjectSchema realmToken = schema.get("RealmToken");
+            if (realmToken != null && !realmToken.hasField("erc1155BlockRead"))
+            {
+                realmToken.removeField("erc1155BlockRead");
+                realmToken.addField("erc1155BlockRead", String.class);
+            }
+            oldVersion++;
+        }
     }
 
     @Override

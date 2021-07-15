@@ -682,6 +682,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         realmAsset.setMetaData(asset.jsonMetaData());
+        realmAsset.setBalance(asset.getBalance());
     }
 
     private void deleteAllAssets(Realm realm, String dbKey) throws RealmException
@@ -722,6 +723,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 //grab all assets for this tokenId
                 BigInteger tokenId = new BigInteger(realmAsset.getTokenId());
                 NFTAsset asset = new NFTAsset(realmAsset.getMetaData());
+                asset.setBalance(realmAsset.getBalance());
                 assets.put(tokenId, asset);
             }
             catch (NumberFormatException e)

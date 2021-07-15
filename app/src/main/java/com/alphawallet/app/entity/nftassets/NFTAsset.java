@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +41,8 @@ public class NFTAsset implements Parcelable
     private final Map<String, String> assetMap = new HashMap<>();
     private final Map<String, String> attributeMap = new HashMap<>();
 
+    private BigDecimal balance; //for ERC1155
+
     public boolean isChecked = false;
     public boolean exposeRadio = false;
 
@@ -47,6 +50,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.clear();
         attributeMap.clear();
+        balance = BigDecimal.ZERO;
         loadFromMetaData(metaData);
     }
 
@@ -54,6 +58,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.clear();
         attributeMap.clear();
+        balance = BigDecimal.ZERO;
         assetMap.put(LOADING_TOKEN, ".");
     }
 
@@ -61,6 +66,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.clear();
         attributeMap.clear();
+        balance = BigDecimal.ZERO;
         assetMap.put(NAME, "ID #" + tokenId.toString());
     }
 
@@ -120,6 +126,24 @@ public class NFTAsset implements Parcelable
     public String getExternalLink()
     {
         return assetMap.get(EXTERNAL_LINK);
+    }
+
+    public void setDecimals(BigDecimal rawBalance)
+    {
+        if (assetMap.containsKey("decimals"))
+        {
+            BigDecimal decimals = new BigDecimal(assetMap.get("decimals"));
+        }
+    }
+
+    public void setBalance(BigDecimal value)
+    {
+        this.balance = value;
+    }
+
+    public BigDecimal getBalance()
+    {
+        return this.balance;
     }
 
     protected NFTAsset(Parcel in)

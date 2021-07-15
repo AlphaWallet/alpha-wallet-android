@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -123,7 +122,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             contractSeparator.setVisibility(View.GONE);
 
             //setup name and value (put these together on a single string to make wrap-around text appear better).
-            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
+            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTokenCount());
             balanceEth.setText(nameValue);
 
             primaryElement = false;

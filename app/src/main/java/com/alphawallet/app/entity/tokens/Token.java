@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.realm.Realm;
+
 public class Token implements Parcelable
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
@@ -199,6 +201,9 @@ public class Token implements Parcelable
         }
     }
 
+    //Used for custom balance updates
+    public void updateBalance(Realm realm) { }
+
     public boolean isTerminated() { return (updateBlancaTime == -1); }
 
     public String getAddress() {
@@ -305,7 +310,7 @@ public class Token implements Parcelable
         return null;
     }
 
-    public int getTicketCount()
+    public int getTokenCount()
     {
         return balance.intValue();
     }

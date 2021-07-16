@@ -20,6 +20,7 @@
         android:required="false" />
 
     <application
+        android:extractNativeLibs="true"
         android:name=".App"
         android:allowBackup="false"
         android:hardwareAccelerated="true"

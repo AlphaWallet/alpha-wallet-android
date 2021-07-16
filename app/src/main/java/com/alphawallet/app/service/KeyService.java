@@ -29,6 +29,7 @@ import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
@@ -125,7 +126,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private Wallet currentWallet;
 
     private AuthenticationLevel authLevel;
-    private SignTransactionDialog signDialog;
+    private final SignTransactionDialog signDialog;
     private AWalletAlertDialog alertDialog;
     private CreateWalletCallbackInterface callbackInterface;
     private ImportWalletCallback importCallback;
@@ -144,6 +145,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         System.loadLibrary("TrustWalletCore");
         context = ctx;
         checkSecurity();
+        signDialog = new SignTransactionDialog(context);
     }
 
     /**
@@ -221,7 +223,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         //cursory check for valid key import
         if (!HDWallet.isValid(seedPhrase))
         {
-            callback.WalletValidated(null, AuthenticationLevel.NOT_SET);
+            callback.walletValidated(null, KeyEncodingType.SEED_PHRASE_KEY, AuthenticationLevel.NOT_SET);
         }
         else
         {
@@ -281,7 +283,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         signCallback = callback;
         activity = callingActivity;
         currentWallet = wallet;
-        if (isChecking()) return; //guard against resetting existing dialog request
 
         switch (wallet.type)
         {
@@ -434,51 +435,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
     }
 
-
-    /*********************************
-     * Internal Functions
-     */
-
-    private void getAuthenticationForSignature()
+    public void resetSigningDialog()
     {
-        //check unlock status
-        try
-        {
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-            keyStore.load(null);
-            String matchingAddr = findMatchingAddrInKeyStore(currentWallet.address);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(matchingAddr, null);
-            String encryptedHDKeyPath = getFilePath(context, matchingAddr);
-            if (!new File(encryptedHDKeyPath).exists() || secretKey == null)
-            {
-                signCallback.gotAuthorisation(false);
-                return;
-            }
-            byte[] iv = readBytesFromFile(getFilePath(context, matchingAddr + "iv"));
-            Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-            final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-            outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-            signCallback.gotAuthorisation(true);
-            return;
-        }
-        catch (UserNotAuthenticatedException e)
-        {
-            checkAuthentication(Operation.CHECK_AUTHENTICATION);
-            return;
-        }
-        catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e)
-        {
-            //see if we can automatically recover the key
-            keyFailure("Key created at different security level. Please re-import key");
-            e.printStackTrace();
-        }
-        catch (Exception e)
-        {
-            //some other error, will exit the recursion with bad
-            e.printStackTrace();
-        }
-
-        signCallback.gotAuthorisation(false);
+        signDialog.close();
     }
 
     private synchronized String unpackMnemonic() throws KeyServiceException, UserNotAuthenticatedException
@@ -559,14 +518,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             HDWallet newWallet = new HDWallet(seedPhrase, "");
             boolean success = storeHDKey(newWallet, true);
             String reportAddress = success ? currentWallet.address : null;
-            importCallback.WalletValidated(reportAddress, authLevel);
+            importCallback.walletValidated(reportAddress, KeyEncodingType.SEED_PHRASE_KEY, authLevel);
         }
-        catch (UserNotAuthenticatedException e)
-        {
-            //Should not get this. Authentication has already been requested and key should not be auth-locked at this stage
-            checkAuthentication(IMPORT_HD_KEY);
-        }
-        catch (KeyServiceException e)
+        catch (UserNotAuthenticatedException | KeyServiceException e)
         {
             keyFailure(e.getMessage());
         }
@@ -825,10 +779,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
         }
 
-        signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
-        signDialog.setCanceledOnTouchOutside(false);
-        signDialog.show();
-        signDialog.getFingerprintAuthorisation(this);
+        signDialog.getAuthentication(this, activity, operation);
         requireAuthentication = false;
     }
 
@@ -847,8 +798,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     @Override
     public void authenticatePass(Operation operation)
     {
-        if (signDialog != null && signDialog.isShowing())
-            signDialog.dismiss();
         //resume key operation
         switch (operation)
         {
@@ -859,10 +808,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 try
                 {
                     callbackInterface.fetchMnemonic(unpackMnemonic());
-                }
-                catch (UserNotAuthenticatedException e)
-                {
-                    checkAuthentication(FETCH_MNEMONIC);
                 }
                 catch (Exception e)
                 {
@@ -895,11 +840,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             case AUTHENTICATION_DIALOG_CANCELLED: //user dialog cancel
                 cancelAuthentication();
-                if (signDialog != null && signDialog.isShowing())
-                    signDialog.dismiss();
                 break;
             case FINGERPRINT_ERROR_CANCELED:
-                //can be called when swapping between Fingerprint and PIN, may not be a cancel event
+                //called when user cancels the dialog
                 return;
             case FINGERPRINT_NOT_VALIDATED:
                 vibrate();
@@ -961,11 +904,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             signCallback.cancelAuthentication();
         else if (callbackInterface != null)
             callbackInterface.cancelAuthentication();
-    }
-
-    public boolean isChecking()
-    {
-        return (signDialog != null && signDialog.isShowing());
     }
 
     private boolean AuthorisationFailMessage(String message)
@@ -1033,8 +971,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 case UPGRADE_KEYSTORE_KEY:
                 case UPGRADE_HD_KEY:
                     //dismiss sign dialog & cancel authentication
-                    if (signDialog != null && signDialog.isShowing())
-                        signDialog.dismiss();
+                    /*if (signDialog != null && signDialog.isShowing())
+                        signDialog.dismiss();*/
                     cancelAuthentication();
                     break;
                 default:
@@ -1084,10 +1022,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             switch (operation)
             {
                 case CREATE_KEYSTORE_KEY:
-                    importCallback.KeystoreValidated(new String(newPassword), authLevel);
+                    importCallback.walletValidated(new String(newPassword), KeyEncodingType.KEYSTORE_KEY, authLevel);
                     break;
                 case CREATE_PRIVATE_KEY:
-                    importCallback.KeyValidated(new String(newPassword), authLevel);
+                    importCallback.walletValidated(new String(newPassword), KeyEncodingType.RAW_HEX_KEY, authLevel);
                     break;
             }
         }
@@ -1467,15 +1405,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
 
         return false;
-    }
-
-    public void resetSigningDialog()
-    {
-        if (signDialog != null && signDialog.isShowing())
-        {
-            signDialog.dismiss();
-        }
-        signDialog = null;
     }
 
     private boolean deviceIsLocked()

@@ -1,213 +1,176 @@
 package com.alphawallet.app.widget;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.CancellationSignal;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.os.Build;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import java.util.concurrent.Executor;
 
 import static android.content.Context.KEYGUARD_SERVICE;
+import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG;
+import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK;
+import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
 /**
  * Created by James on 7/06/2019.
  * Stormbird in Sydney
  */
-public class SignTransactionDialog extends BottomSheetDialog
+
+/* Outstanding TODOs:
+    1. Implement weak biometrics key unlock for lower security keys
+       a. UI for this
+       b. Designate the key as weak locked
+ */
+public class SignTransactionDialog
 {
     public static final int REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 123;
 
-    protected Activity context;
-    private Operation callBackId;
-    private final ImageView fingerprint;
-    private final TextView cancel;
-    private final TextView usePin;
-    private final TextView fingerprintError;
-    private final String unlockTitle;
-    private final String unlockDetail;
-    private AuthenticationCallback authCallback;
-    private CancellationSignal cancellationSignal;
+    private final boolean hasStrongBiometric;  //fingerprint, iris
+    private final boolean hasDeviceCredential; //PIN, Swipe, Password
+    private final boolean hasWeakCredential;   //TODO: Face unlock
 
-    public SignTransactionDialog(@NonNull Activity activity, Operation callBackId, String msg, String desc)
+    private BiometricPrompt biometricPrompt;
+
+    public SignTransactionDialog(Context context)
     {
-        super(activity);
-        context = activity;
-        setContentView(R.layout.dialog_unlock_private_key);
-        fingerprint = findViewById(R.id.image_fingerprint);
-        cancel = findViewById(R.id.text_cancel);
-        usePin = findViewById(R.id.text_use_pin);
-        TextView dialogTitle = findViewById(R.id.dialog_main_text);
-        fingerprintError = findViewById(R.id.text_fingerprint_error);
-        fingerprint.setVisibility(View.VISIBLE);
-        unlockTitle = msg;
-        unlockDetail = desc;
-
-        if (msg != null) dialogTitle.setText(msg);
-
-        this.callBackId = callBackId;
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        setCanceledOnTouchOutside(false);
-
-        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        usePin.setOnClickListener(v -> {
-            showAuthenticationScreen();
-        });
-
-        cancel.setOnClickListener(v -> {
-            authCallback.authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callBackId);
-            if (cancellationSignal != null) cancellationSignal.cancel();
-        });
+        BiometricManager biometricManager = BiometricManager.from(context);
+        hasStrongBiometric = biometricManager.canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
+        hasDeviceCredential = biometricManager.canAuthenticate(DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS;
+        hasWeakCredential = biometricManager.canAuthenticate(BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS;
     }
 
-    //get fingerprint or PIN
-    public void getFingerprintAuthorisation(AuthenticationCallback authCallback) {
-        this.authCallback = authCallback;
-        FingerprintManager fpManager = fingerprintUnlockSupported(context);
-
-        if (fpManager != null)
-        {
-            authenticate(fpManager, context, authCallback, callBackId);
-        }
-        else
-        {
-            removeFingerprintGraphic();
-        }
-
-        if (!hasPINLockSetup())
-        {
-            authCallback.authenticateFail("Device unlocked", AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
-        }
-    }
-
-    private void removeFingerprintGraphic()
+    public void getAuthentication(AuthenticationCallback authCallback, @NonNull Activity activity, Operation callbackId)
     {
-        //remove fingerprint
-        fingerprint.setVisibility(View.GONE);
-        TextView fingerPrintText = findViewById(R.id.fingerprint_text);
-        fingerPrintText.setVisibility(View.GONE);
-    }
-
-    private void showAuthenticationScreen()
-    {
-        if (isShowing()) dismiss();
-        KeyguardManager km = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
-        if (km != null)
-        {
-            Intent intent = km.createConfirmDeviceCredentialIntent(unlockTitle, unlockDetail);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            context.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
-        }
-        else
-        {
-            authCallback.authenticateFail("Device unlocked", AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
-        }
-    }
-
-    private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback, final Operation callbackId) {
-        cancellationSignal = new CancellationSignal();
-        fpManager.authenticate(null, cancellationSignal, 0, new FingerprintManager.AuthenticationCallback() {
+        Executor executor = ContextCompat.getMainExecutor(activity);
+        biometricPrompt = new BiometricPrompt((FragmentActivity) activity,
+                executor, new BiometricPrompt.AuthenticationCallback() {
             @Override
-            public void onAuthenticationError(int errorCode, CharSequence errString) {
+            public void onAuthenticationError(int errorCode,
+                                              @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
                 switch (errorCode)
                 {
-                    case FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED:
-                        removeFingerprintGraphic();
-                        break;
-                    case FingerprintManager.FINGERPRINT_ERROR_CANCELED:
-                        cancellationSignal.cancel();
+                    case BiometricPrompt.ERROR_NEGATIVE_BUTTON:
+                        //this could be a 'use pin'
+                        if (!TextUtils.isEmpty(errString) && errString.equals(activity.getString(R.string.use_pin)))
+                        {
+                            showAuthenticationScreen(activity, authCallback, callbackId);
+                            break;
+                        }
+                        //drop through  |
+                        //              v
+                    case BiometricPrompt.ERROR_CANCELED:
                         authCallback.authenticateFail("Cancelled", AuthenticationFailType.FINGERPRINT_ERROR_CANCELED, callbackId);
                         break;
-                    case FingerprintManager.FINGERPRINT_ERROR_HW_NOT_PRESENT:
-                    case FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE:
-                        //remove the fingerprint graphic
-                        removeFingerprintGraphic();
+                    case BiometricPrompt.ERROR_LOCKOUT:
+                    case BiometricPrompt.ERROR_LOCKOUT_PERMANENT:
+                        authCallback.authenticateFail(activity.getString(R.string.too_many_fails), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callbackId);
                         break;
-                    case FingerprintManager.FINGERPRINT_ERROR_LOCKOUT:
-                        fingerprintError.setText(R.string.too_many_fails);
-                        fingerprintError.setVisibility(View.VISIBLE);
+                    case BiometricPrompt.ERROR_USER_CANCELED:
+                        authCallback.authenticateFail(activity.getString(R.string.fingerprint_error_user_canceled), AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
                         break;
-                    case FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT:
-                        fingerprintError.setText(R.string.too_many_fails);
-                        fingerprintError.setVisibility(View.VISIBLE);
-                        break;
-                    case FingerprintManager.FINGERPRINT_ERROR_NO_FINGERPRINTS:
-                        removeFingerprintGraphic();
-                        fingerprintError.setText(R.string.no_fingerprint_enrolled);
-                        fingerprintError.setVisibility(View.VISIBLE);
-                        break;
-                    case FingerprintManager.FINGERPRINT_ERROR_TIMEOUT:
-                        //safe to ignore
-                        break;
-                    case FingerprintManager.FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
-                        removeFingerprintGraphic();
-                        fingerprintError.setText(R.string.cannot_process_fingerprint);
-                        fingerprintError.setVisibility(View.VISIBLE);
+                    case BiometricPrompt.ERROR_HW_NOT_PRESENT:
+                    case BiometricPrompt.ERROR_HW_UNAVAILABLE:
+                    case BiometricPrompt.ERROR_NO_BIOMETRICS:
+                    case BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL:
+                    case BiometricPrompt.ERROR_NO_SPACE:
+                    case BiometricPrompt.ERROR_TIMEOUT:
+                    case BiometricPrompt.ERROR_UNABLE_TO_PROCESS:
+                    case BiometricPrompt.ERROR_VENDOR:
+                        authCallback.authenticateFail(activity.getString(R.string.fingerprint_authentication_failed), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callbackId);
                         break;
                 }
             }
 
             @Override
-            public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
-                super.onAuthenticationHelp(helpCode, helpString);
-            }
-
-            @Override
-            public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
+            public void onAuthenticationSucceeded(
+                    @NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                authCallback.authenticatePass(callBackId);
+                authCallback.authenticatePass(callbackId);
             }
 
-            //This is called when fingerprint is invalid
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                cancellationSignal.cancel();
-                authCallback.authenticateFail("Authentication Failure", AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);
+                authCallback.authenticateFail(activity.getString(R.string.fingerprint_authentication_failed), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callbackId);
             }
-        }, null);
-    }
+        });
 
-    private static FingerprintManager fingerprintUnlockSupported(Context ctx)
-    {
-        if (ctx.checkSelfPermission(Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
-            return null;
+        //determine how user can authenticate
+        //This is a bit of a mess at the moment due to the API# transition.
+        // Android 30+ dialog handles both BIOMETRIC_STRONG and DEVICE_CREDENTIAL
+        //   - setAllowedAuthenticators as appropriate
+        // Android -> 29 dialog only can handle BIOMETRIC_STRONG
+        //   - if device has BIOMETRIC_STRONG setAllowedAuthenticators BIOMETRIC_STRONG, if also has DEVICE_CREDENTIAL then setup 'use pin' to call showAuthenticationScreen
+        //   - if device doesn't have BIOMETRIC_STRONG then go straight to showAuthenticationScreen
+
+        final BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle(activity.getString(R.string.unlock_private_key));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
+        {
+            promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
+        }
+        else
+        {
+            if (!hasStrongBiometric) //go straight to authentication screen
+            {
+                showAuthenticationScreen(activity, authCallback, callbackId);
+                return;
+            }
+            else
+            {
+                promptBuilder.setAllowedAuthenticators(BIOMETRIC_STRONG)
+                        .setNegativeButtonText(activity.getString(R.string.use_pin));
+            }
         }
 
-        FingerprintManager fpManager = (FingerprintManager) ctx.getSystemService(Context.FINGERPRINT_SERVICE);
-        if (fpManager == null || !fpManager.isHardwareDetected() || !fpManager.hasEnrolledFingerprints()) {
-            return null;
+        BiometricPrompt.PromptInfo promptInfo = promptBuilder.build();
+        biometricPrompt.authenticate(promptInfo);
+    }
+
+    private void showAuthenticationScreen(Activity activity, AuthenticationCallback authCallback, Operation callBackId)
+    {
+        KeyguardManager km = (KeyguardManager) activity.getSystemService(KEYGUARD_SERVICE);
+        if (km != null)
+        {
+            Intent intent = km.createConfirmDeviceCredentialIntent(activity.getString(R.string.unlock_private_key), "");
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            activity.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
         }
-
-        return fpManager;
+        else
+        {
+            authCallback.authenticateFail("Device unlocked", AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
+        }
     }
 
-    private boolean hasPINLockSetup()
-    {
-        KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
-        return (keyguardManager == null || keyguardManager.isDeviceSecure());
-    }
 
-    @Override
-    public void onDetachedFromWindow()
+    public void close()
     {
-        super.onDetachedFromWindow();
-        if (isShowing()) dismiss();
+        if (biometricPrompt != null)
+        {
+            try
+            {
+                biometricPrompt.cancelAuthentication();
+            }
+            catch (Exception e)
+            {
+                //
+            }
+        }
     }
 }

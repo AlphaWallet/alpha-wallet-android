@@ -842,7 +842,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 cancelAuthentication();
                 break;
             case FINGERPRINT_ERROR_CANCELED:
-                //can be called when swapping between Fingerprint and PIN, may not be a cancel event
+                //called when user cancels the dialog
                 return;
             case FINGERPRINT_NOT_VALIDATED:
                 vibrate();

@@ -81,7 +81,7 @@ public class SignTransactionDialog
                         authCallback.authenticateFail(activity.getString(R.string.too_many_fails), AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callbackId);
                         break;
                     case BiometricPrompt.ERROR_USER_CANCELED:
-                        authCallback.authenticateFail(activity.getString(R.string.fingerprint_error_user_canceled), AuthenticationFailType.FINGERPRINT_ERROR_CANCELED, callbackId);
+                        authCallback.authenticateFail(activity.getString(R.string.fingerprint_error_user_canceled), AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, callbackId);
                         break;
                     case BiometricPrompt.ERROR_HW_NOT_PRESENT:
                     case BiometricPrompt.ERROR_HW_UNAVAILABLE:

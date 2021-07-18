@@ -48,6 +48,12 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         initTestNetDialog(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupFilterList();
+    }
+
     void setupList()
     {
         boolean isMainNetActive = viewModel.mainNetActive();

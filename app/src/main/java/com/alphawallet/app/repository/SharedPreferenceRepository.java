@@ -14,6 +14,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";
     private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
     private static final String NETWORK_FILTER_KEY = "network_filters";
+    private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
     private static final String NOTIFICATIONS_KEY = "notifications";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
@@ -63,6 +64,16 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setActiveBrowserNetwork(int networkId) {
         pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
+    }
+
+    @Override
+    public String getCustomRPCNetworks() {
+        return pref.getString(CUSTOM_NETWORKS_KEY, "");
+    }
+
+    @Override
+    public void setCustomRPCNetworks(String networks) {
+        pref.edit().putString(CUSTOM_NETWORKS_KEY, networks).apply();
     }
 
     @Override

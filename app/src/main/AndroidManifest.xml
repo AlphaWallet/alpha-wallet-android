@@ -324,6 +324,10 @@
             android:name=".ui.TransactionSuccessActivity"
             android:label="Transaction Success" />
 
-    </application>
+        <activity
+            android:name=".ui.AddCustomRPCNetworkActivity"
+            android:label="@string/title_activity_add_custom_rpcnetwork"/>
+
+</application>
 
 </manifest>

@@ -114,7 +114,9 @@ public class Token implements Parcelable, Comparable<Token>
     {
         int decimals = 18;
         if (tokenInfo != null) decimals = tokenInfo.decimals;
-        return BalanceUtils.getScaledValueScientific(balance, decimals);
+        String balanceStr = BalanceUtils.getScaledValueScientific(balance, decimals);
+        if (balanceStr.equals("0") && balance.compareTo(BigDecimal.ZERO) > 0) { balanceStr = "~0"; }
+        return balanceStr;
     }
 
     public boolean hasPositiveBalance() {

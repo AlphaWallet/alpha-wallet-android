@@ -229,7 +229,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         if (biometricsSetting != null) systemSettingsLayout.addView(biometricsSetting, systemIndex++);
 
-        if (EthereumNetworkRepository.showNetworkFilters())
+        if (CustomViewSettings.getLockedChains().size() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         systemSettingsLayout.addView(advancedSetting, systemIndex++);

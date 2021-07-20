@@ -551,8 +551,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         else return 0;
     }
 
-    public static boolean showNetworkFilters() { return true; }
-
     public static int decimalOverride(String address, int chainId)
     {
         return 0;

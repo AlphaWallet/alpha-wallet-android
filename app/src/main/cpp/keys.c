@@ -96,3 +96,13 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_EthereumNetworkBase_getBSCExplorerKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getBSCExplorerKey(env);
+#else
+    return (*env)->NewStringUTF(env, "");
+#endif
+}

@@ -153,7 +153,7 @@ public class AWEnsResolver extends EnsResolver
         if (address == null || address.length() == 0) return false;
 
         String[] split = address.split("[.]");
-        if (split.length == 2)
+        if (split.length > 1)
         {
             String extension = split[split.length - 1];
             return extension.length() > 0 && Utils.isAlNum(extension);

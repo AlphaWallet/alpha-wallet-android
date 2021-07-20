@@ -330,13 +330,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = CustomViewSettings.filterToken(token, true, context);
+        boolean allowThroughFilter = CustomViewSettings.tokenCanBeDisplayed(token.type, token.balance, token.getChain(), token.getAddress());
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
-        //for popular tokens, choose if we display or not
-        if (allowThroughFilter && tokensService != null)
-        {
-            allowThroughFilter = tokensService.shouldDisplayPopularToken(token);
-        }
 
         switch (filterType)
         {

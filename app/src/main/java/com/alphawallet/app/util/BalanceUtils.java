@@ -13,6 +13,7 @@ import java.text.NumberFormat;
 public class BalanceUtils
 {
     private static String weiInEth  = "1000000000000000000";
+    private static int showDecimalPlaces = 5;
 
     private static String getDigitalPattern(int precision)
     {
@@ -149,7 +150,7 @@ public class BalanceUtils
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals)
     {
-        return getScaledValueScientific(value, decimals, 4);
+        return getScaledValueScientific(value, decimals, showDecimalPlaces);
     }
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals, int dPlaces)

@@ -77,6 +77,36 @@ https://github.com/AlphaWallet/alpha-wallet-android/blob/master/app/src/main/ass
 
 You can submit feedback and report bugs as Github issues. Please be sure to include your operating system, device, version number, and steps to reproduce reported bugs.
 
+## How to customise the appearance of your wallet fork
+
+If you are forking AlphaWallet, and have a token that you want to be locked visible this can now be done easily. Let's say we want to only show Ethereum Mainnet, and always show the USDC stablecoin.
+
+```
+class CustomViewSettings
+{
+```
+...
+```
+    private static final List<TokenInfo> lockedTokens = Arrays.asList(
+            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, int ChainId)
+            new TokenInfo("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "USD Coin", "USDC", 6, true, EthereumNetworkBase.MAINNET_ID)
+    );
+    
+    private static final List<Integer> lockedChains = Arrays.asList(
+            EthereumNetworkBase.MAINNET_ID
+    );
+```
+Further, you may have your own Dapp that sells or uses the USDC that you want your users to use.
+```
+public static boolean minimiseBrowserURLBar() { return true; } //this removes the ability to enter URL's directly (they can be clicked on within your dapp)
+```
+```
+public abstract class EthereumNetworkBase ...
+{
+    private static final String DEFAULT_HOMEPAGE = "https://my-awesome-nfts.com/usdc/";
+```
+If you are forking AlphaWallet and you have a cool Token, please consider donating a small amount of said Token to `alphawallet.eth` to help fund continuing development of the main repo.
+
 ### Request or submit a feature :postbox:
 
 Would you like to request a feature? Please get in touch with us [Telegram](https://t.me/AlphaWalletGroup), [Discord](https://discord.gg/mx23YWRTYf), [Twitter](https://twitter.com/AlphaWallet) or through our [community forums](https://community.tokenscript.org/).

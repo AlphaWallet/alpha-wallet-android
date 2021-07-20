@@ -181,6 +181,15 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
                 }
             }
         }
+        else
+        {
+            editText.setImeOptions(EditorInfo.IME_ACTION_DONE); //add default action
+        }
+
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            hideKeyboard();
+            return false;
+        });
     }
 
     public void setStatus(CharSequence statusTxt)

@@ -48,8 +48,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
+import static com.alphawallet.app.repository.EthereumNetworkBase.getBSCExplorerKey;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
@@ -65,6 +68,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final int AUX_DATABASE_ID = 15; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    private final String BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -375,6 +379,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             if (networkInfo.etherscanTxUrl.contains("etherscan"))
             {
                 sb.append(ETHERSCAN_API_KEY);
+            }
+            else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
+            {
+                sb.append(BSC_EXPLORER_API_KEY);
             }
 
             fullUrl = sb.toString();

@@ -1775,6 +1775,31 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return insets;
     };
 
+    // Required for if we have status bar showing
+    public void softKeyboardVisible()
+    {
+        if (getActivity() == null) { return; }
+
+        Rect r = new Rect();
+        webFrame.getWindowVisibleDisplayFrame(r);
+
+        int heightDifference = webFrame.getRootView().getHeight() - r.bottom;
+
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
+
+        layoutParams.bottomMargin = heightDifference;
+        webFrame.setLayoutParams(layoutParams);
+    }
+
+    public void softKeyboardGone()
+    {
+        if (getActivity() == null) { return; }
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
+        layoutParams.bottomMargin = ((HomeActivity) getActivity()).getNavBarHeight();
+        webFrame.setLayoutParams(layoutParams);
+        shrinkSearchBar();
+    }
+
     @NotNull
     private String determineMimeType(@NotNull WebChromeClient.FileChooserParams fileChooserParams)
     {

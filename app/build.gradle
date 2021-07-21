@@ -52,6 +52,11 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
+        packagingOptions {
+            jniLibs {
+                useLegacyPackaging true
+            }
+        }
     }
     flavorDimensions "targetting"
 

@@ -140,4 +140,14 @@ public class CustomViewSettings
 
     //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
     public static boolean showAllNetworks() { return false; }
+
+    public static String getDecimalFormat() { return "0.####E0"; }
+
+    public static int getDecimalPlaces() { return 5; }
+
+    //set if the Input Amount defaults to Fiat or Crypto
+    public static boolean inputAmountFiatDefault()
+    {
+        return false;
+    }
 }

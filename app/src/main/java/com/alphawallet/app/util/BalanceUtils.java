@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 
 import org.web3j.utils.Convert;
@@ -157,7 +158,7 @@ public class BalanceUtils
     {
         String returnValue;
         BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
-        final NumberFormat formatter = new DecimalFormat("0.####E0");
+        final NumberFormat formatter = new DecimalFormat(CustomViewSettings.getDecimalFormat());
         formatter.setRoundingMode(RoundingMode.DOWN);
         if (value.equals(BigDecimal.ZERO)) //zero balance
         {

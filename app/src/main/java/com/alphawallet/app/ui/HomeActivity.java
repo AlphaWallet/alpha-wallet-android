@@ -295,13 +295,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         KeyboardVisibilityEvent.setEventListener(
                 this, isOpen -> {
+                    boolean requiresDappBrowserResize = !viewModel.fullScreenSelected() && viewPager.getCurrentItem() == DAPP_BROWSER.ordinal();
                     if (isOpen)
                     {
                         setNavBarVisibility(View.GONE);
+                        if (requiresDappBrowserResize) ((DappBrowserFragment)dappBrowserFragment).softKeyboardVisible();
                     }
                     else
                     {
                         setNavBarVisibility(View.VISIBLE);
+                        if (requiresDappBrowserResize) ((DappBrowserFragment)dappBrowserFragment).softKeyboardGone();
                     }
                 });
     }

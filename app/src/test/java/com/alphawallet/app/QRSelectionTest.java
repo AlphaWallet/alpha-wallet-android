@@ -141,7 +141,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public void removeOldTransaction(Wallet wallet, String oldTxHash)
+            public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
             {
 
             }

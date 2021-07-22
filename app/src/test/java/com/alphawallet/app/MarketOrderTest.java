@@ -157,7 +157,7 @@ public class MarketOrderTest
                 return Single.fromCallable(() -> { return ""; });
             }
 
-            @Override public void removeOldTransaction(Wallet wallet, String oldTxHash)
+            @Override public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
             {
 
             }

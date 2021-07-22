@@ -14,7 +14,8 @@ import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
-public class TransactionDetailViewModelFactory implements ViewModelProvider.Factory {
+public class TransactionDetailViewModelFactory implements ViewModelProvider.Factory
+{
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -35,7 +36,8 @@ public class TransactionDetailViewModelFactory implements ViewModelProvider.Fact
             KeyService keyService,
             GasService2 gasService,
             CreateTransactionInteract createTransactionInteract,
-            AnalyticsServiceType analyticsService) {
+            AnalyticsServiceType analyticsService)
+    {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokensService = tokensService;
@@ -49,7 +51,8 @@ public class TransactionDetailViewModelFactory implements ViewModelProvider.Fact
 
     @NonNull
     @Override
-    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass)
+    {
         return (T) new TransactionDetailViewModel(
                 findDefaultNetworkInteract,
                 externalBrowserRouter,

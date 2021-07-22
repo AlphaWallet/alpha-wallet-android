@@ -75,7 +75,7 @@ public class CreateTransactionInteract
 
     public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
     {
-        transactionRepository.removeOldTransaction(wallet, oldTxHash);
+        transactionRepository.removeOverridenTransaction(wallet, oldTxHash);
     }
 
     public Single<TransactionData> signTransaction(Wallet wallet, Web3Transaction w3tx, int chainId)

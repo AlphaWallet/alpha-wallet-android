@@ -26,7 +26,6 @@ import com.alphawallet.app.ui.widget.holder.OpenseaHolder;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
 import com.alphawallet.app.ui.widget.holder.TicketHolder;
 import com.alphawallet.app.ui.widget.holder.TokenDescriptionHolder;
-import com.alphawallet.app.ui.widget.holder.TokenFunctionViewHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.token.entity.TicketRange;
@@ -99,9 +98,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, token, assetService, clickThrough);
                 holder.setOnTokenClickListener(onTokenClickListener);
-                break;
-            case TokenFunctionViewHolder.VIEW_TYPE:
-                holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token, functionCallback, assetService);
                 break;
             case QuantitySelectorHolder.VIEW_TYPE:
                 holder = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, assetCount, assetService);

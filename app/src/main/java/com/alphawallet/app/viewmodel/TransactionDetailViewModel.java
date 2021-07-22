@@ -44,6 +44,7 @@ import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -64,11 +65,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private final GasService2 gasService;
     private final AnalyticsServiceType analyticsService;
 
-    private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
     private final MutableLiveData<Transaction> latestTx = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
 
@@ -94,7 +93,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
             KeyService keyService,
             GasService2 gasService,
             CreateTransactionInteract createTransactionInteract,
-            AnalyticsServiceType analyticsService) {
+            AnalyticsServiceType analyticsService)
+    {
         this.networkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokenService = tokenService;
@@ -153,7 +153,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
     }
 
-    public void shareTransactionDetail(Context context, Transaction transaction) {
+    public void shareTransactionDetail(Context context, Transaction transaction)
+    {
         Uri shareUri = buildEtherscanUri(transaction);
         if (shareUri != null) {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
@@ -170,7 +171,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     @Nullable
-    private Uri buildEtherscanUri(Transaction transaction) {
+    private Uri buildEtherscanUri(Transaction transaction)
+    {
         NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId);
         if (networkInfo != null) {
             return networkInfo.getEtherscanUri(transaction.hash);
@@ -199,7 +201,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
         if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed()) pendingUpdateDisposable.dispose();
         if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed()) currentBlockUpdateDisposable.dispose();
     }
-
 
     public void fetchTransaction(Wallet wallet, String txHash, int chainId)
     {
@@ -268,7 +269,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
         gasService.stopGasPriceCycle();
     }
 
-
     public void restartServices()
     {
         fetchTransactionsInteract.restartTransactionService();
@@ -279,43 +279,35 @@ public class TransactionDetailViewModel extends BaseViewModel {
         return tokenService;
     }
 
-    private void onCreateTransaction(String transaction) {
-        progress.postValue(false);
-        newTransaction.postValue(transaction);
-    }
-
-
-    public void sendOverrideTransaction(String transactionHex, String to, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, int chainId)
-    {
-        byte[] data = Numeric.hexStringToByteArray(transactionHex);
-        disposable = createTransactionInteract
-                .resend(defaultWallet.getValue(), nonce, to, value, gasPrice, gasLimit, data, chainId)
-                .subscribe(this::onCreateTransaction,
-                        this::onError);
-    }
-
     public BigInteger calculateMinGasPrice(BigInteger oldGasPrice)
     {
-
         BigInteger candidateGasOverridePrice = new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).toBigInteger();
         BigInteger checkGasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
 
         return checkGasPrice.max(candidateGasOverridePrice); //highest price between adding 2 gwei or 10%
     }
 
-
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
     {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId)
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId, String overridenTxHash)
     {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
+                .subscribe(txData -> processTransaction(txData, wallet, overridenTxHash),
                         transactionError::postValue);
     }
+
+    private void processTransaction(TransactionData txData, Wallet wallet, String overridenTxHash)
+    {
+        //remove old tx from database
+        fetchTransactionsInteract.removeOverridenTransaction(wallet, overridenTxHash);
+        //update Activity
+        transactionFinalised.postValue(txData);
+    }
+
     public void actionSheetConfirm(String mode)
     {
         AnalyticsProperties analyticsProperties = new AnalyticsProperties();
@@ -323,5 +315,4 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
-
 }

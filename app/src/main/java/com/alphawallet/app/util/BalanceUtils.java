@@ -144,6 +144,11 @@ public class BalanceUtils
         return scaledValue(value, pattern, decimals);
     }
 
+    public static String getScaledValueMinimal(BigInteger value, long decimals)
+    {
+        return scaledValue(new BigDecimal(value), getDigitalPattern(Token.TOKEN_BALANCE_FOCUS_PRECISION, 0), decimals);
+    }
+
     public static String getScaledValueMinimal(BigDecimal value, long decimals, int max_precision)
     {
         return scaledValue(value, getDigitalPattern(max_precision, 0), decimals);

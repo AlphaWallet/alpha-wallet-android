@@ -8,8 +8,9 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.TokensService;
@@ -29,16 +30,17 @@ public class TokenFunctionModule
     TokenFunctionViewModelFactory provideTokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            GasService gasService,
+            GasService2 gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenseaService openseaService,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract,
+            AnalyticsServiceType analyticsServiceType) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTransactionsInteract);
+                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTransactionsInteract, analyticsServiceType);
     }
 
     @Provides

@@ -24,7 +24,6 @@ import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
@@ -171,12 +170,6 @@ public class RepositoriesModule {
 												   TransactionsNetworkClientType transactionsNetworkClientType,
 												   TransactionLocalSource transactionLocalSource) {
 		return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
-	}
-
-	@Singleton
-	@Provides
-	GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new GasService(ethereumNetworkRepository);
 	}
 
 	@Singleton

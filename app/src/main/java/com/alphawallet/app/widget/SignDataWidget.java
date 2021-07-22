@@ -26,6 +26,7 @@ public class SignDataWidget extends LinearLayout
     private final ScrollView scrollView;
     private final TextView messageTitle;
     private ActionSheetInterface sheetInterface;
+    private Signable signable;
 
     public SignDataWidget(Context context, @Nullable AttributeSet attrs)
     {
@@ -41,6 +42,7 @@ public class SignDataWidget extends LinearLayout
 
     public void setupSignData(Signable message)
     {
+        this.signable = message;
         textSignDetails.setText(message.getUserMessage());
         textSignDetailsMax.setText(message.getUserMessage());
 
@@ -67,5 +69,10 @@ public class SignDataWidget extends LinearLayout
     public void setLockCallback(ActionSheetInterface asIf)
     {
         sheetInterface = asIf;
+    }
+
+    public Signable getSignable()
+    {
+        return signable;
     }
 }

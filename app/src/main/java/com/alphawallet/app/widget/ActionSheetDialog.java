@@ -68,6 +68,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private String txHash = null;
     private boolean actionCompleted;
+    private Transaction transaction;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -109,7 +110,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = tx;
         callbackId = tx.leafPosition;
 
-        balanceDisplay.setupBalance(token, tokensService);
+        transaction = new Transaction(tx, token.tokenInfo.chainId, ts.getCurrentAddress());
+        transaction.transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
+
+        balanceDisplay.setupBalance(token, tokensService, transaction);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
@@ -117,7 +121,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         gasWidget.setupWidget(ts, token, candidateTransaction, this, activity);
         updateAmount();
 
-        addressDetail.setupAddress(destAddress, destName);
+        addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
 
         if (token.isERC721())
         {
@@ -195,6 +199,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         detailWidget.setLockCallback(this);
+        if (candidateTransaction.value.equals(BigInteger.ZERO))
+        {
+            amountDisplay.setVisibility(View.GONE);
+        }
+        else
+        {
+            amountDisplay.setVisibility(View.VISIBLE);
+            amountDisplay.setAmountUsingToken(candidateTransaction.value, tokensService.getServiceToken(token.tokenInfo.chainId), tokensService);
+        }
     }
 
     public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)
@@ -205,25 +218,23 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private boolean isSendingTransaction()
     {
-        return (mode == ActionSheetMode.SEND_TRANSACTION || mode == ActionSheetMode.SEND_TRANSACTION_DAPP || mode == ActionSheetMode.SEND_TRANSACTION_WC
-         || mode == ActionSheetMode.SIGN_TRANSACTION);
+        return (mode != ActionSheetMode.SIGN_MESSAGE && mode != ActionSheetMode.SIGN_TRANSACTION);
     }
 
-    public void setupResendTransaction(boolean cancel)
+    public void setupResendTransaction(ActionSheetMode callingMode)
     {
-        gasWidget.setupResendSettings(cancel, candidateTransaction.gasPrice);
+        mode = callingMode;
+        gasWidget.setupResendSettings(mode, candidateTransaction.gasPrice);
         balanceDisplay.setVisibility(View.GONE);
         addressDetail.setVisibility(View.GONE);
         detailWidget.setVisibility(View.GONE);
         amountDisplay.setVisibility(View.GONE);
-
     }
 
     @Override
     public void updateAmount()
     {
-        String amountVal = BalanceUtils.getScaledValueScientific(getTransactionAmount(), token.tokenInfo.decimals);
-        showAmount(amountVal);
+        showAmount(getTransactionAmount().toBigInteger());
     }
 
     @Override
@@ -234,6 +245,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             case SEND_TRANSACTION_WC:
             case SEND_TRANSACTION:
             case SEND_TRANSACTION_DAPP:
+            case SPEEDUP_TRANSACTION:
+            case CANCEL_TRANSACTION:
                 //check gas and warn user
                 if (!gasWidget.checkSufficientGas())
                 {
@@ -264,9 +277,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
         else if (isSendingTransaction())
         {
-            //Decode tx
-            TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
-            txAmount = new BigDecimal(token.getTransferValueRaw(transactionInput));
+            txAmount = new BigDecimal(token.getTransferValueRaw(transaction.transactionInput));
         }
         else
         {
@@ -279,8 +290,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private String getERC721TokenId()
     {
         if (!token.isERC721()) return "";
-        TransactionInput transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
-        return token.getTransferValueRaw(transactionInput).toString();
+        return token.getTransferValueRaw(transaction.transactionInput).toString();
     }
 
     private void signMessage()
@@ -291,20 +301,22 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         //authentication screen
         SignAuthenticationCallback localSignCallback = new SignAuthenticationCallback()
         {
+            final SignDataWidget signWidget = findViewById(R.id.sign_widget);
+
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
                 actionCompleted = true;
                 //display success and hand back to calling function
                 if (gotAuth) confirmationWidget.startProgressCycle(1);
-                signCallback.gotAuthorisation(gotAuth);
+                signCallback.gotAuthorisationForSigning(gotAuth, signWidget.getSignable());
             }
 
             @Override
             public void cancelAuthentication()
             {
                 confirmationWidget.hide();
-                signCallback.gotAuthorisation(false);
+                signCallback.gotAuthorisationForSigning(false, signWidget.getSignable());
             }
         };
 
@@ -359,11 +371,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
             case SEND_TRANSACTION_WC:
             case SEND_TRANSACTION_DAPP:
-                //return to dapp
-                dismiss();
-                break;
-
+            case SPEEDUP_TRANSACTION:
+            case CANCEL_TRANSACTION:
             case SIGN_TRANSACTION:
+                //return to dapp
                 dismiss();
                 break;
         }
@@ -441,6 +452,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 case SEND_TRANSACTION_WC:
                 case SEND_TRANSACTION:
                 case SEND_TRANSACTION_DAPP:
+                case SPEEDUP_TRANSACTION:
+                case CANCEL_TRANSACTION:
+                case SIGN_TRANSACTION:
                     signCallback.gotAuthorisation(gotAuth);
                     break;
 
@@ -448,10 +462,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                     actionCompleted = true;
                     //display success and hand back to calling function
                     confirmationWidget.startProgressCycle(1);
-                    signCallback.gotAuthorisation(gotAuth);
-                    break;
-
-                case SIGN_TRANSACTION:
                     signCallback.gotAuthorisation(gotAuth);
                     break;
             }
@@ -525,40 +535,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     public void setGasEstimate(BigInteger estimate)
     {
-        //String amountVal = BalanceUtils.getScaledValueScientific(new BigDecimal(candidateTransaction.value.add(estimate)), token.tokenInfo.decimals);
         gasWidget.setGasEstimate(estimate);
     }
 
-    private void showAmount(String amountVal)
+    private void showAmount(BigInteger amountVal)
     {
-        String displayStr = getContext().getString(R.string.total_cost, amountVal, token.getSymbol());
-
-        //fetch ticker if required
-        if (gasWidget.getValue().compareTo(BigInteger.ZERO) > 0)
-        {
-            try (Realm realm = tokensService.getTickerRealmInstance())
-            {
-                RealmTokenTicker rtt = realm.where(RealmTokenTicker.class)
-                        .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
-                        .findFirst();
-
-                if (rtt != null)
-                {
-                    //calculate equivalent fiat
-                    double cryptoRate = Double.parseDouble(rtt.getPrice());
-                    double cryptoAmount = Double.parseDouble(amountVal);
-                    displayStr = getContext().getString(R.string.fiat_format, amountVal, token.getSymbol(),
-                            TickerService.getCurrencyString(cryptoAmount * cryptoRate),
-                            rtt.getCurrencySymbol()) ;
-                }
-            }
-            catch (Exception e)
-            {
-                //
-            }
-        }
-
-        amountDisplay.setAmountFromString(displayStr);
+        amountDisplay.setAmountUsingToken(amountVal, token, tokensService);
 
         BigInteger networkFee = gasWidget.getGasPrice(candidateTransaction.gasPrice).multiply(gasWidget.getGasLimit());
         BigInteger balanceAfterTransaction = token.balance.toBigInteger().subtract(gasWidget.getValue());

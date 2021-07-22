@@ -30,6 +30,7 @@ import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -75,7 +76,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
                 .get(TransactionDetailViewModel.class);
         viewModel.latestBlock().observe(this, this::onLatestBlock);
         viewModel.onTransaction().observe(this, this::onTransaction);
-
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
 
@@ -141,7 +141,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         setOperationName();
 
-        if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
+        //if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
         setupWalletDetails();
         checkFailed();
     }
@@ -294,11 +294,11 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     {
         if (id == R.string.speedup_transaction)
         {
-            checkConfirm(false);
+            checkConfirm(ActionSheetMode.SPEEDUP_TRANSACTION);
         }
         else if (id == R.string.cancel_transaction)
         {
-            checkConfirm(true);
+            checkConfirm(ActionSheetMode.CANCEL_TRANSACTION);
         }
         else if (id == R.string.action_open_etherscan)
         {
@@ -310,11 +310,11 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      *
      */
-    private void checkConfirm(boolean isCancelling) {
-
+    private void checkConfirm(ActionSheetMode mode)
+    {
         BigInteger minGasPrice = viewModel.calculateMinGasPrice(new BigInteger(transaction.gasPrice));
 
-        Web3Transaction w3tx = new Web3Transaction(transaction, isCancelling, minGasPrice);
+        Web3Transaction w3tx = new Web3Transaction(transaction, mode, minGasPrice);
 
         if (dialog != null && dialog.isShowing())
         {
@@ -323,7 +323,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         confirmationDialog = new ActionSheetDialog(this, w3tx, token, null,
                 transaction.to, viewModel.getTokenService(), this);
-        confirmationDialog.setupResendTransaction(isCancelling);
+        confirmationDialog.setupResendTransaction(mode);
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
     }
@@ -347,7 +347,10 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         }
         else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            if (confirmationDialog != null && confirmationDialog.isShowing())
+            {
+                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            }
         }
         else
         {
@@ -369,16 +372,17 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId);
+        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId, transaction.hash); //return point is txWritten
     }
 
     @Override
     public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
         //ActionSheet was dismissed
-        if (!TextUtils.isEmpty(txHash)) {
+        if (!TextUtils.isEmpty(txHash))
+        {
             Intent intent = new Intent();
-            intent.putExtra("tx_hash", txHash);
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
             finish();
         }
@@ -390,6 +394,8 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private void txWritten(TransactionData transactionData)
     {
         confirmationDialog.transactionWritten(transactionData.txHash);
+        //reset display to show new transaction (load transaction from database)
+        viewModel.fetchTransaction(wallet, transactionData.txHash, transaction.chainId);
     }
 
     //Transaction failed to be sent
@@ -407,5 +413,4 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         dialog.show();
         confirmationDialog.dismiss();
     }
-
 }

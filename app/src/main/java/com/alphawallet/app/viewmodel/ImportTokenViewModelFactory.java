@@ -12,7 +12,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
@@ -31,7 +31,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final GasService gasService;
+    private final GasService2 gasService;
     private final KeyService keyService;
 
     public ImportTokenViewModelFactory(GenericWalletInteract genericWalletInteract,
@@ -43,7 +43,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
                                        EthereumNetworkRepositoryType ethereumNetworkRepository,
                                        AssetDefinitionService assetDefinitionService,
                                        FetchTransactionsInteract fetchTransactionsInteract,
-                                       GasService gasService,
+                                       GasService2 gasService,
                                        KeyService keyService) {
         this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;

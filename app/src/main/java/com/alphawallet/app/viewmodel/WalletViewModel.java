@@ -3,6 +3,7 @@ package com.alphawallet.app.viewmodel;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -75,7 +76,7 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<Wallet> defaultWallet() { return defaultWallet; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
 
-    public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : null; }
+    public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : ""; }
     public WalletType getWalletType() { return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE; }
 
     public void prepare()
@@ -124,7 +125,14 @@ public class WalletViewModel extends BaseViewModel
     public Token getTokenFromService(@NotNull Token token)
     {
         Token serviceToken = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
-        return (serviceToken != null) ? serviceToken : token;
+        if (serviceToken != null && serviceToken.isEthereum())
+        {
+            return tokensService.getServiceToken(token.tokenInfo.chainId);
+        }
+        else
+        {
+            return (serviceToken != null) ? serviceToken : token;
+        }
     }
 
     public Wallet getWallet()
@@ -177,7 +185,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void checkBackup()
     {
-        if (getWalletAddr() == null || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
+        if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
         lastBackupCheck = System.currentTimeMillis();
         double walletUSDValue = tokensService.getUSDValue();
 
@@ -216,5 +224,10 @@ public class WalletViewModel extends BaseViewModel
     public void notifyRefresh()
     {
         tokensService.clearFocusToken(); //ensure if we do a refresh there's no focus token preventing correct update
+    }
+
+    public boolean isChainToken(int chainId, String tokenAddress)
+    {
+        return tokensService.isChainToken(chainId, tokenAddress);
     }
 }

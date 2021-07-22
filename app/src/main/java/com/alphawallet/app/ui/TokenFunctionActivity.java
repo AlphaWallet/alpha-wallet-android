@@ -150,7 +150,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, idList.get(0), HISTORY_LENGTH);
+                token, viewModel.getTokensService(), idList.get(0), HISTORY_LENGTH);
     }
 
     @Override

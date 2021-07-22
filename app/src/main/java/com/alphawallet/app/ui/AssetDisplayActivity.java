@@ -440,7 +440,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, BigInteger.ZERO, HISTORY_LENGTH);
+                token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
     }
 
     @Override

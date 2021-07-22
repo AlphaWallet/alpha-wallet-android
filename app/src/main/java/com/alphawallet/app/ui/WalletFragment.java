@@ -214,6 +214,7 @@ public class WalletFragment extends BaseFragment implements
             for (RealmToken t : realmTokens)
             {
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
+                if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
                 String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
 

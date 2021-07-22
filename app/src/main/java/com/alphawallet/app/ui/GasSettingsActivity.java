@@ -135,7 +135,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         setupGasSpeeds();
         startGasListener();
     }
-
     private RealmQuery<RealmGasSpread> getGasQuery()
     {
         return viewModel.getTickerRealm().where(RealmGasSpread.class)

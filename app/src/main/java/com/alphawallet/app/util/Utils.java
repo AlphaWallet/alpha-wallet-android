@@ -50,6 +50,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
@@ -235,6 +236,8 @@ public class Utils {
                 return R.color.optimistic_main;
             case OPTIMISTIC_TEST_ID:
                 return R.color.optimistic_test;
+            case CRONOS_TEST_ID:
+                return R.color.cronos_test;
             default:
                 return R.color.mine;
         }

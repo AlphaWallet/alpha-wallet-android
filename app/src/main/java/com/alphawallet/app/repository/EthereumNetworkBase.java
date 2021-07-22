@@ -232,6 +232,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     };
 
+    static final Map<Integer, String> addressOverride = new HashMap<Integer, String>() {
+        {
+            put(OPTIMISTIC_MAIN_ID, "0x4200000000000000000000000000000000000006");
+            put(OPTIMISTIC_TEST_ID, "0x4200000000000000000000000000000000000006");
+        }
+    };
+
     final PreferenceRepositoryType preferences;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
     final boolean useTestNets;
@@ -267,6 +274,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 result.add(info);
             }
         }
+    }
+
+    public static String getChainOverrideAddress(int id) {
+        return addressOverride.containsKey(id) ? addressOverride.get(id) : "";
     }
 
     @Override
@@ -466,9 +477,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case MATIC_TEST_ID:
                 return R.drawable.ic_icons_matic;
             case OPTIMISTIC_MAIN_ID:
-                return R.drawable.ic_optimistic_eth;
+                return R.drawable.ic_optimism_logo;
             case OPTIMISTIC_TEST_ID:
-                return R.drawable.optimistic_test_logo;
+                return R.drawable.ic_optimism_testnet_logo;
             case CRONOS_TEST_ID:
                 return R.drawable.ic_cronos;
             default:
@@ -547,6 +558,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static ContractLocator getOverrideToken()
     {
         return new ContractLocator("", MAINNET_ID, ContractType.ETHEREUM);
+    }
+
+    @Override
+    public boolean isChainContract(int chainId, String address)
+    {
+        return (addressOverride.containsKey(chainId) && address.equalsIgnoreCase(addressOverride.get(chainId)));
     }
 
     public static boolean isPriorityToken(Token token)

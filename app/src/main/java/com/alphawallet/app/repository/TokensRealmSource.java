@@ -753,7 +753,8 @@ public class TokensRealmSource implements TokenLocalSource {
             for (RealmToken t : realmItems)
             {
                 if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) ||
-                        (t.getContractType() != ContractType.ETHEREUM && !t.getEnabled())) continue;
+                        (t.getContractType() != ContractType.ETHEREUM && !t.getEnabled()) ||
+                        (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress()))) continue;
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(),
                         convertStringBalance(t.getBalance(), t.getContractType()), t.getUpdateTime(),
@@ -795,6 +796,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 for (RealmToken t : realmItems)
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
+                    if (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
                     if (t.getContractType() == ContractType.ETHEREUM && !(t.getTokenAddress().equalsIgnoreCase(wallet.address)

@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.util.BalanceUtils;
@@ -96,7 +97,7 @@ public class Web3Transaction implements Parcelable {
         gasPrice = minGas;
         gasLimit= new BigInteger(tx.gasUsed);
         nonce = tx.nonce;
-        payload = (isCancelling) ? "0x": tx.hash;
+        payload = (isCancelling) ? "0x": tx.input;
         leafPosition = -1;
     }
 

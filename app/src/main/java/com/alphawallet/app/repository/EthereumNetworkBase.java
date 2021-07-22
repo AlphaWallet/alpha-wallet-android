@@ -122,7 +122,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8585";
+    public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
 
     //This optional list creates a defined order in which tokens are displayed
     static final int[] orderList = {

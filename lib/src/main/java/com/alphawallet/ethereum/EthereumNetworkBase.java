@@ -57,8 +57,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8585";
-
+    public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8545";
+  
     static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",

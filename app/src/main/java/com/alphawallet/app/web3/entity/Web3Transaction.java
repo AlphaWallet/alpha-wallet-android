@@ -123,26 +123,7 @@ public class Web3Transaction implements Parcelable {
         leafPosition = -1;
         description = null;
     }
-
-    /**
-     * Initialise from previous Transaction for Resending (Speeding up or cancelling)
-     * @param tx
-     * @param isCancelling
-     * @param minGas
-     */
-    public Web3Transaction(com.alphawallet.app.entity.Transaction tx, Boolean isCancelling, BigInteger minGas)
-    {
-
-        recipient = new Address(tx.to);
-        contract = new Address (tx.to);
-        value = (isCancelling) ? BigInteger.ZERO: new BigInteger(tx.value);
-        gasPrice = minGas;
-        gasLimit= new BigInteger(tx.gasUsed);
-        nonce = tx.nonce;
-        payload = (isCancelling) ? "0x": tx.input;
-        leafPosition = -1;
-    }
-
+    
     Web3Transaction(Parcel in) {
         recipient = in.readParcelable(Address.class.getClassLoader());
         contract = in.readParcelable(Address.class.getClassLoader());

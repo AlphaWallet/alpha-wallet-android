@@ -1,9 +1,10 @@
 package com.alphawallet.app.ui;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
+
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateUtils;
+
 import androidx.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,18 +15,23 @@ import android.widget.LinearLayout;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
@@ -44,15 +50,16 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 /**
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
-public class TokenFunctionActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback, OnSetValuesListener
+public class TokenFunctionActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback,
+                                                                    OnSetValuesListener, ActionSheetCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
@@ -69,6 +76,8 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
+    private ActionSheetDialog confirmationDialog;
+
     private void initViews(Token t) {
         token = t;
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
@@ -98,6 +107,9 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.walletUpdate().observe(this, this::onWalletUpdate);
+        viewModel.transactionError().observe(this, this::txError);
+        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
 
         SystemView systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -108,6 +120,12 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
+    }
+
+    private void txError(Throwable throwable)
+    {
+        throwable.getStackTrace();
+        System.out.println("ERROR: " + throwable.getMessage());
     }
 
     private void onWalletUpdate(Wallet w)
@@ -248,15 +266,65 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         TSAction action = functions.get(function);
         if (action != null && action.view == null && action.function != null)
         {
-            if (!viewModel.handleFunction(action, selection.get(0), token, this))
+            //open action sheet after we determine the gas limit
+            Web3Transaction web3Tx = viewModel.handleFunction(action, selection.get(0), token, this);
+            if (web3Tx.gasLimit.equals(BigInteger.ZERO))
             {
-                showTransactionError();
+                calculateEstimateDialog();
+                //get gas estimate
+                viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
+            }
+            else
+            {
+                //go straight to confirmation
+                checkConfirm(web3Tx);
             }
         }
         else
         {
             viewModel.showFunction(this, token, function, idList);
         }
+    }
+
+    /**
+     * Open the action sheet with the function call request
+     * @param w3tx
+     */
+    private void checkConfirm(Web3Transaction w3tx)
+    {
+        if (w3tx.gasLimit.equals(BigInteger.ZERO))
+        {
+            estimateError(w3tx);
+        }
+        else
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve ENS address
+                    w3tx.recipient.toString(), viewModel.getTokenService(), this);
+            confirmationDialog.setURL("TokenScript");
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
+        }
+    }
+
+    /**
+     * Final return path
+     * @param transactionData
+     */
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+    }
+
+    private void calculateEstimateDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.calc_gas_limit));
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
     }
 
     private void errorInsufficientFunds(Token currency)
@@ -270,6 +338,27 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         dialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.getSymbol()));
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void estimateError(final Web3Transaction w3tx)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.confirm_transaction);
+        dialog.setMessage(R.string.error_transaction_may_fail);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setButtonListener(v -> {
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
+            checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
+        });
+
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+
         dialog.show();
     }
 
@@ -321,5 +410,39 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v ->dialog.dismiss());
         dialog.show();
+    }
+
+    /*
+        ActionSheet methods
+     */
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        if (actionCompleted)
+        {
+            Intent intent = new Intent();
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+        viewModel.actionSheetConfirm(mode);
     }
 }

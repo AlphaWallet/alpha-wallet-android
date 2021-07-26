@@ -214,7 +214,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String currentWebpageTitle;
     private String currentFragment;
 
-    private Signable messageTBS;  // To-Be-Signed
     private DAppFunction dAppFunction;
 
     @Nullable
@@ -995,7 +994,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void handleSignMessage(Signable message)
     {
-        messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
             public void DAppError(Throwable error, Signable message) {
@@ -1650,15 +1648,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && dAppFunction != null) //sign message
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
+    {
+        if (gotAuth)
         {
             viewModel.completeAuthentication(SIGN_DATA);
-            viewModel.signMessage(messageTBS, dAppFunction);
+            viewModel.signMessage(messageToSign, dAppFunction);
         }
-        else if (confirmationDialog != null && confirmationDialog.isShowing())
+        else
         {
-            if (messageTBS != null) web3.onSignCancel(messageTBS.getCallbackId());
-            confirmationDialog.dismiss();
+            web3.onSignCancel(messageToSign.getCallbackId());
         }
     }
 

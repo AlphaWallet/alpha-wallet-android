@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -11,6 +13,10 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -18,8 +24,10 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
@@ -28,6 +36,7 @@ import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
@@ -38,6 +47,10 @@ import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -48,6 +61,8 @@ import com.alphawallet.token.entity.TSTokenView;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -72,13 +87,14 @@ import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 
 /**
  * Created by JB on 6/08/2020.
  */
-public class TokenActivity extends BaseActivity implements PageReadyCallback, StandardFunctionInterface,
+public class TokenActivity extends BaseActivity implements PageReadyCallback, StandardFunctionInterface, ActionSheetCallback,
                                                             TokenScriptRenderCallback, WebCompletionCallback, OnSetValuesListener
 {
     @Inject
@@ -102,6 +118,8 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     private boolean isFromTokenHistory = false;
     private long pendingStart = 0;
     private TokenTransferData transferData;
+    private ActionSheetDialog confirmationDialog;
+    private AWalletAlertDialog dialog;
 
     @Nullable
     private Disposable pendingTxUpdate = null;
@@ -113,10 +131,20 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_activity);
 
-        eventKey = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
-        transactionHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-        isFromTokenHistory = getIntent().getBooleanExtra(C.EXTRA_STATE, false);
-        transferData = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        if (savedInstanceState != null && savedInstanceState.containsKey(C.EXTRA_ACTION_NAME))
+        {
+            eventKey = savedInstanceState.getString(C.EXTRA_ACTION_NAME);
+            transactionHash = savedInstanceState.getString(C.EXTRA_TXHASH);
+            isFromTokenHistory = savedInstanceState.getBoolean(C.EXTRA_STATE, false);
+            transferData = savedInstanceState.getParcelable(C.EXTRA_TOKEN_ID);
+        }
+        else
+        {
+            eventKey = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
+            transactionHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
+            isFromTokenHistory = getIntent().getBooleanExtra(C.EXTRA_STATE, false);
+            transferData = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        }
         //TODO: Send event details
         icon = findViewById(R.id.token_icon);
 
@@ -136,6 +164,8 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
         viewModel.walletUpdate().observe(this, this::onWallet);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
     }
 
     private void initViews()
@@ -164,11 +194,28 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         return super.onCreateOptionsMenu(menu);
     }
 
+    ActivityResultLauncher<Intent> txDetailPage = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getData() != null && result.getData().hasExtra(C.EXTRA_TXHASH))
+                    {
+                        transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                        //onResume will be called by OS and the transaction will reset
+                    }
+                }
+            });
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_view_transaction_details)
         {
-            viewModel.showTransactionDetail(this, transactionHash, token.tokenInfo.chainId);
+            Intent intent = new Intent(this, TransactionDetailActivity.class);
+            intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+            intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+            intent.putExtra(C.Key.WALLET, viewModel.getWallet());
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            txDetailPage.launch(intent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -179,6 +226,30 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         super.onDestroy();
         if (realm != null && !realm.isClosed()) realm.close();
         stopPendingUpdate();
+    }
+
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash);
+        transactionHash = transactionData.txHash;
+        //reset display using new transaction hash
+        viewModel.getCurrentWallet();
+    }
+
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+        confirmationDialog.dismiss();
     }
 
     private void onWallet(Wallet wallet)
@@ -580,6 +651,16 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     }
 
     @Override
+    public void onSaveInstanceState(@NotNull Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putString(C.EXTRA_ACTION_NAME, eventKey);
+        outState.putString(C.EXTRA_TXHASH, transactionHash);
+        outState.putBoolean(C.EXTRA_STATE, isFromTokenHistory);
+        outState.putParcelable(C.EXTRA_TOKEN_ID, transferData);
+    }
+
+    @Override
     public void enterKeyPressed()
     {
         KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -623,18 +704,40 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
     }
 
+    /**
+     * Activity sheet popup
+     *
+     */
+    private void checkConfirm(ActionSheetMode mode)
+    {
+        Transaction transaction = viewModel.fetchTransaction(transactionHash);
+        if (transaction == null) return;
+
+        BigInteger minGasPrice = viewModel.calculateMinGasPrice(new BigInteger(transaction.gasPrice));
+
+        Web3Transaction w3tx = new Web3Transaction(transaction, mode, minGasPrice);
+
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, null,
+                transaction.to, viewModel.getTokenService(), this);
+        confirmationDialog.setupResendTransaction(mode);
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
+    }
+
     @Override
     public void handleClick(String action, int actionId)
     {
         if (actionId == R.string.speedup_transaction)
         {
+            checkConfirm(ActionSheetMode.SPEEDUP_TRANSACTION);
             //resend the transaction to speedup
-            viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.RESEND);
+            //viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.RESEND);
         }
         else if (actionId == R.string.cancel_transaction)
         {
+            checkConfirm(ActionSheetMode.CANCEL_TRANSACTION);
             //cancel the transaction
-            viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.CANCEL_TX);
+            //viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.CANCEL_TX);
         }
         else
         {
@@ -662,5 +765,34 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         {
             eventDetail.setupERC721TokenView(token, token.getTransferValueRaw(transaction.transactionInput).toString(), true);
         }
+    }
+
+    //// ActionSheet methods
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, transactionHash); //return point is txWritten
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        //ActionSheet was dismissed
+        //refresh page with new tx
+        transactionHash = txHash;
+        viewModel.getCurrentWallet();
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+        viewModel.actionSheetConfirm(mode);
     }
 }

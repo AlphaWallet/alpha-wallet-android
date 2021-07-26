@@ -12,6 +12,7 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
+import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.token.entity.MagicLinkInfo;
 
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -29,6 +30,7 @@ public class Web3Transaction implements Parcelable {
     public final long nonce;
     public final String payload;
     public final long leafPosition;
+    public final String description;
 
     public Web3Transaction(
             Address recipient,
@@ -49,6 +51,26 @@ public class Web3Transaction implements Parcelable {
             BigInteger gasLimit,
             long nonce,
             String payload,
+            String description) {
+        this.recipient = recipient;
+        this.contract = contract;
+        this.value = value;
+        this.gasPrice = gasPrice;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = 0;
+        this.description = description;
+    }
+
+    public Web3Transaction(
+            Address recipient,
+            Address contract,
+            BigInteger value,
+            BigInteger gasPrice,
+            BigInteger gasLimit,
+            long nonce,
+            String payload,
             long leafPosition) {
         this.recipient = recipient;
         this.contract = contract;
@@ -58,6 +80,7 @@ public class Web3Transaction implements Parcelable {
         this.nonce = nonce;
         this.payload = payload;
         this.leafPosition = leafPosition;
+        this.description = null;
     }
 
     /**
@@ -79,6 +102,26 @@ public class Web3Transaction implements Parcelable {
         this.nonce = Hex.hexToLong(nonce, -1);
         this.payload = wcTx.getData();
         this.leafPosition = callbackId;
+        this.description = null;
+    }
+
+    /**
+     * Initialise from previous Transaction for Resending (Speeding up or cancelling)
+     * @param tx
+     * @param mode
+     * @param minGas
+     */
+    public Web3Transaction(com.alphawallet.app.entity.Transaction tx, ActionSheetMode mode, BigInteger minGas)
+    {
+        recipient = new Address(tx.to);
+        contract = new Address (tx.to);
+        value = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? BigInteger.ZERO: new BigInteger(tx.value);
+        gasPrice = minGas;
+        gasLimit= new BigInteger(tx.gasUsed);
+        nonce = tx.nonce;
+        payload = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? "0x": tx.input;
+        leafPosition = -1;
+        description = null;
     }
 
     Web3Transaction(Parcel in) {
@@ -90,6 +133,7 @@ public class Web3Transaction implements Parcelable {
         nonce = in.readLong();
         payload = in.readString();
         leafPosition = in.readLong();
+        description = in.readString();
     }
 
     public static final Creator<Web3Transaction> CREATOR = new Creator<Web3Transaction>() {
@@ -120,6 +164,7 @@ public class Web3Transaction implements Parcelable {
         dest.writeLong(nonce);
         dest.writeString(payload);
         dest.writeLong(leafPosition);
+        dest.writeString(description);
     }
 
     public boolean isConstructor()

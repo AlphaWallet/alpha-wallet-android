@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Token implements Parcelable, Comparable<Token>
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
-    private final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+    public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
 
     public final TokenInfo tokenInfo;
     public BigDecimal balance;

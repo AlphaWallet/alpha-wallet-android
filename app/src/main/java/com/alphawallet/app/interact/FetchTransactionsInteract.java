@@ -2,23 +2,18 @@ package com.alphawallet.app.interact;
 
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
-import io.reactivex.Observable;
+
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.service.TokensService;
-
-import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.util.List;
 
@@ -75,5 +70,10 @@ public class FetchTransactionsInteract {
     public void restartTransactionService()
     {
         transactionRepository.restartService();
+    }
+
+    public void removeOverridenTransaction(Wallet wallet, String overridenTxHash)
+    {
+        transactionRepository.removeOverridenTransaction(wallet, overridenTxHash);
     }
 }

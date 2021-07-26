@@ -1,24 +1,24 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.util.Log;
+
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.annotation.Nullable;
-import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -39,6 +39,8 @@ import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.ParseMagicLink;
+
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -227,7 +229,7 @@ public class ImportTokenViewModel extends BaseViewModel
                 break;
         }
 
-        gasService.startGasListener(importOrder.chainId); //start fetching gas price
+        gasService.startGasPriceCycle(importOrder.chainId); //start fetching gas price
     }
 
     //2. Fetch all cached tokens and get eth price
@@ -431,8 +433,11 @@ public class ImportTokenViewModel extends BaseViewModel
             MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
-            GasSettings settings = gasService.getGasSettings(tradeData, true, importOrder.chainId);
-            performImportFinal(settings);
+
+            gasService.calculateGasEstimate(tradeData, importOrder.chainId, wallet.getValue().address, order.amount, wallet.getValue())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::performImportFinal).isDisposed();
         }
         catch (Exception e)
         {
@@ -441,10 +446,20 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    private void performImportFinal(GasSettings settings)
+    private void performImportFinal(EthEstimateGas gasEstimate)
     {
         try
         {
+            BigInteger gasEstimateWei;
+            if (gasEstimate.hasError())
+            {
+                gasEstimateWei = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
+            }
+            else
+            {
+                gasEstimateWei = gasEstimate.getAmountUsed();
+            }
+
             MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
@@ -452,7 +467,7 @@ public class ImportTokenViewModel extends BaseViewModel
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                            settings.gasPrice, settings.gasLimit, tradeData, order.chainId)
+                            gasService.getGasPrice(), gasEstimateWei, tradeData, order.chainId)
                     .subscribe(this::onCreateTransaction, this::onTransactionError);
 
             addTokenWatchToWallet();
@@ -701,6 +716,6 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (getBalanceDisposable != null && !getBalanceDisposable.isDisposed()) getBalanceDisposable.dispose();
         getBalanceDisposable = null;
-        gasService.stopGasListener();
+        gasService.stopGasPriceCycle();
     }
 }

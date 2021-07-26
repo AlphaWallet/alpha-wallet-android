@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -36,7 +35,6 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 
 /**
  * Created by JB on 5/08/2020.
@@ -110,6 +108,19 @@ public class ActivityHistoryList extends LinearLayout
 
             addItems(metas);
         });
+    }
+
+    public boolean resetAdapter()
+    {
+        if (activityAdapter == null)
+        {
+            return false;
+        }
+        else
+        {
+            activityAdapter.clear();
+            return true;
+        }
     }
 
     private void handleRealmTransactions(RealmResults<RealmTransaction> realmTransactions)

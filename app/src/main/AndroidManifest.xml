@@ -163,10 +163,6 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.ConfirmationActivity"
-            android:label="@string/title_activity_confirmation" />
-
-        <activity
             android:name=".ui.AddTokenActivity"
             android:label="@string/title_add_token" />
 
@@ -180,10 +176,6 @@
 
         <activity
             android:name=".ui.GasSettingsActivity"
-            android:label="@string/title_send_settings" />
-
-        <activity
-            android:name=".ui.GasSettingsActivityLegacy"
             android:label="@string/title_send_settings" />
 
         <activity

@@ -35,6 +35,8 @@ import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -76,8 +78,16 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
+        symbol = null;
         toolbar();
         setTitle("");
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(C.EXTRA_SYMBOL))
+        {
+            symbol = savedInstanceState.getString(C.EXTRA_ACTION_NAME);
+            wallet = savedInstanceState.getParcelable(WALLET);
+            token = savedInstanceState.getParcelable(C.EXTRA_TOKEN_ID);
+        }
     }
 
     private void setupViewModel()
@@ -149,11 +159,22 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void getIntentData()
     {
+        if (symbol != null) return;
+
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         tokenMeta = new TokenCardMeta(token);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NotNull Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putString(C.EXTRA_SYMBOL, symbol);
+        outState.putParcelable(WALLET, wallet);
+        outState.putParcelable(C.EXTRA_TOKEN_ID, token);
     }
 
     private void setTokenListener()
@@ -235,15 +256,26 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     protected void onResume()
     {
         super.onResume();
-        if (viewModel == null)
+        if (viewModel == null || !activityHistoryList.resetAdapter())
         {
-            getIntentData();
-            setupViewModel();
-            setUpTokenView();
-            setUpRecentTransactionsView();
+            restartView();
+        }
+        else
+        {
+            //reset the transaction history
+            activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
+                    token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
         }
         viewModel.getTokensService().setFocusToken(token);
         viewModel.restartServices();
+    }
+
+    private void restartView()
+    {
+        getIntentData();
+        setupViewModel();
+        setUpTokenView();
+        setUpRecentTransactionsView();
     }
 
     @Override

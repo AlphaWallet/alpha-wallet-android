@@ -174,6 +174,12 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
+    GasService provideGasService2(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager) {
+		return new GasService(ethereumNetworkRepository, client, realmManager);
+	}
+
+	@Singleton
+	@Provides
     MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
                                                  TransactionRepositoryType transactionRepository) {
 		return new MarketQueueService(ctx, okHttpClient, transactionRepository);

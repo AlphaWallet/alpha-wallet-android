@@ -206,14 +206,14 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
         }
-        else
-        {
-            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            GasSettings settings = gasService.getERC875TransferGasLimit();
-            disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
-                    .subscribe(this::onCreateTransaction, this::onError);
-        }
+//        else
+//        {
+//            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
+//            GasSettings settings = gasService.getERC875TransferGasLimit();
+//            disposable = createTransactionInteract
+//                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
+//                    .subscribe(this::onCreateTransaction, this::onError);
+//        }
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)

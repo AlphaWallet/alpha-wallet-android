@@ -289,10 +289,16 @@ public class AWRealmMigration implements RealmMigration
             RealmObjectSchema realmData = schema.get("RealmNFTAsset");
             if (realmData != null && !realmData.hasField("balance")) realmData.addField("balance", String.class);
             RealmObjectSchema realmToken = schema.get("RealmToken");
-            if (realmToken != null && !realmToken.hasField("erc1155BlockRead"))
+            if (realmToken != null)
             {
-                realmToken.removeField("erc1155BlockRead");
-                realmToken.addField("erc1155BlockRead", String.class);
+                if (realmToken.hasField("erc1155BlockRead"))
+                {
+                    realmToken.removeField("erc1155BlockRead");
+                }
+                if (!realmToken.hasField("erc1155BlockRead"))
+                {
+                    realmToken.addField("erc1155BlockRead", String.class);
+                }
             }
             oldVersion++;
         }

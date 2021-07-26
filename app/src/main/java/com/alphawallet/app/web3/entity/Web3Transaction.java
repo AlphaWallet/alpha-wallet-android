@@ -123,7 +123,7 @@ public class Web3Transaction implements Parcelable {
         leafPosition = -1;
         description = null;
     }
-
+    
     Web3Transaction(Parcel in) {
         recipient = in.readParcelable(Address.class.getClassLoader());
         contract = in.readParcelable(Address.class.getClassLoader());

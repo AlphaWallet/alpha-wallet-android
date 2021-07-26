@@ -142,4 +142,30 @@
         tools:text="@string/text_speedup_note"
         android:visibility="gone"/>
 
+    <TextView
+        android:id="@+id/text_speedup_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:textAlignment="center"
+        android:fontFamily="@font/font_regular"
+        android:textSize="@dimen/sp17"
+        android:textColor="@color/mine"
+        android:lineHeight="29sp"
+        tools:text="@string/text_speedup_note"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/text_speedup_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:textAlignment="center"
+        android:fontFamily="@font/font_regular"
+        android:textSize="@dimen/sp17"
+        android:textColor="@color/mine"
+        android:lineHeight="29sp"
+        tools:text="@string/text_speedup_note"
+        android:visibility="gone"/>
+
 </LinearLayout>

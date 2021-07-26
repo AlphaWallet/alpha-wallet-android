@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -41,7 +40,7 @@ import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -958,7 +957,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.setButtonText(R.string.button_ok);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
-            BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
         });
 

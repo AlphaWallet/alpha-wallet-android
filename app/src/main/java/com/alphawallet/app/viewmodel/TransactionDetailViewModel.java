@@ -28,12 +28,11 @@ import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthTransaction;
@@ -44,7 +43,6 @@ import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -62,7 +60,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private final KeyService keyService;
     private final TokensService tokenService;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final AnalyticsServiceType analyticsService;
 
     private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
@@ -91,7 +89,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
             TokensService tokenService,
             FetchTransactionsInteract fetchTransactionsInteract,
             KeyService keyService,
-            GasService2 gasService,
+            GasService gasService,
             CreateTransactionInteract createTransactionInteract,
             AnalyticsServiceType analyticsService)
     {

@@ -10,7 +10,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
@@ -29,7 +29,7 @@ public class TransactionDetailModule {
             TokensService tokensService,
             FetchTransactionsInteract fetchTransactionsInteract,
             KeyService keyService,
-            GasService2 gasService,
+            GasService gasService,
             CreateTransactionInteract createTransactionInteract,
             AnalyticsServiceType analyticsService) {
         return new TransactionDetailViewModelFactory(

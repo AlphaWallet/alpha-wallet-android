@@ -8,7 +8,6 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -27,14 +26,13 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
@@ -68,7 +66,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
-    private final GasService2 gasService;
+    private final GasService gasService;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -80,7 +78,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService2 gasService) {
+            GasService gasService) {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;

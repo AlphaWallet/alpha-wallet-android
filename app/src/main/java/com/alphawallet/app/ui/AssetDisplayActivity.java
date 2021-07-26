@@ -24,26 +24,22 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.service.GasService2;
-import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
-import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -55,10 +51,8 @@ import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 /**
@@ -490,7 +484,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         dialog.setButtonText(R.string.button_ok);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
-            BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
         });
 

@@ -46,7 +46,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
  * Starts a cycle to update the gas settings stored in the database
  * Service automatically cleans up after itself - erasing readings older than 12 hours
  */
-public class GasService2 implements ContractGasProvider
+public class GasService implements ContractGasProvider
 {
     private final static String GAS_NOW_API = "https://www.gasnow.org/api/v3/gas/price?utm_source=AlphaWallet";
     public final static long FETCH_GAS_PRICE_INTERVAL_SECONDS = 15;
@@ -62,7 +62,7 @@ public class GasService2 implements ContractGasProvider
     @Nullable
     private Disposable gasFetchDisposable;
 
-    public GasService2(EthereumNetworkRepositoryType networkRepository, OkHttpClient httpClient, RealmManager realm)
+    public GasService(EthereumNetworkRepositoryType networkRepository, OkHttpClient httpClient, RealmManager realm)
     {
         this.networkRepository = networkRepository;
         this.httpClient = httpClient;

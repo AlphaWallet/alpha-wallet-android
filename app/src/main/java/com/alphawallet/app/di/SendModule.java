@@ -9,7 +9,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.SendViewModelFactory;
@@ -27,7 +27,7 @@ class SendModule {
                                                      FetchTransactionsInteract fetchTransactionsInteract,
                                                      AddTokenInteract addTokenInteract,
                                                      CreateTransactionInteract createTransactionInteract,
-                                                     GasService2 gasService,
+                                                     GasService gasService,
                                                      AssetDefinitionService assetDefinitionService,
                                                      KeyService keyService,
                                                      AnalyticsServiceType analyticsService) {

@@ -30,7 +30,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -77,7 +77,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final KeyService keyService;
 
     private ParseMagicLink parser;
@@ -116,7 +116,7 @@ public class ImportTokenViewModel extends BaseViewModel
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         GasService2 gasService,
+                         GasService gasService,
                          KeyService keyService) {
         this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;

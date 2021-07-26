@@ -17,7 +17,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.GasSettingsActivity;
@@ -119,7 +119,7 @@ public class GasWidget extends LinearLayout implements Runnable
 
         if (tx.gasLimit.equals(BigInteger.ZERO)) //dapp didn't specify a limit, use default limits until node returns an estimate (see setGasEstimate())
         {
-            baseLineGasLimit = GasService2.getDefaultGasLimit(token, tx);
+            baseLineGasLimit = GasService.getDefaultGasLimit(token, tx);
         }
         else
         {

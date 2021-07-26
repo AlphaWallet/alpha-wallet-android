@@ -10,7 +10,7 @@ import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
@@ -23,7 +23,7 @@ public class TransactionDetailViewModelFactory implements ViewModelProvider.Fact
     private final TokenRepositoryType tokenRepository;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final KeyService keyService;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
 
@@ -34,7 +34,7 @@ public class TransactionDetailViewModelFactory implements ViewModelProvider.Fact
             TokensService tokensService,
             FetchTransactionsInteract fetchTransactionsInteract,
             KeyService keyService,
-            GasService2 gasService,
+            GasService gasService,
             CreateTransactionInteract createTransactionInteract,
             AnalyticsServiceType analyticsService)
     {

@@ -1,11 +1,10 @@
 package com.alphawallet.app.ui;
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateUtils;
+
 import androidx.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,9 +20,8 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
@@ -52,7 +50,6 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
@@ -354,7 +351,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         dialog.setButtonText(R.string.button_ok);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
-            BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
         });
 

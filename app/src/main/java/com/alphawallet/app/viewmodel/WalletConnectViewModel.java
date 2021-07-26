@@ -28,7 +28,7 @@ import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
@@ -69,7 +69,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final RealmManager realmManager;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final TokensService tokensService;
     private final AnalyticsServiceType analyticsService;
     private final Context context;
@@ -87,7 +87,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                            CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
                            RealmManager realmManager,
-                           GasService2 gasService,
+                           GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
                            Context ctx) {

@@ -8,7 +8,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
@@ -30,7 +30,7 @@ public class TransferTicketDetailModule {
             CreateTransactionInteract createTransactionInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            GasService2 gasService,
+            GasService gasService,
             AnalyticsServiceType analyticsService,
             TokensService tokensService) {
         return new TransferTicketDetailViewModelFactory(genericWalletInteract,

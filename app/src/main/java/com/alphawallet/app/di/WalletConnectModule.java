@@ -9,11 +9,10 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 
 import dagger.Module;
@@ -28,7 +27,7 @@ class WalletConnectModule {
             CreateTransactionInteract createTransactionInteract,
             GenericWalletInteract genericWalletInteract,
             RealmManager realmManager,
-            GasService2 gasService,
+            GasService gasService,
             TokensService tokensService,
             AnalyticsServiceType analyticsServiceType,
             Context context) {

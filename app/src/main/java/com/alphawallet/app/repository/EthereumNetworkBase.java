@@ -229,7 +229,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/api?"));
-
+        }
+    };
+    
     static final Map<Integer, String> addressOverride = new HashMap<Integer, String>() {
         {
             put(OPTIMISTIC_MAIN_ID, "0x4200000000000000000000000000000000000006");

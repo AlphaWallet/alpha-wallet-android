@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 
 import java.math.BigInteger;
@@ -72,7 +73,7 @@ public class ActivityHistoryList extends LinearLayout
         recentTransactionsView.setAdapter(adapter);
     }
 
-    public void startActivityListeners(Realm realm, Wallet wallet, Token token, BigInteger tokenId, final int historyCount)
+    public void startActivityListeners(Realm realm, Wallet wallet, Token token, TokensService svs, BigInteger tokenId, final int historyCount)
     {
         this.realm = realm;
 
@@ -82,15 +83,15 @@ public class ActivityHistoryList extends LinearLayout
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (auxRealmUpdates != null) auxRealmUpdates.removeAllChangeListeners();
 
-        if (token.isEthereum())
-        {
-            realmUpdateQuery = getEthListener(token.tokenInfo.chainId, wallet, historyCount);
-            initViews(true);
-        }
-        else
+        if (!token.isEthereum() || svs.isChainToken(token.tokenInfo.chainId, token.getAddress()))
         {
             realmUpdateQuery = getContractListener(token.tokenInfo.chainId, token.getAddress(), historyCount);
             initViews(false);
+        }
+        else
+        {
+            realmUpdateQuery = getEthListener(token.tokenInfo.chainId, wallet, historyCount);
+            initViews(true);
         }
 
         realmTransactionUpdates = realmUpdateQuery.findAllAsync();

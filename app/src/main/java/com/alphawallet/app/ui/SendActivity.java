@@ -476,6 +476,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
+        addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.revealButtons();
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));

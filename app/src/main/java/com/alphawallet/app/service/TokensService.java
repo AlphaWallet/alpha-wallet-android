@@ -945,4 +945,26 @@ public class TokensService
     {
         if (openseaCheck != null && !openseaCheck.isDisposed()) openseaCheck.dispose();
     }
+
+    public boolean isChainToken(int chainId, String tokenAddress)
+    {
+        return ethereumNetworkRepository.isChainContract(chainId, tokenAddress);
+    }
+
+    public boolean hasChainToken(int chainId)
+    {
+        return EthereumNetworkRepository.getChainOverrideAddress(chainId).length() > 0;
+    }
+
+    public Token getServiceToken(int chainId)
+    {
+        if (hasChainToken(chainId))
+        {
+            return getToken(chainId, EthereumNetworkRepository.getChainOverrideAddress(chainId));
+        }
+        else
+        {
+            return getToken(chainId, currentAddress);
+        }
+    }
 }

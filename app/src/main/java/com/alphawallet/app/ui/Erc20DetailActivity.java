@@ -114,7 +114,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, BigInteger.ZERO, HISTORY_LENGTH);
+                token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
     }
 
     private void setUpTokenView()

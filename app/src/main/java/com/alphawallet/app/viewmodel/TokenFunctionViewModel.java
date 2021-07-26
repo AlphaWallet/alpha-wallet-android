@@ -26,7 +26,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.TokensService;
@@ -71,7 +71,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 /**
  * Created by James on 2/04/2019.
@@ -81,7 +80,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
@@ -106,7 +105,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            GasService2 gasService,
+            GasService gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,

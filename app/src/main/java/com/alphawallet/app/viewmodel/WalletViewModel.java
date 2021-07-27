@@ -224,6 +224,7 @@ public class WalletViewModel extends BaseViewModel
     public void notifyRefresh()
     {
         tokensService.clearFocusToken(); //ensure if we do a refresh there's no focus token preventing correct update
+        tokensService.onWalletRefreshSwipe();
     }
 
     public boolean isChainToken(int chainId, String tokenAddress)

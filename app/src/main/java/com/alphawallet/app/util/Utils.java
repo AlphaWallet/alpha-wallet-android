@@ -853,4 +853,9 @@ public class Utils {
         }
         return new String(buffer);
     }
+
+    public static long timeUntil(long eventInMillis)
+    {
+        return eventInMillis - System.currentTimeMillis();
+    }
 }

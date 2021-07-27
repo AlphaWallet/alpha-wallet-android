@@ -476,8 +476,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     @Override
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
-        final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
-        if (nftCheck && svs.openseaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
+        final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery(); //YOLESS
+        if (true || nftCheck && svs.openseaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
         else return Single.fromCallable(() -> {
             //get latest block read
             int eventCount = 0;

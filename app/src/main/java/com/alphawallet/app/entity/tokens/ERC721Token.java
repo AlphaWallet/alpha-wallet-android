@@ -382,12 +382,6 @@ public class ERC721Token extends Token implements Parcelable
 
         List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
 
-        //anything remaining will be a removed asset
-        if (changeList.size() > 0)
-        {
-            System.out.println("YOLESS");
-        }
-
         //Now detect differences or new tokens
         for (BigInteger tokenId : tokenBalanceAssets.keySet())
         {

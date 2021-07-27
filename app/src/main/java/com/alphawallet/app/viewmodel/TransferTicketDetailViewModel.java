@@ -12,10 +12,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
-<<<<<<< HEAD
-=======
 import com.alphawallet.app.entity.GasSettings;
->>>>>>> 544f05b0c... Further integration
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -209,7 +206,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
         }
-<<<<<<< HEAD
 //        else
 //        {
 //            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
@@ -218,16 +214,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 //                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
 //                    .subscribe(this::onCreateTransaction, this::onError);
 //        }
-=======
-        else
-        {
-            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            GasSettings settings = gasService.getERC875TransferGasLimit();
-            disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
-                    .subscribe(this::onCreateTransaction, this::onError);
-        }
->>>>>>> 544f05b0c... Further integration
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)

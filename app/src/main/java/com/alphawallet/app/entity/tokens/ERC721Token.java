@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.tokens;
 import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -15,6 +14,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 
+import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -387,6 +387,30 @@ public class ERC721Token extends Token implements Parcelable
         {
             NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
             NFTAsset oldAsset = assetMap.get(tokenId);
+
+            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
+            {
+                changeList.add(tokenId);
+            }
+        }
+
+        return changeList;
+    }
+
+    @Override
+    public List<BigInteger> getChangeList(Map<BigInteger, Asset> assetMap)
+    {
+        //detect asset removal
+        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
+        oldAssetIdList.removeAll(tokenBalanceAssets.keySet());
+
+        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
+
+        //Now detect differences or new tokens
+        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        {
+            Asset newAsset = tokenBalanceAssets.get(tokenId);
+            Asset oldAsset = assetMap.get(tokenId);
 
             if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
             {

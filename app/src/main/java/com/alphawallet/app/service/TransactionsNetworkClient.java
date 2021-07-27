@@ -477,13 +477,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
         final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
-        return Single.fromCallable(() -> {
+        if (nftCheck && svs.openseaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
+        else return Single.fromCallable(() -> {
             //get latest block read
             int eventCount = 0;
-            if (networkInfo.chainId == RINKEBY_ID)
-            {
-                System.out.println("YOLESS");
-            }
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
                 //get last tokencheck
@@ -608,7 +605,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         if (additions.size() > 0 || removals.size() > 0)
         {
-            svs.stopOpenseaCheck(token.tokenInfo.chainId); //prevent simultaneous checking
             svs.updateAssets(token, additions, removals);
         }
     }

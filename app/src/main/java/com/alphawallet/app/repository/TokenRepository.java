@@ -140,6 +140,10 @@ public class TokenRepository implements TokenRepositoryType {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
+                if (t.tokenInfo.address.equalsIgnoreCase("0x89D142Bef8605646881C68dcD48cDAF17FE597dC"))
+                {
+                    System.out.println("YOLESS");
+                }
                 if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20 || !t.checkBalanceType()) //balance type appears to be wrong
                 {
                     ContractType type = determineCommonType(t.tokenInfo).blockingGet();
@@ -1338,7 +1342,9 @@ public class TokenRepository implements TokenRepositoryType {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             try
             {
-                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
+                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE))
+                    returnType = ContractType.ERC721_TICKET;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))
                     returnType = ContractType.ERC721;
@@ -1348,8 +1354,6 @@ public class TokenRepository implements TokenRepositoryType {
                     returnType = ContractType.ERC721_LEGACY;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE))
                     returnType = ContractType.ERC721_LEGACY;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE))
-                    returnType = ContractType.ERC721_TICKET;
                 else
                     returnType = ContractType.OTHER;
             }

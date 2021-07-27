@@ -14,7 +14,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -28,7 +27,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
 
-import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,7 +39,6 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import wallet.core.jni.Hash;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -374,6 +371,36 @@ public class ERC721Token extends Token implements Parcelable
         {
             return new NFTAsset();
         }
+    }
+
+    @Override
+    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
+    {
+        //detect asset removal
+        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
+        oldAssetIdList.removeAll(tokenBalanceAssets.keySet());
+
+        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
+
+        //anything remaining will be a removed asset
+        if (changeList.size() > 0)
+        {
+            System.out.println("YOLESS");
+        }
+
+        //Now detect differences or new tokens
+        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        {
+            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
+            NFTAsset oldAsset = assetMap.get(tokenId);
+
+            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
+            {
+                changeList.add(tokenId);
+            }
+        }
+
+        return changeList;
     }
 
     private String callSmartContractFunction(Web3j web3j,

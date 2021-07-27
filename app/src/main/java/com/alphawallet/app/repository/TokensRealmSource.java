@@ -26,6 +26,7 @@ import com.alphawallet.token.entity.ContractAddress;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -637,21 +638,28 @@ public class TokensRealmSource implements TokenLocalSource {
                 {
                     if (!token.isERC721()) continue;
 
-                    String dbKey = databaseKey(token);
-
                     //load all the old assets
                     Map<BigInteger, Asset> assetMap = getERC721Assets(r, token);
 
-                    deleteAllAssets(r, dbKey);
+                    List<BigInteger> changeList = token.getChangeList(assetMap);
 
                     setTokenUpdateTime(r, token, token.getTokenAssets().size());
 
-                    //now create the assets inside this
-                    for (Asset asset : token.getTokenAssets().values())
+                    for (BigInteger tokenId : changeList)
                     {
-                        //check against existing assets; did the existing asset have better details?
-                        asset.updateAsset(assetMap);
-                        writeAsset(r, asset, token);
+                        Asset asset = token.getTokenAssets().get(tokenId);
+
+                        if (asset == null)
+                        {
+                            //token deleted
+                            deleteAssets(r, token, Collections.singletonList(tokenId));
+                        }
+                        else
+                        {
+                            //token updated or new
+                            if (assetMap.get(tokenId) != null) { asset.updateAsset(assetMap); }
+                            writeAsset(r, asset, token);
+                        }
                     }
                 }
             });

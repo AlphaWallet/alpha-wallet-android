@@ -838,21 +838,6 @@ public class Token implements Parcelable, Comparable<Token>
                 : StatusType.RECEIVE;
     }
 
-//    public int getTxImage(Transaction transaction)
-//    {
-//        int asset;
-//        if (isEthereum())
-//        {
-//            asset = ethereumTxImage(transaction);
-//        }
-//        else
-//        {
-//            asset = transaction.getOperationImage(this);
-//        }
-//
-//        return asset;
-//    }
-
     public StatusType getTxStatus(Transaction transaction)
     {
         StatusType status = transaction.getTransactionStatus();
@@ -1034,5 +1019,10 @@ public class Token implements Parcelable, Comparable<Token>
     public Asset fetchTokenMetadata(BigInteger tokenId)
     {
         return null;
+    }
+
+    public List<BigInteger> getChangeList(Map<BigInteger, Asset> assetMap)
+    {
+        return new ArrayList<>();
     }
 }

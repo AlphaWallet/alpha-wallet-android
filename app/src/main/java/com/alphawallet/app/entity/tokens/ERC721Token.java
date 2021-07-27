@@ -1,10 +1,8 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -13,12 +11,10 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.tools.Numeric;
 
-import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -235,21 +231,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public List<BigInteger> getArrayBalance()
     {
-        List<BigInteger> balanceAsArray = new ArrayList<>();
-        for (Asset a : tokenBalanceAssets.values())
-        {
-            try
-            {
-                BigInteger tokenIdBI = new BigInteger(a.getTokenId());
-                balanceAsArray.add(tokenIdBI);
-            }
-            catch (NumberFormatException e)
-            {
-                //
-            }
-        }
-
-        return balanceAsArray;
+        return new ArrayList<>(tokenBalanceAssets.keySet());
     }
 
     @Override
@@ -426,6 +408,30 @@ public class ERC721Token extends Token implements Parcelable
         {
             return new Asset(tokenId);
         }
+    }
+
+    @Override
+    public List<BigInteger> getChangeList(Map<BigInteger, Asset> assetMap)
+    {
+        //detect asset removal
+        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
+        oldAssetIdList.removeAll(tokenBalanceAssets.keySet());
+
+        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
+
+        //Now detect differences or new tokens
+        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        {
+            Asset newAsset = tokenBalanceAssets.get(tokenId);
+            Asset oldAsset = assetMap.get(tokenId);
+
+            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
+            {
+                changeList.add(tokenId);
+            }
+        }
+
+        return changeList;
     }
 
     private String callSmartContractFunction(Web3j web3j,

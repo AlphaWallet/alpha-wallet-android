@@ -81,6 +81,7 @@ public class TokensService
     private boolean appHasFocus = true;
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
+    private int transferCheckChain;
 
     @Nullable
     private Disposable eventTimer;
@@ -116,6 +117,7 @@ public class TokensService
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
+        transferCheckChain = 0;
     }
 
     private void checkUnknownTokens()
@@ -560,6 +562,8 @@ public class TokensService
             NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
             final Wallet wallet = new Wallet(currentAddress);
 
+            if (info.chainId == transferCheckChain) return; //currently checking this chainId
+
             openSeaCheck = false;
 
             if (BuildConfig.DEBUG)
@@ -574,6 +578,16 @@ public class TokensService
                     .subscribe(t -> checkedNetwork(),
                             this::chuckError);
         }
+    }
+
+    public boolean openseaUpdateInProgress(int chainId)
+    {
+        if (openseaCheck != null && !openseaCheck.isDisposed() && chainId == MAINNET_ID)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void checkedNetwork()
@@ -941,11 +955,6 @@ public class TokensService
         tokenRepository.storeAsset(currentAddress, token, asset);
     }
 
-    public void stopOpenseaCheck()
-    {
-        if (openseaCheck != null && !openseaCheck.isDisposed()) openseaCheck.dispose();
-    }
-
     public boolean isChainToken(int chainId, String tokenAddress)
     {
         return ethereumNetworkRepository.isChainContract(chainId, tokenAddress);
@@ -966,5 +975,10 @@ public class TokensService
         {
             return getToken(chainId, currentAddress);
         }
+    }
+
+    public void checkingChain(int chainId)
+    {
+        transferCheckChain = chainId;
     }
 }

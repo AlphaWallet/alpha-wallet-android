@@ -145,6 +145,7 @@ public class TransactionsService
     {
         //check if this route has combined NFT
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (isNFT) tokensService.checkingChain(chainId);
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -161,6 +162,7 @@ public class TransactionsService
 
     private void handleMoveCheck(int count, int chainId, boolean isNFT)
     {
+        if (isNFT) tokensService.checkingChain(0);
         if (count == TRANSFER_RESULT_MAX)
         {
             //there's more moves to fetch

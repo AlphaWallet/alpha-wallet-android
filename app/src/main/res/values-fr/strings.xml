@@ -781,4 +781,9 @@
     <string name="text_resend_gas_note">In order to speed up this transaction, the gas price must be at least 10% higher than the original gas price.</string>
     <string name="title_speed_resend">Speed Up Setting</string>
     <string name="title_speed_cancel">Cancel Setting</string>
+    <string name="action_select">Select</string>
+    <string name="title_x_selected">%s Selected</string>
+    <string name="request_change_chain">This site is requesting you to switch to the %1$s chain with chain ID: %2$s. This will reload the page.</string>
+    <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
+    <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
 </resources>

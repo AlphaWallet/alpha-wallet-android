@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
@@ -51,6 +52,8 @@ public class Web3View extends WebView {
     private OnSignTypedMessageListener onSignTypedMessageListener;
     @Nullable
     private OnEthCallListener onEthCallListener;
+    @Nullable
+    private OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
     @Nullable
     private OnVerifyListener onVerifyListener;
     @Nullable
@@ -106,7 +109,8 @@ public class Web3View extends WebView {
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener,
-                innerOnEthCallListener), "alpha");
+                innerOnEthCallListener,
+                innerAddChainListener), "alpha");
     }
 
     public void setWalletAddress(@NonNull Address address) {
@@ -166,6 +170,10 @@ public class Web3View extends WebView {
 
     public void setOnEthCallListener(@Nullable OnEthCallListener onEthCallListener) {
         this.onEthCallListener = onEthCallListener;
+    }
+
+    public void setOnWalletAddEthereumChainObjectListener(@Nullable OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener) {
+        this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
     }
 
     public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
@@ -251,6 +259,15 @@ public class Web3View extends WebView {
         public void onEthCall(Web3Call txData)
         {
             onEthCallListener.onEthCall(txData);
+        }
+    };
+
+    private final OnWalletAddEthereumChainObjectListener innerAddChainListener = new OnWalletAddEthereumChainObjectListener()
+    {
+        @Override
+        public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
+        {
+            onWalletAddEthereumChainObjectListener.OnWalletAddEthereumChainObject(chainObject);
         }
     };
 

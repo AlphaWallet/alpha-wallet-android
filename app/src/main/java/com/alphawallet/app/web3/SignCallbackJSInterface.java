@@ -6,20 +6,27 @@ import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
+import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.SignMessageType;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
@@ -36,6 +43,8 @@ public class SignCallbackJSInterface
     private final OnSignTypedMessageListener onSignTypedMessageListener;
     @NonNull
     private final OnEthCallListener onEthCallListener;
+    @NonNull
+    private final OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
 
     public SignCallbackJSInterface(
             WebView webView,
@@ -43,13 +52,15 @@ public class SignCallbackJSInterface
             @NonNull OnSignMessageListener onSignMessageListener,
             @NonNull OnSignPersonalMessageListener onSignPersonalMessageListener,
             @NonNull OnSignTypedMessageListener onSignTypedMessageListener,
-            @NotNull OnEthCallListener onEthCallListener) {
+            @NotNull OnEthCallListener onEthCallListener,
+            @NonNull OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener) {
         this.webView = webView;
         this.onSignTransactionListener = onSignTransactionListener;
         this.onSignMessageListener = onSignMessageListener;
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
         this.onSignTypedMessageListener = onSignTypedMessageListener;
         this.onEthCallListener = onEthCallListener;
+        this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
     }
 
     @JavascriptInterface
@@ -121,6 +132,24 @@ public class SignCallbackJSInterface
                 callbackId);
 
         webView.post(() -> onEthCallListener.onEthCall(call));
+    }
+
+    @JavascriptInterface
+    public void walletAddEthereumChain(int callbackId, String msgParams) {
+        //TODO: Implement custom chains from dapp browser: see OnWalletAddEthereumChainObject in class DappBrowserFragment
+        //First draft: attempt to match this chain with known chains; switch to known chain if we match
+        try
+        {
+            WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
+            if (!TextUtils.isEmpty(chainObj.chainId))
+            {
+                webView.post(() -> onWalletAddEthereumChainObjectListener.OnWalletAddEthereumChainObject(chainObj));
+            }
+        }
+        catch (JsonSyntaxException e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
     }
 
     private String getUrl() {

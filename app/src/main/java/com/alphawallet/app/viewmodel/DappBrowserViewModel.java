@@ -316,4 +316,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
     }
+
+    public NetworkInfo getNetworkInfo(int chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
 }

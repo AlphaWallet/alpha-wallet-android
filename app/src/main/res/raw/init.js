@@ -1,3 +1,4 @@
+
 const addressHex = "%1$s";
 const rpcURL = "%2$s";
 const chainID = "%3$s";
@@ -47,6 +48,14 @@ window.AlphaWallet.init(rpcURL, {
     AlphaWallet.addCallback(id, cb)
     //alpha.ethCall(id, JSON.stringify(msgParams));
     alpha.ethCall(id, msgParams.to, msgParams.data);
+  },
+  walletAddEthereumChain: function (msgParams, cb) {
+    const data = msgParams
+    const { id = Math.floor((Math.random() * 100000) + 1) } = msgParams
+    console.log("walletAddEthereumChain", msgParams)
+    AlphaWallet.addCallback(id, cb)
+    alpha.walletAddEthereumChain(id, JSON.stringify(msgParams));
+    //webkit.messageHandlers.walletAddEthereumChain.postMessage({"name": "walletAddEthereumChain", "object": data, id: id})
   },
   enable: function() {
       return new Promise(function(resolve, reject) {

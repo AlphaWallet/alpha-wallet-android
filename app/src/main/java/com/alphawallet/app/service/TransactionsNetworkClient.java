@@ -53,10 +53,6 @@ import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -476,8 +472,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     @Override
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
-        final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery(); //YOLESS
-        if (true || nftCheck && svs.openseaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
+        final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
+        if (nftCheck && svs.openseaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
         else return Single.fromCallable(() -> {
             //get latest block read
             int eventCount = 0;

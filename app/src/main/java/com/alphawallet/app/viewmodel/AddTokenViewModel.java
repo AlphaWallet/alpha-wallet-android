@@ -224,11 +224,29 @@ public class AddTokenViewModel extends BaseViewModel {
         testAddress = address;
         foundNetwork = false;
         networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
-        //first test the network selected, then do all the others
-        scanNetworksDisposable = fetchTokensInteract.getContractResponse(testAddress, networkInfo.chainId, "name")
+        //String address, String name, String symbol, int decimals, boolean isEnabled, int chainId
+        TokenInfo tokenInfo = new TokenInfo(address, "", "", 0, true, networkInfo.chainId);
+        //first test the network selected, then do all the
+        //try to determine what kind of contract this is. Note if we get invalid response there's no contract there
+        scanNetworksDisposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::checkSelectedNetwork, this::onTestError);
+                .subscribe(this::onContract, this::onError);
+
+
+//        scanNetworksDisposable = fetchTokensInteract.getContractResponse(testAddress, networkInfo.chainId, "name")
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::checkSelectedNetwork, this::onTestError);
+    }
+
+    private void onContract(ContractType contractType)
+    {
+        //did it detect anything?
+        if (contractType != null)
+        {
+            System.out.println("Contract type: " + contractType.toString());
+        }
     }
 
     private void checkSelectedNetwork(ContractLocator result)

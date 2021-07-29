@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.Contract;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -32,6 +33,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -231,25 +233,56 @@ public class AddTokenViewModel extends BaseViewModel {
         scanNetworksDisposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onContract, this::onError);
-
-
-//        scanNetworksDisposable = fetchTokensInteract.getContractResponse(testAddress, networkInfo.chainId, "name")
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::checkSelectedNetwork, this::onTestError);
+                .subscribe(type -> onContract(tokenInfo, type), this::onError);
     }
 
-    private void onContract(ContractType contractType)
+    private void onContract(TokenInfo info, ContractType contractType)
     {
         //did it detect anything?
-        if (contractType != null)
+        if (contractType != ContractType.OTHER)
         {
-            System.out.println("Contract type: " + contractType.toString());
+            //found the contract
+            foundNetwork = true;
+            switchNetwork.postValue(info.chainId);
+            setupToken(info.chainId, info.address);
+        }
+        else
+        {
+            //try the other networks
+            List<Integer> networkIds = getNetworkIds();
+            networkIds.remove((Integer)info.chainId);
+            networkCount--;
+
+            Observable.fromIterable(networkIds)
+                    .filter(networkId -> !foundNetwork)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .blockingForEach(networkId -> {
+                        TokenInfo tokenInfo = new TokenInfo(info.address, "", "", 0, true, networkId);
+                        fetchTransactionsInteract.queryInterfaceSpec(tokenInfo)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(type -> testNetworkResult2(tokenInfo, type), this::onTestError)
+                                .isDisposed();
+                    });
         }
     }
 
-    private void checkSelectedNetwork(ContractLocator result)
+    private void testNetworkResult2(TokenInfo info, ContractType type)
+    {
+        if (!foundNetwork && type != ContractType.OTHER)
+        {
+            foundNetwork = true;
+            switchNetwork.postValue(info.chainId);
+            setupToken(info.chainId, info.address);
+        }
+        else
+        {
+            checkNetworkCount();
+        }
+    }
+
+    /*private void checkSelectedNetwork(ContractLocator result)
     {
         if (!result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
@@ -272,7 +305,7 @@ public class AddTokenViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::testNetworkResult, this::onTestError);
         }
-    }
+    }*/
 
     private void onTestError(Throwable throwable)
     {
@@ -280,7 +313,7 @@ public class AddTokenViewModel extends BaseViewModel {
         onError(throwable);
     }
 
-    private void testNetworkResult(ContractLocator result)
+    /*private void testNetworkResult(ContractLocator result)
     {
         if (!foundNetwork && !result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
@@ -293,7 +326,7 @@ public class AddTokenViewModel extends BaseViewModel {
         {
             checkNetworkCount();
         }
-    }
+    }*/
 
     private void checkNetworkCount()
     {

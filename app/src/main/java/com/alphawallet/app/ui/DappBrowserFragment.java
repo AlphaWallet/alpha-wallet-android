@@ -873,7 +873,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             break;
                         case C.DAPP_PREFIX_WALLETCONNECT:
                             //start walletconnect
-                            if (getContext() != null) viewModel.handleWalletConnect(getContext(), url);
+                            if (getContext() != null) viewModel.handleWalletConnect(getContext(), url, activeNetwork);
                             return true;
                         default:
                             break;

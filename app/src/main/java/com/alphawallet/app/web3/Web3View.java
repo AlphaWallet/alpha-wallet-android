@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -88,6 +89,20 @@ public class Web3View extends WebView {
     {
         checkDOMUsage(url);
         super.loadUrl(url, additionalHttpHeaders);
+    }
+
+    @Override
+    public void loadUrl(@NonNull String url)
+    {
+        checkDOMUsage(url);
+        super.loadUrl(url);
+    }
+
+    @Override
+    public void reload()
+    {
+        checkDOMUsage(getUrl());
+        super.reload();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -303,6 +318,12 @@ public class Web3View extends WebView {
         @Override
         public void onPageStarted(WebView view, String url,Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            if (!redirect)
+            {
+                internalClient.resetInject();
+            }
+
+            redirect = false;
         }
 
         @Override
@@ -311,7 +332,8 @@ public class Web3View extends WebView {
 
             if (!redirect && !loadingError)
             {
-                if (loadInterface != null) loadInterface.onWebpageLoaded(url, view.getTitle());
+                if (!internalClient.didInjection()) { internalClient.injectScriptFile(view); }
+                if (loadInterface != null) { loadInterface.onWebpageLoaded(url, view.getTitle()); }
             }
             else if (!loadingError && loadInterface != null)
             {
@@ -325,9 +347,12 @@ public class Web3View extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             redirect = true;
+            if (!externalClient.shouldOverrideUrlLoading(view, url))
+            {
+                view.loadUrl(url);
+            }
 
-            return externalClient.shouldOverrideUrlLoading(view, url)
-                    || internalClient.shouldOverrideUrlLoading(view, url);
+            return true;
         }
 
         @Override
@@ -335,39 +360,6 @@ public class Web3View extends WebView {
             loadingError = true;
             if (externalClient != null)
                 externalClient.onReceivedError(view, request, error);
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.N)
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            redirect = true;
-            if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
-
-            return externalClient.shouldOverrideUrlLoading(view, request)
-                    || internalClient.shouldOverrideUrlLoading(view, request);
-        }
-
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);
-            if (response != null) {
-                try {
-                    InputStream in = response.getData();
-                    int len = in.available();
-                    byte[] data = new byte[len];
-                    int readLen = in.read(data);
-                    if (readLen == 0) {
-                        throw new IOException("Nothing is read.");
-                    }
-                    String injectedHtml = internalClient.getJsInjectorClient().injectJS(new String(data));
-                    response.setData(new ByteArrayInputStream(injectedHtml.getBytes()));
-                } catch (IOException ex) {
-                    Log.d("INJECT AFTER_EXTERNAL", "", ex);
-                }
-            } else {
-                response = internalClient.shouldInterceptRequest(view, request);
-            }
-            return response;
         }
     }
 

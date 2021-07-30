@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Base64;
 import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -39,7 +38,6 @@ import java.io.InputStream;
 import java.util.Map;
 
 public class Web3View extends WebView {
-    private static final String TAG = "W3VIEW";
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
     private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
     private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
@@ -92,13 +90,6 @@ public class Web3View extends WebView {
         super.loadUrl(url, additionalHttpHeaders);
     }
 
-    @Override
-    public void reload()
-    {
-        checkDOMUsage(getUrl());
-        super.reload();
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     public void init() {
         getSettings().setJavaScriptEnabled(true);
@@ -107,7 +98,7 @@ public class Web3View extends WebView {
         getSettings().setDisplayZoomControls(false);
         getSettings().setUseWideViewPort(true);
         getSettings().setLoadWithOverviewMode(true);
-        getSettings().setDomStorageEnabled(false);
+        getSettings().setDomStorageEnabled(true);
         getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         getSettings().setUserAgentString(getSettings().getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
@@ -312,9 +303,10 @@ public class Web3View extends WebView {
         @Override
         public void onPageStarted(WebView view, String url,Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
-            Log.d(TAG, "On Page Started: " + url);
-            Log.d(TAG, "Reset Inject: " + url);
-            internalClient.resetInject();
+            if (!redirect)
+            {
+                internalClient.resetInject();
+            }
 
             redirect = false;
         }
@@ -323,10 +315,7 @@ public class Web3View extends WebView {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
-            Log.d(TAG, "On Page Finish: " + url);
-
-            Log.d(TAG, "Check Inject: " + url + " : " + internalClient.didInjection());
-            //if (!internalClient.didInjection()) { internalClient.injectScriptFile(view); }
+            if (!internalClient.didInjection()) { internalClient.injectScriptFile2(view); }
 
             if (!redirect && !loadingError)
             {
@@ -343,32 +332,10 @@ public class Web3View extends WebView {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            checkDOMUsage(url);
             redirect = true;
-            if (!externalClient.shouldOverrideUrlLoading(view, url))
-            {
-                Log.d(TAG, "load url: " + url);
-                view.loadUrl(url);
-            }
 
-            return true;
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.N)
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            redirect = true;
-            if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
-
-            if (!externalClient.shouldOverrideUrlLoading(view, request))
-            {
-                Log.d(TAG, "load url: " + request.getUrl());
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return externalClient.shouldOverrideUrlLoading(view, url)
+                    || internalClient.shouldOverrideUrlLoading(view, url);
         }
 
         @Override
@@ -377,24 +344,51 @@ public class Web3View extends WebView {
             if (externalClient != null)
                 externalClient.onReceivedError(view, request, error);
         }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            redirect = true;
+            if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
+
+            return externalClient.shouldOverrideUrlLoading(view, request)
+                    || internalClient.shouldOverrideUrlLoading(view, request);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);
+            if (response != null) {
+                try {
+                    InputStream in = response.getData();
+                    int len = in.available();
+                    byte[] data = new byte[len];
+                    int readLen = in.read(data);
+                    if (readLen == 0) {
+                        throw new IOException("Nothing is read.");
+                    }
+                    String injectedHtml = internalClient.getJsInjectorClient().injectJS(new String(data));
+                    response.setData(new ByteArrayInputStream(injectedHtml.getBytes()));
+                } catch (IOException ex) {
+                    Log.d("INJECT AFTER_EXTERNAL", "", ex);
+                }
+            } else {
+                response = internalClient.shouldInterceptRequest(view, request);
+            }
+            return response;
+        }
     }
 
     // Grim hack for dapps that still use local storage
     private void checkDOMUsage(@NotNull String url)
     {
-        if (url.startsWith("javascript:(function() {"))
+        if (url.equals("https://wallet.matic.network/bridge/")) // may need other sites added
         {
-            //no action
-        }
-        else if (url.toLowerCase().startsWith("https://wallet.matic.network/bridge/")) // may need other sites added
-        {
-            Log.d(TAG, "DOM Storage disabled: " + url);
             getSettings().setDomStorageEnabled(false);
         }
         else
         {
-            Log.d(TAG, "DOM Storage enabled: " + url);
-            //getSettings().setDomStorageEnabled(true);
+            getSettings().setDomStorageEnabled(true);
         }
     }
 

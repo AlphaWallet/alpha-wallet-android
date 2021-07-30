@@ -293,11 +293,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
         balanceTimerDisposable = null;
     }
 
-    public void handleWalletConnect(Context context, String url)
+    public void handleWalletConnect(Context context, String url, NetworkInfo activeNetwork)
     {
         String importPassData = WalletConnectActivity.WC_LOCAL_PREFIX + url;
         Intent intent = new Intent(context, WalletConnectActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         intent.putExtra("qrCode", importPassData);
         context.startActivity(intent);
     }

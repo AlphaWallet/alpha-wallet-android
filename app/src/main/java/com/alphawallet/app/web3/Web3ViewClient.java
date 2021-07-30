@@ -170,7 +170,7 @@ public class Web3ViewClient extends WebViewClient {
         byte[] buffer = js.getBytes();
         String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
 
-        /*view.post(() ->*/ view.loadUrl("javascript:(function() {" +
+        view.loadUrl("javascript:(function() {" +
                 "var parent = document.getElementsByTagName('head').item(0);" +
                 "var script = document.createElement('script');" +
                 "script.type = 'text/javascript';" +

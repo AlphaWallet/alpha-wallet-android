@@ -303,15 +303,23 @@ public class Web3View extends WebView {
         @Override
         public void onPageStarted(WebView view, String url,Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            if (!redirect)
+            {
+                internalClient.resetInject();
+            }
+
+            redirect = false;
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
+            if (!internalClient.didInjection()) { internalClient.injectScriptFile2(view); }
+
             if (!redirect && !loadingError)
             {
-                if (loadInterface != null) loadInterface.onWebpageLoaded(url, view.getTitle());
+                if (loadInterface != null) { loadInterface.onWebpageLoaded(url, view.getTitle()); }
             }
             else if (!loadingError && loadInterface != null)
             {

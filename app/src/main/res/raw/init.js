@@ -1,14 +1,14 @@
 
-const addressHex = "%1$s";
-const rpcURL = "%2$s";
-const chainID = "%3$s";
+const __addressHex = "%1$s";
+const __rpcURL = "%2$s";
+const __chainID = "%3$s";
 
 function executeCallback (id, error, value) {
   AlphaWallet.executeCallback(id, error, value)
 }
 
-window.AlphaWallet.init(rpcURL, {
-  getAccounts: function (cb) { cb(null, [addressHex]) },
+window.AlphaWallet.init(__rpcURL, {
+  getAccounts: function (cb) { cb(null, [__addressHex]) },
   processTransaction: function (tx, cb){
     console.log('signing a transaction', tx)
     const { id = 8888 } = tx
@@ -60,12 +60,12 @@ window.AlphaWallet.init(rpcURL, {
   enable: function() {
       return new Promise(function(resolve, reject) {
           //send back the coinbase account as an array of one
-          resolve([addressHex])
+          resolve([__addressHex])
       })
   }
 }, {
-    address: addressHex,
-    networkVersion: chainID
+    address: __addressHex,
+    networkVersion: __chainID
 })
 
 window.web3.setProvider = function () {
@@ -73,11 +73,11 @@ window.web3.setProvider = function () {
 }
 
 window.web3.version.getNetwork = function(cb) {
-    cb(null, chainID)
+    cb(null, __chainID)
 }
 window.web3.eth.getCoinbase = function(cb) {
-    return cb(null, addressHex)
+    return cb(null, __addressHex)
 }
-window.web3.eth.defaultAccount = addressHex
+window.web3.eth.defaultAccount = __addressHex
 
 window.ethereum = web3.currentProvider

@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -24,7 +25,6 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import kotlin.Unit;
 
-import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
 import static com.alphawallet.app.C.WALLET_CONNECT_REQUEST;
 
 /**
@@ -60,6 +60,12 @@ public class WalletConnectService extends Service
                     Log.d(TAG, "SERVICE DISCONNECT");
                     //kill any active connection
                     disconnectCurrentSessions();
+                    break;
+                case CLOSE:
+                    Log.d(TAG, "SERVICE CLOSE");
+                    //result.getData().getIntExtra(C.EXTRA_CHAIN_ID, -1);
+                    String sessionId = intent.getStringExtra("session");
+                    disconnectSession(sessionId);
                     break;
             }
         }
@@ -109,6 +115,19 @@ public class WalletConnectService extends Service
         }
     }
 
+    private void disconnectSession(String sessionId)
+    {
+        if (TextUtils.isEmpty(sessionId))
+        {
+            disconnectCurrentSessions();
+        }
+        else
+        {
+            WCClient client = clientMap.get(sessionId);
+            if (client != null) client.killSession();
+        }
+    }
+
     public class LocalBinder extends Binder
     {
         public WalletConnectService getService()
@@ -129,7 +148,8 @@ public class WalletConnectService extends Service
 
     public WCClient getClient(String sessionId)
     {
-        return clientMap.get(sessionId);
+        if (sessionId == null) { return null; }
+        else { return clientMap.get(sessionId); }
     }
 
     public void putClient(String sessionId, WCClient client)
@@ -164,7 +184,7 @@ public class WalletConnectService extends Service
         client.setOnSessionRequest((id, peer) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, peer, client.getChainId()));
+            signRequests.add(new WCRequest(client.sessionId(), id, peer, client.chainIdVal()));
             Log.d(TAG, "On Request: " + peer.getName());
             return Unit.INSTANCE;
         });
@@ -173,7 +193,7 @@ public class WalletConnectService extends Service
             //alert UI
             if (client.sessionId() == null) return Unit.INSTANCE;
             Log.d(TAG, "On Fail: " + throwable.getMessage());
-            signRequests.add(new WCRequest(client.sessionId(), throwable, client.getChainId()));
+            signRequests.add(new WCRequest(client.sessionId(), throwable, client.chainIdVal()));
             return Unit.INSTANCE;
         });
 
@@ -190,7 +210,7 @@ public class WalletConnectService extends Service
         client.setOnEthSignTransaction((id, transaction) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, transaction, true, client.getChainId()));
+            signRequests.add(new WCRequest(client.sessionId(), id, transaction, true, client.chainIdVal()));
             switchToWalletConnectApprove(client.sessionId());
             return Unit.INSTANCE;
         });
@@ -198,7 +218,7 @@ public class WalletConnectService extends Service
         client.setOnEthSendTransaction((id, transaction) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, transaction, false, client.getChainId()));
+            signRequests.add(new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal()));
             switchToWalletConnectApprove(client.sessionId());
             return Unit.INSTANCE;
         });
@@ -236,7 +256,7 @@ public class WalletConnectService extends Service
             if (c.isConnected() && c.getChainId() != null && c.getAccounts() != null)
             {
                 Log.d(TAG, "Ping Key: " + sessionKey);
-                c.approveSession(c.getAccounts(), c.getChainId());
+                c.approveSession(c.getAccounts(), c.chainIdVal());
             }
 
             long lastUsed = getLastUsed(c);

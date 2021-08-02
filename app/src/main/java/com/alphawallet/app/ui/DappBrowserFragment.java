@@ -6,7 +6,6 @@ import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -28,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
@@ -45,7 +45,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -70,6 +69,7 @@ import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -77,6 +77,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
@@ -149,6 +150,7 @@ import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
@@ -165,6 +167,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
     private static final String CURRENT_URL = "urlInBar";
+    private static final String WALLETCONNECT_CHAINID_ERROR = "Error: ChainId missing or not supported";
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
@@ -216,6 +219,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private PermissionRequest requestCallback = null;
     private String geoOrigin;
     private final Handler handler = new Handler();
+    private String walletConnectSession;
 
     private String currentWebpageTitle;
     private String currentFragment;
@@ -528,8 +532,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         webFrame.setOnApplyWindowInsetsListener(resizeListener);
     }
 
-    private void displayNothingToShare()
-    {
+    private void displayNothingToShare() {
         if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setTitle(getString(R.string.nothing_to_share));
@@ -796,6 +799,47 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
+    ActivityResultLauncher<Intent> getNewNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                loadNewNetwork(networkId);
+                reloadPage();
+            });
+
+    private void launchNetworkPicker()
+    {
+        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
+        getNewNetwork.launch(intent);
+    }
+
+    private void launchWalletConnectSessionCancel()
+    {
+        String sessionId = walletConnectSession != null ? viewModel.getSessionId(walletConnectSession) : "";
+        Intent bIntent = new Intent(getContext(), WalletConnectService.class);
+        bIntent.setAction(String.valueOf(WalletConnectActions.CLOSE.ordinal()));
+        bIntent.putExtra("session", sessionId);
+        getContext().startService(bIntent);
+        reloadPage();
+    }
+
+    private void displayCloseWC()
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog.setIcon(WARNING);
+        resultDialog.setTitle(R.string.title_wallet_connect);
+        resultDialog.setMessage(getString(R.string.unsupported_walletconnect));
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            launchWalletConnectSessionCancel();
+            launchNetworkPicker();
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+    }
+
     private void setupWeb3() {
         web3.setChainId(activeNetwork.chainId);
         web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
@@ -813,6 +857,22 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     progressBar.setProgress(newProgress);
                     swipeRefreshLayout.setRefreshing(true);
                 }
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage msg)
+            {
+                boolean ret = super.onConsoleMessage(msg);
+
+                if (msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
+                {
+                    if (msg.message().contains(WALLETCONNECT_CHAINID_ERROR))
+                    {
+                        displayCloseWC();
+                    }
+                }
+
+                return ret;
             }
 
             @Override
@@ -873,6 +933,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             break;
                         case C.DAPP_PREFIX_WALLETCONNECT:
                             //start walletconnect
+                            walletConnectSession = url;
                             if (getContext() != null) viewModel.handleWalletConnect(getContext(), url, activeNetwork);
                             return true;
                         default:
@@ -918,14 +979,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             });
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>()
-            {
-                @Override
-                public void onActivityResult(ActivityResult result)
-                {
-                    int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
-                    loadNewNetwork(networkId);
-                }
+            result -> {
+                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                loadNewNetwork(networkId);
             });
 
     private void loadNewNetwork(int newNetworkId)

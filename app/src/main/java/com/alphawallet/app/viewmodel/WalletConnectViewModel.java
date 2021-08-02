@@ -60,7 +60,7 @@ import io.realm.Sort;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class WalletConnectViewModel extends BaseViewModel {
-    private static final String WC_SESSION_DB = "wc_data-db.realm";
+    public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
     protected Disposable disposable;
@@ -409,9 +409,10 @@ public class WalletConnectViewModel extends BaseViewModel {
         });
     }
 
-    public void recordSignTransaction(Context ctx, Web3Transaction tx, int chainId, String sessionId)
+    public void recordSignTransaction(Context ctx, Web3Transaction tx, String chainIdStr, String sessionId)
     {
         realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+                int chainId = chainIdStr != null ? Integer.parseInt(chainIdStr) : MAINNET_ID;
                 RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
                 String signType = "Transaction";
                 signMessage.setSessionId(sessionId);

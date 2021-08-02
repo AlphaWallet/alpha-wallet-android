@@ -761,4 +761,5 @@
     <string name="request_change_chain">This site is requesting you to switch to the %1$s chain with chain ID: %2$s. This will reload the page.</string>
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
+    <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
 </resources>

@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -164,7 +165,7 @@ public class Web3ViewClient extends WebViewClient {
         }
     }
 
-    private void injectScriptFile(WebView view) {
+    /*private void injectScriptFile(WebView view) {
         String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
         byte[] buffer = js.getBytes();
         String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
@@ -177,9 +178,15 @@ public class Web3ViewClient extends WebViewClient {
                 "script.innerHTML = window.atob('" + encoded + "');" +
                 "parent.appendChild(script)" +
                 "})()"));
+    }*/
+
+    private void injectScriptFile(WebView view) {
+        Log.d("W3VIEW", "Inject: ");
+        view.post(() -> injectScriptFileFinal(view));
     }
 
-    public void injectScriptFile2(WebView view) {
+    public void injectScriptFileFinal(WebView view) {
+        Log.d("W3VIEW", "Inject2: ");
         isInjected = true;
         String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
         byte[] buffer = js.getBytes();

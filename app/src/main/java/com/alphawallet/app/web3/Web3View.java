@@ -315,7 +315,7 @@ public class Web3View extends WebView {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
-            if (!internalClient.didInjection()) { internalClient.injectScriptFile2(view); }
+            if (!internalClient.didInjection()) { internalClient.injectScriptFileFinal(view); }
 
             if (!redirect && !loadingError)
             {

@@ -4,8 +4,9 @@ import android.util.Log
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
-import com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID
+import com.alphawallet.ethereum.EthereumNetworkBase
 import com.github.salomonbrys.kotson.fromJson
+import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
@@ -22,6 +23,7 @@ open class WCClient(
 
     private val gson = builder
             .serializeNulls()
+            .registerTypeAdapter(ethTransactionSerializer)
             .create()
 
     private var socket: WebSocket? = null
@@ -53,8 +55,14 @@ open class WCClient(
 
     var accounts: List<String>? = null
         private set
-    var chainId: Int? = null
+
+    var chainId: String? = null
         private set
+
+    fun chainIdVal(): Int
+    {
+        return chainId?.toInt() ?: EthereumNetworkBase.MAINNET_ID
+    }
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
     var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
@@ -86,12 +94,6 @@ open class WCClient(
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
-            if (text.equals("ping"))
-            {
-                Log.d(TAG, "<== pong")
-                onPong(text);
-                return;
-            }
             Log.d(TAG, "<== message $text")
             decrypted = decryptMessage(text)
             Log.d(TAG, "<== decrypted $decrypted")
@@ -104,6 +106,7 @@ open class WCClient(
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        Log.d(TAG,"<< websocket closed >>")
         resetState()
         onFailure(t)
 
@@ -147,14 +150,28 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
-        check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
+    fun connect4(session: WCSession, peerMeta: WCPeerMeta, peerId: String = UUID.randomUUID().toString(), remotePeerId: String? = null) {
+        if (this.session != null && this.session?.topic != session.topic) {
+            killSession()
+        }
 
-        this.accounts = accounts;
-        this.chainId = chainId;
+        this.session = session
+        this.peerMeta = peerMeta
+        this.peerId = peerId
+        this.remotePeerId = remotePeerId
+
+        val request = Request.Builder()
+            .url(session.bridge)
+            .build()
+
+        socket = httpClient.newWebSocket(request, this)
+    }
+
+    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+        if (handshakeId <= 0) { onFailure(Throwable("handshakeId must be greater than 0 on session approve")) }
 
         val result = WCApproveSessionResponse(
-                chainId = chainId,
+                chainId = this.chainId?.toIntOrNull() ?: chainId,
                 accounts = accounts,
                 peerId = peerId,
                 peerMeta = peerMeta
@@ -179,7 +196,7 @@ open class WCClient(
                 params = listOf(
                         WCSessionUpdate(
                                 approved = approved,
-                                chainId = chainId,
+                                chainId = this.chainId?.toIntOrNull() ?: chainId,
                                 accounts = accounts
                         )
                 )
@@ -260,8 +277,7 @@ open class WCClient(
                         .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                chainId = param.chainId?.toInt()
-                if (chainId == null) chainId = MAINNET_ID
+                chainId = param.chainId
                 onSessionRequest(request.id, param.peerMeta)
             }
             WCMethod.SESSION_UPDATE -> {

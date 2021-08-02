@@ -1,6 +1,6 @@
 package com.alphawallet.app.walletconnect.entity
 
-//TODO: Integrate the EthereumMessage here
+import com.github.salomonbrys.kotson.jsonDeserializer
 
 data class WCEthereumSignMessage(
         val raw: List<String>,
@@ -23,7 +23,18 @@ data class WCEthereumTransaction(
         val to: String?,
         val nonce: String?,
         val gasPrice: String?,
+        val gas: String?,
         val gasLimit: String?,
         val value: String?,
         val data: String
 )
+
+val ethTransactionSerializer = jsonDeserializer<List<WCEthereumTransaction>> {
+    val array = mutableListOf<WCEthereumTransaction>()
+    it.json.asJsonArray.forEach { tx ->
+        if (tx.isJsonObject) {
+            array.add(it.context.deserialize(tx))
+        }
+    }
+    array
+}

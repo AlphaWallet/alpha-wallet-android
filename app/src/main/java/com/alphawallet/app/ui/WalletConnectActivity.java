@@ -336,11 +336,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 peerId = viewModel.getPeerId(sessionId);
                 displaySessionStatus(sessionId);
 
-                if (client != null && client.isConnected())
-                {
-                    Log.d(TAG, "Use running session: " + getSessionId());
-                }
-                else
+                if (client == null || !client.isConnected())
                 {
                     if (!fromSessionActivity && (session == null || client == null))
                     {
@@ -349,8 +345,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     }
                     else
                     {
-                        //session is not current, no need to display the 'end session' button
-                        functionBar.setVisibility(View.GONE);
+                        //attempt to restart the session; this will allow session 'force' close
+                        initWalletConnectPeerMeta();
+                        client = startClient();
+                        initWalletConnectSession(peerId, connectionId);
+                        startup = false;
+                        return;
                     }
                 }
 
@@ -451,7 +451,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void initWalletConnectSession(String sessionId, String connectionId)
+    private void initWalletConnectSession(String peerId, String connectionId)
     {
         if (session == null)
         {
@@ -461,7 +461,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
 
         Log.d(TAG, "Connect: " + getSessionId() + " (" + connectionId + ")");
-        client.connect(session, peerMeta, sessionId, connectionId);
+        client.connect(session, peerMeta, peerId, connectionId);
+
+        client.setOnFailure(throwable -> {
+            Log.d(TAG, "On Fail: " + throwable.getMessage());
+            runOnUiThread(() -> {
+                showErrorDialog("Error: " + throwable.getMessage());
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     private void invalidSession()
@@ -492,13 +500,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void initWalletConnectClient()
     {
-        httpClient = new OkHttpClient.Builder()
-                .connectTimeout(7, TimeUnit.SECONDS)
-                .readTimeout(7, TimeUnit.SECONDS)
-                .writeTimeout(7, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
-                .build();
-        client = new WCClient(new GsonBuilder(), httpClient);
+        client = startClient();
 
         client.setOnWCOpen(peerId -> {
             viewModel.putClient(getSessionId(), client);
@@ -507,6 +509,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
 
         setClientDisconnect(client);
+    }
+
+    private WCClient startClient()
+    {
+        httpClient = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+        return new WCClient(new GsonBuilder(), httpClient);
     }
 
     public void setClientDisconnect(WCClient thisClient)
@@ -726,6 +739,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 viewModel.signMessage(
                         signable,
                         dappFunction);
+            }
+
+            @Override
+            public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
+            {
+                if (gotAuth)
+                {
+                    viewModel.signMessage(
+                            signable,
+                            dappFunction);
+                }
+                else
+                {
+                    cancelAuthentication();
+                }
             }
 
             @Override
@@ -1078,7 +1106,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.sendTransaction(finalTx, client.getChainId(), callback);
+        viewModel.sendTransaction(finalTx, client.chainIdVal(), callback);
     }
 
     @Override
@@ -1126,7 +1154,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), client.getChainId());
+        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), client.chainIdVal());
         if (fromDappBrowser) switchToDappBrowser();
     }
 }

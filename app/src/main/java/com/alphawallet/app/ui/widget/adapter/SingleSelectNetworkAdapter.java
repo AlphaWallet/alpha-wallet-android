@@ -15,6 +15,8 @@ import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
 import java.util.ArrayList;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelectNetworkAdapter.ViewHolder> {
     private ArrayList<NetworkItem> networkList;
     private boolean hasSelection;
@@ -39,7 +41,15 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         {
             if (data.isSelected()) return data.getChainId();
         }
-        return null;
+
+        if (networkList.size() > 0)
+        {
+            return networkList.get(0).getChainId();
+        }
+        else
+        {
+            return MAINNET_ID;
+        }
     }
 
     @Override

@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
 
+import java.security.ProviderException;
 import java.util.concurrent.Executor;
 
 import static android.content.Context.KEYGUARD_SERVICE;
@@ -123,7 +124,8 @@ public class SignTransactionDialog
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
         {
-            promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
+            promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0))
+                    .setNegativeButtonText(activity.getString(R.string.action_cancel));
         }
         else
         {
@@ -139,14 +141,26 @@ public class SignTransactionDialog
             }
         }
 
-        BiometricPrompt.PromptInfo promptInfo = promptBuilder.build();
-        biometricPrompt.authenticate(promptInfo);
+        try
+        {
+            BiometricPrompt.PromptInfo promptInfo = promptBuilder.build();
+            biometricPrompt.authenticate(promptInfo);
+        }
+        catch (ProviderException e)
+        {
+            authCallback.authenticateFail(activity.getString(R.string.authentication_error), AuthenticationFailType.BIOMETRIC_AUTHENTICATION_NOT_AVAILABLE, callbackId);
+        }
     }
 
     private void showAuthenticationScreen(Activity activity, AuthenticationCallback authCallback, Operation callBackId)
     {
         KeyguardManager km = (KeyguardManager) activity.getSystemService(KEYGUARD_SERVICE);
-        if (km != null)
+        if (km != null && !km.isDeviceSecure())
+        {
+            //device is unlocked. No need to authenticate
+            authCallback.authenticatePass(callBackId);
+        }
+        else if (km != null)
         {
             Intent intent = km.createConfirmDeviceCredentialIntent(activity.getString(R.string.unlock_private_key), "");
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

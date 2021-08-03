@@ -44,6 +44,10 @@ public class TokenFactory
                     thisToken.balance = balance;
                 }
                 break;
+            case ERC1155:
+                tokenInfo = new TokenInfo(tokenInfo.address, tokenInfo.name, tokenInfo.symbol, 0, tokenInfo.isEnabled, tokenInfo.chainId);
+                thisToken = new ERC1155Token(tokenInfo, new HashMap<>(), updateBlancaTime, networkName);
+                break;
             case NOT_SET:
             case ERC20:
             case MAYBE_ERC20:

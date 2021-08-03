@@ -185,6 +185,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case MAYBE_ERC20:
             case ERC721:
             case ERC721_LEGACY:
+            case ERC1155:
                 saveToken(r, token);
                 break;
             //No save

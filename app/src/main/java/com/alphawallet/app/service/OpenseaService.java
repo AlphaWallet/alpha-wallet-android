@@ -40,6 +40,7 @@ public class OpenseaService {
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
     private final List<Integer> storedImagesForChain = new ArrayList<>();
+    static final TokenFactory tf = new TokenFactory();
 
     //TODO: remove old files not accessed for some time
     //      On service creation, check files for old files and delete
@@ -96,50 +97,107 @@ public class OpenseaService {
                                       int networkId, String networkName, TokensService tokensService) throws Exception
     {
         final Map<String, Map<BigInteger, NFTAsset>> assetList = new HashMap<>();
-        TokenFactory tf = new TokenFactory();
+
         for (int i = 0; i < assets.length(); i++)
         {
-            NFTAsset asset = new NFTAsset(assets.getJSONObject(i).toString());
-            AssetContract assetContract = assets.getJSONObject(i).has("asset_contract") ?
-                    new Gson().fromJson(assets.getJSONObject(i).getString("asset_contract"), AssetContract.class)
+            JSONObject assetJSON = assets.getJSONObject(i);
+            AssetContract assetContract = assetJSON.has("asset_contract") ?
+                    new Gson().fromJson(assetJSON.getString("asset_contract"), AssetContract.class)
                     : null;
 
-            if (assetContract != null && !TextUtils.isEmpty(assetContract.getSchemaName())
-                && assetContract.getSchemaName().equalsIgnoreCase("ERC721"))
+            if (assetContract != null && !TextUtils.isEmpty(assetContract.getSchemaName()))
             {
-                BigInteger tokenId = assets.getJSONObject(i).has("token_id") ? new BigInteger(assets.getJSONObject(i).getString("token_id")) : null;
-                if (tokenId == null) continue;
-
-                addAssetImageToHashMap(imageUrls, assetContract, networkId);
-                Token token = foundTokens.get(assetContract.getAddress());
-                if (token == null)
+                switch (assetContract.getSchemaName())
                 {
-                    TokenInfo tInfo;
-                    ContractType type;
-                    long lastCheckTime = 0;
-                    Token checkToken = tokensService.getToken(networkId, assetContract.getAddress());
-                    if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
-                    {
-                        assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
-                        tInfo = checkToken.tokenInfo;
-                        type = checkToken.getInterfaceSpec();
-                        lastCheckTime = checkToken.lastTxTime;
-                    }
-                    else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
-                    {
-                        tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
-                        type = ContractType.ERC721_UNDETERMINED;
-                    }
-
-                    token = tf.createToken(tInfo, type, networkName);
-                    token.setTokenWallet(address);
-                    token.lastTxTime = lastCheckTime;
-                    foundTokens.put(assetContract.getAddress(), token);
+                    case "ERC721":
+                        handleERC721(assetList, assetJSON, networkId, foundTokens, tokensService,
+                                networkName, address);
+                        break;
+                    case "ERC1155":
+                        handleERC1155(assetList, assetJSON, networkId, foundTokens, tokensService,
+                                networkName, address);
+                        break;
                 }
-                asset.updateAsset(tokenId, assetList.get(token.getAddress()));
-                token.addAssetToTokenBalanceAssets(tokenId, asset);
             }
         }
+    }
+
+    private void handleERC721(Map<String, Map<BigInteger, NFTAsset>> assetList, JSONObject assetJSON, int networkId,
+                              Map<String, Token> foundTokens, TokensService svs, String networkName, String address) throws Exception
+    {
+        NFTAsset asset = new NFTAsset(assetJSON.toString());
+        AssetContract assetContract = new Gson().fromJson(assetJSON.getString("asset_contract"), AssetContract.class);
+
+        BigInteger tokenId = assetJSON.has("token_id") ? new BigInteger(assetJSON.getString("token_id")) : null;
+        if (tokenId == null) return;
+
+        addAssetImageToHashMap(imageUrls, assetContract, networkId);
+        Token token = foundTokens.get(assetContract.getAddress());
+        if (token == null)
+        {
+            TokenInfo tInfo;
+            ContractType type;
+            long lastCheckTime = 0;
+            Token checkToken = svs.getToken(networkId, assetContract.getAddress());
+            if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
+            {
+                assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
+                tInfo = checkToken.tokenInfo;
+                type = checkToken.getInterfaceSpec();
+                lastCheckTime = checkToken.lastTxTime;
+            }
+            else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
+            {
+                tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
+                type = ContractType.ERC721_UNDETERMINED;
+            }
+
+            token = tf.createToken(tInfo, type, networkName);
+            token.setTokenWallet(address);
+            token.lastTxTime = lastCheckTime;
+            foundTokens.put(assetContract.getAddress(), token);
+        }
+        asset.updateAsset(tokenId, assetList.get(token.getAddress()));
+        token.addAssetToTokenBalanceAssets(tokenId, asset);
+    }
+
+    private void handleERC1155(Map<String, Map<BigInteger, NFTAsset>> assetList, JSONObject assetJSON, int networkId,
+                              Map<String, Token> foundTokens, TokensService svs, String networkName, String address) throws Exception
+    {
+        NFTAsset asset = new NFTAsset(assetJSON.toString());
+        AssetContract assetContract = new Gson().fromJson(assetJSON.getString("asset_contract"), AssetContract.class);
+
+        BigInteger tokenId = assetJSON.has("token_id") ? new BigInteger(assetJSON.getString("token_id")) : null;
+        if (tokenId == null) return;
+
+        addAssetImageToHashMap(imageUrls, assetContract, networkId);
+        Token token = foundTokens.get(assetContract.getAddress());
+        if (token == null)
+        {
+            TokenInfo tInfo;
+            ContractType type;
+            long lastCheckTime = 0;
+            Token checkToken = svs.getToken(networkId, assetContract.getAddress());
+            if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
+            {
+                assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
+                tInfo = checkToken.tokenInfo;
+                type = checkToken.getInterfaceSpec();
+                lastCheckTime = checkToken.lastTxTime;
+            }
+            else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
+            {
+                tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
+                type = ContractType.ERC721_UNDETERMINED;
+            }
+
+            token = tf.createToken(tInfo, type, networkName);
+            token.setTokenWallet(address);
+            token.lastTxTime = lastCheckTime;
+            foundTokens.put(assetContract.getAddress(), token);
+        }
+        asset.updateAsset(tokenId, assetList.get(token.getAddress()));
+        token.addAssetToTokenBalanceAssets(tokenId, asset);
     }
 
     private void addAssetImageToHashMap(Map<String, String> imageUrls, AssetContract assetContract, int networkId)

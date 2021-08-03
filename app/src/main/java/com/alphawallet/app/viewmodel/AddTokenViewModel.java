@@ -1,5 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -121,10 +122,22 @@ public class AddTokenViewModel extends BaseViewModel {
         return primaryChainId;
     }
 
-    private void setupToken(int chainId, String addr) {
+    private void setupToken(int chainId, String addr, ContractType type) {
         disposable = tokensService
                 .update(addr, chainId)
-                .subscribe(this::onTokensSetup, this::onError);
+                .subscribe(info -> onTokensSetup(info, type), error -> checkType(error, chainId, addr, type));
+    }
+
+    private void checkType(Throwable throwable, int chainId, String address, ContractType type)
+    {
+        if (type == ContractType.ERC1155)
+        {
+            onTokensSetup(new TokenInfo(address, "Holding Contract", "", 0, true, chainId), type);
+        }
+        else
+        {
+            onError(throwable);
+        }
     }
 
     public void fetchToken(int chainId, String addr)
@@ -158,11 +171,10 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(wallet::setValue, this::onError);
     }
 
-    private void onTokensSetup(TokenInfo tokenData) {
+    private void onTokensSetup(TokenInfo tokenData, ContractType type) {
         tokenInfo.postValue(tokenData);
-        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenData).toObservable()
-                .flatMap(contractType -> addTokenInteract.add(tokenData, contractType, wallet.getValue()))
-                //.flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
+        disposable = addTokenInteract.add(tokenData, type, wallet.getValue())
+                .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokentype::postValue, error -> tokenTypeError(error, tokenData));
@@ -236,7 +248,7 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(type -> onContract(tokenInfo, type), this::onError);
     }
 
-    private void onContract(TokenInfo info, ContractType contractType)
+    private void onContract(@NonNull TokenInfo info, ContractType contractType)
     {
         //did it detect anything?
         if (contractType != ContractType.OTHER)
@@ -244,7 +256,7 @@ public class AddTokenViewModel extends BaseViewModel {
             //found the contract
             foundNetwork = true;
             switchNetwork.postValue(info.chainId);
-            setupToken(info.chainId, info.address);
+            setupToken(info.chainId, info.address, contractType);
         }
         else
         {
@@ -262,19 +274,19 @@ public class AddTokenViewModel extends BaseViewModel {
                         fetchTransactionsInteract.queryInterfaceSpec(tokenInfo)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(type -> testNetworkResult2(tokenInfo, type), this::onTestError)
+                                .subscribe(type -> testNetworkResult(tokenInfo, type), this::onTestError)
                                 .isDisposed();
                     });
         }
     }
 
-    private void testNetworkResult2(TokenInfo info, ContractType type)
+    private void testNetworkResult(TokenInfo info, ContractType type)
     {
         if (!foundNetwork && type != ContractType.OTHER)
         {
             foundNetwork = true;
             switchNetwork.postValue(info.chainId);
-            setupToken(info.chainId, info.address);
+            setupToken(info.chainId, info.address, type);
         }
         else
         {

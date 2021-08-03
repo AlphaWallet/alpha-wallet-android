@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokens;
 
 import android.os.Parcelable;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC1155TransferEvent;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -67,8 +68,14 @@ public class ERC1155Token extends Token implements Parcelable
         return assets;
     }
 
+    @Override
+    public int getContractType()
+    {
+        return R.string.erc1155;
+    }
 
-        /**
+
+    /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
         The `_operator` argument MUST be msg.sender.
         The `_from` argument MUST be the address of the holder whose balance is decreased.

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -237,6 +238,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      */
     public void updateToken(TokenCardMeta token, boolean notify)
     {
+        if (token.type == ContractType.ERC1155)
+        {
+            System.out.println("YOLESS");
+        }
         if (canDisplayToken(token))
         {
             //does this token already exist with a different weight (ie name has changed)?

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -261,7 +262,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     public WCClient getClient(String sessionId)
     {
         //may fail.
-        if (walletConnectService == null)
+        if (walletConnectService == null || TextUtils.isEmpty(sessionId))
         {
             return null;
         }

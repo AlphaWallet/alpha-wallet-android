@@ -152,13 +152,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         retrieveQrCode();
         startup = true;
         viewModel.prepare();
-
-        if (savedInstanceState != null)
-        {
-            requestId = savedInstanceState.getLong("SESSIONID", 0);
-            savedInstanceState.putLong("SESSIONID", 0);
-            savedInstanceState.clear();
-        }
     }
 
     @Override
@@ -204,6 +197,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             //wait for service to connect
             waitForWalletConnectSession = true;
+            viewModel.prepareIfRequired();
         }
         else if (client == null || !client.isConnected())
         {
@@ -402,6 +396,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (rq != null)
         {
             requestId = rq.id;
+            int useChainId = viewModel.getChainId(getSessionId());
             switch (rq.type)
             {
                 case MESSAGE:
@@ -411,12 +406,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     break;
                 case SIGN_TX:
                     runOnUiThread(() -> {
-                        onEthSignTransaction(rq.id, rq.tx, rq.chainId);
+                        onEthSignTransaction(rq.id, rq.tx, useChainId);
                     });
                     break;
                 case SEND_TX:
                     runOnUiThread(() -> {
-                        onEthSendTransaction(rq.id, rq.tx, rq.chainId);
+                        onEthSendTransaction(rq.id, rq.tx, useChainId);
                     });
                     break;
                 case FAILURE:
@@ -517,7 +512,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
+                .pingInterval(10000, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(true)
                 .build();
         return new WCClient(new GsonBuilder(), httpClient);
     }
@@ -606,12 +602,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void onSessionRequest(Long id, WCPeerMeta peer, int chainIdHint)
+    private void onSessionRequest(Long id, WCPeerMeta peer, int chainId)
     {
         if (peer == null) { finish(); }
 
         String[] accounts = {viewModel.getWallet().address};
         String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
+
+        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : chainId;
 
         Glide.with(this)
                 .load(displayIcon)
@@ -619,8 +617,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());
         signCount.setText(R.string.empty);
-        final int chainId = chainIdOverride > 0 ? chainIdOverride : chainIdHint;
-        chainName.setChainID(chainId);
+        chainName.setChainID(chainIdOverride);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder
@@ -631,7 +628,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     sessionStarted = true;
                     client.approveSession(Arrays.asList(accounts), chainId);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
-                            new Gson().toJson(session), new Gson().toJson(peer), chainId);
+                            new Gson().toJson(session), new Gson().toJson(peer), chainIdOverride);
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);
                     infoLayout.setVisibility(View.VISIBLE);

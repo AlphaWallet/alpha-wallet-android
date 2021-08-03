@@ -723,7 +723,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 confirmationDialog.success();
                 updateSignCount();
-                if (fromDappBrowser) switchToDappBrowser();
+                if (fromDappBrowser)
+                {
+                    confirmationDialog.forceDismiss();
+                    switchToDappBrowser();
+                }
                 requestId = 0;
             }
         };
@@ -764,12 +768,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        if (confirmationDialog == null || !confirmationDialog.isShowing())
-        {
-            confirmationDialog = new ActionSheetDialog(this, this, signCallback, signable);
-            confirmationDialog.setCanceledOnTouchOutside(false);
-            confirmationDialog.show();
-        }
+        confirmationDialog = new ActionSheetDialog(this, this, signCallback, signable);
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
     }
 
     private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, int chainId)
@@ -1061,7 +1062,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_reject_request));
         }
 
-        if (fromDappBrowser) switchToDappBrowser();
+        if (fromDappBrowser)
+        {
+            if (confirmationDialog != null) confirmationDialog.forceDismiss();
+            switchToDappBrowser();
+        }
     }
 
     private void switchToDappBrowser()

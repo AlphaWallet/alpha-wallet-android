@@ -567,4 +567,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             confirmationWidget.completeProgressMessage(".", this::dismiss);
         }
     }
+
+    public void forceDismiss()
+    {
+        setOnDismissListener(v -> {
+            // Do nothing
+        });
+        dismiss();
+    }
 }

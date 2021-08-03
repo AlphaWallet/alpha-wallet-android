@@ -983,7 +983,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             new ActivityResultCallback<Uri>() {
                 @Override
                 public void onActivityResult(Uri uri) {
-                    uploadMessage.onReceiveValue(new Uri[] { uri });
+                    if (uri != null) uploadMessage.onReceiveValue(new Uri[] { uri });
                 }
             });
 
@@ -1650,7 +1650,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
+        if (isVisibleToUser && viewModel != null) {
             viewModel.checkForNetworkChanges();
         }
     }

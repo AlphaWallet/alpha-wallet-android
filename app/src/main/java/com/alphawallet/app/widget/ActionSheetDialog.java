@@ -308,8 +308,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             {
                 actionCompleted = true;
                 //display success and hand back to calling function
-                if (gotAuth) confirmationWidget.startProgressCycle(1);
-                signCallback.gotAuthorisationForSigning(gotAuth, signWidget.getSignable());
+                if (gotAuth)
+                {
+                    confirmationWidget.startProgressCycle(1);
+                    signCallback.gotAuthorisationForSigning(gotAuth, signWidget.getSignable());
+                }
+                else
+                {
+                    cancelAuthentication();
+                }
             }
 
             @Override
@@ -559,5 +566,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         {
             confirmationWidget.completeProgressMessage(".", this::dismiss);
         }
+    }
+
+    public void forceDismiss()
+    {
+        setOnDismissListener(v -> {
+            // Do nothing
+        });
+        dismiss();
     }
 }

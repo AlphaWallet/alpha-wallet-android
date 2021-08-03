@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -80,6 +82,9 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     private Wallet wallet;
 
+    @Nullable
+    private Disposable prepareDisposable;
+
     private static final String TAG = "WCClientVM";
 
     WalletConnectViewModel(KeyService keyService,
@@ -101,6 +106,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
         serviceConnection = startService();
+        prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
                 .subscribe(w -> this.wallet = w, this::onError);
@@ -143,7 +149,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     public void prepare()
     {
-        disposable = genericWalletInteract
+        prepareDisposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
@@ -256,7 +262,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     public WCClient getClient(String sessionId)
     {
         //may fail.
-        if (walletConnectService == null)
+        if (walletConnectService == null || TextUtils.isEmpty(sessionId))
         {
             return null;
         }
@@ -498,5 +504,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public boolean connectedToService()
     {
         return walletConnectService != null;
+    }
+
+    public void prepareIfRequired()
+    {
+        if (prepareDisposable == null)
+        {
+            prepare();
+        }
     }
 }

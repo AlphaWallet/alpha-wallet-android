@@ -191,7 +191,14 @@ public class BalanceUtils
 
     public static String getScaledValue(BigDecimal value, long decimals, int precision)
     {
-        return scaledValue(value, getDigitalPattern(precision), decimals);
+        try
+        {
+            return scaledValue(value, getDigitalPattern(precision), decimals);
+        }
+        catch (NumberFormatException e)
+        {
+            return "~";
+        }
     }
 
     private static String scaledValue(BigDecimal value, String pattern, long decimals)

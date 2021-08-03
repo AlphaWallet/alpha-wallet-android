@@ -71,6 +71,7 @@ import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -933,8 +934,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             break;
                         case C.DAPP_PREFIX_WALLETCONNECT:
                             //start walletconnect
-                            walletConnectSession = url;
-                            if (getContext() != null) viewModel.handleWalletConnect(getContext(), url, activeNetwork);
+                            if (wallet.type == WalletType.WATCH)
+                            {
+                                showWalletWatch();
+                            }
+                            else
+                            {
+                                walletConnectSession = url;
+                                if (getContext() != null)
+                                    viewModel.handleWalletConnect(getContext(), url, activeNetwork);
+                            }
                             return true;
                         default:
                             break;
@@ -974,7 +983,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             new ActivityResultCallback<Uri>() {
                 @Override
                 public void onActivityResult(Uri uri) {
-                    uploadMessage.onReceiveValue(new Uri[] { uri });
+                    if (uri != null) uploadMessage.onReceiveValue(new Uri[] { uri });
                 }
             });
 
@@ -1224,7 +1233,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
         resultDialog.show();
 
-        confirmationDialog.dismiss();
+        if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.dismiss();
+    }
+
+    private void showWalletWatch()
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog.setIcon(AWalletAlertDialog.WARNING);
+        resultDialog.setTitle(R.string.title_wallet_connect);
+        resultDialog.setMessage(R.string.action_watch_account);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
     }
 
     private void onInvalidTransaction(Web3Transaction transaction)
@@ -1627,7 +1650,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
+        if (isVisibleToUser && viewModel != null) {
             viewModel.checkForNetworkChanges();
         }
     }

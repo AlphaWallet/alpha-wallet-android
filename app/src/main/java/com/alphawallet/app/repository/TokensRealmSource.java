@@ -225,7 +225,7 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 NetworkInfo[] allMainNetworks = ethereumNetworkRepository.getAllActiveNetworks();
                 for (NetworkInfo info : allMainNetworks)
                 {
@@ -240,8 +240,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     }
                 }
             });
-
-            realm.refresh();
         }
     }
 
@@ -455,7 +453,7 @@ public class TokensRealmSource implements TokenLocalSource {
         String key = databaseKey(chainId, tokenAddress.toLowerCase());
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", key)
                         .equalTo("chainId", chainId)
@@ -1002,7 +1000,7 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 for (String tokenAddress : erc20Tickers.keySet())
                 {
                     writeTickerToRealm(r, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);

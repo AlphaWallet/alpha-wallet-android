@@ -42,6 +42,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
@@ -85,6 +89,8 @@ public class TokensService
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
     private int transferCheckChain;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private final Future<Boolean> future = executorService.submit(this::updateCycle);
 
     @Nullable
     private Disposable eventTimer;
@@ -263,9 +269,8 @@ public class TokensService
         }
     }
 
-    public void startUpdateCycle()
+    private boolean updateCycle()
     {
-        if (currentAddress == null) return;
         startupPass();
         populateTokenCheck();
 
@@ -280,8 +285,24 @@ public class TokensService
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) erc20CheckDisposable.dispose();
 
         addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
-        checkIssueTokens();
 
+        return true;
+    }
+
+    public void startUpdateCycle()
+    {
+        if (currentAddress == null) return;
+
+        try
+        {
+            future.get();
+        }
+        catch (InterruptedException|ExecutionException e)
+        {
+            //
+        }
+
+        checkIssueTokens();
         eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
                 .doOnNext(l -> checkTokensBalance())
                 .observeOn(Schedulers.newThread()).subscribe();

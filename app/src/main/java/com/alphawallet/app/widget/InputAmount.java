@@ -144,6 +144,8 @@ public class InputAmount extends LinearLayout
 
     public void onDestroy()
     {
+        if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
+        if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
         if (realm != null) realm.removeAllChangeListeners();
         if (tickerRealm != null) tickerRealm.removeAllChangeListeners();
         realmTickerUpdate = null;

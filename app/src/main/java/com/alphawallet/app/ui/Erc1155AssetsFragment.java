@@ -15,16 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.ERC1155Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModelFactory;
-
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -54,9 +51,8 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            // TODO: retrieve ERC1155 Token
-             token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
-             wallet = getArguments().getParcelable(C.Key.WALLET);
+            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            wallet = getArguments().getParcelable(C.Key.WALLET);
 
             recyclerView = view.findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -64,19 +60,19 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
 
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(Erc1155AssetsViewModel.class);
-            viewModel.assets().observe(getViewLifecycleOwner(), this::onAssets);
+            //viewModel.assets().observe(getViewLifecycleOwner(), this::onAssets);
 
-            viewModel.getAssets(token);
+            onAssets(token);
         }
     }
 
-    private void onAssets(Map<Long, ERC1155Asset> assets) {
-        adapter = new Erc1155AssetsAdapter(getContext(), assets, this);
+    private void onAssets(Token token) {
+        adapter = new Erc1155AssetsAdapter(getContext(), token.getTokenAssets(), this);
         recyclerView.setAdapter(adapter);
     }
 
     @Override
-    public void onAssetClicked(ERC1155Asset item)
+    public void onAssetClicked(NFTAsset item)
     {
         viewModel.showAssetDetails(getContext(), wallet, token, item);
     }

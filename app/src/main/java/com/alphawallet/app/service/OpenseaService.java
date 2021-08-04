@@ -178,17 +178,17 @@ public class OpenseaService {
             ContractType type;
             long lastCheckTime = 0;
             Token checkToken = svs.getToken(networkId, assetContract.getAddress());
-            if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
+            if (checkToken != null && checkToken.getInterfaceSpec() == ContractType.ERC1155)
             {
                 assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
                 tInfo = checkToken.tokenInfo;
                 type = checkToken.getInterfaceSpec();
                 lastCheckTime = checkToken.lastTxTime;
             }
-            else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
+            else
             {
                 tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
-                type = ContractType.ERC721_UNDETERMINED;
+                type = ContractType.ERC1155;
             }
 
             token = tf.createToken(tInfo, type, networkName);

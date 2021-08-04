@@ -9,33 +9,33 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.tokens.ERC1155Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.ui.widget.OnAssetSelectListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155AssetSelectAdapter.ViewHolder> {
-    private List<Pair<Long, ERC1155Asset>> actualData;
+    private List<Pair<BigInteger, NFTAsset>> actualData;
     private Context context;
     private OnAssetSelectListener listener;
 
-    public Erc1155AssetSelectAdapter(Context context, Map<Long, ERC1155Asset> data, OnAssetSelectListener listener)
+    public Erc1155AssetSelectAdapter(Context context, Map<BigInteger, NFTAsset> data, OnAssetSelectListener listener)
     {
         this.context = context;
         this.listener = listener;
         actualData = new ArrayList<>(data.size());
-        for (Map.Entry<Long, ERC1155Asset> d : data.entrySet()) {
+        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet()) {
             actualData.add(new Pair<>(d.getKey(), d.getValue()));
         }
     }
@@ -51,14 +51,14 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
     @Override
     public void onBindViewHolder(ViewHolder holder, int position)
     {
-        Pair<Long, ERC1155Asset> pair = actualData.get(position);
-        ERC1155Asset item = pair.second;
+        Pair<BigInteger, NFTAsset> pair = actualData.get(position);
+        NFTAsset item = pair.second;
         if (item != null)
         {
-            holder.title.setText(item.getTitle());
-            holder.subtitle.setText(item.getSubtitle());
+            holder.title.setText(item.getName());
+            holder.subtitle.setText(item.getDescription());
             Glide.with(context)
-                    .load(item.getIconUri())
+                    .load(item.getImage())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(holder.icon);
             holder.checkBox.setChecked(item.isSelected());
@@ -82,11 +82,11 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         return actualData.size();
     }
 
-    public List<ERC1155Asset> getSelectedAssets()
+    public List<NFTAsset> getSelectedAssets()
     {
-        List<ERC1155Asset> selectedAssets = new ArrayList<>();
+        List<NFTAsset> selectedAssets = new ArrayList<>();
 
-        for (Pair<Long, ERC1155Asset> asset : actualData) {
+        for (Pair<BigInteger, NFTAsset> asset : actualData) {
             if (asset.second.isSelected()) {
                 selectedAssets.add(asset.second);
             }

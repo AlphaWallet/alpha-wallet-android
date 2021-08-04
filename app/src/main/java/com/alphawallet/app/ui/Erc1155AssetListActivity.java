@@ -3,35 +3,23 @@ package com.alphawallet.app.ui;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokens.ERC1155Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetListAdapter;
-import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModel;
-import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModelFactory;
 import com.alphawallet.app.viewmodel.Erc1155AssetListViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetListViewModelFactory;
-import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.TokenInfoCategoryView;
-import com.alphawallet.app.widget.TokenInfoView;
-
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -87,17 +75,10 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     {
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(Erc1155AssetListViewModel.class);
-        viewModel.assets().observe(this, this::onAssets);
-    }
-
-    private void onAssets(Map<Long, ERC1155Asset> assets)
-    {
-        adapter = new Erc1155AssetListAdapter(this, assets, this);
-        recyclerView.setAdapter(adapter);
     }
 
     @Override
-    public void onAssetClicked(ERC1155Asset asset)
+    public void onAssetClicked(NFTAsset asset)
     {
         viewModel.showAssetDetails(this, wallet, token, asset);
     }

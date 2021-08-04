@@ -111,6 +111,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 if (backupChain != null) token = backupChain;
             }
 
+            if (token.getAddress().equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
+            {
+                System.out.println("YOLESS");
+            }
+
             if (realmUpdate != null)
             {
                 realmUpdate.removeAllChangeListeners();
@@ -212,7 +217,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceCurrency.setText(EMPTY_BALANCE);
     }
 
-    private Runnable clearElevation = new Runnable()
+    private final Runnable clearElevation = new Runnable()
     {
         @Override
         public void run()

@@ -1,6 +1,8 @@
 package com.alphawallet.app.entity.tokens;
 
 
+import android.app.Activity;
+import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alphawallet.app.R;
@@ -10,6 +12,8 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.viewmodel.BaseViewModel;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -58,6 +62,42 @@ public class ERC1155Token extends Token implements Parcelable
         setInterfaceSpec(ContractType.ERC1155);
     }
 
+    private ERC1155Token(Parcel in) {
+        super(in);
+        assets = new HashMap<>();
+        //read in the element list
+        int size = in.readInt();
+        for (; size > 0; size--)
+        {
+            BigInteger tokenId = new BigInteger(in.readString(), Character.MAX_RADIX);
+            NFTAsset asset = in.readParcelable(NFTAsset.class.getClassLoader());
+            assets.put(tokenId, asset);
+        }
+    }
+
+    public static final Creator<ERC1155Token> CREATOR = new Creator<ERC1155Token>() {
+        @Override
+        public ERC1155Token createFromParcel(Parcel in) {
+            return new ERC1155Token(in);
+        }
+
+        @Override
+        public ERC1155Token[] newArray(int size) {
+            return new ERC1155Token[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(assets.size());
+        for (BigInteger assetKey : assets.keySet())
+        {
+            dest.writeString(assetKey.toString(Character.MAX_RADIX));
+            dest.writeParcelable(assets.get(assetKey), flags);
+        }
+    }
+
     public void setEventBlockRead(BigInteger blockNumber)
     {
         lastEventBlockRead = blockNumber;
@@ -68,12 +108,57 @@ public class ERC1155Token extends Token implements Parcelable
         return assets;
     }
 
+    public boolean isNonFungible() { return true; }
+
     @Override
     public int getContractType()
     {
         return R.string.erc1155;
     }
 
+    @Override
+    public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset)
+    {
+        assets.put(tokenId, asset);
+    }
+
+    @Override
+    public BigDecimal getBalanceRaw()
+    {
+        return new BigDecimal(assets.size());
+    }
+
+    @Override
+    public boolean checkRealmBalanceChange(RealmToken realmToken)
+    {
+        String currentState = realmToken.getBalance();
+        if (!lastEventBlockRead.equals(realmToken.getErc1155BlockRead())) return true;
+        if (currentState == null || !currentState.equals(getBalanceRaw().toString())) return true;
+        //check balances
+        for (NFTAsset a : assets.values())
+        {
+            if (!a.needsLoading() && !a.requiresReplacement()) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void setRealmBalance(RealmToken realmToken)
+    {
+        realmToken.setBalance(getBalanceRaw().toString());
+    }
+
+    @Override
+    public String getStringBalance()
+    {
+        return getBalanceRaw().toString();
+    }
+
+    @Override
+    public void clickReact(BaseViewModel viewModel, Activity activity)
+    {
+        viewModel.showTokenList(activity, this);
+    }
 
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).

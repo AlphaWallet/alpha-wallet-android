@@ -14,7 +14,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokens.ERC1155Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetSelectListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetSelectAdapter;
@@ -23,6 +23,7 @@ import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     @Inject
     Erc1155AssetSelectViewModelFactory viewModelFactory;
     Erc1155AssetSelectViewModel viewModel;
-    List<ERC1155Asset> selectedAssets = new ArrayList<>();
+    List<NFTAsset> selectedAssets = new ArrayList<>();
     private Menu menu;
     private Token token;
     private Wallet wallet;
@@ -88,7 +89,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         }
     }
 
-    private void onAssets(Map<Long, ERC1155Asset> assets)
+    private void onAssets(Map<BigInteger, NFTAsset> assets)
     {
         adapter = new Erc1155AssetSelectAdapter(this, assets, this);
         recyclerView.setAdapter(adapter);

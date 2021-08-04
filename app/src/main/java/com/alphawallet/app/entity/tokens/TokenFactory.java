@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.alphawallet.app.entity.ContractType.ERC1155;
+
 /**
  * Created by James on 27/01/2018.
  */
@@ -123,6 +125,10 @@ public class TokenFactory
                 thisToken = new ERC721Token(tokenInfo, null, decimalBalance, updateBlancaTime, networkName, type);
                 break;
 
+            case ERC1155:
+                thisToken = new ERC1155Token(tokenInfo, null, updateBlancaTime, networkName);
+                break;
+
             case OTHER:
             default:
                 thisToken = new Token(tokenInfo, BigDecimal.ZERO, updateBlancaTime, networkName, type);
@@ -164,6 +170,9 @@ public class TokenFactory
                                       tokenInfo.chainId),
                         BigDecimal.ZERO, currentTime, networkName, type);
                 thisToken.pendingBalance = BigDecimal.ZERO;
+                break;
+            case ERC1155:
+                thisToken = new ERC1155Token(tokenInfo, new HashMap<>(), currentTime, networkName);
                 break;
             case ERC20:
             case DYNAMIC_CONTRACT:

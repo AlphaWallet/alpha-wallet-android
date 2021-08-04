@@ -336,4 +336,14 @@ public class NFTAsset implements Parcelable
             }
         }
     }
+
+    public boolean isSelected()
+    {
+        return isChecked;
+    }
+
+    public void setSelected(boolean selected)
+    {
+        this.isChecked = selected;
+    }
 }

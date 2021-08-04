@@ -180,6 +180,11 @@ public class TokensService
 
     public Token getToken(int chainId, String addr)
     {
+        if (addr.equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
+        {
+            System.out.println("YOLESS");
+        }
+
         if (TextUtils.isEmpty(currentAddress) || TextUtils.isEmpty(addr)) return null;
         else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
     }

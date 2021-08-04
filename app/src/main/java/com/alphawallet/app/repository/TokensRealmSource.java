@@ -362,7 +362,7 @@ public class TokensRealmSource implements TokenLocalSource {
         if (!token.isNonFungible()) return 0;
 
         //load all the old assets
-        Map<BigInteger, NFTAsset> assetMap = getERC721Assets(realm, token);
+        Map<BigInteger, NFTAsset> assetMap = getNFTAssets(realm, token);
         int assetCount = assetMap.size();
 
         for (BigInteger updatedTokenId : additions)
@@ -637,7 +637,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (!token.isNonFungible()) continue;
 
                     //load all the old assets
-                    Map<BigInteger, NFTAsset> assetMap = getERC721Assets(r, token);
+                    Map<BigInteger, NFTAsset> assetMap = getNFTAssets(r, token);
 
                     List<BigInteger> changeList = token.getChangeList(assetMap);
 
@@ -708,7 +708,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private Map<BigInteger, NFTAsset> getERC721Assets(Realm realm, Token token)
+    private Map<BigInteger, NFTAsset> getNFTAssets(Realm realm, Token token)
     {
         Map<BigInteger, NFTAsset> assets = new HashMap<>();
 
@@ -794,6 +794,11 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
                     if (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
+
+                    if (t.getTokenAddress().equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
+                    {
+                        System.out.println("YOLESS");
+                    }
 
                     if (t.getContractType() == ContractType.ETHEREUM && !(t.getTokenAddress().equalsIgnoreCase(wallet.address)
                             || t.getTokenAddress().equals("eth")))
@@ -1108,6 +1113,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 case ERC721_UNDETERMINED:
                 case ERC721:
                 case ERC721_LEGACY:
+                case ERC1155:
                 default:
                     return balance;
 
@@ -1140,12 +1146,13 @@ public class TokensRealmSource implements TokenLocalSource {
         TokenInfo    info    = tf.createTokenInfo(realmItem);
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
         if (network == null) return null;
+
         Token result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
         result.setTokenWallet(wallet.address);
 
         if (result.isNonFungible())
         {
-            Map<BigInteger, NFTAsset> assets = getERC721Assets(realm, result);
+            Map<BigInteger, NFTAsset> assets = getNFTAssets(realm, result);
             for (BigInteger tokenId : assets.keySet())
             {
                 result.addAssetToTokenBalanceAssets(tokenId, assets.get(tokenId));

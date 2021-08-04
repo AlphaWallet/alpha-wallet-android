@@ -14,26 +14,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.tokens.ERC1155Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdapter.ViewHolder> {
-    private List<Pair<Long, ERC1155Asset>> actualData;
+    private List<Pair<BigInteger, NFTAsset>> actualData;
     private Context context;
     private OnAssetClickListener listener;
 
-    public Erc1155AssetsAdapter(Context context, Map<Long, ERC1155Asset> data, OnAssetClickListener listener)
+    public Erc1155AssetsAdapter(Context context, Map<BigInteger, NFTAsset> data, OnAssetClickListener listener)
     {
         this.context = context;
         this.listener = listener;
         actualData = new ArrayList<>(data.size());
-        for (Map.Entry<Long, ERC1155Asset> d : data.entrySet()) {
+        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet()) {
             actualData.add(new Pair<>(d.getKey(), d.getValue()));
         }
     }
@@ -49,14 +50,14 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
     @Override
     public void onBindViewHolder(ViewHolder holder, int position)
     {
-        Pair<Long, ERC1155Asset> pair = actualData.get(position);
-        ERC1155Asset item = pair.second;
+        Pair<BigInteger, NFTAsset> pair = actualData.get(position);
+        NFTAsset item = pair.second;
         if (item != null)
         {
-            holder.title.setText(item.getTitle());
-            holder.subtitle.setText(item.getSubtitle());
+            holder.title.setText(item.getName());
+            holder.subtitle.setText(item.getDescription());
             Glide.with(context)
-                    .load(item.getIconUri())
+                    .load(item.getImage())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(holder.icon);
             holder.layout.setOnClickListener(v -> listener.onAssetClicked(item));

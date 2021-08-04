@@ -19,15 +19,17 @@ import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdapter.ViewHolder> {
-    private List<Pair<BigInteger, NFTAsset>> actualData;
-    private Context context;
-    private OnAssetClickListener listener;
+    private final List<Pair<BigInteger, NFTAsset>> actualData;
+    private final Context context;
+    private final OnAssetClickListener listener;
 
     public Erc1155AssetsAdapter(Context context, Map<BigInteger, NFTAsset> data, OnAssetClickListener listener)
     {
@@ -48,7 +50,7 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position)
+    public void onBindViewHolder(@NotNull ViewHolder holder, int position)
     {
         Pair<BigInteger, NFTAsset> pair = actualData.get(position);
         NFTAsset item = pair.second;
@@ -70,7 +72,7 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
         return actualData.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout layout;
         ImageView icon;
         TextView title;

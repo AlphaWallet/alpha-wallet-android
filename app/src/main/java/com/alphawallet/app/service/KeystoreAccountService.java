@@ -8,6 +8,8 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3j.RawTransaction;
+import com.alphawallet.app.web3j.TransactionEncoder;
 import com.alphawallet.token.entity.Signable;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -18,14 +20,9 @@ import org.json.JSONObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
-import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
@@ -225,7 +222,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
+    public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice,
+                                                    BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
             SignatureFromKey returnSig = new SignatureFromKey();
             Sign.SignatureData sigData;
@@ -238,7 +236,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                     toAddress,
                     amount,
                     dataStr
-                    );
+            );
 
             byte[] signData = TransactionEncoder.encode(rtx, chainId);
             returnSig = keyService.signData(signer, signData);
@@ -247,11 +245,44 @@ public class KeystoreAccountService implements AccountKeystoreService
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
                 returnSig.failMessage = "Incorrect signature length"; //should never see this message
             }
-            else sigData = TransactionEncoder.createEip155SignatureData(sigData, chainId);
-            returnSig.signature = encode(rtx, sigData);
+            else sigData = org.web3j.crypto.TransactionEncoder.createEip155SignatureData(sigData, chainId);
+            returnSig.signature = TransactionEncoder.encode(rtx, sigData);
             return returnSig;
         })
         .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<SignatureFromKey> signTransactionEIP1559(Wallet signer, String toAddress, BigInteger amount, BigInteger gasLimit,
+                                                           BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId)
+    {
+        return Single.fromCallable(() -> {
+            SignatureFromKey returnSig = new SignatureFromKey();
+            Sign.SignatureData sigData;
+            String dataStr = data != null ? Numeric.toHexString(data) : "";
+
+            RawTransaction rtx = RawTransaction.createTransaction(
+                    chainId,
+                    BigInteger.valueOf(nonce),
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    dataStr,
+                    gasPremium, //max priority
+                    gasMax  //max gas
+            );
+
+            byte[] signData = TransactionEncoder.encode(rtx);
+
+            returnSig = keyService.signData(signer, signData);
+            sigData = sigFromByteArray(returnSig.signature);
+            if (sigData == null) {
+                returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
+                returnSig.failMessage = "Incorrect signature length"; //should never see this message
+            }
+            returnSig.signature = TransactionEncoder.encode(rtx, sigData);
+            return returnSig;
+        }).subscribeOn(Schedulers.io());
     }
 
     /**
@@ -286,51 +317,6 @@ public class KeystoreAccountService implements AccountKeystoreService
         if (BuildConfig.DEBUG) Log.d("RealmDebug", "gotcredentials + " + address);
         return credentials;
     }
-
-    private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
-        List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
-        RlpList rlpList = new RlpList(values);
-        return RlpEncoder.encode(rlpList);
-    }
-
-    /*private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
-        List<RlpType> values = asRlpValues(rawTransaction, signatureData);
-        RlpList rlpList = new RlpList(values);
-        return RlpEncoder.encode(rlpList);
-    }
-
-    static List<RlpType> asRlpValues(
-            RawTransaction rawTransaction, Sign.SignatureData signatureData) {
-        List<RlpType> result = new ArrayList<>();
-
-        result.add(RlpString.create(rawTransaction.getNonce()));
-        result.add(RlpString.create(rawTransaction.getGasPrice()));
-        result.add(RlpString.create(rawTransaction.getGasLimit()));
-
-        // an empty to address (contract creation) should not be encoded as a numeric 0 value
-        String to = rawTransaction.getTo();
-        if (to != null && to.length() > 0) {
-            // addresses that start with zeros should be encoded with the zeros included, not
-            // as numeric values
-            result.add(RlpString.create(Numeric.hexStringToByteArray(to)));
-        } else {
-            result.add(RlpString.create(""));
-        }
-
-        result.add(RlpString.create(rawTransaction.getValue()));
-
-        // value field will already be hex encoded, so we need to convert into binary first
-        byte[] data = Numeric.hexStringToByteArray(rawTransaction.getData());
-        result.add(RlpString.create(data));
-
-        if (signatureData != null) {
-            result.add(RlpString.create(signatureData.getV()));
-            result.add(RlpString.create(Bytes.trimLeadingZeroes(signatureData.getR())));
-            result.add(RlpString.create(Bytes.trimLeadingZeroes(signatureData.getS())));
-        }
-
-        return result;
-    }*/
 
     @Override
     public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {

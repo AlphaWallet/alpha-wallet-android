@@ -4,6 +4,8 @@ package com.alphawallet.app.ui;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -62,6 +64,17 @@ public class NameThisWalletActivity extends BaseActivity implements StandardFunc
 
         inputName = findViewById(R.id.input_name);
 
+        inputName.getEditText().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    updateNameAndExit();
+                    return true;
+                }
+                return false;
+            }
+        });
+
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(NameThisWalletViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
@@ -77,12 +90,17 @@ public class NameThisWalletActivity extends BaseActivity implements StandardFunc
     }
 
     public void handleClick(String action, int actionId) {
+        updateNameAndExit();
+    }
+
+    private void updateNameAndExit() {
         disposable = viewModel.setWalletName(inputName.getText().toString()).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(n -> {
                     finish();
                 });
     }
+
 
     @Override
     protected void onResume() {

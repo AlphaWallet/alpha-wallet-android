@@ -404,7 +404,7 @@
     <string name="dialog_load_as_contract">Chargement de token</string>
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00">0.00 %s</string>
-    <string name="telegram">Telegram</string>
+    <string name="telegram">Telegram (Support Client)</string>
     <string name="transfer_request">Demande de transfert</string>
     <string name="token_transfer_request">Demande de transfert de token: %1$s</string>
     <string name="generate_payment_request">Générer une demande de paiement</string>
@@ -786,4 +786,6 @@
     <string name="request_change_chain">This site is requesting you to switch to the %1$s chain with chain ID: %2$s. This will reload the page.</string>
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
+    <string name="email">Email</string>
+    <string name="discord">Discord</string>
 </resources>

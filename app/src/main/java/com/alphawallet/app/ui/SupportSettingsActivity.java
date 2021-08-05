@@ -19,6 +19,8 @@ public class SupportSettingsActivity extends BaseActivity {
     private LinearLayout supportSettingsLayout;
 
     private SettingsItemView telegram;
+    private SettingsItemView discord;
+    private SettingsItemView email;
     private SettingsItemView twitter;
     private SettingsItemView reddit;
     private SettingsItemView facebook;
@@ -43,6 +45,18 @@ public class SupportSettingsActivity extends BaseActivity {
                 .withIcon(R.drawable.ic_logo_telegram)
                 .withTitle(R.string.telegram)
                 .withListener(this::onTelegramClicked)
+                .build();
+
+        discord = new SettingsItemView.Builder(this)
+                .withIcon(R.drawable.ic_logo_discord)
+                .withTitle(R.string.discord)
+                .withListener(this::onDiscordClicked)
+                .build();
+
+        email = new SettingsItemView.Builder(this)
+                .withIcon(R.drawable.ic_email)
+                .withTitle(R.string.email)
+                .withListener(this::onEmailClicked)
                 .build();
 
         twitter = new SettingsItemView.Builder(this)
@@ -81,6 +95,15 @@ public class SupportSettingsActivity extends BaseActivity {
         if (MediaLinks.AWALLET_TELEGRAM_URL != null) {
             supportSettingsLayout.addView(telegram);
         }
+
+        if (MediaLinks.AWALLET_DISCORD_URL != null){
+            supportSettingsLayout.addView(discord);
+        }
+
+        if (MediaLinks.AWALLET_EMAIL1 != null) {
+            supportSettingsLayout.addView(email);
+        }
+
         if (MediaLinks.AWALLET_TWITTER_URL != null) {
             supportSettingsLayout.addView(twitter);
         }
@@ -108,6 +131,25 @@ public class SupportSettingsActivity extends BaseActivity {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
+    }
+
+    private void onDiscordClicked(){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData((Uri.parse(MediaLinks.AWALLET_DISCORD_URL)));
+        if (isAppAvailable(C.DISCORD_PACKAGE_NAME)){
+            intent.setPackage(C.DISCORD_PACKAGE_NAME);
+        }
+        try{
+            startActivity(intent);
+        } catch (Exception e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
+    }
+
+    private void onEmailClicked() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData();
     }
 
     private void onLinkedInClicked() {

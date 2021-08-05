@@ -391,7 +391,7 @@
     <string name="dialog_load_as_contract">加载通证</string>
     <string name="blockchain">%1$s区块链</string>
     <string name="currency_00">0.00%s</string>
-    <string name="telegram">电报</string>
+    <string name="telegram">电报 (客户支持)</string>
     <string name="transfer_request">转账请求</string>
     <string name="token_transfer_request">通证转账请求: %1$s</string>
     <string name="generate_payment_request">生成付款请求</string>
@@ -761,4 +761,6 @@
     <string name="request_change_chain">This site is requesting you to switch to the %1$s chain with chain ID: %2$s. This will reload the page.</string>
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
+    <string name="email">Email</string>
+    <string name="discord">Discord</string>
 </resources>

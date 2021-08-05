@@ -12,6 +12,7 @@ public class MediaLinks
     public static final String AWALLET_REDDIT_URL = "https://www.reddit.com/r/AlphaWallet/";
     public static final String AWALLET_INSTAGRAM_URL = null;
     public static final String AWALLET_BLOG_URL = null;
+    public static final String AWALLET_FAQ_URL = "https://alphawallet.com/faq/";
 
     public static final String AWALLET_EMAIL1 = "feedback+android";
     public static final String AWALLET_EMAIL2 = "alphawallet.com";

@@ -134,12 +134,14 @@ public class SupportSettingsActivity extends BaseActivity {
     }
 
     private void onDiscordClicked(){
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData((Uri.parse(MediaLinks.AWALLET_DISCORD_URL)));
-        if (isAppAvailable(C.DISCORD_PACKAGE_NAME)){
-            intent.setPackage(C.DISCORD_PACKAGE_NAME);
+        Intent intent;
+        try {
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        } catch (Exception e) {
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
         }
-        try{
+        try {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
@@ -149,7 +151,6 @@ public class SupportSettingsActivity extends BaseActivity {
 
     private void onEmailClicked() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData();
     }
 
     private void onLinkedInClicked() {

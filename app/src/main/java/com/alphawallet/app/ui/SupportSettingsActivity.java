@@ -179,7 +179,15 @@ public class SupportSettingsActivity extends BaseActivity {
     }
 
     private void onFaqClicked() {
-        new HelpRouter().open(this);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(MediaLinks.AWALLET_FAQ_URL));
+
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
     }
 
     private boolean isAppAvailable(String packageName) {

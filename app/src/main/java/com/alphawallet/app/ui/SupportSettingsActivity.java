@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+
+import android.provider.MediaStore;
 import android.widget.LinearLayout;
 
 import com.alphawallet.app.C;
@@ -150,7 +152,20 @@ public class SupportSettingsActivity extends BaseActivity {
     }
 
     private void onEmailClicked() {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        final String at = "@";
+        String email =
+                "mailto:" + MediaLinks.AWALLET_EMAIL1 + at + MediaLinks.AWALLET_EMAIL2 +
+                        "?subject=" + Uri.encode(MediaLinks.AWALLET_SUBJECT) +
+                        "&body=" + Uri.encode("");
+        intent.setData(Uri.parse(email));
+
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
     }
 
     private void onLinkedInClicked() {

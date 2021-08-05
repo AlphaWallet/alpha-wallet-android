@@ -16,5 +16,5 @@ public class MediaLinks
 
     public static final String AWALLET_EMAIL1 = "feedback+android";
     public static final String AWALLET_EMAIL2 = "alphawallet.com";
-    public static final String AWALLET_SUBJECT = "Hi guys. I've been using AlphaWallet";
+    public static final String AWALLET_SUBJECT = "AlphaWallet Android Help";
 }

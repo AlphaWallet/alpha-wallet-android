@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -883,4 +884,7 @@ public class Token implements Parcelable
     {
         return new ArrayList<>();
     }
+
+    public void setAssetContract(AssetContract contract) {  }
+    public AssetContract getAssetContract() { return null; }
 }

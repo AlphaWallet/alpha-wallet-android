@@ -4,16 +4,18 @@ package com.alphawallet.app.entity.tokens;
 import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC1155TransferEvent;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.google.gson.Gson;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -47,6 +49,7 @@ public class ERC1155Token extends Token implements Parcelable
 {
     private final Map<BigInteger, NFTAsset> assets;
     private BigInteger lastEventBlockRead;
+    private AssetContract assetContract;
 
     public ERC1155Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, long blancaTime, String networkName) {
         super(tokenInfo, balanceList != null ? BigDecimal.valueOf(balanceList.keySet().size()) : BigDecimal.ZERO, blancaTime, networkName, ContractType.ERC1155);
@@ -64,6 +67,8 @@ public class ERC1155Token extends Token implements Parcelable
 
     private ERC1155Token(Parcel in) {
         super(in);
+        String assetJSON = in.readString();
+        if (!TextUtils.isEmpty(assetJSON)) assetContract = new Gson().fromJson(assetJSON, AssetContract.class);
         assets = new HashMap<>();
         //read in the element list
         int size = in.readInt();
@@ -90,6 +95,7 @@ public class ERC1155Token extends Token implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeString(assetContract != null ? assetContract.getJSON() : "");
         dest.writeInt(assets.size());
         for (BigInteger assetKey : assets.keySet())
         {
@@ -160,16 +166,28 @@ public class ERC1155Token extends Token implements Parcelable
         viewModel.showTokenList(activity, this);
     }
 
-    /**
-        @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
-        The `_operator` argument MUST be msg.sender.
-        The `_from` argument MUST be the address of the holder whose balance is decreased.
-        The `_to` argument MUST be the address of the recipient whose balance is increased.
-        The `_id` argument MUST be the token type being transferred.
-        The `_value` argument MUST be the number of tokens the holder balance is decreased by and match what the recipient balance is increased by.
-        When minting/creating tokens, the `_from` argument MUST be set to `0x0` (i.e. zero address).
-        When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
-    */
+    @Override
+    public void setAssetContract(AssetContract contract)
+    {
+        assetContract = contract;
+    }
+
+    @Override
+    public AssetContract getAssetContract()
+    {
+        return assetContract;
+    }
+
+    /*
+     @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
+     The `_operator` argument MUST be msg.sender.
+     The `_from` argument MUST be the address of the holder whose balance is decreased.
+     The `_to` argument MUST be the address of the recipient whose balance is increased.
+     The `_id` argument MUST be the token type being transferred.
+     The `_value` argument MUST be the number of tokens the holder balance is decreased by and match what the recipient balance is increased by.
+     When minting/creating tokens, the `_from` argument MUST be set to `0x0` (i.e. zero address).
+     When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
+     */
     //event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
     /**

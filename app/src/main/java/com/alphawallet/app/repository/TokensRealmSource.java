@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -21,6 +22,10 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
+import org.json.JSONException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -65,7 +70,7 @@ public class TokensRealmSource implements TokenLocalSource {
         else return Single.fromCallable(() -> {
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                realm.executeTransactionAsync(r -> {
+                realm.executeTransaction(r -> {
                     for (Token token : items) {
                         if (token.tokenInfo != null && token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT) && token.tokenInfo.symbol != null)
                         {
@@ -613,6 +618,8 @@ public class TokensRealmSource implements TokenLocalSource {
             }
         }
 
+        writeAssetContract(realm, token);
+
         //Final check to see if the token should be visible
         if (token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0 && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
@@ -623,6 +630,26 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             token.tokenInfo.isEnabled = false;
             realmToken.setEnabled(false);
+        }
+    }
+
+    private void writeAssetContract(final Realm realm, Token token)
+    {
+        if (token == null || token.getAssetContract() == null) return;
+
+        String databaseKey = databaseKey(token);
+        RealmNFTAsset realmNFT = realm.where(RealmNFTAsset.class)
+                .equalTo("tokenIdAddr", databaseKey)
+                .findFirst();
+
+        if (realmNFT == null)
+        {
+            realmNFT = realm.createObject(RealmNFTAsset.class, databaseKey);
+            realmNFT.setMetaData(token.getAssetContract().getJSON());
+        }
+        else
+        {
+            realmNFT.setMetaData(token.getAssetContract().getJSON());
         }
     }
 
@@ -1157,8 +1184,31 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 result.addAssetToTokenBalanceAssets(tokenId, assets.get(tokenId));
             }
+
+            loadAssetContract(realm, result);
         }
         return result;
+    }
+
+    private void loadAssetContract(Realm realm, Token token)
+    {
+        String databaseKey = databaseKey(token);
+        RealmNFTAsset realmNFT = realm.where(RealmNFTAsset.class)
+                .equalTo("tokenIdAddr", databaseKey)
+                .findFirst();
+
+        try
+        {
+            if (realmNFT != null)
+            {
+                AssetContract assetContract = new Gson().fromJson(realmNFT.getMetaData(), AssetContract.class);
+                token.setAssetContract(assetContract);
+            }
+        }
+        catch (JsonSyntaxException e)
+        {
+            //
+        }
     }
 
     public Token createCurrencyToken(NetworkInfo network, Wallet wallet)

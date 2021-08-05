@@ -194,6 +194,7 @@ public class OpenseaService {
             token = tf.createToken(tInfo, type, networkName);
             token.setTokenWallet(address);
             token.lastTxTime = lastCheckTime;
+            token.setAssetContract(assetContract);
             foundTokens.put(assetContract.getAddress(), token);
         }
         asset.updateAsset(tokenId, assetList.get(token.getAddress()));

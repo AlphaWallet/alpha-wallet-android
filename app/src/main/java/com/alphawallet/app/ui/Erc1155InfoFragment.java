@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.Erc1155InfoViewModel;
 import com.alphawallet.app.viewmodel.Erc1155InfoViewModelFactory;
+import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 
@@ -32,13 +35,6 @@ public class Erc1155InfoFragment extends BaseFragment {
     private Token token;
     private LinearLayout tokenInfoLayout;
 
-    private TokenInfoView issuer;
-    private TokenInfoView totalReserve;
-    private TokenInfoView created;
-    private TokenInfoView assets;
-    private TokenInfoView melts;
-    private TokenInfoView hodlers;
-    private TokenInfoView transfers;
     private TextView tokenDescription;
 
     @Nullable
@@ -59,29 +55,41 @@ public class Erc1155InfoFragment extends BaseFragment {
 
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
             tokenDescription = view.findViewById(R.id.token_description);
-
-            issuer = new TokenInfoView(getContext(), "Issuer");
-            totalReserve = new TokenInfoView(getContext(), "Total Reserve");
-            created = new TokenInfoView(getContext(), "Created");
-            assets = new TokenInfoView(getContext(), "Assets");
-            melts = new TokenInfoView(getContext(), "Melts");
-            hodlers = new TokenInfoView(getContext(), "Hodlers");
-            transfers = new TokenInfoView(getContext(), "Transfers");
+            AssetContract assetContract = token.getAssetContract();
 
             tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Details"));
-            tokenInfoLayout.addView(issuer);
-            tokenInfoLayout.addView(totalReserve);
-            tokenInfoLayout.addView(created);
-            tokenInfoLayout.addView(assets);
-            tokenInfoLayout.addView(melts);
-            tokenInfoLayout.addView(hodlers);
-            tokenInfoLayout.addView(transfers);
+            if (assetContract != null)
+            {
+                addInfoView("Issuer", assetContract.getName());
+                addInfoView("Created", assetContract.getCreationDate());
+                //addInfoView("Total Reserve", assetContract.getName());
+                //addInfoView("Assets", assetContract.getName());
+                //addInfoView("Melts", assetContract.getName());
+                //addInfoView("Hodlers", assetContract.getName());
+                //addInfoView("Transfers", assetContract.getName());
 
-            tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Description"));
-            tokenDescription.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam ut ante ut velit molestie rutrum. Praesent ut sapien vitae ex imperdiet efficitur id vel urna. Etiam ac gravida metus.");
+                if (!TextUtils.isEmpty(assetContract.getDescription()))
+                {
+                    tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Description"));
+                    tokenDescription.setText(assetContract.getDescription());
+                }
+            }
+
+            TokenIcon icon = view.findViewById(R.id.token_icon);
+            icon.bindData(token, null);
 
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(Erc1155InfoViewModel.class);
+        }
+    }
+
+    private void addInfoView(String elementName, String name)
+    {
+        if (!TextUtils.isEmpty(name))
+        {
+            TokenInfoView v = new TokenInfoView(getContext(), elementName);
+            v.setValue(name);
+            tokenInfoLayout.addView(v);
         }
     }
 }

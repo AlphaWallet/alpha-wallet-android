@@ -52,7 +52,7 @@ public class TokenActivityFragment extends BaseFragment {
 
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            token = getArguments().getParcelable(C.EXTRA_TOKEN);
             wallet = getArguments().getParcelable(C.Key.WALLET);
 
             history = view.findViewById(R.id.history_list);

@@ -86,7 +86,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             symbol = savedInstanceState.getString(C.EXTRA_ACTION_NAME);
             wallet = savedInstanceState.getParcelable(WALLET);
-            token = savedInstanceState.getParcelable(C.EXTRA_TOKEN_ID);
+            token = savedInstanceState.getParcelable(C.EXTRA_TOKEN);
         }
     }
 
@@ -164,7 +164,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         tokenMeta = new TokenCardMeta(token);
     }
 
@@ -174,7 +174,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         super.onSaveInstanceState(outState);
         outState.putString(C.EXTRA_SYMBOL, symbol);
         outState.putParcelable(WALLET, wallet);
-        outState.putParcelable(C.EXTRA_TOKEN_ID, token);
+        outState.putParcelable(C.EXTRA_TOKEN, token);
     }
 
     private void setTokenListener()

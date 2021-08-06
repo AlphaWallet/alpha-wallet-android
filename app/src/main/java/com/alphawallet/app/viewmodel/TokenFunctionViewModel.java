@@ -299,7 +299,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         Intent intent = new Intent(ctx, MyAddressActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -558,7 +558,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.putExtra(C.EXTRA_HAS_DEFINITION, hasDefinition);
         context.startActivity(intent);

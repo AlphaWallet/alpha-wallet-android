@@ -377,7 +377,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void getInfo()
     {
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         int fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
 

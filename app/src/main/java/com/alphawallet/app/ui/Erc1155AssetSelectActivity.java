@@ -67,7 +67,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
 
     private void getIntentData()
     {
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
     }
 

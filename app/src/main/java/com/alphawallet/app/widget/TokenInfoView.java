@@ -1,8 +1,13 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.text.Spanned;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 
@@ -25,8 +30,24 @@ public class TokenInfoView extends LinearLayout {
         label.setText(text);
     }
 
+    public void setValue(Spanned text)
+    {
+        value.setText(text);
+    }
+
     public void setValue(String text)
     {
         value.setText(text);
+    }
+
+    public void setLink()
+    {
+        value.setTextColor(ContextCompat.getColor(getContext(), R.color.azure));
+        value.setOnClickListener(v -> {
+            String url = value.getText().toString();
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(url));
+            getContext().startActivity(i);
+        });
     }
 }

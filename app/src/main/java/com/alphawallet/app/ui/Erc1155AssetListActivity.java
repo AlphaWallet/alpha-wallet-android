@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -21,6 +22,8 @@ import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.Erc1155AssetListViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetListViewModelFactory;
 
+import java.math.BigInteger;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
@@ -32,6 +35,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
     private Token token;
     private Wallet wallet;
+    private BigInteger tokenId;
 
     private RecyclerView recyclerView;
     private Erc1155AssetListAdapter adapter;
@@ -65,8 +69,10 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
     private void getIntentData()
     {
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+        tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
+
         // TODO: retrieve asset from intent
         // asset = getIntent().getParcelableExtra("asset");
     }
@@ -78,9 +84,9 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     }
 
     @Override
-    public void onAssetClicked(NFTAsset asset)
+    public void onAssetClicked(Pair<BigInteger, NFTAsset> pair)
     {
-        viewModel.showAssetDetails(this, wallet, token, asset);
+        viewModel.showAssetDetails(this, wallet, token, pair.first);
     }
 
     @Override

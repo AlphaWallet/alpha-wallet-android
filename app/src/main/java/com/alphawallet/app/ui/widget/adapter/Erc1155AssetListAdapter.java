@@ -60,7 +60,7 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
                     .load(item.getImage())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(holder.icon);
-            holder.layout.setOnClickListener(v -> listener.onAssetClicked(item));
+            holder.layout.setOnClickListener(v -> listener.onAssetClicked(pair));
         }
     }
 

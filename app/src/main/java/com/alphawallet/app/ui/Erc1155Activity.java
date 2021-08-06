@@ -27,6 +27,7 @@ import com.alphawallet.app.viewmodel.Erc1155ViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.google.android.material.tabs.TabLayout;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
     private void getIntentData()
     {
         wallet = getIntent().getParcelableExtra(WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
     }
 
     private void setupViewPager()
@@ -79,7 +80,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         TokenActivityFragment tokenActivityFragment = new TokenActivityFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(C.EXTRA_TOKEN_ID, token);
+        bundle.putParcelable(C.EXTRA_TOKEN, token);
         bundle.putParcelable(WALLET, wallet);
         infoFragment.setArguments(bundle);
         assetsFragment.setArguments(bundle);
@@ -93,6 +94,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         ScrollControlViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
         setupTabs(viewPager);
+        viewPager.setCurrentItem(1);
     }
 
     private void setupTabs(ScrollControlViewPager viewPager)

@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,8 @@ import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModelFactory;
+
+import java.math.BigInteger;
 
 import javax.inject.Inject;
 
@@ -51,7 +54,7 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            token = getArguments().getParcelable(C.EXTRA_TOKEN);
             wallet = getArguments().getParcelable(C.Key.WALLET);
 
             recyclerView = view.findViewById(R.id.recycler_view);
@@ -60,7 +63,6 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
 
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(Erc1155AssetsViewModel.class);
-            //viewModel.assets().observe(getViewLifecycleOwner(), this::onAssets);
 
             onAssets(token);
         }
@@ -72,8 +74,8 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
     }
 
     @Override
-    public void onAssetClicked(NFTAsset item)
+    public void onAssetClicked(Pair<BigInteger, NFTAsset> item)
     {
-        viewModel.showAssetDetails(getContext(), wallet, token, item);
+        viewModel.showAssetDetails(getContext(), wallet, token, item.first);
     }
 }

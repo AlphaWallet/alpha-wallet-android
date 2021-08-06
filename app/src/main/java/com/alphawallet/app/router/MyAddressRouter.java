@@ -20,7 +20,7 @@ public class MyAddressRouter {
     public void open(Context context, Wallet wallet, Token token) {
         Intent intent = new Intent(context, MyAddressActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
     }

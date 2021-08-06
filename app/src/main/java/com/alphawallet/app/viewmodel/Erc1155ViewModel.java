@@ -123,7 +123,7 @@ public class Erc1155ViewModel extends BaseViewModel {
     public void openSelectionMode(Context context, Token token, Wallet wallet)
     {
         Intent intent = new Intent(context, Erc1155AssetSelectActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.Key.WALLET, wallet);
         context.startActivity(intent);
     }

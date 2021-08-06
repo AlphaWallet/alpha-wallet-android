@@ -2,6 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:orientation="vertical">
 
@@ -18,13 +20,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/placeholder"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_margin="@dimen/dp16"
-                android:background="@drawable/ic_token_eth" />
+            <com.alphawallet.app.widget.NFTImageView
+                android:id="@+id/asset_image"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:gravity="center"/>
 
             <LinearLayout
                 android:id="@+id/layout_token_info"
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:padding="@dimen/dp16"
-                android:text="Test description"
+                tools:text="Test description"
                 android:textColor="@color/mine" />
         </LinearLayout>
     </ScrollView>

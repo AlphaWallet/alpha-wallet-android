@@ -12,6 +12,8 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.Erc1155AssetDetailActivity;
 import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 
+import java.math.BigInteger;
+
 public class Erc1155AssetListViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -33,19 +35,19 @@ public class Erc1155AssetListViewModel extends BaseViewModel {
 
     }
 
-    public void showAssetDetails(Context context, Wallet wallet, Token token, NFTAsset asset)
+    public void showAssetDetails(Context context, Wallet wallet, Token token, BigInteger tokenId)
     {
         Intent intent = new Intent(context, Erc1155AssetDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
-        intent.putExtra("asset", asset);
+        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
         context.startActivity(intent);
     }
 
     public void openSelectionMode(Context context, Token token, Wallet wallet)
     {
         Intent intent = new Intent(context, Erc1155AssetSelectActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.Key.WALLET, wallet);
         context.startActivity(intent);
     }

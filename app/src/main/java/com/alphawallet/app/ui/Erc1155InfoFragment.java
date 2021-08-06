@@ -51,7 +51,7 @@ public class Erc1155InfoFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            token = getArguments().getParcelable(C.EXTRA_TOKEN);
 
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
             tokenDescription = view.findViewById(R.id.token_description);
@@ -75,11 +75,11 @@ public class Erc1155InfoFragment extends BaseFragment {
                 }
             }
 
-            TokenIcon icon = view.findViewById(R.id.token_icon);
-            icon.bindData(token, null);
-
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(Erc1155InfoViewModel.class);
+
+            TokenIcon icon = view.findViewById(R.id.token_icon);
+            icon.bindData(token, viewModel.getAssetDefinitionService());
         }
     }
 

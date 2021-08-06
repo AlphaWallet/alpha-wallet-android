@@ -328,6 +328,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (actionId == R.string.convert_to_xdai)
         {
             openDapp(C.XDAI_BRIDGE_DAPP);
+        } else if (actionId == R.string.swap_with_quickswap) {
+            String queryPath = "?use=v2&inputCurrency=" + token.getAddress();
+            openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
         }
     }
 

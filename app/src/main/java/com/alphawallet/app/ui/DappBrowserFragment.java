@@ -1462,6 +1462,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
+            // reset initial url, to avoid issues with initial load
+            loadOnInit = null;
+
             cancelSearchSession();
             addToBackStack(DAPP_BROWSER);
             setUrlText(Utils.formatUrl(urlText));

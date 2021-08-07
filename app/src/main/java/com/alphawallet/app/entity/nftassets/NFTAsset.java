@@ -142,9 +142,12 @@ public class NFTAsset implements Parcelable
         }
     }
 
-    public void setBalance(BigDecimal value)
+    public boolean setBalance(BigDecimal value)
     {
+        boolean retval = false;
+        if (this.balance == null || !this.balance.equals(value)) { retval = true; }
         this.balance = value;
+        return retval;
     }
 
     public BigDecimal getBalance()
@@ -154,6 +157,7 @@ public class NFTAsset implements Parcelable
 
     protected NFTAsset(Parcel in)
     {
+        balance = new BigDecimal(in.readString());
         int assetCount = in.readInt();
         for (int i = 0; i < assetCount; i++)
         {
@@ -253,6 +257,7 @@ public class NFTAsset implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
+        dest.writeString(balance != null ? balance.toString() : "1");
         dest.writeInt(assetMap.size());
         for (String key : assetMap.keySet())
         {

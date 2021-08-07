@@ -1468,6 +1468,32 @@ public class TokenRepository implements TokenRepositoryType {
         return Web3j.build(publicNodeService);
     }
 
+    public static String callSmartContractFunction(int chainId,
+                                             Function function, String contractAddress, String walletAddr)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = getWeb3jService(chainId).ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+
+            if (!responseValues.isEmpty())
+            {
+                return responseValues.get(0).getValue().toString();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return null;
+    }
+
     private boolean ignoreToken(Token t)
     {
         //Screen discovery token out

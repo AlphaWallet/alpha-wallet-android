@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC1155TransferEvent;
@@ -23,6 +24,8 @@ import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Event;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -35,6 +38,7 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +46,7 @@ import java.util.Map;
 
 import io.realm.Realm;
 
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
@@ -132,6 +137,56 @@ public class ERC1155Token extends Token implements Parcelable
     public BigDecimal getBalanceRaw()
     {
         return new BigDecimal(assets.size());
+    }
+
+    //Must not be called on main thread
+    private void updateBalances(Realm realm)
+    {
+        boolean updated = false;
+        for (BigInteger tokenId : assets.keySet())
+        {
+            try
+            {
+                Function balanceOf = new Function(
+                        "balanceOf",
+                        Arrays.asList(
+                                new org.web3j.abi.datatypes.Address(getWallet()),
+                                new Uint256(tokenId)
+                        ), Collections.singletonList(new TypeReference<Uint256>()
+                {
+                }));
+
+                String response = callSmartContractFunction(tokenInfo.chainId, balanceOf, getAddress(), getWallet());
+                BigInteger balance = new BigInteger(response);
+                //TODO: Allow for decimal
+                if (assets.get(tokenId).setBalance(new BigDecimal(balance)) && !updated) { updated = true; }
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+        }
+
+        if (updated)
+        {
+            updatRealmBalances(realm);
+        }
+    }
+
+    private void updatRealmBalances(Realm realm)
+    {
+        realm.executeTransaction(r -> {
+            for (BigInteger tokenId : assets.keySet())
+            {
+                String key = RealmNFTAsset.databaseKey(this, tokenId);
+                RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                        .equalTo("tokenIdAddr", key)
+                        .findFirst();
+
+                if (realmAsset == null) { continue; } //only update established assets
+                realmAsset.setBalance(assets.get(tokenId).getBalance());
+            }
+        });
     }
 
     @Override
@@ -251,7 +306,11 @@ public class ERC1155Token extends Token implements Parcelable
     {
         try
         {
+            updateBalances(realm);
+            if (true) return;
+
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+
             List<ERC1155TransferEvent> txEvents = new ArrayList<>();
             DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(lastEventBlockRead);
             final Event event = getBalanceUpdateEvents();

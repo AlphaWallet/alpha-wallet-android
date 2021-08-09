@@ -72,9 +72,6 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
-
-        // TODO: retrieve asset from intent
-        // asset = getIntent().getParcelableExtra("asset");
     }
 
     private void initViewModel()

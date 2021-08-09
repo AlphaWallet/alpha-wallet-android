@@ -822,11 +822,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
-                    if (t.getTokenAddress().equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
-                    {
-                        System.out.println("YOLESS");
-                    }
-
                     if (t.getContractType() == ContractType.ETHEREUM && !(t.getTokenAddress().equalsIgnoreCase(wallet.address)
                             || t.getTokenAddress().equals("eth")))
                     {

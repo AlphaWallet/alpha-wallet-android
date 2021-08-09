@@ -3,6 +3,8 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -24,9 +26,9 @@ import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomViewTarget;
@@ -37,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
+import static com.alphawallet.app.util.Utils.ALPHAWALLET_REPO_NAME;
 
 public class TokenIcon extends ConstraintLayout
 {
@@ -47,12 +50,13 @@ public class TokenIcon extends ConstraintLayout
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
-    private CustomViewTarget<ImageView, Drawable> viewTarget;
+    private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
     private boolean showStatus = false;
-    private boolean largeIcon = false;
     private StatusType currentStatus;
     private AssetDefinitionService assetSvs;
+    private Request currentRq;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public TokenIcon(Context context, AttributeSet attrs)
     {
@@ -60,14 +64,7 @@ public class TokenIcon extends ConstraintLayout
 
         getAttrs(context, attrs);
 
-        if (largeIcon)
-        {
-            inflate(context, R.layout.item_token_icon_large, this);
-        }
-        else
-        {
-            inflate(context, R.layout.item_token_icon, this);
-        }
+        inflate(context, R.layout.item_token_icon, this);
 
         icon = findViewById(R.id.icon);
         textIcon = findViewById(R.id.text_icon);
@@ -77,6 +74,23 @@ public class TokenIcon extends ConstraintLayout
         currentStatus = StatusType.NONE;
 
         bindViews();
+
+        viewTarget = new CustomViewTarget<ImageView, Drawable>(icon)
+        {
+            @Override
+            protected void onResourceCleared(@Nullable Drawable placeholder) { }
+
+            @Override
+            public void onLoadFailed(@Nullable Drawable errorDrawable) { }
+
+            @Override
+            public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
+            {
+                textIcon.setVisibility(View.GONE);
+                icon.setVisibility(View.VISIBLE);
+                icon.setImageDrawable(bitmap);
+            }
+        };
     }
 
     private void getAttrs(Context context, AttributeSet attrs) {
@@ -89,7 +103,6 @@ public class TokenIcon extends ConstraintLayout
         try
         {
             showStatus = a.getBoolean(R.styleable.TokenIcon_showStatus, false);
-            largeIcon = a.getBoolean(R.styleable.TokenIcon_largeIcon, false);
         }
         finally
         {
@@ -112,30 +125,12 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, AssetDefinitionService assetDefinition)
     {
         if (token == null) return;
+        this.handler.removeCallbacks(null);
         this.token = token;
         this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
         this.assetSvs = assetDefinition;
 
         final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
-
-        viewTarget = new CustomViewTarget<ImageView, Drawable>(icon) {
-            @Override
-            protected void onResourceCleared(@Nullable Drawable placeholder) { }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable)
-            {
-                if (token != null) IconItem.iconLoadFail(token.getAddress());
-            }
-
-            @Override
-            public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
-            {
-                textIcon.setVisibility(View.GONE);
-                icon.setVisibility(View.VISIBLE);
-                icon.setImageDrawable(bitmap);
-            }
-        };
 
         displayTokenIcon(iconItem);
     }
@@ -147,11 +142,7 @@ public class TokenIcon extends ConstraintLayout
     {
         int chainIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
 
-        // This appears more complex than necessary;
-        // This is because we are dealing with: new token holder view, refreshing views and recycled views
-        // If the token is a basechain token, immediately show the chain icon - no need to load
-        // Otherwise, try to load the icon resource. If there's no icon resource then generate a text token Icon (round circle with first four chars from the name)
-        // Only reveal the icon immediately before populating it - this stops the update flicker.
+        if (currentRq != null && currentRq.isRunning()) currentRq.clear(); //clear current load request if this is replacing an old asset that didn't finish loading
         if (token.isEthereum() || EthereumNetworkRepository.getChainOverrideAddress(token.tokenInfo.chainId).equalsIgnoreCase(token.getAddress()))
         {
             textIcon.setVisibility(View.GONE);
@@ -160,32 +151,29 @@ public class TokenIcon extends ConstraintLayout
         }
         else
         {
-            setupTextIcon(token);
-            if (iconItem.useTextSymbol()) return;
-            RequestBuilder<Drawable> rb = null;
+            if (iconItem.useTextSymbol())
+            {
+                setupTextIcon(token);
+                return;
+            }
             RequestOptions circleCrop;
 
             //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
-            if (!iconItem.getUrl().contains(Utils.ALPHAWALLET_REPO_NAME))
+            if (!iconItem.getUrl().startsWith(ALPHAWALLET_REPO_NAME))
             {
                 circleCrop = new RequestOptions().circleCrop();
-                rb = Glide.with(getContext().getApplicationContext())
-                        .load(Utils.getAWIconRepo(token.getAddress()))
-                        .addListener(requestListenerAW);
             }
             else
             {
                 circleCrop = new RequestOptions().sizeMultiplier(1.0f); // Placeholder NOP to avoid null
             }
 
-            Glide.with(getContext().getApplicationContext())
+            currentRq = Glide.with(getContext())
                     .load(iconItem.getUrl())
-                    .signature(iconItem.getSignature())
-                    .error(rb)
                     .apply(circleCrop) //only crop if not from AW iconassets repo
-                    .apply(new RequestOptions().placeholder(chainIcon))
+                    .placeholder(R.drawable.ic_token_eth)
                     .listener(requestListener)
-                    .into(viewTarget);
+                    .into(viewTarget).getRequest();
         }
     }
 
@@ -239,6 +227,22 @@ public class TokenIcon extends ConstraintLayout
     }
 
     /**
+     * Attempt to load the icon from the AW icon repo
+     * @param model
+     */
+    private void loadFromAWRepo(Object model)
+    {
+        String addr = Utils.getTokenAddrFromUrl(model.toString());
+
+        if (!TextUtils.isEmpty(addr)) handler.post(() ->
+                currentRq = Glide.with(getContext())
+                .load(Utils.getAWIconRepo(addr))
+                .placeholder(R.drawable.ic_token_eth)
+                .listener(requestListenerAW)
+                .into(viewTarget).getRequest());
+    }
+
+    /**
      * This method is used to change visibility of "Status" Icon i.e. Send Or Receive.
      * @param isVisible Boolean parameter to either make Transaction icon visible or hidden
      */
@@ -287,16 +291,24 @@ public class TokenIcon extends ConstraintLayout
     private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            setupTextIcon(token);
-            if (token != null) IconItem.iconLoadFail(token.getAddress());
-            return true;
+            //attempt to load from AW repo
+            if (model != null && !model.toString().startsWith(ALPHAWALLET_REPO_NAME))
+            {
+                loadFromAWRepo(model);
+            }
+            else
+            {
+                if (token != null)
+                {
+                    IconItem.iconLoadFail(token.getAddress());
+                    setupTextIcon(token);
+                }
+            }
+            return false;
         }
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            textIcon.setVisibility(View.GONE);
-            icon.setVisibility(View.VISIBLE);
-            icon.setImageDrawable(resource);
             return false;
         }
     };
@@ -305,14 +317,13 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             setupTextIcon(token);
-            if (token != null) IconItem.iconLoadFail(token.getAddress());
+            if (token != null) IconItem.iconLoadFail(token.getAddress()); //don't try to load this asset again for this session
             return false;
         }
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            //got icon from AW iconasset repo, now load from this repo, so invalidate the cache
-            if (assetSvs != null) { assetSvs.storeImageUrl(token.tokenInfo.chainId, token.getAddress()); }
+            if (assetSvs != null) { assetSvs.storeImageUrl(token.tokenInfo.chainId, model.toString()); } //make a note that AW repo has this asset
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);

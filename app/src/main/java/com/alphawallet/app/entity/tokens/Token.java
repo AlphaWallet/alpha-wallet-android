@@ -203,7 +203,7 @@ public class Token implements Parcelable
     }
 
     //Used for custom balance updates
-    public void updateBalance(Realm realm) { }
+    public BigDecimal updateBalance(Realm realm) { return BigDecimal.ZERO; }
 
     public boolean isTerminated() { return (updateBlancaTime == -1); }
 

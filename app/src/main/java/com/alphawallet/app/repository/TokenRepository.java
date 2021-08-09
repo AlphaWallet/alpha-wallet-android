@@ -140,10 +140,6 @@ public class TokenRepository implements TokenRepositoryType {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
-                if (t.tokenInfo.address.equalsIgnoreCase("0x89D142Bef8605646881C68dcD48cDAF17FE597dC"))
-                {
-                    System.out.println("YOLESS");
-                }
                 if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20 || !t.checkBalanceType()) //balance type appears to be wrong
                 {
                     ContractType type = determineCommonType(t.tokenInfo).blockingGet();
@@ -444,7 +440,7 @@ public class TokenRepository implements TokenRepositoryType {
                             balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
                             break;
                         case ERC1155:
-                            token.updateBalance(getRealmInstance(wallet));
+                            balance = token.updateBalance(getRealmInstance(wallet));
                             break;
                         case ERC721_TICKET:
                             balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());

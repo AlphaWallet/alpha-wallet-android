@@ -14,8 +14,8 @@
 
         <com.alphawallet.app.widget.TokenIcon
             android:id="@+id/token_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/token_icon"
+            android:layout_height="@dimen/token_icon"
             android:layout_margin="@dimen/dp16"
             custom:largeIcon="false"
             android:layout_gravity="center_horizontal"

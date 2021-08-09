@@ -63,11 +63,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private boolean primaryElement;
     private final Realm realm;
+    private final int id;
 
     private final Handler handler = new Handler();
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
+
+    private static int counter = 1;
 
     public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
@@ -91,6 +94,9 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         assetDefinition = assetService;
         tokensService = tSvs;
         realm = r;
+
+        id = counter;
+        counter++;
     }
 
     @Override
@@ -111,11 +117,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 if (backupChain != null) token = backupChain;
             }
 
-            if (token.getAddress().equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
-            {
-                System.out.println("YOLESS");
-            }
-
             if (realmUpdate != null)
             {
                 realmUpdate.removeAllChangeListeners();
@@ -132,8 +133,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             primaryElement = false;
 
+            System.out.println("YOLESS: Binding " + id + " : " + token.getFullName());
             tokenIcon.bindData(token, assetDefinition);
             tokenIcon.setOnTokenClickListener(onTokenClickListener);
+
 
             populateTicker();
 

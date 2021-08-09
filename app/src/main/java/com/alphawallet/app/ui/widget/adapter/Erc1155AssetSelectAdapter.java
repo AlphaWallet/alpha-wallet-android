@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,9 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155AssetSelectAdapter.ViewHolder> {
-    private List<Pair<BigInteger, NFTAsset>> actualData;
-    private Context context;
-    private OnAssetSelectListener listener;
+    private final List<Pair<BigInteger, NFTAsset>> actualData;
+    private final Context context;
+    private final OnAssetSelectListener listener;
 
     public Erc1155AssetSelectAdapter(Context context, Map<BigInteger, NFTAsset> data, OnAssetSelectListener listener)
     {
@@ -49,7 +50,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
         Pair<BigInteger, NFTAsset> pair = actualData.get(position);
         NFTAsset item = pair.second;
@@ -62,7 +63,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(holder.icon);
             holder.checkBox.setChecked(item.isSelected());
-            holder.infoLayout.setOnClickListener(v -> {
+            holder.holderLayout.setOnClickListener(v -> {
                 boolean b = !item.isSelected();
                 setSelected(position, b);
                 holder.checkBox.setChecked(b);
@@ -95,19 +96,19 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         return selectedAssets;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        LinearLayout menuLayout;
-        LinearLayout infoLayout;
-        ImageView icon;
-        TextView title;
-        TextView subtitle;
-        CheckBox checkBox;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final LinearLayout menuLayout;
+        final RelativeLayout holderLayout;
+        final ImageView icon;
+        final TextView title;
+        final TextView subtitle;
+        final CheckBox checkBox;
 
         ViewHolder(View view)
         {
             super(view);
             menuLayout = view.findViewById(R.id.layout_menu);
-            infoLayout = view.findViewById(R.id.layout_info);
+            holderLayout = view.findViewById(R.id.holding_view);
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
             subtitle = view.findViewById(R.id.subtitle);

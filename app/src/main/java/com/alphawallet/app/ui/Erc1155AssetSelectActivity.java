@@ -37,7 +37,6 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     Erc1155AssetSelectViewModelFactory viewModelFactory;
     Erc1155AssetSelectViewModel viewModel;
     List<NFTAsset> selectedAssets = new ArrayList<>();
-    private Menu menu;
     private Token token;
     private Wallet wallet;
     private RecyclerView recyclerView;

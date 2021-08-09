@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -12,15 +13,19 @@
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="@dimen/dp16">
+        android:paddingTop="@dimen/dp16"
+        android:paddingBottom="@dimen/dp16"
+        android:paddingLeft="@dimen/dp8"
+        android:paddingRight="@dimen/dp8">
 
-        <ImageView
-            android:id="@+id/btn_menu"
+        <CheckBox
+            android:id="@+id/checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/dp8"
-            android:background="@color/transparent"
-            android:src="@drawable/ic_menu" />
+            android:button="@drawable/selector_round_checkbox"
+            android:clickable="false" />
 
         <ImageView
             android:id="@+id/icon"
@@ -30,11 +35,11 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/layout_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/layout_menu"
+        android:layout_toStartOf="@id/btn_menu"
         android:orientation="vertical"
         android:paddingTop="@dimen/dp16"
         android:paddingBottom="@dimen/dp16">
@@ -63,14 +68,14 @@
 
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/checkbox"
+    <ImageView
+        android:id="@+id/btn_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/dp8"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/dp16"
-        android:button="@drawable/selector_round_checkbox"
-        android:clickable="false" />
+        android:layout_alignParentEnd="true"
+        android:background="@color/transparent"
+        android:src="@drawable/ic_menu" />
 
 </RelativeLayout>

@@ -131,6 +131,7 @@ public class ERC1155Token extends Token implements Parcelable
     public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset)
     {
         assets.put(tokenId, asset);
+        balance = new BigDecimal(assets.keySet().size());
     }
 
     @Override
@@ -302,12 +303,12 @@ public class ERC1155Token extends Token implements Parcelable
     }
 
     @Override
-    public void updateBalance(Realm realm)
+    public BigDecimal updateBalance(Realm realm)
     {
         try
         {
             updateBalances(realm);
-            if (true) return;
+            if (true) return new BigDecimal(assets.keySet().size());
 
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
@@ -413,5 +414,7 @@ public class ERC1155Token extends Token implements Parcelable
         {
             e.printStackTrace();
         }
+
+        return new BigDecimal(assets.keySet().size());
     }
 }

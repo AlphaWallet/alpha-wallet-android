@@ -24,6 +24,7 @@ import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModelFactory;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.inject.Inject;
@@ -76,6 +77,13 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
     @Override
     public void onAssetClicked(Pair<BigInteger, NFTAsset> item)
     {
-        viewModel.showAssetDetails(getContext(), wallet, token, item.first);
+        if (item.second.getBalance() != null && item.second.getBalance().compareTo(BigDecimal.ONE) > 0)
+        {
+            viewModel.showAssetListDetails(getContext(), wallet, token, item.first);
+        }
+        else
+        {
+            viewModel.showAssetDetails(getContext(), wallet, token, item.first);
+        }
     }
 }

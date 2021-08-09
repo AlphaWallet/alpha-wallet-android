@@ -1,11 +1,11 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.ViewGroup;
+import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -31,8 +31,6 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +51,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected final TokensService tokensService;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
-    private Context context;
     private String walletAddress;
     private boolean debugView = false;
 
@@ -99,11 +96,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService, Context context) {
+    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = tService;
-        this.context = context;
         this.realm = tokensService.getTickerRealmInstance();
     }
 
@@ -238,10 +234,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      */
     public void updateToken(TokenCardMeta token, boolean notify)
     {
-        if (token.type == ContractType.ERC1155)
-        {
-            System.out.println("YOLESS");
-        }
         if (canDisplayToken(token))
         {
             //does this token already exist with a different weight (ie name has changed)?
@@ -353,10 +345,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
                 break;
             case FILTER_COLLECTIBLES:
-                if (!(token.isNFT()))
-                {
-                    allowThroughFilter = false;
-                }
+                allowThroughFilter = allowThroughFilter && token.isNFT();
                 break;
             default:
                 break;

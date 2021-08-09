@@ -2524,10 +2524,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
-    public void storeImageUrl(int chainId, String tokenAddress)
+    public void storeImageUrl(int chainId, String imageUrl)
     {
-        String imageUrl = Utils.getAWIconRepo(tokenAddress);
-        tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
+        String tokenAddress = Utils.getTokenAddrFromAWUrl(imageUrl);
+        if (!TextUtils.isEmpty(tokenAddress))
+        {
+            tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
+        }
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)
@@ -2574,5 +2577,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public Realm getEventRealm()
     {
         return realmManager.getRealmInstance(tokensService.getCurrentAddress());
+    }
+
+    // For testing only
+    private void deleteAWRealm()
+    {
+        try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmResults<RealmAuxData> instance = r.where(RealmAuxData.class)
+                        .findAll();
+
+                if (instance != null)
+                {
+                    instance.deleteAllFromRealm();
+                }
+            });
+        }
     }
 }

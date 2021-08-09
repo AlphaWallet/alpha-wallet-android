@@ -22,6 +22,7 @@ import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
@@ -74,9 +75,11 @@ public class Utils {
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
-    public  static final String ALPHAWALLET_REPO_NAME = "alphawallet/iconassets";
-    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/" + ALPHAWALLET_REPO_NAME + "/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final String TOKEN_LOGO = "/logo.png";
+    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/master/";
+    private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
+    private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
+    private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -775,6 +778,39 @@ public class Utils {
         }
     }
 
+    @NotNull
+    public static String getTokenAddrFromUrl(String url)
+    {
+        if (!TextUtils.isEmpty(url) && url.startsWith(TRUST_ICON_REPO_BASE))
+        {
+            int start = url.lastIndexOf("/assets/") + "/assets/".length();
+            int end = url.lastIndexOf(TOKEN_LOGO);
+            if (start > 0 && end > 0)
+            {
+                return url.substring(start, end);
+            }
+        }
+
+        return "";
+    }
+
+    @NotNull
+    public static String getTokenAddrFromAWUrl(String url)
+    {
+        if (!TextUtils.isEmpty(url) && url.startsWith(ALPHAWALLET_REPO_NAME))
+        {
+            int start = ALPHAWALLET_REPO_NAME.length();
+            int end = url.lastIndexOf(TOKEN_LOGO);
+            if (end > 0 && end > start)
+            {
+                return url.substring(start, end);
+            }
+        }
+
+        return "";
+    }
+
+    @NotNull
     public static String getTokenImageUrl(int chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;

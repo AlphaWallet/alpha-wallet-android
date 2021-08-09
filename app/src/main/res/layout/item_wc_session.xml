@@ -15,7 +15,12 @@
     android:clickable="true"
     android:focusable="true">
 
-    <include layout="@layout/item_token_icon" />
+    <LinearLayout
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
+        android:orientation="horizontal">
+        <include layout="@layout/item_token_icon" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

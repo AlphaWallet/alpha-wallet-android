@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -46,6 +48,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
     private Wallet wallet;
     private Token token;
     private FunctionButtonBar functionBar;
+    private int menuItem;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -57,7 +60,6 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         getIntentData();
         initViewModel();
         setTitle(token.tokenInfo.name);
-        setupFunctionBar();
         setupViewPager();
     }
 
@@ -94,7 +96,6 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         ScrollControlViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
         setupTabs(viewPager);
-        viewPager.setCurrentItem(1);
     }
 
     private void setupTabs(ScrollControlViewPager viewPager)
@@ -105,6 +106,9 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
 
         TabUtils.decorateTabLayout(this, tabLayout);
 
+        viewPager.setCurrentItem(1, true);
+        menuItem = R.menu.menu_select;
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab)
@@ -112,16 +116,19 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
                 switch (tab.getPosition())
                 {
                     case 0:
-                        functionBar.setVisibility(View.VISIBLE);
-                        menu.clear();
+                        showFunctionBar(true);
+                        menuItem = 0;
+                        invalidateOptionsMenu();
                         break;
                     case 1:
-                        functionBar.setVisibility(View.GONE);
-                        getMenuInflater().inflate(R.menu.menu_select, menu);
+                        showFunctionBar(false);
+                        menuItem = R.menu.menu_select;
+                        invalidateOptionsMenu();
                         break;
                     default:
-                        functionBar.setVisibility(View.GONE);
-                        menu.clear();
+                        showFunctionBar(false);
+                        menuItem = 0;
+                        invalidateOptionsMenu();
                         break;
                 }
             }
@@ -140,9 +147,25 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         });
     }
 
+    private void showFunctionBar(boolean show)
+    {
+        if (functionBar == null && !show) return;
+        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
+        {
+            if (functionBar == null) setupFunctionBar();
+            functionBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         this.menu = menu;
+        if (menuItem != 0)
+        {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(menuItem, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -164,6 +187,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
+            functionBar.setVisibility(View.GONE);
         }
     }
 }

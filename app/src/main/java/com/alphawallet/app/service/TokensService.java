@@ -26,6 +26,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
@@ -180,11 +181,6 @@ public class TokensService
 
     public Token getToken(int chainId, String addr)
     {
-        if (addr.equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
-        {
-            System.out.println("YOLESS");
-        }
-
         if (TextUtils.isEmpty(currentAddress) || TextUtils.isEmpty(addr)) return null;
         else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
     }
@@ -554,7 +550,10 @@ public class TokensService
     {
         boolean balanceChange = !newBalance.equals(t.balance);
         // could still be pending transactions so let's keep checking for a short while
-        if (balanceChange && BuildConfig.DEBUG) Log.d(TAG, "Change Registered: * " + t.getFullName());
+        if (balanceChange && BuildConfig.DEBUG)
+        {
+            Log.d(TAG, "Change Registered: * " + t.getFullName());
+        }
 
         //Switch this token chain on
         if (t.isEthereum() && newBalance.compareTo(BigDecimal.ZERO) > 0)

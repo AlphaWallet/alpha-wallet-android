@@ -21,6 +21,7 @@ import com.bumptech.glide.request.RequestOptions;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +57,9 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
         NFTAsset item = pair.second;
         if (item != null)
         {
+            int textId = item.getBalance().equals(BigDecimal.ONE) ? R.string.asset_description_text : R.string.asset_description_text_plural;
             holder.title.setText(item.getName());
-            holder.subtitle.setText(item.getDescription());
+            holder.subtitle.setText(context.getString(textId, item.getBalance().toString(), item.getDescription()));
             Glide.with(context)
                     .load(item.getImage())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))

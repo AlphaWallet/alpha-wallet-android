@@ -42,6 +42,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
@@ -83,6 +84,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static native String getAmberDataKey();
     public static native String getInfuraKey();
     public static native String getSecondaryInfuraKey();
+    public static native String getBSCExplorerKey();
 
     //Fallback nodes: these nodes are used if there's no Amberdata key, and also as a fallback in case the primary node times out while attempting a call
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
@@ -121,13 +123,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
+    public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
 
     //This optional list creates a defined order in which tokens are displayed
     static final int[] orderList = {
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, KOVAN_ID, ROPSTEN_ID, SOKOL_ID,
             RINKEBY_ID, GOERLI_ID, ARTIS_TAU1_ID, BINANCE_TEST_ID, BINANCE_MAIN_ID, HECO_ID, HECO_TEST_ID,
             AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID, OPTIMISTIC_MAIN_ID,
-            OPTIMISTIC_TEST_ID
+            OPTIMISTIC_TEST_ID, CRONOS_TEST_ID
     };
 
     static final Map<Integer, NetworkInfo> networkMap = new HashMap<Integer, NetworkInfo>() {
@@ -223,6 +226,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     OPTIMISTIC_TEST_URL,
                     "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
                     "https://api-kovan-optimistic.etherscan.io/api?"));
+            put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
+                    CRONOS_TEST_URL,
+                    "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
+                    "https://cronos-explorer.crypto.org/api?"));
+        }
+    };
+    
+    static final Map<Integer, String> addressOverride = new HashMap<Integer, String>() {
+        {
+            put(OPTIMISTIC_MAIN_ID, "0x4200000000000000000000000000000000000006");
+            put(OPTIMISTIC_TEST_ID, "0x4200000000000000000000000000000000000006");
         }
     };
 
@@ -299,6 +313,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 result.add(info);
             }
         }
+    }
+
+    public static String getChainOverrideAddress(int id) {
+        return addressOverride.containsKey(id) ? addressOverride.get(id) : "";
     }
 
     @Override
@@ -522,9 +540,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case MATIC_TEST_ID:
                 return R.drawable.ic_icons_matic;
             case OPTIMISTIC_MAIN_ID:
-                return R.drawable.ic_optimistic_eth;
+                return R.drawable.ic_optimism_logo;
             case OPTIMISTIC_TEST_ID:
-                return R.drawable.optimistic_test_logo;
+                return R.drawable.ic_optimism_testnet_logo;
+            case CRONOS_TEST_ID:
+                return R.drawable.ic_cronos;
             default:
                 return R.drawable.ic_ethereum_logo;
         }
@@ -618,6 +638,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return new ContractLocator("", MAINNET_ID, ContractType.ETHEREUM);
     }
 
+    @Override
+    public boolean isChainContract(int chainId, String address)
+    {
+        return (addressOverride.containsKey(chainId) && address.equalsIgnoreCase(addressOverride.get(chainId)));
+    }
+
     public static boolean isPriorityToken(Token token)
     {
         return false;
@@ -628,8 +654,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         if (token.isEthereum()) return token.tokenInfo.chainId + 1;
         else return 0;
     }
-
-    public static boolean showNetworkFilters() { return true; }
 
     public static int decimalOverride(String address, int chainId)
     {

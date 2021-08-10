@@ -26,6 +26,7 @@ import com.alphawallet.token.entity.ContractAddress;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,7 +225,7 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 NetworkInfo[] allMainNetworks = ethereumNetworkRepository.getAllActiveNetworks();
                 for (NetworkInfo info : allMainNetworks)
                 {
@@ -239,8 +240,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     }
                 }
             });
-
-            realm.refresh();
         }
     }
 
@@ -454,7 +453,7 @@ public class TokensRealmSource implements TokenLocalSource {
         String key = databaseKey(chainId, tokenAddress.toLowerCase());
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", key)
                         .equalTo("chainId", chainId)
@@ -637,21 +636,28 @@ public class TokensRealmSource implements TokenLocalSource {
                 {
                     if (!token.isERC721()) continue;
 
-                    String dbKey = databaseKey(token);
-
                     //load all the old assets
                     Map<BigInteger, Asset> assetMap = getERC721Assets(r, token);
 
-                    deleteAllAssets(r, dbKey);
+                    List<BigInteger> changeList = token.getChangeList(assetMap);
 
                     setTokenUpdateTime(r, token, token.getTokenAssets().size());
 
-                    //now create the assets inside this
-                    for (Asset asset : token.getTokenAssets().values())
+                    for (BigInteger tokenId : changeList)
                     {
-                        //check against existing assets; did the existing asset have better details?
-                        asset.updateAsset(assetMap);
-                        writeAsset(r, asset, token);
+                        Asset asset = token.getTokenAssets().get(tokenId);
+
+                        if (asset == null)
+                        {
+                            //token deleted
+                            deleteAssets(r, token, Collections.singletonList(tokenId));
+                        }
+                        else
+                        {
+                            //token updated or new
+                            if (assetMap.get(tokenId) != null) { asset.updateAsset(assetMap); }
+                            writeAsset(r, asset, token);
+                        }
                     }
                 }
             });
@@ -753,7 +759,8 @@ public class TokensRealmSource implements TokenLocalSource {
             for (RealmToken t : realmItems)
             {
                 if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) ||
-                        (t.getContractType() != ContractType.ETHEREUM && !t.getEnabled())) continue;
+                        (t.getContractType() != ContractType.ETHEREUM && !t.getEnabled()) ||
+                        (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress()))) continue;
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(),
                         convertStringBalance(t.getBalance(), t.getContractType()), t.getUpdateTime(),
@@ -795,6 +802,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 for (RealmToken t : realmItems)
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
+                    if (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
                     if (t.getContractType() == ContractType.ETHEREUM && !(t.getTokenAddress().equalsIgnoreCase(wallet.address)
@@ -1002,7 +1010,7 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 for (String tokenAddress : erc20Tickers.keySet())
                 {
                     writeTickerToRealm(r, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);

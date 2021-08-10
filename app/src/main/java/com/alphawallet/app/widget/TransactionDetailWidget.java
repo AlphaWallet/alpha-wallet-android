@@ -5,6 +5,7 @@ package com.alphawallet.app.widget;
  */
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -42,9 +43,16 @@ public class TransactionDetailWidget extends LinearLayout
     {
         layoutHolder.setVisibility(View.VISIBLE);
         textFullDetails.setText(w3tx.getFormattedTransaction(getContext(), chainId, symbol));
-        TransactionInput transactionInput = Transaction.decoder.decodeInput(w3tx, chainId, walletAddress);
 
-        textTransactionSummary.setText(transactionInput.getOperationTitle(getContext()));
+        if (!TextUtils.isEmpty(w3tx.description))
+        {
+            textTransactionSummary.setText(w3tx.description);
+        }
+        else
+        {
+            TransactionInput transactionInput = Transaction.decoder.decodeInput(w3tx, chainId, walletAddress);
+            textTransactionSummary.setText(transactionInput.getOperationTitle(getContext()));
+        }
 
         layoutHolder.setOnClickListener(v -> {
             if (layoutDetails.getVisibility() == View.GONE)

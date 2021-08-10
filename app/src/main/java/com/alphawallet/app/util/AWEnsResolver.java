@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
-import com.alphawallet.app.entity.Wallet;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -157,15 +156,7 @@ public class AWEnsResolver extends EnsResolver
         if (split.length > 1)
         {
             String extension = split[split.length - 1];
-            switch (extension)
-            {
-                case "eth":
-                case "xyz":
-                case "crypto":
-                    return true;
-                default:
-                    break;
-            }
+            return extension.length() > 0 && Utils.isAlNum(extension);
         }
 
         return false;

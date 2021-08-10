@@ -3,15 +3,16 @@ package com.alphawallet.app.viewmodel;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
@@ -26,25 +27,33 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.ui.WalletConnectSessionActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
+import com.alphawallet.app.walletconnect.WCClient;
+import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.GsonBuilder;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -54,6 +63,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
@@ -68,7 +78,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
-    private final GasService2 gasService;
+    private final GasService gasService;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -80,7 +90,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService2 gasService) {
+            GasService gasService) {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -295,11 +305,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
         balanceTimerDisposable = null;
     }
 
-    public void handleWalletConnect(Context context, String url)
+    public void handleWalletConnect(Context context, String url, NetworkInfo activeNetwork)
     {
         String importPassData = WalletConnectActivity.WC_LOCAL_PREFIX + url;
         Intent intent = new Intent(context, WalletConnectActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         intent.putExtra("qrCode", importPassData);
         context.startActivity(intent);
     }
@@ -317,5 +328,16 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public String getNetworkNodeRPC(int chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
+    }
+
+    public NetworkInfo getNetworkInfo(int chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
+
+    public String getSessionId(String url)
+    {
+        String uriString = url.replace("wc:", "wc://");
+        return Uri.parse(uriString).getUserInfo();
     }
 }

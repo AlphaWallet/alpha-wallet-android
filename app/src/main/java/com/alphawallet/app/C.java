@@ -42,6 +42,7 @@ public abstract class C {
     public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
     public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
+    public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -65,6 +66,7 @@ public abstract class C {
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
     public static final String MATIC_SYMBOL = "MATIC";
+    public static final String CRONOS_SYMBOL = "tCRO";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -115,6 +117,7 @@ public abstract class C {
     public static final String EXTRA_LOCALE = "LOCALE_STRING";
     public static final String EXTRA_PAGE_TITLE = "PTITLE";
     public static final String EXTRA_CURRENCY = "CURRENCY_STRING";
+    public static final String EXTRA_MIN_GAS_PRICE = "_MINGASPRICE";
     public static final String EXTRA_QR_CODE = "QR_SCAN_CODE";
     public static final String EXTRA_UNIVERSAL_SCAN = "UNIVERSAL_SCAN";
     public static final String EXTRA_NONCE = "_NONCE";
@@ -176,6 +179,7 @@ public abstract class C {
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
+
 
     public interface ErrorCode {
         int UNKNOWN = 1;

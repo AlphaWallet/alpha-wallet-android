@@ -106,6 +106,26 @@
 
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/layout_resend_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/sp17"
+        android:visibility="gone">
+        <TextView
+            android:background="@drawable/background_round_azure_16dp_filled"
+            android:id="@+id/text_resend_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_regular"
+            android:lineHeight="29sp"
+            android:padding="26dp"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp17"
+            android:text="@string/text_resend_gas_note" />
+    </FrameLayout>
+
     <EditText
         android:id="@+id/nonce_entry"
         android:layout_width="match_parent"

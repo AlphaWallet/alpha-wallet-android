@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -73,6 +74,11 @@ public class Web3ViewClient extends WebViewClient {
         boolean isMainFrame = request.isForMainFrame();
         boolean isRedirect = SDK_INT >= N && request.isRedirect();
         return shouldOverrideUrlLoading(view, url, isMainFrame, isRedirect);
+    }
+
+    public boolean didInjection()
+    {
+        return isInjected;
     }
 
     private boolean shouldOverrideUrlLoading(WebView webView, String url, boolean isMainFrame, boolean isRedirect) {
@@ -160,18 +166,25 @@ public class Web3ViewClient extends WebViewClient {
     }
 
     private void injectScriptFile(WebView view) {
+        Log.d("W3VIEW", "Inject: ");
+        view.post(() -> injectScriptFileFinal(view));
+    }
+
+    public void injectScriptFileFinal(WebView view) {
+        Log.d("W3VIEW", "Inject2: ");
+        isInjected = true;
         String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
         byte[] buffer = js.getBytes();
         String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
 
-        view.post(() -> view.loadUrl("javascript:(function() {" +
+        view.loadUrl("javascript:(function() {" +
                 "var parent = document.getElementsByTagName('head').item(0);" +
                 "var script = document.createElement('script');" +
                 "script.type = 'text/javascript';" +
                 // Tell the browser to BASE64-decode the string into your script !!!
                 "script.innerHTML = window.atob('" + encoded + "');" +
                 "parent.appendChild(script)" +
-                "})()"));
+                "})()");
     }
 
     @Override
@@ -285,5 +298,10 @@ public class Web3ViewClient extends WebViewClient {
         {
             return false;
         }
+    }
+
+    public void resetInject()
+    {
+        isInjected = false;
     }
 }

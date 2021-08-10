@@ -9,7 +9,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
@@ -24,7 +24,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final TokensService tokensService;
     private final AnalyticsServiceType analyticsService;
 
@@ -34,7 +34,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
                                                 CreateTransactionInteract createTransactionInteract,
                                                 FetchTransactionsInteract fetchTransactionsInteract,
                                                 AssetDefinitionService assetDefinitionService,
-                                                GasService2 gasService,
+                                                GasService gasService,
                                                 AnalyticsServiceType analyticsService,
                                                 TokensService tokensService) {
         this.genericWalletInteract = genericWalletInteract;

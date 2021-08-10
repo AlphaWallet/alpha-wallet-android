@@ -1,42 +1,39 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
-import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
-import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.ActivityHistoryList;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
@@ -53,13 +50,10 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 /**
  * Created by James on 22/01/2018.
@@ -84,7 +78,8 @@ import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
  * Note that we need to pre-calculate both the view-iconified and views. If these are the same then an optimisation skips the normal view.
  *
  */
-public class AssetDisplayActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback, Runnable
+public class AssetDisplayActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback,
+                                                                    Runnable, ActionSheetCallback
 {
     private static final int TOKEN_SIZING_DELAY = 3000; //3 seconds until timeout waiting for tokenview size calculation
 
@@ -102,12 +97,12 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private NonFungibleTokenAdapter adapter;
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
+    private ActionSheetDialog confirmationDialog;
     private final Handler handler = new Handler();
     private int checkVal;
     private int itemViewHeight;
 
     private RecyclerView tokenView;
-    private ActivityHistoryList activityHistoryList = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -143,6 +138,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.newScriptFound().observe(this, this::onNewScript);
+        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
 
         functionBar = findViewById(R.id.layoutButtons);
 
@@ -164,7 +161,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         }
 
         viewModel.checkForNewScript(token); //check for updated script
-        setUpRecentTransactionsView();
         viewModel.updateTokensCheck(token);
     }
 
@@ -249,6 +245,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         unregisterReceiver(finishReceiver);
         viewModel.clearFocusToken();
         if (adapter != null) adapter.onDestroy(tokenView);
+        viewModel.onDestroy();
     }
 
     /**
@@ -340,13 +337,61 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         //handle TS function
         if (action != null && action.view == null && action.function != null)
         {
-            //go straight to function call
-            viewModel.handleFunction(action, selection.get(0), token, this);
+            //open action sheet after we determine the gas limit
+            Web3Transaction web3Tx = viewModel.handleFunction(action, selection.get(0), token, this);
+            if (web3Tx.gasLimit.equals(BigInteger.ZERO))
+            {
+                calculateEstimateDialog();
+                //get gas estimate
+                viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
+            }
+            else
+            {
+                //go straight to confirmation
+                checkConfirm(web3Tx);
+            }
         }
         else
         {
             viewModel.showFunction(this, token, function, selection);
         }
+    }
+
+    private void checkConfirm(Web3Transaction w3tx)
+    {
+        if (w3tx.gasLimit.equals(BigInteger.ZERO))
+        {
+            estimateError(w3tx);
+        }
+        else
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
+                    w3tx.recipient.toString(), viewModel.getTokenService(), this);
+            confirmationDialog.setURL("TokenScript");
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
+        }
+    }
+
+    /**
+     * Final return path
+     * @param transactionData
+     */
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+    }
+
+    private void calculateEstimateDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.calc_gas_limit));
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
     }
 
     @Override
@@ -429,18 +474,25 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         dialog.show();
     }
 
-    private void setUpRecentTransactionsView()
+    private void estimateError(final Web3Transaction w3tx)
     {
-        if (activityHistoryList != null) return;
-        activityHistoryList = findViewById(R.id.history_list);
-        ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService());
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.confirm_transaction);
+        dialog.setMessage(R.string.error_transaction_may_fail);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setButtonListener(v -> {
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
+            checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
+        });
 
-        adapter.setDefaultWallet(wallet);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
 
-        activityHistoryList.setupAdapter(adapter);
-        activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, BigInteger.ZERO, HISTORY_LENGTH);
+        dialog.show();
     }
 
     @Override
@@ -461,5 +513,39 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
             default:
                 break;
         }
+    }
+
+    /*
+    Action sheet methods
+     */
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction finalTx)
+    {
+        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        if (actionCompleted)
+        {
+            Intent intent = new Intent();
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+        viewModel.actionSheetConfirm(mode);
     }
 }

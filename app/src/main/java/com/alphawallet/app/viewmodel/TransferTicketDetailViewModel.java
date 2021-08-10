@@ -1,7 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.content.Context;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -15,7 +14,6 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -24,7 +22,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
@@ -59,7 +57,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final AnalyticsServiceType analyticsService;
     private final TokensService tokensService;
 
@@ -73,7 +71,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   CreateTransactionInteract createTransactionInteract,
                                   FetchTransactionsInteract fetchTransactionsInteract,
                                   AssetDefinitionService assetDefinitionService,
-                                  GasService2 gasService,
+                                  GasService gasService,
                                   AnalyticsServiceType analyticsService,
                                   TokensService tokensService) {
         this.genericWalletInteract = genericWalletInteract;

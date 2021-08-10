@@ -152,13 +152,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         retrieveQrCode();
         startup = true;
         viewModel.prepare();
-
-        if (savedInstanceState != null)
-        {
-            requestId = savedInstanceState.getLong("SESSIONID", 0);
-            savedInstanceState.putLong("SESSIONID", 0);
-            savedInstanceState.clear();
-        }
     }
 
     @Override
@@ -204,6 +197,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             //wait for service to connect
             waitForWalletConnectSession = true;
+            viewModel.prepareIfRequired();
         }
         else if (client == null || !client.isConnected())
         {
@@ -336,11 +330,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 peerId = viewModel.getPeerId(sessionId);
                 displaySessionStatus(sessionId);
 
-                if (client != null && client.isConnected())
-                {
-                    Log.d(TAG, "Use running session: " + getSessionId());
-                }
-                else
+                if (client == null || !client.isConnected())
                 {
                     if (!fromSessionActivity && (session == null || client == null))
                     {
@@ -349,8 +339,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     }
                     else
                     {
-                        //session is not current, no need to display the 'end session' button
-                        functionBar.setVisibility(View.GONE);
+                        //attempt to restart the session; this will allow session 'force' close
+                        initWalletConnectPeerMeta();
+                        client = startClient();
+                        initWalletConnectSession(peerId, connectionId);
+                        startup = false;
+                        return;
                     }
                 }
 
@@ -402,6 +396,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (rq != null)
         {
             requestId = rq.id;
+            int useChainId = viewModel.getChainId(getSessionId());
             switch (rq.type)
             {
                 case MESSAGE:
@@ -411,12 +406,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     break;
                 case SIGN_TX:
                     runOnUiThread(() -> {
-                        onEthSignTransaction(rq.id, rq.tx, rq.chainId);
+                        onEthSignTransaction(rq.id, rq.tx, useChainId);
                     });
                     break;
                 case SEND_TX:
                     runOnUiThread(() -> {
-                        onEthSendTransaction(rq.id, rq.tx, rq.chainId);
+                        onEthSendTransaction(rq.id, rq.tx, useChainId);
                     });
                     break;
                 case FAILURE:
@@ -451,7 +446,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void initWalletConnectSession(String sessionId, String connectionId)
+    private void initWalletConnectSession(String peerId, String connectionId)
     {
         if (session == null)
         {
@@ -461,7 +456,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
 
         Log.d(TAG, "Connect: " + getSessionId() + " (" + connectionId + ")");
-        client.connect(session, peerMeta, sessionId, connectionId);
+        client.connect(session, peerMeta, peerId, connectionId);
+
+        client.setOnFailure(throwable -> {
+            Log.d(TAG, "On Fail: " + throwable.getMessage());
+            runOnUiThread(() -> {
+                showErrorDialog("Error: " + throwable.getMessage());
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     private void invalidSession()
@@ -492,13 +495,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void initWalletConnectClient()
     {
-        httpClient = new OkHttpClient.Builder()
-                .connectTimeout(7, TimeUnit.SECONDS)
-                .readTimeout(7, TimeUnit.SECONDS)
-                .writeTimeout(7, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
-                .build();
-        client = new WCClient(new GsonBuilder(), httpClient);
+        client = startClient();
 
         client.setOnWCOpen(peerId -> {
             viewModel.putClient(getSessionId(), client);
@@ -507,6 +504,18 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
 
         setClientDisconnect(client);
+    }
+
+    private WCClient startClient()
+    {
+        httpClient = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .pingInterval(10000, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
+        return new WCClient(new GsonBuilder(), httpClient);
     }
 
     public void setClientDisconnect(WCClient thisClient)
@@ -593,12 +602,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void onSessionRequest(Long id, WCPeerMeta peer, int chainIdHint)
+    private void onSessionRequest(Long id, WCPeerMeta peer, int chainId)
     {
         if (peer == null) { finish(); }
 
         String[] accounts = {viewModel.getWallet().address};
         String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
+
+        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : chainId;
 
         Glide.with(this)
                 .load(displayIcon)
@@ -606,8 +617,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());
         signCount.setText(R.string.empty);
-        final int chainId = chainIdOverride > 0 ? chainIdOverride : chainIdHint;
-        chainName.setChainID(chainId);
+        chainName.setChainID(chainIdOverride);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder
@@ -618,7 +628,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     sessionStarted = true;
                     client.approveSession(Arrays.asList(accounts), chainId);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
-                            new Gson().toJson(session), new Gson().toJson(peer), chainId);
+                            new Gson().toJson(session), new Gson().toJson(peer), chainIdOverride);
                     progressBar.setVisibility(View.GONE);
                     functionBar.setVisibility(View.VISIBLE);
                     infoLayout.setVisibility(View.VISIBLE);
@@ -713,7 +723,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 confirmationDialog.success();
                 updateSignCount();
-                if (fromDappBrowser) switchToDappBrowser();
+                if (fromDappBrowser)
+                {
+                    confirmationDialog.forceDismiss();
+                    switchToDappBrowser();
+                }
                 requestId = 0;
             }
         };
@@ -729,6 +743,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
 
             @Override
+            public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
+            {
+                if (gotAuth)
+                {
+                    viewModel.signMessage(
+                            signable,
+                            dappFunction);
+                }
+                else
+                {
+                    cancelAuthentication();
+                }
+            }
+
+            @Override
             public void cancelAuthentication()
             {
                 requestId = 0;
@@ -739,12 +768,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        if (confirmationDialog == null || !confirmationDialog.isShowing())
-        {
-            confirmationDialog = new ActionSheetDialog(this, this, signCallback, signable);
-            confirmationDialog.setCanceledOnTouchOutside(false);
-            confirmationDialog.show();
-        }
+        confirmationDialog = new ActionSheetDialog(this, this, signCallback, signable);
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
     }
 
     private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, int chainId)
@@ -1036,7 +1062,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_reject_request));
         }
 
-        if (fromDappBrowser) switchToDappBrowser();
+        if (fromDappBrowser)
+        {
+            if (confirmationDialog != null) confirmationDialog.forceDismiss();
+            switchToDappBrowser();
+        }
     }
 
     private void switchToDappBrowser()
@@ -1078,7 +1108,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.sendTransaction(finalTx, client.getChainId(), callback);
+        viewModel.sendTransaction(finalTx, client.chainIdVal(), callback);
     }
 
     @Override
@@ -1126,7 +1156,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), client.getChainId());
+        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), client.chainIdVal());
         if (fromDappBrowser) switchToDappBrowser();
     }
 }

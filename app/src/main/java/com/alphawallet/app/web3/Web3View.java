@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
@@ -51,6 +52,8 @@ public class Web3View extends WebView {
     private OnSignTypedMessageListener onSignTypedMessageListener;
     @Nullable
     private OnEthCallListener onEthCallListener;
+    @Nullable
+    private OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
     @Nullable
     private OnVerifyListener onVerifyListener;
     @Nullable
@@ -106,7 +109,8 @@ public class Web3View extends WebView {
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener,
-                innerOnEthCallListener), "alpha");
+                innerOnEthCallListener,
+                innerAddChainListener), "alpha");
     }
 
     public void setWalletAddress(@NonNull Address address) {
@@ -166,6 +170,10 @@ public class Web3View extends WebView {
 
     public void setOnEthCallListener(@Nullable OnEthCallListener onEthCallListener) {
         this.onEthCallListener = onEthCallListener;
+    }
+
+    public void setOnWalletAddEthereumChainObjectListener(@Nullable OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener) {
+        this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
     }
 
     public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
@@ -254,6 +262,15 @@ public class Web3View extends WebView {
         }
     };
 
+    private final OnWalletAddEthereumChainObjectListener innerAddChainListener = new OnWalletAddEthereumChainObjectListener()
+    {
+        @Override
+        public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
+        {
+            onWalletAddEthereumChainObjectListener.OnWalletAddEthereumChainObject(chainObject);
+        }
+    };
+
     private final OnVerifyListener innerOnVerifyListener = new OnVerifyListener() {
         @Override
         public void onVerify(String message, String signHex) {
@@ -286,15 +303,23 @@ public class Web3View extends WebView {
         @Override
         public void onPageStarted(WebView view, String url,Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            if (!redirect)
+            {
+                internalClient.resetInject();
+            }
+
+            redirect = false;
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
+            if (!internalClient.didInjection()) { internalClient.injectScriptFileFinal(view); }
+
             if (!redirect && !loadingError)
             {
-                if (loadInterface != null) loadInterface.onWebpageLoaded(url, view.getTitle());
+                if (loadInterface != null) { loadInterface.onWebpageLoaded(url, view.getTitle()); }
             }
             else if (!loadingError && loadInterface != null)
             {

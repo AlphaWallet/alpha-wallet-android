@@ -11,7 +11,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -87,7 +89,7 @@ public class InputAmount extends LinearLayout
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
         gasFetch = findViewById(R.id.gas_fetch_progress);
-        showingCrypto = true;
+        showingCrypto = !CustomViewSettings.inputAmountFiatDefault();
         amountReady = false;
 
         setupAttrs(context, attrs);
@@ -142,6 +144,8 @@ public class InputAmount extends LinearLayout
 
     public void onDestroy()
     {
+        if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
+        if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
         if (realm != null) realm.removeAllChangeListeners();
         if (tickerRealm != null) tickerRealm.removeAllChangeListeners();
         realmTickerUpdate = null;
@@ -221,13 +225,11 @@ public class InputAmount extends LinearLayout
             {
                 showingCrypto = false;
                 startTickerListener();
-                icon.showLocalCurrency();
             }
             else
             {
                 showingCrypto = true;
                 if (tickerRealm != null) tickerRealm.removeAllChangeListeners(); //stop ticker listener
-                icon.bindData(token, assetService);
             }
 
             updateAvailableBalance();
@@ -293,6 +295,7 @@ public class InputAmount extends LinearLayout
 
     private void showCrypto()
     {
+        icon.bindData(token, assetService);
         symbolText.setText(token.getSymbol());
         availableSymbol.setText(token.getSymbol());
         availableAmount.setText(token.getStringBalance());
@@ -301,9 +304,14 @@ public class InputAmount extends LinearLayout
 
     private void showFiat()
     {
+        icon.showLocalCurrency();
+
+        RealmQuery<RealmTokenTicker> rawQuery = getTickerQuery();
+        if (rawQuery == null) return;
+
         try
         {
-            RealmTokenTicker rtt = getTickerQuery().findFirst();
+            RealmTokenTicker rtt = rawQuery.findFirst();
 
             if (rtt != null)
             {
@@ -311,7 +319,7 @@ public class InputAmount extends LinearLayout
                 symbolText.setText(currencyLabel);
                 //calculate available fiat
                 double cryptoRate = Double.parseDouble(rtt.getPrice());
-                double availableCryptoBalance = Double.parseDouble(token.getStringBalance());
+                double availableCryptoBalance = token.getCorrectedBalance(18).doubleValue();
                 availableAmount.setText(TickerService.getCurrencyString(availableCryptoBalance * cryptoRate));
                 availableSymbol.setText(rtt.getCurrencySymbol());
                 updateAllFundsAmount(); //update amount if showing 'All Funds'
@@ -320,9 +328,11 @@ public class InputAmount extends LinearLayout
                         getWeiInputAmount()
                 ); //now update
             }
+            updateAllFundsAmount();
         }
         catch (Exception e)
         {
+            if (BuildConfig.DEBUG) e.printStackTrace();
             // continue with old value
         }
     }
@@ -374,7 +384,8 @@ public class InputAmount extends LinearLayout
             }
             else
             {
-                editText.setText(token.getStringBalance());
+                exactAmount = token.balance;
+                updateAllFundsAmount();
             }
         });
     }
@@ -462,15 +473,15 @@ public class InputAmount extends LinearLayout
 
     private BigDecimal convertFiatAmountToWei(double fiatAmount)
     {
-        BigDecimal weiAmount = BigDecimal.ZERO;
+        BigDecimal tokenGranularValue = BigDecimal.ZERO;
         try
         {
             RealmTokenTicker rtt = getTickerQuery().findFirst();
 
             if (rtt != null)
             {
-                double wei = fiatAmount / Double.parseDouble(rtt.getPrice());
-                weiAmount = BigDecimal.valueOf(wei).multiply(BigDecimal.valueOf(Math.pow(10, token.tokenInfo.decimals)));
+                double tokenDisplayValue = (fiatAmount + 0.0001) / Double.parseDouble(rtt.getPrice()); //add a tiny amount to ensure fiat equals the amount specified when rounded down
+                tokenGranularValue = BigDecimal.valueOf(tokenDisplayValue).multiply(BigDecimal.valueOf(Math.pow(10, token.tokenInfo.decimals)));
             }
         }
         catch (Exception e)
@@ -478,7 +489,7 @@ public class InputAmount extends LinearLayout
             // continue with old value
         }
 
-        return weiAmount;
+        return tokenGranularValue;
     }
 
     /**

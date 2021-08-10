@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -26,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
@@ -43,7 +45,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -68,13 +69,16 @@ import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
@@ -98,8 +102,10 @@ import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.OnSignTransactionListener;
 import com.alphawallet.app.web3.OnSignTypedMessageListener;
+import com.alphawallet.app.web3.OnWalletAddEthereumChainObjectListener;
 import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -145,10 +151,12 @@ import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
-public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        OnEthCallListener, URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
+public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
+        OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
+        URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
         ActionSheetCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
@@ -160,6 +168,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
     private static final String CURRENT_URL = "urlInBar";
+    private static final String WALLETCONNECT_CHAINID_ERROR = "Error: ChainId missing or not supported";
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
@@ -187,6 +196,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private NetworkInfo activeNetwork;
     private AWalletAlertDialog resultDialog;
     private DappBrowserSuggestionsAdapter adapter;
+    private AlertDialog chainSwapDialog;
     private String loadOnInit;
     private boolean homePressed;
 
@@ -210,11 +220,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private PermissionRequest requestCallback = null;
     private String geoOrigin;
     private final Handler handler = new Handler();
+    private String walletConnectSession;
 
     private String currentWebpageTitle;
     private String currentFragment;
 
-    private Signable messageTBS;  // To-Be-Signed
     private DAppFunction dAppFunction;
 
     @Nullable
@@ -523,8 +533,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         webFrame.setOnApplyWindowInsetsListener(resizeListener);
     }
 
-    private void displayNothingToShare()
-    {
+    private void displayNothingToShare() {
         if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setTitle(getString(R.string.nothing_to_share));
@@ -791,6 +800,47 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
+    ActivityResultLauncher<Intent> getNewNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                loadNewNetwork(networkId);
+                reloadPage();
+            });
+
+    private void launchNetworkPicker()
+    {
+        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
+        getNewNetwork.launch(intent);
+    }
+
+    private void launchWalletConnectSessionCancel()
+    {
+        String sessionId = walletConnectSession != null ? viewModel.getSessionId(walletConnectSession) : "";
+        Intent bIntent = new Intent(getContext(), WalletConnectService.class);
+        bIntent.setAction(String.valueOf(WalletConnectActions.CLOSE.ordinal()));
+        bIntent.putExtra("session", sessionId);
+        getContext().startService(bIntent);
+        reloadPage();
+    }
+
+    private void displayCloseWC()
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog.setIcon(WARNING);
+        resultDialog.setTitle(R.string.title_wallet_connect);
+        resultDialog.setMessage(getString(R.string.unsupported_walletconnect));
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            launchWalletConnectSessionCancel();
+            launchNetworkPicker();
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+    }
+
     private void setupWeb3() {
         web3.setChainId(activeNetwork.chainId);
         web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
@@ -808,6 +858,22 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     progressBar.setProgress(newProgress);
                     swipeRefreshLayout.setRefreshing(true);
                 }
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage msg)
+            {
+                boolean ret = super.onConsoleMessage(msg);
+
+                if (msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
+                {
+                    if (msg.message().contains(WALLETCONNECT_CHAINID_ERROR))
+                    {
+                        displayCloseWC();
+                    }
+                }
+
+                return ret;
             }
 
             @Override
@@ -868,7 +934,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             break;
                         case C.DAPP_PREFIX_WALLETCONNECT:
                             //start walletconnect
-                            if (getContext() != null) viewModel.handleWalletConnect(getContext(), url);
+                            if (wallet.type == WalletType.WATCH)
+                            {
+                                showWalletWatch();
+                            }
+                            else
+                            {
+                                walletConnectSession = url;
+                                if (getContext() != null)
+                                    viewModel.handleWalletConnect(getContext(), url, activeNetwork);
+                            }
                             return true;
                         default:
                             break;
@@ -885,6 +960,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
         web3.setOnEthCallListener(this);
+        web3.setOnWalletAddEthereumChainObjectListener(this);
 
         if (loadOnInit != null)
         {
@@ -907,26 +983,27 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             new ActivityResultCallback<Uri>() {
                 @Override
                 public void onActivityResult(Uri uri) {
-                    uploadMessage.onReceiveValue(new Uri[] { uri });
+                    if (uri != null) uploadMessage.onReceiveValue(new Uri[] { uri });
                 }
             });
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>()
-            {
-                @Override
-                public void onActivityResult(ActivityResult result)
-                {
-                    int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
-                    if (activeNetwork == null || activeNetwork.chainId != networkId) {
-                        balance.setVisibility(View.GONE);
-                        symbol.setVisibility(View.GONE);
-                        viewModel.setNetwork(networkId);
-                        //refresh URL page
-                        reloadPage();
-                    }
-                }
+            result -> {
+                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                loadNewNetwork(networkId);
             });
+
+    private void loadNewNetwork(int newNetworkId)
+    {
+        if (activeNetwork == null || activeNetwork.chainId != newNetworkId)
+        {
+            balance.setVisibility(View.GONE);
+            symbol.setVisibility(View.GONE);
+            viewModel.setNetwork(newNetworkId);
+        }
+        //refresh URL page
+        reloadPage();
+    }
 
     protected boolean requestUpload()
     {
@@ -993,9 +1070,45 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 .isDisposed();
     }
 
+    @Override
+    public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
+    {
+        //TODO: Support custom chains
+        //read chain value
+        int chainId = chainObj.getChainId();
+        final NetworkInfo info = viewModel.getNetworkInfo(chainId);
+
+        //Don't display dialog for unknown network // TODO: handle unknown network
+        if (info == null) return;
+
+        //Don't show dialog if network doesn't need to be changed or if alredy showing
+        if (activeNetwork.chainId == chainId || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setMessage(getString(R.string.request_change_chain, info.name, String.valueOf(info.chainId)))
+                .setPositiveButton(R.string.dialog_ok, (d, w) -> loadNewNetwork(info.chainId))
+                .setNegativeButton(R.string.action_cancel, (d, w) -> chainSwapDialog.dismiss())
+                .setCancelable(true);
+
+        //Warn if we're switching between network types
+        if (EthereumNetworkRepository.hasRealValue(activeNetwork.chainId) != EthereumNetworkRepository.hasRealValue(info.chainId))
+        {
+            if (EthereumNetworkRepository.hasRealValue(info.chainId))
+            {
+                builder.setTitle(R.string.warning_switch_to_main);
+            }
+            else
+            {
+                builder.setTitle(R.string.warning_switching_to_test);
+            }
+        }
+
+        chainSwapDialog = builder.create();
+        chainSwapDialog.show();
+    }
+
     private void handleSignMessage(Signable message)
     {
-        messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
             public void DAppError(Throwable error, Signable message) {
@@ -1120,7 +1233,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
         resultDialog.show();
 
-        confirmationDialog.dismiss();
+        if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.dismiss();
+    }
+
+    private void showWalletWatch()
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog.setIcon(AWalletAlertDialog.WARNING);
+        resultDialog.setTitle(R.string.title_wallet_connect);
+        resultDialog.setMessage(R.string.action_watch_account);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
     }
 
     private void onInvalidTransaction(Web3Transaction transaction)
@@ -1523,7 +1650,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
+        if (isVisibleToUser && viewModel != null) {
             viewModel.checkForNetworkChanges();
         }
     }
@@ -1650,15 +1777,23 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && dAppFunction != null) //sign message
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
+    {
+        if (gotAuth)
         {
             viewModel.completeAuthentication(SIGN_DATA);
-            viewModel.signMessage(messageTBS, dAppFunction);
+            viewModel.signMessage(messageToSign, dAppFunction);
         }
-        else if (confirmationDialog != null && confirmationDialog.isShowing())
+        else
         {
-            if (messageTBS != null) web3.onSignCancel(messageTBS.getCallbackId());
-            confirmationDialog.dismiss();
+            web3.onSignCancel(messageToSign.getCallbackId());
         }
     }
 
@@ -1774,6 +1909,31 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
         return insets;
     };
+
+    // Required for if we have status bar showing
+    public void softKeyboardVisible()
+    {
+        if (getActivity() == null) { return; }
+
+        Rect r = new Rect();
+        webFrame.getWindowVisibleDisplayFrame(r);
+
+        int heightDifference = webFrame.getRootView().getHeight() - r.bottom;
+
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
+
+        layoutParams.bottomMargin = heightDifference;
+        webFrame.setLayoutParams(layoutParams);
+    }
+
+    public void softKeyboardGone()
+    {
+        if (getActivity() == null) { return; }
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
+        layoutParams.bottomMargin = ((HomeActivity) getActivity()).getNavBarHeight();
+        webFrame.setLayoutParams(layoutParams);
+        shrinkSearchBar();
+    }
 
     @NotNull
     private String determineMimeType(@NotNull WebChromeClient.FileChooserParams fileChooserParams)

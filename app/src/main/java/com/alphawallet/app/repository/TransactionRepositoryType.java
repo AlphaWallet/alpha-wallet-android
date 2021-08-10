@@ -30,7 +30,7 @@ public interface TransactionRepositoryType {
 
 	Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
 
-	void removeOldTransaction(Wallet wallet, String oldTxHash);
+	void removeOverridenTransaction(Wallet wallet, String oldTxHash);
 
     Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit);
 	Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount);

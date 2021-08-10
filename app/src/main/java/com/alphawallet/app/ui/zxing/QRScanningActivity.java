@@ -67,6 +67,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
         {
+            chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
             setContentView(R.layout.activity_full_screen_scanner_fragment);
             initView();
         }
@@ -74,8 +75,6 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         {
             requestCameraPermission();
         }
-
-        chainIdOverride = getIntent().getIntExtra(C.EXTRA_NETWORKID, 0);
     }
 
     private void initView()
@@ -89,6 +88,8 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         browseButton = findViewById(R.id.browse_button);
 
         fullScannerFragment = (FullScannerFragment) getSupportFragmentManager().findFragmentById(R.id.scanner_fragment);
+
+        fullScannerFragment.setChainOverride(chainIdOverride);
 
         if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(C.EXTRA_UNIVERSAL_SCAN))
         {
@@ -222,6 +223,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     {
         Intent intent = new Intent(this, WalletConnectActivity.class);
         intent.putExtra("qrCode", qrCode);
+        intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         startActivity(intent);
         setResult(WALLET_CONNECT);
         finish();

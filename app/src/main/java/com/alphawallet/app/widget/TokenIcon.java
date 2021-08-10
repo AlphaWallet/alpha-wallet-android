@@ -153,7 +153,7 @@ public class TokenIcon extends ConstraintLayout
         // If the token is a basechain token, immediately show the chain icon - no need to load
         // Otherwise, try to load the icon resource. If there's no icon resource then generate a text token Icon (round circle with first four chars from the name)
         // Only reveal the icon immediately before populating it - this stops the update flicker.
-        if (token.isEthereum())
+        if (token.isEthereum() || EthereumNetworkRepository.getChainOverrideAddress(token.tokenInfo.chainId).equalsIgnoreCase(token.getAddress()))
         {
             textIcon.setVisibility(View.GONE);
             icon.setImageResource(chainIcon);

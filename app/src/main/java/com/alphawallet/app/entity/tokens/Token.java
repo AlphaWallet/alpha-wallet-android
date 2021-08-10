@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Token implements Parcelable, Comparable<Token>
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
-    private final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+    public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
 
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
@@ -114,7 +114,9 @@ public class Token implements Parcelable, Comparable<Token>
     {
         int decimals = 18;
         if (tokenInfo != null) decimals = tokenInfo.decimals;
-        return BalanceUtils.getScaledValueScientific(balance, decimals);
+        String balanceStr = BalanceUtils.getScaledValueScientific(balance, decimals);
+        if (balanceStr.equals("0") && balance.compareTo(BigDecimal.ZERO) > 0) { balanceStr = "~0"; }
+        return balanceStr;
     }
 
     public boolean hasPositiveBalance() {
@@ -836,21 +838,6 @@ public class Token implements Parcelable, Comparable<Token>
                 : StatusType.RECEIVE;
     }
 
-//    public int getTxImage(Transaction transaction)
-//    {
-//        int asset;
-//        if (isEthereum())
-//        {
-//            asset = ethereumTxImage(transaction);
-//        }
-//        else
-//        {
-//            asset = transaction.getOperationImage(this);
-//        }
-//
-//        return asset;
-//    }
-
     public StatusType getTxStatus(Transaction transaction)
     {
         StatusType status = transaction.getTransactionStatus();
@@ -1032,5 +1019,10 @@ public class Token implements Parcelable, Comparable<Token>
     public Asset fetchTokenMetadata(BigInteger tokenId)
     {
         return null;
+    }
+
+    public List<BigInteger> getChangeList(Map<BigInteger, Asset> assetMap)
+    {
+        return new ArrayList<>();
     }
 }

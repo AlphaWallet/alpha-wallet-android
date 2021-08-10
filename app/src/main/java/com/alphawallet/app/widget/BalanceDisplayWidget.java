@@ -2,15 +2,18 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,6 +28,7 @@ public class BalanceDisplayWidget extends LinearLayout
     public final TextView newBalance;
     private final ChainName chainName;
     private final TokenIcon chainIcon;
+    private Transaction transaction;
 
     public BalanceDisplayWidget(Context context, @Nullable AttributeSet attrs)
     {
@@ -36,30 +40,34 @@ public class BalanceDisplayWidget extends LinearLayout
         chainIcon = findViewById(R.id.chain_icon);
     }
 
-    public void setupBalance(Token token, TokensService tokenService)
+    public void setupBalance(Token token, TokensService tokenService, Transaction tx)
     {
         chainName.setChainID(token.tokenInfo.chainId);
         chainName.invertChainID(token.tokenInfo.chainId);
         chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, tokenService.getCurrentAddress()), null);
 
         balance.setText(getContext().getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
+        transaction = tx;
     }
 
     public void setNewBalanceText(Token token, BigDecimal transactionAmount, BigInteger networkFee, BigInteger balanceAfterTransaction)
     {
-
         if (token.isEthereum())
         {
             balanceAfterTransaction = balanceAfterTransaction.subtract(networkFee).max(BigInteger.ZERO);
         }
-        else
+        else if (transaction == null || transaction.transactionInput == null || transaction.transactionInput.isSendOrReceive(transaction))
         {
             balanceAfterTransaction = token.getBalanceRaw().subtract(transactionAmount).toBigInteger();
+        }
+        else
+        {
+            newBalance.setVisibility(View.GONE);
+            return;
         }
 
         //convert to ETH amount
         String newBalanceVal = BalanceUtils.getScaledValueScientific(new BigDecimal(balanceAfterTransaction), token.tokenInfo.decimals);
         newBalance.setText(getContext().getString(R.string.new_balance, newBalanceVal, token.getSymbol()));
     }
-
 }

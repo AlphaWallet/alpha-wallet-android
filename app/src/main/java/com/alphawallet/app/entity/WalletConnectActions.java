@@ -5,5 +5,5 @@ package com.alphawallet.app.entity;
  */
 public enum  WalletConnectActions
 {
-    CONNECT, DISCONNECT
+    CONNECT, DISCONNECT, CLOSE
 }

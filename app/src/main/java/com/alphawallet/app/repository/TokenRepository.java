@@ -576,7 +576,6 @@ public class TokenRepository implements TokenRepositoryType {
 
             switch (interfaceSpec)
             {
-                case DYNAMIC_CONTRACT:
                 case ETHEREUM:
                     balance = getEthBalance(wallet, tInfo.chainId);
                     break;
@@ -599,6 +598,7 @@ public class TokenRepository implements TokenRepositoryType {
                     balanceArray = checkERC721TicketBalanceArray(wallet, tInfo, token);
                     break;
                 case ERC20:
+                case DYNAMIC_CONTRACT:
                     balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
                     break;
                 case OTHER:
@@ -773,6 +773,12 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal getEthBalance(Wallet wallet, int chainId)
     {
+        //in case chain has an override
+        if (EthereumNetworkRepository.getChainOverrideAddress(chainId).length() > 0)
+        {
+            return checkUint256Balance(wallet, chainId, EthereumNetworkRepository.getChainOverrideAddress(chainId));
+        }
+
         try {
             return new BigDecimal(getService(chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
                     .send()
@@ -787,27 +793,6 @@ public class TokenRepository implements TokenRepositoryType {
             if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return BigDecimal.valueOf(-1);
         }
-    }
-
-    private Single<BigDecimal> getEthBalanceInternal(NetworkInfo network, Wallet wallet, boolean pending)
-    {
-        return Single.fromCallable(() -> {
-            try {
-                DefaultBlockParameterName balanceCheckType = pending ? DefaultBlockParameterName.PENDING : DefaultBlockParameterName.LATEST;
-                return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, balanceCheckType)
-                                                  .send()
-                                                  .getBalance());
-            }
-            catch (IOException e)
-            {
-                return BigDecimal.valueOf(-1);
-            }
-            catch (Exception e)
-            {
-                if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
-                return BigDecimal.valueOf(-1);
-            }
-        }).subscribeOn(Schedulers.io());
     }
 
     private List<BigInteger> getBalanceArray875(Wallet wallet, int chainId, String tokenAddress) {

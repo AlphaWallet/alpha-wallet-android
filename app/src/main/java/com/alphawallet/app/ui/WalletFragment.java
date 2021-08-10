@@ -214,6 +214,7 @@ public class WalletFragment extends BaseFragment implements
             for (RealmToken t : realmTokens)
             {
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
+                if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
                 String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
 
@@ -356,8 +357,9 @@ public class WalletFragment extends BaseFragment implements
         if (selectedToken == null)
         {
             selectedToken = view;
-            token = viewModel.getTokenFromService(token);
-            token.clickReact(viewModel, getActivity());
+            Token clickOrigin = viewModel.getTokenFromService(token);
+            if (clickOrigin == null) clickOrigin = token;
+            clickOrigin.clickReact(viewModel, getActivity());
             handler.postDelayed(this, 700);
         }
     }

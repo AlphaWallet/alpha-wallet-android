@@ -299,7 +299,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public void removeOldTransaction(Wallet wallet, String oldTxHash)
+	public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
 	{
 		inDiskCache.deleteTransaction(wallet, oldTxHash);
 	}

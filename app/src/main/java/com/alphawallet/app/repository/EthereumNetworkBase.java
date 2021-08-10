@@ -68,6 +68,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String COVALENT = "[COVALENT]";
 
     private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
+
+    private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -582,9 +584,22 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return 0;
     }
 
-    public static String defaultDapp()
+    public static String defaultDapp(int chainId)
     {
-        return DEFAULT_HOMEPAGE;
+        String dapp = DEFAULT_HOMEPAGE;
+        try
+        {
+            if (chainId == MATIC_ID || chainId == MATIC_TEST_ID)
+            {
+                dapp = POLYGON_HOMEPAGE;
+            }
+        }
+        catch (Exception e)
+        {
+            dapp = DEFAULT_HOMEPAGE;
+        }
+
+        return dapp;
     }
 
     public Token getBlankOverrideToken(NetworkInfo networkInfo)

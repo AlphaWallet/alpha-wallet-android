@@ -285,7 +285,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
 
             attachFragment(DAPP_BROWSER);
-            loadOnInit = TextUtils.isEmpty(lastUrl) ? EthereumNetworkRepository.defaultDapp() : lastUrl;
+            loadOnInit = TextUtils.isEmpty(lastUrl) ? EthereumNetworkRepository.defaultDapp(-1) : lastUrl;
         }
 
         return view;
@@ -499,7 +499,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }
-        else if (EthereumNetworkRepository.defaultDapp() != null)
+        else if (EthereumNetworkRepository.defaultDapp(web3.getChainId()) != null)
         {
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
@@ -1287,12 +1287,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.goBack();
             detachFragments();
         }
-        else if (!web3.getUrl().equalsIgnoreCase(EthereumNetworkRepository.defaultDapp()))
+        else if (!web3.getUrl().equalsIgnoreCase(EthereumNetworkRepository.defaultDapp(web3.getChainId())))
         {
             //load homepage
             homePressed = true;
-            web3.loadUrl(EthereumNetworkBase.defaultDapp(), getWeb3Headers());
-            setUrlText(EthereumNetworkBase.defaultDapp());
+            web3.loadUrl(EthereumNetworkBase.defaultDapp(web3.getChainId()), getWeb3Headers());
+            setUrlText(EthereumNetworkBase.defaultDapp(web3.getChainId()));
             checkBackClickArrowVisibility();
         }
         else
@@ -1330,10 +1330,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
-            nextUrl = EthereumNetworkRepository.defaultDapp();
+            nextUrl = EthereumNetworkRepository.defaultDapp(web3.getChainId());
         }
 
-        if (nextUrl.equalsIgnoreCase(EthereumNetworkRepository.defaultDapp()))
+        if (nextUrl.equalsIgnoreCase(EthereumNetworkRepository.defaultDapp(web3.getChainId())))
         {
             back.setAlpha(0.3f);
         }
@@ -1380,7 +1380,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (homePressed)
         {
             homePressed = false;
-            if (currentFragment.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp()))
+            if (currentFragment.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp(web3.getChainId())))
             {
                 web3.clearHistory();
             }
@@ -1407,7 +1407,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             sessionHistory = web3.copyBackForwardList();
             String url = web3.getUrl();
-            canBrowseBack = web3.canGoBack() || (!TextUtils.isEmpty(url) && !url.equals(EthereumNetworkBase.defaultDapp()));
+            canBrowseBack = web3.canGoBack() || (!TextUtils.isEmpty(url) && !url.equals(EthereumNetworkBase.defaultDapp(web3.getChainId())));
             canBrowseForward = (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1);
         }
 
@@ -1529,8 +1529,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         web3.clearHistory();
         web3.stopLoading();
-        web3.loadUrl(EthereumNetworkRepository.defaultDapp(), getWeb3Headers());
-        setUrlText(EthereumNetworkRepository.defaultDapp());
+        web3.loadUrl(EthereumNetworkRepository.defaultDapp(web3.getChainId()), getWeb3Headers());
+        setUrlText(EthereumNetworkRepository.defaultDapp(web3.getChainId()));
     }
 
     public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)

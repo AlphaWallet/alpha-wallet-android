@@ -586,19 +586,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static String defaultDapp(int chainId)
     {
-        String dapp = DEFAULT_HOMEPAGE;
-        try
-        {
-            if (chainId == MATIC_ID || chainId == MATIC_TEST_ID)
-            {
-                dapp = POLYGON_HOMEPAGE;
-            }
-        }
-        catch (Exception e)
-        {
-            dapp = DEFAULT_HOMEPAGE;
-        }
-
+        String dapp = (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
         return dapp;
     }
 

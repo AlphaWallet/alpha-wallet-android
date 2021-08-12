@@ -307,6 +307,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         if (requiresDappBrowserResize) ((DappBrowserFragment)dappBrowserFragment).softKeyboardGone();
                     }
                 });
+
+        viewModel.tryToShowRateAppDialog(this);
     }
 
     private void onBackup(String address)

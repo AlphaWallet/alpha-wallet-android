@@ -28,6 +28,9 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String SHOWN_WARNING = "shown_warning";
     private static final String SET_NETWORK_FILTERS = "set_filters";
 
+    private static final String RATE_APP_SHOWN = "rate_us_shown";
+    private static final String LAUNCH_COUNT = "launch_count";
+
     private final SharedPreferences pref;
 
     public SharedPreferenceRepository(Context context) {
@@ -181,5 +184,26 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void commit()
     {
         pref.edit().commit();
+    }
+
+    @Override
+    public void incrementLaunchCount() {
+        int prevLaunchCount = getLaunchCount();
+        pref.edit().putInt(LAUNCH_COUNT, prevLaunchCount + 1).apply();
+    }
+
+    @Override
+    public int getLaunchCount() {
+        return pref.getInt(LAUNCH_COUNT, 0);
+    }
+
+    @Override
+    public void setRateAppShown() {
+        pref.edit().putBoolean(RATE_APP_SHOWN, true).apply();
+    }
+
+    @Override
+    public boolean getRateAppShown() {
+        return pref.getBoolean(RATE_APP_SHOWN, false);
     }
 }

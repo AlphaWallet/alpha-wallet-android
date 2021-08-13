@@ -787,4 +787,5 @@
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
     <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
+    <string name="swap_with_quickswap">Swap with Quickswap</string>
 </resources>

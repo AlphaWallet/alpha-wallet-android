@@ -590,6 +590,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return dapp;
     }
 
+    public static boolean isDefaultDapp(String url)
+    {
+        return url != null && (url.equals(DEFAULT_HOMEPAGE)
+                || url.equals(POLYGON_HOMEPAGE));
+    }
+
     public Token getBlankOverrideToken(NetworkInfo networkInfo)
     {
         return createCurrencyToken(networkInfo);

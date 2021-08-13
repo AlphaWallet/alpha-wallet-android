@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
@@ -27,33 +26,24 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
-import com.alphawallet.app.ui.WalletConnectSessionActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
-import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.WCSession;
-import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
-import com.google.gson.GsonBuilder;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +53,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
@@ -118,6 +107,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
                     .subscribe(this::onDefaultWallet, this::onError);
     }
 
+    public NetworkInfo getActiveNetwork()
+    {
+        return ethereumNetworkRepository.getActiveBrowserNetwork();
+    }
+
     public void checkForNetworkChanges()
     {
         activeNetwork.postValue(ethereumNetworkRepository.getActiveBrowserNetwork());
@@ -138,13 +132,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
                             .observeOn(Schedulers.io())
                             .subscribe(w -> { }, e -> { });
         }
-    }
-
-    public Observable<Wallet> getWallet() {
-        if (defaultWallet().getValue() != null) {
-            return Observable.fromCallable(() -> defaultWallet().getValue());
-        } else
-            return genericWalletInteract.find().toObservable();
     }
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {

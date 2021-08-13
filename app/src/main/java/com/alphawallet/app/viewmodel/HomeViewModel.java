@@ -258,17 +258,14 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     private void onWallet(Wallet wallet) {
-        //TODO: change priority here: First, show name, if blank then scan for ENS
         transactionsService.changeWallet(wallet);
-        if (!TextUtils.isEmpty(wallet.ENSname))
-        {
-            walletName.postValue(wallet.ENSname);
-        }
-        else if (!TextUtils.isEmpty(wallet.name))
+        if (!TextUtils.isEmpty(wallet.name))
         {
             walletName.postValue(wallet.name);
-        }
-        else
+        } else if (!TextUtils.isEmpty(wallet.ENSname))
+        {
+            walletName.postValue(wallet.ENSname);
+        } else
         {
             walletName.postValue("");
             //check for ENS name

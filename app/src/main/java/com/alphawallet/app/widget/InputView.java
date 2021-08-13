@@ -162,6 +162,10 @@ public class InputView extends LinearLayout {
         editText.setLines(lines);
     }
 
+    public EditText getEditText() {
+        return this.editText;
+    }
+
     public CharSequence getText() {
         return this.editText.getText();
     }

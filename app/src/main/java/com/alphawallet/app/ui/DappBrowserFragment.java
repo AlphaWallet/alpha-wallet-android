@@ -73,7 +73,6 @@ import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -256,6 +255,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
+            activeNetwork = viewModel.getActiveNetwork();
             web3.setWebLoadCallback(this);
         }
     }
@@ -285,7 +285,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
 
             attachFragment(DAPP_BROWSER);
-            loadOnInit = TextUtils.isEmpty(lastUrl) ? EthereumNetworkRepository.defaultDapp() : lastUrl;
+            loadOnInit = TextUtils.isEmpty(lastUrl) ? EthereumNetworkRepository.defaultDapp(activeNetwork.chainId) : lastUrl;
         }
 
         return view;
@@ -499,7 +499,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }
-        else if (EthereumNetworkRepository.defaultDapp() != null)
+        else if (EthereumNetworkRepository.defaultDapp(activeNetwork.chainId) != null)
         {
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
@@ -759,6 +759,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        activeNetwork = viewModel.getActiveNetwork();
     }
 
     private void startBalanceListener()
@@ -794,6 +795,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             currentNetwork.setText(networkInfo.getShortName());
             Utils.setChainColour(currentNetworkCircle, networkInfo.chainId);
             viewModel.findWallet();
+
+            if (isOnHomePage()) resetDappBrowser(); //trigger a reset if on homepage
         } else {
             openNetworkSelection();
             resetDappBrowser();
@@ -1287,12 +1290,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.goBack();
             detachFragments();
         }
-        else if (!web3.getUrl().equalsIgnoreCase(EthereumNetworkRepository.defaultDapp()))
+        else if (!web3.getUrl().equalsIgnoreCase(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId)))
         {
             //load homepage
             homePressed = true;
-            web3.loadUrl(EthereumNetworkBase.defaultDapp(), getWeb3Headers());
-            setUrlText(EthereumNetworkBase.defaultDapp());
+            web3.loadUrl(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId), getWeb3Headers());
+            setUrlText(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId));
             checkBackClickArrowVisibility();
         }
         else
@@ -1330,10 +1333,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
-            nextUrl = EthereumNetworkRepository.defaultDapp();
+            nextUrl = EthereumNetworkRepository.defaultDapp(activeNetwork.chainId);
         }
 
-        if (nextUrl.equalsIgnoreCase(EthereumNetworkRepository.defaultDapp()))
+        if (nextUrl.equalsIgnoreCase(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId)))
         {
             back.setAlpha(0.3f);
         }
@@ -1380,7 +1383,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (homePressed)
         {
             homePressed = false;
-            if (currentFragment.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp()))
+            if (currentFragment.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId)))
             {
                 web3.clearHistory();
             }
@@ -1406,8 +1409,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (web3 != null)
         {
             sessionHistory = web3.copyBackForwardList();
-            String url = web3.getUrl();
-            canBrowseBack = web3.canGoBack() || (!TextUtils.isEmpty(url) && !url.equals(EthereumNetworkBase.defaultDapp()));
+            canBrowseBack = web3.canGoBack() || !isOnHomePage();
             canBrowseForward = (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1);
         }
 
@@ -1433,6 +1435,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             {
                 next.setAlpha(0.3f);
             }
+        }
+    }
+
+    private boolean isOnHomePage()
+    {
+        if (web3 != null)
+        {
+            String url = web3.getUrl();
+            return EthereumNetworkRepository.isDefaultDapp(url);
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -1529,8 +1544,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         web3.clearHistory();
         web3.stopLoading();
-        web3.loadUrl(EthereumNetworkRepository.defaultDapp(), getWeb3Headers());
-        setUrlText(EthereumNetworkRepository.defaultDapp());
+        web3.loadUrl(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId), getWeb3Headers());
+        setUrlText(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId));
     }
 
     public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)
@@ -1546,7 +1561,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     {
                         qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
                         if (qrCode == null || checkForMagicLink(qrCode)) return;
-                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                        QRParser parser = QRParser.getInstance(EthereumNetworkRepository.extraChains());
                         QRResult result = parser.parse(qrCode);
                         switch (result.type)
                         {

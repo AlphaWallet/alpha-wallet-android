@@ -14,6 +14,7 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
+import com.alphawallet.app.ui.NameThisWalletActivity;
 import com.alphawallet.app.ui.NewSettingsFragment;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.RedeemSignatureDisplayActivity;
@@ -176,4 +177,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletConnectModule.class)
 	abstract WalletConnectSessionActivity bindWalletConnectSessionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = NameThisWalletModule.class)
+	abstract NameThisWalletActivity bindNameThisWalletActivity();
 }

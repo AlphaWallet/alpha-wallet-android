@@ -81,6 +81,11 @@ public class GenericWalletInteract
 		return b.compareTo(BigDecimal.ZERO) > 0;
 	}
 
+	public Single<Wallet> updateWalletName(Wallet wallet, String name) {
+		wallet.name = name;
+		return walletRepository.updateWalletData(wallet);
+	}
+
 	public Single<Wallet> updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)
 	{
 		String newBalanceStr = BalanceUtils.getScaledValueFixed(newBalance, ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);

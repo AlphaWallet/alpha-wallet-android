@@ -112,6 +112,7 @@ android {
             apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
+                implementation 'com.google.android.play:core:1.10.0'
                 implementation 'com.google.firebase:firebase-analytics:19.0.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }

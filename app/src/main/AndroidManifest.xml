@@ -144,6 +144,9 @@
             android:enabled="true">
         </service>
 
+        <activity android:name=".ui.NameThisWalletActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/name_this_wallet" />
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"

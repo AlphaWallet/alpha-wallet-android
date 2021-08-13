@@ -35,6 +35,7 @@ import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
+import com.alphawallet.app.ui.TransferNFTActivity;
 import com.alphawallet.app.ui.TransferTicketActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.WalletActionsActivity;
@@ -211,4 +212,8 @@ public abstract class BuildersModule {
     @FragmentScope
     @ContributesAndroidInjector(modules = TokenActivityModule.class)
     abstract TokenActivityFragment bindTokenActivityFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TransferTicketDetailModule.class)
+	abstract TransferNFTActivity bindTransferNFTActivity();
 }

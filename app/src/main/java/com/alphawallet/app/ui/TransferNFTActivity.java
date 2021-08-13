@@ -1,37 +1,27 @@
 package com.alphawallet.app.ui;
 
-import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -49,7 +39,6 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
@@ -69,14 +58,9 @@ import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -85,10 +69,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -96,13 +78,10 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
- * Created by James on 21/02/2018.
+ * Created by JB on 11/08/2021.
  */
-
-public class TransferTicketDetailActivity extends BaseActivity
-        implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback {
-    private static final int SEND_INTENT_REQUEST_CODE = 2;
-
+public class TransferNFTActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
+{
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
     protected TransferTicketDetailViewModel viewModel;
@@ -114,12 +93,8 @@ public class TransferTicketDetailActivity extends BaseActivity
     private Token token;
     private NonFungibleTokenAdapter adapter;
 
-    private TextView validUntil;
-    private TextView textQuantity;
-
-    private String ticketIds;
+    private String tokenIds;
     private List<BigInteger> selection;
-    private DisplayState transferStatus;
 
     private InputAddress addressInput;
     private String sendAddress;
@@ -128,19 +103,9 @@ public class TransferTicketDetailActivity extends BaseActivity
     private ActionSheetDialog actionDialog;
     private AWalletConfirmationDialog confirmationDialog;
 
-    private AppCompatRadioButton pickLink;
-    private AppCompatRadioButton pickTransfer;
-
     private LinearLayout pickTicketQuantity;
     private LinearLayout pickTransferMethod;
     private LinearLayout pickExpiryDate;
-    private LinearLayout buttonLinkPick;
-    private LinearLayout buttonTransferPick;
-
-    private EditText expiryDateEditText;
-    private EditText expiryTimeEditText;
-    private DatePickerDialog datePickerDialog;
-    private TimePickerDialog timePickerDialog;
 
     private SignAuthenticationCallback signCallback;
 
@@ -154,11 +119,10 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        token = getIntent().getParcelableExtra(TICKET);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
 
-        ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
-        transferStatus = DisplayState.values()[getIntent().getIntExtra(EXTRA_STATE, 0)];
-        selection = token.stringHexToBigIntegerList(ticketIds);
+        tokenIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
+        selection = token.stringHexToBigIntegerList(tokenIds);
 
         toolbar();
         systemView = findViewById(R.id.system_view);
@@ -179,7 +143,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
-        viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.userTransaction().observe(this, this::onUserTransaction);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
@@ -189,66 +152,19 @@ public class TransferTicketDetailActivity extends BaseActivity
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        textQuantity = findViewById(R.id.text_quantity);
-        validUntil = findViewById(R.id.text_valid_until);
-
         pickTicketQuantity = findViewById(R.id.layout_ticket_quantity);
         pickTransferMethod = findViewById(R.id.layout_choose_method);
         pickExpiryDate = findViewById(R.id.layout_date_picker);
         functionBar = findViewById(R.id.layoutButtons);
 
-        expiryDateEditText = findViewById(R.id.edit_expiry_date);
-        expiryDateEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            @SuppressLint("StringFormatInvalid")
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                validUntil.setText(getString(R.string.link_valid_until, s.toString(), expiryTimeEditText.getText().toString()));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        expiryTimeEditText = findViewById(R.id.edit_expiry_time);
-        expiryTimeEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @SuppressLint("StringFormatInvalid")
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                validUntil.setText(getString(R.string.link_valid_until, expiryDateEditText.getText().toString(), s.toString()));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        pickLink = findViewById(R.id.radio_pickup_link);
-        pickTransfer = findViewById(R.id.radio_transfer_now);
-
-        buttonLinkPick = findViewById(R.id.layout_link_pick);
-        buttonTransferPick = findViewById(R.id.layout_transfer_now);
-
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_next)));
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_transfer)));
         functionBar.revealButtons();
 
         setupScreen();
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
-    private void initQuantitySelector() {
+    /*private void initQuantitySelector() {
         pickTicketQuantity.setVisibility(View.VISIBLE);
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
@@ -256,7 +172,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             if ((quantity + 1) <= adapter.getTicketRangeCount()) {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
-                selection = token.pruneIDList(ticketIds, quantity);
+                selection = token.pruneIDList(tokenIds, quantity);
             }
         });
 
@@ -266,145 +182,13 @@ public class TransferTicketDetailActivity extends BaseActivity
             if ((quantity - 1) > 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                selection = token.pruneIDList(ticketIds, 1);
+                selection = token.pruneIDList(tokenIds, 1);
             }
         });
 
         textQuantity.setText("1");
-        selection = token.pruneIDList(ticketIds, 1);
-    }
-
-    private void setupRadioButtons()
-    {
-        buttonLinkPick.setSelected(true);
-        buttonLinkPick.setOnClickListener((View v) -> {
-            pickLink.setChecked(true);
-            pickTransfer.setChecked(false);
-            buttonLinkPick.setSelected(true);
-            buttonTransferPick.setSelected(false);
-        });
-
-        buttonTransferPick.setOnClickListener((View v) -> {
-            pickLink.setChecked(false);
-            pickTransfer.setChecked(true);
-            buttonLinkPick.setSelected(false);
-            buttonTransferPick.setSelected(true);
-        });
-
-        pickLink.setOnClickListener((View v) -> {
-            pickLink.setChecked(true);
-            pickTransfer.setChecked(false);
-            buttonLinkPick.setSelected(true);
-            buttonTransferPick.setSelected(false);
-        });
-
-        pickTransfer.setOnClickListener((View v) -> {
-            pickLink.setChecked(false);
-            pickTransfer.setChecked(true);
-            buttonLinkPick.setSelected(false);
-            buttonTransferPick.setSelected(true);
-        });
-    }
-
-    private DisplayState getNextState()
-    {
-        DisplayState newState = DisplayState.NO_ACTION;
-
-        switch (transferStatus)
-        {
-            case CHOOSE_QUANTITY:
-                if (CustomViewSettings.hasDirectTransfer())
-                {
-                    newState = DisplayState.PICK_TRANSFER_METHOD;
-                }
-                else
-                {
-                    newState = DisplayState.TRANSFER_USING_LINK;
-                }
-                break;
-            case PICK_TRANSFER_METHOD:
-                if (pickTransfer.isChecked())
-                {
-                    newState = DisplayState.TRANSFER_TO_ADDRESS;
-                }
-                else
-                {
-                    newState = DisplayState.TRANSFER_USING_LINK;
-                }
-                break;
-            case TRANSFER_USING_LINK:
-                //generate link
-                getAuthenticationForLinkGeneration();
-                break;
-            case TRANSFER_TO_ADDRESS:
-                addressInput.getAddress(); // ask address module to supply address
-                break;
-        }
-
-        return newState;
-    }
-
-    private void getAuthenticationForLinkGeneration()
-    {
-        signCallback = new SignAuthenticationCallback()
-        {
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
-                else viewModel.failedAuthentication(SIGN_DATA);
-
-                if (gotAuth)
-                {
-                    if(token.isERC721Ticket())
-                    {
-                        viewModel.generateSpawnLink(selection, token.getAddress(), calculateExpiryTime());
-                    }
-                    else
-                    {
-                        viewModel.generateUniversalLink(token.getTransferListFormat(selection), token.getAddress(), calculateExpiryTime());
-                    }
-                }
-                else
-                {
-                    //display fail auth
-                    onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
-                }
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-
-            }
-        };
-
-        viewModel.getAuthorisation(this, signCallback);
-    }
-
-    private long calculateExpiryTime()
-    {
-        String expiryDate = expiryDateEditText.getText().toString();
-        String expiryTime = expiryTimeEditText.getText().toString();
-        String tempDateString = expiryDate + " " + expiryTime;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Date date;
-        String dateString = "";
-        long UTCTimeStamp = 0;
-        try
-        {
-            date = simpleDateFormat.parse(tempDateString);
-            dateString = simpleDateFormat.format(date);
-            Log.d(SellDetailActivity.class.getSimpleName(), "date : " + dateString);
-            UTCTimeStamp = (date.getTime()) / 1000;
-        }
-        catch (ParseException e)
-        {
-            Log.e(SellDetailActivity.class.getSimpleName(), e.getMessage(), e);
-        }
-
-        return UTCTimeStamp;
-    }
+        selection = token.pruneIDList(tokenIds, 1);
+    }*/
 
     private void setupScreen()
     {
@@ -412,33 +196,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         pickTicketQuantity.setVisibility(View.GONE);
         pickTransferMethod.setVisibility(View.GONE);
         pickExpiryDate.setVisibility(View.GONE);
-
-        switch (transferStatus)
-        {
-            case CHOOSE_QUANTITY:
-                initQuantitySelector();
-                pickTicketQuantity.setVisibility(View.VISIBLE);
-                String typeName = viewModel.getAssetDefinitionService().getTokenName(token.tokenInfo.chainId, token.tokenInfo.address, 1);
-                setTitle(getString(R.string.title_select_ticket_quantity, typeName != null ? typeName : getString(R.string.ticket)));
-                break;
-            case PICK_TRANSFER_METHOD:
-                setupRadioButtons();
-                pickTransferMethod.setVisibility(View.VISIBLE);
-                setTitle(R.string.title_select_transfer_method);
-                break;
-            case TRANSFER_USING_LINK:
-                initDatePicker();
-                initTimePicker();
-                expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
-                expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
-                pickExpiryDate.setVisibility(View.VISIBLE);
-                setTitle(R.string.title_set_universal_link_expiry);
-                break;
-            case TRANSFER_TO_ADDRESS:
-                addressInput.setVisibility(View.VISIBLE);
-                setTitle(R.string.title_input_wallet_address);
-                break;
-        }
+        addressInput.setVisibility(View.VISIBLE);
+        setTitle(R.string.title_input_wallet_address);
     }
 
     private void onTransaction(String success)
@@ -521,7 +280,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.show();
     }
 
-    private void transferTicketFinal(String to)
+    private void transferTokenFinal(String to)
     {
         //complete the transfer
         onProgress(true);
@@ -604,7 +363,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                         break;
                     default:
                         Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                    "Code: " + resultCode
+                                "Code: " + resultCode
                         ));
                         break;
                 }
@@ -651,30 +410,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.show();
     }
 
-    private void linkReady(String universalLink)
-    {
-        int quantity = 1;
-        if(selection != null)
-        {
-            quantity = selection.size();
-        }
-        int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
-        String qty = String.valueOf(quantity) + " " +
-                getResources().getString(ticketName) + "\n" +
-                getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
-
-        confirmationDialog = new AWalletConfirmationDialog(this);
-        confirmationDialog.setTitle(R.string.generate_pick_up_link);
-        confirmationDialog.setSmallText(R.string.generate_free_transfer_link);
-        confirmationDialog.setMediumText(qty);
-        confirmationDialog.setPrimaryButtonText(R.string.send_universal_link);
-        confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        confirmationDialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
-        confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
-        confirmationDialog.showShareLink();
-        confirmationDialog.show();
-    }
-
     private void handleERC875Transfer(final String to, final String ensName)
     {
         //how many indices are we selling?
@@ -696,7 +431,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
 
-                if (gotAuth) transferTicketFinal(to);
+                if (gotAuth) transferTokenFinal(to);
             }
 
             @Override
@@ -730,63 +465,13 @@ public class TransferTicketDetailActivity extends BaseActivity
                 sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
             });
 
-    private void transferLinkFinal(String universalLink)
-    {
-        //create share intent
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
-        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Magic Link");
-        sendIntent.setType("text/plain");
-        transferLinkFinalResult.launch(Intent.createChooser(sendIntent, "Share via"));
-    }
-
-    private void initDatePicker()
-    {
-        String dateFormat = "dd/MM/yyyy";
-        Calendar newCalendar = Calendar.getInstance();
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat, Locale.ENGLISH);
-
-        datePickerDialog = new DatePickerDialog(this, (view, year, monthOfYear, dayOfMonth) -> {
-            Calendar newDate = Calendar.getInstance();
-            newDate.set(year, monthOfYear, dayOfMonth);
-            expiryDateEditText.setText(dateFormatter.format(newDate.getTime()));
-        }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-
-        //set default for tomorrow
-        long tomorrowStamp = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
-        Date tomorrow = new Date(tomorrowStamp);
-        expiryDateEditText.setText(dateFormatter.format(tomorrow.getTime()));
-    }
-
-    private void initTimePicker()
-    {
-        Calendar newCalendar = Calendar.getInstance();
-        timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
-            String time = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
-            expiryTimeEditText.setText(time);
-        }, newCalendar.get(Calendar.HOUR_OF_DAY), newCalendar.get(Calendar.MINUTE), true);
-
-        //set for now
-        String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-                                    Calendar.getInstance().get(Calendar.MINUTE));
-        expiryTimeEditText.setText(time);
-    }
-
     @Override
     public void handleClick(String action, int actionId)
     {
         //clicked the next button
-        if (actionId == R.string.action_next)
+        if (actionId == R.string.action_transfer)
         {
-            KeyboardUtils.hideKeyboard(getCurrentFocus());
-            addressInput.getAddress();
-
-            if (addressInput.getVisibility() != View.VISIBLE)
-            {
-                // go to next screen
-                viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
-            }
+            //
         }
     }
 
@@ -803,15 +488,15 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
         else
         {
-            if (token instanceof ERC721Token)
-            {
-                calculateTransactionCost();
-            }
-            else
-            {
-                handleERC875Transfer(address, ensName);
-            }
+            calculateTransactionCost();
         }
+    }
+
+    @Override
+    public void showTransferToken(List<BigInteger> selection)
+    {
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        addressInput.getAddress();
     }
 
     private void calculateTransactionCost()
@@ -822,22 +507,16 @@ public class TransferTicketDetailActivity extends BaseActivity
         final String txSendAddress = sendAddress;
         sendAddress = null;
 
-        final byte[] transactionBytes = viewModel.getERC721TransferBytes(txSendAddress,token.getAddress(),ticketIds,token.tokenInfo.chainId);
-        if (token.isEthereum())
-        {
-            checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);
-        }
-        else
-        {
-            calculateEstimateDialog();
-            //form payload and calculate tx cost
-            calcGasCost = viewModel.calculateGasEstimate(viewModel.getWallet(), transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
-                    .map(this::convertToGasLimit)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
-                            error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
-        }
+        final byte[] transactionBytes = token.getTransferBytes(txSendAddress, selection);
+
+        calculateEstimateDialog();
+        //form payload and calculate tx cost
+        calcGasCost = viewModel.calculateGasEstimate(viewModel.getWallet(), transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
+                .map(this::convertToGasLimit)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
+                        error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
     }
 
     private BigInteger convertToGasLimit(EthEstimateGas estimate)
@@ -884,6 +563,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                 -1,
                 Numeric.toHexString(transactionBytes),
                 -1);
+
         if (sendGasLimit.equals(BigInteger.ZERO))
         {
             estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);

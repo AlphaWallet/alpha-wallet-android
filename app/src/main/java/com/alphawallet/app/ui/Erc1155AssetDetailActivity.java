@@ -26,6 +26,8 @@ import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 
 import java.math.BigInteger;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -39,18 +41,9 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     private Token token;
     private Wallet wallet;
     private BigInteger tokenId;
+    private String sequenceId;
 
     private LinearLayout tokenInfoLayout;
-
-//    private TokenInfoView issuer;
-//    private TokenInfoView reserveValue;
-//    private TokenInfoView created;
-//    private TokenInfoView type;
-//    private TokenInfoView type2;
-//    private TokenInfoView transferFee;
-//    private TokenInfoView circulatingSupply;
-    private TextView tokenDescription;
-    private NFTImageView tokenImage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -75,35 +68,23 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     private void initViews()
     {
         tokenInfoLayout = findViewById(R.id.layout_token_info);
-        tokenImage = findViewById(R.id.asset_image);
-
+        NFTImageView tokenImage = findViewById(R.id.asset_image);
         NFTAsset asset = token.getTokenAssets().get(tokenId);
 
         if (asset == null) return;
 
-        //TODO: Find this data from event log
-
-//        issuer = new TokenInfoView(this, "Issuer");
-//        reserveValue = new TokenInfoView(this, "Reserve Value");
-//        created = new TokenInfoView(this, "Created");
-//        type = new TokenInfoView(this, "Type");
-//        type2 = new TokenInfoView(this, "Type");
-//        transferFee = new TokenInfoView(this, "Transfer Fee");
-//        circulatingSupply = new TokenInfoView(this, "Circulating Supply");
-
         tokenImage.setupTokenImage(asset);
 
-        tokenDescription = findViewById(R.id.token_description);
+        TextView tokenDescription = findViewById(R.id.token_description);
 
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Details"));
 
-        addInfoView("External Link", asset.getExternalLink());//Html.fromHtml("<a href=\"" + asset.getExternalLink() + "\">" + asset.getExternalLink() + "</a>"));
-
+        if (!TextUtils.isEmpty(sequenceId)) { addInfoView("Sequence #", sequenceId); }
+        addInfoView("External Link", asset.getExternalLink());
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
         tokenDescription.setText(asset.getDescription());
 
         tokenInfoLayout.forceLayout();
-
     }
 
     private void getIntentData()
@@ -111,9 +92,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
-
-        // TODO: retrieve asset from intent
-        // asset = getIntent().getParcelableExtra("asset");
+        sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
     }
 
     private void initViewModel()
@@ -127,7 +106,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
@@ -139,8 +118,14 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         {
             TokenInfoView v = new TokenInfoView(this, elementName);
             v.setValue(name);
-            v.setLink();
+            if (name.startsWith("http")) { v.setLink(); }
             tokenInfoLayout.addView(v);
         }
+    }
+
+    @Override
+    public void showTransferToken(List<BigInteger> selection)
+    {
+        viewModel.showTransferToken(this, token, selection);
     }
 }

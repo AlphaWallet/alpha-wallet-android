@@ -272,4 +272,10 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         return new BigDecimal(getArrayBalance().size());
     }
+
+    @Override
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_use, R.string.action_transfer);
+    }
 }

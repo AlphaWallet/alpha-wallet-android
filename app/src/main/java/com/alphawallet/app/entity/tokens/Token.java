@@ -28,7 +28,13 @@ import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -132,6 +138,9 @@ public class Token implements Parcelable
     }
 
     public NFTAsset getAssetForToken(String tokenId) {
+        return null;
+    }
+    public NFTAsset getAssetForToken(BigInteger tokenId) {
         return null;
     }
     public List<BigInteger> getUniqueTokenIds()
@@ -401,6 +410,11 @@ public class Token implements Parcelable
     {
         return null;
     }
+    public byte[] getTransferBytes(String to, List<BigInteger> transferData)
+    {
+        return Numeric.hexStringToByteArray("0x");
+    }
+
     public Function getSpawnPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
     {
         return new Function(
@@ -887,4 +901,9 @@ public class Token implements Parcelable
 
     public void setAssetContract(AssetContract contract) {  }
     public AssetContract getAssetContract() { return null; }
+
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_send, R.string.action_receive);
+    }
 }

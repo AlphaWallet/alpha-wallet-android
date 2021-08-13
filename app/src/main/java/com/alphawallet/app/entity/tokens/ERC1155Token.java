@@ -15,17 +15,23 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.google.gson.Gson;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -43,11 +49,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.realm.Realm;
 
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
 public class ERC1155Token extends Token implements Parcelable
@@ -119,6 +128,18 @@ public class ERC1155Token extends Token implements Parcelable
         return assets;
     }
 
+    @Override
+    public NFTAsset getAssetForToken(BigInteger tokenId)
+    {
+        return assets.get(tokenId);
+    }
+
+    @Override
+    public NFTAsset getAssetForToken(String tokenIdStr)
+    {
+        return assets.get(parseTokenId(tokenIdStr));
+    }
+
     public boolean isNonFungible() { return true; }
 
     @Override
@@ -140,23 +161,118 @@ public class ERC1155Token extends Token implements Parcelable
         return new BigDecimal(assets.size());
     }
 
+    @Override
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_transfer);
+    }
+
+    @Override
+    public byte[] getTransferBytes(String to, List<BigInteger> tokenIds) throws NumberFormatException
+    {
+        Function txFunc = getTransferFunction(to, tokenIds);
+        String encodedFunction = FunctionEncoder.encode(txFunc);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    @Override
+    public Function getTransferFunction(String to, List<BigInteger> tokenIds) throws NumberFormatException
+    {
+        Function               function    = null;
+        List<Type>             params;
+        BigInteger             tokenIdBI   = tokenIds.get(0);
+        List<TypeReference<?>> returnTypes = Collections.emptyList();
+        Map<BigInteger, BigInteger> idMap = Utils.getIdMap(tokenIds);
+
+        if (idMap.keySet().size() == 1)
+        {
+            params = Arrays.asList(new Address(getWallet()), new Address(to), new Uint256(tokenIdBI),
+                    new Uint256(idMap.get(tokenIdBI)), new DynamicBytes(new byte[0]));
+            function = new Function("safeTransferFrom", params, returnTypes);
+        }
+        else
+        {
+            List<Uint256> idList = new ArrayList<>(idMap.keySet().size());
+            List<Uint256> amounts = new ArrayList<>(idMap.keySet().size());
+            for (BigInteger tokenId : idMap.keySet())
+            {
+                idList.add(new Uint256(tokenId));
+                amounts.add(new Uint256(idMap.get(tokenId)));
+            }
+
+            params = Arrays.asList(new Address(getWallet()), new Address(to), new DynamicArray<>(Uint256.class, idList),
+                    new DynamicArray<>(Uint256.class, amounts), new DynamicBytes(new byte[0]));
+            function = new Function("safeBatchTransferFrom", params, returnTypes);
+        }
+        return function;
+    }
+
+    @Override
+    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
+    {
+        //detect asset removal
+        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
+        oldAssetIdList.removeAll(assets.keySet());
+
+        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
+
+        //Now detect differences or new tokens
+        for (BigInteger tokenId : assets.keySet())
+        {
+            NFTAsset newAsset = assets.get(tokenId);
+            NFTAsset oldAsset = assetMap.get(tokenId);
+
+            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
+            {
+                changeList.add(tokenId);
+            }
+        }
+
+        return changeList;
+    }
+
     //Must not be called on main thread
     private void updateBalances(Realm realm)
+    {
+        if (updateBatchBalance(realm)) { return; }
+        updateIndividualBalances(realm);
+    }
+
+    private boolean updateBatchBalance(Realm realm)
+    {
+        boolean updated = false;
+        Function balanceOfBatch = balanceOfBatch(getWallet(), assets.keySet());
+        List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
+        //fill in balances
+        if (balances != null && balances.size() > 0)
+        {
+            int index = 0;
+            for (BigInteger tokenId : assets.keySet())
+            {
+                if (assets.get(tokenId).setBalance(new BigDecimal(balances.get(index).getValue())) && !updated)
+                {
+                    updated = true;
+                }
+                index++;
+            }
+
+            if (updated) { updateRealmBalances(realm); }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void updateIndividualBalances(Realm realm)
     {
         boolean updated = false;
         for (BigInteger tokenId : assets.keySet())
         {
             try
             {
-                Function balanceOf = new Function(
-                        "balanceOf",
-                        Arrays.asList(
-                                new org.web3j.abi.datatypes.Address(getWallet()),
-                                new Uint256(tokenId)
-                        ), Collections.singletonList(new TypeReference<Uint256>()
-                {
-                }));
-
+                Function balanceOf = balanceOfSingle(getWallet(), tokenId);
                 String response = callSmartContractFunction(tokenInfo.chainId, balanceOf, getAddress(), getWallet());
                 BigInteger balance = new BigInteger(response);
                 //TODO: Allow for decimal
@@ -170,11 +286,11 @@ public class ERC1155Token extends Token implements Parcelable
 
         if (updated)
         {
-            updatRealmBalances(realm);
+            updateRealmBalances(realm);
         }
     }
 
-    private void updatRealmBalances(Realm realm)
+    private void updateRealmBalances(Realm realm)
     {
         realm.executeTransaction(r -> {
             for (BigInteger tokenId : assets.keySet())
@@ -416,5 +532,33 @@ public class ERC1155Token extends Token implements Parcelable
         }
 
         return new BigDecimal(assets.keySet().size());
+    }
+
+    private Function balanceOfBatch(String address, Set<BigInteger> tokenIds)
+    {
+        //create address list
+        List<Address> batchAddresses = new ArrayList<>(tokenIds.size());
+        List<Uint256> tokenIdList = new ArrayList<>(tokenIds.size());
+        for (BigInteger id : tokenIds)
+        {
+            batchAddresses.add(new Address(address));
+            tokenIdList.add(new Uint256(id));
+        } //populate list of addresses with wallet address
+
+        return new Function("balanceOfBatch",
+                Arrays.asList(
+                        new DynamicArray<>(Address.class, batchAddresses),
+                        new DynamicArray<>(Uint256.class, tokenIdList)),
+                Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
+    }
+
+    private Function balanceOfSingle(String address, BigInteger tokenId)
+    {
+        return new Function(
+                "balanceOf",
+                Arrays.asList(
+                        new org.web3j.abi.datatypes.Address(address),
+                        new Uint256(tokenId)),
+                Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 }

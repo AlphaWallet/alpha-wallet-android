@@ -332,7 +332,9 @@ public class TokenRepository implements TokenRepositoryType {
                     break;
                 case ERC721_LEGACY:
                 case ERC721:
+                    break;
                 case ERC1155:
+                    //TODO: get balance.
                     break;
                 case ERC721_TICKET:
                     balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
@@ -1465,7 +1467,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     public static String callSmartContractFunction(int chainId,
-                                             Function function, String contractAddress, String walletAddr)
+                                  Function function, String contractAddress, String walletAddr)
     {
         String encodedFunction = FunctionEncoder.encode(function);
 
@@ -1488,6 +1490,43 @@ public class TokenRepository implements TokenRepositoryType {
         }
 
         return null;
+    }
+
+    public static List callSmartContractFunctionArray(int chainId,
+                                Function function, String contractAddress, String walletAddr)
+    {
+        try
+        {
+            String encodedFunction = FunctionEncoder.encode(function);
+            org.web3j.protocol.core.methods.response.EthCall ethCall = getWeb3jService(chainId).ethCall(
+                    org.web3j.protocol.core.methods.request.Transaction
+                            .createEthCallTransaction(walletAddr, contractAddress, encodedFunction),
+                    DefaultBlockParameterName.LATEST).send();
+
+            String value = ethCall.getValue();
+            List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
+            Object o;
+            if (values.isEmpty())
+            {
+                values = new ArrayList<>();
+                values.add(new Uint256(CONTRACT_BALANCE_NULL));
+                o = values;
+            }
+            else
+            {
+                o = values.get(0).getValue();
+            }
+            return (List)o;
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
+            return null;
+        }
     }
 
     private boolean ignoreToken(Token t)

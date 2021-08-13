@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.Menu;
@@ -57,7 +58,8 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
         initViewModel();
 
-        viewModel.getAssets(token);
+        adapter = new Erc1155AssetListAdapter(this, token.getTokenAssets(), tokenId, this);
+        recyclerView.setAdapter(adapter);
     }
 
     private void initViews()
@@ -83,7 +85,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     @Override
     public void onAssetClicked(Pair<BigInteger, NFTAsset> pair)
     {
-        viewModel.showAssetDetails(this, wallet, token, pair.first);
+        viewModel.showAssetDetails(this, wallet, token, tokenId, pair.first);
     }
 
     @Override

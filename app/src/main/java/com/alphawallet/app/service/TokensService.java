@@ -378,7 +378,6 @@ public class TokensService
 
     public void onWalletRefreshSwipe()
     {
-        long lala = Utils.timeUntil(openSeaCheck);
         if (Utils.timeUntil(openSeaCheck) > DateUtils.MINUTE_IN_MILLIS && (openSeaQueryDisposable == null || openSeaQueryDisposable.isDisposed()))
         {
             openSeaCheck = System.currentTimeMillis() + 3 * DateUtils.SECOND_IN_MILLIS;
@@ -606,7 +605,7 @@ public class TokensService
 
         final Wallet wallet = new Wallet(currentAddress);
 
-        openSeaCheck = System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS;
+        openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS;
 
         if (BuildConfig.DEBUG)
             Log.d(TAG, "Fetch from opensea : " + currentAddress + " : " + info.getShortName());

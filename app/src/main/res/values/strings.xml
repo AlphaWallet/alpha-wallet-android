@@ -793,4 +793,5 @@
     <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
     <string name="asset_description_text">%1$s Asset | %2$s</string>
     <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
+    <string name="erc1155_idname" translatable="false">%1$s #%2$s</string>
 </resources>

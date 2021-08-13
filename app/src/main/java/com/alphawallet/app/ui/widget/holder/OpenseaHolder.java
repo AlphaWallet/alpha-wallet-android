@@ -16,6 +16,7 @@ import androidx.appcompat.widget.AppCompatRadioButton;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.AssetDisplayActivity;
@@ -28,11 +29,16 @@ import com.alphawallet.token.entity.TicketRange;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.app.util.Utils.getIdMap;
 
 /**
  * Created by James on 3/10/2018.
@@ -81,37 +87,38 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         activeClick = false;
         if (data == null) return;
 
-        //retrieve asset from token
-        BigInteger tokenId = data.tokenIds.get(0);
-        NFTAsset asset = token.getAssetForToken(tokenId.toString());
-
-        layoutDetails.setVisibility(View.GONE);
-        tokenImageView.blankViews();
-
         if (assetLoader != null && !assetLoader.isDisposed())
         {
             assetLoader.dispose();
         }
 
-        if (asset.needsLoading())
+        //retrieve asset from token
+        BigInteger tokenId = data.tokenIds.get(0);
+        NFTAsset asset = token.getAssetForToken(tokenId);
+
+        layoutDetails.setVisibility(View.GONE);
+        tokenImageView.blankViews();
+
+        if (false && data.tokenIds.size() > 0 && token.getInterfaceSpec() == ContractType.ERC1155) //TODO: bind ERC1155 batch
         {
-            loadingSpinner.setVisibility(View.VISIBLE);
-            titleText.setText(asset.getName());
-            assetLoader = Single.fromCallable(() -> {
-                    return token.fetchTokenMetadata(data.tokenIds.get(0));//fetch directly from token
-                })
-                .map(newAsset -> storeAsset(tokenId, newAsset, asset))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(a -> displayAsset(data, a), e -> handleError(e, tokenId));
+            bindERC1155Batch(data, addition);
         }
         else
         {
-            displayAsset(data, asset);
+            displayAsset(data, asset, true);
         }
 
-        clickLayer.setOnClickListener(v -> handleClick(v, data));
-        clickLayer.setOnLongClickListener(v -> handleLongClick(v, data));
+        addClickListener(data);
+    }
+
+    private void bindERC1155Batch(TicketRange data, Bundle addition)
+    {
+        //TODO: Show batch as per picture here: https://user-images.githubusercontent.com/17334718/119675191-68925580-be6f-11eb-9646-b94b3f170276.jpg (top right "send tokens")
+        //NB if there's a repeating tokenId it means transfer a batch
+        Map<BigInteger, BigInteger> tokenMap = getIdMap(data.tokenIds);
+
+        //Use this map with counts of separate tokens. Display as appropriate (eg 200x TokenId#1, 5x TokenId#2 etc)
+
     }
 
     private NFTAsset storeAsset(BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)
@@ -141,10 +148,25 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         titleText.setText(assetName);
     }
 
-    private void displayAsset(TicketRange data, NFTAsset asset)
+    private void displayAsset(TicketRange data, NFTAsset asset, boolean entry)
     {
-        String assetName;
         BigInteger tokenId = data.tokenIds.get(0);
+
+        if (entry && asset.needsLoading())
+        {
+            loadingSpinner.setVisibility(View.VISIBLE);
+            titleText.setText(asset.getName());
+            assetLoader = Single.fromCallable(() -> {
+                return token.fetchTokenMetadata(data.tokenIds.get(0));//fetch directly from token
+            }).map(newAsset -> storeAsset(tokenId, newAsset, asset))
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(a -> displayAsset(data, a, false), e -> handleError(e, tokenId));
+
+            return;
+        }
+
+        String assetName;
         if (asset.getName() != null && !asset.getName().equals("null")) {
             assetName = asset.getName();
         } else {
@@ -193,10 +215,17 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         tokenImageView.setupTokenImageThumbnail(asset);
     }
 
-    public void handleClick(View v, TicketRange data)
+    private void addClickListener(TicketRange data)
     {
-        if (!clickThrough) { return; }
+        if (clickThrough)
+        {
+            clickLayer.setOnClickListener(v -> handleClick(v, data));
+            clickLayer.setOnLongClickListener(v -> handleLongClick(v, data));
+        }
+    }
 
+    private void handleClick(View v, TicketRange data)
+    {
         BigInteger tokenId = data.tokenIds.get(0);
 
         if (data.exposeRadio)

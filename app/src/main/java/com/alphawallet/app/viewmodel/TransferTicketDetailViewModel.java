@@ -12,7 +12,6 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
-import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -196,7 +195,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         universalLinkReady.postValue(universalLink);
     }
 
-    public void createTicketTransfer(String to, Token token, List<BigInteger> transferList)
+    public void createTokenTransfer(String to, Token token, List<BigInteger> transferList)
     {
         if (!token.contractTypeValid())
         {
@@ -220,7 +219,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         token.setInterfaceSpec(spec);
         TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
-        createTicketTransfer(to, token, transferList);
+        createTokenTransfer(to, token, transferList);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

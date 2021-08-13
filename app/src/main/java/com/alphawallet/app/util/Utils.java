@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -442,6 +443,20 @@ public class Utils {
         return indexList;
     }
 
+    public static BigInteger parseTokenId(String tokenIdStr)
+    {
+        BigInteger tokenId;
+        try
+        {
+            tokenId = new BigInteger(tokenIdStr);
+        }
+        catch (Exception e)
+        {
+            tokenId = BigInteger.ZERO;
+        }
+
+        return tokenId;
+    }
 
     /**
      * Produce a string CSV of integer IDs given an input list of values
@@ -509,6 +524,17 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static Map<BigInteger, BigInteger> getIdMap(List<BigInteger> tokenIds)
+    {
+        Map<BigInteger, BigInteger> tokenMap = new HashMap<>();
+        for (BigInteger tokenId : tokenIds)
+        {
+            tokenMap.put(tokenId, tokenMap.containsKey(tokenId) ? tokenMap.get(tokenId).add(BigInteger.ONE) : BigInteger.ONE);
+        }
+
+        return tokenMap;
     }
 
     public static boolean isNumeric(String numString)

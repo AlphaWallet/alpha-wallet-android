@@ -24,16 +24,44 @@
         android:layout_toEndOf="@id/icon"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_semibold"
-            android:singleLine="true"
-            android:text="Title"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/_hash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/sequence"
+                android:paddingLeft="4dp"
+                android:text="#"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp17"/>
+
+            <TextView
+                android:id="@+id/sequence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="1"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp17"/>
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_semibold"
+                android:layout_toStartOf="@id/_hash"
+                android:layout_alignParentStart="true"
+                android:singleLine="true"
+                android:text="Title"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp17" />
+
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/subtitle"

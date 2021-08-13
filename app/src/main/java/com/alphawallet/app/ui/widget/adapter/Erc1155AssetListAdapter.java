@@ -19,28 +19,36 @@ import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetListAdapter.ViewHolder> {
-    private List<Pair<BigInteger, NFTAsset>> actualData;
-    private Context context;
-    private OnAssetClickListener listener;
+    private final List<BigInteger> actualData;
+    private final NFTAsset asset;
+    private final Context context;
+    private final OnAssetClickListener listener;
+    private final BigInteger tokenId;
 
-    public Erc1155AssetListAdapter(Context context, Map<BigInteger, NFTAsset> data, OnAssetClickListener listener)
+    public Erc1155AssetListAdapter(Context context, Map<BigInteger, NFTAsset> data, BigInteger tokenId, OnAssetClickListener listener)
     {
         this.context = context;
         this.listener = listener;
+        this.asset = data.get(tokenId);
         actualData = new ArrayList<>(data.size());
-        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet()) {
-            actualData.add(new Pair<>(d.getKey(), d.getValue()));
+        for (BigInteger d = BigInteger.ONE; d.compareTo(asset.getBalance().toBigInteger()) <= 0; d = d.add(BigInteger.ONE))
+        {
+            actualData.add(d);
         }
+        this.tokenId = tokenId;
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_erc1155_asset, parent, false);
@@ -48,20 +56,17 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position)
+    public void onBindViewHolder(@NotNull ViewHolder holder, int position)
     {
-        Pair<BigInteger, NFTAsset> pair = actualData.get(position);
-        NFTAsset item = pair.second;
-        if (item != null)
-        {
-            holder.title.setText(item.getName());
-            holder.subtitle.setText(item.getDescription());
-            Glide.with(context)
-                    .load(item.getImage())
-                    .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
-                    .into(holder.icon);
-            holder.layout.setOnClickListener(v -> listener.onAssetClicked(pair));
-        }
+        BigInteger id = actualData.get(position);
+        holder.title.setText(asset.getName());
+        holder.sequence.setText(id.toString());
+        holder.subtitle.setText(asset.getDescription());
+        Glide.with(context)
+                .load(asset.getImage())
+                .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
+                .into(holder.icon);
+        holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(id, asset)));
     }
 
     @Override
@@ -70,11 +75,12 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
         return actualData.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        RelativeLayout layout;
-        ImageView icon;
-        TextView title;
-        TextView subtitle;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final RelativeLayout layout;
+        final ImageView icon;
+        final TextView title;
+        final TextView sequence;
+        final TextView subtitle;
 
         ViewHolder(View view)
         {
@@ -83,6 +89,7 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
             subtitle = view.findViewById(R.id.subtitle);
+            sequence = view.findViewById(R.id.sequence);
         }
     }
 }

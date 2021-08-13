@@ -8,6 +8,7 @@ import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -128,7 +129,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
         assetCount = tokenIds.size();
-        int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+        int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
         if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
@@ -145,7 +146,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
         assetCount = t.getTokenCount();
-        int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+        int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
         if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
@@ -319,5 +320,10 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
 
         return new TicketRange(subSelection, token.getAddress(), false);
+    }
+
+    private int getHolderType()
+    {
+        return (token.getInterfaceSpec() == ContractType.ERC1155 || token.isERC721())  ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
     }
 }

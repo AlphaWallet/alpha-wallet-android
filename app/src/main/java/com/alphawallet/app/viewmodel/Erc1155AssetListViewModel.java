@@ -35,14 +35,24 @@ public class Erc1155AssetListViewModel extends BaseViewModel {
 
     }
 
-    public void showAssetDetails(Context context, Wallet wallet, Token token, BigInteger tokenId)
+    public void showAssetDetails(Context context, Wallet wallet, Token token, BigInteger tokenId, BigInteger sequenceId)
+    {
+        Intent intent = new Intent(context, Erc1155AssetDetailActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
+        intent.putExtra(C.EXTRA_STATE, sequenceId.toString());
+        context.startActivity(intent);
+    }
+
+    /*public void showAssetDetails(Context context, Wallet wallet, Token token, BigInteger tokenId)
     {
         Intent intent = new Intent(context, Erc1155AssetDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
         context.startActivity(intent);
-    }
+    }*/
 
     public void openSelectionMode(Context context, Token token, Wallet wallet)
     {

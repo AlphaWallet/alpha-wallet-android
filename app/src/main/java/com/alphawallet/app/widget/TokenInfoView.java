@@ -45,9 +45,12 @@ public class TokenInfoView extends LinearLayout {
         value.setTextColor(ContextCompat.getColor(getContext(), R.color.azure));
         value.setOnClickListener(v -> {
             String url = value.getText().toString();
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setData(Uri.parse(url));
-            getContext().startActivity(i);
+            if (url.startsWith("http"))
+            {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                getContext().startActivity(i);
+            }
         });
     }
 }

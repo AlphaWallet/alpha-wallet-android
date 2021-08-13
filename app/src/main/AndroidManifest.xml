@@ -333,6 +333,10 @@
             android:name=".ui.Erc1155AssetListActivity"
             android:label="ERC1155 Asset Details" />
 
+        <activity
+            android:name=".ui.TransferNFTActivity"
+            android:label="NFT Transfer" />
+
     </application>
 
 </manifest>

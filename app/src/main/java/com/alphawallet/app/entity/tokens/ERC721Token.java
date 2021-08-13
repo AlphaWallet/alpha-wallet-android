@@ -27,6 +27,7 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -41,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
@@ -79,6 +81,12 @@ public class ERC721Token extends Token implements Parcelable
     public NFTAsset getAssetForToken(String tokenIdStr)
     {
         return tokenBalanceAssets.get(parseTokenId(tokenIdStr));
+    }
+
+    @Override
+    public NFTAsset getAssetForToken(BigInteger tokenId)
+    {
+        return tokenBalanceAssets.get(tokenId);
     }
 
     private ERC721Token(Parcel in) {
@@ -128,6 +136,14 @@ public class ERC721Token extends Token implements Parcelable
     {
         if (balance.compareTo(BigDecimal.ZERO) > 0) { return balance.toString(); }
         else { return "0"; }
+    }
+
+    @Override
+    public byte[] getTransferBytes(String to, List<BigInteger> tokenIds) throws NumberFormatException
+    {
+        Function txFunc = getTransferFunction(to, tokenIds);
+        String encodedFunction = FunctionEncoder.encode(txFunc);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
     @Override
@@ -341,21 +357,6 @@ public class ERC721Token extends Token implements Parcelable
         return balance;
     }
 
-    private BigInteger parseTokenId(String tokenIdStr)
-    {
-        BigInteger tokenId;
-        try
-        {
-            tokenId = new BigInteger(tokenIdStr);
-        }
-        catch (Exception e)
-        {
-            tokenId = BigInteger.ZERO;
-        }
-
-        return tokenId;
-    }
-
     @Override
     public NFTAsset fetchTokenMetadata(BigInteger tokenId)
     {
@@ -471,5 +472,11 @@ public class ERC721Token extends Token implements Parcelable
                     .retryOnConnectionFailure(true)
                     .build();
         }
+    }
+
+    @Override
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_transfer);
     }
 }

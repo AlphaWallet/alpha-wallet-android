@@ -183,31 +183,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      */
     private void addStandardTokenFunctions(Token token) {
         if (token == null) return;
-        switch (token.getInterfaceSpec()) {
-            case ERC20:
-            case DYNAMIC_CONTRACT:
-            case ETHEREUM:
-                addFunction(R.string.action_send);
-                addFunction(R.string.action_receive);
-                break;
-            case ERC721:
-            case ERC721_LEGACY:
-                addFunction(R.string.action_transfer);
-                break;
-            case ERC721_TICKET:
-                addFunction(R.string.action_use);
-                addFunction(R.string.action_transfer);
-                break;
-            case ERC875:
-            case ERC875_LEGACY:
-                addFunction(R.string.action_use);
-                addFunction(R.string.action_transfer);
-                addFunction(R.string.action_sell);
-                break;
-            default:
-                addFunction(R.string.action_receive);
-                break;
-        }
+        for (Integer i : token.getStandardFunctions()) { addFunction(i); }
     }
 
     public void revealButtons()
@@ -660,7 +636,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         return (tokenIds != null && tokenIds.size() > 0) ? tokenIds.get(0) : BigInteger.ZERO;
     }
 
-    private void setupTokenMap(Token token, Map<BigInteger, List<String>> availabilityMap)
+    private void setupTokenMap(@NotNull Token token, Map<BigInteger, List<String>> availabilityMap)
     {
         token.setFunctionAvailability(availabilityMap);
         functionMapComplete.release();

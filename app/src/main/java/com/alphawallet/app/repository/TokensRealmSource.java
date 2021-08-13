@@ -589,6 +589,11 @@ public class TokensRealmSource implements TokenLocalSource {
                 .equalTo("chainId", token.tokenInfo.chainId)
                 .findFirst();
 
+        if (token.getAddress().equalsIgnoreCase("0xf5b48f1ab6fa44962e3a4479e7c1e0b1d6bba4d7"))
+        {
+            System.out.println("YOLESS");
+        }
+
         if (realmToken == null)
         {
             if (BuildConfig.DEBUG) Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address + " : " + token.balance.toString());
@@ -661,6 +666,10 @@ public class TokensRealmSource implements TokenLocalSource {
             realm.executeTransaction(r -> {
                 for (Token token : tokens)
                 {
+                    if (token.getAddress().equalsIgnoreCase("0xf5b48f1ab6fa44962e3a4479e7c1e0b1d6bba4d7"))
+                    {
+                        System.out.println("YOLESS");
+                    }
                     if (!token.isNonFungible()) continue;
 
                     //load all the old assets

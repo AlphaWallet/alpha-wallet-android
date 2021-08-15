@@ -22,7 +22,7 @@ public interface TokenLocalSource {
     Single<Token> saveToken(Wallet wallet, Token token);
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
     void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
-    boolean updateTokenBalance(Wallet wallet, int chainId, String tokenAddress, BigDecimal balance, List<BigInteger> balanceArray, ContractType type);
+    boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray);
     void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress);
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);

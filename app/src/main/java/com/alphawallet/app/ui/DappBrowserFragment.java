@@ -787,6 +787,22 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         startBalanceListener();
     }
 
+    /**
+     * Called by openDapp(Dapp url) to automatically switch to the required network when required
+     * @param chainId
+     */
+    public void switchNetwork(int chainId)
+    {
+        if (activeNetwork != null && activeNetwork.chainId == chainId) return; //not required
+        viewModel.setNetwork(chainId);
+
+        //setup network selection and init web3 with updated chain
+        activeNetwork = viewModel.getNetworkInfo(chainId);
+        currentNetwork.setText(activeNetwork.getShortName());
+        Utils.setChainColour(currentNetworkCircle, activeNetwork.chainId);
+        setupWeb3();
+    }
+
     private void onNetworkChanged(NetworkInfo networkInfo)
     {
         boolean networkChanged = networkInfo != null && (activeNetwork == null || activeNetwork.chainId != networkInfo.chainId);
@@ -1669,12 +1685,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return false;
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser && viewModel != null) {
-            viewModel.checkForNetworkChanges();
-        }
+    public void becomeVisible(boolean isVisible)
+    {
+        if (viewModel != null) { viewModel.checkForNetworkChanges(); }
     }
 
     @Override

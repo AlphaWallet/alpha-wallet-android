@@ -329,7 +329,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (actionId == R.string.convert_to_xdai)
         {
             openDapp(C.XDAI_BRIDGE_DAPP);
-        } else if (actionId == R.string.swap_with_quickswap) {
+        }
+        else if (actionId == R.string.swap_with_quickswap)
+        {
             String queryPath = "?use=v2&inputCurrency=" + (token.isEthereum() ? ETH_SYMBOL : token.getAddress());
             openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
         }
@@ -340,6 +342,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         //switch to dappbrowser and open at dappURL
         Intent intent = new Intent();
         intent.putExtra(C.DAPP_URL_LOAD, dappURL);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         setResult(RESULT_OK, intent);
         finish();
     }

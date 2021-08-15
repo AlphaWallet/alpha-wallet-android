@@ -168,17 +168,20 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         if (dataInteract != null) dataInteract.fetchMoreData(earliestDate);
     }
 
-    private Runnable checkData = () -> {
+    private final Runnable checkData = () -> {
         //get final position time
-        SortedItem<?> item = items.get(items.size() - 1);
-        long earliestDate = 0;
-        if (item instanceof TimestampSortedItem)
+        if (items.size() > 0)
         {
-            Date itemDate = ((TimestampSortedItem)item).getTimestamp();
-            earliestDate = itemDate.getTime();
-        }
+            SortedItem<?> item = items.get(items.size() - 1);
+            long earliestDate = 0;
+            if (item instanceof TimestampSortedItem)
+            {
+                Date itemDate = ((TimestampSortedItem) item).getTimestamp();
+                earliestDate = itemDate.getTime();
+            }
 
-        fetchData(earliestDate);
+            fetchData(earliestDate);
+        }
     };
 
     @Override

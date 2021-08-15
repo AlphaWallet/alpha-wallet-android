@@ -125,7 +125,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void txError(Throwable throwable)
     {
         throwable.getStackTrace();
-        System.out.println("ERROR: " + throwable.getMessage());
+        if (BuildConfig.DEBUG) System.out.println("ERROR: " + throwable.getMessage());
     }
 
     private void onWalletUpdate(Wallet w)

@@ -254,15 +254,6 @@ public class WalletFragment extends BaseFragment implements
     }
 
     @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        isVisible = isVisibleToUser;
-        if (isResumed()) { // fragment created
-            if (isVisible) viewModel.prepare();
-        }
-    }
-
-    @Override
     public void onPause()
     {
         super.onPause();
@@ -488,14 +479,17 @@ public class WalletFragment extends BaseFragment implements
         if (viewModel != null && adapter != null)
         {
             adapter.clear();
+            //reload tokens
+            viewModel.reloadTokens();
         }
     }
 
     public void refreshTokens()
     {
         //only update the tokens in place if something has changed, using TokenSortedItem rules.
-        if (viewModel != null)
+        if (viewModel != null && adapter != null)
         {
+            adapter.clear();
             viewModel.prepare();
             systemView.showProgress(false); //indicate update complete
         }

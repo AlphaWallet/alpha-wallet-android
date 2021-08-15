@@ -24,7 +24,7 @@ import io.realm.Realm;
 public interface TokenRepositoryType {
 
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
-    Single<BigDecimal> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type);
+    Single<BigDecimal> updateTokenBalance(String walletAddress, Token token);
     Single<ContractLocator> getTokenResponse(String address, int chainId, String method);
     Single<Token[]> checkInterface(Token[] tokens, Wallet wallet);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);

@@ -195,7 +195,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case CREATION:
                 break;
             default:
-                System.out.println("Unknown Token Contract");
+                if (BuildConfig.DEBUG) System.out.println("Unknown Token Contract");
                 break;
         }
     }
@@ -497,7 +497,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         realmToken.setUpdateTime(System.currentTimeMillis());
                         deleteAllAssets(r, key);
                     });
-                    Log.d(TAG, "Zero out ERC721 balance: " + realmToken.getName() + " :" + token.getAddress());
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Zero out ERC721 balance: " + realmToken.getName() + " :" + token.getAddress());
                     balanceChanged = true;
                 }
                 else if (!newBalance.equals(currentBalance))
@@ -506,7 +506,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         realmToken.setBalance(newBalance);
                         realmToken.setUpdateTime(System.currentTimeMillis());
                     });
-                    Log.d(TAG, "Update Token Balance: " + realmToken.getName() + " :" + token.getAddress());
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Update Token Balance: " + realmToken.getName() + " :" + token.getAddress());
                     balanceChanged = true;
                 }
 

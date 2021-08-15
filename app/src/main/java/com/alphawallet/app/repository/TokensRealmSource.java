@@ -823,12 +823,6 @@ public class TokensRealmSource implements TokenLocalSource {
                         .like("address", ADDRESS_FORMAT)
                         .findAll();
 
-                RealmResults<RealmToken> realmItems2 = realm.where(RealmToken.class)
-                        .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isEnabled", true)
-                        .like("address", ADDRESS_FORMAT)
-                        .findAll();
-
                 for (RealmToken t : realmItems)
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
@@ -836,7 +830,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
-                    if (t.getContractType() == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId()))
+                    if (t.getContractType() == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId())) //only allow 1 base per chain
                     {
                         rootChainTokenCards.remove((Integer)t.getChainId());
                     }
@@ -855,16 +849,6 @@ public class TokensRealmSource implements TokenLocalSource {
             catch (Exception e)
             {
                 e.printStackTrace();
-            }
-            finally
-            {
-                //create metas for any card not previously saved
-                /*for (Integer chainId : rootChainTokenCards)
-                {
-                    TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, svs, "", "", ContractType.ETHEREUM);
-                    meta.lastTxUpdate = 0;
-                    tokenMetas.add(meta);
-                }*/
             }
 
             return tokenMetas.toArray(new TokenCardMeta[0]);

@@ -255,7 +255,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
-            activeNetwork = viewModel.getActiveNetwork();
             web3.setWebLoadCallback(this);
         }
     }
@@ -285,7 +284,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
 
             attachFragment(DAPP_BROWSER);
-            loadOnInit = TextUtils.isEmpty(lastUrl) ? EthereumNetworkRepository.defaultDapp(activeNetwork.chainId) : lastUrl;
+            loadOnInit = TextUtils.isEmpty(lastUrl) ? getDefaultDappUrl() : lastUrl;
         }
 
         return view;
@@ -499,7 +498,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }
-        else if (EthereumNetworkRepository.defaultDapp(activeNetwork.chainId) != null)
+        else if (getDefaultDappUrl() != null)
         {
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
@@ -788,7 +787,25 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         startBalanceListener();
     }
 
-    private void onNetworkChanged(NetworkInfo networkInfo) {
+    /**
+     * Called by openDapp(Dapp url) to automatically switch to the required network when required
+     * @param chainId
+     */
+    public void switchNetwork(int chainId)
+    {
+        if (activeNetwork != null && activeNetwork.chainId == chainId) return; //not required
+        viewModel.setNetwork(chainId);
+
+        //setup network selection and init web3 with updated chain
+        activeNetwork = viewModel.getNetworkInfo(chainId);
+        currentNetwork.setText(activeNetwork.getShortName());
+        Utils.setChainColour(currentNetworkCircle, activeNetwork.chainId);
+        setupWeb3();
+    }
+
+    private void onNetworkChanged(NetworkInfo networkInfo)
+    {
+        boolean networkChanged = networkInfo != null && (activeNetwork == null || activeNetwork.chainId != networkInfo.chainId);
         this.activeNetwork = networkInfo;
         if (networkInfo != null)
         {
@@ -796,8 +813,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             Utils.setChainColour(currentNetworkCircle, networkInfo.chainId);
             viewModel.findWallet();
 
-            if (isOnHomePage()) resetDappBrowser(); //trigger a reset if on homepage
-        } else {
+            if (networkChanged && isOnHomePage())
+                resetDappBrowser(); //trigger a reset if on homepage
+        }
+        else
+        {
             openNetworkSelection();
             resetDappBrowser();
         }
@@ -1290,12 +1310,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.goBack();
             detachFragments();
         }
-        else if (!web3.getUrl().equalsIgnoreCase(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId)))
+        else if (!web3.getUrl().equalsIgnoreCase(getDefaultDappUrl()))
         {
             //load homepage
             homePressed = true;
-            web3.loadUrl(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId), getWeb3Headers());
-            setUrlText(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId));
+            web3.loadUrl(getDefaultDappUrl(), getWeb3Headers());
+            setUrlText(getDefaultDappUrl());
             checkBackClickArrowVisibility();
         }
         else
@@ -1333,10 +1353,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
-            nextUrl = EthereumNetworkRepository.defaultDapp(activeNetwork.chainId);
+            nextUrl = getDefaultDappUrl();
         }
 
-        if (nextUrl.equalsIgnoreCase(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId)))
+        if (nextUrl.equalsIgnoreCase(getDefaultDappUrl()))
         {
             back.setAlpha(0.3f);
         }
@@ -1383,7 +1403,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (homePressed)
         {
             homePressed = false;
-            if (currentFragment.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId)))
+            if (currentFragment.equals(DAPP_BROWSER) && url.equals(getDefaultDappUrl()))
             {
                 web3.clearHistory();
             }
@@ -1477,6 +1497,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         else
         {
+            // reset initial url, to avoid issues with initial load
+            loadOnInit = null;
+
             cancelSearchSession();
             addToBackStack(DAPP_BROWSER);
             setUrlText(Utils.formatUrl(urlText));
@@ -1544,8 +1567,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         web3.clearHistory();
         web3.stopLoading();
-        web3.loadUrl(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId), getWeb3Headers());
-        setUrlText(EthereumNetworkRepository.defaultDapp(activeNetwork.chainId));
+        web3.loadUrl(getDefaultDappUrl(), getWeb3Headers());
+        setUrlText(getDefaultDappUrl());
     }
 
     public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)
@@ -1662,12 +1685,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return false;
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser && viewModel != null) {
-            viewModel.checkForNetworkChanges();
-        }
+    public void becomeVisible(boolean isVisible)
+    {
+        if (viewModel != null) { viewModel.checkForNetworkChanges(); }
     }
 
     @Override
@@ -2008,5 +2028,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         return mime;
+    }
+
+    private String getDefaultDappUrl()
+    {
+        return EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
     }
 }

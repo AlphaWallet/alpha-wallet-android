@@ -10,7 +10,7 @@ import com.google.android.play.core.tasks.Task;
 public class RateApp {
     // should be shown on 5th run or after the first transaction (afterTransaction == true)
     static public void showRateTheApp(Activity context, PreferenceRepositoryType preferenceRepository, boolean afterTransaction) {
-        if ((preferenceRepository.getLaunchCount() == 6 || afterTransaction) && !preferenceRepository.getRateAppShown()) {
+        if (true || (preferenceRepository.getLaunchCount() == 6 || afterTransaction) && !preferenceRepository.getRateAppShown()) {
             ReviewManager manager = ReviewManagerFactory.create(context);
             Task<ReviewInfo> request = manager.requestReviewFlow();
             request.addOnCompleteListener(task -> {

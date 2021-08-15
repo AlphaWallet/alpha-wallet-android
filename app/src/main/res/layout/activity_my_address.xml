@@ -70,7 +70,6 @@
                 android:layout_marginBottom="@dimen/dp24"
                 android:gravity="center"
                 android:visibility="gone"
-                custom:gravity="center_vertical"
                 custom:text="@string/ethereum"
                 custom:bold="true"
                 custom:removePadding="true"
@@ -81,8 +80,7 @@
                 style="@style/MyAddressCopyTextStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                custom:gravity="center"
+                android:gravity="center"
                 custom:bold="true"
                 custom:textColor="@color/black" />
 

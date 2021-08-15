@@ -290,7 +290,7 @@ public class TokensService
             return true;
         }).subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(this::updateCycle);
+          .subscribe(this::updateCycle, this::onError);
     }
 
     public void stopUpdateCycle()

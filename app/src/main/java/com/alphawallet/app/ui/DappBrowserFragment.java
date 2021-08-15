@@ -800,7 +800,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         activeNetwork = viewModel.getNetworkInfo(chainId);
         currentNetwork.setText(activeNetwork.getShortName());
         Utils.setChainColour(currentNetworkCircle, activeNetwork.chainId);
-        setupWeb3();
+        viewModel.findWallet();
     }
 
     private void onNetworkChanged(NetworkInfo networkInfo)

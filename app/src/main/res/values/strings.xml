@@ -408,7 +408,7 @@
     <string name="dialog_load_as_contract">Load Token</string>
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00">0.00 %s</string>
-    <string name="telegram">Telegram</string>
+    <string name="telegram">Telegram (Customer Support)</string>
     <string name="transfer_request">Transfer request</string>
     <string name="token_transfer_request">Token transfer request: %1$s</string>
     <string name="generate_payment_request">Generate Payment Request</string>
@@ -794,4 +794,10 @@
     <string name="asset_description_text">%1$s Asset | %2$s</string>
     <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
     <string name="erc1155_idname" translatable="false">%1$s #%2$s</string>
+    <string name="swap_with_quickswap">Swap with Quickswap</string>
+    <string name="email">Email</string>
+    <string name="discord">Discord</string>
+    <string name="name_this_wallet">Name This Wallet</string>
+    <string name="enter_wallet_name">Enter Wallet Name</string>
+    <string name="action_save_name">Save Name</string>
 </resources>

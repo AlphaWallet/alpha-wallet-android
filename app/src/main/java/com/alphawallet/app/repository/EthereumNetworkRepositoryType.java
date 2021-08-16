@@ -32,6 +32,7 @@ public interface EthereumNetworkRepositoryType {
 
     List<Integer> getFilterNetworkList();
     List<Integer> getSelectedFilters(boolean isMainNet);
+    Integer getDefaultNetwork(boolean isMainNet);
 
     void setFilterNetworkList(Integer[] networkList);
 

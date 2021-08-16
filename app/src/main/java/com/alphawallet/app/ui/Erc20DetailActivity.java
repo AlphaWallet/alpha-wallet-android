@@ -46,6 +46,7 @@ import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
@@ -162,7 +163,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (symbol != null) return;
 
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
-        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
+        symbol = symbol == null ? ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         tokenMeta = new TokenCardMeta(token);
@@ -329,6 +330,11 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             openDapp(C.XDAI_BRIDGE_DAPP);
         }
+        else if (actionId == R.string.swap_with_quickswap)
+        {
+            String queryPath = "?use=v2&inputCurrency=" + (token.isEthereum() ? ETH_SYMBOL : token.getAddress());
+            openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
+        }
     }
 
     private void openDapp(String dappURL)
@@ -336,6 +342,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         //switch to dappbrowser and open at dappURL
         Intent intent = new Intent();
         intent.putExtra(C.DAPP_URL_LOAD, dappURL);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         setResult(RESULT_OK, intent);
         finish();
     }

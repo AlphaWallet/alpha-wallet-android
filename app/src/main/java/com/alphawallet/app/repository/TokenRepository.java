@@ -464,10 +464,10 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
-                        localSource.updateTokenBalance(wallet, token.tokenInfo.chainId, token.getAddress(), balance, balanceArray, token.getInterfaceSpec());
+                        localSource.updateTokenBalance(wallet, token, balance, balanceArray);
                     }
 
-                    if (token.getInterfaceSpec() != ContractType.ETHEREUM && wallet.address.equalsIgnoreCase(token.getAddress()))
+                    if (token.isEthereum() && wallet.address.equalsIgnoreCase(token.getWallet()))
                     {
                         updateNativeToken(wallet, token.tokenInfo.chainId);
                     }

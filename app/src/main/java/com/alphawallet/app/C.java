@@ -76,6 +76,8 @@ public abstract class C {
 
     public static final String XDAI_BRIDGE_DAPP = "https://bridge.xdaichain.com/";
 
+    public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
+
     public static final String GWEI_UNIT = "Gwei";
 
     public static final String MARKET_SALE = "market";

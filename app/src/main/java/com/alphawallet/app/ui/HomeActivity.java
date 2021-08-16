@@ -74,6 +74,7 @@ import com.github.florent37.tutoshowcase.TutoShowcase;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
@@ -88,6 +89,7 @@ import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.WalletPage.SETTINGS;
 import static com.alphawallet.app.entity.WalletPage.WALLET;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
         FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver
@@ -234,7 +236,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             @Override
             public void onPageSelected(int position)
             {
-
+                alertFragmentVisible(position);
             }
 
             @Override
@@ -307,6 +309,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         if (requiresDappBrowserResize) ((DappBrowserFragment)dappBrowserFragment).softKeyboardGone();
                     }
                 });
+    }
+
+    private void alertFragmentVisible(int position)
+    {
+        Fragment visibleFragment = getFragment(position);
+        try
+        {
+            Method m = visibleFragment.getClass().getDeclaredMethod(
+                    "becomeVisible", Boolean.TYPE);
+            m.invoke(visibleFragment, true);
+        }
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e)
+        {
+            //
+        }
     }
 
     private void onBackup(String address)
@@ -1069,6 +1086,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.DAPP_URL_LOAD))
                 {
                     String url = data.getStringExtra(C.DAPP_URL_LOAD);
+                    int chainId = data.getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+                    ((DappBrowserFragment)dappBrowserFragment).switchNetwork(chainId);
                     ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
                     showPage(DAPP_BROWSER);
                 }

@@ -391,7 +391,7 @@
     <string name="dialog_load_as_contract">加载通证</string>
     <string name="blockchain">%1$s区块链</string>
     <string name="currency_00">0.00%s</string>
-    <string name="telegram">电报</string>
+    <string name="telegram">电报 (客户支持)</string>
     <string name="transfer_request">转账请求</string>
     <string name="token_transfer_request">通证转账请求: %1$s</string>
     <string name="generate_payment_request">生成付款请求</string>
@@ -764,4 +764,10 @@
     <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
     <string name="asset_description_text">%1$s Asset | %2$s</string>
     <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
+    <string name="swap_with_quickswap">Swap with Quickswap</string>
+    <string name="email">Email</string>
+    <string name="discord">Discord</string>
+    <string name="name_this_wallet">Name This Wallet</string>
+    <string name="enter_wallet_name">Enter Wallet Name</string>
+    <string name="action_save_name">Save Name</string>
 </resources>

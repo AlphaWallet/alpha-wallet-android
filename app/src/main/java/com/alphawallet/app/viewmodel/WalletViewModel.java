@@ -88,11 +88,24 @@ public class WalletViewModel extends BaseViewModel
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
+    public void reloadTokens()
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            fetchTokens(defaultWallet().getValue());
+        }
+        else
+        {
+            prepare();
+        }
+    }
+
     private void onDefaultWallet(Wallet wallet)
     {
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
+        tokensService.startUpdateCycle();
         fetchTokens(wallet);
     }
 
@@ -109,7 +122,6 @@ public class WalletViewModel extends BaseViewModel
     {
         tokens.postValue(metaTokens);
         tokensService.updateTickers();
-        tokensService.startUpdateCycle();
     }
 
     public AssetDefinitionService getAssetDefinitionService()

@@ -56,6 +56,7 @@ import io.reactivex.schedulers.Schedulers;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, OnTokenClickListener, View.OnClickListener {
@@ -602,6 +603,12 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                         addFunction(R.string.convert_to_xdai);
                         return true;
                 }
+                break;
+            case MATIC_ID:
+                {
+                    addFunction(R.string.swap_with_quickswap);
+                }
+                break;
         }
         return false;
     }

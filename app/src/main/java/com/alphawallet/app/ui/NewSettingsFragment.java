@@ -68,6 +68,7 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView supportSetting;
     private SettingsItemView walletConnectSetting;
     private SettingsItemView showSeedPhrase;
+    private SettingsItemView nameThisWallet;
 
     private LinearLayout layoutBackup;
     private View warningSeparator;
@@ -163,6 +164,12 @@ public class NewSettingsFragment extends BaseFragment {
                 .withListener(this::onShowSeedPhrase) //onShow
                 .build();
 
+        nameThisWallet = new SettingsItemView.Builder(getContext())
+                .withIcon(R.drawable.ic_settings_name_this_wallet)
+                .withTitle(R.string.name_this_wallet)
+                .withListener(this::onNameThisWallet)
+                .build();
+
         walletConnectSetting =
                 new SettingsItemView.Builder(getContext())
                         .withIcon(R.drawable.ic_wallet_connect)
@@ -222,6 +229,8 @@ public class NewSettingsFragment extends BaseFragment {
 
         walletSettingsLayout.addView(showSeedPhrase, walletIndex++);
         showSeedPhrase.setVisibility(View.GONE);
+
+        walletSettingsLayout.addView(nameThisWallet, walletIndex++);
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
@@ -449,6 +458,12 @@ public class NewSettingsFragment extends BaseFragment {
         if (wallet != null) {
             openShowSeedPhrase(wallet);
         }
+    }
+
+    private void onNameThisWallet()
+    {
+        Intent intent = new Intent(getActivity(), NameThisWalletActivity.class);
+        requireActivity().startActivity(intent);
     }
 
     private void onNotificationsSettingClicked() {

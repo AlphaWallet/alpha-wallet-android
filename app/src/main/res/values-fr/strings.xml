@@ -793,4 +793,12 @@
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="title_activity_add_custom_rpcnetwork">Add Custom RPC Network</string>
+    <string name="hint_network_name">Network Name</string>
+    <string name="hint_network_rpc_url">RPC URL</string>
+    <string name="hint_network_chain_id">Chain ID</string>
+    <string name="hint_network_symbol">Symbol</string>
+    <string name="hint_network_block_explorer_url">Block Explorer URL</string>
+    <string name="action_add_network">Add Network</string>
+    <string name="error_invalid_url">Invalid URL</string>
 </resources>

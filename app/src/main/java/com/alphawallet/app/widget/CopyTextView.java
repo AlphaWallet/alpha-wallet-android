@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import com.alphawallet.app.R;
 
+import org.web3j.crypto.WalletUtils;
+
 public class CopyTextView extends LinearLayout {
 
     public static final String KEY_ADDRESS = "key_address";
@@ -53,7 +55,7 @@ public class CopyTextView extends LinearLayout {
         try {
             textResId = a.getResourceId(R.styleable.CopyTextView_text, R.string.action_add_wallet);
             textColor = a.getColor(R.styleable.CopyTextView_textColour, context.getColor(R.color.mine));
-            gravity = a.getInt(R.styleable.CopyTextView_grav, Gravity.NO_GRAVITY);
+            gravity = a.getInt(R.styleable.CopyTextView_android_gravity, Gravity.NO_GRAVITY);
             showToast = a.getBoolean(R.styleable.CopyTextView_showToast, true);
             boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
             removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);
@@ -90,12 +92,18 @@ public class CopyTextView extends LinearLayout {
     }
 
     public String getText() {
-        return this.text.getText().toString();
+        return rawAddress;
     }
 
     public void setText(CharSequence text) {
         rawAddress = text.toString();
-        this.text.setText(rawAddress);
+        String breakAddr = rawAddress;
+        if ((gravity & Gravity.CENTER_HORIZONTAL) == Gravity.CENTER_HORIZONTAL && WalletUtils.isValidAddress(breakAddr)) //split string across two lines
+        {
+            breakAddr = breakAddr.substring(0, 22) + " " + breakAddr.substring(22);
+        }
+
+        this.text.setText(breakAddr);
     }
 
     private void copyToClipboard()

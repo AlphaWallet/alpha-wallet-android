@@ -69,6 +69,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String COVALENT = "[COVALENT]";
 
     private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
+
+    private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -130,7 +132,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, KOVAN_ID, ROPSTEN_ID, SOKOL_ID,
             RINKEBY_ID, GOERLI_ID, ARTIS_TAU1_ID, BINANCE_TEST_ID, BINANCE_MAIN_ID, HECO_ID, HECO_TEST_ID,
             AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID, OPTIMISTIC_MAIN_ID,
-            OPTIMISTIC_TEST_ID, CRONOS_TEST_ID
+            OPTIMISTIC_TEST_ID//, CRONOS_TEST_ID
     };
 
     static final Map<Integer, NetworkInfo> networkMap = new HashMap<Integer, NetworkInfo>() {
@@ -226,10 +228,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     OPTIMISTIC_TEST_URL,
                     "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
                     "https://api-kovan-optimistic.etherscan.io/api?"));
-            put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
+            /*put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
                     CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
-                    "https://cronos-explorer.crypto.org/api?"));
+                    "https://cronos-explorer.crypto.org/api?"));*/
         }
     };
     
@@ -392,12 +394,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         if (selectedIds.size() == 0)
         {
-            selectedIds.add(isMainNet ? MAINNET_ID : RINKEBY_ID);
+            selectedIds.add(getDefaultNetwork(isMainNet));
             preferences.blankHasSetNetworkFilters();
             preferences.commit();
         }
 
         return selectedIds;
+    }
+
+    @Override
+    public Integer getDefaultNetwork(boolean isMainNet)
+    {
+        return isMainNet ? MAINNET_ID : RINKEBY_ID;
     }
 
     @Override
@@ -660,9 +668,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return 0;
     }
 
-    public static String defaultDapp()
+    public static String defaultDapp(int chainId)
     {
-        return DEFAULT_HOMEPAGE;
+        String dapp = (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
+        return dapp;
+    }
+
+    public static boolean isDefaultDapp(String url)
+    {
+        return url != null && (url.equals(DEFAULT_HOMEPAGE)
+                || url.equals(POLYGON_HOMEPAGE));
     }
 
     public Token getBlankOverrideToken(NetworkInfo networkInfo)

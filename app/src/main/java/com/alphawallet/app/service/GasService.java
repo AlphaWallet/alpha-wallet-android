@@ -95,7 +95,7 @@ public class GasService implements ContractGasProvider
     {
         if (networkRepository.getNetworkByChain(chainId) == null)
         {
-            System.out.println("Network error, no chain, trying to pick: " + chainId);
+            if (BuildConfig.DEBUG) System.out.println("Network error, no chain, trying to pick: " + chainId);
         }
         else if (EthereumNetworkRepository.hasGasOverride(chainId))
         {

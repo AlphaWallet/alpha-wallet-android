@@ -93,7 +93,7 @@ public class TransactionsService
         //reset transaction timers
         if (eventTimer == null || eventTimer.isDisposed())
         {
-            eventTimer = Observable.interval(0, 1, TimeUnit.SECONDS)
+            eventTimer = Observable.interval(0, 5, TimeUnit.SECONDS)
                     .doOnNext(l -> checkTransactionQueue()).subscribe();
         }
 

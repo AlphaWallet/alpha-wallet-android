@@ -340,12 +340,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         if (selectedIds.size() == 0)
         {
-            selectedIds.add(isMainNet ? MAINNET_ID : RINKEBY_ID);
+            selectedIds.add(getDefaultNetwork(isMainNet));
             preferences.blankHasSetNetworkFilters();
             preferences.commit();
         }
 
         return selectedIds;
+    }
+
+    @Override
+    public Integer getDefaultNetwork(boolean isMainNet)
+    {
+        return isMainNet ? MAINNET_ID : RINKEBY_ID;
     }
 
     @Override

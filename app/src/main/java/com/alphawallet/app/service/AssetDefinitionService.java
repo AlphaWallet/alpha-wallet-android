@@ -372,7 +372,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void handleFileLoadError(Throwable throwable, File file)
     {
-        System.out.println("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
+        if (BuildConfig.DEBUG) System.out.println("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
     }
 
     private TokenDefinition fileLoadComplete(List<ContractLocator> originContracts, TokenScriptFile file, TokenDefinition td)

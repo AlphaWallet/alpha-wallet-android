@@ -79,8 +79,8 @@
     <style name="MyAddressCopyTextStyle">
         <item name="android:paddingTop">@dimen/dp15</item>
         <item name="android:paddingBottom">@dimen/dp15</item>
-        <item name="android:layout_marginStart">@dimen/dp16</item>
-        <item name="android:layout_marginEnd">@dimen/dp16</item>
+        <item name="android:layout_marginStart">@dimen/dp8</item>
+        <item name="android:layout_marginEnd">@dimen/dp8</item>
         <item name="android:paddingStart">@dimen/dp24</item>
         <item name="android:paddingEnd">@dimen/dp24</item>
         <item name="android:background">@drawable/background_round_grey_5dp</item>

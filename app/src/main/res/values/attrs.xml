@@ -55,7 +55,7 @@
         <attr name="removePadding" format="boolean" />
         <attr name="marginRight" format="dimension" />
         <attr name="textColour" format="color"/>
-        <attr name="grav" format="integer"/>
+        <attr name="android:gravity" />
     </declare-styleable>
     <declare-styleable name="BarcodeScannerView">
         <attr name="shouldScaleToFill" format="boolean" />

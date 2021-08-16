@@ -303,11 +303,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<BigDecimal> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
+    public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
         Wallet wallet = new Wallet(walletAddress);
-        localSource.markBalanceChecked(wallet, chainId, tokenAddress);
-        return updateBalance(wallet, chainId, tokenAddress, type)
+        localSource.markBalanceChecked(wallet, token.tokenInfo.chainId, token.getAddress());
+        return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }
@@ -450,7 +450,7 @@ public class TokenRepository implements TokenRepositoryType {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
-    private Single<BigDecimal> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
+    private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
         return Single.fromCallable(() -> {
                 BigDecimal balance = BigDecimal.valueOf(-1);
@@ -458,29 +458,29 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     List<BigInteger> balanceArray = null;
 
-                    switch (type)
+                    switch (token.getInterfaceSpec())
                     {
                         case ETHEREUM:
-                            balance = getEthBalance(wallet, chainId);
+                            balance = getEthBalance(wallet, token.tokenInfo.chainId);
                             break;
                         case ERC875:
                         case ERC875_LEGACY:
-                            balanceArray = getBalanceArray875(wallet, chainId, tokenAddress);
+                            balanceArray = getBalanceArray875(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
                             //checking raw balance, this only gives the count of tokens
-                            balance = checkUint256Balance(wallet, chainId, tokenAddress);
+                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
                             break;
                         case ERC721_TICKET:
-                            balanceArray = getBalanceArray721Ticket(wallet, chainId, tokenAddress);
+                            balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
                         case MAYBE_ERC20:
-                            balance = checkUint256Balance(wallet, chainId, tokenAddress);
+                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
                             break;
                         case NOT_SET:
                             break;
@@ -493,12 +493,12 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
-                        localSource.updateTokenBalance(wallet, chainId, tokenAddress, balance, balanceArray, type);
+                        localSource.updateTokenBalance(wallet, token, balance, balanceArray);
                     }
 
-                    if (type != ContractType.ETHEREUM && wallet.address.equalsIgnoreCase(tokenAddress))
+                    if (token.isEthereum() && wallet.address.equalsIgnoreCase(token.getWallet()))
                     {
-                        updateNativeToken(wallet, chainId);
+                        updateNativeToken(wallet, token.tokenInfo.chainId);
                     }
                 }
                 catch (Exception e)

@@ -787,10 +787,14 @@
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
     <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
-    <string name="would_you_like_to_rate_the_app">Would you like to rate the AlphaWallet app?</string>
     <string name="email">Email</string>
     <string name="discord">Discord</string>
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="rate_prompt">If you enjoy using %1$s, please help us by rating it.</string>
+    <string name="rate_later">LATER</string>
+    <string name="rate_rate">RATE</string>
+    <string name="rate_no_thanks">NO, THANKS</string>
+    <string name="rate_title">Rate %1$s</string>
 </resources>

@@ -193,6 +193,11 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
+    public void resetLaunchCount() {
+        pref.edit().putInt(LAUNCH_COUNT, 0).apply();
+    }
+
+    @Override
     public int getLaunchCount() {
         return pref.getInt(LAUNCH_COUNT, 0);
     }

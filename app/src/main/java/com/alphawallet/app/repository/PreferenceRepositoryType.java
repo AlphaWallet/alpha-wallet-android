@@ -53,6 +53,7 @@ public interface PreferenceRepositoryType {
 
     void incrementLaunchCount();
     int getLaunchCount();
+    void resetLaunchCount();
 
     void setRateAppShown();
     boolean getRateAppShown();

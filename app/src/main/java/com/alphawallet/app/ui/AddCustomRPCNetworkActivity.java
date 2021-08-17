@@ -2,13 +2,17 @@ package com.alphawallet.app.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.view.inputmethod.EditorInfo;
 import android.webkit.URLUtil;
 
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModel;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -24,6 +28,8 @@ import dagger.android.AndroidInjection;
 
 public class AddCustomRPCNetworkActivity extends BaseActivity implements StandardFunctionInterface {
 
+    public static final String CHAIN_ID = "chain_id";
+
     @Inject
     CustomNetworkViewModelFactory walletViewModelFactory;
     private CustomNetworkViewModel viewModel;
@@ -33,6 +39,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     private InputView chainIdInputView;
     private InputView symbolInputView;
     private InputView blockExplorerUrlInputView;
+    private InputView blockExplorerApiUrl;
     private SwitchMaterial testNetSwitch;
 
     private final Handler handler = new Handler();
@@ -47,17 +54,69 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         toolbar();
 
         nameInputView = findViewById(R.id.input_network_name);
+        nameInputView.getEditText().setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        nameInputView.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+
         rpcUrlInputView = findViewById(R.id.input_network_rpc_url);
+        rpcUrlInputView.getEditText().setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        rpcUrlInputView.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+
         chainIdInputView = findViewById(R.id.input_network_chain_id);
+        chainIdInputView.getEditText().setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        chainIdInputView.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
+
         symbolInputView = findViewById(R.id.input_network_symbol);
+        symbolInputView.getEditText().setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        symbolInputView.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+
         blockExplorerUrlInputView = findViewById(R.id.input_network_block_explorer_url);
+        blockExplorerUrlInputView.getEditText().setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        blockExplorerUrlInputView.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        blockExplorerUrlInputView.getEditText().setHint("https://etherscan.com/tx/");
+
+        blockExplorerApiUrl = findViewById(R.id.input_network_explorer_api);
+        blockExplorerApiUrl.getEditText().setImeOptions(EditorInfo.IME_ACTION_DONE);
+        blockExplorerApiUrl.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        blockExplorerApiUrl.getEditText().setHint("https://api.etherscan.io/api?");
+
         testNetSwitch = findViewById(R.id.testnet_switch);
 
-        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_add_network)));
-        functionBar.revealButtons();
-
         initViewModel();
+
+        int chainId = getIntent().getIntExtra(CHAIN_ID, -1);
+
+        if (chainId >= 0) {
+            // get network info and fill ui
+            EthereumNetworkRepositoryType.NetworkInfoExt ext = viewModel.getNetworkInfo(chainId);
+
+            nameInputView.setText(ext.info.name);
+            rpcUrlInputView.setText(ext.info.rpcServerUrl);
+            chainIdInputView.setText(String.valueOf(ext.info.chainId));
+            symbolInputView.setText(ext.info.symbol);
+            blockExplorerUrlInputView.setText(ext.info.etherscanUrl);
+            blockExplorerApiUrl.setText(ext.info.etherscanTxUrl);
+            testNetSwitch.setChecked(ext.isTestNetwork);
+            // disable editing for hardcoded networks
+            if (!ext.isCustomNetwork) {
+                nameInputView.getEditText().setEnabled(false);
+                rpcUrlInputView.getEditText().setEnabled(false);
+                chainIdInputView.getEditText().setEnabled(false);
+                symbolInputView.getEditText().setEnabled(false);
+                blockExplorerUrlInputView.getEditText().setEnabled(false);
+                blockExplorerApiUrl.getEditText().setEnabled(false);
+                testNetSwitch.setEnabled(false);
+            } else {
+                addFunctionBar(true);
+            }
+        } else {
+            addFunctionBar(false);
+        }
+    }
+
+    private void addFunctionBar(boolean update) {
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(update ? R.string.action_update_network : R.string.action_add_network)));
+        functionBar.revealButtons();
     }
 
     private void initViewModel()
@@ -105,6 +164,14 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             return false;
         }
 
+        if (TextUtils.isEmpty(blockExplorerApiUrl.getText())) {
+            blockExplorerApiUrl.setError(getString(R.string.error_field_required));
+            return false;
+        } else if (!URLUtil.isValidUrl(blockExplorerApiUrl.getText().toString())) {
+            blockExplorerApiUrl.setError(getString(R.string.error_invalid_url));
+            return false;
+        }
+
         return true;
     }
 
@@ -120,12 +187,15 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     public void handleClick(String action, int actionId)
     {
         if (validateInputs()) {
+            int oldChainId = getIntent().getIntExtra(CHAIN_ID, -1);
+
             // add network
             viewModel.addNetwork(nameInputView.getText().toString(),
                     rpcUrlInputView.getText().toString(),
                     Integer.parseInt(chainIdInputView.getText().toString()),
                     symbolInputView.getText().toString(),
-                    blockExplorerUrlInputView.getText().toString(), testNetSwitch.isChecked());
+                    blockExplorerUrlInputView.getText().toString(),
+                    blockExplorerApiUrl.getText().toString(), testNetSwitch.isChecked(), oldChainId != -1 ? oldChainId : null);
             finish();
         } else {
             handler.postDelayed(this::resetValidateErrors, 2000);

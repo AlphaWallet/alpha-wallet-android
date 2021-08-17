@@ -272,7 +272,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             }
         }
 
-        public void addCustomNetwork(NetworkInfo info, boolean isTestnet) {
+        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Integer oldChainId) {
+            if (oldChainId != null) {
+                for (NetworkInfo in : list) {
+                    if (in.chainId == oldChainId) {
+                        list.remove(in);
+                        break;
+                    }
+                }
+                mapToTestNet.remove(oldChainId);
+                map.remove(oldChainId);
+            }
+
             list.add(info);
             mapToTestNet.put(info.chainId, isTestnet);
             map.put(info.chainId, info);
@@ -733,8 +744,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return preferences.isActiveMainnet();
     }
 
-    public void addCustomRPCNetwork(String networkName, String rpcUrl, int chainId, String symbol, String blockExplorerUrl, boolean isTestnet) {
-        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, null);
-        customNetworks.addCustomNetwork(info, isTestnet);
+    public void addCustomRPCNetwork(String networkName, String rpcUrl, int chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Integer oldChainId) {
+        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, explorerApiUrl);
+        customNetworks.addCustomNetwork(info, isTestnet, oldChainId);
+    }
+
+    public NetworkInfoExt getNetworkInfoExt(int chainId) {
+
+        boolean isCustom = customNetworks.map.containsKey(chainId);
+        NetworkInfo info = getNetworkByChain(chainId);
+        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : hasRealValue(chainId);
+
+        return new NetworkInfoExt(info, isTestNetwork, isCustom);
     }
 }

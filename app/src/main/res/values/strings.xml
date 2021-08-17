@@ -785,7 +785,7 @@
     <string name="hint_network_rpc_url">RPC URL</string>
     <string name="hint_network_chain_id">Chain ID</string>
     <string name="hint_network_symbol">Symbol</string>
-    <string name="hint_network_block_explorer_url">Block Explorer URL</string>
+    <string name="hint_network_block_explorer_url">Transaction Explorer URL</string>
     <string name="action_add_network">Add Network</string>
     <string name="error_invalid_url">Invalid URL</string>
 
@@ -807,4 +807,6 @@
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="hint_network_explorer_api">Explorer API</string>
+    <string name="action_update_network">Update Network</string>
 </resources>

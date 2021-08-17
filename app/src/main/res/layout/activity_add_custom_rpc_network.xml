@@ -60,6 +60,13 @@
                 android:layout_marginBottom="15dp"
                 custom:label="@string/hint_network_block_explorer_url" />
 
+            <com.alphawallet.app.widget.InputView
+                android:id="@+id/input_network_explorer_api"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                custom:label="@string/hint_network_explorer_api" />
+
             <FrameLayout
                 android:id="@+id/testnet_frame"
                 android:layout_width="match_parent"

@@ -23,6 +23,8 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.alphawallet.app.ui.AddCustomRPCNetworkActivity.CHAIN_ID;
+
 public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
     @Inject
     SelectNetworkFilterViewModelFactory viewModelFactory;
@@ -92,10 +94,19 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<NetworkItem> mainNetList = viewModel.getNetworkList(true);
         List<NetworkItem> testNetList = viewModel.getNetworkList(false);
 
-        mainNetAdapter = new MultiSelectNetworkAdapter(mainNetList);
+        MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener() {
+            @Override
+            public void onEditNetwork(int chainId) {
+                Intent intent = new Intent(SelectNetworkFilterActivity.this, AddCustomRPCNetworkActivity.class);
+                intent.putExtra(CHAIN_ID, chainId);
+                startActivity(intent);
+            }
+        };
+
+        mainNetAdapter = new MultiSelectNetworkAdapter(mainNetList, editNetworkListener);
         mainnetRecyclerView.setAdapter(mainNetAdapter);
 
-        testNetAdapter = new MultiSelectNetworkAdapter(testNetList);
+        testNetAdapter = new MultiSelectNetworkAdapter(testNetList, editNetworkListener);
         testnetRecyclerView.setAdapter(testNetAdapter);
     }
 

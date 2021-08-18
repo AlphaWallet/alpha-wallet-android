@@ -9,6 +9,7 @@ import android.webkit.URLUtil;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -90,7 +91,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             EthereumNetworkRepositoryType.NetworkInfoExt ext = viewModel.getNetworkInfo(chainId);
 
             nameInputView.setText(ext.info.name);
-            rpcUrlInputView.setText(ext.info.rpcServerUrl);
+            rpcUrlInputView.setText(ext.info.rpcServerUrl.replace(BuildConfig.XInfuraAPI,"********************************"));
             chainIdInputView.setText(String.valueOf(ext.info.chainId));
             symbolInputView.setText(ext.info.symbol);
             blockExplorerUrlInputView.setText(ext.info.etherscanUrl);

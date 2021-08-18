@@ -314,6 +314,9 @@ public class Token implements Parcelable
     public Map<BigInteger, NFTAsset> getTokenAssets() {
         return null;
     }
+    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId) {
+        return null;
+    }
 
     public List<BigInteger> ticketIdStringToIndexList(String userList)
     {

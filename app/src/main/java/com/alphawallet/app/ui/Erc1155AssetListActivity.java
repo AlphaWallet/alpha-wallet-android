@@ -99,7 +99,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if (item.getItemId() == R.id.action_select) {
-            viewModel.openSelectionMode(this, token, wallet);
+            viewModel.openSelectionMode(this, token, wallet, tokenId);
             return true;
         }
         return super.onOptionsItemSelected(item);

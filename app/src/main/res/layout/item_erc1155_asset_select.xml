@@ -1,45 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/layout_menu"
+    <CheckBox
+        android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingTop="@dimen/dp16"
-        android:paddingBottom="@dimen/dp16"
-        android:paddingLeft="@dimen/dp8"
-        android:paddingRight="@dimen/dp8">
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/dp8"
+        android:button="@drawable/selector_round_checkbox"
+        android:clickable="false" />
 
-        <CheckBox
-            android:id="@+id/checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/dp8"
-            android:button="@drawable/selector_round_checkbox"
-            android:clickable="false" />
+    <RelativeLayout
+        android:id="@+id/icon_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/checkbox"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginTop="@dimen/dp8"
+        android:layout_marginBottom="@dimen/dp8">
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
             android:src="@drawable/ic_token_eth" />
-    </LinearLayout>
 
-    <LinearLayout
+        <TextView
+            android:id="@+id/text_count"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/value_amount_overlay"
+            android:gravity="center"
+            android:backgroundTint="@color/azure"
+            android:fontFamily="@font/font_bold"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            tools:text="25" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/layout_menu"
-        android:layout_toStartOf="@id/btn_menu"
+        android:layout_toEndOf="@id/icon_wrapper"
         android:orientation="vertical"
         android:paddingTop="@dimen/dp16"
         android:paddingBottom="@dimen/dp16">
@@ -51,31 +65,48 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_semibold"
             android:singleLine="true"
-            android:text="Title"
+            tools:text="Title"
             android:textColor="@color/black"
             android:textSize="@dimen/sp17" />
+
 
         <TextView
             android:id="@+id/subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/count"
+            android:layout_below="@id/title"
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            android:text="200 Assets | Infinite FT"
+            tools:text="Infinite Fungible Token"
             android:textColor="@color/dove"
             android:textSize="@dimen/sp15" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_semibold"
+            android:singleLine="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@id/subtitle"
+            android:textColor="@color/black"
+            android:layout_marginEnd="@dimen/dp8"
+            android:textSize="@dimen/sp15"
+            android:visibility="gone"
+            tools:text="x200" />
 
-    <ImageView
-        android:id="@+id/btn_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/dp8"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:background="@color/transparent"
-        android:src="@drawable/ic_menu" />
+        <View
+            android:id="@+id/click_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/count"
+            android:layout_alignBottom="@id/count"
+            android:layout_alignTop="@id/title"
+            android:layout_alignParentEnd="true"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

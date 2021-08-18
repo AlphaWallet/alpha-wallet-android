@@ -98,6 +98,7 @@ public abstract class C {
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
+    public static final String EXTRA_NFTASSET_LIST = "NFTASSET_LIST";
     public static final String ERC875RANGE = "ERC875RANGE";
     public static final String TOKEN_TYPE = "TOKEN_TYPE";
     public static final String MARKET_INSTANCE = "MARKET_INSTANCE";

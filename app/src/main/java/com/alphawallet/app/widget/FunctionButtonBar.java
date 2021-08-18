@@ -35,6 +35,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.Utils;
@@ -62,7 +63,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, OnTokenClickListener, View.OnClickListener {
     private final Context context;
     private Map<String, TSAction> functions;
-    private NonFungibleTokenAdapter adapter;
+    private NonFungibleAdapterInterface adapter;
     private List<BigInteger> selection = new ArrayList<>();
     private StandardFunctionInterface callStandardFunctions;
     private BuyCryptoInterface buyFunctionInterface;
@@ -86,15 +87,16 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private boolean hasBuyFunction;
     private OnRampRepositoryType onRampRepository;
 
-    public FunctionButtonBar(Context ctx, @Nullable AttributeSet attrs) {
+    public FunctionButtonBar(Context ctx, @Nullable AttributeSet attrs)
+    {
         super(ctx, attrs);
         inflate(ctx, R.layout.layout_function_buttons, this);
         context = ctx;
         initializeViews();
     }
 
-    private void initializeViews() {
-
+    private void initializeViews()
+    {
         primaryButton = findViewById(R.id.primary_button);
         secondaryButton = findViewById(R.id.secondary_button);
         moreButton = findViewById(R.id.more_button);
@@ -149,7 +151,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
     }
 
-    public void setupFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleTokenAdapter adp, List<BigInteger> tokenIds) {
+    public void setupFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleAdapterInterface adp, List<BigInteger> tokenIds) {
         callStandardFunctions = functionInterface;
         adapter = adp;
         selection = tokenIds;
@@ -442,15 +444,13 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         if (button == null) return;
         button.setBackgroundResource(R.drawable.button_round_error);
         handler.postDelayed(() -> {
-            switch (button.getId())
+            if (button.hashCode() == primaryButton.hashCode())
             {
-                case R.id.primary_button:
-                    button.setBackgroundResource(R.drawable.selector_round_button);
-                    break;
-                default:
-                case R.id.secondary_button:
-                    button.setBackgroundResource(R.drawable.selector_round_button_secondary);
-                    break;
+                button.setBackgroundResource(R.drawable.selector_round_button);
+            }
+            else if (button.hashCode() == secondaryButton.hashCode())
+            {
+                button.setBackgroundResource(R.drawable.selector_round_button_secondary);
             }
         }, 500);
     }

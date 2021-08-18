@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
@@ -48,7 +49,8 @@ import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_V
  * Created by James on 9/02/2018.
  */
 
-public class NonFungibleTokenAdapter extends TokensAdapter {
+public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibleAdapterInterface
+{
     TicketRange currentRange = null;
     final Token token;
     protected final OpenseaService openseaService;
@@ -245,6 +247,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         this.notifyDataSetChanged();
     }
 
+    @Override
     public void setRadioButtons(boolean expose)
     {
         boolean requiresFullRedraw = false;
@@ -268,6 +271,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
     }
 
+    @Override
     public List<BigInteger> getSelectedTokenIds(List<BigInteger> selection)
     {
         List<BigInteger> tokenIds = new ArrayList<>(selection);
@@ -284,6 +288,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         return tokenIds;
     }
 
+    @Override
     public int getSelectedGroups()
     {
         int selected = 0;

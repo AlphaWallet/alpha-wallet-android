@@ -43,6 +43,7 @@ public class NFTAsset implements Parcelable
     private final Map<String, String> attributeMap = new HashMap<>();
 
     private BigDecimal balance; //for ERC1155
+    private BigDecimal selected; //for ERC1155 transfer
 
     public boolean isChecked = false;
     public boolean exposeRadio = false;
@@ -155,9 +156,15 @@ public class NFTAsset implements Parcelable
         return this.balance;
     }
 
+    public boolean isAssetMultiple()
+    {
+        return this.balance != null && this.balance.compareTo(BigDecimal.ONE) > 0;
+    }
+
     protected NFTAsset(Parcel in)
     {
         balance = new BigDecimal(in.readString());
+        selected = new BigDecimal(in.readString());
         int assetCount = in.readInt();
         for (int i = 0; i < assetCount; i++)
         {
@@ -258,6 +265,7 @@ public class NFTAsset implements Parcelable
     public void writeToParcel(Parcel dest, int flags)
     {
         dest.writeString(balance != null ? balance.toString() : "1");
+        dest.writeString(selected != null ? selected.toString() : "0");
         dest.writeInt(assetMap.size());
         for (String key : assetMap.keySet())
         {
@@ -350,5 +358,14 @@ public class NFTAsset implements Parcelable
     public void setSelected(boolean selected)
     {
         this.isChecked = selected;
+    }
+
+    public void setSelectedBalance(BigDecimal amount)
+    {
+        this.selected = amount;
+    }
+    public BigDecimal getSelectedBalance()
+    {
+        return selected != null ? this.selected : BigDecimal.ZERO;
     }
 }

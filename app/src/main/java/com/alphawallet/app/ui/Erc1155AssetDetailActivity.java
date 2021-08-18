@@ -26,6 +26,8 @@ import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -126,6 +128,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        viewModel.showTransferToken(this, token, selection);
+        NFTAsset asset = token.getTokenAssets().get(tokenId);
+        viewModel.showTransferToken(this, token, new ArrayList<>(Collections.singletonList(asset)));
     }
 }

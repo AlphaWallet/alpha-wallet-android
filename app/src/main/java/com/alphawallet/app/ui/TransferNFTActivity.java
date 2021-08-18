@@ -26,6 +26,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -92,9 +93,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
 
     private Token token;
     private NonFungibleTokenAdapter adapter;
-
-    private String tokenIds;
-    private List<BigInteger> selection;
+    private ArrayList<NFTAsset> assetSelection;
 
     private InputAddress addressInput;
     private String sendAddress;
@@ -121,8 +120,8 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
 
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
 
-        tokenIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
-        selection = token.stringHexToBigIntegerList(tokenIds);
+        String tokenIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
+        assetSelection = getIntent().getParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST);
 
         toolbar();
         systemView = findViewById(R.id.system_view);
@@ -148,6 +147,10 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         viewModel.transactionError().observe(this, this::txError);
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
+
+
+        //TODO: Build new NFT Asset display module. Needs to have horizonal scroll
+
         adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
@@ -162,33 +165,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
 
         setupScreen();
     }
-
-    //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
-    /*private void initQuantitySelector() {
-        pickTicketQuantity.setVisibility(View.VISIBLE);
-        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
-        plusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity + 1) <= adapter.getTicketRangeCount()) {
-                quantity++;
-                textQuantity.setText(String.valueOf(quantity));
-                selection = token.pruneIDList(tokenIds, quantity);
-            }
-        });
-
-        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
-        minusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity - 1) > 0) {
-                quantity--;
-                textQuantity.setText(String.valueOf(quantity));
-                selection = token.pruneIDList(tokenIds, 1);
-            }
-        });
-
-        textQuantity.setText("1");
-        selection = token.pruneIDList(tokenIds, 1);
-    }*/
 
     private void setupScreen()
     {

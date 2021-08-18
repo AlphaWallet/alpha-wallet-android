@@ -140,6 +140,13 @@ public class ERC1155Token extends Token implements Parcelable
         return assets.get(parseTokenId(tokenIdStr));
     }
 
+    //TODO: Handle various collection formats; may need to specify collection
+    @Override
+    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId) {
+        return new HashMap<BigInteger, NFTAsset>()
+            {{ put(tokenId, assets.get(tokenId));}};
+    }
+
     public boolean isNonFungible() { return true; }
 
     @Override

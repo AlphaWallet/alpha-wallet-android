@@ -17,6 +17,7 @@ import com.alphawallet.app.ui.TransferNFTActivity;
 import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,20 +47,20 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public void showTransferToken(Context ctx, Token token, List<BigInteger> selection)
+    public void showTransferToken(Context ctx, Token token, ArrayList<NFTAsset> selection)
     {
         walletInteract.find()
                 .subscribe(wallet -> completeTransfer(ctx, token, selection, wallet), this::onError)
                 .isDisposed();
     }
 
-    private void completeTransfer(Context ctx, Token token, List<BigInteger> selection, Wallet wallet)
+    private void completeTransfer(Context ctx, Token token, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN, token);
 
-        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
+        intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
 
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);

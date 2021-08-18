@@ -794,10 +794,13 @@
     <string name="asset_description_text">%1$s Asset | %2$s</string>
     <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
     <string name="erc1155_idname" translatable="false">%1$s #%2$s</string>
+    <string name="asset_count_val" translatable="false">x%1$s</string>
+    <string name="input_amount_max" translatable="false">(max. %1$s)</string>
     <string name="swap_with_quickswap">Swap with Quickswap</string>
     <string name="email">Email</string>
     <string name="discord">Discord</string>
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="select_amount">Select Amount</string>
 </resources>

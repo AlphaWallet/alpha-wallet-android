@@ -61,6 +61,7 @@ import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.RootUtil;
+import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
@@ -309,6 +310,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         if (requiresDappBrowserResize) ((DappBrowserFragment)dappBrowserFragment).softKeyboardGone();
                     }
                 });
+
+        UpdateUtils.checkForUpdates(this);
     }
 
     private void alertFragmentVisible(int position)

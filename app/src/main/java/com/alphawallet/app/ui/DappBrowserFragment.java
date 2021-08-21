@@ -16,6 +16,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -218,7 +219,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private GeolocationPermissions.Callback geoCallback = null;
     private PermissionRequest requestCallback = null;
     private String geoOrigin;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private String walletConnectSession;
 
     private String currentWebpageTitle;
@@ -240,6 +241,29 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void onCreate(@Nullable Bundle savedInstanceState) {
         LocaleUtils.setActiveLocale(getContext());
         super.onCreate(savedInstanceState);
+
+        getChildFragmentManager().addFragmentOnAttachListener((fManager, f) -> {
+            if (getContext() != null && f.getTag() != null)
+            {
+                switch (f.getTag())
+                {
+                    case DISCOVER_DAPPS:
+                        ((DiscoverDappsFragment) f).setCallbacks(this);
+                        break;
+                    case MY_DAPPS:
+                        ((MyDappsFragment) f).setCallbacks(this);
+                        break;
+                    case HISTORY:
+                        ((BrowserHistoryFragment) f).setCallbacks(this, this);
+                        break;
+                    case DAPP_BROWSER:
+                        break;
+                    default:
+                        //no init
+                        break;
+                }
+            }
+        });
     }
 
     @Override
@@ -288,30 +312,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         return view;
-    }
-
-    @Override
-    public void onAttachFragment(Fragment fragment) {
-        if (getContext() != null && fragment.getTag() != null)
-        {
-            switch (fragment.getTag())
-            {
-                case DISCOVER_DAPPS:
-                    ((DiscoverDappsFragment) fragment).setCallbacks(this);
-                    break;
-                case MY_DAPPS:
-                    ((MyDappsFragment) fragment).setCallbacks(this);
-                    break;
-                case HISTORY:
-                    ((BrowserHistoryFragment) fragment).setCallbacks(this, this);
-                    break;
-                case DAPP_BROWSER:
-                    break;
-                default:
-                    //no init
-                    break;
-            }
-        }
     }
 
     private void attachFragment(Fragment fragment, String tag)
@@ -1412,6 +1412,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         DappBrowserUtils.addToHistory(getContext(), dapp);
         adapter.addSuggestion(dapp);
         onWebpageLoadComplete();
+
+        if (urlTv != null) urlTv.setText(url);
     }
 
     @Override

@@ -32,6 +32,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -59,6 +60,7 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
@@ -1045,6 +1047,19 @@ public class TokensService
         {
             return getToken(chainId, currentAddress);
         }
+    }
+
+    public IconItem fetchIconForToken(Token token)
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+
+        String tURL = tokenRepository.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
+        if (TextUtils.isEmpty(tURL))
+        {
+            tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
+        }
+
+        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
     public void checkingChain(int chainId)

@@ -123,7 +123,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
 
-        if (token.isERC721())
+        if (token.isNonFungible())
         {
             assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
             assetDetailView.setVisibility(View.VISIBLE);

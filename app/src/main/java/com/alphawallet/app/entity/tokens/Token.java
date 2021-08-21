@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -417,6 +418,10 @@ public class Token implements Parcelable
     {
         return Numeric.hexStringToByteArray("0x");
     }
+    public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData)
+    {
+        return Numeric.hexStringToByteArray("0x");
+    }
 
     public Function getSpawnPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
     {
@@ -654,6 +659,7 @@ public class Token implements Parcelable
     {
         return tokenIds;
     }
+
     protected org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
     {
         return new org.web3j.abi.datatypes.DynamicArray<>(

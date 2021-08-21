@@ -129,6 +129,6 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     public void showTransferToken(List<BigInteger> selection)
     {
         NFTAsset asset = token.getTokenAssets().get(tokenId);
-        viewModel.showTransferToken(this, token, new ArrayList<>(Collections.singletonList(asset)));
+        viewModel.showTransferToken(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)));
     }
 }

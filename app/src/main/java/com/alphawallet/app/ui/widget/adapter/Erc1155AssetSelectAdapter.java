@@ -1,16 +1,16 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.format.DateUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -35,6 +35,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
     private final List<Pair<BigInteger, NFTAsset>> actualData;
     private final Context context;
     private final OnAssetSelectListener listener;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public Erc1155AssetSelectAdapter(Context context, Map<BigInteger, NFTAsset> data, OnAssetSelectListener listener)
     {
@@ -83,10 +84,21 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
                 {
                     holder.selectionAmount.setVisibility(View.VISIBLE);
                     holder.selectionAmount.setText(item.getSelectedBalance().toString());
+                    holder.selectionAmount.setScaleX(0.0f);
+                    holder.selectionAmount.setScaleY(0.0f);
                     holder.selectionAmount.setAlpha(0.0f);
-                    holder.selectionAmount.animate().alpha(1.0f).setDuration(500);
-                    return;
+                    holder.selectionAmount.animate().alpha(1.0f).setDuration(300);
+                    holder.selectionAmount.animate().scaleX(1.0f).setDuration(300);
+                    holder.selectionAmount.animate().scaleY(1.0f).setDuration(300);
                 }
+                else //if (holder.selectionAmount.getVisibility() == View.VISIBLE)
+                {
+                    holder.selectionAmount.animate().alpha(0.0f).setDuration(2000);
+                    holder.selectionAmount.animate().scaleX(0.0f).setDuration(2000);
+                    holder.selectionAmount.animate().scaleY(0.0f).setDuration(2000);
+                    handler.postDelayed(() -> holder.selectionAmount.setVisibility(View.GONE), 1500);
+                }
+                return;
             }
             else
             {
@@ -129,6 +141,19 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         }
 
         return selectedAssets;
+    }
+
+    public List<BigInteger> getSelectedTokenIds()
+    {
+        List<BigInteger> selectedIds = new ArrayList<>();
+
+        for (Pair<BigInteger, NFTAsset> asset : actualData) {
+            if (asset.second.isSelected()) {
+                selectedIds.add(asset.first);
+            }
+        }
+
+        return selectedIds;
     }
 
     @Override
@@ -175,8 +200,15 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         if (position < actualData.size())
         {
             NFTAsset asset = actualData.get(position).second;
+            if (amount == 0)
+            {
+                asset.setSelected(false);
+            }
+            else if (amount > asset.getBalance().intValue())
+            {
+                amount = asset.getBalance().intValue();
+            }
             asset.setSelectedBalance(BigDecimal.valueOf(amount));
-            if (amount == 0) asset.setSelected(false);
             notifyItemChanged(position);
         }
     }

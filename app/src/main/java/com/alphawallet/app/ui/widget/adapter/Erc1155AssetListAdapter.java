@@ -31,7 +31,6 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
     private final NFTAsset asset;
     private final Context context;
     private final OnAssetClickListener listener;
-    private final BigInteger tokenId;
 
     public Erc1155AssetListAdapter(Context context, Map<BigInteger, NFTAsset> data, BigInteger tokenId, OnAssetClickListener listener)
     {
@@ -43,7 +42,6 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
         {
             actualData.add(d);
         }
-        this.tokenId = tokenId;
     }
 
     @NotNull

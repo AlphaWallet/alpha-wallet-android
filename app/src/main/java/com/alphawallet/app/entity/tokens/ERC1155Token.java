@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC1155TransferEvent;
+import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.repository.TokenRepository;
@@ -25,13 +27,11 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -180,6 +180,47 @@ public class ERC1155Token extends Token implements Parcelable
         Function txFunc = getTransferFunction(to, tokenIds);
         String encodedFunction = FunctionEncoder.encode(txFunc);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    @Override
+    public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData) throws NumberFormatException
+    {
+        Function txFunc = getTransferFunction(to, transferData);
+        String encodedFunction = FunctionEncoder.encode(txFunc);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    @Override
+    public boolean hasGroupedTransfer() { return true; }
+
+    public Function getTransferFunction(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData) throws NumberFormatException
+    {
+        Function               function;
+        List<Type>             params;
+        List<TypeReference<?>> returnTypes = Collections.emptyList();
+        //Map<BigInteger, BigInteger> idMap = Utils.getIdMap(tokenIds);
+
+        if (transferData.size() == 1)
+        {
+            params = Arrays.asList(new Address(getWallet()), new Address(to), new Uint256(transferData.get(0).first),
+                    new Uint256(transferData.get(0).second.getSelectedBalance().toBigInteger()), new DynamicBytes(new byte[0]));
+            function = new Function("safeTransferFrom", params, returnTypes);
+        }
+        else
+        {
+            List<Uint256> idList = new ArrayList<>(transferData.size());
+            List<Uint256> amounts = new ArrayList<>(transferData.size());
+            for (int i = 0; i < transferData.size(); i++)
+            {
+                idList.add(new Uint256(transferData.get(i).first));
+                amounts.add(new Uint256(transferData.get(i).second.getSelectedBalance().toBigInteger()));
+            }
+
+            params = Arrays.asList(new Address(getWallet()), new Address(to), new DynamicArray<>(Uint256.class, idList),
+                    new DynamicArray<>(Uint256.class, amounts), new DynamicBytes(new byte[0]));
+            function = new Function("safeBatchTransferFrom", params, returnTypes);
+        }
+        return function;
     }
 
     @Override
@@ -355,6 +396,19 @@ public class ERC1155Token extends Token implements Parcelable
     public AssetContract getAssetContract()
     {
         return assetContract;
+    }
+
+    @Override
+    public BigInteger getTransferValueRaw(TransactionInput txInput)
+    {
+        if (txInput.arrayValues != null)
+        {
+            return BigInteger.valueOf(txInput.arrayValues.size()/2);
+        }
+        else
+        {
+            return BigInteger.ONE;
+        }
     }
 
     /*

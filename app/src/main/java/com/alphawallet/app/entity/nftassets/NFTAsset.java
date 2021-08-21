@@ -322,6 +322,11 @@ public class NFTAsset implements Parcelable
         return (hashCode() == new NFTAsset(realmAsset.getMetaData()).hashCode());
     }
 
+    public boolean equals(NFTAsset other)
+    {
+        return (hashCode() == other.hashCode());
+    }
+
     public boolean isBlank()
     {
         return assetMap.size() == 0;

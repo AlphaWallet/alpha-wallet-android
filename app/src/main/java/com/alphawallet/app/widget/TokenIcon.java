@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
@@ -122,15 +123,33 @@ public class TokenIcon extends ConstraintLayout
      * @param token Token object
      * @param assetDefinition Asset Definition Service for Icons
      */
-    public void bindData(Token token, AssetDefinitionService assetDefinition)
+    public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
         if (token == null) return;
+        this.assetSvs = assetDefinition;
+        this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
+
+        bind(token, assetDefinition.fetchIconForToken(token));
+    }
+
+    public void bindData(Token token)
+    {
+        if (token == null) return;
+        this.tokenName = token.getFullName();
+        bind(token, getIconUrl(token));
+    }
+
+    public void bindData(Token token, @NotNull TokensService svs)
+    {
+        if (token == null) return;
+        this.tokenName = token.getFullName();
+        bind(token, svs.fetchIconForToken(token));
+    }
+
+    private void bind(Token token, IconItem iconItem)
+    {
         this.handler.removeCallbacks(null);
         this.token = token;
-        this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
-        this.assetSvs = assetDefinition;
-
-        final IconItem iconItem = assetDefinition != null ? assetDefinition.fetchIconForToken(token) : getIconUrl(token);
 
         displayTokenIcon(iconItem);
     }

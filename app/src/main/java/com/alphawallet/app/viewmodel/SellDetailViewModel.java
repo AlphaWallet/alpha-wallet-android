@@ -20,7 +20,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -44,7 +43,6 @@ public class SellDetailViewModel extends BaseViewModel {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
-    private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
     private final KeyService keyService;
@@ -54,14 +52,12 @@ public class SellDetailViewModel extends BaseViewModel {
 
     SellDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                         GenericWalletInteract genericWalletInteract,
-                        MarketQueueService marketQueueService,
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
                         KeyService keyService,
                         AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
-        this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.keyService = keyService;

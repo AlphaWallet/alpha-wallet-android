@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.appcompat.widget.AppCompatRadioButton;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.SortedList;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -18,12 +20,14 @@ import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
+import com.alphawallet.app.ui.widget.entity.NFTSortedItem;
 import com.alphawallet.app.ui.widget.entity.QuantitySelectorSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
+import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
 import com.alphawallet.app.ui.widget.holder.OpenseaHolder;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
 import com.alphawallet.app.ui.widget.holder.TicketHolder;
@@ -35,8 +39,10 @@ import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -81,7 +87,31 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         setTokenRange(token, tokenSelection);
         this.activity = null;
     }
-    
+
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
+                                   AssetDefinitionService service)
+    {
+        super(tokenClickListener, service);
+        assetCount = 0;
+        token = t;
+        clickThrough = false;
+        openseaService = null;
+        setAssetSelection(token, assetSelection);
+        this.activity = null;
+    }
+
+    private void setAssetSelection(Token token, List<Pair<BigInteger, NFTAsset>> selection)
+    {
+        if (selection.size() == 1 && selection.get(0).second.getSelectedBalance().compareTo(BigDecimal.ONE) <= 0)
+        {
+            setTokenRange(token, Collections.singletonList(selection.get(0).first)); //setup a normal single token transfer
+        }
+        else
+        {
+            setAssetRange(token, selection);
+        }
+    }
+
     @NotNull
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -104,6 +134,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, token, assetService, clickThrough);
                 holder.setOnTokenClickListener(onTokenClickListener);
+                break;
+            case NFTAssetHolder.VIEW_TYPE:
+                holder = new NFTAssetHolder(parent);
                 break;
             case QuantitySelectorHolder.VIEW_TYPE:
                 holder = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, assetCount, assetService);
@@ -154,6 +187,21 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         addRanges(t, holderType);
+        items.endBatchedUpdates();
+    }
+
+    private void setAssetRange(Token t, List<Pair<BigInteger, NFTAsset>> selection)
+    {
+        items.beginBatchedUpdates();
+        items.clear();
+        assetCount = selection.size();
+
+        for (int i = 0; i < selection.size(); i++)
+        {
+            NFTAsset asset = selection.get(i).second;
+            items.add(new NFTSortedItem(asset, i+1));
+        }
+
         items.endBatchedUpdates();
     }
 

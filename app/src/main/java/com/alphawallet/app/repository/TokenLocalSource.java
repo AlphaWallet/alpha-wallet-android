@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -18,6 +19,8 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.realm.Realm;
 
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
+
 public interface TokenLocalSource {
     Single<Token> saveToken(Wallet wallet, Token token);
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
@@ -27,6 +30,7 @@ public interface TokenLocalSource {
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
     void createBaseNetworkTokens(String walletAddress);
+    String getTokenImageUrl(int networkId, String address);
 
     Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
     void deleteRealmToken(int chainId, Wallet wallet, String address);

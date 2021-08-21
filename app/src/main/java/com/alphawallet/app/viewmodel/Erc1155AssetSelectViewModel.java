@@ -64,13 +64,13 @@ public class Erc1155AssetSelectViewModel extends BaseViewModel {
         }
     }
 
-    public void completeTransfer(Context ctx, Token token, ArrayList<NFTAsset> selection, Wallet wallet)
+    public void completeTransfer(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, false));
         intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
-
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
     }

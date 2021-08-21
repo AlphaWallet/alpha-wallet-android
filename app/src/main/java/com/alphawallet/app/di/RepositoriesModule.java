@@ -27,7 +27,6 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
-import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.RealmManager;
@@ -176,13 +175,6 @@ public class RepositoriesModule {
 	@Provides
     GasService provideGasService2(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager) {
 		return new GasService(ethereumNetworkRepository, client, realmManager);
-	}
-
-	@Singleton
-	@Provides
-    MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
-                                                 TransactionRepositoryType transactionRepository) {
-		return new MarketQueueService(ctx, okHttpClient, transactionRepository);
 	}
 
 	@Singleton

@@ -133,7 +133,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             primaryElement = false;
 
-            System.out.println("YOLESS: Binding " + id + " : " + token.getFullName());
             tokenIcon.bindData(token, assetDefinition);
             tokenIcon.setOnTokenClickListener(onTokenClickListener);
 

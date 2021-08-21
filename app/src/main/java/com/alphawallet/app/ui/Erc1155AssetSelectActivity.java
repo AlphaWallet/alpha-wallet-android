@@ -154,7 +154,6 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        // Need to pass the asset selection list
-        viewModel.completeTransfer(this, token, adapter.getSelectedAssets(), wallet);
+        viewModel.completeTransfer(this, token, adapter.getSelectedTokenIds(), adapter.getSelectedAssets(), wallet);
     };
 }

@@ -9,7 +9,6 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.viewmodel.SellDetailModelFactory;
 
 import dagger.Module;
@@ -26,13 +25,12 @@ public class SellDetailModule {
     SellDetailModelFactory sellDetailModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             GenericWalletInteract genericWalletInteract,
-            MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
             SellDetailRouter sellDetailRouter,
             KeyService keyService,
             AssetDefinitionService assetDefinitionService) {
         return new SellDetailModelFactory(
-                findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
+                findDefaultNetworkInteract, genericWalletInteract, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
     }
 
     @Provides

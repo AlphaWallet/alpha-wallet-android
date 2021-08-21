@@ -47,21 +47,20 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public void showTransferToken(Context ctx, Token token, ArrayList<NFTAsset> selection)
+    public void showTransferToken(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
     {
         walletInteract.find()
-                .subscribe(wallet -> completeTransfer(ctx, token, selection, wallet), this::onError)
+                .subscribe(wallet -> completeTransfer(ctx, token, tokenIds, selection, wallet), this::onError)
                 .isDisposed();
     }
 
-    private void completeTransfer(Context ctx, Token token, ArrayList<NFTAsset> selection, Wallet wallet)
+    private void completeTransfer(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN, token);
-
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, false));
         intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
-
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
     }

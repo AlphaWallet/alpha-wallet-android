@@ -27,7 +27,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
     private final Button buttonDown;
     private AmountReadyCallback amountReady;
     private boolean gotFocus;
-    private int activePosition = 0;
+    private int activePosition = -1;
 
     public NumericInputBottomSheet(Context context, @Nullable AttributeSet attrs)
     {
@@ -44,7 +44,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
     {
         textAmountMax.setText(getContext().getString(R.string.input_amount_max, String.valueOf(maxAmount)));
 
-        if (amountReady != null && activePosition > 0 && activePosition != position)
+        if (amountReady != null && activePosition != position)
         {
             amountReady.amountReady(textAmount.getBigDecimalValue(), BigDecimal.valueOf(activePosition));
         }
@@ -79,7 +79,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
             {
                 amountReady.amountReady(textAmount.getBigDecimalValue(), BigDecimal.valueOf(position));
                 amountReady = null;
-                activePosition = 0;
+                activePosition = -1;
             }
 
             setVisibility(View.GONE);
@@ -88,16 +88,13 @@ public class NumericInputBottomSheet extends ConstraintLayout
         });
 
         textAmount.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus)
+            if (!hasFocus)
             {
-                gotFocus = true;
-            }
-            else if (gotFocus)
-            {
-                if (amountReady != null) amountReady.amountReady(textAmount.getBigDecimalValue(), BigDecimal.valueOf(position));
+                if (amountReady != null)
+                    amountReady.amountReady(textAmount.getBigDecimalValue(), BigDecimal.valueOf(position));
                 setVisibility(View.GONE);
                 KeyboardUtils.hideKeyboard(this);
-                activePosition = 0;
+                activePosition = -1;
                 amountReady = null;
             }
         });

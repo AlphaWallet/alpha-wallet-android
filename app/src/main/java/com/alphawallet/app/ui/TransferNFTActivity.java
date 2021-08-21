@@ -7,19 +7,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -27,7 +26,6 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
@@ -70,10 +68,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -86,14 +81,10 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
     protected TransferTicketDetailViewModel viewModel;
-    private SystemView systemView;
-    private ProgressView progressView;
     private AWalletAlertDialog dialog;
-    private FunctionButtonBar functionBar;
 
     private Token token;
-    private NonFungibleTokenAdapter adapter;
-    private ArrayList<NFTAsset> assetSelection;
+    private ArrayList<Pair<BigInteger, NFTAsset>> assetSelection;
 
     private InputAddress addressInput;
     private String sendAddress;
@@ -105,8 +96,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
     private LinearLayout pickTicketQuantity;
     private LinearLayout pickTransferMethod;
     private LinearLayout pickExpiryDate;
-
-    private SignAuthenticationCallback signCallback;
 
     @Nullable
     private Disposable calcGasCost;
@@ -120,13 +109,15 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
 
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
 
-        String tokenIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
-        assetSelection = getIntent().getParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST);
+        String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
+        List<BigInteger> tokenIdList = token.stringHexToBigIntegerList(tokenIds);
+        List<NFTAsset> assets = getIntent().getParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST);
+        assetSelection = formAssetSelection(tokenIdList, assets);
 
         toolbar();
-        systemView = findViewById(R.id.system_view);
+        SystemView systemView = findViewById(R.id.system_view);
         systemView.hide();
-        progressView = findViewById(R.id.progress_view);
+        ProgressView progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
         addressInput = findViewById(R.id.input_address);
@@ -148,17 +139,14 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
 
-
-        //TODO: Build new NFT Asset display module. Needs to have horizonal scroll
-
-        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
+        NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(null, token, assetSelection, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
         pickTicketQuantity = findViewById(R.id.layout_ticket_quantity);
         pickTransferMethod = findViewById(R.id.layout_choose_method);
         pickExpiryDate = findViewById(R.id.layout_date_picker);
-        functionBar = findViewById(R.id.layoutButtons);
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_transfer)));
         functionBar.revealButtons();
@@ -228,21 +216,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         viewModel.resetSignDialog();
     }
 
-    private void onProgress(boolean shouldShowProgress)
-    {
-        hideDialog();
-        if (shouldShowProgress)
-        {
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.NONE);
-            dialog.setTitle(R.string.title_dialog_sending);
-            dialog.setMessage(R.string.transfer);
-            dialog.setProgressMode();
-            dialog.setCancelable(false);
-            dialog.show();
-        }
-    }
-
     private void onError(@NotNull ErrorEnvelope error)
     {
         hideDialog();
@@ -254,17 +227,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
-    }
-
-    private void transferTokenFinal(String to)
-    {
-        //complete the transfer
-        onProgress(true);
-
-        viewModel.createTokenTransfer(
-                to,
-                token,
-                token.getTransferListFormat(selection));
     }
 
     @Override
@@ -365,7 +327,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 if (actionDialog != null && actionDialog.isShowing()) actionDialog.completeSignRequest(resultCode == RESULT_OK);
-                //signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -384,71 +345,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
             dialog.dismiss();
         });
         dialog.show();
-    }
-
-    private void handleERC875Transfer(final String to, final String ensName)
-    {
-        //how many indices are we selling?
-        int quantity = selection.size();
-        int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
-
-        String toAddress = (ensName == null) ? to : ensName;
-
-        String qty = String.valueOf(quantity) + " " +
-                getResources().getString(ticketName) + "\n" +
-                getResources().getString(R.string.to) + " " +
-                toAddress;
-
-        signCallback = new SignAuthenticationCallback()
-        {
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
-                else viewModel.failedAuthentication(SIGN_DATA);
-
-                if (gotAuth) transferTokenFinal(to);
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-                AWalletAlertDialog dialog = new AWalletAlertDialog(getParent());
-                dialog.setIcon(AWalletAlertDialog.NONE);
-                dialog.setTitle(R.string.authentication_cancelled);
-                dialog.setButtonText(R.string.ok);
-                dialog.setButtonListener(v -> {
-                    dialog.dismiss();
-                });
-                dialog.setCancelable(true);
-                dialog.show();
-            }
-        };
-
-        confirmationDialog = new AWalletConfirmationDialog(this);
-        confirmationDialog.setTitle(R.string.title_transaction_details);
-        confirmationDialog.setSmallText(R.string.confirm_transfer_details);
-        confirmationDialog.setMediumText(qty);
-        confirmationDialog.setPrimaryButtonText(R.string.transfer_tickets);
-        confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        confirmationDialog.setPrimaryButtonListener(v1 -> viewModel.getAuthorisation(this, signCallback));
-        confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
-        confirmationDialog.show();
-    }
-
-    ActivityResultLauncher<Intent> transferLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
-            });
-
-    @Override
-    public void handleClick(String action, int actionId)
-    {
-        //clicked the next button
-        if (actionId == R.string.action_transfer)
-        {
-            //
-        }
     }
 
     @Override
@@ -483,7 +379,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         final String txSendAddress = sendAddress;
         sendAddress = null;
 
-        final byte[] transactionBytes = token.getTransferBytes(txSendAddress, selection);
+        final byte[] transactionBytes = token.getTransferBytes(txSendAddress, assetSelection);
 
         calculateEstimateDialog();
         //form payload and calculate tx cost
@@ -630,5 +526,28 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         });
 
         dialog.show();
+    }
+
+    private ArrayList<Pair<BigInteger, NFTAsset>> formAssetSelection(List<BigInteger> tokenIdList, List<NFTAsset> assets)
+    {
+        ArrayList<Pair<BigInteger, NFTAsset>> assetList = new ArrayList<>();
+        if (tokenIdList.size() != assets.size())
+        {
+            if (BuildConfig.DEBUG) //warn developer of problem
+            {
+                throw new RuntimeException("Token ID list size != Asset size");
+            }
+            else if (assets.size() < tokenIdList.size())  //ensure below code doesn't crash
+            {
+                tokenIdList = tokenIdList.subList(0, assets.size());
+            }
+        }
+
+        for (int i = 0; i < tokenIdList.size(); i++)
+        {
+            assetList.add(new Pair<>(tokenIdList.get(i), assets.get(i)));
+        }
+
+        return assetList;
     }
 }

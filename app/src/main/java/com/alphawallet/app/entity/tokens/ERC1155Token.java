@@ -11,6 +11,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC1155TransferEvent;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
@@ -409,6 +410,32 @@ public class ERC1155Token extends Token implements Parcelable
         {
             return BigInteger.ONE;
         }
+    }
+
+    @Override
+    public List<NFTAsset> getAssetListFromTransaction(Transaction tx)
+    {
+        List<NFTAsset> assetList = new ArrayList<>();
+        if (tx == null || tx.transactionInput == null) return assetList;
+        //given a transaction get the associated Asset map (with quantities)
+        switch (tx.transactionInput.functionData.functionName)
+        {
+            case "safeTransferFrom":
+            case "safeBatchTransferFrom":
+                int halfIndex = tx.transactionInput.arrayValues.size()/2;
+                for (int i = 0; i < halfIndex; i++)
+                {
+                    NFTAsset asset = new NFTAsset(assets.get(tx.transactionInput.arrayValues.get(i)));
+                    int amountIndex = i + halfIndex;
+                    asset.setSelectedBalance(new BigDecimal(tx.transactionInput.arrayValues.get(amountIndex)));
+                    assetList.add(asset);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return assetList;
     }
 
     /*

@@ -26,6 +26,7 @@ import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
@@ -914,5 +915,10 @@ public class Token implements Parcelable
     public List<Integer> getStandardFunctions()
     {
         return Arrays.asList(R.string.action_send, R.string.action_receive);
+    }
+
+    public List<NFTAsset> getAssetListFromTransaction(Transaction tx)
+    {
+        return new ArrayList<>();
     }
 }

@@ -72,6 +72,12 @@ public class NFTAsset implements Parcelable
         assetMap.put(NAME, "ID #" + tokenId.toString());
     }
 
+    public NFTAsset(NFTAsset asset)
+    {
+        assetMap.putAll(asset.assetMap);
+        attributeMap.putAll(asset.attributeMap);
+    }
+
     public String getAssetValue(String key)
     {
         return assetMap.get(key);

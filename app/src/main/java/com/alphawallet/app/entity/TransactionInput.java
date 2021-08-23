@@ -268,7 +268,11 @@ public class TransactionInput
             case RECEIVE_FROM:
                 break;
             case TRANSFER_FROM:
+            case SAFE_TRANSFER:
                 address = tx.from;
+                break;
+            case SAFE_BATCH_TRANSFER:
+                address = tx.to.equalsIgnoreCase(t.getWallet()) ? tx.from : tx.to;
                 break;
             case REMIX:
             case COMMIT_NFT:
@@ -350,8 +354,10 @@ public class TransactionInput
                 type = interpretTradeData(tx, walletAddress);
                 break;
             case "safeTransferFrom":
-            case "safeBatchTransferFrom":
                 type = interpretSafeTransferFrom(walletAddress);
+                break;
+            case "safeBatchTransferFrom":
+                type = TransactionType.SAFE_BATCH_TRANSFER;
                 break;
             case "transferFrom":
                 type = interpretTransferFrom(walletAddress);
@@ -464,7 +470,7 @@ public class TransactionInput
         String fromAddr = getFirstAddress();
         if (walletAddr == null)
         {
-            return TransactionType.TRANSFER_FROM;
+            return TransactionType.SAFE_TRANSFER;
         }
         else if (destinationAddr.equals(C.BURN_ADDRESS))
         {
@@ -476,7 +482,7 @@ public class TransactionInput
         }
         else if (!destinationAddr.equalsIgnoreCase(walletAddr)) //otherparty in this case will be the first address, the previous owner of the token(s)
         {
-            return TransactionType.TRANSFER_FROM;
+            return TransactionType.SAFE_TRANSFER;
         }
         else
         {

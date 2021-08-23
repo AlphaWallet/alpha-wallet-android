@@ -19,6 +19,8 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
+import org.jetbrains.annotations.NotNull;
+
 public class TransactionDetailWidget extends LinearLayout
 {
     private final TextView textTransactionSummary;
@@ -39,10 +41,12 @@ public class TransactionDetailWidget extends LinearLayout
         layoutSummary = findViewById(R.id.layout_summary);
     }
 
-    public void setupTransaction(Web3Transaction w3tx, int chainId, String walletAddress, String symbol)
+    public void setupTransaction(Web3Transaction w3tx, int chainId, String walletAddress, String symbol,
+                                 @NotNull ActionSheetInterface asIf)
     {
         layoutHolder.setVisibility(View.VISIBLE);
         textFullDetails.setText(w3tx.getFormattedTransaction(getContext(), chainId, symbol));
+        sheetInterface = asIf;
 
         if (!TextUtils.isEmpty(w3tx.description))
         {
@@ -68,10 +72,5 @@ public class TransactionDetailWidget extends LinearLayout
                 sheetInterface.lockDragging(false);
             }
         });
-    }
-
-    public void setLockCallback(ActionSheetInterface asIf)
-    {
-        sheetInterface = asIf;
     }
 }

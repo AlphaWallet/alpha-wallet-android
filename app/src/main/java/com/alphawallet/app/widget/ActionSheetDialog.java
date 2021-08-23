@@ -128,8 +128,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         if (token.isNonFungible())
         {
-            assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
-            assetDetailView.setVisibility(View.VISIBLE);
             balanceDisplay.setVisibility(View.GONE);
 
             if (token.getInterfaceSpec() == ContractType.ERC1155)
@@ -137,10 +135,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 List<NFTAsset> assetList = token.getAssetListFromTransaction(transaction);
                 amountDisplay.setVisibility(View.VISIBLE);
                 amountDisplay.setAmountFromAssetList(assetList);
+                setupTransactionDetails();
             }
             else
             {
                 amountDisplay.setVisibility(View.GONE);
+                assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
+                assetDetailView.setVisibility(View.VISIBLE);
             }
         }
 
@@ -205,13 +206,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         AddressDetailView requester = findViewById(R.id.requester);
         requester.setupRequester(url);
         detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
-                tokensService.getNetworkSymbol(token.tokenInfo.chainId));
+                tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
         if (candidateTransaction.isConstructor())
         {
             addressDetail.setVisibility(View.GONE);
         }
 
-        detailWidget.setLockCallback(this);
         if (candidateTransaction.value.equals(BigInteger.ZERO))
         {
             amountDisplay.setVisibility(View.GONE);
@@ -221,6 +221,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             amountDisplay.setVisibility(View.VISIBLE);
             amountDisplay.setAmountUsingToken(candidateTransaction.value, tokensService.getServiceToken(token.tokenInfo.chainId), tokensService);
         }
+    }
+
+    private void setupTransactionDetails()
+    {
+        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
+                tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
+        detailWidget.setVisibility(View.VISIBLE);
     }
 
     public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)

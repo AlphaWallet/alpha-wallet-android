@@ -38,7 +38,6 @@ public class AmountDisplayWidget extends LinearLayout {
     private final Locale deviceSettingsLocale = LocaleUtils.getDeviceLocale(getContext());
     private final TextView amount;
     private final RecyclerView tokensList;
-    private final LinearLayout textHoldingLayout;
 
     public AmountDisplayWidget(Context context, @Nullable AttributeSet attrs)
     {
@@ -47,7 +46,6 @@ public class AmountDisplayWidget extends LinearLayout {
         inflate(context, R.layout.item_amount_display, this);
         amount = findViewById(R.id.text_amount);
         tokensList = findViewById(R.id.tokens_list);
-        textHoldingLayout = findViewById(R.id.layout_amount_text);
     }
 
     public void setAmountFromString(String displayStr)
@@ -63,7 +61,7 @@ public class AmountDisplayWidget extends LinearLayout {
 
     public void setAmountFromAssetList(List<NFTAsset> assets)
     {
-        textHoldingLayout.setVisibility(View.GONE);
+        amount.setVisibility(View.GONE);
         tokensList.setVisibility(View.VISIBLE);
 
         //display assets

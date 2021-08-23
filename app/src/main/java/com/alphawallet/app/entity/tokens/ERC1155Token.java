@@ -417,15 +417,22 @@ public class ERC1155Token extends Token implements Parcelable
     {
         List<NFTAsset> assetList = new ArrayList<>();
         if (tx == null || tx.transactionInput == null) return assetList;
+        NFTAsset asset;
         //given a transaction get the associated Asset map (with quantities)
         switch (tx.transactionInput.functionData.functionName)
         {
             case "safeTransferFrom":
+                BigInteger tokenId = new BigInteger(tx.transactionInput.miscData.get(0), 16);
+                BigInteger count = new BigInteger(tx.transactionInput.miscData.get(1), 16);
+                asset = new NFTAsset(assets.get(tokenId));
+                asset.setSelectedBalance(new BigDecimal(count));
+                assetList.add(asset);
+                break;
             case "safeBatchTransferFrom":
                 int halfIndex = tx.transactionInput.arrayValues.size()/2;
                 for (int i = 0; i < halfIndex; i++)
                 {
-                    NFTAsset asset = new NFTAsset(assets.get(tx.transactionInput.arrayValues.get(i)));
+                    asset = new NFTAsset(assets.get(tx.transactionInput.arrayValues.get(i)));
                     int amountIndex = i + halfIndex;
                     asset.setSelectedBalance(new BigDecimal(tx.transactionInput.arrayValues.get(amountIndex)));
                     assetList.add(asset);

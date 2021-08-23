@@ -11,20 +11,7 @@
         android:layout_height="1dp"
         android:background="@color/mercury" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tokens_list"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_marginTop="@dimen/dp20"
-        android:layout_marginBottom="@dimen/dp20"
-        android:layout_marginStart="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_height="wrap_content"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-
     <LinearLayout
-        android:id="@+id/layout_amount_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp20"
@@ -52,6 +39,15 @@
             android:gravity="start"
             tools:text="1.234 ETH ≈ 500.23 USD"
             android:textSize="@dimen/sp16"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tokens_list"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:layout_width="0dp"
+            android:layout_weight="3.5"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     </LinearLayout>
 

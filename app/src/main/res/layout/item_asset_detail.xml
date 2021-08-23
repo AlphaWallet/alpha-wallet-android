@@ -31,6 +31,8 @@
             android:gravity="start"
             android:textSize="@dimen/sp13"/>
 
+
+
         <TextView
             android:id="@+id/text_asset_name"
             android:layout_width="0dp"

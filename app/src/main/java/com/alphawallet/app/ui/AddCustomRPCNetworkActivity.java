@@ -91,7 +91,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             EthereumNetworkRepositoryType.NetworkInfoExt ext = viewModel.getNetworkInfo(chainId);
 
             nameInputView.setText(ext.info.name);
-            rpcUrlInputView.setText(ext.info.rpcServerUrl.replace(BuildConfig.XInfuraAPI,"********************************"));
+            rpcUrlInputView.setText(ext.info.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})","/********************************"));
             chainIdInputView.setText(String.valueOf(ext.info.chainId));
             symbolInputView.setText(ext.info.symbol);
             blockExplorerUrlInputView.setText(ext.info.etherscanUrl);

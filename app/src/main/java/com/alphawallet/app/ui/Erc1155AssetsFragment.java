@@ -70,16 +70,16 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
     }
 
     private void onAssets(Token token) {
-        adapter = new Erc1155AssetsAdapter(getContext(), token.getTokenAssets(), this);
+        adapter = new Erc1155AssetsAdapter(getContext(), token.getCollectionMap(), this);
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onAssetClicked(Pair<BigInteger, NFTAsset> item)
     {
-        if (item.second.getBalance() != null && item.second.getBalance().compareTo(BigDecimal.ONE) > 0)
+        if (item.second.isCollection())
         {
-            viewModel.showAssetListDetails(getContext(), wallet, token, item.first);
+            viewModel.showAssetListDetails(getContext(), wallet, token, item.second);
         }
         else
         {

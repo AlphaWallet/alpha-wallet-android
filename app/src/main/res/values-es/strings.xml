@@ -770,5 +770,7 @@
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
-    <string name="select_amount">Select Amount</string>
+    <string name="select_amount">Seleccionar Monto</string>
+    <string name="selected_tokens">Tokens Seleccionados</string>
+    <string name="send_tokens">Enviar Tokens</string>
 </resources>

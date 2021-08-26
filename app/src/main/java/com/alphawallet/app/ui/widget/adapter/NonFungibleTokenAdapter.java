@@ -102,14 +102,16 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     private void setAssetSelection(Token token, List<Pair<BigInteger, NFTAsset>> selection)
     {
-        if (selection.size() == 1 && selection.get(0).second.getSelectedBalance().compareTo(BigDecimal.ONE) <= 0)
-        {
-            setTokenRange(token, Collections.singletonList(selection.get(0).first)); //setup a normal single token transfer
-        }
-        else
-        {
-            setAssetRange(token, selection);
-        }
+        setAssetRange(token, selection);
+
+//        if (selection.size() == 1 && selection.get(0).second.getSelectedBalance().compareTo(BigDecimal.ONE) <= 0)
+//        {
+//            setTokenRange(token, Collections.singletonList(selection.get(0).first)); //setup a normal single token transfer
+//        }
+//        else
+//        {
+//
+//        }
     }
 
     @NotNull
@@ -198,8 +200,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
         for (int i = 0; i < selection.size(); i++)
         {
-            NFTAsset asset = selection.get(i).second;
-            items.add(new NFTSortedItem(asset, i+1));
+            items.add(new NFTSortedItem(selection.get(i), i+1));
         }
 
         items.endBatchedUpdates();

@@ -18,6 +18,7 @@ import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class Erc1155AssetSelectViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
-    private MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
+    private final MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
 
 
     public Erc1155AssetSelectViewModel(FetchTransactionsInteract fetchTransactionsInteract,
@@ -52,11 +53,13 @@ public class Erc1155AssetSelectViewModel extends BaseViewModel {
         return assets;
     }
 
-    public void getAssets(Token token, BigInteger tokenId)
+    public void getAssets(Token token, List<BigInteger> tokenIds)
     {
-        if (tokenId.compareTo(BigInteger.ZERO) > 0)
+        if (tokenIds.size() > 0)
         {
-            assets.postValue(token.getTokenAssetMap(tokenId));
+            Map<BigInteger, NFTAsset> assetMap = new HashMap<>();
+            for (BigInteger tokenId : tokenIds) { assetMap.put(tokenId, token.getAssetForToken(tokenId)); }
+            assets.postValue(assetMap);
         }
         else
         {

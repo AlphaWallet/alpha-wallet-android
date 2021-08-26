@@ -4,6 +4,8 @@
     android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/dp8"
+    android:layout_marginEnd="@dimen/dp8"
     android:orientation="vertical">
 
     <CheckBox
@@ -11,7 +13,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/dp8"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/dp8"
         android:button="@drawable/selector_round_checkbox"
@@ -64,18 +65,32 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:fontFamily="@font/font_semibold"
+            android:layout_alignParentStart="true"
             android:singleLine="true"
             tools:text="Title"
             android:textColor="@color/black"
             android:textSize="@dimen/sp17" />
 
+        <TextView
+            android:id="@+id/token_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_semibold"
+            android:singleLine="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignBottom="@id/subtitle"
+            android:textColor="@color/black"
+            android:layout_marginEnd="2dp"
+            android:textSize="@dimen/sp15"
+            android:visibility="visible"
+            tools:text="#1" />
 
         <TextView
             android:id="@+id/subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/count"
+            android:layout_toEndOf="@id/token_id"
             android:layout_below="@id/title"
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
@@ -93,19 +108,9 @@
             android:layout_alignParentEnd="true"
             android:layout_alignBottom="@id/subtitle"
             android:textColor="@color/black"
-            android:layout_marginEnd="@dimen/dp8"
             android:textSize="@dimen/sp15"
             android:visibility="gone"
             tools:text="x200" />
-
-        <View
-            android:id="@+id/click_area"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignStart="@id/count"
-            android:layout_alignBottom="@id/count"
-            android:layout_alignTop="@id/title"
-            android:layout_alignParentEnd="true"/>
 
     </RelativeLayout>
 

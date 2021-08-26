@@ -44,10 +44,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
     {
         textAmountMax.setText(getContext().getString(R.string.input_amount_max, String.valueOf(maxAmount)));
 
-        if (amountReady != null && activePosition != position)
-        {
-            amountReady.amountReady(textAmount.getBigDecimalValue(), BigDecimal.valueOf(activePosition));
-        }
+        completeLastSelection(position);
 
         textAmount.setText(String.valueOf(startingAmount));
         amountReady = callback;
@@ -69,6 +66,14 @@ public class NumericInputBottomSheet extends ConstraintLayout
 
         textAmount.requestFocus();
         setupCallbacks(position);
+    }
+
+    public void completeLastSelection(int position)
+    {
+        if (amountReady != null && activePosition != position)
+        {
+            amountReady.amountReady(textAmount.getBigDecimalValue(), BigDecimal.valueOf(activePosition));
+        }
     }
 
     private void setupCallbacks(final int position)

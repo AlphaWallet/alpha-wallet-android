@@ -796,4 +796,6 @@
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
     <string name="select_amount">Select Amount</string>
+    <string name="selected_tokens">Selected Tokens</string>
+    <string name="send_tokens">Sélectionnez le Montant</string>
 </resources>

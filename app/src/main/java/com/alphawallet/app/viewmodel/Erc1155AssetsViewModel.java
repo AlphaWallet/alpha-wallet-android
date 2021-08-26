@@ -29,17 +29,12 @@ public class Erc1155AssetsViewModel extends BaseViewModel {
         this.tokensService = tokensService;
     }
 
-    public void getAssets(Token token)
-    {
-
-    }
-
-    public void showAssetListDetails(Context context, Wallet wallet, Token token, BigInteger tokenId)
+    public void showAssetListDetails(Context context, Wallet wallet, Token token, NFTAsset asset)
     {
         Intent intent = new Intent(context, Erc1155AssetListActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN, token);
-        intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
+        intent.putExtra(C.EXTRA_NFTASSET_LIST, asset);
         context.startActivity(intent);
     }
 

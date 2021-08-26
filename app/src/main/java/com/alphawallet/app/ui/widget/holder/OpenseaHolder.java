@@ -99,26 +99,9 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         layoutDetails.setVisibility(View.GONE);
         tokenImageView.blankViews();
 
-        if (false && data.tokenIds.size() > 0 && token.getInterfaceSpec() == ContractType.ERC1155) //TODO: bind ERC1155 batch
-        {
-            bindERC1155Batch(data, addition);
-        }
-        else
-        {
-            displayAsset(data, asset, true);
-        }
+        displayAsset(data, asset, true);
 
         addClickListener(data);
-    }
-
-    private void bindERC1155Batch(TicketRange data, Bundle addition)
-    {
-        //TODO: Show batch as per picture here: https://user-images.githubusercontent.com/17334718/119675191-68925580-be6f-11eb-9646-b94b3f170276.jpg (top right "send tokens")
-        //NB if there's a repeating tokenId it means transfer a batch
-        Map<BigInteger, BigInteger> tokenMap = getIdMap(data.tokenIds);
-
-        //Use this map with counts of separate tokens. Display as appropriate (eg 200x TokenId#1, 5x TokenId#2 etc)
-
     }
 
     private NFTAsset storeAsset(BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)

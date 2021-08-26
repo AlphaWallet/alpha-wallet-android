@@ -771,4 +771,6 @@
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
     <string name="select_amount">Select Amount</string>
+    <string name="selected_tokens">选定的通证</string>
+    <string name="send_tokens">发送通证</string>
 </resources>

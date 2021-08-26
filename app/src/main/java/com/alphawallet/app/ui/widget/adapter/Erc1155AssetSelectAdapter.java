@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.ERC1155Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnAssetSelectListener;
 import com.bumptech.glide.Glide;
@@ -41,8 +43,9 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
     {
         this.context = context;
         this.listener = listener;
-        actualData = new ArrayList<>(data.size());
-        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet()) {
+        this.actualData = new ArrayList<>(data.size());
+        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
+        {
             actualData.add(new Pair<>(d.getKey(), d.getValue()));
         }
     }
@@ -63,7 +66,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         if (item != null)
         {
             holder.title.setText(item.getName());
-            holder.assetCategory.setText("Placeholder: Asset type");
+            holder.assetCategory.setText(item.getDescription());
             Glide.with(context)
                     .load(item.getThumbnail())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
@@ -74,6 +77,16 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
                 setSelected(position, b);
                 holder.checkBox.setChecked(b);
             });
+
+            if (ERC1155Token.isNFT(pair.first))
+            {
+                holder.tokenId.setVisibility(View.VISIBLE);
+                holder.tokenId.setText(context.getString(R.string.hash_tokenid, ERC1155Token.getNFTTokenId(pair.first).toString()));
+            }
+            else
+            {
+                holder.tokenId.setVisibility(View.GONE);
+            }
 
             if (item.isAssetMultiple())
             {
@@ -91,12 +104,12 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
                     holder.selectionAmount.animate().scaleX(1.0f).setDuration(300);
                     holder.selectionAmount.animate().scaleY(1.0f).setDuration(300);
                 }
-                else //if (holder.selectionAmount.getVisibility() == View.VISIBLE)
+                else
                 {
-                    holder.selectionAmount.animate().alpha(0.0f).setDuration(2000);
-                    holder.selectionAmount.animate().scaleX(0.0f).setDuration(2000);
-                    holder.selectionAmount.animate().scaleY(0.0f).setDuration(2000);
-                    handler.postDelayed(() -> holder.selectionAmount.setVisibility(View.GONE), 1500);
+                    holder.selectionAmount.animate().alpha(0.0f).setDuration(300);
+                    holder.selectionAmount.animate().scaleX(0.0f).setDuration(300);
+                    holder.selectionAmount.animate().scaleY(0.0f).setDuration(300);
+                    handler.postDelayed(() -> holder.selectionAmount.setVisibility(View.GONE), 500);
                 }
                 return;
             }
@@ -221,7 +234,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         final TextView assetCount;
         final TextView selectionAmount;
         final CheckBox checkBox;
-        final View     clickBox;
+        final TextView tokenId;
 
         ViewHolder(View view)
         {
@@ -232,8 +245,8 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
             assetCategory = view.findViewById(R.id.subtitle);
             assetCount = view.findViewById(R.id.count);
             checkBox = view.findViewById(R.id.checkbox);
-            clickBox = view.findViewById(R.id.click_area);
             selectionAmount = view.findViewById(R.id.text_count);
+            tokenId = view.findViewById(R.id.token_id);
         }
     }
 }

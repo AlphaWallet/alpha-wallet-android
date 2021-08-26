@@ -1,8 +1,6 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,7 +25,6 @@ import com.alphawallet.app.widget.TokenInfoView;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -81,7 +78,11 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Details"));
 
-        if (!TextUtils.isEmpty(sequenceId)) { addInfoView("Sequence #", sequenceId); }
+        //can be either: FT with a balance (balance > 1)
+        //unique NFT with tokenId (sequenceId)
+
+        if (!TextUtils.isEmpty(sequenceId)) { addInfoView("Token #", sequenceId); }
+        if (asset.isAssetMultiple()) { addInfoView(getString(R.string.balance), asset.getBalance().toString()); }
         addInfoView("External Link", asset.getExternalLink());
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
         tokenDescription.setText(asset.getDescription());
@@ -129,6 +130,13 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     public void showTransferToken(List<BigInteger> selection)
     {
         NFTAsset asset = token.getTokenAssets().get(tokenId);
-        viewModel.showTransferToken(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)));
+        if (asset.isAssetMultiple())
+        {
+            viewModel.showTransferSelectCount(this, token, tokenId);
+        }
+        else
+        {
+            viewModel.showTransferToken(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)));
+        }
     }
 }

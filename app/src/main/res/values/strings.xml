@@ -805,4 +805,7 @@
     <string name="select_amount">Select Amount</string>
     <string name="safe_transfer" translatable="false">Safe Transfer</string>
     <string name="safe_batch_transfer" translatable="false">Safe Batch Transfer</string>
+    <string name="hash_tokenid" translatable="false">#%1$s</string>
+    <string name="selected_tokens">Selected Tokens</string>
+    <string name="send_tokens">Send Tokens</string>
 </resources>

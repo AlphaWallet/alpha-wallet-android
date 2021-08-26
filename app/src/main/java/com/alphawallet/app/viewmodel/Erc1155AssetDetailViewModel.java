@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.app.ui.TransferNFTActivity;
 import com.alphawallet.app.util.Utils;
 
@@ -45,6 +46,23 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
 
     public AssetDefinitionService getAssetDefinitionService() {
         return assetDefinitionService;
+    }
+
+    public void showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)
+    {
+        walletInteract.find()
+                .subscribe(wallet -> completeTransferSelect(ctx, token, tokenId, wallet), this::onError)
+                .isDisposed();
+    }
+
+    private void completeTransferSelect(Context ctx, Token token, BigInteger tokenId, Wallet wallet)
+    {
+        Intent intent = new Intent(ctx, Erc1155AssetSelectActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString(16));
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        ctx.startActivity(intent);
     }
 
     public void showTransferToken(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)

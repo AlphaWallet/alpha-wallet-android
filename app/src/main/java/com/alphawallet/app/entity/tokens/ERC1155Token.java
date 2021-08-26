@@ -164,6 +164,40 @@ public class ERC1155Token extends Token implements Parcelable
     }
 
     @Override
+    public Map<BigInteger, NFTAsset> getCollectionMap()
+    {
+        Map<BigInteger, BigInteger> collectionBuilder = new HashMap<>();
+        Map<BigInteger, NFTAsset> collectionMap = new HashMap<>();
+        //run through all assets to fetch the list
+        for (BigInteger tokenId : assets.keySet())
+        {
+            BigInteger baseTokenId = getBaseTokenId(tokenId);
+            if (baseTokenId.compareTo(BigInteger.ZERO) > 0)
+            {
+                NFTAsset checkAsset;
+                if (!collectionBuilder.containsKey(baseTokenId))
+                {
+                    checkAsset = new NFTAsset(assets.get(tokenId));
+                    collectionBuilder.put(baseTokenId, tokenId);
+                }
+                else
+                {
+                    checkAsset = collectionMap.get(collectionBuilder.get(baseTokenId));
+                }
+
+                checkAsset.addCollectionToken(tokenId);
+                collectionMap.put(collectionBuilder.get(baseTokenId), checkAsset);
+            }
+            else
+            {
+                collectionMap.put(tokenId, assets.get(tokenId)); //add token as-is
+            }
+        }
+
+        return collectionMap;
+    }
+
+    @Override
     public BigDecimal getBalanceRaw()
     {
         return new BigDecimal(assets.size());
@@ -199,7 +233,6 @@ public class ERC1155Token extends Token implements Parcelable
         Function               function;
         List<Type>             params;
         List<TypeReference<?>> returnTypes = Collections.emptyList();
-        //Map<BigInteger, BigInteger> idMap = Utils.getIdMap(tokenIds);
 
         if (transferData.size() == 1)
         {
@@ -227,7 +260,7 @@ public class ERC1155Token extends Token implements Parcelable
     @Override
     public Function getTransferFunction(String to, List<BigInteger> tokenIds) throws NumberFormatException
     {
-        Function               function    = null;
+        Function               function;
         List<Type>             params;
         BigInteger             tokenIdBI   = tokenIds.get(0);
         List<TypeReference<?>> returnTypes = Collections.emptyList();
@@ -655,5 +688,36 @@ public class ERC1155Token extends Token implements Parcelable
                         new org.web3j.abi.datatypes.Address(address),
                         new Uint256(tokenId)),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
+    }
+
+    /**
+     * Handle Fungibility types.
+     * Adapted from rules given in the contract here: https://github.com/enjin/erc-1155/blob/master/contracts/ERC1155MixedFungible.sol
+     * @param tokenId
+     * @return
+     */
+    private static BigInteger getBaseTokenId(BigInteger tokenId)
+    {
+        //mask top 32 bytes
+        return tokenId.shiftRight(40); //Top 27 bytes (bottom 5 is NFT tokenId)
+    }
+
+    public static BigInteger getNFTTokenId(BigInteger tokenId)
+    {
+        return tokenId.and(Numeric.toBigInt("0xFFFFFFFFFF")); //apply bitmask, bottom 5 bytes
+    }
+
+    /**
+     * This is a heuristic based on the ERC1155 suggested rules here: https://github.com/enjin/erc-1155/blob/master/contracts/ERC1155MixedFungible.sol
+     * See if there's a base ID, if there is, then see if the NFT tokenID is below 0xFFFF and non zero, which means the mask is 0x000000FFFF
+     * The consequence of mis-identification here is only that the token type description is not correct.
+     * @param tokenId
+     * @return
+     */
+    public static boolean isNFT(BigInteger tokenId)
+    {
+        return getBaseTokenId(tokenId).compareTo(BigInteger.ZERO) > 0
+                && getNFTTokenId(tokenId).compareTo(BigInteger.valueOf(0xFFFF)) < 0
+                && getNFTTokenId(tokenId).compareTo(BigInteger.ZERO) > 0;
     }
 }

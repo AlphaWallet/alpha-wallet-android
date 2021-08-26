@@ -93,10 +93,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
     private ActionSheetDialog actionDialog;
     private AWalletConfirmationDialog confirmationDialog;
 
-    private LinearLayout pickTicketQuantity;
-    private LinearLayout pickTransferMethod;
-    private LinearLayout pickExpiryDate;
-
     @Nullable
     private Disposable calcGasCost;
 
@@ -105,7 +101,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
     {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_transfer_detail);
+        setContentView(R.layout.activity_transfer_nft);
 
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
 
@@ -143,9 +139,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        pickTicketQuantity = findViewById(R.id.layout_ticket_quantity);
-        pickTransferMethod = findViewById(R.id.layout_choose_method);
-        pickExpiryDate = findViewById(R.id.layout_date_picker);
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_transfer)));
@@ -157,11 +150,8 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
     private void setupScreen()
     {
         addressInput.setVisibility(View.GONE);
-        pickTicketQuantity.setVisibility(View.GONE);
-        pickTransferMethod.setVisibility(View.GONE);
-        pickExpiryDate.setVisibility(View.GONE);
         addressInput.setVisibility(View.VISIBLE);
-        setTitle(R.string.title_input_wallet_address);
+        setTitle(getString(R.string.send_tokens));
     }
 
     private void onTransaction(String success)

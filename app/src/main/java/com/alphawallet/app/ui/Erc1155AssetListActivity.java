@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.Menu;
@@ -36,7 +35,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
     private Token token;
     private Wallet wallet;
-    private BigInteger tokenId;
+    private NFTAsset asset;
 
     private RecyclerView recyclerView;
     private Erc1155AssetListAdapter adapter;
@@ -58,7 +57,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
         initViewModel();
 
-        adapter = new Erc1155AssetListAdapter(this, token.getTokenAssets(), tokenId, this);
+        adapter = new Erc1155AssetListAdapter(this, token.getTokenAssets(), asset,this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -73,7 +72,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     {
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
+        asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET_LIST);
     }
 
     private void initViewModel()
@@ -85,7 +84,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     @Override
     public void onAssetClicked(Pair<BigInteger, NFTAsset> pair)
     {
-        viewModel.showAssetDetails(this, wallet, token, tokenId, pair.first);
+        viewModel.showAssetDetails(this, wallet, token, pair.first);
     }
 
     @Override
@@ -98,8 +97,9 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_select) {
-            viewModel.openSelectionMode(this, token, wallet, tokenId);
+        if (item.getItemId() == R.id.action_select)
+        {
+            viewModel.openSelectionMode(this, token, wallet, asset);
             return true;
         }
         return super.onOptionsItemSelected(item);

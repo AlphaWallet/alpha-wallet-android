@@ -24,6 +24,7 @@ import com.alphawallet.app.ui.widget.adapter.Erc1155AssetSelectAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.widget.entity.NumericInputBottomSheet;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -46,7 +47,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     List<NFTAsset> selectedAssets = new ArrayList<>();
     private Token token;
     private Wallet wallet;
-    private BigInteger tokenId;
+    private List<BigInteger> tokenIds;
     private RecyclerView recyclerView;
     private Erc1155AssetSelectAdapter adapter;
     private NumericInputBottomSheet numericInput;
@@ -70,7 +71,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
 
         numericInput = findViewById(R.id.numeric_input);
 
-        viewModel.getAssets(token, tokenId);
+        viewModel.getAssets(token, tokenIds);
     }
 
     private void getIntentData()
@@ -78,8 +79,8 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
-        tokenId = !TextUtils.isEmpty(tokenIdStr) ? new BigInteger(tokenIdStr)
-                : BigInteger.ZERO;
+        tokenIds = !TextUtils.isEmpty(tokenIdStr) ? token.stringHexToBigIntegerList(tokenIdStr)
+                : new ArrayList<>();
     }
 
     private void initViewModel()
@@ -125,7 +126,9 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         }
         else
         {
+            numericInput.completeLastSelection(position);
             adapter.setSelectedAmount(position, 1);
+            removeInput();
         }
     }
 
@@ -136,9 +139,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         setTitle(getString(R.string.title_x_selected, String.valueOf(selectedAssets.size())));
         if (numericInput.getVisibility() == View.VISIBLE)
         {
-            numericInput.setVisibility(View.GONE);
-            FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setVisibility(View.VISIBLE);
+            removeInput();
         }
     }
 
@@ -155,5 +156,12 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     public void showTransferToken(List<BigInteger> selection)
     {
         viewModel.completeTransfer(this, token, adapter.getSelectedTokenIds(), adapter.getSelectedAssets(), wallet);
-    };
+    }
+
+    private void removeInput()
+    {
+        numericInput.setVisibility(View.GONE);
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        functionBar.setVisibility(View.VISIBLE);
+    }
 }

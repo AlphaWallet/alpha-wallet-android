@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
 
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,6 +47,8 @@ public class NFTAsset implements Parcelable
     private BigDecimal balance; //for ERC1155
     private BigDecimal selected; //for ERC1155 transfer
 
+    private List<BigInteger> tokenIdList; // for ERC1155 collections
+
     public boolean isChecked = false;
     public boolean exposeRadio = false;
 
@@ -76,6 +80,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.putAll(asset.assetMap);
         attributeMap.putAll(asset.attributeMap);
+        balance = asset.balance;
     }
 
     public String getAssetValue(String key)
@@ -172,15 +177,24 @@ public class NFTAsset implements Parcelable
         balance = new BigDecimal(in.readString());
         selected = new BigDecimal(in.readString());
         int assetCount = in.readInt();
+        int attrCount = in.readInt();
+        int tokenIdCount = in.readInt();
+
         for (int i = 0; i < assetCount; i++)
         {
             assetMap.put(in.readString(), in.readString());
         }
 
-        int attrCount = in.readInt();
         for (int i = 0; i < attrCount; i++)
         {
             attributeMap.put(in.readString(), in.readString());
+        }
+
+        if (tokenIdCount > 0) { tokenIdList = new ArrayList<>(); }
+
+        for (int i = 0; i < tokenIdCount; i++)
+        {
+            tokenIdList.add(new BigInteger(in.readString()));
         }
     }
 
@@ -273,16 +287,27 @@ public class NFTAsset implements Parcelable
         dest.writeString(balance != null ? balance.toString() : "1");
         dest.writeString(selected != null ? selected.toString() : "0");
         dest.writeInt(assetMap.size());
+        dest.writeInt(attributeMap.size());
+        dest.writeInt(tokenIdList != null ? tokenIdList.size() : 0);
+
         for (String key : assetMap.keySet())
         {
             dest.writeString(key);
             dest.writeString(assetMap.get(key));
         }
-        dest.writeInt(attributeMap.size());
+
         for (String key : attributeMap.keySet())
         {
             dest.writeString(key);
             dest.writeString(attributeMap.get(key));
+        }
+
+        if (tokenIdList != null)
+        {
+            for (BigInteger tokenId : tokenIdList)
+            {
+                dest.writeString(tokenId.toString());
+            }
         }
     }
 
@@ -378,5 +403,47 @@ public class NFTAsset implements Parcelable
     public BigDecimal getSelectedBalance()
     {
         return selected != null ? this.selected : BigDecimal.ZERO;
+    }
+
+    public void addCollectionToken(BigInteger nftTokenId)
+    {
+        if (tokenIdList == null) tokenIdList = new ArrayList<>();
+        tokenIdList.add(nftTokenId);
+    }
+
+    public boolean isCollection()
+    {
+        return tokenIdList != null && tokenIdList.size() > 1;
+    }
+
+    public int getCollectionCount()
+    {
+        return tokenIdList != null ? tokenIdList.size() : 0;
+    }
+
+    public List<BigInteger> getCollectionIds()
+    {
+        return tokenIdList;
+    }
+
+    public String getAssetCategory()
+    {
+        if (tokenIdList != null && tokenIdList.size() > 1)
+        {
+            return "Collection";
+        }
+        else if (balance.compareTo(BigDecimal.ONE) > 0)
+        {
+            return "Fungible Token";
+        }
+        else if (tokenIdList != null && tokenIdList.size() == 1
+                && ERC1155Token.getNFTTokenId(tokenIdList.get(0)).compareTo(BigInteger.ZERO) > 0)
+        {
+            return "NFT";
+        }
+        else
+        {
+            return "Fungible Token"; //?
+        }
     }
 }

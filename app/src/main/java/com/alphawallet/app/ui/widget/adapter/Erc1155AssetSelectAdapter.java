@@ -18,17 +18,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnAssetSelectListener;
+import com.alphawallet.app.widget.NFTImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +51,8 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         {
             actualData.add(new Pair<>(d.getKey(), d.getValue()));
         }
+
+        sortData();
     }
 
     @Override
@@ -67,10 +72,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         {
             holder.title.setText(item.getName());
             holder.assetCategory.setText(item.getDescription());
-            Glide.with(context)
-                    .load(item.getThumbnail())
-                    .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
-                    .into(holder.icon);
+            holder.icon.setupTokenImageThumbnail(item);
             holder.checkBox.setChecked(item.isSelected());
             holder.holderLayout.setOnClickListener(v -> {
                 boolean b = !item.isSelected();
@@ -228,7 +230,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final RelativeLayout holderLayout;
-        final ImageView icon;
+        final NFTImageView icon;
         final TextView title;
         final TextView assetCategory;
         final TextView assetCount;
@@ -247,6 +249,17 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
             checkBox = view.findViewById(R.id.checkbox);
             selectionAmount = view.findViewById(R.id.text_count);
             tokenId = view.findViewById(R.id.token_id);
+
+            checkBox.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void sortData()
+    {
+        Collections.sort(actualData, (e1, e2) -> {
+            BigInteger tokenId1 = e1.first;
+            BigInteger tokenId2 = e2.first;
+            return tokenId1.compareTo(tokenId2);
+        });
     }
 }

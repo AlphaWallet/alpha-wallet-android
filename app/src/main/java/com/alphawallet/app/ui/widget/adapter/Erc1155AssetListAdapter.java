@@ -16,6 +16,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
+import com.alphawallet.app.widget.NFTImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -44,7 +45,7 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_erc1155_asset, parent, false);
+                .inflate(R.layout.item_erc1155_asset_select, parent, false);
         return new ViewHolder(itemView);
     }
 
@@ -55,10 +56,7 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
         holder.title.setText(assetData.get(id).getName());
         holder.tokenId.setText(context.getString(R.string.hash_tokenid, ERC1155Token.getNFTTokenId(id).toString())); //base value of token
         holder.subtitle.setText(assetData.get(id).getDescription());
-        Glide.with(context)
-                .load(assetData.get(id).getImage())
-                .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
-                .into(holder.icon);
+        holder.icon.setupTokenImageThumbnail(assetData.get(id));
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(id, assetData.get(id))));
     }
 
@@ -70,7 +68,7 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final RelativeLayout layout;
-        final ImageView icon;
+        final NFTImageView icon;
         final TextView title;
         final TextView tokenId;
         final TextView subtitle;
@@ -78,12 +76,14 @@ public class Erc1155AssetListAdapter extends RecyclerView.Adapter<Erc1155AssetLi
         ViewHolder(View view)
         {
             super(view);
-            layout = view.findViewById(R.id.layout);
+            layout = view.findViewById(R.id.holding_view);
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
             subtitle = view.findViewById(R.id.subtitle);
             tokenId = view.findViewById(R.id.token_id);
             tokenId.setVisibility(View.VISIBLE);
+
+            view.findViewById(R.id.arrow_right).setVisibility(View.VISIBLE);
         }
     }
 }

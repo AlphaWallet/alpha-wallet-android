@@ -172,12 +172,14 @@ public class ERC1155Token extends Token implements Parcelable
         for (BigInteger tokenId : assets.keySet())
         {
             BigInteger baseTokenId = getBaseTokenId(tokenId);
+
             if (baseTokenId.compareTo(BigInteger.ZERO) > 0)
             {
+                NFTAsset thisAsset = assets.get(tokenId);
                 NFTAsset checkAsset;
                 if (!collectionBuilder.containsKey(baseTokenId))
                 {
-                    checkAsset = new NFTAsset(assets.get(tokenId));
+                    checkAsset = new NFTAsset(thisAsset);
                     collectionBuilder.put(baseTokenId, tokenId);
                 }
                 else
@@ -698,8 +700,7 @@ public class ERC1155Token extends Token implements Parcelable
      */
     private static BigInteger getBaseTokenId(BigInteger tokenId)
     {
-        //mask top 32 bytes
-        return tokenId.shiftRight(40); //Top 27 bytes (bottom 5 is NFT tokenId)
+        return tokenId.shiftRight(96); //Top 20 bytes (bottom 5 is NFT tokenId)
     }
 
     public static BigInteger getNFTTokenId(BigInteger tokenId)

@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -423,6 +424,13 @@ public class NFTAsset implements Parcelable
 
     public List<BigInteger> getCollectionIds()
     {
+        //return sorted list
+        Collections.sort(tokenIdList);/*, (e1, e2) -> {
+            BigInteger tokenId1 = e1.first;
+            BigInteger tokenId2 = e2.first;
+            return tokenId1.compareTo(tokenId2);
+        });*/
+
         return tokenIdList;
     }
 

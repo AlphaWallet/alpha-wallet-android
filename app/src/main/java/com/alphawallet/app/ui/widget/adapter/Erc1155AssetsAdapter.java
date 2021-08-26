@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
+import com.alphawallet.app.widget.NFTImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -36,16 +38,19 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
         this.context = context;
         this.listener = listener;
         actualData = new ArrayList<>(data.size());
-        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet()) {
+        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
+        {
             actualData.add(new Pair<>(d.getKey(), d.getValue()));
         }
+
+        sortData();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_erc1155_asset, parent, false);
+                .inflate(R.layout.item_erc1155_asset_select, parent, false);
         return new ViewHolder(itemView);
     }
 
@@ -60,10 +65,7 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
             int textId = assetCount == 1 ? R.string.asset_description_text : R.string.asset_description_text_plural;
             holder.title.setText(item.getName());
             holder.subtitle.setText(context.getString(textId, assetCount, item.getAssetCategory()));
-            Glide.with(context)
-                    .load(item.getImage())
-                    .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
-                    .into(holder.icon);
+            holder.icon.setupTokenImageThumbnail(item);
             holder.layout.setOnClickListener(v -> listener.onAssetClicked(pair));
         }
     }
@@ -76,17 +78,28 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout layout;
-        ImageView icon;
+        NFTImageView icon;
         TextView title;
         TextView subtitle;
 
         ViewHolder(View view)
         {
             super(view);
-            layout = view.findViewById(R.id.layout);
+            layout = view.findViewById(R.id.holding_view);
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
             subtitle = view.findViewById(R.id.subtitle);
+
+            view.findViewById(R.id.arrow_right).setVisibility(View.VISIBLE);
         }
+    }
+
+    private void sortData()
+    {
+        Collections.sort(actualData, (e1, e2) -> {
+            BigInteger tokenId1 = e1.first;
+            BigInteger tokenId2 = e2.first;
+            return tokenId1.compareTo(tokenId2);
+        });
     }
 }

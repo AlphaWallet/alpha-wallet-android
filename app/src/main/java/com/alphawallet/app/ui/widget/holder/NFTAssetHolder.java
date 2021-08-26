@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
+import com.alphawallet.app.widget.NFTImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -25,7 +26,7 @@ public class NFTAssetHolder extends BinderViewHolder<Pair<BigInteger, NFTAsset>>
 {
     public static final int VIEW_TYPE = 1303;
 
-    final ImageView icon;
+    final NFTImageView icon;
     final TextView title;
     final TextView assetCategory;
     final TextView assetCount;
@@ -42,8 +43,6 @@ public class NFTAssetHolder extends BinderViewHolder<Pair<BigInteger, NFTAsset>>
         assetCount = findViewById(R.id.count);
         selectionAmount = findViewById(R.id.text_count);
         tokenId = findViewById(R.id.token_id);
-
-        findViewById(R.id.checkbox).setVisibility(View.GONE);
     }
 
     @Override
@@ -51,10 +50,7 @@ public class NFTAssetHolder extends BinderViewHolder<Pair<BigInteger, NFTAsset>>
     {
         title.setText(asset.second.getName());
         assetCategory.setText(asset.second.getDescription());
-        Glide.with(getContext())
-                .load(asset.second.getThumbnail())
-                .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
-                .into(icon);
+        icon.setupTokenImageThumbnail(asset.second);
 
         if (asset.second.isAssetMultiple())
         {

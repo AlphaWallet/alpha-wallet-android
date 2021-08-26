@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -16,6 +17,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/dp8"
         android:button="@drawable/selector_round_checkbox"
+        android:visibility="gone"
         android:clickable="false" />
 
     <RelativeLayout
@@ -28,12 +30,12 @@
         android:layout_marginTop="@dimen/dp8"
         android:layout_marginBottom="@dimen/dp8">
 
-        <ImageView
+        <com.alphawallet.app.widget.NFTImageView
             android:id="@+id/icon"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/ic_token_eth" />
+            android:layout_centerVertical="true"
+            custom:webview_height="64" />
 
         <TextView
             android:id="@+id/text_count"
@@ -55,6 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/icon_wrapper"
+        android:layout_toStartOf="@id/arrow_right"
         android:orientation="vertical"
         android:paddingTop="@dimen/dp16"
         android:paddingBottom="@dimen/dp16">
@@ -113,5 +116,14 @@
             tools:text="x200" />
 
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/arrow_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:src="@drawable/ic_arrow_right" />
 
 </RelativeLayout>

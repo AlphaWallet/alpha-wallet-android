@@ -132,7 +132,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, KOVAN_ID, ROPSTEN_ID, SOKOL_ID,
             RINKEBY_ID, GOERLI_ID, ARTIS_TAU1_ID, BINANCE_TEST_ID, BINANCE_MAIN_ID, HECO_ID, HECO_TEST_ID,
             AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID, OPTIMISTIC_MAIN_ID,
-            OPTIMISTIC_TEST_ID//, CRONOS_TEST_ID
+            OPTIMISTIC_TEST_ID, CRONOS_TEST_ID
     };
 
     static final Map<Integer, NetworkInfo> networkMap = new HashMap<Integer, NetworkInfo>() {
@@ -228,10 +228,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     OPTIMISTIC_TEST_URL,
                     "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
                     "https://api-kovan-optimistic.etherscan.io/api?"));
-            /*put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
+            put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
                     CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
-                    "https://cronos-explorer.crypto.org/api?"));*/
+                    "https://cronos-explorer.crypto.org/api?"));
         }
     };
     
@@ -272,7 +272,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             }
         }
 
-        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Integer oldChainId) {
+        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Integer oldChainId)
+        {
             if (oldChainId != null) {
                 for (NetworkInfo in : list) {
                     if (in.chainId == oldChainId) {
@@ -347,12 +348,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public NetworkInfo getActiveBrowserNetwork()
     {
-        NetworkInfo info = customNetworks.map.get(preferences.getActiveBrowserNetwork());
+        int activeNetwork = preferences.getActiveBrowserNetwork();
+        NetworkInfo info = customNetworks.map.get(activeNetwork);
         if (info != null) {
             return info;
         }
 
-        return networkMap.get(preferences.getActiveBrowserNetwork());
+        return networkMap.get(activeNetwork);
     }
 
     @Override

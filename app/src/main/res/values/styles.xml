@@ -68,12 +68,7 @@
 
     <style name="SettingsItemSwitchAppearance" parent="Theme.AppCompat.Light">
         <item name="colorControlActivated">@color/azure</item>
-        <item name="colorSwitchThumbNormal">@color/dove</item>
-    </style>
-
-    <style name="ToggleItemSwitchAppearance" parent="Theme.AppCompat.Light">
-        <item name="colorControlActivated">@color/rinkeby</item>
-        <item name="colorSwitchThumbNormal">@color/mainnet</item>
+        <item name="colorSwitchThumbNormal">@color/dusty</item>
     </style>
 
     <style name="MyAddressCopyTextStyle">

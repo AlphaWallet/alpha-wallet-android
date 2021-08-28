@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
 import org.jetbrains.annotations.NotNull;
@@ -21,9 +22,17 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     private final List<NetworkItem> networkList;
     private boolean hasClicked = false;
 
-    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks)
+    public interface EditNetworkListener {
+        void onEditNetwork(int chainId);
+    }
+
+    private EditNetworkListener editListener;
+
+
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener)
     {
         networkList = selectedNetworks;
+        editListener = editNetworkListener;
     }
 
     public Integer[] getSelectedItems()
@@ -62,8 +71,15 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         {
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
+            holder.itemLayout.setOnLongClickListener(v -> longClickListener(holder, position));
             holder.checkbox.setSelected(item.isSelected());
         }
+    }
+
+    private Boolean longClickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)
+    {
+        editListener.onEditNetwork(networkList.get(position).getChainId());
+        return false;
     }
 
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)

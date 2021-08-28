@@ -764,6 +764,7 @@
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
     <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
+    <string name="this_is_testnet">This is Testnet</string>
     <string name="swap_with_quickswap">Swap with Quickswap</string>
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
@@ -773,4 +774,14 @@
     <string name="rate_rate">RATE</string>
     <string name="rate_no_thanks">NO, THANKS</string>
     <string name="rate_title">Rate %1$s</string>
+    <string name="title_activity_add_custom_rpcnetwork">Add Custom RPC Network</string>
+    <string name="hint_network_name">Network Name</string>
+    <string name="hint_network_rpc_url">RPC URL</string>
+    <string name="hint_network_chain_id">Chain ID</string>
+    <string name="hint_network_symbol">Symbol</string>
+    <string name="hint_network_block_explorer_url">Transaction Explorer URL</string>
+    <string name="action_add_network">Add Network</string>
+    <string name="error_invalid_url">Invalid URL</string>
+    <string name="hint_network_explorer_api">Explorer API</string>
+    <string name="action_update_network">Update Network</string>
 </resources>

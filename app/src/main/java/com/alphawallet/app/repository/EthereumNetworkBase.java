@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
+import com.google.gson.Gson;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
@@ -246,11 +247,61 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     final boolean useTestNets;
     final NetworkInfo[] additionalNetworks;
 
+
+    static class CustomNetworks {
+        private ArrayList<NetworkInfo> list = new ArrayList<>();
+        transient private Map<Integer, NetworkInfo> map = new HashMap<>();
+        private Map<Integer, Boolean> mapToTestNet = new HashMap<>();
+        transient private PreferenceRepositoryType preferences;
+
+        public CustomNetworks(PreferenceRepositoryType preferences) {
+            this.preferences = preferences;
+            restore();
+        }
+
+        public void restore() {
+            String networks = preferences.getCustomRPCNetworks();
+            if (!TextUtils.isEmpty(networks)) {
+                CustomNetworks cn = new Gson().fromJson(networks, CustomNetworks.class);
+                this.list = cn.list;
+                this.mapToTestNet = cn.mapToTestNet;
+
+                for (NetworkInfo info : list) {
+                    map.put(info.chainId, info);
+                }
+            }
+        }
+
+        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Integer oldChainId)
+        {
+            if (oldChainId != null) {
+                for (NetworkInfo in : list) {
+                    if (in.chainId == oldChainId) {
+                        list.remove(in);
+                        break;
+                    }
+                }
+                mapToTestNet.remove(oldChainId);
+                map.remove(oldChainId);
+            }
+
+            list.add(info);
+            mapToTestNet.put(info.chainId, isTestnet);
+            map.put(info.chainId, info);
+            String networks = new Gson().toJson(this);
+            preferences.setCustomRPCNetworks(networks);
+        }
+    }
+
+    private static CustomNetworks customNetworks;
+
     EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, NetworkInfo[] additionalNetworks, boolean useTestNets)
     {
         this.preferences = preferenceRepository;
         this.additionalNetworks = additionalNetworks;
         this.useTestNets = useTestNets;
+
+        this.customNetworks = new CustomNetworks(this.preferences);
     }
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
@@ -285,18 +336,34 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public String getNameById(int id)
     {
+        NetworkInfo info = customNetworks.map.get(id);
+        if (info != null) {
+            return info.name;
+        }
+
         if (networkMap.containsKey(id)) return networkMap.get(id).name;
         else return "Unknown: " + id;
     }
 
     @Override
-    public NetworkInfo getActiveBrowserNetwork() {
-        return networkMap.get(preferences.getActiveBrowserNetwork());
+    public NetworkInfo getActiveBrowserNetwork()
+    {
+        int activeNetwork = preferences.getActiveBrowserNetwork();
+        NetworkInfo info = customNetworks.map.get(activeNetwork);
+        if (info != null) {
+            return info;
+        }
+
+        return networkMap.get(activeNetwork);
     }
 
     @Override
     public NetworkInfo getNetworkByChain(int chainId)
     {
+        NetworkInfo info = customNetworks.map.get(chainId);
+        if (info != null) {
+            return info;
+        }
         return networkMap.get(chainId);
     }
 
@@ -389,9 +456,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
          * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
          * test nets, they are displayed by that order.
          */
-
+        addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, true);
         addNetworks(additionalNetworks, networks, true);
         addNetworks(networks, true);
+        addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, false);
         addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(networks, false);
         return networks.toArray(new NetworkInfo[0]);
@@ -426,8 +494,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case MATIC_ID:
             case OPTIMISTIC_MAIN_ID:
                 return true;
-
             default:
+                if (customNetworks.mapToTestNet.containsKey(chainId)) {
+                    return customNetworks.mapToTestNet.get(chainId) == false;
+                }
                 return false;
         }
     }
@@ -435,8 +505,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getSecondaryNodeURL(int networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
+        if (info == null) {
+            info = customNetworks.map.get(networkId);
+        }
+
         if (info != null) { return info.backupNodeUrl; }
-        else { return ""; }
+        else {
+            return "";
+        }
     }
 
     //TODO: Fold this into file and add to database
@@ -498,6 +574,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getNodeURLByNetworkId(int networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
+        if (info == null) {
+            info = customNetworks.map.get(networkId);
+        }
         if (info != null) { return info.rpcServerUrl; }
         else { return MAINNET_RPC_URL; }
     }
@@ -509,6 +588,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
     public static String getDefaultNodeURL(int networkId) {
         NetworkInfo info = networkMap.get(networkId);
+        if (info == null) {
+            info = customNetworks.map.get(networkId);
+        }
         if (info != null) return info.rpcServerUrl;
         else return "";
     }
@@ -516,6 +598,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getEtherscanURLbyNetworkAndHash(int networkId, String txHash)
     {
         NetworkInfo info = networkMap.get(networkId);
+        if (info == null) {
+            info = customNetworks.map.get(networkId);
+        }
+
         if (info != null)
         {
             return info.getEtherscanUri(txHash).toString();
@@ -529,6 +615,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static int getNetworkIdFromName(String name)
     {
         if (!TextUtils.isEmpty(name)) {
+            for (NetworkInfo NETWORK : customNetworks.map.values()) {
+                if (name.equals(NETWORK.name)) {
+                    return NETWORK.chainId;
+                }
+            }
             for (NetworkInfo NETWORK : networkMap.values()) {
                 if (name.equals(NETWORK.name)) {
                     return NETWORK.chainId;
@@ -653,5 +744,19 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public boolean isMainNetSelected()
     {
         return preferences.isActiveMainnet();
+    }
+
+    public void addCustomRPCNetwork(String networkName, String rpcUrl, int chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Integer oldChainId) {
+        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, explorerApiUrl);
+        customNetworks.addCustomNetwork(info, isTestnet, oldChainId);
+    }
+
+    public NetworkInfoExt getNetworkInfoExt(int chainId) {
+
+        boolean isCustom = customNetworks.map.containsKey(chainId);
+        NetworkInfo info = getNetworkByChain(chainId);
+        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : hasRealValue(chainId);
+
+        return new NetworkInfoExt(info, isTestNetwork, isCustom);
     }
 }

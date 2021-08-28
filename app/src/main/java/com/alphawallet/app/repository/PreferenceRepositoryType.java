@@ -15,6 +15,10 @@ public interface PreferenceRepositoryType {
 
     void setNetworkFilterList(String filters);
 
+    String getCustomRPCNetworks();
+
+    void setCustomRPCNetworks(String networks);
+
     boolean getNotificationsState();
 
     void setNotificationState(boolean state);

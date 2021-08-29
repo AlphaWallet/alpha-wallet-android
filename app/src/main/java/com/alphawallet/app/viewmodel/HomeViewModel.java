@@ -428,8 +428,4 @@ public class HomeViewModel extends BaseViewModel {
     {
         return preferenceRepository.getFullScreenState();
     }
-
-    public void checkForUpdates(Activity context) {
-        UpdateUtils.checkForUpdates(context);
-    }
 }

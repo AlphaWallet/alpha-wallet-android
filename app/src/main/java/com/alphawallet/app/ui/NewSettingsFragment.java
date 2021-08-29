@@ -1,15 +1,9 @@
 package com.alphawallet.app.ui;
 
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +12,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -28,12 +28,13 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
 
 import java.util.Locale;
 
@@ -43,7 +44,6 @@ import dagger.android.support.AndroidSupportInjection;
 
 import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
@@ -78,6 +78,8 @@ public class NewSettingsFragment extends BaseFragment {
     private ImageView backupMenuButton;
     private View backupPopupAnchor;
     private NotificationView notificationView;
+    private AppUpdateInfo pendingUpdate;
+    private LinearLayout updateLayout;
 
     private Wallet wallet;
 
@@ -107,6 +109,8 @@ public class NewSettingsFragment extends BaseFragment {
 
         initNotificationView(view);
 
+        checkPendingUpdate(view);
+
         return view;
     }
 
@@ -119,6 +123,13 @@ public class NewSettingsFragment extends BaseFragment {
         } else {
             notificationView.setVisibility(View.GONE);
         }
+    }
+
+    public void signalUpdate(AppUpdateInfo updateInfo)
+    {
+        //add wallet update signal to adapter
+        pendingUpdate = updateInfo;
+        checkPendingUpdate(getView());
     }
 
     private void initBackupWarningViews(View view) {
@@ -136,6 +147,7 @@ public class NewSettingsFragment extends BaseFragment {
         walletSettingsLayout = view.findViewById(R.id.layout_settings_wallet);
         systemSettingsLayout = view.findViewById(R.id.layout_settings_system);
         supportSettingsLayout = view.findViewById(R.id.layout_settings_support);
+        updateLayout = view.findViewById(R.id.layout_update);
 
         myAddressSetting =
                 new SettingsItemView.Builder(getContext())
@@ -503,5 +515,36 @@ public class NewSettingsFragment extends BaseFragment {
         Intent intent = new Intent(getActivity(), WalletConnectSessionActivity.class);
         intent.putExtra("wallet", wallet);
         startActivity(intent);
+    }
+
+    private void checkPendingUpdate(View view)
+    {
+        if (updateLayout == null) return;
+
+        if (pendingUpdate != null)
+        {
+            final AppUpdateInfo thisPendingUpdate = pendingUpdate; //avoid OS reclaiming the value
+            updateLayout.setVisibility(View.VISIBLE);
+            TextView current = view.findViewById(R.id.text_detail_current);
+            TextView available = view.findViewById(R.id.text_detail_available);
+            current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
+            available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate.availableVersionCode())));
+            if (getActivity() != null) {
+                ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
+            }
+
+            updateLayout.setOnClickListener(v -> {
+                UpdateUtils.pushUpdateDialog(getActivity(), thisPendingUpdate);
+                updateLayout.setVisibility(View.GONE);
+                pendingUpdate = null;
+                if (getActivity() != null) {
+                    ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
+                }
+            });
+        }
+        else
+        {
+            updateLayout.setVisibility(View.GONE);
+        }
     }
 }

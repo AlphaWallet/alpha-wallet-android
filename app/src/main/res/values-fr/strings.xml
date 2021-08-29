@@ -793,4 +793,6 @@
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="installed_version">Installed: %1$s</string>
+    <string name="available_version">Available: %1$s</string>
 </resources>

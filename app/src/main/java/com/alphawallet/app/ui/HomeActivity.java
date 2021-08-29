@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -71,6 +72,7 @@ import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -101,10 +103,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private Dialog dialog;
     private ScrollControlViewPager viewPager;
-    private PagerAdapter pagerAdapter;
+    private final PagerAdapter pagerAdapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private HomeReceiver homeReceiver;
     private String buildVersion;
     private final Fragment settingsFragment;
@@ -131,6 +133,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
         activityFragment = new ActivityFragment();
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -223,7 +226,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewPager = findViewById(R.id.view_pager);
         viewPager.lockPages(true);
-        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(WalletPage.values().length);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
@@ -311,7 +313,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     }
                 });
 
-        UpdateUtils.checkForUpdates(this);
+        UpdateUtils.checkForUpdates(this, this);
     }
 
     private void alertFragmentVisible(int position)
@@ -647,6 +649,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void AddToken(String address)
     {
         viewModel.showAddToken(this, address);
+    }
+
+    @Override
+    public void updateReady(AppUpdateInfo updateInfo)
+    {
+        //signal to WalletFragment an update is ready
+        //display entry in the WalletView
+        ((NewSettingsFragment)settingsFragment).signalUpdate(updateInfo);
     }
 
     @Override

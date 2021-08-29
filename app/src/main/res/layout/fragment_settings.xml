@@ -25,6 +25,7 @@
                 android:layout_height="wrap_content" />
 
             <include layout="@layout/item_warning" />
+            <include layout="@layout/item_update" />
 
             <View
                 android:id="@+id/warning_separator"

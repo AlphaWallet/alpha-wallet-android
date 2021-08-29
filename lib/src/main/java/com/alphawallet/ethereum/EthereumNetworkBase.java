@@ -112,7 +112,6 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
                     OPTIMISTIC_TEST_ID));
             put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://cronos-explorer.crypto.org/tx/",CRONOS_TEST_ID));
-
         }
     };
 

@@ -36,7 +36,7 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
 
     public boolean usesSeparateNFTTransferQuery()
     {
-        return (!etherscanTxUrl.contains(BLOCKSCOUT_API) && !etherscanTxUrl.contains(MATIC_API) && !etherscanTxUrl.contains(COVALENT));
+        return (etherscanTxUrl != null && !etherscanTxUrl.contains(BLOCKSCOUT_API) && !etherscanTxUrl.contains(MATIC_API) && !etherscanTxUrl.contains(COVALENT));
     }
 
     @Nullable

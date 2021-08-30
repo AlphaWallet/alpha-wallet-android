@@ -38,7 +38,7 @@ AlphaWallet's focus is to provide an interface to interact with Ethereum Tokens 
 - [FIFA and UEFA’s blockchain tickets](https://apps.apple.com/au/app/shankai/id1492559481)
 - [Car Ownership portal](https://github.com/AlphaWallet/TokenScript-Examples/tree/master/examples/Karma)
 
-### Full TokenScript Support
+### TokenScript Support
 
 With TokenScript, you can extend your Token’s capabilities to become "smart" and secure, enabling a mobile-native user experience :iphone:
 
@@ -61,6 +61,8 @@ We want to give businesses the whitelabel tools they need to develop their ether
 1. [Download](https://developer.android.com/studio/) Android Studio.
 1. Clone this repository
 1. Run `./gradlew build` to install tools and dependencies.
+
+You can also build it from the commandline just like other Android apps. Note that JDK 8 and 11 are the versions supported by Android.
 
 Find more information in our available [documentation](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/docs/overview.md).
 

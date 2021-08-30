@@ -1,6 +1,7 @@
 package com.alphawallet.app.di;
 
 import com.alphawallet.app.ui.ActivityFragment;
+import com.alphawallet.app.ui.AddCustomRPCNetworkActivity;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.AdvancedSettingsActivity;
 import com.alphawallet.app.ui.AssetDisplayActivity;
@@ -164,6 +165,9 @@ public abstract class BuildersModule {
 
 	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
 	abstract SelectNetworkActivity bindSelectNetworkActivity();
+
+	@ContributesAndroidInjector(modules = CustomNetworkModule.class)
+	abstract AddCustomRPCNetworkActivity bindAddCustomRPCNetworkActivity();
 
 	@ContributesAndroidInjector(modules = SelectNetworkFilterModule.class)
 	abstract SelectNetworkFilterActivity bindSelectNetworkFilterActivity();

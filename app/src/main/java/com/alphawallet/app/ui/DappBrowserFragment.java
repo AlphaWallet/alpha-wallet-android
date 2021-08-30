@@ -199,6 +199,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private AlertDialog chainSwapDialog;
     private String loadOnInit;
     private boolean homePressed;
+    private AddEthereumChainPrompt addCustomChainDialog;
 
     private final Fragment myDappsFragment;
     private final Fragment discoverDappsFragment;
@@ -1096,13 +1097,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
     {
-        //TODO: Support custom chains
-        //read chain value
+        // read chain value
         int chainId = chainObj.getChainId();
         final NetworkInfo info = viewModel.getNetworkInfo(chainId);
 
-        //Don't display dialog for unknown network // TODO: handle unknown network
-        if (info == null) return;
+        // handle unknown network
+        if (info == null) {
+            // show add custom chain dialog
+            addCustomChainDialog = new AddEthereumChainPrompt(getContext(), chainObj, chainObject -> {
+                viewModel.addCustomChain(chainObject);
+                loadNewNetwork(chainObj.getChainId());
+                addCustomChainDialog.dismiss();
+            });
+            addCustomChainDialog.show();
+            return;
+        }
 
         //Don't show dialog if network doesn't need to be changed or if alredy showing
         if (activeNetwork.chainId == chainId || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;

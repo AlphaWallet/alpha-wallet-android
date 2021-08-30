@@ -74,6 +74,9 @@ public class SplashViewModel extends ViewModel
         this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
         this.currencyRepository = currencyRepository;
+
+        // increase launch count
+        this.preferenceRepository.incrementLaunchCount();
     }
 
     public void setLocale(Context context)

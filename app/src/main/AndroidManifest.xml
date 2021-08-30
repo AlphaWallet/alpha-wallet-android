@@ -321,6 +321,10 @@
             android:label="Transaction Success" />
 
         <activity
+            android:name=".ui.AddCustomRPCNetworkActivity"
+            android:label="@string/title_activity_add_custom_rpcnetwork"/>
+
+        <activity
             android:name=".ui.Erc1155Activity"
             android:label="ERC1155 Master Activity" />
 

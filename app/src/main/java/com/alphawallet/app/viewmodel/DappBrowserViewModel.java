@@ -38,6 +38,7 @@ import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
 
@@ -326,5 +327,27 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         String uriString = url.replace("wc:", "wc://");
         return Uri.parse(uriString).getUserInfo();
+    }
+
+    public void addCustomChain(WalletAddEthereumChainObject chainObject) {
+        this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
+                chainObject.nativeCurrency.symbol, "", "", false, -1);
+
+        tokensService.createBaseToken(chainObject.getChainId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(w -> { }, e -> { })
+                .isDisposed();
+    }
+
+    //NB Chain descriptions can contain WSS socket defs, which might come first.
+    private String extractRpc(WalletAddEthereumChainObject chainObject)
+    {
+        for (String thisRpc : chainObject.rpcUrls)
+        {
+            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
+        }
+
+        return "";
     }
 }

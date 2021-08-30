@@ -591,6 +591,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private boolean setupCustomTokenActions()
     {
         int chainId = token.tokenInfo.chainId;
+
+        if (chainId == MATIC_ID && token.isNonFungible()) {
+            return false;
+        }
+
         String address = token.getAddress();
 
         switch (chainId)

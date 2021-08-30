@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -36,11 +38,21 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if (item.getItemId() == android.R.id.home)
         {
             handleSetNetworks();
+        }
+        else if (item.getItemId() == R.id.action_add)
+        {
+            startActivity(new Intent(this, AddCustomRPCNetworkActivity.class));
         }
         return false;
     }

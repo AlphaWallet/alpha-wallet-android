@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -100,7 +101,7 @@ public class WalletFragment extends BaseFragment implements
     private TokensAdapter adapter;
     private ImageView addressBlockie;
     private View selectedToken;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private String importFileName;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;

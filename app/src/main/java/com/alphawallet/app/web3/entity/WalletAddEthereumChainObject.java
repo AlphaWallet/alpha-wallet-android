@@ -12,9 +12,9 @@ import java.math.BigInteger;
 public class WalletAddEthereumChainObject
 {
     public static class NativeCurrency {
-        String name;
-        String symbol;
-        int decimals;
+        public String name;
+        public String symbol;
+        public int decimals;
     }
 
     public NativeCurrency nativeCurrency;

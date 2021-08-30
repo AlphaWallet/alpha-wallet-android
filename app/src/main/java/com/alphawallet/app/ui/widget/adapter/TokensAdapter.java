@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-import android.content.Context;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -9,7 +8,6 @@ import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -276,22 +274,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
             }
         }
-    }
-
-    private TokenCardMeta getToken(int chainId, String tokenAddress)
-    {
-        String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
-        for (int i = 0; i < items.size(); i++) {
-            Object si = items.get(i);
-            if (si instanceof TokenSortedItem) {
-                TokenSortedItem tsi = (TokenSortedItem) si;
-                if (tsi.value.tokenId.equalsIgnoreCase(id)) {
-                    return tsi.value;
-                }
-            }
-        }
-
-        return null;
     }
 
     public void removeToken(TokenCardMeta token) {

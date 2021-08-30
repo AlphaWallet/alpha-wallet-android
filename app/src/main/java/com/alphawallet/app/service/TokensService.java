@@ -44,10 +44,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
@@ -297,6 +293,24 @@ public class TokensService
         }).subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(this::updateCycle, this::onError);
+    }
+
+    /**
+     * Creates and stores an enabled basechain Token
+     * @param chainId
+     * @return
+     */
+    public Single<Token[]> createBaseToken(int chainId)
+    {
+        Token[] tok = new Token[1];
+        tok[0] = tokenRepository.fetchToken(chainId, currentAddress, currentAddress);
+        if (!networkFilter.contains(chainId)) //add chain to filter list
+        {
+            networkFilter.add(chainId);
+            ethereumNetworkRepository.setFilterNetworkList(networkFilter.toArray(new Integer[0]));
+        }
+
+        return tokenRepository.storeTokens(new Wallet(currentAddress), tok);
     }
 
     public void stopUpdateCycle()

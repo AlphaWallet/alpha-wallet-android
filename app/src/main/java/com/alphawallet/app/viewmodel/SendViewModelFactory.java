@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import android.content.Context;
+
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -7,6 +9,7 @@ import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -28,6 +31,7 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
     private final AnalyticsServiceType analyticsService;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public SendViewModelFactory(MyAddressRouter myAddressRouter,
                                 EthereumNetworkRepositoryType networkRepository,
@@ -38,7 +42,8 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
                                 GasService gasService,
                                 AssetDefinitionService assetDefinitionService,
                                 KeyService keyService,
-                                AnalyticsServiceType analyticsService) {
+                                AnalyticsServiceType analyticsService,
+                                PreferenceRepositoryType preferenceRepository) {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = networkRepository;
         this.tokensService = tokensService;
@@ -49,12 +54,14 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.analyticsService = analyticsService;
+        this.preferenceRepository = preferenceRepository;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new SendViewModel(myAddressRouter, networkRepository, tokensService,
-                fetchTransactionsInteract, addTokenInteract, createTransactionInteract, gasService, assetDefinitionService, keyService, analyticsService);
+                fetchTransactionsInteract, addTokenInteract, createTransactionInteract, gasService,
+                assetDefinitionService, keyService, analyticsService, preferenceRepository);
     }
 }

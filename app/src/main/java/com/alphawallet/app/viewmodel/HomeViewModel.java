@@ -41,6 +41,7 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
@@ -427,5 +428,9 @@ public class HomeViewModel extends BaseViewModel {
     public boolean fullScreenSelected()
     {
         return preferenceRepository.getFullScreenState();
+    }
+
+    public void tryToShowRateAppDialog(Activity context) {
+        RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 }

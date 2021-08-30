@@ -34,7 +34,6 @@ import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
-import com.google.android.play.core.appupdate.AppUpdateInfo;
 
 import java.util.Locale;
 
@@ -78,7 +77,7 @@ public class NewSettingsFragment extends BaseFragment {
     private ImageView backupMenuButton;
     private View backupPopupAnchor;
     private NotificationView notificationView;
-    private AppUpdateInfo pendingUpdate;
+    private int pendingUpdate = 0;
     private LinearLayout updateLayout;
 
     private Wallet wallet;
@@ -125,10 +124,10 @@ public class NewSettingsFragment extends BaseFragment {
         }
     }
 
-    public void signalUpdate(AppUpdateInfo updateInfo)
+    public void signalUpdate(int updateVersion)
     {
         //add wallet update signal to adapter
-        pendingUpdate = updateInfo;
+        pendingUpdate = updateVersion;
         checkPendingUpdate(getView());
     }
 
@@ -521,22 +520,22 @@ public class NewSettingsFragment extends BaseFragment {
     {
         if (updateLayout == null) return;
 
-        if (pendingUpdate != null)
+        if (pendingUpdate > 0)
         {
-            final AppUpdateInfo thisPendingUpdate = pendingUpdate; //avoid OS reclaiming the value
+            final int thisPendingUpdate = pendingUpdate; //avoid OS reclaiming the value
             updateLayout.setVisibility(View.VISIBLE);
             TextView current = view.findViewById(R.id.text_detail_current);
             TextView available = view.findViewById(R.id.text_detail_available);
             current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
-            available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate.availableVersionCode())));
+            available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate)));
             if (getActivity() != null) {
                 ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
             }
 
             updateLayout.setOnClickListener(v -> {
-                UpdateUtils.pushUpdateDialog(getActivity(), thisPendingUpdate);
+                UpdateUtils.pushUpdateDialog(getActivity());
                 updateLayout.setVisibility(View.GONE);
-                pendingUpdate = null;
+                pendingUpdate = 0;
                 if (getActivity() != null) {
                     ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
                 }

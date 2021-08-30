@@ -20,14 +20,22 @@ public class UpdateUtils {
         appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE)
             {
-                messenger.updateReady(appUpdateInfo);
+                messenger.updateReady(appUpdateInfo.availableVersionCode());
             }
         });
     }
 
-    public static void pushUpdateDialog(Activity context, AppUpdateInfo updateInfo)
+    public static void pushUpdateDialog(Activity context)
     {
         AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(context);
-        appUpdateManager.startUpdateFlow(updateInfo, context, AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build());
+
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE)
+            {
+                appUpdateManager.startUpdateFlow(appUpdateInfo, context, AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build());
+            }
+        });
     }
 }

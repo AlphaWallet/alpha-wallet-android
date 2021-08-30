@@ -18,12 +18,14 @@ import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -51,6 +53,7 @@ public class SendViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public SendViewModel(MyAddressRouter myAddressRouter,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -61,7 +64,8 @@ public class SendViewModel extends BaseViewModel {
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
                          KeyService keyService,
-                         AnalyticsServiceType analyticsService)
+                         AnalyticsServiceType analyticsService,
+                         PreferenceRepositoryType preferenceRepository)
     {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = ethereumNetworkRepositoryType;
@@ -73,6 +77,7 @@ public class SendViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.analyticsService = analyticsService;
+        this.preferenceRepository = preferenceRepository;
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -177,5 +182,9 @@ public class SendViewModel extends BaseViewModel {
         analyticsProperties.setData(mode);
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
+    public void tryToShowRateAppDialog(Activity context) {
+        RateApp.showRateTheApp(context, preferenceRepository, true);
     }
 }

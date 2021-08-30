@@ -54,4 +54,11 @@ public interface PreferenceRepositoryType {
     void blankHasSetNetworkFilters();
 
     void commit();
+
+    void incrementLaunchCount();
+    int getLaunchCount();
+    void resetLaunchCount();
+
+    void setRateAppShown();
+    boolean getRateAppShown();
 }

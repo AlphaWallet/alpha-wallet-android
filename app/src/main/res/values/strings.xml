@@ -807,6 +807,11 @@
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="rate_prompt">If you enjoy using %1$s, please help us by rating it.</string>
+    <string name="rate_later">LATER</string>
+    <string name="rate_rate">RATE</string>
+    <string name="rate_no_thanks">NO, THANKS</string>
+    <string name="rate_title">Rate %1$s</string>
     <string name="installed_version">Installed: %1$s</string>
     <string name="available_version">Available: %1$s</string>
     <string name="hint_network_explorer_api">Explorer API</string>

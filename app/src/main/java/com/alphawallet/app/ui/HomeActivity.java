@@ -53,7 +53,6 @@ import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -72,7 +71,6 @@ import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
-import com.google.android.play.core.appupdate.AppUpdateInfo;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -313,6 +311,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     }
                 });
 
+        viewModel.tryToShowRateAppDialog(this);
         UpdateUtils.checkForUpdates(this, this);
     }
 
@@ -652,11 +651,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void updateReady(AppUpdateInfo updateInfo)
+    public void updateReady(int updateVersion)
     {
         //signal to WalletFragment an update is ready
         //display entry in the WalletView
-        ((NewSettingsFragment)settingsFragment).signalUpdate(updateInfo);
+        ((NewSettingsFragment)settingsFragment).signalUpdate(updateVersion);
     }
 
     @Override

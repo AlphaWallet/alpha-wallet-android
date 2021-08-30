@@ -330,7 +330,24 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void addCustomChain(WalletAddEthereumChainObject chainObject) {
-        this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, chainObject.rpcUrls[0], chainObject.getChainId(),
+        this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
                 chainObject.nativeCurrency.symbol, "", "", false, -1);
+
+        tokensService.createBaseToken(chainObject.getChainId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(w -> { }, e -> { })
+                .isDisposed();
+    }
+
+    //NB Chain descriptions can contain WSS socket defs, which might come first.
+    private String extractRpc(WalletAddEthereumChainObject chainObject)
+    {
+        for (String thisRpc : chainObject.rpcUrls)
+        {
+            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
+        }
+
+        return "";
     }
 }

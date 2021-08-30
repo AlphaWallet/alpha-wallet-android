@@ -157,18 +157,21 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             return false;
         }
 
-        if (TextUtils.isEmpty(blockExplorerUrlInputView.getText())) {
+        //Allow blank for these
+        /*if (TextUtils.isEmpty(blockExplorerUrlInputView.getText())) {
             blockExplorerUrlInputView.setError(getString(R.string.error_field_required));
             return false;
-        } else if (!URLUtil.isValidUrl(blockExplorerUrlInputView.getText().toString())) {
+        } else*/
+        if (!TextUtils.isEmpty(blockExplorerUrlInputView.getText().toString()) && !URLUtil.isValidUrl(blockExplorerUrlInputView.getText().toString())) {
             blockExplorerUrlInputView.setError(getString(R.string.error_invalid_url));
             return false;
         }
 
-        if (TextUtils.isEmpty(blockExplorerApiUrl.getText())) {
+        /*if (TextUtils.isEmpty(blockExplorerApiUrl.getText())) {
             blockExplorerApiUrl.setError(getString(R.string.error_field_required));
             return false;
-        } else if (!URLUtil.isValidUrl(blockExplorerApiUrl.getText().toString())) {
+        } else*/
+        if (!TextUtils.isEmpty(blockExplorerApiUrl.getText().toString()) && !URLUtil.isValidUrl(blockExplorerApiUrl.getText().toString())) {
             blockExplorerApiUrl.setError(getString(R.string.error_invalid_url));
             return false;
         }

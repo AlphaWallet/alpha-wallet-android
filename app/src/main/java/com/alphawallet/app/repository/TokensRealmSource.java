@@ -1177,7 +1177,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return result;
     }
 
-    public Token createCurrencyToken(NetworkInfo network, Wallet wallet)
+    private Token createCurrencyToken(NetworkInfo network, Wallet wallet)
     {
         TokenInfo tokenInfo = new TokenInfo(wallet.address, network.name, network.symbol, 18, true, network.chainId);
         BigDecimal balance = BigDecimal.ZERO;

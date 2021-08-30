@@ -63,7 +63,7 @@
             android:paddingEnd="@dimen/dp8"
             android:paddingBottom="@dimen/dp12"
             android:textColor="@color/black"
-            android:textColorHint="@color/dove"
+            android:textColorHint="@color/dove_hint"
             android:textSize="@dimen/sp17"
             android:layout_toStartOf="@id/img_scan_qr"
             tools:text="Awesome High Yield DeFi Token" />

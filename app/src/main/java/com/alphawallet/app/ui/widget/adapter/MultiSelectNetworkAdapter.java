@@ -71,12 +71,12 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.manageView.setVisibility(View.VISIBLE);
-            holder.manageView.setOnClickListener(v -> manageListener(holder, position));
+            holder.manageView.setOnClickListener(v -> manageListener(position));
             holder.checkbox.setSelected(item.isSelected());
         }
     }
 
-    private void manageListener(final ViewHolder holder, final int position)
+    private void manageListener(final int position)
     {
         editListener.onEditNetwork(networkList.get(position).getChainId());
     }

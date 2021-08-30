@@ -799,6 +799,8 @@
     <string name="rate_rate">RATE</string>
     <string name="rate_no_thanks">NO, THANKS</string>
     <string name="rate_title">Rate %1$s</string>
+    <string name="installed_version">Installed: %1$s</string>
+    <string name="available_version">Available: %1$s</string>
     <string name="title_activity_add_custom_rpcnetwork">Add Custom RPC Network</string>
     <string name="hint_network_name">Network Name</string>
     <string name="hint_network_rpc_url">RPC URL</string>
@@ -809,4 +811,9 @@
     <string name="error_invalid_url">Invalid URL</string>
     <string name="hint_network_explorer_api">Explorer API</string>
     <string name="action_update_network">Update Network</string>
+
+    <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
+    <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
+    <string name="switch_chain_request">Switch Chain Request</string>
+
 </resources>

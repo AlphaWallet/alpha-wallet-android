@@ -341,7 +341,7 @@
     <string name="ticket_range_expired">Magiclink Expired</string>
     <string name="ticket_not_valid">Invalid Token</string>
     <string name="ticket_not_valid_body">No valid contract at this address on this network. The contract could have been terminated or it may be on a different network. Try changing to \'Ropsten (Test)\'.</string>
-    <string name="new_version_title">Update available</string>
+    <string name="new_version_title">Update Available</string>
     <string name="new_version">Version update is available on the AlphaWallet website.</string>
     <string name="confirm_update">Download and Install</string>
     <string name="dialog_later">Later</string>
@@ -812,6 +812,11 @@
     <string name="rate_rate">RATE</string>
     <string name="rate_no_thanks">NO, THANKS</string>
     <string name="rate_title">Rate %1$s</string>
+    <string name="installed_version">Installed: %1$s</string>
+    <string name="available_version">Available: %1$s</string>
     <string name="hint_network_explorer_api">Explorer API</string>
     <string name="action_update_network">Update Network</string>
+    <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
+    <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
+    <string name="switch_chain_request">Switch Chain Request</string>
 </resources>

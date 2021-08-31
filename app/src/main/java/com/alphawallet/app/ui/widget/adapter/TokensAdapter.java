@@ -16,6 +16,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
+import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
@@ -25,6 +26,7 @@ import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
+import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
@@ -145,8 +147,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
             }
             case ManageTokensHolder.VIEW_TYPE:
-                holder = new ManageTokensHolder(R.layout.layout_manage_tokens, parent);
+                holder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
                 break;
+
+            case SearchTokensHolder.VIEW_TYPE:
+                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent);
+                break;
+
             case WarningHolder.VIEW_TYPE:
                 holder = new WarningHolder(R.layout.item_warning, parent);
                 break;
@@ -200,9 +207,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.walletAddress = walletAddress;
     }
 
+    private void addSearchTokensLayout() {
+        if (walletAddress != null && !walletAddress.isEmpty()) {
+            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress), 0));
+        }
+    }
+
     private void addManageTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress), 0));
+            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress), Integer.MAX_VALUE));
         }
     }
 
@@ -377,11 +390,16 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (clear) {
             items.clear();
         }
-        addManageTokensLayout();
+
+        addSearchTokensLayout();
+
         for (TokenCardMeta token : tokens)
         {
             updateToken(token, false);
         }
+
+        addManageTokensLayout();
+
         items.endBatchedUpdates();
     }
 

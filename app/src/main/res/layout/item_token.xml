@@ -40,6 +40,7 @@
             android:paddingEnd="2dp"
             android:paddingTop="14dp">
 
+
             <com.alphawallet.app.widget.TokenIcon
                 android:id="@+id/token_icon"
                 android:layout_width="wrap_content"
@@ -64,22 +65,25 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="2dp"
                         android:layout_alignParentStart="true"
-                        android:layout_toStartOf="@+id/chain_name"
                         android:fontFamily="@font/font_regular"
                         android:text="0 Ethereum"
                         android:textColor="@color/text_black"
                         android:textSize="20sp" />
 
-                    <com.alphawallet.app.widget.ChainName
-                        android:id="@+id/chain_name"
+                    <TextView
+                        android:id="@+id/balance_currency"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="@string/unknown_balance_without_symbol"
+                        android:textSize="20sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="@dimen/dp16"
+                        android:visibility="gone"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentTop="true"
-                        android:layout_marginTop="@dimen/dp5"
-                        android:layout_marginEnd="@dimen/dp8"
-                        android:layout_marginStart="@dimen/dp5"
-                        custom:font_size="10"/>
+                        />
 
                 </RelativeLayout>
 
@@ -118,13 +122,14 @@
                             android:textSize="12sp" />
 
                         <TextView
-                            android:id="@+id/balance_currency"
+                            android:id="@+id/balance_coin"
+                            android:textColor="@color/dove"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
-                            android:textSize="12sp"
+                            android:textSize="15sp"
                             android:visibility="gone"/>
 
                         <View
@@ -156,7 +161,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="end"
+                        android:gravity="end|center_vertical"
                         android:paddingEnd="@dimen/dp16"
                         android:visibility="gone">
 
@@ -164,20 +169,34 @@
                             android:id="@+id/text_appreciation"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
+                            android:layout_gravity="center_vertical"
                             android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
                             android:text="@string/unknown_balance_without_symbol"
                             android:textSize="12sp" />
-
-                        <TextView
-                            android:id="@+id/text_24_hrs"
+                        <LinearLayout
+                            android:id="@+id/root_24_hrs"
+                            android:orientation="horizontal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:fontFamily="@font/font_regular"
-                            android:text="@string/unknown_balance_without_symbol"
-                            android:textSize="12sp" />
+                            android:padding="2dp">
+                            <ImageView
+                                android:id="@+id/image_24_hrs"
+                                android:padding="4dp"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_price_up"/>
+                            <TextView
+                                android:id="@+id/text_24_hrs"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:fontFamily="@font/font_regular"
+                                android:text="@string/unknown_balance_without_symbol"
+                                android:textSize="12sp"
+                                android:layout_marginEnd="4dp"/>
+                        </LinearLayout>
 
                     </LinearLayout>
 

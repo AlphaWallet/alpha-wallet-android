@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,6 +32,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
+import com.google.zxing.common.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -47,11 +50,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokenIcon tokenIcon;
     private final TextView balanceEth;
     private final TextView balanceCurrency;
+    private final TextView balanceCoin;
     private final TextView text24Hours;
+    private final View     root24Hours;
+    private final ImageView image24h;
     private final TextView textAppreciation;
-    private final TextView issuer;
-    private final TextView issuerPlaceholder;
-    private final TextView contractType;
+    //private final TextView issuer;
+    // private final TextView issuerPlaceholder;
+    // private final TextView contractType;
     private final View contractSeparator;
     private final View layoutAppreciation;
     private final LinearLayout extendedInfo;
@@ -59,7 +65,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
-    private final ChainName testnet;
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private boolean primaryElement;
     private final Realm realm;
@@ -76,17 +81,19 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         tokenIcon = findViewById(R.id.token_icon);
         balanceEth = findViewById(R.id.eth_data);
         balanceCurrency = findViewById(R.id.balance_currency);
+        balanceCoin = findViewById(R.id.balance_coin);
         text24Hours = findViewById(R.id.text_24_hrs);
+        root24Hours = findViewById(R.id.root_24_hrs);
+        image24h = findViewById(R.id.image_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
-        issuer = findViewById(R.id.issuer);
-        issuerPlaceholder = findViewById(R.id.issuerPlaceholder);
-        contractType = findViewById(R.id.contract_type);
+        // issuer = findViewById(R.id.issuer);
+        // issuerPlaceholder = findViewById(R.id.issuerPlaceholder);
+        //contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
-        testnet = findViewById(R.id.chain_name);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -122,8 +129,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             contractSeparator.setVisibility(View.GONE);
 
             //setup name and value (put these together on a single string to make wrap-around text appear better).
-            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
+            String nameValue = token.getSymbol();//getFullName(assetDefinition, token.getTicketCount());
             balanceEth.setText(nameValue);
+
+            String coinBalance = token.getStringBalance();
+            if (!TextUtils.isEmpty(coinBalance)) {
+                balanceCoin.setVisibility(View.VISIBLE);
+                balanceCoin.setText(coinBalance + " " + token.tokenInfo.symbol);
+            }
 
             primaryElement = false;
 
@@ -199,12 +212,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     }
 
     private void showNetworkLabel() {
-        testnet.setVisibility(View.VISIBLE);
-        testnet.setChainID(token.tokenInfo.chainId);
+
     }
 
     private void hideNetworkLabel() {
-        testnet.setVisibility(View.GONE);
+
     }
 
     private void fillEmpty() {
@@ -252,9 +264,9 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if (token.isEthereum())     // If token is eth and we get here, it's a testnet chain, show testnet
         {
-            issuer.setVisibility(View.VISIBLE);
-            issuer.setText(R.string.testnet);
-            issuerPlaceholder.setVisibility(View.GONE);
+            //issuer.setVisibility(View.VISIBLE);
+            //issuer.setText(R.string.testnet);
+            //issuerPlaceholder.setVisibility(View.GONE);
             primaryElement = true;
         }
         else
@@ -262,10 +274,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             String issuerName = assetDefinition.getIssuerName(token);
             if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
             {
-                issuer.setVisibility(View.VISIBLE);
-                issuerPlaceholder.setVisibility(View.VISIBLE);
+              //  issuer.setVisibility(View.VISIBLE);
+              //  issuerPlaceholder.setVisibility(View.VISIBLE);
                 primaryElement = true;
-                issuer.setText(issuerName);
+                //issuer.setText(issuerName);
             }
             else
             {
@@ -275,15 +287,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     }
 
     private void hideIssuerViews() {
-        issuer.setVisibility(View.GONE);
-        issuerPlaceholder.setVisibility(View.GONE);
+        // issuer.setVisibility(View.GONE);
+        //issuerPlaceholder.setVisibility(View.GONE);
         contractSeparator.setVisibility(View.GONE);
     }
 
     private void setContractType()
     {
         //Display contract type if required
-        int contractStringId = token.getContractType();
+       /* int contractStringId = token.getContractType();
         if (contractStringId > 0)
         {
             contractType.setText(contractStringId);
@@ -293,7 +305,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         else
         {
             contractType.setVisibility(View.GONE);
-        }
+        }*/
     }
 
     private void emptyTicker()
@@ -334,7 +346,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         int color = Color.RED;
 
         String lbl = getString(R.string.token_balance, "", converted);
-        lbl += " " + ticker.priceSymbol;
+        // lbl += " " + ticker.priceSymbol;
         Spannable spannable;
         if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
         {
@@ -342,7 +354,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             spannable.setSpan(new ForegroundColorSpan(color),
                     converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             this.balanceCurrency.setText(lbl);
-            this.issuer.setVisibility(View.GONE);
+            // this.issuer.setVisibility(View.GONE);
         }
         else
         {
@@ -354,9 +366,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         try {
             percentage = Double.parseDouble(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
+            formattedPercents = ticker.percentChange24h.replace("-", "") + "%";
+            root24Hours.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);
+            image24h.setImageResource(percentage < 0 ? R.drawable.ic_price_down : R.drawable.ic_price_up);
         } catch (Exception ex) { /* Quietly */ }
 
         //This sets the crypto price value (middle amount)

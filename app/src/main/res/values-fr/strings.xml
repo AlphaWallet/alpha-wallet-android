@@ -593,6 +593,7 @@
     <string name="title_support">Support</string>
     <string name="title_blog">Blog</string>
     <string name="title_faq">FAQ</string>
+    <string name="title_eth">ETH NODE ACCESS</string>
     <string name="title_console">Console</string>
     <string name="title_clear_browser_cache">Effacer le Cache du Navigateur</string>
     <string name="title_reload_token_data">Recharger les données du Tokens</string>

@@ -1,37 +1,31 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextWatcher;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 
-import static com.alphawallet.app.C.EXTRA_ADDRESS;
 
 public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
     public static final int VIEW_TYPE = 2021;
 
-    LinearLayout layout;
+    EditText editSearch;
+    TextWatcher textWatcher;
 
     @Override
     public void bind(@Nullable ManageTokensData data, @NonNull Bundle addition) {
-        /*layout.setOnClickListener(v -> {
-            if (data.walletAddress != null) {
-                Intent intent = new Intent(getContext(), TokenManagementActivity.class);
-                intent.putExtra(EXTRA_ADDRESS, data.walletAddress);
-                getContext().startActivity(intent);
-            }
-        });*/
+        editSearch.addTextChangedListener(textWatcher);
     }
 
-    public SearchTokensHolder(int res_id, ViewGroup parent) {
+    public SearchTokensHolder(int res_id, ViewGroup parent, TextWatcher textWatcher) {
         super(res_id, parent);
-        //layout = findViewById(R.id.layout);
+        this.editSearch = findViewById(R.id.edit_search);
+        this.textWatcher = textWatcher;
     }
 }

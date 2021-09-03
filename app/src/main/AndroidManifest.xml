@@ -324,6 +324,26 @@
             android:name=".ui.AddCustomRPCNetworkActivity"
             android:label="@string/title_activity_add_custom_rpcnetwork"/>
 
-</application>
+        <activity
+            android:name=".ui.Erc1155Activity"
+            android:label="ERC1155 Master Activity" />
+
+        <activity
+            android:name=".ui.Erc1155AssetSelectActivity"
+            android:label="ERC1155 Asset Selection" />
+
+        <activity
+            android:name=".ui.Erc1155AssetDetailActivity"
+            android:label="ERC1155 Asset Details" />
+
+        <activity
+            android:name=".ui.Erc1155AssetListActivity"
+            android:label="ERC1155 Asset Details" />
+
+        <activity
+            android:name=".ui.TransferNFTActivity"
+            android:label="NFT Transfer" />
+
+    </application>
 
 </manifest>

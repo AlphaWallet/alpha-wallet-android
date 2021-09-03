@@ -4,7 +4,7 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -37,12 +37,13 @@ public interface TokenRepositoryType {
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
     Token fetchToken(int chainId, String walletAddress, String address);
     void createBaseNetworkTokens(String walletAddress);
+    String getTokenImageUrl(int networkId, String address);
 
     Single<Token[]> storeTokens(Wallet wallet, Token[] tokens);
     Single<String> resolveENS(int chainId, String address);
     void updateAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
-    void storeAsset(String currentAddress, Token token, Asset asset);
-    Token[] initERC721Assets(Wallet wallet, Token[] token);
+    void storeAsset(String currentAddress, Token token, BigInteger tokenId, NFTAsset asset);
+    Token[] initNFTAssets(Wallet wallet, Token[] token);
 
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Token updateTokenType(Token token, Wallet wallet, ContractType type);

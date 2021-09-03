@@ -795,6 +795,8 @@
     <string name="title_speed_cancel">Hủy cài đặt</string>
     <string name="action_select">Hãy chọn</string>
     <string name="title_x_selected">%s Đã chọn</string>
+    <string name="asset_description_text">%1$s Asset | %2$s</string>
+    <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
     <string name="request_change_chain">Trang web này yêu cầu bạn chuyển sang %1$s chuỗi với chuỗi ID: %2$s. Điều này sẽ tải lại trang.</string>
     <string name="warning_switch_to_main">Cảnh báo: Đang chuyển qua mạng chính</string>
     <string name="warning_switching_to_test">Cảnh báo: Đang chuyển qua mạng thử nghiệm</string>
@@ -805,6 +807,9 @@
     <string name="name_this_wallet">Đặt tên cho ví này</string>
     <string name="enter_wallet_name">Nhập Tên Ví</string>
     <string name="action_save_name">Lưu lại</string>
+    <string name="select_amount">Select Amount</string>
+    <string name="selected_tokens">Selected Tokens</string>
+    <string name="send_tokens">Send Tokens</string>
     <string name="rate_prompt">Nếu bạn thích sử dụng %1$s, hãy xếp hạng cho chúng tôi 5 sao nhé! ^^</string>
     <string name="rate_later">LATER</string>
     <string name="rate_rate">RATE</string>

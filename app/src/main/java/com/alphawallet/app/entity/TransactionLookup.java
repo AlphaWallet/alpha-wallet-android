@@ -88,6 +88,8 @@ public class TransactionLookup
             typeMapping.put(TransactionType.MINT, R.string.token_mint);
             typeMapping.put(TransactionType.BURN, R.string.token_burn);
             typeMapping.put(TransactionType.COMMIT_NFT, R.string.commit_nft);
+            typeMapping.put(TransactionType.SAFE_TRANSFER, R.string.safe_transfer);
+            typeMapping.put(TransactionType.SAFE_BATCH_TRANSFER, R.string.safe_batch_transfer);
 
             typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.contract_call);
         }

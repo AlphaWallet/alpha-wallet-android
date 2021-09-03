@@ -1,11 +1,13 @@
 package com.alphawallet.app.viewmodel;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.Contract;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -32,6 +34,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -97,8 +100,17 @@ public class AddTokenViewModel extends BaseViewModel {
         TokenInfo tf = new TokenInfo(address, name, symbol, decimals, true, chainId);
         addTokenInteract.add(tf, contractType, wallet.getValue())
                 .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(this::setVisibilityChanged, this::onError)
+                .isDisposed();
+    }
+
+    private void setVisibilityChanged(Token t)
+    {
+        tokensService.lockTokenVisibility(t)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result::postValue, this::onError)
+                .subscribe(() -> result.postValue(t))
                 .isDisposed();
     }
 
@@ -119,10 +131,22 @@ public class AddTokenViewModel extends BaseViewModel {
         return primaryChainId;
     }
 
-    private void setupToken(int chainId, String addr) {
+    private void setupToken(int chainId, String addr, ContractType type) {
         disposable = tokensService
                 .update(addr, chainId)
-                .subscribe(this::onTokensSetup, this::onError);
+                .subscribe(info -> onTokensSetup(info, type), error -> checkType(error, chainId, addr, type));
+    }
+
+    private void checkType(Throwable throwable, int chainId, String address, ContractType type)
+    {
+        if (type == ContractType.ERC1155)
+        {
+            onTokensSetup(new TokenInfo(address, "Holding Contract", "", 0, true, chainId), type);
+        }
+        else
+        {
+            onError(throwable);
+        }
     }
 
     public void fetchToken(int chainId, String addr)
@@ -156,11 +180,10 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(wallet::setValue, this::onError);
     }
 
-    private void onTokensSetup(TokenInfo tokenData) {
+    private void onTokensSetup(TokenInfo tokenData, ContractType type) {
         tokenInfo.postValue(tokenData);
-        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenData).toObservable()
-                .flatMap(contractType -> addTokenInteract.add(tokenData, contractType, wallet.getValue()))
-                //.flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
+        disposable = addTokenInteract.add(tokenData, type, wallet.getValue())
+                .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokentype::postValue, error -> tokenTypeError(error, tokenData));
@@ -196,7 +219,7 @@ public class AddTokenViewModel extends BaseViewModel {
         intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, wallet.getValue());
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.EXTRA_AMOUNT, result);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
@@ -224,14 +247,63 @@ public class AddTokenViewModel extends BaseViewModel {
         testAddress = address;
         foundNetwork = false;
         networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
-        //first test the network selected, then do all the others
-        scanNetworksDisposable = fetchTokensInteract.getContractResponse(testAddress, networkInfo.chainId, "name")
+        //String address, String name, String symbol, int decimals, boolean isEnabled, int chainId
+        TokenInfo tokenInfo = new TokenInfo(address, "", "", 0, true, networkInfo.chainId);
+        //first test the network selected, then do all the
+        //try to determine what kind of contract this is. Note if we get invalid response there's no contract there
+        scanNetworksDisposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::checkSelectedNetwork, this::onTestError);
+                .subscribe(type -> onContract(tokenInfo, type), this::onError);
     }
 
-    private void checkSelectedNetwork(ContractLocator result)
+    private void onContract(@NonNull TokenInfo info, ContractType contractType)
+    {
+        //did it detect anything?
+        if (contractType != ContractType.OTHER)
+        {
+            //found the contract
+            foundNetwork = true;
+            switchNetwork.postValue(info.chainId);
+            setupToken(info.chainId, info.address, contractType);
+        }
+        else
+        {
+            //try the other networks
+            List<Integer> networkIds = getNetworkIds();
+            networkIds.remove((Integer)info.chainId);
+            networkCount--;
+
+            Observable.fromIterable(networkIds)
+                    .filter(networkId -> !foundNetwork)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .blockingForEach(networkId -> {
+                        TokenInfo tokenInfo = new TokenInfo(info.address, "", "", 0, true, networkId);
+                        fetchTransactionsInteract.queryInterfaceSpec(tokenInfo)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(type -> testNetworkResult(tokenInfo, type), this::onTestError)
+                                .isDisposed();
+                    });
+        }
+    }
+
+    private void testNetworkResult(TokenInfo info, ContractType type)
+    {
+        if (!foundNetwork && type != ContractType.OTHER)
+        {
+            foundNetwork = true;
+            switchNetwork.postValue(info.chainId);
+            setupToken(info.chainId, info.address, type);
+        }
+        else
+        {
+            checkNetworkCount();
+        }
+    }
+
+    /*private void checkSelectedNetwork(ContractLocator result)
     {
         if (!result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
@@ -254,7 +326,7 @@ public class AddTokenViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::testNetworkResult, this::onTestError);
         }
-    }
+    }*/
 
     private void onTestError(Throwable throwable)
     {
@@ -262,7 +334,7 @@ public class AddTokenViewModel extends BaseViewModel {
         onError(throwable);
     }
 
-    private void testNetworkResult(ContractLocator result)
+    /*private void testNetworkResult(ContractLocator result)
     {
         if (!foundNetwork && !result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
@@ -275,7 +347,7 @@ public class AddTokenViewModel extends BaseViewModel {
         {
             checkNetworkCount();
         }
-    }
+    }*/
 
     private void checkNetworkCount()
     {

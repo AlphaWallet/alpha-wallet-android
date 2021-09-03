@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_transactions"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical">
 
@@ -20,22 +20,17 @@
     <LinearLayout
         android:id="@+id/layout_no_recent_transactions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_height="match_parent"
         android:paddingBottom="@dimen/dp18"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:orientation="vertical">
 
-        <TextView
+        <ImageView
             android:id="@+id/no_recent_transactions"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="20dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/font_light"
-            android:text="@string/no_recent_transactions"
-            android:textColor="@color/text_dark_gray"
-            android:textSize="18sp" />
+            android:src="@drawable/ic_icons_no_transactions" />
 
         <TextView
             android:id="@+id/no_recent_transactions_subtext"
@@ -43,9 +38,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:fontFamily="@font/font_regular"
-            android:text="@string/no_recent_transactions_subtext"
-            android:textColor="@color/text_dark_gray"
-            android:textSize="13sp" />
+            android:text="@string/no_transactions_yet"
+            android:textColor="@color/mine"
+            android:textSize="@dimen/sp17" />
     </LinearLayout>
 
     <ProgressBar

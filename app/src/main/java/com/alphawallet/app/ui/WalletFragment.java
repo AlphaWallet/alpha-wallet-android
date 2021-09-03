@@ -154,7 +154,7 @@ public class WalletFragment extends BaseFragment implements
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
-        recyclerView.setRecyclerListener(holder -> adapter.onRViewRecycled(holder));
+        recyclerView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
     }
 
     private void initViewModel() {

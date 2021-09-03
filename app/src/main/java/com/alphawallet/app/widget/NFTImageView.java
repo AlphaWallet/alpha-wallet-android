@@ -14,13 +14,12 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -34,7 +33,7 @@ import static com.alphawallet.app.util.Utils.loadFile;
 /**
  * Created by JB on 30/05/2021.
  */
-public class ERC721ImageView extends LinearLayout
+public class NFTImageView extends LinearLayout
 {
     private final ImageView image;
     private final LinearLayout webLayout;
@@ -42,7 +41,7 @@ public class ERC721ImageView extends LinearLayout
     private final LinearLayout holdingView;
     private final Handler handler = new Handler();
 
-    public ERC721ImageView(Context context, @Nullable AttributeSet attrs)
+    public NFTImageView(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
         inflate(context, R.layout.item_erc721_image, this);
@@ -55,17 +54,17 @@ public class ERC721ImageView extends LinearLayout
         setAttrs(context, attrs);
     }
 
-    public void setupTokenImageThumbnail(Asset asset)
+    public void setupTokenImageThumbnail(NFTAsset asset)
     {
-        loadTokenImage(asset, asset.getPreviewImageUrl());
+        loadTokenImage(asset, asset.getThumbnail());
     }
 
-    public void setupTokenImage(Asset asset)
+    public void setupTokenImage(NFTAsset asset)
     {
-        loadTokenImage(asset, asset.getBestImageUrl());
+        loadTokenImage(asset, asset.getImage());
     }
 
-    private void loadTokenImage(Asset asset, String imageUrl)
+    private void loadTokenImage(NFTAsset asset, String imageUrl)
     {
         if (getContext() == null ||
                 (getContext() instanceof Activity && ((Activity)getContext()).isDestroyed())) return;

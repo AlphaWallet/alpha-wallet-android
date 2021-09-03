@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/view_container"
-    android:layout_width="43dp"
-    android:layout_height="43dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_constraintDimensionRatio="1:1"
     android:orientation="horizontal">
 
     <androidx.constraintlayout.widget.Guideline
@@ -22,49 +23,73 @@
         app:layout_constraintGuide_percent="0.98" />
 
     <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.04" />
+
+    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineInnerRight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.92" />
+        app:layout_constraintGuide_percent="0.96" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineInnerLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.04" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineInnerBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.92" />
+        app:layout_constraintGuide_percent="0.96" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBottomMid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.65" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineRightMid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.65" />
 
     <ImageView
-        android:foreground="@drawable/white_circle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:background="@color/logo_grey"
+        android:id="@+id/circle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:contentDescription="@string/empty"
-        android:gravity="center"
-        android:visibility="visible"
-        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
-        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"/>
+        android:src="@drawable/grey_circle"
+        />
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_gravity="center"
-        android:background="@color/transparent"
         android:contentDescription="@string/empty"
         android:gravity="center"
         android:src="@drawable/ropsten_logo"
         android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
-        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom" />
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintTop_toTopOf="@id/guidelineTop" />
 
     <TextView
         android:id="@+id/text_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_gravity="center"
         android:background="@drawable/grid_icon"
         android:backgroundTint="@color/azure"
@@ -73,33 +98,40 @@
         android:lines="1"
         android:textColor="@color/white"
         android:visibility="gone"
-        app:autoSizeMaxTextSize="@dimen/sp13"
+        android:paddingLeft="@dimen/dp5"
+        android:paddingRight="@dimen/dp5"
+        app:autoSizeMaxTextSize="@dimen/sp24"
         app:autoSizeMinTextSize="@dimen/sp12"
         app:autoSizeStepGranularity="1sp"
         app:autoSizeTextType="uniform"
-        app:layout_constraintEnd_toEndOf="@+id/icon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintTop_toTopOf="@id/guidelineTop"
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         tools:text="UEFA" />
 
     <ImageView
         android:id="@+id/status_icon"
-        android:layout_width="@dimen/dp16"
-        android:layout_height="@dimen/dp16"
-        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
         android:contentDescription="@string/empty"
-        android:src="@drawable/ic_timer_small"
+        android:src="@drawable/ic_sent_white_small"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
+        app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
 
     <ProgressBar
         android:id="@+id/pending_progress"
-        android:layout_width="@dimen/dp16"
-        android:layout_height="@dimen/dp16"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="@drawable/item_white_circle"
         style="?android:attr/progressBarStyleSmall"
         android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
+        app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

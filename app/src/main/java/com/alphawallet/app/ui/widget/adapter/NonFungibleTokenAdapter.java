@@ -2,26 +2,32 @@ package com.alphawallet.app.ui.widget.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
+import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
+import com.alphawallet.app.ui.widget.entity.NFTSortedItem;
 import com.alphawallet.app.ui.widget.entity.QuantitySelectorSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
+import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
 import com.alphawallet.app.ui.widget.holder.OpenseaHolder;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
 import com.alphawallet.app.ui.widget.holder.TicketHolder;
@@ -30,6 +36,8 @@ import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.token.entity.TicketRange;
 import com.bumptech.glide.Glide;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -45,17 +53,18 @@ import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_V
  * Created by James on 9/02/2018.
  */
 
-public class NonFungibleTokenAdapter extends TokensAdapter {
+public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibleAdapterInterface
+{
     TicketRange currentRange = null;
     final Token token;
-    protected final OpenseaService openseaService;
+    protected final OpenSeaService openseaService;
     private final boolean clickThrough;
     protected int assetCount;
     private FunctionCallback functionCallback;
     private final Activity activity;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenseaService opensea, Activity activity) {
+                                   OpenSeaService opensea, Activity activity) {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
@@ -76,10 +85,37 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         setTokenRange(token, tokenSelection);
         this.activity = null;
     }
-    
+
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
+                                   AssetDefinitionService service)
+    {
+        super(tokenClickListener, service);
+        assetCount = 0;
+        token = t;
+        clickThrough = false;
+        openseaService = null;
+        setAssetSelection(token, assetSelection);
+        this.activity = null;
+    }
+
+    private void setAssetSelection(Token token, List<Pair<BigInteger, NFTAsset>> selection)
+    {
+        setAssetRange(token, selection);
+
+//        if (selection.size() == 1 && selection.get(0).second.getSelectedBalance().compareTo(BigDecimal.ONE) <= 0)
+//        {
+//            setTokenRange(token, Collections.singletonList(selection.get(0).first)); //setup a normal single token transfer
+//        }
+//        else
+//        {
+//
+//        }
+    }
+
+    @NotNull
     @Override
-    public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        BinderViewHolder holder = null;
+    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+        BinderViewHolder<?> holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
@@ -98,6 +134,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, token, assetService, clickThrough);
                 holder.setOnTokenClickListener(onTokenClickListener);
+                break;
+            case NFTAssetHolder.VIEW_TYPE:
+                holder = new NFTAssetHolder(parent);
                 break;
             case QuantitySelectorHolder.VIEW_TYPE:
                 holder = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, assetCount, assetService);
@@ -125,7 +164,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
         assetCount = tokenIds.size();
-        int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+        int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
         if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
@@ -141,13 +180,27 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
-        assetCount = t.getTicketCount();
-        int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+        assetCount = t.getTokenCount();
+        int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
         if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         addRanges(t, holderType);
+        items.endBatchedUpdates();
+    }
+
+    private void setAssetRange(Token t, List<Pair<BigInteger, NFTAsset>> selection)
+    {
+        items.beginBatchedUpdates();
+        items.clear();
+        assetCount = selection.size();
+
+        for (int i = 0; i < selection.size(); i++)
+        {
+            items.add(new NFTSortedItem(selection.get(i), i+1));
+        }
+
         items.endBatchedUpdates();
     }
 
@@ -241,6 +294,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         this.notifyDataSetChanged();
     }
 
+    @Override
     public void setRadioButtons(boolean expose)
     {
         boolean requiresFullRedraw = false;
@@ -264,6 +318,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
     }
 
+    @Override
     public List<BigInteger> getSelectedTokenIds(List<BigInteger> selection)
     {
         List<BigInteger> tokenIds = new ArrayList<>(selection);
@@ -280,6 +335,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         return tokenIds;
     }
 
+    @Override
     public int getSelectedGroups()
     {
         int selected = 0;
@@ -316,5 +372,10 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
 
         return new TicketRange(subSelection, token.getAddress(), false);
+    }
+
+    private int getHolderType()
+    {
+        return (token.getInterfaceSpec() == ContractType.ERC1155 || token.isERC721())  ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
     }
 }

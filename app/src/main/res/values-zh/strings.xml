@@ -762,6 +762,8 @@
     <string name="warning_switch_to_main">Warning: Switching to Main nets</string>
     <string name="warning_switching_to_test">Warning: Switching to Test nets</string>
     <string name="unsupported_walletconnect">WalletConnect: Unsupported network. Close the connection and change the DappBrowser Network</string>
+    <string name="asset_description_text">%1$s Asset | %2$s</string>
+    <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
     <string name="this_is_testnet">This is Testnet</string>
     <string name="swap_with_quickswap">Swap with Quickswap</string>
     <string name="email">Email</string>
@@ -769,6 +771,9 @@
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
+    <string name="select_amount">Select Amount</string>
+    <string name="selected_tokens">选定的通证</string>
+    <string name="send_tokens">发送通证</string>
     <string name="rate_prompt">If you enjoy using %1$s, please help us by rating it.</string>
     <string name="rate_later">LATER</string>
     <string name="rate_rate">RATE</string>

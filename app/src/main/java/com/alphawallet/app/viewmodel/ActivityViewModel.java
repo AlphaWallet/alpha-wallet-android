@@ -26,7 +26,7 @@ import io.realm.Realm;
  */
 public class ActivityViewModel extends BaseViewModel
 {
-    private final int TRANSACTION_FETCH_LIMIT = 500;
+    private final int TRANSACTION_FETCH_LIMIT = 150;
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<ActivityMeta[]> activityItems = new MutableLiveData<>();

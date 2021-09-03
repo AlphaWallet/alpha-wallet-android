@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
@@ -176,7 +177,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
                 final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime, fetchLimit).findAll();
-                Log.d(TAG, "Found " + txs.size() + " TX Results");
+                if (BuildConfig.DEBUG) Log.d(TAG, "Found " + txs.size() + " TX Results");
                 fixBadTXValues(instance, fetchTime, fetchLimit);
 
                 for (RealmTransaction item : txs)

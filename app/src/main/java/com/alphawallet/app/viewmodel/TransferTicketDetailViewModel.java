@@ -1,6 +1,9 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -9,11 +12,14 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.DisplayState;
+import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -25,6 +31,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -35,6 +42,7 @@ import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -84,7 +92,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.tokensService = tokensService;
     }
 
-
     public MutableLiveData<TransactionData> transactionFinalised()
     {
         return transactionFinalised;
@@ -128,11 +135,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void setWallet(Wallet wallet)
     {
         defaultWallet.setValue(wallet);
-    }
-
-    private void onCreateTransaction(String transaction)
-    {
-        userTransaction.postValue(transaction);
     }
 
     public void generateUniversalLink(List<BigInteger> ticketSendIndexList, String contractAddress, long expiry)
@@ -191,7 +193,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         universalLinkReady.postValue(universalLink);
     }
 
-    public void createTicketTransfer(String to, Token token, List<BigInteger> transferList)
+    public void createTokenTransfer(String to, Token token, List<BigInteger> transferList)
     {
         if (!token.contractTypeValid())
         {
@@ -201,13 +203,37 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
         }
+//        else
+//        {
+//            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
+//            GasSettings settings = gasService.getERC875TransferGasLimit();
+//            disposable = createTransactionInteract
+//                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
+//                    .subscribe(this::onCreateTransaction, this::onError);
+//        }
+    }
+
+    public void createTokenTransfer(String to, Token token, ArrayList<Pair<BigInteger, NFTAsset>> transferList)
+    {
+        //need to determine the spec
+        disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
+    }
+
+    private void onInterfaceSpec(ContractType spec, String to, Token token, ArrayList<Pair<BigInteger, NFTAsset>> transferList)
+    {
+        token.setInterfaceSpec(spec);
+        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
+        createTokenTransfer(to, token, transferList);
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)
     {
         token.setInterfaceSpec(spec);
         TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
-        createTicketTransfer(to, token, transferList);
+        createTokenTransfer(to, token, transferList);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -261,14 +287,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                         transactionError::postValue);
     }
 
-    public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit, int chainId)
-    {
-        final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId, chainId);
-        disposable = createTransactionInteract
-                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
-                .subscribe(this::onCreateTransaction, this::onError);
-    }
-
     public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, int chainId) {
         Token token = tokensService.getToken(chainId, contractAddress);
         List<BigInteger> tokenIds = token.stringHexToBigIntegerList(tokenId);
@@ -283,8 +301,21 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 
-
     public TokensService getTokenService() {
         return tokensService;
+    }
+
+    public void openTransferState(Context context, Token token, String ticketIds, DisplayState transferStatus)
+    {
+        if (transferStatus != DisplayState.NO_ACTION)
+        {
+            Intent intent = new Intent(context, TransferTicketDetailActivity.class);
+            intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
+            intent.putExtra(C.Key.TICKET, token);
+            intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIds);
+            intent.putExtra(C.EXTRA_STATE, transferStatus.ordinal());
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            context.startActivity(intent);
+        }
     }
 }

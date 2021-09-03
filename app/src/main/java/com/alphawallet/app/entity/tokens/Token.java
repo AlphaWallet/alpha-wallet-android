@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -14,7 +15,8 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -24,10 +26,18 @@ import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -39,11 +49,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
-public class Token implements Parcelable, Comparable<Token>
+import io.realm.Realm;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
+
+public class Token implements Parcelable
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+
+    protected static OkHttpClient client;
 
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
@@ -57,9 +76,7 @@ public class Token implements Parcelable, Comparable<Token>
     public boolean walletUIUpdateRequired;
     public boolean hasTokenScript;
     public long lastTxCheck;
-    public long txSync;
     public long lastTxTime;
-    private int nameWeight;
     public int itemViewHeight;
 
     private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
@@ -78,7 +95,6 @@ public class Token implements Parcelable, Comparable<Token>
         this.shortNetworkName = networkName;
         this.contractType = type;
         this.pendingBalance = balance;
-        this.txSync = 0;
         this.lastTxCheck = 0;
         this.lastBlockCheck = 0;
         this.lastTxTime = 0;
@@ -98,7 +114,6 @@ public class Token implements Parcelable, Comparable<Token>
         tokenWallet = in.readString();
         lastBlockCheck = in.readLong();
         lastTxCheck = in.readLong();
-        txSync = in.readLong();
         lastTxTime = in.readLong();
         hasTokenScript = in.readByte() == 1;
         functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
@@ -124,17 +139,15 @@ public class Token implements Parcelable, Comparable<Token>
         else return false;
     }
 
-    public boolean independentUpdate()
-    {
-        return false;
-    }
-
     public String getFullBalance() {
         if (balance != null) return balance.toString();
         else return "0";
     }
 
-    public Asset getAssetForToken(String tokenId) {
+    public NFTAsset getAssetForToken(String tokenId) {
+        return null;
+    }
+    public NFTAsset getAssetForToken(BigInteger tokenId) {
         return null;
     }
     public List<BigInteger> getUniqueTokenIds()
@@ -155,7 +168,7 @@ public class Token implements Parcelable, Comparable<Token>
         return uniqueIds;
     }
 
-    public void addAssetToTokenBalanceAssets(Asset asset) {
+    public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset) {
         //only for ERC721, see override in ERC721Token
     }
 
@@ -187,7 +200,6 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeString(tokenWallet);
         dest.writeLong(lastBlockCheck);
         dest.writeLong(lastTxCheck);
-        dest.writeLong(txSync);
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
         dest.writeMap(functionAvailabilityMap);
@@ -205,11 +217,9 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public void setIsTerminated(RealmToken realmToken)
-    {
-        realmToken.setUpdateTime(-1);
-        updateBlancaTime = -1;
-    }
+    //Used for custom balance updates
+    public BigDecimal updateBalance(Realm realm) { return BigDecimal.ZERO; }
+
     public boolean isTerminated() { return (updateBlancaTime == -1); }
 
     public String getAddress() {
@@ -307,25 +317,22 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public Map<BigInteger, Asset> getTokenAssets() {
+    public Map<BigInteger, NFTAsset> getTokenAssets() {
         return null;
     }
+    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId) {
+        return null;
+    }
+    public Map<BigInteger, NFTAsset> getCollectionMap() { return null; }
 
     public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
         return null;
     }
 
-    public int getTicketCount()
+    public int getTokenCount()
     {
         return balance.intValue();
-    }
-
-    public boolean addressMatches(String contractAddress)
-    {
-        String checkAddress = Numeric.cleanHexPrefix(contractAddress);
-        String ourAddress = Numeric.cleanHexPrefix(getAddress());
-        return ourAddress.equalsIgnoreCase(checkAddress);
     }
 
     public boolean isToken()
@@ -348,22 +355,6 @@ public class Token implements Parcelable, Comparable<Token>
         return !currentState.equals(currentBalance);
     }
 
-    private Map<String, String> restoreAuxData(String data)
-    {
-        Map<String, String> aux = null;
-        if (data != null && data.length() > 0)
-        {
-            String[] set = data.split(",");
-            aux = new ConcurrentHashMap<>();
-            for (int i = 0; i < (set.length - 1); i+=2)
-            {
-                aux.put(set[i], set[i+1]);
-            }
-        }
-
-        return aux;
-    }
-
     public void setIsEthereum()
     {
         contractType = ContractType.ETHEREUM;
@@ -374,11 +365,6 @@ public class Token implements Parcelable, Comparable<Token>
         return tokenInfo == null || (tokenInfo.symbol == null && tokenInfo.name == null);
     }
 
-    public boolean checkTokenWallet(String address)
-    {
-        return tokenWallet != null && tokenWallet.equalsIgnoreCase(address);
-    }
-
     public void setTokenWallet(String address)
     {
         this.tokenWallet = address;
@@ -387,16 +373,9 @@ public class Token implements Parcelable, Comparable<Token>
     public void setupRealmToken(RealmToken realmToken)
     {
         lastBlockCheck = realmToken.getLastBlock();
-        txSync = realmToken.getTXUpdateTime();
         lastTxCheck = realmToken.getLastTxTime();
         lastTxTime = realmToken.getLastTxTime();
         tokenInfo.isEnabled = realmToken.getEnabled();
-    }
-
-    public boolean checkBalanceChange(Token token)
-    {
-        if (token != null && tokenInfo.decimals != token.tokenInfo.decimals) return true;
-        else return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()
@@ -422,19 +401,6 @@ public class Token implements Parcelable, Comparable<Token>
         realmToken.setInterfaceSpec(contractType.ordinal());
     }
 
-    public void setInterfaceSpecFromRealm(RealmToken realm)
-    {
-        if (realm.getInterfaceSpec() > ContractType.CREATION.ordinal())
-        {
-            //need to re-sync this contract
-            this.contractType = ContractType.NOT_SET;
-        }
-        else
-        {
-            this.contractType = ContractType.values()[realm.getInterfaceSpec()];
-        }
-    }
-
     public void setRealmLastBlock(RealmToken realmToken)
     {
         realmToken.setLastBlock(lastBlockCheck);
@@ -449,18 +415,19 @@ public class Token implements Parcelable, Comparable<Token>
         contractType = type;
     }
     public ContractType getInterfaceSpec() { return contractType; }
-    public int interfaceOrdinal()
-    {
-        return 0;
-    }
-    public BigInteger getTokenID(int index)
-    {
-        return BigInteger.valueOf(-1);
-    }
     public Function getTransferFunction(String to, List<BigInteger> transferData) throws NumberFormatException
     {
         return null;
     }
+    public byte[] getTransferBytes(String to, List<BigInteger> transferData)
+    {
+        return Numeric.hexStringToByteArray("0x");
+    }
+    public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData)
+    {
+        return Numeric.hexStringToByteArray("0x");
+    }
+
     public Function getSpawnPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
     {
         return new Function(
@@ -485,13 +452,9 @@ public class Token implements Parcelable, Comparable<Token>
                 Collections.emptyList());
     }
 
-    public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
-    public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean contractTypeValid() { return !(contractType == ContractType.NOT_SET || contractType == ContractType.OTHER); }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
     public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(Arrays.asList(BigInteger.ZERO)); }
-    public boolean isMatchedInXML() { return false; }
-
     public String getOperationName(Transaction transaction, Context ctx)
     {
         String name;
@@ -517,21 +480,6 @@ public class Token implements Parcelable, Comparable<Token>
 
 
         return name;
-    }
-
-    /* Raw string value for balance */
-    public String getScaledBalance()
-    {
-        return balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)), 18, RoundingMode.DOWN).toString();
-    }
-
-    /**
-     * Balance in human readable form, variable decimal width - will only display decimals if present (eg 14.5, 20, 32.5432)
-     * @return formatted balance
-     */
-    public String getFormattedBalance()
-    {
-        return BalanceUtils.getScaledValue(balance, tokenInfo.decimals, TOKEN_BALANCE_PRECISION);
     }
 
     /**
@@ -695,24 +643,6 @@ public class Token implements Parcelable, Comparable<Token>
         return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
     }
 
-
-    public BigDecimal getCorrectedAmount(String newAmount)
-    {
-        if (newAmount == null || newAmount.length() == 0) return BigDecimal.ZERO;
-
-        try
-        {
-            BigDecimal bd = new BigDecimal(newAmount);
-            BigDecimal factor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
-            return bd.multiply(factor).setScale(0, RoundingMode.DOWN).stripTrailingZeros();
-        }
-        catch (Exception e)
-        {
-            //
-        }
-        return BigDecimal.ZERO;
-    }
-
     public String getShortName() {
         if (isTerminated() || isBad()) return "";
         return tokenInfo.name != null ? tokenInfo.name : tokenInfo.symbol != null ? tokenInfo.symbol : "";
@@ -734,6 +664,7 @@ public class Token implements Parcelable, Comparable<Token>
     {
         return tokenIds;
     }
+
     protected org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
     {
         return new org.web3j.abi.datatypes.DynamicArray<>(
@@ -760,40 +691,6 @@ public class Token implements Parcelable, Comparable<Token>
         int hash = 7;
         hash = 17 * hash + (this.tokenInfo.name != null ? this.tokenInfo.name.hashCode() : 0);
         return hash;
-    }
-
-    @Override
-    public int compareTo(@NonNull Token otherToken)
-    {
-        return nameWeight - otherToken.nameWeight;
-    }
-
-    public long getUID()
-    {
-        String id = getAddress() + "-" + tokenInfo.chainId;
-        return id.hashCode();
-    }
-
-    public BigDecimal getTxValue(Transaction transaction)
-    {
-        BigDecimal returnValue = BigDecimal.ZERO;
-        try
-        {
-            if (isEthereum())
-            {
-                returnValue = new BigDecimal(transaction.value);
-            }
-            else
-            {
-                returnValue = transaction.getRawValue(getWallet());
-            }
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return returnValue;
     }
 
     public boolean checkBalanceType()
@@ -903,11 +800,6 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public void setNameWeight(int weight)
-    {
-        nameWeight = weight;
-    }
-
     public long getTransactionCheckInterval()
     {
         if (hasRealValue() && hasPositiveBalance())
@@ -1005,24 +897,101 @@ public class Token implements Parcelable, Comparable<Token>
         return balance;
     }
 
-    public void removeBalance(String tokenID)
-    {
-        //
-    }
-
     public boolean mayRequireRefresh()
     {
         return (!TextUtils.isEmpty(tokenInfo.name) && tokenInfo.name.contains("?"))
                 || (!TextUtils.isEmpty(tokenInfo.symbol) && tokenInfo.symbol.contains("?"));
     }
 
-    public Asset fetchTokenMetadata(BigInteger tokenId)
-    {
-        return null;
-    }
-
-    public List<BigInteger> getChangeList(Map<BigInteger, Asset> assetMap)
+    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
     {
         return new ArrayList<>();
+    }
+
+    public void setAssetContract(AssetContract contract) {  }
+    public AssetContract getAssetContract() { return null; }
+
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_send, R.string.action_receive);
+    }
+
+    public List<NFTAsset> getAssetListFromTransaction(Transaction tx)
+    {
+        return new ArrayList<>();
+    }
+
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    {
+        return assetMap;
+    }
+
+    /**
+     * Token Metadata handling
+     */
+
+    public NFTAsset fetchTokenMetadata(BigInteger tokenId)
+    {
+        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
+        String responseValue = callSmartContractFunction(tokenInfo.chainId, getTokenURI(tokenId), getAddress(), getWallet());
+        if (responseValue == null) responseValue = callSmartContractFunction(tokenInfo.chainId, getTokenURI2(tokenId), getAddress(), getWallet());
+        String metaData = loadMetaData(responseValue);
+        if (!TextUtils.isEmpty(metaData))
+        {
+            return new NFTAsset(metaData);
+        }
+        else
+        {
+            return new NFTAsset();
+        }
+    }
+
+    private Function getTokenURI(BigInteger tokenId)
+    {
+        return new Function("tokenURI",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private Function getTokenURI2(BigInteger tokenId)
+    {
+        return new Function("uri",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private String loadMetaData(String tokenURI)
+    {
+        setupClient();
+
+        try
+        {
+            Request request = new Request.Builder()
+                    .url(Utils.parseIPFS(tokenURI))
+                    .get()
+                    .build();
+
+            okhttp3.Response response = client.newCall(request).execute();
+            return response.body().string();
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return "";
+    }
+
+    private static void setupClient()
+    {
+        if (client == null)
+        {
+            client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
+                    .build();
+        }
     }
 }

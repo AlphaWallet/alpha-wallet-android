@@ -17,7 +17,7 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.Erc20DetailRouter;
+import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -41,7 +41,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
-    private final Erc20DetailRouter erc20DetailRouter;
+    private final TokenDetailRouter tokenDetailRouter;
     private final AssetDisplayRouter assetDisplayRouter;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -52,7 +52,7 @@ public class WalletViewModel extends BaseViewModel
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
-            Erc20DetailRouter erc20DetailRouter,
+            TokenDetailRouter tokenDetailRouter,
             AssetDisplayRouter assetDisplayRouter,
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
@@ -61,7 +61,7 @@ public class WalletViewModel extends BaseViewModel
             MyAddressRouter myAddressRouter)
     {
         this.fetchTokensInteract = fetchTokensInteract;
-        this.erc20DetailRouter = erc20DetailRouter;
+        this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -185,14 +185,24 @@ public class WalletViewModel extends BaseViewModel
 
     @Override
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
-        boolean isToken = !address.equalsIgnoreCase(defaultWallet.getValue().address);
+        boolean isToken = !token.isEthereum();
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
-        erc20DetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
+        tokenDetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
     }
 
     @Override
-    public void showTokenList(Activity activity, Token token) {
-        assetDisplayRouter.open(activity, token, defaultWallet.getValue());
+    public void showTokenList(Activity activity, Token token)
+    {
+        switch (token.getInterfaceSpec())
+        {
+            case ERC1155:
+                boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+                tokenDetailRouter.openERC1155(activity, token, defaultWallet.getValue(), hasDefinition);
+                break;
+            default:
+                assetDisplayRouter.open(activity, token, defaultWallet.getValue());
+                break;
+        }
     }
 
     public void checkBackup()
@@ -236,6 +246,7 @@ public class WalletViewModel extends BaseViewModel
     public void notifyRefresh()
     {
         tokensService.clearFocusToken(); //ensure if we do a refresh there's no focus token preventing correct update
+        tokensService.onWalletRefreshSwipe();
     }
 
     public boolean isChainToken(int chainId, String tokenAddress)

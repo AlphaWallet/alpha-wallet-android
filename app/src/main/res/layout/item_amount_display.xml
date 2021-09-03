@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -38,6 +39,15 @@
             android:gravity="start"
             tools:text="1.234 ETH ≈ 500.23 USD"
             android:textSize="@dimen/sp16"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tokens_list"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:layout_width="0dp"
+            android:layout_weight="3.5"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     </LinearLayout>
 

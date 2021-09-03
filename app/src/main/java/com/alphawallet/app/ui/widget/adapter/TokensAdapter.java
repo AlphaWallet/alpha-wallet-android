@@ -327,10 +327,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
                 break;
             case FILTER_COLLECTIBLES:
-                if (!(token.isNFT()))
-                {
-                    allowThroughFilter = false;
-                }
+                allowThroughFilter = allowThroughFilter && token.isNFT();
                 break;
             default:
                 break;

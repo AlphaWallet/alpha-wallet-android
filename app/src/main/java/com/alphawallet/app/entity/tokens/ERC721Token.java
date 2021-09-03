@@ -3,17 +3,17 @@ package com.alphawallet.app.entity.tokens;
 import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.token.tools.Numeric;
 
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
@@ -27,8 +27,8 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.utils.Numeric;
 
-import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import wallet.core.jni.Hash;
 
+import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
@@ -51,10 +51,9 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
  */
 public class ERC721Token extends Token implements Parcelable
 {
-    private final Map<BigInteger, Asset> tokenBalanceAssets;
-    private static OkHttpClient client;
+    private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
 
-    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, Asset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type) {
+    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, balance, blancaTime, networkName, type);
         if (balanceList != null)
         {
@@ -68,20 +67,25 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public Map<BigInteger, Asset> getTokenAssets() {
+    public Map<BigInteger, NFTAsset> getTokenAssets() {
         return tokenBalanceAssets;
     }
 
     @Override
-    public void addAssetToTokenBalanceAssets(Asset asset) {
-        BigInteger tokenId = parseTokenId(asset.getTokenId());
+    public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset) {
         tokenBalanceAssets.put(tokenId, asset);
     }
 
     @Override
-    public Asset getAssetForToken(String tokenIdStr)
+    public NFTAsset getAssetForToken(String tokenIdStr)
     {
         return tokenBalanceAssets.get(parseTokenId(tokenIdStr));
+    }
+
+    @Override
+    public NFTAsset getAssetForToken(BigInteger tokenId)
+    {
+        return tokenBalanceAssets.get(tokenId);
     }
 
     private ERC721Token(Parcel in) {
@@ -91,8 +95,9 @@ public class ERC721Token extends Token implements Parcelable
         int size = in.readInt();
         for (; size > 0; size--)
         {
-            Asset asset = in.readParcelable(Asset.class.getClassLoader());
-            tokenBalanceAssets.put(parseTokenId(asset.getTokenId()), asset);
+            BigInteger tokenId = new BigInteger(in.readString(), Character.MAX_RADIX);
+            NFTAsset asset = in.readParcelable(NFTAsset.class.getClassLoader());
+            tokenBalanceAssets.put(tokenId, asset);
         }
     }
 
@@ -112,16 +117,11 @@ public class ERC721Token extends Token implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(tokenBalanceAssets.size());
-        for (Asset asset : tokenBalanceAssets.values())
+        for (BigInteger assetKey : tokenBalanceAssets.keySet())
         {
-            dest.writeParcelable(asset, flags);
+            dest.writeString(assetKey.toString(Character.MAX_RADIX));
+            dest.writeParcelable(tokenBalanceAssets.get(assetKey), flags);
         }
-    }
-
-    @Override
-    public boolean independentUpdate()
-    {
-        return true;
     }
 
     @Override
@@ -135,6 +135,14 @@ public class ERC721Token extends Token implements Parcelable
     {
         if (balance.compareTo(BigDecimal.ZERO) > 0) { return balance.toString(); }
         else { return "0"; }
+    }
+
+    @Override
+    public byte[] getTransferBytes(String to, List<BigInteger> tokenIds) throws NumberFormatException
+    {
+        Function txFunc = getTransferFunction(to, tokenIds);
+        String encodedFunction = FunctionEncoder.encode(txFunc);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
     @Override
@@ -170,9 +178,9 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public int getTicketCount()
+    public int getTokenCount()
     {
-        return tokenBalanceAssets.size();
+        return balance.intValue();
     }
 
     @Override
@@ -243,7 +251,7 @@ public class ERC721Token extends Token implements Parcelable
         if (lastTxTime > realmToken.getLastTxTime()) return true;
         if (!currentState.equals(balance.toString())) return true;
         //check balances
-        for (Asset a : tokenBalanceAssets.values())
+        for (NFTAsset a : tokenBalanceAssets.values())
         {
             if (!a.needsLoading() && !a.requiresReplacement()) return true;
         }
@@ -273,9 +281,9 @@ public class ERC721Token extends Token implements Parcelable
     {
         boolean onlyHasTokenId = true;
         //if elements contain asset with only assetId then most likely this is a ticket.
-        for (Asset a : tokenBalanceAssets.values())
+        for (NFTAsset a : tokenBalanceAssets.values())
         {
-            if (!a.hasIdOnly()) onlyHasTokenId = false;
+            if (!a.isBlank()) onlyHasTokenId = false;
         }
 
         return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
@@ -348,70 +356,57 @@ public class ERC721Token extends Token implements Parcelable
         return balance;
     }
 
-    private BigInteger parseTokenId(String tokenIdStr)
-    {
-        BigInteger tokenId;
-        try
-        {
-            tokenId = new BigInteger(tokenIdStr);
-        }
-        catch (Exception e)
-        {
-            tokenId = BigInteger.ZERO;
-        }
-
-        return tokenId;
-    }
-
+    /**
+     * Create a live balance of assets. Only need to query assets that have dropped out
+     * From where this is called, the current assets are those loaded from opensea call
+     * If there is a token that previously was there, but now isn't, it could be because
+     * the opensea call was split or that the owner transferred the token
+     * @param assetMap Loaded Assets from Realm
+     * @return map of currently known live assets
+     */
     @Override
-    public void removeBalance(String tokenID)
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
-        tokenBalanceAssets.remove(parseTokenId(tokenID));
-    }
-
-    private static String getHashBalance(ERC721Token token)
-    {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try
+        List<BigInteger> missingTokens = new ArrayList<>();
+        for (BigInteger oldTokenId : assetMap.keySet())
         {
-            for (Asset item : token.tokenBalanceAssets.values())
+            NFTAsset checkAsset = tokenBalanceAssets.get(oldTokenId);
+            if (checkAsset == null)
             {
-                baos.write(item.getTokenId().getBytes());
-                if (item.getImagePreviewUrl() != null) baos.write(item.getImagePreviewUrl().getBytes());
-                if (item.getImageOriginalUrl() != null) baos.write(item.getImageOriginalUrl().getBytes());
-                if (item.getName() != null) baos.write(item.getName().getBytes());
-                if (item.getDescription() != null) baos.write(item.getDescription().getBytes());
-                if (item.getTraits() != null) baos.write(item.getTraits().hashCode());
+                missingTokens.add(oldTokenId);
+            }
+            else
+            {
+                checkAsset.setBalance(BigDecimal.ONE);
             }
         }
-        catch (Exception e)
+
+        final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+
+        //now check balance for each of the missing tokenIds (note that ERC1155 has a batch balance check, ERC721 does not)
+        for (BigInteger checkId : missingTokens)
         {
-            return String.valueOf(token.tokenBalanceAssets.size());
+            NFTAsset checkAsset = assetMap.get(checkId);
+            //check balance
+            String owner = callSmartContractFunction(web3j, ownerOf(checkId), getAddress(), getWallet());
+            if (owner.toLowerCase().equals(getWallet()))
+            {
+                checkAsset.setBalance(BigDecimal.ONE);
+            }
+            else
+            {
+                checkAsset.setBalance(BigDecimal.ZERO);
+            }
+
+            //add back into asset map
+            tokenBalanceAssets.put(checkId, checkAsset);
         }
 
-        return Numeric.toHexString(Hash.keccak256(baos.toByteArray()));
+        return tokenBalanceAssets;
     }
 
     @Override
-    public Asset fetchTokenMetadata(BigInteger tokenId)
-    {
-        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
-        Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
-        String responseValue = callSmartContractFunction(web3j, getTokenURI(tokenId), getAddress(), getWallet());
-        if (responseValue == null) responseValue = callSmartContractFunction(web3j, getTokenURI2(tokenId), getAddress(), getWallet());
-        JSONObject metaData = loadMetaData(responseValue);
-        if (metaData != null)
-        {
-            return Asset.fromMetaData(metaData, tokenId, this);
-        }
-        else
-        {
-            return new Asset(tokenId);
-        }
-    }
-
-    @Override
-    public List<BigInteger> getChangeList(Map<BigInteger, Asset> assetMap)
+    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
     {
         //detect asset removal
         List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
@@ -422,8 +417,8 @@ public class ERC721Token extends Token implements Parcelable
         //Now detect differences or new tokens
         for (BigInteger tokenId : tokenBalanceAssets.keySet())
         {
-            Asset newAsset = tokenBalanceAssets.get(tokenId);
-            Asset oldAsset = assetMap.get(tokenId);
+            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
+            NFTAsset oldAsset = assetMap.get(tokenId);
 
             if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
             {
@@ -460,53 +455,16 @@ public class ERC721Token extends Token implements Parcelable
         return null;
     }
 
-    private Function getTokenURI(BigInteger tokenId)
-    {
-        return new Function("tokenURI",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    private static Function ownerOf(BigInteger token) {
+        return new Function(
+                "ownerOf",
+                Collections.singletonList(new Uint256(token)),
+                Collections.singletonList(new TypeReference<Address>() {}));
     }
 
-    private Function getTokenURI2(BigInteger tokenId)
+    @Override
+    public List<Integer> getStandardFunctions()
     {
-        return new Function("uri",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-    }
-
-    private JSONObject loadMetaData(String tokenURI)
-    {
-        JSONObject metaData = null;
-        setupClient();
-
-        try
-        {
-            Request request = new Request.Builder()
-                    .url(Utils.parseIPFS(tokenURI))
-                    .get()
-                    .build();
-
-            okhttp3.Response response = client.newCall(request).execute();
-            metaData = new JSONObject(response.body().string());
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return metaData;
-    }
-
-    private static void setupClient()
-    {
-        if (client == null)
-        {
-            client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(true)
-                    .build();
-        }
+        return Arrays.asList(R.string.action_transfer);
     }
 }

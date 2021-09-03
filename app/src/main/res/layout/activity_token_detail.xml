@@ -63,7 +63,7 @@
                         android:textSize="11sp" />
                 </LinearLayout>
 
-                <com.alphawallet.app.widget.ERC721ImageView
+                <com.alphawallet.app.widget.NFTImageView
                     android:id="@+id/layout_image"
                     android:layout_below="@id/layout_token_title"
                     android:layout_width="match_parent"
@@ -148,33 +148,17 @@
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/label_attributes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/layout_name_desc"
-                    android:layout_marginBottom="20dp"
-                    android:layout_marginTop="20dp"
-                    android:fontFamily="@font/font_bold"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:text="@string/label_attributes"
-                    android:textColor="@color/text_dark_gray" />
-
-                <androidx.gridlayout.widget.GridLayout
-                    android:id="@+id/grid"
+                <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+                    android:id="@+id/attributes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/label_attributes"
-                    app:columnCount="2">
-
-                </androidx.gridlayout.widget.GridLayout>
+                    android:layout_below="@id/layout_name_desc"/>
 
                 <TextView
                     android:id="@+id/open_external"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/grid"
+                    android:layout_below="@id/attributes"
                     android:layout_marginTop="20dp"
                     android:drawablePadding="5dp"
                     app:drawableRightCompat="@drawable/ic_forward"

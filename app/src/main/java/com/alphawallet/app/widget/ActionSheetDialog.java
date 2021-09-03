@@ -13,10 +13,12 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -38,6 +40,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -123,12 +126,23 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
 
-        if (token.isERC721())
+        if (token.isNonFungible())
         {
-            assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
-            assetDetailView.setVisibility(View.VISIBLE);
             balanceDisplay.setVisibility(View.GONE);
-            amountDisplay.setVisibility(View.GONE);
+
+            if (token.getInterfaceSpec() == ContractType.ERC1155)
+            {
+                List<NFTAsset> assetList = token.getAssetListFromTransaction(transaction);
+                amountDisplay.setVisibility(View.VISIBLE);
+                amountDisplay.setAmountFromAssetList(assetList);
+                setupTransactionDetails();
+            }
+            else
+            {
+                amountDisplay.setVisibility(View.GONE);
+                assetDetailView.setupAssetDetail(token, getERC721TokenId(), this);
+                assetDetailView.setVisibility(View.VISIBLE);
+            }
         }
 
         setupCancelListeners();
@@ -192,13 +206,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         AddressDetailView requester = findViewById(R.id.requester);
         requester.setupRequester(url);
         detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
-                tokensService.getNetworkSymbol(token.tokenInfo.chainId));
+                tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
         if (candidateTransaction.isConstructor())
         {
             addressDetail.setVisibility(View.GONE);
         }
 
-        detailWidget.setLockCallback(this);
         if (candidateTransaction.value.equals(BigInteger.ZERO))
         {
             amountDisplay.setVisibility(View.GONE);
@@ -208,6 +221,13 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             amountDisplay.setVisibility(View.VISIBLE);
             amountDisplay.setAmountUsingToken(candidateTransaction.value, tokensService.getServiceToken(token.tokenInfo.chainId), tokensService);
         }
+    }
+
+    private void setupTransactionDetails()
+    {
+        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
+                tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
+        detailWidget.setVisibility(View.VISIBLE);
     }
 
     public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)

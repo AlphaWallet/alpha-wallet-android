@@ -18,7 +18,7 @@ public class SendTokenRouter {
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.EXTRA_AMOUNT, (QRResult)null);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivityForResult(intent, C.COMPLETED_TRANSACTION);

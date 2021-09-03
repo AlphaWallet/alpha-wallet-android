@@ -22,6 +22,7 @@ import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
@@ -41,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,9 +76,11 @@ public class Utils {
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
-    public  static final String ALPHAWALLET_REPO_NAME = "alphawallet/iconassets";
-    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/" + ALPHAWALLET_REPO_NAME + "/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final String TOKEN_LOGO = "/logo.png";
+    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/master/";
+    private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
+    private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
+    private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -439,6 +443,20 @@ public class Utils {
         return indexList;
     }
 
+    public static BigInteger parseTokenId(String tokenIdStr)
+    {
+        BigInteger tokenId;
+        try
+        {
+            tokenId = new BigInteger(tokenIdStr);
+        }
+        catch (Exception e)
+        {
+            tokenId = BigInteger.ZERO;
+        }
+
+        return tokenId;
+    }
 
     /**
      * Produce a string CSV of integer IDs given an input list of values
@@ -506,6 +524,17 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static Map<BigInteger, BigInteger> getIdMap(List<BigInteger> tokenIds)
+    {
+        Map<BigInteger, BigInteger> tokenMap = new HashMap<>();
+        for (BigInteger tokenId : tokenIds)
+        {
+            tokenMap.put(tokenId, tokenMap.containsKey(tokenId) ? tokenMap.get(tokenId).add(BigInteger.ONE) : BigInteger.ONE);
+        }
+
+        return tokenMap;
     }
 
     public static boolean isNumeric(String numString)
@@ -775,6 +804,39 @@ public class Utils {
         }
     }
 
+    @NotNull
+    public static String getTokenAddrFromUrl(String url)
+    {
+        if (!TextUtils.isEmpty(url) && url.startsWith(TRUST_ICON_REPO_BASE))
+        {
+            int start = url.lastIndexOf("/assets/") + "/assets/".length();
+            int end = url.lastIndexOf(TOKEN_LOGO);
+            if (start > 0 && end > 0)
+            {
+                return url.substring(start, end);
+            }
+        }
+
+        return "";
+    }
+
+    @NotNull
+    public static String getTokenAddrFromAWUrl(String url)
+    {
+        if (!TextUtils.isEmpty(url) && url.startsWith(ALPHAWALLET_REPO_NAME))
+        {
+            int start = ALPHAWALLET_REPO_NAME.length();
+            int end = url.lastIndexOf(TOKEN_LOGO);
+            if (end > 0 && end > start)
+            {
+                return url.substring(start, end);
+            }
+        }
+
+        return "";
+    }
+
+    @NotNull
     public static String getTokenImageUrl(int chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;
@@ -859,5 +921,10 @@ public class Utils {
             Log.d("READ_JS_TAG", "Ex", ex);
         }
         return new String(buffer);
+    }
+
+    public static long timeUntil(long eventInMillis)
+    {
+        return eventInMillis - System.currentTimeMillis();
     }
 }

@@ -27,12 +27,14 @@ import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
+import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -172,9 +174,18 @@ public class AdvancedSettingsActivity extends BaseActivity {
     private void onClearBrowserCacheClicked() {
         WebView webView = new WebView(this);
         webView.clearCache(true);
-        Toast.makeText(this, getString(R.string.toast_browser_cache_cleared), Toast.LENGTH_SHORT).show();
         viewModel.blankFilterSettings();
-        finish();
+
+        Single.fromCallable(() -> {
+            Glide.get(this).clearDiskCache();
+            return 1;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(v ->
+                {
+                    Toast.makeText(this, getString(R.string.toast_browser_cache_cleared), Toast.LENGTH_SHORT).show();
+                    finish();
+                }).isDisposed();
     }
 
     private void onReloadTokenDataClicked() {

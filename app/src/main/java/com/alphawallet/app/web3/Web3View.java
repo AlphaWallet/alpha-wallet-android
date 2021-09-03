@@ -301,7 +301,7 @@ public class Web3View extends WebView {
         }
 
         @Override
-        public void onPageStarted(WebView view, String url,Bitmap favicon) {
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
             if (!redirect)
             {

@@ -53,19 +53,18 @@ import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
-    public static final int TRANSFER_RESULT_MAX = 200; //check 200 records when we first get a new account
+    public static final int TRANSFER_RESULT_MAX = 250; //check 200 records when we first get a new account
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 15; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 19; //increment this to do a one off refresh the AUX database, in case of changed design etc (16)
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
     private final String BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
@@ -474,7 +473,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, boolean isNFTCheck)
     {
         final boolean nftCheck = isNFTCheck && networkInfo.usesSeparateNFTTransferQuery();
-        if (nftCheck && svs.openseaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
+        if (nftCheck && svs.openSeaUpdateInProgress(networkInfo.chainId)) { return Single.fromCallable(() -> 0); } //don't allow simultaneous NFT checking
         else return Single.fromCallable(() -> {
             //get latest block read
             int eventCount = 0;
@@ -545,11 +544,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 continue;
             }
 
-            if (token.isERC721())
+            if (token.isNonFungible())
             {
                 writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
             }
-            else //not ERC721
+            else //not NFT
             {
                 svs.storeToken(token);
             }
@@ -909,7 +908,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 //find tx name
                 String activityName = tx.getEventName(walletAddress);
                 String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, scanAsNFT ? ev.tokenID : ev.value); //Etherscan sometimes interprets NFT transfers as FT's
-                storeTransferData(r, tx.hash, valueList, activityName, ev.contractAddress);
+                storeTransferData(r, tx.hash, valueList, activityName, ev.contractAddress, ev.timeStamp);
                 //ensure we have fetched the transaction for each hash
                 writeTransaction(r, tx, txFetches);
             }
@@ -918,7 +917,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         fetchRequiredTransactions(instance, networkInfo.chainId, txFetches);
     }
 
-    private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress)
+    private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress, long timeStamp)
     {
         RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
                 .equalTo("hash", hash)
@@ -977,6 +976,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      */
     private void fetchRequiredTransactions(Realm instance, int chainId, Map<String, Transaction> txFetches)
     {
+        //TODO: this should go into the TX service, or be loaded at view time.
         instance.executeTransactionAsync(r -> {
             Web3j web3j = getWeb3jService(chainId);
             for (Transaction tx : txFetches.values())

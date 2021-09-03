@@ -6,8 +6,8 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmKeyType;
+import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
@@ -15,17 +15,16 @@ import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import io.realm.exceptions.RealmException;
 
 /**
  * Created by James on 8/11/2018.
@@ -341,26 +340,13 @@ public class WalletDataRealmSource {
             {
                 e.printStackTrace();
             }
-            //now delete the token and transaction data
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                RealmResults<RealmToken>       tokens = realm.where(RealmToken.class).findAll();
-                RealmResults<RealmERC721Asset> assets = realm.where(RealmERC721Asset.class).findAll();
-                RealmResults<RealmTransaction> transactions = realm.where(RealmTransaction.class).findAll();
-                RealmResults<RealmAuxData>     auxData = realm.where(RealmAuxData.class).findAll();
-                RealmResults<RealmTransfer>    transfers = realm.where(RealmTransfer.class).findAll();
+            //now delete the token data
+            Realm realm = realmManager.getRealmInstance(wallet);
 
-                realm.executeTransaction(r -> {
-                    tokens.deleteAllFromRealm();
-                    assets.deleteAllFromRealm();
-                    transactions.deleteAllFromRealm();
-                    auxData.deleteAllFromRealm();
-                    transfers.deleteAllFromRealm();
-                });
-            }
-            catch (Exception e)
+            File databaseFile = new File(realm.getConfiguration().getPath());
+            if (databaseFile.exists())
             {
-                e.printStackTrace();
+                databaseFile.delete();
             }
 
             return wallet;

@@ -94,9 +94,11 @@ public abstract class C {
     public static final String EXTRA_CUSTOM_GAS_LIMIT = "CUSTOM_GAS_LIMIT";
     public static final String EXTRA_GAS_LIMIT_PRESET = "GAS_LIMIT_PRESET";
     public static final String EXTRA_ACTION_NAME = "NAME";
+    public static final String EXTRA_TOKEN = "TOK";
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
+    public static final String EXTRA_NFTASSET_LIST = "NFTASSET_LIST";
     public static final String ERC875RANGE = "ERC875RANGE";
     public static final String TOKEN_TYPE = "TOKEN_TYPE";
     public static final String MARKET_INSTANCE = "MARKET_INSTANCE";

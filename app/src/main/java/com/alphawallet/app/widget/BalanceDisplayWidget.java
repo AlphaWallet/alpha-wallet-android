@@ -28,6 +28,7 @@ public class BalanceDisplayWidget extends LinearLayout
     public final TextView newBalance;
     private final ChainName chainName;
     private final TokenIcon chainIcon;
+    private final TokenIcon tokenIcon;
     private Transaction transaction;
 
     public BalanceDisplayWidget(Context context, @Nullable AttributeSet attrs)
@@ -38,15 +39,25 @@ public class BalanceDisplayWidget extends LinearLayout
         newBalance = findViewById(R.id.text_new_balance);
         chainName = findViewById(R.id.chain_name);
         chainIcon = findViewById(R.id.chain_icon);
+        tokenIcon = findViewById(R.id.token_icon);
     }
 
     public void setupBalance(Token token, TokensService tokenService, Transaction tx)
     {
         chainName.setChainID(token.tokenInfo.chainId);
         chainName.invertChainID(token.tokenInfo.chainId);
-        chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, tokenService.getCurrentAddress()), null);
+        chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, tokenService.getCurrentAddress()), tokenService);
 
-        balance.setText(getContext().getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
+        if (token.isNonFungible())
+        {
+            tokenIcon.setVisibility(View.VISIBLE);
+            tokenIcon.bindData(token, tokenService);
+        }
+        else
+        {
+            tokenIcon.setVisibility(View.GONE);
+            balance.setText(getContext().getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
+        }
         transaction = tx;
     }
 

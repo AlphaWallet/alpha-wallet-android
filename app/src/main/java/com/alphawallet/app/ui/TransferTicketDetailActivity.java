@@ -49,6 +49,7 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
@@ -63,6 +64,7 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.tools.Numeric;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
@@ -506,7 +508,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
     }
 
-    private void onError(ErrorEnvelope error)
+    private void onError(@NotNull ErrorEnvelope error)
     {
         hideDialog();
         dialog = new AWalletAlertDialog(this);
@@ -524,7 +526,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         //complete the transfer
         onProgress(true);
 
-        viewModel.createTicketTransfer(
+        viewModel.createTokenTransfer(
                 to,
                 token,
                 token.getTransferListFormat(selection));
@@ -779,6 +781,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
             addressInput.getAddress();
+
+            if (addressInput.getVisibility() != View.VISIBLE)
+            {
+                // go to next screen
+                viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
+            }
         }
     }
 
@@ -917,7 +925,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         //ActionSheet was dismissed
         if (!TextUtils.isEmpty(txHash)) {
             Intent intent = new Intent();
-            intent.putExtra("tx_hash", txHash);
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
             finish();
         }

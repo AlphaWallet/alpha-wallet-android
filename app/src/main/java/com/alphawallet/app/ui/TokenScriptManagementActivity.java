@@ -1,16 +1,15 @@
 package com.alphawallet.app.ui;
 
+import android.os.Bundle;
+
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.ui.widget.adapter.TokenScriptManagementAdapter;
-import com.alphawallet.app.viewmodel.TokenManagementViewModel;
 import com.alphawallet.app.viewmodel.TokenScriptManagementViewModel;
 import com.alphawallet.app.viewmodel.TokenScriptManagementViewModelFactory;
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/token_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,30 +15,13 @@
     android:orientation="vertical"
     android:padding="@dimen/dp10">
 
-    <ImageView
+    <com.alphawallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
-        android:layout_width="@dimen/grid_icon_height"
-        android:layout_height="@dimen/grid_icon_height"
-        android:src="@drawable/ic_ethereum"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/text_icon"
-        android:layout_width="@dimen/grid_icon_height"
-        android:layout_height="@dimen/grid_icon_height"
-        android:background="@drawable/grid_icon"
-        android:backgroundTint="@color/azure"
-        android:fontFamily="@font/font_bold"
-        android:gravity="center"
-        android:lines="1"
-        android:padding="@dimen/dp5"
-        android:text="UEFA"
-        android:textColor="@color/white"
+        android:layout_width="@dimen/token_icon_large"
+        android:layout_height="@dimen/token_icon_large"
+        custom:showStatus="false"
         android:visibility="visible"
-        app:autoSizeMaxTextSize="@dimen/sp32"
-        app:autoSizeMinTextSize="@dimen/sp24"
-        app:autoSizeStepGranularity="1sp"
-        app:autoSizeTextType="uniform" />
+        />
 
     <TextView
         android:id="@+id/token_name"
@@ -48,7 +33,7 @@
         android:gravity="center_horizontal"
         android:lines="2"
         android:maxLines="2"
-        android:text="Token Name"
+        tools:text="Token Name"
         android:textColor="@color/black" />
 
 </LinearLayout>

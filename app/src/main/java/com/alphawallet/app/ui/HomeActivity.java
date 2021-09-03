@@ -115,6 +115,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
+    private int currentFragmentId;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -237,7 +238,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             @Override
             public void onPageSelected(int position)
             {
-                alertFragmentVisible(position);
+
             }
 
             @Override
@@ -313,21 +314,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel.tryToShowRateAppDialog(this);
         UpdateUtils.checkForUpdates(this, this);
-    }
-
-    private void alertFragmentVisible(int position)
-    {
-        Fragment visibleFragment = getFragment(position);
-        try
-        {
-            Method m = visibleFragment.getClass().getDeclaredMethod(
-                    "becomeVisible", Boolean.TYPE);
-            m.invoke(visibleFragment, true);
-        }
-        catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e)
-        {
-            //
-        }
     }
 
     private void onBackup(String address)
@@ -546,7 +532,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void showPage(WalletPage page)
     {
-        ((DappBrowserFragment) dappBrowserFragment).dropFocus();
+        int oldPage = viewPager.getCurrentItem();
+
         switch (page)
         {
             case DAPP_BROWSER:
@@ -606,6 +593,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
         }
         checkWarnings();
+
+        signalPageVisibilityChange(oldPage, page.ordinal());
+    }
+
+    private void signalPageVisibilityChange(int oldPage, int newPage)
+    {
+        if (oldPage == newPage) return;
+
+        BaseFragment leavingFocus = (BaseFragment) getFragment(oldPage);
+        BaseFragment inFocus      = (BaseFragment) getFragment(newPage);
+        leavingFocus.leaveFocus();
+        inFocus.comeIntoFocus();
     }
 
     private void checkWarnings()
@@ -1102,6 +1101,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     ((DappBrowserFragment)dappBrowserFragment).switchNetwork(chainId);
                     ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
                     showPage(DAPP_BROWSER);
+                }
+                else if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.EXTRA_TXHASH))
+                {
+                    showPage(ACTIVITY);
                 }
                 break;
             case C.TERMINATE_ACTIVITY:

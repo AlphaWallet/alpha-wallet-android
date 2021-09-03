@@ -15,7 +15,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
@@ -39,10 +39,8 @@ import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -59,14 +57,14 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 {
     TicketRange currentRange = null;
     final Token token;
-    protected final OpenseaService openseaService;
+    protected final OpenSeaService openseaService;
     private final boolean clickThrough;
     protected int assetCount;
     private FunctionCallback functionCallback;
     private final Activity activity;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenseaService opensea, Activity activity) {
+                                   OpenSeaService opensea, Activity activity) {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;

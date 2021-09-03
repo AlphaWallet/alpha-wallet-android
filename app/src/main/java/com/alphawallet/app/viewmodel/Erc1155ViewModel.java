@@ -18,6 +18,7 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.Erc1155Activity;
 import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -120,11 +121,11 @@ public class Erc1155ViewModel extends BaseViewModel {
         fetchTransactionsInteract.restartTransactionService();
     }
 
-    public void openSelectionMode(Context context, Token token, Wallet wallet)
+    public Intent openSelectionModeIntent(Context context, Token token, Wallet wallet)
     {
         Intent intent = new Intent(context, Erc1155AssetSelectActivity.class);
         intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.Key.WALLET, wallet);
-        context.startActivity(intent);
+        return intent;
     }
 }

@@ -3,6 +3,7 @@ package com.alphawallet.app.service;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
@@ -16,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,21 +35,17 @@ import okhttp3.Request;
  * Stormbird in Singapore
  */
 
-public class OpenseaService {
+public class OpenSeaService
+{
     private static OkHttpClient httpClient;
-    private static Map<String, Long> balanceAccess = new ConcurrentHashMap<>();
-    private final Context context;
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
     private final List<Integer> storedImagesForChain = new ArrayList<>();
-    static final TokenFactory tf = new TokenFactory();
+    private static final TokenFactory tf = new TokenFactory();
+    private int pageOffset;
 
-    //TODO: remove old files not accessed for some time
-    //      On service creation, check files for old files and delete
-
-    public OpenseaService(Context ctx) {
-        context = ctx;
-        balanceAccess.clear();
+    public OpenSeaService() {
+        pageOffset = 0;
         httpClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
@@ -56,27 +54,39 @@ public class OpenseaService {
                 .build();
     }
 
+    public int getCurrentOffset()
+    {
+        return pageOffset;
+    }
+
     public Single<Token[]> getTokens(String address, int networkId, String networkName, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
             int receivedTokens;
-            int offset = 0;
+            int currentPage = 0;
 
             Map<String, Token> foundTokens = new HashMap<>();
 
             do
             {
-                String jsonData = fetchTokensFromOpensea(address, networkId, offset);
+                String jsonData = fetchTokensFromOpensea(address, networkId, pageOffset);
                 if (!verifyData(jsonData)) return foundTokens.values().toArray(new Token[0]); //on error return results found so far
                 JSONObject result = new JSONObject(jsonData);
                 JSONArray assets = result.getJSONArray("assets");
                 receivedTokens = assets.length();
-                offset += assets.length();
+                pageOffset += assets.length();
 
                 //process this page of results
                 processOpenseaTokens(foundTokens, assets, address, networkId, networkName, tokensService);
+                currentPage++;
             }
-            while (receivedTokens == PAGE_SIZE); //keep fetching until last page
+            while (receivedTokens == PAGE_SIZE && currentPage <= 3); //fetch 4 pages for each loop
+
+            if (receivedTokens < PAGE_SIZE)
+            {
+                if (BuildConfig.DEBUG) System.out.println("Reset OpenSeaAPI reads at: " + pageOffset);
+                pageOffset = 0;
+            }
 
             //now write the contract images
             if (!storedImagesForChain.contains(networkId))
@@ -250,7 +260,6 @@ public class OpenseaService {
 
             okhttp3.Response response = httpClient.newCall(request).execute();
             jsonResult = response.body().string();
-            balanceAccess.put(address, System.currentTimeMillis());
         }
         catch (InterruptedIOException e)
         {
@@ -264,5 +273,10 @@ public class OpenseaService {
         }
 
         return jsonResult;
+    }
+
+    public void resetOffetRead()
+    {
+        pageOffset = 0;
     }
 }

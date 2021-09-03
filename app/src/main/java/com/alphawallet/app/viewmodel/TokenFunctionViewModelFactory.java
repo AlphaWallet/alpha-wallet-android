@@ -12,7 +12,7 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 
 /**
@@ -28,7 +28,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
-    private final OpenseaService openseaService;
+    private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AnalyticsServiceType analyticsServiceType;
 
@@ -40,7 +40,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService,
+            OpenSeaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
             AnalyticsServiceType analyticsServiceType) {
         this.assetDefinitionService = assetDefinitionService;

@@ -71,4 +71,14 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
     public boolean onMenuItemClick(MenuItem menuItem) {
         return false;
     }
+
+    public void comeIntoFocus()
+    {
+        //
+    }
+
+    public void leaveFocus()
+    {
+        //
+    }
 }

@@ -81,10 +81,10 @@ public class RealmToken extends RealmObject {
         this.addedTime = addedTime;
     }
 
-    public long getTXUpdateTime() {
+    public long getAssetUpdateTime() {
         return updatedTime;
     }
-    public void setTXUpdateTime(long updatedTime) {
+    public void setAssetUpdateTime(long updatedTime) {
         this.updatedTime = updatedTime;
     }
 

@@ -20,6 +20,7 @@ import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
 import org.web3j.abi.EventEncoder;
@@ -33,6 +34,7 @@ import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -42,33 +44,39 @@ import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.util.Utils.parseTokenId;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
 public class ERC1155Token extends Token implements Parcelable
 {
     private final Map<BigInteger, NFTAsset> assets;
-    private BigInteger lastEventBlockRead;
     private AssetContract assetContract;
 
-    public ERC1155Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, long blancaTime, String networkName) {
+    public ERC1155Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, long blancaTime, String networkName)
+    {
         super(tokenInfo, balanceList != null ? BigDecimal.valueOf(balanceList.keySet().size()) : BigDecimal.ZERO, blancaTime, networkName, ContractType.ERC1155);
-        lastEventBlockRead = BigInteger.ZERO;
         if (balanceList != null)
         {
             assets = balanceList;
@@ -80,10 +88,12 @@ public class ERC1155Token extends Token implements Parcelable
         setInterfaceSpec(ContractType.ERC1155);
     }
 
-    private ERC1155Token(Parcel in) {
+    private ERC1155Token(Parcel in)
+    {
         super(in);
         String assetJSON = in.readString();
-        if (!TextUtils.isEmpty(assetJSON)) assetContract = new Gson().fromJson(assetJSON, AssetContract.class);
+        if (!TextUtils.isEmpty(assetJSON))
+            assetContract = new Gson().fromJson(assetJSON, AssetContract.class);
         assets = new HashMap<>();
         //read in the element list
         int size = in.readInt();
@@ -95,20 +105,24 @@ public class ERC1155Token extends Token implements Parcelable
         }
     }
 
-    public static final Creator<ERC1155Token> CREATOR = new Creator<ERC1155Token>() {
+    public static final Creator<ERC1155Token> CREATOR = new Creator<ERC1155Token>()
+    {
         @Override
-        public ERC1155Token createFromParcel(Parcel in) {
+        public ERC1155Token createFromParcel(Parcel in)
+        {
             return new ERC1155Token(in);
         }
 
         @Override
-        public ERC1155Token[] newArray(int size) {
+        public ERC1155Token[] newArray(int size)
+        {
             return new ERC1155Token[size];
         }
     };
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags)
+    {
         super.writeToParcel(dest, flags);
         dest.writeString(assetContract != null ? assetContract.getJSON() : "");
         dest.writeInt(assets.size());
@@ -119,13 +133,9 @@ public class ERC1155Token extends Token implements Parcelable
         }
     }
 
-    public void setEventBlockRead(BigInteger blockNumber)
-    {
-        lastEventBlockRead = blockNumber;
-    }
-
     @Override
-    public Map<BigInteger, NFTAsset> getTokenAssets() {
+    public Map<BigInteger, NFTAsset> getTokenAssets()
+    {
         return assets;
     }
 
@@ -143,12 +153,18 @@ public class ERC1155Token extends Token implements Parcelable
 
     //TODO: Handle various collection formats; may need to specify collection
     @Override
-    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId) {
+    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId)
+    {
         return new HashMap<BigInteger, NFTAsset>()
-            {{ put(tokenId, assets.get(tokenId));}};
+        {{
+            put(tokenId, assets.get(tokenId));
+        }};
     }
 
-    public boolean isNonFungible() { return true; }
+    public boolean isNonFungible()
+    {
+        return true;
+    }
 
     @Override
     public int getContractType()
@@ -228,12 +244,15 @@ public class ERC1155Token extends Token implements Parcelable
     }
 
     @Override
-    public boolean hasGroupedTransfer() { return true; }
+    public boolean hasGroupedTransfer()
+    {
+        return true;
+    }
 
     public Function getTransferFunction(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData) throws NumberFormatException
     {
-        Function               function;
-        List<Type>             params;
+        Function function;
+        List<Type> params;
         List<TypeReference<?>> returnTypes = Collections.emptyList();
 
         if (transferData.size() == 1)
@@ -262,9 +281,9 @@ public class ERC1155Token extends Token implements Parcelable
     @Override
     public Function getTransferFunction(String to, List<BigInteger> tokenIds) throws NumberFormatException
     {
-        Function               function;
-        List<Type>             params;
-        BigInteger             tokenIdBI   = tokenIds.get(0);
+        Function function;
+        List<Type> params;
+        BigInteger tokenIdBI = tokenIds.get(0);
         List<TypeReference<?>> returnTypes = Collections.emptyList();
         Map<BigInteger, BigInteger> idMap = Utils.getIdMap(tokenIds);
 
@@ -315,77 +334,141 @@ public class ERC1155Token extends Token implements Parcelable
         return changeList;
     }
 
-    //Must not be called on main thread
-    private void updateBalances(Realm realm)
+    private List<Uint256> fetchBalances(Set<BigInteger> tokenIds)
     {
-        if (updateBatchBalance(realm)) { return; }
-        updateIndividualBalances(realm);
+        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
+        return callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
     }
 
-    private boolean updateBatchBalance(Realm realm)
+    @Override
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    {
+        //first see if there's no change; if this is the case we can skip
+        if (assetsUnchanged(assetMap)) return assets;
+
+        //add all known tokens in
+        Map<BigInteger, NFTAsset> sum = new HashMap<>(assetMap);
+        sum.putAll(assets);
+        Set<BigInteger> tokenIds = sum.keySet();
+        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
+        List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
+        Map<BigInteger, NFTAsset> updatedAssetMap;
+
+        if (balances != null && balances.size() > 0)
+        {
+            updatedAssetMap = new HashMap<>();
+            int index = 0;
+            for (BigInteger tokenId : tokenIds)
+            {
+                NFTAsset thisAsset = new NFTAsset(sum.get(tokenId));
+                BigInteger balance = balances.get(index).getValue();
+                thisAsset.setBalance(new BigDecimal(balance));
+                updatedAssetMap.put(tokenId, thisAsset);
+
+                index++;
+            }
+        }
+        else
+        {
+            updatedAssetMap = assets;
+        }
+
+        return updatedAssetMap;
+    }
+
+    /**
+     * See if any asset has disappeared. If not, then no need to check
+     * Note: this takes into account that the map size is the same, but a new asset appeared and an old disappeared
+     * (cannot just compare map sizes)
+     * Also - need to call this in case any new asset has an associated balance
+     *
+     * @param assetMap
+     * @return
+     */
+    private boolean assetsUnchanged(Map<BigInteger, NFTAsset> assetMap)
+    {
+        boolean assetsUnchanged = true;
+        for (BigInteger tokenId : assetMap.keySet())
+        {
+            if (!assets.containsKey(tokenId))
+            {
+                assetsUnchanged = false;
+                break;
+            }
+        }
+
+        for (BigInteger tokenId : assets.keySet())
+        {
+            if (!assetMap.containsKey(tokenId))
+            {
+                assetsUnchanged = false;
+                break;
+            }
+        }
+
+        return assetsUnchanged;
+    }
+
+    private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds, List<Uint256> balances)
     {
         boolean updated = false;
-        Function balanceOfBatch = balanceOfBatch(getWallet(), assets.keySet());
-        List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
         //fill in balances
         if (balances != null && balances.size() > 0)
         {
             int index = 0;
-            for (BigInteger tokenId : assets.keySet())
+            for (BigInteger tokenId : tokenIds)
             {
-                if (assets.get(tokenId).setBalance(new BigDecimal(balances.get(index).getValue())) && !updated)
+                NFTAsset asset = assets.get(tokenId);
+                BigDecimal newBalance = new BigDecimal(balances.get(index).getValue());
+                if (asset == null)
+                {
+                    assets.put(tokenId, new NFTAsset(tokenId));
+                    updated = true;
+                }
+                if (assets.get(tokenId).setBalance(newBalance) && !updated) //set balance and check for change
                 {
                     updated = true;
+                }
+                if (realm == null && newBalance.equals(BigDecimal.ZERO))
+                {
+                    assets.remove(tokenId);
                 }
                 index++;
             }
 
-            if (updated) { updateRealmBalances(realm); }
-            return true;
-        }
-        else
-        {
-            return false;
+            if (updated)
+            {
+                updateRealmBalances(realm, tokenIds);
+            }
         }
     }
 
-    private void updateIndividualBalances(Realm realm)
+    private void updateRealmBalances(Realm realm, Set<BigInteger> tokenIds)
     {
-        boolean updated = false;
-        for (BigInteger tokenId : assets.keySet())
-        {
-            try
-            {
-                Function balanceOf = balanceOfSingle(getWallet(), tokenId);
-                String response = callSmartContractFunction(tokenInfo.chainId, balanceOf, getAddress(), getWallet());
-                BigInteger balance = new BigInteger(response);
-                //TODO: Allow for decimal
-                if (assets.get(tokenId).setBalance(new BigDecimal(balance)) && !updated) { updated = true; }
-            }
-            catch (Exception e)
-            {
-                if (BuildConfig.DEBUG) e.printStackTrace();
-            }
-        }
-
-        if (updated)
-        {
-            updateRealmBalances(realm);
-        }
-    }
-
-    private void updateRealmBalances(Realm realm)
-    {
+        if (realm == null) return;
         realm.executeTransaction(r -> {
-            for (BigInteger tokenId : assets.keySet())
+            for (BigInteger tokenId : tokenIds)
             {
                 String key = RealmNFTAsset.databaseKey(this, tokenId);
                 RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
                         .equalTo("tokenIdAddr", key)
                         .findFirst();
 
-                if (realmAsset == null) { continue; } //only update established assets
-                realmAsset.setBalance(assets.get(tokenId).getBalance());
+                if (realmAsset == null)
+                {
+                    realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
+                    realmAsset.setMetaData(assets.get(tokenId).jsonMetaData());
+                }
+
+                if (assets.get(tokenId).getBalance().equals(BigDecimal.ZERO)) //remove asset no longer in balance
+                {
+                    realmAsset.deleteFromRealm();
+                    assets.remove(tokenId);
+                }
+                else
+                {
+                    realmAsset.setBalance(assets.get(tokenId).getBalance()); //update realm balance
+                }
             }
         });
     }
@@ -394,7 +477,6 @@ public class ERC1155Token extends Token implements Parcelable
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
         String currentState = realmToken.getBalance();
-        if (!lastEventBlockRead.equals(realmToken.getErc1155BlockRead())) return true;
         if (currentState == null || !currentState.equals(getBalanceRaw().toString())) return true;
         //check balances
         for (NFTAsset a : assets.values())
@@ -413,7 +495,7 @@ public class ERC1155Token extends Token implements Parcelable
     @Override
     public String getStringBalance()
     {
-        return getBalanceRaw().toString();
+        return balance.toString();
     }
 
     @Override
@@ -439,7 +521,7 @@ public class ERC1155Token extends Token implements Parcelable
     {
         if (txInput.arrayValues != null)
         {
-            return BigInteger.valueOf(txInput.arrayValues.size()/2);
+            return BigInteger.valueOf(txInput.arrayValues.size() / 2);
         }
         else
         {
@@ -464,7 +546,7 @@ public class ERC1155Token extends Token implements Parcelable
                 assetList.add(asset);
                 break;
             case "safeBatchTransferFrom":
-                int halfIndex = tx.transactionInput.arrayValues.size()/2;
+                int halfIndex = tx.transactionInput.arrayValues.size() / 2;
                 for (int i = 0; i < halfIndex; i++)
                 {
                     asset = new NFTAsset(assets.get(tx.transactionInput.arrayValues.get(i)));
@@ -480,42 +562,31 @@ public class ERC1155Token extends Token implements Parcelable
         return assetList;
     }
 
-    /*
-     @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
-     The `_operator` argument MUST be msg.sender.
-     The `_from` argument MUST be the address of the holder whose balance is decreased.
-     The `_to` argument MUST be the address of the recipient whose balance is increased.
-     The `_id` argument MUST be the token type being transferred.
-     The `_value` argument MUST be the number of tokens the holder balance is decreased by and match what the recipient balance is increased by.
-     When minting/creating tokens, the `_from` argument MUST be set to `0x0` (i.e. zero address).
-     When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
-     */
-    //event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-
-    /**
-     @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
-     The `_operator` argument MUST be msg.sender.
-     The `_from` argument MUST be the address of the holder whose balance is decreased.
-     The `_to` argument MUST be the address of the recipient whose balance is increased.
-     The `_ids` argument MUST be the list of tokens being transferred.
-     The `_values` argument MUST be the list of number of tokens (matching the list and order of tokens specified in _ids) the holder balance is decreased by and match what the recipient balance is increased by.
-     When minting/creating tokens, the `_from` argument MUST be set to `0x0` (i.e. zero address).
-     When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
-     */
-    //event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
-
     //get balance
     private Event getBalanceUpdateEvents()
     {
         //event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
         List<TypeReference<?>> paramList = new ArrayList<>();
-        paramList.add(new TypeReference<Address>(true) { });
-        paramList.add(new TypeReference<Address>(true) { });
-        paramList.add(new TypeReference<Address>(true) { });
-        paramList.add(new TypeReference<Uint256>(false) { });
-        paramList.add(new TypeReference<Uint256>(false) { });
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Uint256>(false) {});
+        paramList.add(new TypeReference<Uint256>(false) {});
 
         return new Event("TransferSingle", paramList);
+    }
+
+    private Event getBatchBalanceUpdateEvents()
+    {
+        //event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
+        List<TypeReference<?>> paramList = new ArrayList<>();
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<DynamicArray<Uint256>>(false) {});
+        paramList.add(new TypeReference<DynamicArray<Uint256>>(false) {});
+
+        return new Event("TransferBatch", paramList);
     }
 
     private EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock)
@@ -540,7 +611,7 @@ public class ERC1155Token extends Token implements Parcelable
                         startBlock,
                         DefaultBlockParameterName.LATEST,
                         tokenInfo.address) // retort contract address
-                        .addSingleTopic(EventEncoder.encode(event));// commit event format
+                        .addSingleTopic(EventEncoder.encode(event)); // commit event format
 
         filter.addSingleTopic(null);
         filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'from'.
@@ -548,113 +619,51 @@ public class ERC1155Token extends Token implements Parcelable
         return filter;
     }
 
+    /**
+     * Uses both events and balance call. Each call to updateBalance uses 3 Node calls:
+     * 1. Get new TransferSingle events since last call
+     * 2. Get new TransferBatch events since last call
+     * 3. Call ERC1155 contract function balanceOfBatch on all tokenIds
+     *
+     * Once we have the current balance for potential tokens the database is updated to reflect the current status
+     *
+     * Note that this function is used even for contracts covered by OpenSea: This is because we could be looking at
+     * a contract 'join' between successive opensea reads. With accounts with huge quantity of NFT, this happens a lot
+     *
+     * @param realm
+     * @return
+     */
     @Override
     public BigDecimal updateBalance(Realm realm)
     {
         try
         {
-            updateBalances(realm);
-            if (true) return new BigDecimal(assets.keySet().size());
-
+            BigInteger lastEventBlockRead = getLastBlockRead(realm);
+            Pair<HashSet<BigInteger>, BigInteger> eventResult;
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-            List<ERC1155TransferEvent> txEvents = new ArrayList<>();
             DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(lastEventBlockRead);
-            final Event event = getBalanceUpdateEvents();
-            EthFilter filter = getReceiveBalanceFilter(event, startBlock);
-            EthFilter filterOut = getSendBalanceFilter(event, startBlock);
-            EthLog receiveLogs = web3j.ethGetLogs(filter).send();
-            EthLog sendLogs = web3j.ethGetLogs(filterOut).send();
 
-            if (receiveLogs.getLogs().size() > 0)
+            eventResult = processSingleTransferEvents(web3j, startBlock);
+            HashSet<BigInteger> tokenIds = new HashSet<>(eventResult.first);
+            lastEventBlockRead = eventResult.second;
+
+            eventResult = processBatchTransferEvents(web3j, startBlock);
+            tokenIds.addAll(eventResult.first);
+            if (lastEventBlockRead.compareTo(eventResult.second) > 0)
+                lastEventBlockRead = eventResult.second;
+
+            if (tokenIds.size() > 0)
             {
-                for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
-                {
-                    String block = ((Log) ethLog.get()).getBlockNumberRaw();
-                    if (block == null || block.length() == 0) continue;
-                    BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
-                    final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
-                    String fromAddress = eventValues.getIndexedValues().get(1).getValue().toString();
-                    String toAddress = eventValues.getIndexedValues().get(2).getValue().toString();
-                    BigInteger _id = new BigInteger(eventValues.getNonIndexedValues().get(0).getValue().toString());
-                    BigInteger value = new BigInteger(eventValues.getNonIndexedValues().get(1).getValue().toString());
-
-                    txEvents.add(new ERC1155TransferEvent(blockNumber, toAddress, fromAddress, _id, value, toAddress.equalsIgnoreCase(getAddress())));
-                }
+                updateEventBlock(realm, lastEventBlockRead);
             }
 
-            if (sendLogs.getLogs().size() > 0)
-            {
-                for (EthLog.LogResult<?> ethLog : sendLogs.getLogs())
-                {
-                    String block = ((Log) ethLog.get()).getBlockNumberRaw();
-                    if (block == null || block.length() == 0) continue;
-                    BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
-                    final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
-                    String fromAddress = eventValues.getIndexedValues().get(1).getValue().toString();
-                    String toAddress = eventValues.getIndexedValues().get(2).getValue().toString();
-                    BigInteger _id = new BigInteger(eventValues.getNonIndexedValues().get(0).getValue().toString());
-                    BigInteger value = new BigInteger(eventValues.getNonIndexedValues().get(1).getValue().toString());
-
-                    txEvents.add(new ERC1155TransferEvent(blockNumber, toAddress, fromAddress, _id, value, toAddress.equalsIgnoreCase(getAddress())));
-                }
-            }
-
-            Collections.sort(txEvents);
-
-            //now move through the recorded events to get the current balance
-            for (ERC1155TransferEvent ev : txEvents)
-            {
-                NFTAsset thisAsset = assets.get(ev.tokenId);
-                if (thisAsset == null) thisAsset = new NFTAsset();
-                //add or subtract
-                thisAsset.setBalance(thisAsset.getBalance().add(new BigDecimal(ev.value)));
-                assets.put(ev.tokenId, thisAsset);
-            }
-
-            if (txEvents.size() > 0)
-            {
-                lastEventBlockRead = txEvents.get(txEvents.size() - 1).blockNumber;
-                //write to token
-
-                //now update the NFTAsset balances
-                realm.executeTransactionAsync(r -> {
-                    RealmToken realmToken = r.where(RealmToken.class)
-                            .equalTo("address", databaseKey(tokenInfo.chainId, getAddress()))
-                            .findFirst();
-
-                    if (realmToken != null)
-                    {
-                        realmToken.setErc1155BlockRead(lastEventBlockRead);
-                    }
-
-                    for (BigInteger tokenId : assets.keySet())
-                    {
-                        NFTAsset thisAsset = assets.get(tokenId);
-
-                        String key = RealmNFTAsset.databaseKey(this, tokenId);
-                        RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
-                                .equalTo("tokenIdAddr", key)
-                                .findFirst();
-
-                        if (thisAsset.getBalance().equals(BigDecimal.ZERO))
-                        {
-                            //delete asset
-                            if (realmAsset != null) realmAsset.deleteFromRealm();
-                        }
-                        else
-                        {
-                            if (realmAsset == null)
-                            {
-                                realmAsset = realm.createObject(RealmNFTAsset.class, key);
-                                realmAsset.setMetaData(thisAsset.jsonMetaData());
-                            }
-
-                            realmAsset.setBalance(thisAsset.getBalance());
-                        }
-                    }
-                });
-            }
+            //combine the tokenIds with existing assets
+            tokenIds.addAll(assets.keySet());
+            //update balances of all
+            List<Uint256> balances = fetchBalances(tokenIds);
+            //update realm
+            updateRealmBalance(realm, tokenIds, balances);
         }
         catch (Exception e)
         {
@@ -662,6 +671,93 @@ public class ERC1155Token extends Token implements Parcelable
         }
 
         return new BigDecimal(assets.keySet().size());
+    }
+
+    private Pair<HashSet<BigInteger>, BigInteger> processBatchTransferEvents(Web3j web3j, DefaultBlockParameter startBlock) throws IOException
+    {
+        final Event event = getBatchBalanceUpdateEvents();
+        EthFilter filter = getReceiveBalanceFilter(event, startBlock);
+        EthLog receiveLogs = web3j.ethGetLogs(filter).send();
+        HashSet<BigInteger> tokenIds = new HashSet<>();
+        BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
+
+        for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
+        {
+            String block = ((Log) ethLog.get()).getBlockNumberRaw();
+            if (block == null || block.length() == 0) continue;
+            BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
+
+            final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
+            ArrayList<Uint256> idResult = (ArrayList<Uint256>)eventValues.getNonIndexedValues().get(0).getValue();
+            for (Uint256 _id : idResult)
+            {
+                tokenIds.add(_id.getValue());
+            }
+
+            if (blockNumber.compareTo(lastEventBlockRead) > 0)
+                lastEventBlockRead = blockNumber;
+        }
+
+        return new Pair<>(tokenIds, lastEventBlockRead);
+    }
+
+    private Pair<HashSet<BigInteger>, BigInteger> processSingleTransferEvents(Web3j web3j, DefaultBlockParameter startBlock) throws IOException
+    {
+        final Event event = getBalanceUpdateEvents();
+        EthFilter filter = getReceiveBalanceFilter(event, startBlock);
+        EthLog receiveLogs = web3j.ethGetLogs(filter).send();
+        HashSet<BigInteger> tokenIds = new HashSet<>();
+        BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
+
+        for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
+        {
+            String block = ((Log) ethLog.get()).getBlockNumberRaw();
+            if (block == null || block.length() == 0) continue;
+            BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
+
+            final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
+            BigInteger _id = new BigInteger(eventValues.getNonIndexedValues().get(0).getValue().toString());
+            tokenIds.add(_id);
+
+            if (blockNumber.compareTo(lastEventBlockRead) > 0)
+                lastEventBlockRead = blockNumber;
+        }
+
+        return new Pair<>(tokenIds, lastEventBlockRead);
+    }
+
+    private BigInteger getLastBlockRead(Realm realm)
+    {
+        if (realm == null) return BigInteger.ONE;
+
+        RealmToken realmToken = realm.where(RealmToken.class)
+                .equalTo("address", databaseKey(tokenInfo.chainId, getAddress()))
+                .findFirst();
+
+        if (realmToken != null)
+        {
+            return realmToken.getErc1155BlockRead();
+        }
+        else
+        {
+            return BigInteger.ONE;
+        }
+    }
+
+    private void updateEventBlock(Realm realm, BigInteger lastEventBlockRead)
+    {
+        if (realm == null) return;
+
+        realm.executeTransaction(r -> {
+            RealmToken realmToken = r.where(RealmToken.class)
+                    .equalTo("address", databaseKey(tokenInfo.chainId, getAddress()))
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                realmToken.setErc1155BlockRead(lastEventBlockRead.add(BigInteger.ONE));
+            }
+        });
     }
 
     private Function balanceOfBatch(String address, Set<BigInteger> tokenIds)

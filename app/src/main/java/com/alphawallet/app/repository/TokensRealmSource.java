@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
@@ -345,6 +346,9 @@ public class TokensRealmSource implements TokenLocalSource {
                 createTokenIfRequired(r, token);
                 deleteAssets(r, token, removals);
                 int assetCount = updateNFTAssets(r, token, additions);
+                //now re-do the balance
+                assetCount = token.getBalanceRaw().intValue();
+
                 setTokenUpdateTime(r, token, assetCount);
             });
         }
@@ -384,6 +388,8 @@ public class TokensRealmSource implements TokenLocalSource {
             }
 
             realmToken.setLastTxTime(System.currentTimeMillis());
+            realmToken.setAssetUpdateTime(System.currentTimeMillis());
+            realmToken.setBalance(String.valueOf(assetCount));
         }
     }
 
@@ -518,7 +524,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 final String currentBalance = realmToken.getBalance();
                 final String newBalance = (balanceArray == null) ? balance.toString() : Utils.bigIntListToString(balanceArray, true);
 
-                if ((token.getInterfaceSpec() == ContractType.ERC721 || token.getInterfaceSpec() == ContractType.ERC721_LEGACY) && balance.equals(BigDecimal.ZERO) && !currentBalance.equals("0"))
+                if ((token.isERC721()) && balance.equals(BigDecimal.ZERO) && !currentBalance.equals("0"))
                 {
                     //only used for determining if balance is now zero
                     realm.executeTransaction(r -> {
@@ -695,20 +701,23 @@ public class TokensRealmSource implements TokenLocalSource {
                 {
                     if (!token.isNonFungible()) continue;
 
-                    //load all the old assets
+                    //load all the assets from the database
                     Map<BigInteger, NFTAsset> assetMap = getNFTAssets(r, token);
 
-                    List<BigInteger> changeList = token.getChangeList(assetMap);
+                    //construct live list
+                    //for erc1155 need to check each potential 'removal'.
+                    //erc721 gets removed by noting token transfer
+                    Map<BigInteger, NFTAsset> liveMap = token.queryAssets(assetMap);
 
-                    for (BigInteger tokenId : changeList)
+                    for (BigInteger tokenId : liveMap.keySet())
                     {
-                        NFTAsset oldAsset = assetMap.get(tokenId);
-                        NFTAsset newAsset = token.getTokenAssets().get(tokenId);
+                        NFTAsset oldAsset = assetMap.get(tokenId); //may be null
+                        NFTAsset newAsset = liveMap.get(tokenId); //never null
 
-                        if (newAsset == null)
+                        if (newAsset.getBalance().compareTo(BigDecimal.ZERO) == 0)
                         {
-                            //token deleted
                             deleteAssets(r, token, Collections.singletonList(tokenId));
+                            liveMap.remove(tokenId);
                         }
                         else
                         {
@@ -716,6 +725,15 @@ public class TokensRealmSource implements TokenLocalSource {
                             if (oldAsset != null) { newAsset.updateAsset(oldAsset); }
                             writeAsset(r, token, tokenId, newAsset);
                         }
+                    }
+
+                    //update token balance & visibility
+                    setTokenUpdateTime(r, token, liveMap.keySet().size());
+                    token.balance = new BigDecimal(liveMap.keySet().size());
+                    if (token.getTokenAssets().hashCode() != liveMap.hashCode()) //replace asset map if different
+                    {
+                        token.getTokenAssets().clear();
+                        token.getTokenAssets().putAll(liveMap);
                     }
                 }
             });
@@ -735,7 +753,7 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             realmAsset = realm.createObject(RealmNFTAsset.class, key);
         }
-        else if (realmAsset.hashCode() == asset.hashCode())
+        else if (asset.equals(realmAsset))
         {
             return;
         }
@@ -764,6 +782,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     .findFirst();
 
             if (realmAsset != null) realmAsset.deleteFromRealm();
+            token.getTokenAssets().remove(tokenId);
         }
     }
 
@@ -781,8 +800,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 //grab all assets for this tokenId
                 BigInteger tokenId = new BigInteger(realmAsset.getTokenId());
-                NFTAsset asset = new NFTAsset(realmAsset.getMetaData());
-                asset.setBalance(realmAsset.getBalance());
+                NFTAsset asset = new NFTAsset(realmAsset);
                 assets.put(tokenId, asset);
             }
             catch (NumberFormatException e)
@@ -871,13 +889,16 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
-                    if (t.getContractType() == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId())) //only allow 1 base per chain
+                    if (t.getContractType() == ContractType.ETHEREUM) //only allow 1 base per chain
                     {
-                        rootChainTokenCards.remove((Integer)t.getChainId());
-                    }
-                    else
-                    {
-                        continue;
+                        if (rootChainTokenCards.contains(t.getChainId()))
+                        {
+                            rootChainTokenCards.remove((Integer)t.getChainId());
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
 
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), t.getContractType());

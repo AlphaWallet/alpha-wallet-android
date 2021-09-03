@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
@@ -56,8 +57,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     private TextView generation;
     private TextView cooldown;
     private TextView openExternal;
-    private TextView labelAttributes;
-    private GridLayout grid;
+    private NFTAttributeLayout attributeLayout;
     private FunctionButtonBar functionBar;
     private Token token;
     private NFTAsset asset;
@@ -72,10 +72,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         generation = findViewById(R.id.generation);
         cooldown = findViewById(R.id.cooldown);
         openExternal = findViewById(R.id.open_external);
-        labelAttributes = findViewById(R.id.label_attributes);
-        grid = findViewById(R.id.grid);
-        grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
-        grid.setUseDefaultMargins(false);
+        attributeLayout = findViewById(R.id.attributes);
         functionBar = findViewById(R.id.layoutButtons);
         if (functionBar != null)
         {
@@ -113,7 +110,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         setDetails(asset);
         setNameAndDesc(asset);
         setExternalLink(asset);
-        setTraits(asset);
+        attributeLayout.bind(token, asset);
     }
 
     @Override
@@ -138,40 +135,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         else
         {
             viewModel.showFunction(this, token, function, selection);
-        }
-    }
-
-    private void setTraits(NFTAsset asset) {
-        Map<String, String> attributes = asset.getAttributes();
-        setAttributeLabel(attributes.size());
-        for (String key : attributes.keySet())
-        {
-            View attributeView = View.inflate(this, R.layout.item_attribute, null);
-            TextView traitType = attributeView.findViewById(R.id.trait);
-            TextView traitValue = attributeView.findViewById(R.id.value);
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams(
-                    GridLayout.spec(GridLayout.UNDEFINED, 1f),
-                    GridLayout.spec(GridLayout.UNDEFINED, 1f));
-            attributeView.setLayoutParams(params);
-            traitType.setText(key);
-            traitValue.setText(attributes.get(key));
-            grid.addView(attributeView);
-        }
-    }
-
-    private void setAttributeLabel(int size)
-    {
-        if (size > 0 && token.tokenInfo.name.toLowerCase().contains("cryptokitties"))
-        {
-            labelAttributes.setText(R.string.label_cattributes);
-        }
-        else if (size > 0)
-        {
-            labelAttributes.setText(R.string.label_attributes);
-        }
-        else
-        {
-            labelAttributes.setVisibility(View.GONE);
         }
     }
 

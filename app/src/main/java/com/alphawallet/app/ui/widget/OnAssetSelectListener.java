@@ -3,8 +3,10 @@ package com.alphawallet.app.ui.widget;
 
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 
+import java.math.BigInteger;
+
 public interface OnAssetSelectListener
 {
-    void onAssetSelected(NFTAsset asset, int position);
+    void onAssetSelected(BigInteger tokenId, NFTAsset asset, int position);
     void onAssetUnselected();
 }

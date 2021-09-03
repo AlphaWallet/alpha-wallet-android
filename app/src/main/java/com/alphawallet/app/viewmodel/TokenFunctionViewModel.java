@@ -28,7 +28,7 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.Erc20DetailActivity;
@@ -85,7 +85,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
-    private final OpenseaService openseaService;
+    private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AnalyticsServiceType analyticsService;
     private Wallet wallet;
@@ -110,7 +110,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService,
+            OpenSeaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
             AnalyticsServiceType analyticsService)
     {
@@ -460,7 +460,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         if (calcGasCost != null && !calcGasCost.isDisposed()) { calcGasCost.dispose(); }
     }
 
-    public OpenseaService getOpenseaService()
+    public OpenSeaService getOpenseaService()
     {
         return openseaService;
     }

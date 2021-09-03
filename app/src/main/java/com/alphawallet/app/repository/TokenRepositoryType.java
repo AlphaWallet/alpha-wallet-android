@@ -43,7 +43,7 @@ public interface TokenRepositoryType {
     Single<String> resolveENS(int chainId, String address);
     void updateAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
     void storeAsset(String currentAddress, Token token, BigInteger tokenId, NFTAsset asset);
-    Token[] initERC721Assets(Wallet wallet, Token[] token);
+    Token[] initNFTAssets(Wallet wallet, Token[] token);
 
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Token updateTokenType(Token token, Wallet wallet, ContractType type);

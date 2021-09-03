@@ -100,8 +100,17 @@ public class AddTokenViewModel extends BaseViewModel {
         TokenInfo tf = new TokenInfo(address, name, symbol, decimals, true, chainId);
         addTokenInteract.add(tf, contractType, wallet.getValue())
                 .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(this::setVisibilityChanged, this::onError)
+                .isDisposed();
+    }
+
+    private void setVisibilityChanged(Token t)
+    {
+        tokensService.lockTokenVisibility(t)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result::postValue, this::onError)
+                .subscribe(() -> result.postValue(t))
                 .isDisposed();
     }
 

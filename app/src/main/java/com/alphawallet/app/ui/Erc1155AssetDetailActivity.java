@@ -1,10 +1,13 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -16,6 +19,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -68,6 +72,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     {
         tokenInfoLayout = findViewById(R.id.layout_token_info);
         NFTImageView tokenImage = findViewById(R.id.asset_image);
+        NFTAttributeLayout attrs = findViewById(R.id.attributes);
         NFTAsset asset = token.getTokenAssets().get(tokenId);
 
         if (asset == null) return;
@@ -85,6 +90,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         if (asset.isAssetMultiple()) { addInfoView(getString(R.string.balance), asset.getBalance().toString()); }
         addInfoView("External Link", asset.getExternalLink());
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
+        attrs.bind(token, asset);
         tokenDescription.setText(asset.getDescription());
 
         tokenInfoLayout.forceLayout();
@@ -126,17 +132,33 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         }
     }
 
+    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                //process hash
+                if (!TextUtils.isEmpty(transactionHash))
+                {
+                    Intent intent = new Intent();
+                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+            });
+
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
         NFTAsset asset = token.getTokenAssets().get(tokenId);
         if (asset.isAssetMultiple())
         {
-            viewModel.showTransferSelectCount(this, token, tokenId);
+            viewModel.showTransferSelectCount(this, token, tokenId)
+                    .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
         }
         else
         {
-            viewModel.showTransferToken(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)));
+            viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
+                    .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
         }
     }
 }

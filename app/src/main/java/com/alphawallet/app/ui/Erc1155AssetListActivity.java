@@ -1,10 +1,14 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -81,10 +85,24 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
                 .get(Erc1155AssetListViewModel.class);
     }
 
+    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                //process hash
+                if (!TextUtils.isEmpty(transactionHash))
+                {
+                    Intent intent = new Intent();
+                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+            });
+
     @Override
     public void onAssetClicked(Pair<BigInteger, NFTAsset> pair)
     {
-        viewModel.showAssetDetails(this, wallet, token, pair.first);
+        handleTransactionSuccess.launch(viewModel.showAssetDetailsIntent(this, wallet, token, pair.first));
     }
 
     @Override
@@ -99,7 +117,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     {
         if (item.getItemId() == R.id.action_select)
         {
-            viewModel.openSelectionMode(this, token, wallet, asset);
+            handleTransactionSuccess.launch(viewModel.openSelectionModeIntent(this, token, wallet, asset));
             return true;
         }
         return super.onOptionsItemSelected(item);

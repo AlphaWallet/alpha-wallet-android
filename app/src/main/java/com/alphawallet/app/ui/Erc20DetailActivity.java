@@ -313,7 +313,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         switch (requestCode)
         {
             case C.COMPLETED_TRANSACTION: //completed a transaction send and got with either a hash or a null
-                if (data != null) transactionHash = data.getStringExtra("tx_hash");
+                if (data != null) transactionHash = data.getStringExtra(C.EXTRA_TXHASH);
                 if (transactionHash != null)
                 {
                     //display transaction complete message

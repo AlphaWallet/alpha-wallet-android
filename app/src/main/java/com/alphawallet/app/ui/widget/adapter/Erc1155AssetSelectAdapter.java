@@ -129,7 +129,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
         asset.setSelected(selected);
         if (selected)
         {
-            listener.onAssetSelected(asset, position);
+            listener.onAssetSelected(actualData.get(position).first, asset, position);
         }
         else
         {
@@ -162,8 +162,10 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
     {
         List<BigInteger> selectedIds = new ArrayList<>();
 
-        for (Pair<BigInteger, NFTAsset> asset : actualData) {
-            if (asset.second.isSelected()) {
+        for (Pair<BigInteger, NFTAsset> asset : actualData)
+        {
+            if (asset.second.isSelected() && asset.second.getSelectedBalance().compareTo(BigDecimal.ZERO) > 0)
+            {
                 selectedIds.add(asset.first);
             }
         }
@@ -174,11 +176,10 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
     @Override
     public List<BigInteger> getSelectedTokenIds(List<BigInteger> selection)
     {
-        //TokenRan
         List<BigInteger> tokenIds = new ArrayList<>();
         for (Pair<BigInteger, NFTAsset> asset : actualData)
         {
-            if (asset.second.isSelected())
+            if (asset.second.isSelected() && asset.second.getSelectedBalance().compareTo(BigDecimal.ZERO) > 0)
             {
                 tokenIds.add(asset.first);
             }

@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Single;
+
 public class Erc1155AssetDetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -48,31 +50,29 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public void showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)
+    public Single<Intent> showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)
     {
-        walletInteract.find()
-                .subscribe(wallet -> completeTransferSelect(ctx, token, tokenId, wallet), this::onError)
-                .isDisposed();
+        return walletInteract.find()
+                .map(wallet -> completeTransferSelect(ctx, token, tokenId, wallet));
     }
 
-    private void completeTransferSelect(Context ctx, Token token, BigInteger tokenId, Wallet wallet)
+    private Intent completeTransferSelect(Context ctx, Token token, BigInteger tokenId, Wallet wallet)
     {
         Intent intent = new Intent(ctx, Erc1155AssetSelectActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN, token);
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString(16));
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        ctx.startActivity(intent);
+        return intent;
     }
 
-    public void showTransferToken(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
+    public Single<Intent> getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
     {
-        walletInteract.find()
-                .subscribe(wallet -> completeTransfer(ctx, token, tokenIds, selection, wallet), this::onError)
-                .isDisposed();
+        return walletInteract.find()
+                .map(wallet -> completeTransferIntent(ctx, token, tokenIds, selection, wallet));
     }
 
-    private void completeTransfer(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
+    private Intent completeTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
@@ -80,6 +80,6 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, false));
         intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        ctx.startActivity(intent);
+        return intent;
     }
 }

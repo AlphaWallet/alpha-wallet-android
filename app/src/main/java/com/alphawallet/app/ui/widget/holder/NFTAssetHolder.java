@@ -52,7 +52,7 @@ public class NFTAssetHolder extends BinderViewHolder<Pair<BigInteger, NFTAsset>>
         assetCategory.setText(asset.second.getDescription());
         icon.setupTokenImageThumbnail(asset.second);
 
-        if (asset.second.isAssetMultiple())
+        if (asset.second.isAssetMultiple() || !ERC1155Token.isNFT(asset.first))
         {
             assetCount.setVisibility(View.VISIBLE);
             assetCount.setText(getString(R.string.asset_count_val, asset.second.getSelectedBalance().toString()));

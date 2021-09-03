@@ -40,6 +40,12 @@
                 android:padding="@dimen/dp16"
                 tools:text="Test description"
                 android:textColor="@color/mine" />
+
+            <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+                android:id="@+id/attributes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
         </LinearLayout>
     </ScrollView>
 

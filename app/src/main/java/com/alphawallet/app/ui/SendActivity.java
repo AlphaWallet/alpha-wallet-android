@@ -639,7 +639,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         if (!TextUtils.isEmpty(txHash))
         {
             Intent intent = new Intent();
-            intent.putExtra("tx_hash", txHash);
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
 
             // successful transaction - try to show rate the app

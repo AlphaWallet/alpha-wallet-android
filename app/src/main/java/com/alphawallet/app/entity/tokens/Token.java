@@ -36,6 +36,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
 
@@ -48,13 +49,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
 public class Token implements Parcelable
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+
+    protected static OkHttpClient client;
 
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
@@ -68,7 +76,6 @@ public class Token implements Parcelable
     public boolean walletUIUpdateRequired;
     public boolean hasTokenScript;
     public long lastTxCheck;
-    public long txSync;
     public long lastTxTime;
     public int itemViewHeight;
 
@@ -88,7 +95,6 @@ public class Token implements Parcelable
         this.shortNetworkName = networkName;
         this.contractType = type;
         this.pendingBalance = balance;
-        this.txSync = 0;
         this.lastTxCheck = 0;
         this.lastBlockCheck = 0;
         this.lastTxTime = 0;
@@ -108,7 +114,6 @@ public class Token implements Parcelable
         tokenWallet = in.readString();
         lastBlockCheck = in.readLong();
         lastTxCheck = in.readLong();
-        txSync = in.readLong();
         lastTxTime = in.readLong();
         hasTokenScript = in.readByte() == 1;
         functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
@@ -195,7 +200,6 @@ public class Token implements Parcelable
         dest.writeString(tokenWallet);
         dest.writeLong(lastBlockCheck);
         dest.writeLong(lastTxCheck);
-        dest.writeLong(txSync);
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
         dest.writeMap(functionAvailabilityMap);
@@ -369,7 +373,6 @@ public class Token implements Parcelable
     public void setupRealmToken(RealmToken realmToken)
     {
         lastBlockCheck = realmToken.getLastBlock();
-        txSync = realmToken.getTXUpdateTime();
         lastTxCheck = realmToken.getLastTxTime();
         lastTxTime = realmToken.getLastTxTime();
         tokenInfo.isEnabled = realmToken.getEnabled();
@@ -900,11 +903,6 @@ public class Token implements Parcelable
                 || (!TextUtils.isEmpty(tokenInfo.symbol) && tokenInfo.symbol.contains("?"));
     }
 
-    public NFTAsset fetchTokenMetadata(BigInteger tokenId)
-    {
-        return null;
-    }
-
     public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
     {
         return new ArrayList<>();
@@ -921,5 +919,79 @@ public class Token implements Parcelable
     public List<NFTAsset> getAssetListFromTransaction(Transaction tx)
     {
         return new ArrayList<>();
+    }
+
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    {
+        return assetMap;
+    }
+
+    /**
+     * Token Metadata handling
+     */
+
+    public NFTAsset fetchTokenMetadata(BigInteger tokenId)
+    {
+        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
+        String responseValue = callSmartContractFunction(tokenInfo.chainId, getTokenURI(tokenId), getAddress(), getWallet());
+        if (responseValue == null) responseValue = callSmartContractFunction(tokenInfo.chainId, getTokenURI2(tokenId), getAddress(), getWallet());
+        String metaData = loadMetaData(responseValue);
+        if (!TextUtils.isEmpty(metaData))
+        {
+            return new NFTAsset(metaData);
+        }
+        else
+        {
+            return new NFTAsset();
+        }
+    }
+
+    private Function getTokenURI(BigInteger tokenId)
+    {
+        return new Function("tokenURI",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private Function getTokenURI2(BigInteger tokenId)
+    {
+        return new Function("uri",
+                Arrays.asList(new Uint256(tokenId)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private String loadMetaData(String tokenURI)
+    {
+        setupClient();
+
+        try
+        {
+            Request request = new Request.Builder()
+                    .url(Utils.parseIPFS(tokenURI))
+                    .get()
+                    .build();
+
+            okhttp3.Response response = client.newCall(request).execute();
+            return response.body().string();
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return "";
+    }
+
+    private static void setupClient()
+    {
+        if (client == null)
+        {
+            client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
+                    .build();
+        }
     }
 }

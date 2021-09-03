@@ -1,11 +1,14 @@
 package com.alphawallet.app.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,6 +21,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetSelectListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetSelectAdapter;
@@ -109,12 +113,12 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     }
 
     @Override
-    public void onAssetSelected(NFTAsset asset, int position)
+    public void onAssetSelected(BigInteger tokenId, NFTAsset asset, int position)
     {
         selectedAssets = adapter.getSelectedAssets();
         setTitle(getString(R.string.title_x_selected, String.valueOf(selectedAssets.size())));
 
-        if (asset.isAssetMultiple())
+        if (asset.isAssetMultiple() || !ERC1155Token.isNFT(tokenId))
         {
             int selectedValue = asset.getSelectedBalance().intValue() > 0 ? asset.getSelectedBalance().intValue() : 1;
             numericInput.setVisibility(View.VISIBLE);
@@ -152,10 +156,25 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         functionBar.setVisibility(View.VISIBLE);
     }
 
+    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                //process hash
+                if (!TextUtils.isEmpty(transactionHash))
+                {
+                    Intent intent = new Intent();
+                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+            });
+
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        viewModel.completeTransfer(this, token, adapter.getSelectedTokenIds(), adapter.getSelectedAssets(), wallet);
+        Intent launchTransfer = viewModel.completeTransferIntent(this, token, adapter.getSelectedTokenIds(), adapter.getSelectedAssets(), wallet);
+        handleTransactionSuccess.launch(launchTransfer);
     }
 
     private void removeInput()

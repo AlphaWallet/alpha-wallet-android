@@ -55,10 +55,14 @@ public class NFTAsset implements Parcelable
 
     public NFTAsset(String metaData)
     {
-        assetMap.clear();
-        attributeMap.clear();
-        balance = BigDecimal.ZERO;
         loadFromMetaData(metaData);
+        balance = BigDecimal.ONE;
+    }
+
+    public NFTAsset(RealmNFTAsset realmAsset)
+    {
+        loadFromMetaData(realmAsset.getMetaData());
+        balance = realmAsset.getBalance();
     }
 
     public NFTAsset()
@@ -346,12 +350,12 @@ public class NFTAsset implements Parcelable
     @Override
     public int hashCode()
     {
-        return assetMap.hashCode() + attributeMap.hashCode();
+        return assetMap.hashCode() + attributeMap.hashCode() + (balance != null ? balance.hashCode() : 0);
     }
 
     public boolean equals(RealmNFTAsset realmAsset)
     {
-        return (hashCode() == new NFTAsset(realmAsset.getMetaData()).hashCode());
+        return (hashCode() == new NFTAsset(realmAsset).hashCode());
     }
 
     public boolean equals(NFTAsset other)
@@ -368,6 +372,7 @@ public class NFTAsset implements Parcelable
     {
         //add thumbnail if it existed
         if (oldAsset.assetMap.containsKey(IMAGE_PREVIEW)) assetMap.put(IMAGE_PREVIEW, oldAsset.getAssetValue(IMAGE_PREVIEW));
+        balance = oldAsset.balance;
     }
 
     public void updateAsset(BigInteger tokenId, Map<BigInteger, NFTAsset> oldAssets)
@@ -383,6 +388,11 @@ public class NFTAsset implements Parcelable
             for (String param : oldAsset.assetMap.keySet()) //add anything that the old asset had, which new one doesn't (if it's still required)
             {
                 if (assetMap.get(param) == null && DESIRED_PARAMS.contains(param)) attributeMap.put(param, oldAsset.assetMap.get(param));
+            }
+
+            if (oldAsset.getBalance().compareTo(BigDecimal.ZERO) > 0)
+            {
+                setBalance(oldAsset.getBalance());
             }
         }
     }

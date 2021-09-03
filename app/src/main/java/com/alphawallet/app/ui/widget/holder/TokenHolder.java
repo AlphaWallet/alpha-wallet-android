@@ -63,7 +63,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private boolean primaryElement;
     private final Realm realm;
-    private final int id;
 
     private final Handler handler = new Handler();
 
@@ -94,14 +93,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         assetDefinition = assetService;
         tokensService = tSvs;
         realm = r;
-
-        id = counter;
-        counter++;
     }
 
     @Override
-    public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition) {
-
+    public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
+    {
         try
         {
             token = tokensService.getToken(data.getChain(), data.getAddress());

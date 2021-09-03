@@ -467,7 +467,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         //ActionSheet was dismissed
         if (!TextUtils.isEmpty(txHash)) {
             Intent intent = new Intent();
-            intent.putExtra("tx_hash", txHash);
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
             finish();
         }

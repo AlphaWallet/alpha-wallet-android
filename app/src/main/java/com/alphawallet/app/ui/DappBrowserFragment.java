@@ -154,7 +154,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
-public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
+public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
         ActionSheetCallback
@@ -617,7 +617,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         });
     }
 
-    public void dropFocus()
+    @Override
+    public void comeIntoFocus()
+    {
+        if (viewModel != null) { viewModel.checkForNetworkChanges(); }
+    }
+
+    @Override
+    public void leaveFocus()
     {
         if (web3 != null) web3.clearFocus();
         if (urlTv != null) urlTv.clearFocus();
@@ -1694,11 +1701,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         return false;
-    }
-
-    public void becomeVisible(boolean isVisible)
-    {
-        if (viewModel != null) { viewModel.checkForNetworkChanges(); }
     }
 
     @Override

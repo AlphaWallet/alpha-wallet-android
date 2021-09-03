@@ -1,12 +1,16 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
@@ -19,6 +23,7 @@ import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
@@ -61,6 +66,11 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         initViewModel();
         setTitle(token.tokenInfo.name);
         setupViewPager();
+    }
+
+    public void storeAsset(BigInteger tokenId, NFTAsset asset)
+    {
+        viewModel.getTokensService().storeAsset(token, tokenId, asset);
     }
 
     private void initViewModel()
@@ -169,11 +179,26 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         return super.onCreateOptionsMenu(menu);
     }
 
+    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                //process hash
+                if (!TextUtils.isEmpty(transactionHash))
+                {
+                    Intent intent = new Intent();
+                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+            });
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_select) {
-            viewModel.openSelectionMode(this, token, wallet);
+        if (item.getItemId() == R.id.action_select)
+        {
+            handleTransactionSuccess.launch(viewModel.openSelectionModeIntent(this, token, wallet));
             return true;
         }
         return super.onOptionsItemSelected(item);

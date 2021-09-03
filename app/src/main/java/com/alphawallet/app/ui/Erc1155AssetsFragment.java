@@ -1,12 +1,16 @@
 package com.alphawallet.app.ui;
 
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -30,6 +34,8 @@ import java.math.BigInteger;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+
+import static android.app.Activity.RESULT_OK;
 
 public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickListener {
     @Inject
@@ -70,20 +76,34 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
     }
 
     private void onAssets(Token token) {
-        adapter = new Erc1155AssetsAdapter(getContext(), token.getCollectionMap(), this);
+        adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this);
         recyclerView.setAdapter(adapter);
     }
+
+    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                //process hash
+                if (!TextUtils.isEmpty(transactionHash))
+                {
+                    Intent intent = new Intent();
+                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                    getActivity().setResult(RESULT_OK, intent);
+                    getActivity().finish();
+                }
+            });
 
     @Override
     public void onAssetClicked(Pair<BigInteger, NFTAsset> item)
     {
         if (item.second.isCollection())
         {
-            viewModel.showAssetListDetails(getContext(), wallet, token, item.second);
+            handleTransactionSuccess.launch(viewModel.showAssetListDetails(getContext(), wallet, token, item.second));
         }
         else
         {
-            viewModel.showAssetDetails(getContext(), wallet, token, item.first);
+            handleTransactionSuccess.launch(viewModel.showAssetDetails(getContext(), wallet, token, item.first));
         }
     }
 }

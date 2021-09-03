@@ -26,7 +26,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
@@ -55,8 +54,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.C.RESET_WALLET;
-import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
@@ -76,7 +73,7 @@ public class TokensService
     private final TokenRepositoryType tokenRepository;
     private final Context context;
     private final TickerService tickerService;
-    private final OpenseaService openseaService;
+    private final OpenSeaService openseaService;
     private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
@@ -103,13 +100,15 @@ public class TokensService
     @Nullable
     private Disposable storeErc20Tokens;
     @Nullable
+    private Disposable tokenStoreDisposable;
+    @Nullable
     private Disposable openSeaQueryDisposable;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
                          Context context,
                          TickerService tickerService,
-                         OpenseaService openseaService,
+                         OpenSeaService openseaService,
                          AnalyticsServiceType<AnalyticsProperties> analyticsService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
@@ -190,7 +189,7 @@ public class TokensService
         addToTokenStoreList(token);
         if (storeErc20Tokens == null)
         {
-            storeErc20Tokens = Observable.interval(0, 50, TimeUnit.MILLISECONDS)
+            storeErc20Tokens = Observable.interval(0, 100, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> storeNextToken()).subscribeOn(Schedulers.newThread()).subscribe();
         }
     }
@@ -209,18 +208,20 @@ public class TokensService
     private void storeNextToken()
     {
         //process chains in order
-        if (tokenStoreList.keySet().iterator().hasNext())
+        if (tokenStoreDisposable == null || tokenStoreDisposable.isDisposed())
         {
-            String key = tokenStoreList.keySet().iterator().next();
-            Token t = tokenStoreList.get(key);
-            Wallet wallet = new Wallet(t.getWallet());
-            tokenStoreList.remove(key);
-            tokenRepository.checkInterface(new Token[]{t}, wallet) //if ERC721 determine the specific contract type
-                    .flatMap(tkns -> tokenRepository.storeTokens(wallet, tkns))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::storedToken, Throwable::printStackTrace)
-                    .isDisposed();
+            if (tokenStoreList.keySet().iterator().hasNext())
+            {
+                String key = tokenStoreList.keySet().iterator().next();
+                Token t = tokenStoreList.get(key);
+                Wallet wallet = new Wallet(t.getWallet());
+                tokenStoreList.remove(key);
+                tokenStoreDisposable = tokenRepository.checkInterface(new Token[]{t}, wallet) //if ERC721 determine the specific contract type
+                        .flatMap(tkns -> tokenRepository.storeTokens(wallet, tkns))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::storedToken, Throwable::printStackTrace);
+            }
         }
         else if (storeErc20Tokens != null && !storeErc20Tokens.isDisposed())
         {
@@ -231,7 +232,7 @@ public class TokensService
 
     private void storedToken(Token[] tokens)
     {
-
+        tokenStoreDisposable = null;
     }
 
     public TokenTicker getTokenTicker(Token token)
@@ -264,6 +265,7 @@ public class TokensService
             stopUpdateCycle();
             addLockedTokens();
             openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
+            openseaService.resetOffetRead();
         }
     }
 
@@ -276,13 +278,13 @@ public class TokensService
 
     public void startUpdateCycle()
     {
-        if (currentAddress == null) return;
+        if (currentAddress == null || (eventTimer != null && !eventTimer.isDisposed())) return;
         if (nextTokenCheck == 0) nextTokenCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
-        if (eventTimer != null && !eventTimer.isDisposed()) { eventTimer.dispose(); }
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) { balanceCheckDisposable.dispose(); }
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) { erc20CheckDisposable.dispose(); }
 
         setupFilters();
+        openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
 
         eventTimer = Single.fromCallable(() -> {
             startupPass();
@@ -320,6 +322,10 @@ public class TokensService
             eventTimer.dispose();
             eventTimer = null;
         }
+
+        if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) { balanceCheckDisposable.dispose(); }
+        if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) { erc20CheckDisposable.dispose(); }
+        if (tokenStoreDisposable != null && !tokenStoreDisposable.isDisposed()) { tokenStoreDisposable.dispose(); }
 
         IconItem.resetCheck();
         tokenValueMap.clear();
@@ -435,7 +441,7 @@ public class TokensService
     {
         if (checkUnknownTokenCycle == null || checkUnknownTokenCycle.isDisposed())
         {
-            checkUnknownTokenCycle = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+            checkUnknownTokenCycle = Observable.interval(1000, 1500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkUnknownTokens()).subscribe();
         }
     }
@@ -609,36 +615,25 @@ public class TokensService
 
         final Wallet wallet = new Wallet(currentAddress);
 
-        openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS;
-
         if (BuildConfig.DEBUG)
             Log.d(TAG, "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
 
         openSeaCheckId = info.chainId;
+        openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
 
         openSeaQueryDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                 .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
+                .map(tokens -> tokenRepository.initNFTAssets(wallet, tokens))
                 .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
-                .map(tokens -> tokenRepository.initERC721Assets(wallet, tokens))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(t -> checkedNetwork(info),
                         this::chuckError);
     }
 
-    public boolean openseaUpdateInProgress(int chainId)
+    public boolean openSeaUpdateInProgress(int chainId)
     {
-        if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed() && openSeaCheckId == chainId)
-        {
-            return true;
-        }
-        else if (Utils.timeUntil(openSeaCheck) < 20*DateUtils.SECOND_IN_MILLIS)
-        {
-            //delay the opensea check if corresponding network
-            openSeaCheck = System.currentTimeMillis() + 20*DateUtils.SECOND_IN_MILLIS;
-        }
-
-        return false;
+        return openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed() && openSeaCheckId == chainId;
     }
 
     private void checkedNetwork(NetworkInfo info)
@@ -646,13 +641,23 @@ public class TokensService
         openSeaQueryDisposable = null;
         openSeaCheckId = 0;
         if (BuildConfig.DEBUG) Log.d(TAG, "Checked " + info.name + " Opensea");
+        if (openseaService.getCurrentOffset() > 0)
+        {
+            if (BuildConfig.DEBUG) Log.d(TAG, "OpenSeaAPI offset:" + openseaService.getCurrentOffset());
+            openSeaCheck = System.currentTimeMillis() + 5 * DateUtils.SECOND_IN_MILLIS;
+        }
+        else
+        {
+            openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
+        }
     }
 
     private void chuckError(@NotNull Throwable e)
     {
         openSeaCheckId = 0;
         openSeaQueryDisposable = null;
-        e.printStackTrace();
+        if (BuildConfig.DEBUG) e.printStackTrace();
+        openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
     }
 
     private void checkERC20()
@@ -935,13 +940,11 @@ public class TokensService
                         .subscribe()).isDisposed();
     }
 
-    private Completable lockTokenVisibility(Token token)
+    public Completable lockTokenVisibility(Token token)
     {
         final Wallet wallet = new Wallet(currentAddress);
         return tokenRepository.setEnable(wallet, token, true)
-                .andThen(tokenRepository.setVisibilityChanged(wallet, token))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .andThen(tokenRepository.setVisibilityChanged(wallet, token));
     }
 
     /**

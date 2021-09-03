@@ -12,7 +12,7 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 
@@ -35,7 +35,7 @@ public class TokenFunctionModule
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService,
+            OpenSeaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
             AnalyticsServiceType analyticsServiceType) {
 

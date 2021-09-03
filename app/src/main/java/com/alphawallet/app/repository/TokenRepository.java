@@ -336,7 +336,10 @@ public class TokenRepository implements TokenRepositoryType {
                 case ERC721:
                     break;
                 case ERC1155:
-                    //TODO: get balance.
+                    Token tToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(),
+                            contractType, network.getShortName(), 0);
+                    tToken.setTokenWallet(wallet.address);
+                    balance = tToken.updateBalance(null);
                     break;
                 case ERC721_TICKET:
                     balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
@@ -381,7 +384,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Token[] initERC721Assets(Wallet wallet, Token[] token)
+    public Token[] initNFTAssets(Wallet wallet, Token[] token)
     {
         return localSource.initNFTAssets(wallet, token);
     }
@@ -579,6 +582,9 @@ public class TokenRepository implements TokenRepositoryType {
                 case ERC20:
                 case DYNAMIC_CONTRACT:
                     balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
+                    break;
+                case ERC1155:
+                    balance = token.updateBalance(null);
                     break;
                 case OTHER:
                     //This token has its interface checked in the flow elsewhere

@@ -52,7 +52,6 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 public class ERC721Token extends Token implements Parcelable
 {
     private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
-    private static OkHttpClient client;
 
     public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, balance, blancaTime, networkName, type);
@@ -357,22 +356,53 @@ public class ERC721Token extends Token implements Parcelable
         return balance;
     }
 
+    /**
+     * Create a live balance of assets. Only need to query assets that have dropped out
+     * From where this is called, the current assets are those loaded from opensea call
+     * If there is a token that previously was there, but now isn't, it could be because
+     * the opensea call was split or that the owner transferred the token
+     * @param assetMap Loaded Assets from Realm
+     * @return map of currently known live assets
+     */
     @Override
-    public NFTAsset fetchTokenMetadata(BigInteger tokenId)
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
-        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
-        Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
-        String responseValue = callSmartContractFunction(web3j, getTokenURI(tokenId), getAddress(), getWallet());
-        if (responseValue == null) responseValue = callSmartContractFunction(web3j, getTokenURI2(tokenId), getAddress(), getWallet());
-        String metaData = loadMetaData(responseValue);
-        if (!TextUtils.isEmpty(metaData))
+        List<BigInteger> missingTokens = new ArrayList<>();
+        for (BigInteger oldTokenId : assetMap.keySet())
         {
-            return new NFTAsset(metaData);
+            NFTAsset checkAsset = tokenBalanceAssets.get(oldTokenId);
+            if (checkAsset == null)
+            {
+                missingTokens.add(oldTokenId);
+            }
+            else
+            {
+                checkAsset.setBalance(BigDecimal.ONE);
+            }
         }
-        else
+
+        final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+
+        //now check balance for each of the missing tokenIds (note that ERC1155 has a batch balance check, ERC721 does not)
+        for (BigInteger checkId : missingTokens)
         {
-            return new NFTAsset();
+            NFTAsset checkAsset = assetMap.get(checkId);
+            //check balance
+            String owner = callSmartContractFunction(web3j, ownerOf(checkId), getAddress(), getWallet());
+            if (owner.toLowerCase().equals(getWallet()))
+            {
+                checkAsset.setBalance(BigDecimal.ONE);
+            }
+            else
+            {
+                checkAsset.setBalance(BigDecimal.ZERO);
+            }
+
+            //add back into asset map
+            tokenBalanceAssets.put(checkId, checkAsset);
         }
+
+        return tokenBalanceAssets;
     }
 
     @Override
@@ -425,53 +455,11 @@ public class ERC721Token extends Token implements Parcelable
         return null;
     }
 
-    private Function getTokenURI(BigInteger tokenId)
-    {
-        return new Function("tokenURI",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-    }
-
-    private Function getTokenURI2(BigInteger tokenId)
-    {
-        return new Function("uri",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-    }
-
-    private String loadMetaData(String tokenURI)
-    {
-        setupClient();
-
-        try
-        {
-            Request request = new Request.Builder()
-                    .url(Utils.parseIPFS(tokenURI))
-                    .get()
-                    .build();
-
-            okhttp3.Response response = client.newCall(request).execute();
-            return response.body().string();
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return "";
-    }
-
-    private static void setupClient()
-    {
-        if (client == null)
-        {
-            client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(true)
-                    .build();
-        }
+    private static Function ownerOf(BigInteger token) {
+        return new Function(
+                "ownerOf",
+                Collections.singletonList(new Uint256(token)),
+                Collections.singletonList(new TypeReference<Address>() {}));
     }
 
     @Override

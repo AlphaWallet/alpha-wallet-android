@@ -38,6 +38,7 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -110,10 +111,16 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         AndroidInjection.inject(this);
 
-        token = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
 
         super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
+                .get(TokenFunctionViewModel.class);
+
+        String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getToken(chainId, address);
 
         setContentView(R.layout.activity_asset_display);
         toolbar();
@@ -132,8 +139,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         tokenView = findViewById(R.id.token_view);
         toolbarView = findViewById(R.id.toolbar);
 
-        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
-                .get(TokenFunctionViewModel.class);
+
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.sig().observe(this, this::onSigData);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);

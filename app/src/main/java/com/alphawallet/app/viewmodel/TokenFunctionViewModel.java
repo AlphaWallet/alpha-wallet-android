@@ -169,7 +169,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         Intent intent = new Intent(ctx, TransferTicketDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
 
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
 
@@ -185,7 +186,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
         if (tokenIds == null) tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
@@ -568,7 +570,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void showTokenList(Activity activity, Token token)
     {
         Intent intent = new Intent(activity, AssetDisplayActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         activity.startActivityForResult(intent, C.TERMINATE_ACTIVITY);

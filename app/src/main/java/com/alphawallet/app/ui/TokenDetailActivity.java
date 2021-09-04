@@ -26,6 +26,7 @@ import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 
 import java.math.BigInteger;
@@ -93,9 +94,11 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
                 .get(TokenFunctionViewModel.class);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
-            asset = getIntent().getExtras().getParcelable("asset");
-            token = getIntent().getExtras().getParcelable("token");
-            tokenId = new BigInteger(getIntent().getExtras().getString("tokenId"));
+            asset = getIntent().getExtras().getParcelable(C.EXTRA_NFTASSET);
+            String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+            int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            token = viewModel.getToken(chainId, address);
+            tokenId = new BigInteger(getIntent().getExtras().getString(C.EXTRA_TOKEN_ID));
             initViews();
             toolbar();
             setTitle(token.getFullName());
@@ -208,7 +211,8 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     {
         Intent intent = new Intent(this, TransferTicketDetailActivity.class);
         intent.putExtra(WALLET, new Wallet(token.getWallet()));
-        intent.putExtra(TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(EXTRA_TOKENID_LIST, tokenId.toString(16));
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

@@ -43,6 +43,7 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.Numeric;
 
@@ -100,12 +101,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private ActionSheetDialog confirmationDialog;
 
     private void initViews() {
-        token = getIntent().getParcelableExtra(TICKET);
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
-        tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
-        tokenId = tokenIds.get(0);
+
+        String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getToken(chainId, address);
 
         if (token == null)
         {
@@ -113,6 +115,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             return;
         }
 
+        tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
+        tokenId = tokenIds.get(0);
         tokenView = findViewById(R.id.web3_tokenview);
 
         tokenView.setChainId(token.tokenInfo.chainId);

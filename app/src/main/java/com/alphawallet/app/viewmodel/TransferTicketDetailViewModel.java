@@ -311,7 +311,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         {
             Intent intent = new Intent(context, TransferTicketDetailActivity.class);
             intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
-            intent.putExtra(C.Key.TICKET, token);
+            intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+            intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
             intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIds);
             intent.putExtra(C.EXTRA_STATE, transferStatus.ordinal());
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

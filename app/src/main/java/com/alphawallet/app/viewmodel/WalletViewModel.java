@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -183,7 +185,44 @@ public class WalletViewModel extends BaseViewModel
         return tokensService.getRealmInstance(wallet);
     }
 
-    @Override
+    public void showTokenDetail(Activity activity, Token token)
+    {
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+        switch (token.getInterfaceSpec())
+        {
+            case ETHEREUM:
+            case ERC20:
+            case CURRENCY:
+            case DYNAMIC_CONTRACT:
+            case LEGACY_DYNAMIC_CONTRACT:
+            case ETHEREUM_INVISIBLE:
+            case MAYBE_ERC20:
+                tokenDetailRouter.open(activity, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
+                        !token.isEthereum(), defaultWallet.getValue(), token, hasDefinition);
+                break;
+
+            case ERC1155:
+                tokenDetailRouter.openERC1155(activity, token, defaultWallet.getValue(), hasDefinition);
+                break;
+
+            case ERC721:
+            case ERC875_LEGACY:
+            case ERC875:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                assetDisplayRouter.open(activity, token, defaultWallet.getValue()); //TODO: Fold this into tokenDetailRouter
+                break;
+
+            case NOT_SET:
+            case OTHER:
+            case DELETED_ACCOUNT:
+            case CREATION:
+                break;
+        }
+    }
+
+    /*@Override
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
         boolean isToken = !token.isEthereum();
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
@@ -203,7 +242,7 @@ public class WalletViewModel extends BaseViewModel
                 assetDisplayRouter.open(activity, token, defaultWallet.getValue());
                 break;
         }
-    }
+    }*/
 
     public void checkBackup()
     {

@@ -88,11 +88,11 @@ import io.reactivex.schedulers.Schedulers;
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -154,7 +154,11 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        token = getIntent().getParcelableExtra(TICKET);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(TransferTicketDetailViewModel.class);
+
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = DisplayState.values()[getIntent().getIntExtra(EXTRA_STATE, 0)];
@@ -172,8 +176,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         sendAddress = null;
         ensAddress = null;
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(TransferTicketDetailViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);

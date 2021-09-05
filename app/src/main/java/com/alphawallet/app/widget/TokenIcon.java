@@ -53,7 +53,6 @@ public class TokenIcon extends ConstraintLayout
     private Token token;
     private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
-    private boolean showStatus = false;
     private StatusType currentStatus;
     private AssetDefinitionService assetSvs;
     private Request currentRq;
@@ -62,8 +61,6 @@ public class TokenIcon extends ConstraintLayout
     public TokenIcon(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-
-        getAttrs(context, attrs);
 
         inflate(context, R.layout.item_token_icon, this);
 
@@ -92,23 +89,6 @@ public class TokenIcon extends ConstraintLayout
                 icon.setImageDrawable(bitmap);
             }
         };
-    }
-
-    private void getAttrs(Context context, AttributeSet attrs) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.TokenIcon,
-                0, 0
-        );
-
-        try
-        {
-            showStatus = a.getBoolean(R.styleable.TokenIcon_showStatus, false);
-        }
-        finally
-        {
-            a.recycle();
-        }
     }
 
     private void bindViews()
@@ -154,46 +134,49 @@ public class TokenIcon extends ConstraintLayout
         displayTokenIcon(iconItem);
     }
 
+    private void setupDefaultIcon()
+    {
+        if (currentRq != null && currentRq.isRunning()) currentRq.clear(); //clear current load request if this is replacing an old asset that didn't finish loading
+        if (token.isEthereum() || EthereumNetworkRepository.getChainOverrideAddress(token.tokenInfo.chainId).equalsIgnoreCase(token.getAddress()))
+        {
+            textIcon.setVisibility(View.GONE);
+            icon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
+            icon.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            setupTextIcon(token);
+        }
+    }
+
     /**
      * Try to fetch Token Icon from the Token URL.
      */
     private void displayTokenIcon(IconItem iconItem)
     {
-        int chainIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
+        setupDefaultIcon();
+        if (token.isEthereum()
+                || token.getWallet().equalsIgnoreCase(token.getAddress())
+                || iconItem.useTextSymbol()) return;
 
-        if (currentRq != null && currentRq.isRunning()) currentRq.clear(); //clear current load request if this is replacing an old asset that didn't finish loading
-        if (token.isEthereum() || EthereumNetworkRepository.getChainOverrideAddress(token.tokenInfo.chainId).equalsIgnoreCase(token.getAddress()))
+        RequestOptions circleCrop;
+
+        //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
+        if (!iconItem.getUrl().startsWith(ALPHAWALLET_REPO_NAME))
         {
-            textIcon.setVisibility(View.GONE);
-            icon.setImageResource(chainIcon);
-            icon.setVisibility(View.VISIBLE);
+            circleCrop = new RequestOptions().circleCrop();
         }
         else
         {
-            if (iconItem.useTextSymbol())
-            {
-                setupTextIcon(token);
-                return;
-            }
-            RequestOptions circleCrop;
-
-            //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
-            if (!iconItem.getUrl().startsWith(ALPHAWALLET_REPO_NAME))
-            {
-                circleCrop = new RequestOptions().circleCrop();
-            }
-            else
-            {
-                circleCrop = new RequestOptions().sizeMultiplier(1.0f); // Placeholder NOP to avoid null
-            }
-
-            currentRq = Glide.with(getContext())
-                    .load(iconItem.getUrl())
-                    .apply(circleCrop) //only crop if not from AW iconassets repo
-                    .placeholder(R.drawable.ic_token_eth)
-                    .listener(requestListener)
-                    .into(viewTarget).getRequest();
+            circleCrop = new RequestOptions().sizeMultiplier(1.0f); // Placeholder NOP to avoid null
         }
+
+        currentRq = Glide.with(getContext())
+                .load(iconItem.getUrl())
+                .apply(circleCrop) //only crop if not from AW iconassets repo
+                .placeholder(R.drawable.ic_token_eth)
+                .listener(requestListener)
+                .into(viewTarget).getRequest();
     }
 
     private IconItem getIconUrl(Token token)
@@ -262,22 +245,11 @@ public class TokenIcon extends ConstraintLayout
     }
 
     /**
-     * This method is used to change visibility of "Status" Icon i.e. Send Or Receive.
-     * @param isVisible Boolean parameter to either make Transaction icon visible or hidden
-     */
-    public void changeStatusVisibility(boolean isVisible)
-    {
-        showStatus = isVisible;
-        statusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
-    }
-
-    /**
      * This method is used to set TextIcon and make Icon hidden as there is no icon available for the token.
      * @param token Token
      */
     private void setupTextIcon(@NotNull Token token)
     {
-        icon.setVisibility(View.GONE);
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
         //try symbol first
@@ -320,7 +292,7 @@ public class TokenIcon extends ConstraintLayout
                 if (token != null)
                 {
                     IconItem.iconLoadFail(token.getAddress());
-                    setupTextIcon(token);
+                    setupDefaultIcon();
                 }
             }
             return false;
@@ -335,7 +307,7 @@ public class TokenIcon extends ConstraintLayout
     private final RequestListener<Drawable> requestListenerAW = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            setupTextIcon(token);
+            setupDefaultIcon();
             if (token != null) IconItem.iconLoadFail(token.getAddress()); //don't try to load this asset again for this session
             return false;
         }

@@ -79,7 +79,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/empty"
         android:gravity="center"
-        android:src="@drawable/ropsten_logo"
+        tools:src="@drawable/ropsten_logo"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"

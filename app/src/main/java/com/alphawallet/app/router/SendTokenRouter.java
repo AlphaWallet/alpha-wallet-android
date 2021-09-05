@@ -14,6 +14,7 @@ public class SendTokenRouter {
     public void open(Activity context, String address, String symbol, int decimals, Wallet wallet, Token token, int chainId) {
         Intent intent = new Intent(context, SendActivity.class);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);

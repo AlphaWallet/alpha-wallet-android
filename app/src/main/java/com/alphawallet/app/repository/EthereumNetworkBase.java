@@ -755,7 +755,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         boolean isCustom = customNetworks.map.containsKey(chainId);
         NetworkInfo info = getNetworkByChain(chainId);
-        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : hasRealValue(chainId);
+        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : !hasRealValue(chainId);
 
         return new NetworkInfoExt(info, isTestNetwork, isCustom);
     }

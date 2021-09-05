@@ -75,8 +75,7 @@
                 android:layout_height="@dimen/token_icon"
                 android:layout_gravity="center"
                 android:layout_marginStart="2dp"
-                android:layout_marginEnd="@dimen/dp8"
-                app:showStatus="false" />
+                android:layout_marginEnd="@dimen/dp8" />
 
             <TextView
                 android:id="@+id/text_token_symbol"

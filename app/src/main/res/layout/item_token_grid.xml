@@ -19,7 +19,6 @@
         android:id="@+id/token_icon"
         android:layout_width="@dimen/token_icon_large"
         android:layout_height="@dimen/token_icon_large"
-        custom:showStatus="false"
         android:visibility="visible"
         />
 

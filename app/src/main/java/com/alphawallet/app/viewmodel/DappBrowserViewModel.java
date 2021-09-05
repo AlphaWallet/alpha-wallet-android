@@ -229,6 +229,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
         intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
+        intent.putExtra(C.EXTRA_NETWORKID, result.chainId);
         intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, defaultWallet.getValue());

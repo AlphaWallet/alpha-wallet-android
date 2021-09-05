@@ -51,8 +51,6 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.tools.Numeric;
 
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-
 import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
@@ -147,7 +145,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         functionBar.revealButtons();
 
         setupScreen();
-        setupKeyboardListener(functionBar);
     }
 
     private void setupScreen()
@@ -542,20 +539,5 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         }
 
         return assetList;
-    }
-
-    private void setupKeyboardListener(final FunctionButtonBar buttonBar)
-    {
-        KeyboardVisibilityEvent.setEventListener(
-                this, isOpen -> {
-                    if (isOpen)
-                    {
-                        buttonBar.setVisibility(View.GONE);
-                    }
-                    else
-                    {
-                        buttonBar.setVisibility(View.VISIBLE);
-                    }
-                });
     }
 }

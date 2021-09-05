@@ -272,7 +272,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onTokenInfo(TokenInfo tokenInfo)
     {
-        tokenInfo.addTokenSetupPage(this, viewModel.getNetworkInfo(tokenInfo.chainId).getShortName());
+        tokenInfo.addTokenSetupPage(this);
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

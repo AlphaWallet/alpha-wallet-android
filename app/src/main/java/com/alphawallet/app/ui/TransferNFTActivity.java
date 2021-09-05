@@ -73,7 +73,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
- * Created by JB on 11/08/2021.
+ * Created by JB on 11/08/2021.cla
  */
 public class TransferNFTActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {

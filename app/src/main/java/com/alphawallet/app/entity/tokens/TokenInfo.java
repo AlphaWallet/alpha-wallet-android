@@ -70,7 +70,7 @@ public class TokenInfo implements Parcelable {
         dest.writeInt(chainId);
     }
 
-    public void addTokenSetupPage(AddTokenActivity layout, String chainName) {
+    public void addTokenSetupPage(AddTokenActivity layout) {
         layout.inputAddressView.setAddress(address);
         layout.symbolInputView.setText(symbol);
         layout.decimalsInputView.setText(String.valueOf(decimals));

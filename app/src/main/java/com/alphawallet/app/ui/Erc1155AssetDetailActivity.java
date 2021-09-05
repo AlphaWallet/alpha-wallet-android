@@ -90,6 +90,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
         if (!TextUtils.isEmpty(sequenceId)) { addInfoView("Token #", sequenceId); }
         if (asset.isAssetMultiple()) { addInfoView(getString(R.string.balance), asset.getBalance().toString()); }
+        if (!TextUtils.isEmpty(asset.getName())) { addInfoView(getString(R.string.hint_contract_name), asset.getName()); }
         addInfoView("External Link", asset.getExternalLink());
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
         attrs.bind(token, asset);
@@ -130,7 +131,6 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         {
             TokenInfoView v = new TokenInfoView(this, elementName);
             v.setValue(name);
-            if (name.startsWith("http")) { v.setLink(); }
             tokenInfoLayout.addView(v);
         }
     }

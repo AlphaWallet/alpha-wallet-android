@@ -49,6 +49,26 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.04" />
+
+    <ImageView
+        android:id="@+id/image_close"
+        android:contentDescription="@string/action_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginStart="@dimen/dp5"
+        android:background="@color/transparent"
+        app:layout_constraintBottom_toBottomOf="@id/amount_wrapper"
+        app:layout_constraintTop_toTopOf="@id/amount_wrapper"
+        app:layout_constraintStart_toStartOf="@id/view_container"
+        android:src="@drawable/ic_close" />
+
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"

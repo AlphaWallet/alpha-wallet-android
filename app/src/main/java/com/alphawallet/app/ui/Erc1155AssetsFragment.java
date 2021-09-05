@@ -27,6 +27,7 @@ import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModelFactory;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -61,15 +62,16 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN);
+            viewModel = new ViewModelProvider(this, viewModelFactory)
+                    .get(Erc1155AssetsViewModel.class);
+
+            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
             wallet = getArguments().getParcelable(C.Key.WALLET);
 
             recyclerView = view.findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.addItemDecoration(new ListDivider(getContext()));
-
-            viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(Erc1155AssetsViewModel.class);
 
             onAssets(token);
         }

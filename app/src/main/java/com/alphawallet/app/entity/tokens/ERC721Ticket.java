@@ -1,8 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -27,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ERC721Ticket extends Token implements Parcelable {
-
+public class ERC721Ticket extends Token
+{
     private final List<BigInteger> balanceArray;
 
     public ERC721Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
@@ -40,35 +38,6 @@ public class ERC721Ticket extends Token implements Parcelable {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
     }
-
-    private ERC721Ticket(Parcel in) {
-        super(in);
-        balanceArray = new ArrayList<>();
-        int objSize = in.readInt();
-        int interfaceOrdinal = in.readInt();
-        contractType = ContractType.values()[interfaceOrdinal];
-        if (objSize > 0)
-        {
-            Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-            for (Object o : readObjArray)
-            {
-                BigInteger val = (BigInteger)o;
-                balanceArray.add(val);
-            }
-        }
-    }
-
-    public static final Creator<ERC721Ticket> CREATOR = new Creator<ERC721Ticket>() {
-        @Override
-        public ERC721Ticket createFromParcel(Parcel in) {
-            return new ERC721Ticket(in);
-        }
-
-        @Override
-        public ERC721Ticket[] newArray(int size) {
-            return new ERC721Ticket[size];
-        }
-    };
 
     @Override
     public String getStringBalance() {
@@ -94,14 +63,6 @@ public class ERC721Ticket extends Token implements Parcelable {
             assets.put(tokenId, new NFTAsset(tokenId));
         }
         return assets;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(balanceArray.size());
-        dest.writeInt(contractType.ordinal());
-        if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
     }
 
     /**

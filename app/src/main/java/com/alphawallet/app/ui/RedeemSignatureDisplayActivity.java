@@ -17,9 +17,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
@@ -80,15 +82,17 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         setTitle(getString(R.string.action_redeem));
 
-        token = getIntent().getParcelableExtra(TICKET);
+        viewModel = new ViewModelProvider(this, redeemSignatureDisplayModelFactory)
+                .get(RedeemSignatureDisplayModel.class);
+
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         tokenView = findViewById(R.id.web3_tokenview);
         webWrapper = findViewById(R.id.layout_webwrapper);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
-        viewModel = new ViewModelProvider(this, redeemSignatureDisplayModelFactory)
-                .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.selection().observe(this, this::onSelected);
         viewModel.burnNotice().observe(this, this::onBurned);

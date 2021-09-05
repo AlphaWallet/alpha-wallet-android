@@ -32,6 +32,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModel;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -65,9 +66,8 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         toolbar();
         setTitle(getString(R.string.title_x_selected, "0"));
 
-        getIntentData();
-
         initViewModel();
+        getIntentData();
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -80,7 +80,9 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
 
     private void getIntentData()
     {
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
+        String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, address);
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         tokenIds = !TextUtils.isEmpty(tokenIdStr) ? token.stringHexToBigIntegerList(tokenIdStr)
@@ -118,7 +120,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
         selectedAssets = adapter.getSelectedAssets();
         setTitle(getString(R.string.title_x_selected, String.valueOf(selectedAssets.size())));
 
-        if (asset.isAssetMultiple() || !ERC1155Token.isNFT(tokenId))
+        if (asset.isAssetMultiple())
         {
             int selectedValue = asset.getSelectedBalance().intValue() > 0 ? asset.getSelectedBalance().intValue() : 1;
             numericInput.setVisibility(View.VISIBLE);

@@ -1,8 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -36,7 +34,7 @@ import java.util.List;
  * and Formuler-one, which, too, amounts to a hundred each".
  */
 
-public class Ticket extends Token implements Parcelable
+public class Ticket extends Token
 {
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
@@ -49,23 +47,6 @@ public class Ticket extends Token implements Parcelable
     public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
-    }
-
-    private Ticket(Parcel in) {
-        super(in);
-        balanceArray = new ArrayList<>();
-        int objSize = in.readInt();
-        int interfaceOrdinal = in.readInt();
-        contractType = ContractType.values()[interfaceOrdinal];
-        if (objSize > 0)
-        {
-            Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-            for (Object o : readObjArray)
-            {
-                BigInteger val = (BigInteger)o;
-                balanceArray.add(val);
-            }
-        }
     }
 
     @Override
@@ -82,26 +63,6 @@ public class Ticket extends Token implements Parcelable
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
         else return Utils.bigIntListToString(balanceArray, true);
-    }
-
-    public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
-        @Override
-        public Ticket createFromParcel(Parcel in) {
-            return new Ticket(in);
-        }
-
-        @Override
-        public Ticket[] newArray(int size) {
-            return new Ticket[size];
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(balanceArray.size());
-        dest.writeInt(contractType.ordinal());
-        if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
     }
 
     /**

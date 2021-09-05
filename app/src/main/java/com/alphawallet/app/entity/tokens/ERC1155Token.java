@@ -2,15 +2,10 @@ package com.alphawallet.app.entity.tokens;
 
 
 import android.app.Activity;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
 import android.util.Pair;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.ERC1155TransferEvent;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -20,8 +15,6 @@ import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.ethereum.EthereumNetworkBase;
-import com.google.gson.Gson;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -34,7 +27,6 @@ import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -49,27 +41,21 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
-import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.util.Utils.parseTokenId;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
-public class ERC1155Token extends Token implements Parcelable
+public class ERC1155Token extends Token
 {
     private final Map<BigInteger, NFTAsset> assets;
     private AssetContract assetContract;
@@ -86,51 +72,6 @@ public class ERC1155Token extends Token implements Parcelable
             assets = new HashMap<>();
         }
         setInterfaceSpec(ContractType.ERC1155);
-    }
-
-    private ERC1155Token(Parcel in)
-    {
-        super(in);
-        String assetJSON = in.readString();
-        if (!TextUtils.isEmpty(assetJSON))
-            assetContract = new Gson().fromJson(assetJSON, AssetContract.class);
-        assets = new HashMap<>();
-        //read in the element list
-        int size = in.readInt();
-        for (; size > 0; size--)
-        {
-            BigInteger tokenId = new BigInteger(in.readString(), Character.MAX_RADIX);
-            NFTAsset asset = in.readParcelable(NFTAsset.class.getClassLoader());
-            assets.put(tokenId, asset);
-        }
-    }
-
-    public static final Creator<ERC1155Token> CREATOR = new Creator<ERC1155Token>()
-    {
-        @Override
-        public ERC1155Token createFromParcel(Parcel in)
-        {
-            return new ERC1155Token(in);
-        }
-
-        @Override
-        public ERC1155Token[] newArray(int size)
-        {
-            return new ERC1155Token[size];
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags)
-    {
-        super.writeToParcel(dest, flags);
-        dest.writeString(assetContract != null ? assetContract.getJSON() : "");
-        dest.writeInt(assets.size());
-        for (BigInteger assetKey : assets.keySet())
-        {
-            dest.writeString(assetKey.toString(Character.MAX_RADIX));
-            dest.writeParcelable(assets.get(assetKey), flags);
-        }
     }
 
     @Override

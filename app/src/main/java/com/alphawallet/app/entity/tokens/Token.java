@@ -2,13 +2,9 @@ package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
-
-import androidx.annotation.NonNull;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -26,16 +22,11 @@ import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
-import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
@@ -57,7 +48,7 @@ import okhttp3.Request;
 
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
-public class Token implements Parcelable
+public class Token
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
@@ -102,27 +93,6 @@ public class Token implements Parcelable
         walletUIUpdateRequired = false;
         hasTokenScript = false;
         resultMap.clear();
-    }
-
-    protected Token(Parcel in) {
-        tokenInfo = in.readParcelable(TokenInfo.class.getClassLoader());
-        balance = new BigDecimal(in.readString());
-        updateBlancaTime = in.readLong();
-        int readType = in.readInt();
-        shortNetworkName = in.readString();
-        pendingBalance = new BigDecimal(in.readString());
-        tokenWallet = in.readString();
-        lastBlockCheck = in.readLong();
-        lastTxCheck = in.readLong();
-        lastTxTime = in.readLong();
-        hasTokenScript = in.readByte() == 1;
-        functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
-
-        balanceChanged = false;
-        if (readType <= ContractType.CREATION.ordinal())
-        {
-            contractType = ContractType.values()[readType];
-        }
     }
 
     public String getStringBalance()
@@ -170,39 +140,6 @@ public class Token implements Parcelable
 
     public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset) {
         //only for ERC721, see override in ERC721Token
-    }
-
-    public static final Creator<Token> CREATOR = new Creator<Token>() {
-        @Override
-        public Token createFromParcel(Parcel in) {
-            return new Token(in);
-        }
-
-        @Override
-        public Token[] newArray(int size) {
-            return new Token[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(tokenInfo, flags);
-        dest.writeString(balance == null ? "0" : balance.toString());
-        dest.writeLong(updateBlancaTime);
-        dest.writeInt(contractType.ordinal());
-        dest.writeString(shortNetworkName);
-        dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
-        dest.writeString(tokenWallet);
-        dest.writeLong(lastBlockCheck);
-        dest.writeLong(lastTxCheck);
-        dest.writeLong(lastTxTime);
-        dest.writeByte(hasTokenScript?(byte)1:(byte)0);
-        dest.writeMap(functionAvailabilityMap);
     }
 
     public void setRealmBalance(RealmToken realmToken)

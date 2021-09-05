@@ -43,6 +43,7 @@ import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.InputAmount;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import org.web3j.crypto.Keys;
 
@@ -376,8 +377,10 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     private void getInfo()
     {
+        if (viewModel == null) initViewModel();
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         int fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
 

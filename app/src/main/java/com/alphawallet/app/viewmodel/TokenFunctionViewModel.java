@@ -147,7 +147,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void openUniversalLink(Context context, Token token, List<BigInteger> selection) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
@@ -248,7 +249,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(idList, token.getAddress(), true));
         Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.TICKET_RANGE, parcel);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
@@ -301,7 +303,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         Intent intent = new Intent(ctx, MyAddressActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -310,7 +313,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(idList, token.getAddress(), true));
         Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.TICKET_RANGE, parcel);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
@@ -319,7 +323,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void sellTicketRouter(Context context, Token token, List<BigInteger> idList) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(idList, false));
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
@@ -560,7 +565,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_ADDRESS, address);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.putExtra(C.EXTRA_HAS_DEFINITION, hasDefinition);
         context.startActivity(intent);

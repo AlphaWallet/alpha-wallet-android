@@ -10,7 +10,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -51,6 +50,8 @@ import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.tools.Numeric;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
@@ -102,8 +103,11 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_nft);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(TransferTicketDetailViewModel.class);
 
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         List<BigInteger> tokenIdList = token.stringHexToBigIntegerList(tokenIds);
@@ -122,8 +126,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         sendAddress = null;
         ensAddress = null;
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(TransferTicketDetailViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -139,12 +141,13 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        final FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_transfer)));
         functionBar.revealButtons();
 
         setupScreen();
+        setupKeyboardListener(functionBar);
     }
 
     private void setupScreen()
@@ -539,5 +542,20 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         }
 
         return assetList;
+    }
+
+    private void setupKeyboardListener(final FunctionButtonBar buttonBar)
+    {
+        KeyboardVisibilityEvent.setEventListener(
+                this, isOpen -> {
+                    if (isOpen)
+                    {
+                        buttonBar.setVisibility(View.GONE);
+                    }
+                    else
+                    {
+                        buttonBar.setVisibility(View.VISIBLE);
+                    }
+                });
     }
 }

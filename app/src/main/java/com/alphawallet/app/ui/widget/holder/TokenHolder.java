@@ -346,7 +346,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         int color = Color.RED;
 
         String lbl = getString(R.string.token_balance, "", converted);
-        // lbl += " " + ticker.priceSymbol;
         Spannable spannable;
         if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
         {
@@ -354,7 +353,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             spannable.setSpan(new ForegroundColorSpan(color),
                     converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             this.balanceCurrency.setText(lbl);
-            // this.issuer.setVisibility(View.GONE);
         }
         else
         {
@@ -374,15 +372,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         } catch (Exception ex) { /* Quietly */ }
 
         //This sets the crypto price value (middle amount)
-        String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
+        BigDecimal currencyChange = new BigDecimal(ticker.price).multiply((
+                new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100)));
+        String formattedValue = TickerService.getCurrencyWithoutSymbol(currencyChange.doubleValue());
 
         lbl = getString(R.string.token_balance, "", formattedValue);
         lbl += " " + ticker.priceSymbol;
-        spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                lbl.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(lbl);
-
         tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
     }
 }

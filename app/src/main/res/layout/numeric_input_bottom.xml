@@ -49,13 +49,6 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guidelineCancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.04" />
-
     <ImageView
         android:id="@+id/image_close"
         android:contentDescription="@string/action_close"

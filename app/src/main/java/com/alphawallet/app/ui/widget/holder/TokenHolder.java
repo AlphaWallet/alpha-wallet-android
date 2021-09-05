@@ -30,6 +30,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.google.zxing.common.StringUtils;
@@ -145,8 +146,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             populateTicker();
 
-            setContractType();
-
             setPendingAmount();
 
         } catch (Exception ex) {
@@ -189,7 +188,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         {
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
-            setIssuerDetails();
         }
 
         if (!token.isEthereum() && token.tokenInfo.chainId != MAINNET_ID)
@@ -260,59 +258,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         this.onTokenClickListener = onTokenClickListener;
     }
 
-    private void setIssuerDetails()
-    {
-        if (token.isEthereum())     // If token is eth and we get here, it's a testnet chain, show testnet
-        {
-            //issuer.setVisibility(View.VISIBLE);
-            //issuer.setText(R.string.testnet);
-            //issuerPlaceholder.setVisibility(View.GONE);
-            primaryElement = true;
-        }
-        else
-        {
-            String issuerName = assetDefinition.getIssuerName(token);
-            if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
-            {
-              //  issuer.setVisibility(View.VISIBLE);
-              //  issuerPlaceholder.setVisibility(View.VISIBLE);
-                primaryElement = true;
-                //issuer.setText(issuerName);
-            }
-            else
-            {
-                hideIssuerViews();
-            }
-        }
-    }
-
     private void hideIssuerViews() {
-        // issuer.setVisibility(View.GONE);
-        //issuerPlaceholder.setVisibility(View.GONE);
         contractSeparator.setVisibility(View.GONE);
-    }
-
-    private void setContractType()
-    {
-        //Display contract type if required
-       /* int contractStringId = token.getContractType();
-        if (contractStringId > 0)
-        {
-            contractType.setText(contractStringId);
-            contractType.setVisibility(View.VISIBLE);
-            if (primaryElement) contractSeparator.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            contractType.setVisibility(View.GONE);
-        }*/
-    }
-
-    private void emptyTicker()
-    {
-        text24Hours.setText(R.string.unknown_balance_without_symbol);
-        textAppreciation.setText(R.string.unknown_balance_without_symbol);
-        balanceCurrency.setText(R.string.unknown_balance_without_symbol);
     }
 
     private void startTickerRealmListener()
@@ -374,12 +321,13 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         //This sets the crypto price value (middle amount)
         BigDecimal currencyChange = new BigDecimal(ticker.price).multiply((
                 new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100)));
-        String formattedValue = TickerService.getCurrencyWithoutSymbol(currencyChange.doubleValue());
+        //String formattedValue = TickerService.getCurrencyWithoutSymbol(currencyChange.doubleValue());
+        String formattedValue =  TickerService.getCurrencyString(currencyChange.doubleValue());
 
-        lbl = getString(R.string.token_balance, "", formattedValue);
-        lbl += " " + ticker.priceSymbol;
+        //lbl = getString(R.string.token_balance, "", formattedValue);
+        //lbl += " " + ticker.priceSymbol;
         this.textAppreciation.setTextColor(color);
-        this.textAppreciation.setText(lbl);
+        this.textAppreciation.setText(formattedValue);
         tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
     }
 }

@@ -514,7 +514,11 @@ public class TickerService
     {
         DecimalFormat df = new DecimalFormat("#,##0.00");
         df.setRoundingMode(RoundingMode.CEILING);
-        return currentCurrencySymbol + df.format(price);
+        if (price >= 0) {
+            return currentCurrencySymbol + df.format(price);
+        } else {
+            return "-" + currentCurrencySymbol + df.format(Math.abs(price));
+        }
     }
 
     public static String getCurrencyWithoutSymbol(double price)

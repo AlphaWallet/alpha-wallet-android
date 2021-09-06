@@ -2530,6 +2530,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (!TextUtils.isEmpty(tokenAddress))
         {
             tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
+            IconItem.iconLoadClear(tokenAddress.toLowerCase());
         }
     }
 

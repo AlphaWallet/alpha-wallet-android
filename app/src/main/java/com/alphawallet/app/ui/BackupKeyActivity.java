@@ -2,6 +2,8 @@ package com.alphawallet.app.ui;
 
 import android.annotation.SuppressLint;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
@@ -777,14 +779,21 @@ public class BackupKeyActivity extends BaseActivity implements
         viewModel.exportedStore().observe(this, this::onExportKeystore);
     }
 
+    ActivityResultLauncher<Intent> handleBackupWallet = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
+                } else {
+                    AskUserSuccess();
+                }
+            });
+
     private void onExportKeystore(String keystore) {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
         sharingIntent.putExtra(Intent.EXTRA_TEXT, keystore);
-        startActivityForResult(
-                Intent.createChooser(sharingIntent, "Share via"),
-                SHARE_REQUEST_CODE);
+        handleBackupWallet.launch(Intent.createChooser(sharingIntent, "Share via"));
     }
 
     @Override
@@ -802,14 +811,6 @@ public class BackupKeyActivity extends BaseActivity implements
         }
 
         switch (requestCode) {
-            case SHARE_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
-                    backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
-                } else {
-                    AskUserSuccess();
-                }
-                break;
-
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 if (resultCode == RESULT_OK) {
                     viewModel.completeAuthentication(taskCode);

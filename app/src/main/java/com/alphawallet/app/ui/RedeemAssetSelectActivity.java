@@ -1,16 +1,18 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.tokens.Token;
@@ -21,6 +23,7 @@ import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TicketRange;
 
 import java.math.BigInteger;
@@ -31,7 +34,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.TICKET_RANGE;
 
 /**
@@ -66,7 +68,11 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        token = getIntent().getParcelableExtra(TICKET);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(RedeemAssetSelectViewModel.class);
+
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         setContentView(R.layout.activity_redeem_asset);
 
@@ -90,8 +96,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(RedeemAssetSelectViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);

@@ -67,6 +67,25 @@ public class Transaction implements Parcelable
 	public static final TransactionDecoder decoder = new TransactionDecoder();
 	public static ParseMagicLink parser = null;
 
+	//placeholder for error
+	public Transaction()
+	{
+		//blank transaction
+		hash = "";
+		blockNumber = "";
+		timeStamp = 0;
+		nonce = 0;
+		from = "";
+		to = "";
+		value = "";
+		gas = "";
+		gasPrice = "";
+		gasUsed = "";
+		input = "";
+		error = "";
+		chainId = 0;
+	}
+
 	public boolean isPending()
 	{
 		return TextUtils.isEmpty(blockNumber) || blockNumber.equals("0") || blockNumber.equals("-2");

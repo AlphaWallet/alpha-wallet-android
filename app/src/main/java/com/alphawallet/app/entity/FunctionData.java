@@ -50,7 +50,7 @@ public class FunctionData
         for (int i = 0; i < temp.size(); i++)//String arg : data.args)
         {
             String arg = temp.get(i);
-            if (arg.contains("[]") || arg.equals("string"))
+            if (arg.contains("[]") || arg.equals("string") || arg.equals("bytes"))
             {
                 //rearrange to end, no need to store this arg
                 this.args.add(arg);

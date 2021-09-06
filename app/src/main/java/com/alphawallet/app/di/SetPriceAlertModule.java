@@ -3,6 +3,7 @@ package com.alphawallet.app.di;
 import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.SetPriceAlertViewModelFactory;
 
 import dagger.Module;
@@ -13,12 +14,14 @@ class SetPriceAlertModule {
     @Provides
     SetPriceAlertViewModelFactory provideSetPriceAlertViewModelFactory(
             CurrencyRepositoryType currencyRepository,
-            PreferenceRepositoryType preferenceRepository
+            PreferenceRepositoryType preferenceRepository,
+            TokensService tokensService
     )
     {
         return new SetPriceAlertViewModelFactory(
                 currencyRepository,
-                preferenceRepository);
+                preferenceRepository,
+                tokensService);
     }
 
     @Provides

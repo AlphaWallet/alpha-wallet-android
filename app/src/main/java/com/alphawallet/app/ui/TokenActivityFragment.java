@@ -18,6 +18,7 @@ import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.viewmodel.TokenActivityViewModel;
 import com.alphawallet.app.viewmodel.TokenActivityViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigInteger;
 
@@ -52,13 +53,14 @@ public class TokenActivityFragment extends BaseFragment {
 
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            viewModel = new ViewModelProvider(this, viewModelFactory)
+                    .get(TokenActivityViewModel.class);
+
+            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
             wallet = getArguments().getParcelable(C.Key.WALLET);
 
             history = view.findViewById(R.id.history_list);
-
-            viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(TokenActivityViewModel.class);
 
             setUpRecentTransactionsView();
         }
@@ -71,6 +73,6 @@ public class TokenActivityFragment extends BaseFragment {
         adapter.setDefaultWallet(wallet);
         history.setupAdapter(adapter);
         history.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, BigInteger.ZERO, 15);
+                token, viewModel.getTokensService(), BigInteger.ZERO, 15);
     }
 }

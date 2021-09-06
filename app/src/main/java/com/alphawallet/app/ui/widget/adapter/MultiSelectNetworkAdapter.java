@@ -21,9 +21,17 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     private final List<NetworkItem> networkList;
     private boolean hasClicked = false;
 
-    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks)
+    public interface EditNetworkListener {
+        void onEditNetwork(int chainId);
+    }
+
+    private EditNetworkListener editListener;
+
+
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener)
     {
         networkList = selectedNetworks;
+        editListener = editNetworkListener;
     }
 
     public Integer[] getSelectedItems()
@@ -62,8 +70,15 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         {
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
+            holder.manageView.setVisibility(View.VISIBLE);
+            holder.manageView.setOnClickListener(v -> manageListener(position));
             holder.checkbox.setSelected(item.isSelected());
         }
+    }
+
+    private void manageListener(final int position)
+    {
+        editListener.onEditNetwork(networkList.get(position).getChainId());
     }
 
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)
@@ -83,6 +98,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         ImageView checkbox;
         TextView name;
         View itemLayout;
+        View manageView;
 
         ViewHolder(View view)
         {
@@ -90,6 +106,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             checkbox = view.findViewById(R.id.checkbox);
             name = view.findViewById(R.id.name);
             itemLayout = view.findViewById(R.id.layout_list_item);
+            manageView = view.findViewById(R.id.manage_btn);
         }
     }
 }

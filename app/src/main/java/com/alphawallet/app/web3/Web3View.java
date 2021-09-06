@@ -4,10 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.WebChromeClient;
@@ -18,20 +15,27 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
@@ -49,24 +53,23 @@ public class Web3View extends WebView {
     @Nullable
     private OnEthCallListener onEthCallListener;
     @Nullable
+    private OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
+    @Nullable
     private OnVerifyListener onVerifyListener;
     @Nullable
     private OnGetBalanceListener onGetBalanceListener;
-    private JsInjectorClient jsInjectorClient;
-    private Web3ViewClient webViewClient;
+    private final Web3ViewClient webViewClient;
     private URLLoadInterface loadInterface;
-
-    public Web3View(@NonNull Context context) {
-        super(context);
-    }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        webViewClient = new Web3ViewClient(getContext());
         init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        webViewClient = new Web3ViewClient(getContext());
         init();
     }
 
@@ -77,23 +80,27 @@ public class Web3View extends WebView {
 
     @Override
     public void setWebViewClient(WebViewClient client) {
-        super.setWebViewClient(new WrapWebViewClient(webViewClient, client, jsInjectorClient));
+        super.setWebViewClient(new WrapWebViewClient(webViewClient, client));
+    }
+
+    @Override
+    public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders)
+    {
+        checkDOMUsage(url);
+        super.loadUrl(url, additionalHttpHeaders);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     public void init() {
-        jsInjectorClient = new JsInjectorClient(getContext());
-        webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
-        WebSettings webSettings = getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setUserAgentString(webSettings.getUserAgentString()
+        getSettings().setJavaScriptEnabled(true);
+        getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+        getSettings().setBuiltInZoomControls(true);
+        getSettings().setDisplayZoomControls(false);
+        getSettings().setUseWideViewPort(true);
+        getSettings().setLoadWithOverviewMode(true);
+        getSettings().setDomStorageEnabled(true);
+        getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        getSettings().setUserAgentString(getSettings().getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
         WebView.setWebContentsDebuggingEnabled(true); //so devs can debug their scripts/pages
         addJavascriptInterface(new SignCallbackJSInterface(
@@ -102,28 +109,29 @@ public class Web3View extends WebView {
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener,
-                innerOnEthCallListener), "alpha");
+                innerOnEthCallListener,
+                innerAddChainListener), "alpha");
     }
 
     public void setWalletAddress(@NonNull Address address) {
-        jsInjectorClient.setWalletAddress(address);
+        webViewClient.getJsInjectorClient().setWalletAddress(address);
     }
 
     @Nullable
     public Address getWalletAddress() {
-        return jsInjectorClient.getWalletAddress();
+        return webViewClient.getJsInjectorClient().getWalletAddress();
     }
 
     public void setChainId(int chainId) {
-        jsInjectorClient.setChainId(chainId);
+        webViewClient.getJsInjectorClient().setChainId(chainId);
     }
 
     public int getChainId() {
-        return jsInjectorClient.getChainId();
+        return webViewClient.getJsInjectorClient().getChainId();
     }
 
     public void setRpcUrl(@NonNull String rpcUrl) {
-        jsInjectorClient.setRpcUrl(rpcUrl);
+        webViewClient.getJsInjectorClient().setRpcUrl(rpcUrl);
     }
 
     public void setWebLoadCallback(URLLoadInterface iFace)
@@ -133,7 +141,7 @@ public class Web3View extends WebView {
 
     @Nullable
     public String getRpcUrl() {
-        return jsInjectorClient.getRpcUrl();
+        return webViewClient.getJsInjectorClient().getRpcUrl();
     }
 
     public void addUrlHandler(@NonNull UrlHandler urlHandler) {
@@ -162,6 +170,10 @@ public class Web3View extends WebView {
 
     public void setOnEthCallListener(@Nullable OnEthCallListener onEthCallListener) {
         this.onEthCallListener = onEthCallListener;
+    }
+
+    public void setOnWalletAddEthereumChainObjectListener(@Nullable OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener) {
+        this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
     }
 
     public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
@@ -250,6 +262,15 @@ public class Web3View extends WebView {
         }
     };
 
+    private final OnWalletAddEthereumChainObjectListener innerAddChainListener = new OnWalletAddEthereumChainObjectListener()
+    {
+        @Override
+        public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
+        {
+            onWalletAddEthereumChainObjectListener.OnWalletAddEthereumChainObject(chainObject);
+        }
+    };
+
     private final OnVerifyListener innerOnVerifyListener = new OnVerifyListener() {
         @Override
         public void onVerify(String message, String signHex) {
@@ -268,36 +289,37 @@ public class Web3View extends WebView {
         }
     };
 
-    public void setActivity(FragmentActivity activity)
-    {
-        webViewClient.setActivity(activity);
-    }
-
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;
         private final WebViewClient externalClient;
-        private final JsInjectorClient jsInjectorClient;
         private boolean loadingError = false;
         private boolean redirect = false;
 
-        public WrapWebViewClient(Web3ViewClient internalClient, WebViewClient externalClient, JsInjectorClient jsInjectorClient) {
+        public WrapWebViewClient(Web3ViewClient internalClient, WebViewClient externalClient) {
             this.internalClient = internalClient;
             this.externalClient = externalClient;
-            this.jsInjectorClient = jsInjectorClient;
         }
 
         @Override
-        public void onPageStarted(WebView view, String url,Bitmap favicon) {
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            if (!redirect)
+            {
+                internalClient.resetInject();
+            }
+
+            redirect = false;
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
+            if (!internalClient.didInjection()) { internalClient.injectScriptFileFinal(view); }
+
             if (!redirect && !loadingError)
             {
-                if (loadInterface != null) loadInterface.onWebpageLoaded(url, view.getTitle());
+                if (loadInterface != null) { loadInterface.onWebpageLoaded(url, view.getTitle()); }
             }
             else if (!loadingError && loadInterface != null)
             {
@@ -327,6 +349,7 @@ public class Web3View extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             redirect = true;
+            if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
 
             return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, request);
@@ -344,15 +367,28 @@ public class Web3View extends WebView {
                     if (readLen == 0) {
                         throw new IOException("Nothing is read.");
                     }
-                    String injectedHtml = jsInjectorClient.injectJS(new String(data));
+                    String injectedHtml = internalClient.getJsInjectorClient().injectJS(new String(data));
                     response.setData(new ByteArrayInputStream(injectedHtml.getBytes()));
                 } catch (IOException ex) {
-                    Log.d("INJECT AFTER_EXTRNAL", "", ex);
+                    Log.d("INJECT AFTER_EXTERNAL", "", ex);
                 }
             } else {
                 response = internalClient.shouldInterceptRequest(view, request);
             }
             return response;
+        }
+    }
+
+    // Grim hack for dapps that still use local storage
+    private void checkDOMUsage(@NotNull String url)
+    {
+        if (url.equals("https://wallet.matic.network/bridge/")) // may need other sites added
+        {
+            getSettings().setDomStorageEnabled(false);
+        }
+        else
+        {
+            getSettings().setDomStorageEnabled(true);
         }
     }
 

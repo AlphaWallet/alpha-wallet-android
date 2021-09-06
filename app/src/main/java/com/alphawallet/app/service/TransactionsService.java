@@ -93,7 +93,7 @@ public class TransactionsService
         //reset transaction timers
         if (eventTimer == null || eventTimer.isDisposed())
         {
-            eventTimer = Observable.interval(0, 1, TimeUnit.SECONDS)
+            eventTimer = Observable.interval(0, 15, TimeUnit.SECONDS)
                     .doOnNext(l -> checkTransactionQueue()).subscribe();
         }
 
@@ -143,12 +143,14 @@ public class TransactionsService
 
     private boolean readTokenMoves(int chainId, boolean isNFT)
     {
+        if (BuildConfig.DEBUG) Log.d(TAG,"Check transfers: " + chainId + " : NFT=" + isNFT);
         //check if this route has combined NFT
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (isNFT) tokensService.checkingChain(chainId);
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(count, chainId, isNFT), this::gotReadErr);
+                .subscribe(count -> handleMoveCheck(isNFT), this::gotReadErr);
 
         return info.usesSeparateNFTTransferQuery();
     }
@@ -159,17 +161,10 @@ public class TransactionsService
         if (BuildConfig.DEBUG) e.printStackTrace();
     }
 
-    private void handleMoveCheck(int count, int chainId, boolean isNFT)
+    private void handleMoveCheck(boolean isNFT)
     {
-        if (count == TRANSFER_RESULT_MAX)
-        {
-            //there's more moves to fetch
-            readTokenMoves(chainId, isNFT);
-        }
-        else
-        {
-            eventFetch = null;
-        }
+        if (isNFT) tokensService.checkingChain(0); //this flags to TokensService that the check is complete. This avoids race condition
+        eventFetch = null;
     }
 
     private void checkTransactionQueue()
@@ -182,7 +177,7 @@ public class TransactionsService
             if (t != null)
             {
                 String tick = (t.isEthereum() && getPendingChains().contains(t.tokenInfo.chainId)) ? "*" : "";
-                if (t.isEthereum() && BuildConfig.DEBUG)
+                if (BuildConfig.DEBUG)
                     Log.d(TAG,"Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
@@ -364,6 +359,7 @@ public class TransactionsService
 
     private Transaction triggerTokenMoveCheck(Transaction transaction)
     {
+        if (transaction.timeStamp == 0) return transaction;
         final String currentWallet = tokensService.getCurrentAddress();
         Token t = tokensService.getToken(transaction.chainId, transaction.to);
         if (t != null && transaction.hasInput() && (t.isERC20() || t.isERC721()))
@@ -389,13 +385,22 @@ public class TransactionsService
 
     private Transaction storeRawTx(EthBlock ethBlock, int chainId, EthGetTransactionReceipt receipt, EthTransaction txDetails, String currentWallet)
     {
-        if (ethBlock != null || ethBlock.getBlock() != null)
+        if (ethBlock != null && ethBlock.getBlock() != null && receipt != null && receipt.getResult() != null)
         {
             return transactionsCache.storeRawTx(new Wallet(currentWallet), chainId, txDetails, ethBlock.getBlock().getTimestamp().longValue(), receipt.getResult().getStatus().equals("0x1"));
         }
         else
         {
-            return null;
+            return new Transaction();
         }
+    }
+
+    public Single<Boolean> wipeDataForWallet()
+    {
+        if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return Single.fromCallable(() -> false);
+        tokensService.stopUpdateCycle();
+        stopAllChainUpdate();
+
+        return transactionsCache.deleteAllForWallet(tokensService.getCurrentAddress());
     }
 }

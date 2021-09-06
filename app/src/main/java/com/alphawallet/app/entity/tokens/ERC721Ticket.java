@@ -1,19 +1,14 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
@@ -26,12 +21,13 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class ERC721Ticket extends Token implements Parcelable {
-
+public class ERC721Ticket extends Token
+{
     private final List<BigInteger> balanceArray;
-    private boolean isMatchedInXML = false;
 
     public ERC721Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
@@ -43,43 +39,14 @@ public class ERC721Ticket extends Token implements Parcelable {
         this.balanceArray = stringHexToBigIntegerList(balances);
     }
 
-    private ERC721Ticket(Parcel in) {
-        super(in);
-        balanceArray = new ArrayList<>();
-        int objSize = in.readInt();
-        int interfaceOrdinal = in.readInt();
-        contractType = ContractType.values()[interfaceOrdinal];
-        if (objSize > 0)
-        {
-            Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-            for (Object o : readObjArray)
-            {
-                BigInteger val = (BigInteger)o;
-                balanceArray.add(val);
-            }
-        }
-    }
-
-    public static final Creator<ERC721Ticket> CREATOR = new Creator<ERC721Ticket>() {
-        @Override
-        public ERC721Ticket createFromParcel(Parcel in) {
-            return new ERC721Ticket(in);
-        }
-
-        @Override
-        public ERC721Ticket[] newArray(int size) {
-            return new ERC721Ticket[size];
-        }
-    };
-
     @Override
     public String getStringBalance() {
-        return String.valueOf(getTicketCount());
+        return String.valueOf(getTokenCount());
     }
 
     @Override
     public boolean hasPositiveBalance() {
-        return (getTicketCount() > 0);
+        return (getTokenCount() > 0);
     }
 
     @Override
@@ -89,11 +56,13 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(balanceArray.size());
-        dest.writeInt(contractType.ordinal());
-        if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
+    public Map<BigInteger, NFTAsset> getTokenAssets() {
+        Map<BigInteger, NFTAsset> assets = new HashMap<>();
+        for (BigInteger tokenId : balanceArray)
+        {
+            assets.put(tokenId, new NFTAsset(tokenId));
+        }
+        return assets;
     }
 
     /**
@@ -117,7 +86,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public int getTicketCount()
+    public int getTokenCount()
     {
         int count = 0;
         if (balanceArray != null)
@@ -146,17 +115,6 @@ public class ERC721Ticket extends Token implements Parcelable {
     public int getContractType()
     {
         return R.string.ERC721T;
-    }
-
-    public void checkIsMatchedInXML(AssetDefinitionService assetService)
-    {
-        isMatchedInXML = assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address);
-    }
-
-    @Override
-    public boolean isMatchedInXML()
-    {
-        return isMatchedInXML;
     }
 
     public Function getPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
@@ -194,13 +152,6 @@ public class ERC721Ticket extends Token implements Parcelable {
     public boolean contractTypeValid()
     {
         return true;
-    }
-
-    @Override
-    public BigInteger getTokenID(int index)
-    {
-        if (balanceArray.size() > index && index >= 0) return balanceArray.get(index);
-        else return BigInteger.valueOf(-1);
     }
 
     @Override
@@ -253,17 +204,9 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public void addAssetToTokenBalanceAssets(Asset asset)
+    public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset)
     {
-        try
-        {
-            BigInteger tokenIdBI = new BigInteger(asset.getTokenId());
-            balanceArray.add(tokenIdBI);
-        }
-        catch (NumberFormatException e)
-        {
-            //
-        }
+        balanceArray.add(tokenId);
     }
 
     @Override
@@ -289,5 +232,11 @@ public class ERC721Ticket extends Token implements Parcelable {
     public BigDecimal getBalanceRaw()
     {
         return new BigDecimal(getArrayBalance().size());
+    }
+
+    @Override
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_use, R.string.action_transfer);
     }
 }

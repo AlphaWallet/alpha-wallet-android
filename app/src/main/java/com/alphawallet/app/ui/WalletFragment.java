@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -27,12 +30,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
@@ -70,6 +71,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
@@ -99,7 +101,7 @@ public class WalletFragment extends BaseFragment implements
     private TokensAdapter adapter;
     private ImageView addressBlockie;
     private View selectedToken;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private String importFileName;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
@@ -141,7 +143,7 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initList() {
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TAB_ALL);
         recyclerView.setAdapter(adapter);
@@ -152,14 +154,13 @@ public class WalletFragment extends BaseFragment implements
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
-        recyclerView.setRecyclerListener(holder -> adapter.onRViewRecycled(holder));
+        recyclerView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
     }
 
     private void initViewModel() {
         viewModel = new ViewModelProvider(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
         viewModel.progress().observe(getViewLifecycleOwner(), systemView::showProgress);
-        //viewModel.error().observe(getViewLifecycleOwner(), this::onError);
         viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
@@ -214,6 +215,7 @@ public class WalletFragment extends BaseFragment implements
             for (RealmToken t : realmTokens)
             {
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
+                if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
                 String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
 
@@ -250,15 +252,6 @@ public class WalletFragment extends BaseFragment implements
             viewModel.prepare();
             viewModel.notifyRefresh();
         });
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        isVisible = isVisibleToUser;
-        if (isResumed()) { // fragment created
-            if (isVisible) viewModel.prepare();
-        }
     }
 
     @Override
@@ -356,8 +349,10 @@ public class WalletFragment extends BaseFragment implements
         if (selectedToken == null)
         {
             selectedToken = view;
-            token = viewModel.getTokenFromService(token);
-            token.clickReact(viewModel, getActivity());
+            Token clickOrigin = viewModel.getTokenFromService(token);
+            if (clickOrigin == null) clickOrigin = token;
+            viewModel.showTokenDetail(getActivity(), clickOrigin);
+            //clickOrigin.clickReact(viewModel, getActivity());
             handler.postDelayed(this, 700);
         }
     }
@@ -486,14 +481,17 @@ public class WalletFragment extends BaseFragment implements
         if (viewModel != null && adapter != null)
         {
             adapter.clear();
+            //reload tokens
+            viewModel.reloadTokens();
         }
     }
 
     public void refreshTokens()
     {
         //only update the tokens in place if something has changed, using TokenSortedItem rules.
-        if (viewModel != null)
+        if (viewModel != null && adapter != null)
         {
+            adapter.clear();
             viewModel.prepare();
             systemView.showProgress(false); //indicate update complete
         }
@@ -529,6 +527,23 @@ public class WalletFragment extends BaseFragment implements
         selectedToken = null;
     }
 
+    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                String keyBackup = null;
+                boolean noLockScreen = false;
+                Intent data = result.getData();
+                if (data != null) keyBackup = data.getStringExtra("Key");
+                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    ((HomeActivity)getActivity()).backupWalletSuccess(keyBackup);
+                }
+                else
+                {
+                    ((HomeActivity)getActivity()).backupWalletFail(keyBackup, noLockScreen);
+                }
+    });
+
     @Override
     public void BackupClick(Wallet wallet)
     {
@@ -546,7 +561,7 @@ public class WalletFragment extends BaseFragment implements
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+        handleBackupClick.launch(intent);
     }
 
     @Override

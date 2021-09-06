@@ -11,6 +11,7 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModelFactory;
 
 import dagger.Module;
@@ -30,10 +31,10 @@ public class RedeemSignatureDisplayModule {
             KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract,
-            AssetDisplayRouter assetDisplayRouter,
+            TokensService tokensService,
             AssetDefinitionService assetDefinitionService) {
         return new RedeemSignatureDisplayModelFactory(
-                genericWalletInteract, signatureGenerateInteract, createTransactionInteract, keyService, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
+                genericWalletInteract, signatureGenerateInteract, createTransactionInteract, keyService, fetchTokensInteract, memPoolInteract, tokensService, assetDefinitionService);
     }
 
     @Provides
@@ -59,10 +60,5 @@ public class RedeemSignatureDisplayModule {
     @Provides
     MemPoolInteract provideMemPoolInteract(TokenRepositoryType tokenRepository) {
         return new MemPoolInteract(tokenRepository);
-    }
-
-    @Provides
-    AssetDisplayRouter provideAssetDisplayRouter() {
-        return new AssetDisplayRouter();
     }
 }

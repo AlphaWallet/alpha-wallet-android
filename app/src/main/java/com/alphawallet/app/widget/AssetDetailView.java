@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 
 import java.math.BigInteger;
@@ -34,7 +34,7 @@ public class AssetDetailView extends LinearLayout
     private final ImageView assetDetails;
     private final LinearLayout layoutHolder;
     private final ProgressBar loadingSpinner;
-    private final ERC721ImageView imageView;
+    private final NFTImageView imageView;
 
     @Nullable
     private Disposable disposable;
@@ -54,7 +54,7 @@ public class AssetDetailView extends LinearLayout
 
     public void setupAssetDetail(Token token, String tokenId, final ActionSheetInterface actionSheetInterface)
     {
-        Asset asset = token.getAssetForToken(tokenId);
+        NFTAsset asset = token.getAssetForToken(tokenId);
         if (asset == null)
         {
             loadingSpinner.setVisibility(View.VISIBLE);
@@ -69,10 +69,9 @@ public class AssetDetailView extends LinearLayout
         }
     }
 
-    private void setupAssetDetail(Asset asset, ActionSheetInterface actionSheetInterface)
+    private void setupAssetDetail(NFTAsset asset, ActionSheetInterface actionSheetInterface)
     {
         loadingSpinner.setVisibility(View.GONE);
-        if (asset.getTokenId() == null) { return; }
 
         layoutHolder.setVisibility(View.VISIBLE);
         assetName.setText(asset.getName());
@@ -98,7 +97,7 @@ public class AssetDetailView extends LinearLayout
         }
     }
 
-    private Single<Asset> fetchAsset(Token token, String tokenId)
+    private Single<NFTAsset> fetchAsset(Token token, String tokenId)
     {
         return Single.fromCallable(() -> {
             return token.fetchTokenMetadata(new BigInteger(tokenId)); //fetch directly from token

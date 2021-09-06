@@ -9,7 +9,7 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
@@ -20,7 +20,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
-    private final GasService2 gasService;
+    private final GasService gasService;
 
     public DappBrowserViewModelFactory(
             GenericWalletInteract genericWalletInteract,
@@ -29,7 +29,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService2 gasService) {
+            GasService gasService) {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;

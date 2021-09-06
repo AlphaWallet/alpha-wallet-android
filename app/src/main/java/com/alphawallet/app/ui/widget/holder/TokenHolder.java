@@ -69,6 +69,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
+    private static int counter = 1;
+
     public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
         super(R.layout.item_token, parent);
@@ -94,8 +96,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     }
 
     @Override
-    public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition) {
-
+    public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
+    {
         try
         {
             token = tokensService.getToken(data.getChain(), data.getAddress());
@@ -122,13 +124,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             contractSeparator.setVisibility(View.GONE);
 
             //setup name and value (put these together on a single string to make wrap-around text appear better).
-            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
+            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTokenCount());
             balanceEth.setText(nameValue);
 
             primaryElement = false;
 
             tokenIcon.bindData(token, assetDefinition);
             tokenIcon.setOnTokenClickListener(onTokenClickListener);
+
 
             populateTicker();
 
@@ -212,7 +215,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceCurrency.setText(EMPTY_BALANCE);
     }
 
-    private Runnable clearElevation = new Runnable()
+    private final Runnable clearElevation = new Runnable()
     {
         @Override
         public void run()

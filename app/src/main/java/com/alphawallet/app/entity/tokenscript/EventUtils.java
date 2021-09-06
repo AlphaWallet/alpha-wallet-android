@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokenscript;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
@@ -252,11 +253,11 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetBlockByHash(blockHash.trim(), false).send();
-                System.out.println(txResult.getResult());
+                if (BuildConfig.DEBUG) System.out.println(txResult.getResult());
             }
             catch (IOException | NullPointerException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 txResult = new EthBlock();
             }
 
@@ -271,11 +272,11 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetTransactionByHash(blockHash.trim()).send();
-                System.out.println(txResult.getResult());
+                if (BuildConfig.DEBUG) System.out.println(txResult.getResult());
             }
             catch (IOException | NullPointerException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 txResult = new EthTransaction();
             }
 

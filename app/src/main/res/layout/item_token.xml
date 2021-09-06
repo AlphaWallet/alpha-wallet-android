@@ -42,11 +42,10 @@
 
             <com.alphawallet.app.widget.TokenIcon
                 android:id="@+id/token_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/token_icon"
+                android:layout_height="@dimen/token_icon"
                 android:layout_marginEnd="10dp"
-                android:layout_gravity="center"
-                app:showStatus="false" />
+                android:layout_gravity="center" />
 
             <LinearLayout
                 android:layout_width="match_parent"

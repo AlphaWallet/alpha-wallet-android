@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
@@ -31,7 +33,8 @@
             android:layout_marginBottom="1dp"
             android:text="DEBUG"
             android:textSize="10sp"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            tools:ignore="HardcodedText,SmallSp" />
 
     </LinearLayout>
 
@@ -54,7 +57,7 @@
             android:lines="1"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text="Primary"
+            tools:text="Primary"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="17sp"
@@ -71,7 +74,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_semibold"
             android:lines="1"
-            android:text="Secondary"
+            tools:text="Secondary"
             android:textAllCaps="false"
             android:textColor="@drawable/selector_button_text_secondary"
             android:textSize="17sp"
@@ -88,7 +91,7 @@
             android:drawableTint="@color/azure"
             android:gravity="center"
             android:src="@drawable/ic_menu_azure"
-            android:tint="@drawable/selector_button_text_secondary"
+            app:tint="@drawable/selector_button_text_secondary"
             android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

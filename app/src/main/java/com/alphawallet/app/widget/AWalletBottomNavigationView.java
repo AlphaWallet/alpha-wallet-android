@@ -35,7 +35,7 @@ public class AWalletBottomNavigationView extends LinearLayout {
 
     private WalletPage selectedItem;
 
-    private ArrayList<String> settingsBadgeKeys = new ArrayList<>();
+    private final ArrayList<String> settingsBadgeKeys = new ArrayList<>();
 
     public AWalletBottomNavigationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);

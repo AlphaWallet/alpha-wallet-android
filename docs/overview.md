@@ -2,7 +2,7 @@
 
 Each module has its own README. Please click the name of the module to go to the corrisponding README file.
 
-| [app](app/README.md) | [lib](lib/README.md) | [dmz](dmz/README.md) | [desktop](desktop/README.md) |
+| [app](../app/README.md) | [lib](../lib/README.md) | [dmz](../dmz/README.md) | [util](../util/README.md) |
 | --- | --- | --- | --- |
 | aWallet Android app | Library code shared between Android app and other modules. e.g. XML parser and Universal Link code. | Code that runs in unprotected DMZ - public facing. Currently only used to display Universal Link | Administrative tool. Currently only for generating Universal Link from desktop. |
 

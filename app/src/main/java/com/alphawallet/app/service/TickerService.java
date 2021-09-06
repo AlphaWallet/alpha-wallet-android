@@ -7,7 +7,6 @@ import android.text.format.DateUtils;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
-import com.alphawallet.app.entity.EtherscanTransaction;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.repository.TokenLocalSource;
@@ -16,8 +15,6 @@ import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -78,7 +75,6 @@ public class TickerService
     private final Gson gson;
     private final Context context;
     private final TokenLocalSource localSource;
-    private final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
     private final Map<Integer, TokenTicker> ethTickers = new ConcurrentHashMap<>();
     private Disposable tickerUpdateTimer;
     private double currentConversionRate = 0.0;
@@ -171,6 +167,7 @@ public class TickerService
         return Single.fromCallable(() -> {
             int newSize = 0;
             canUpdate = false;
+            final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
             try
             {
                 //build ticker header
@@ -194,8 +191,6 @@ public class TickerService
                 List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string());
                 newSize = tickers.size();
 
-                erc20Tickers.clear();
-
                 for (CoinGeckoTicker t : tickers)
                 {
                     BigDecimal changeValue = new BigDecimal(t.usdChange);
@@ -215,13 +210,6 @@ public class TickerService
 
             return newSize;
         });
-    }
-
-    private EtherscanTransaction[] getEtherscanTransactions(String response) throws JSONException
-    {
-        JSONObject stateData = new JSONObject(response);
-        JSONArray orders = stateData.getJSONArray("result");
-        return gson.fromJson(orders.toString(), EtherscanTransaction[].class);
     }
 
     private void addToTokenTickers(BigInteger tickerInfo, long tickerTime)
@@ -340,7 +328,6 @@ public class TickerService
         if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
         localSource.updateEthTickers(ethTickers);
-        localSource.updateERC20Tickers(erc20Tickers);
         localSource.removeOutdatedTickers();
     }
 
@@ -489,7 +476,13 @@ public class TickerService
     {
         if (ticker != null && address != null)
         {
-            erc20Tickers.put(address, ticker);
+            Single.fromCallable(() -> {
+                localSource.updateERC20Tickers(new HashMap<String, TokenTicker>()
+                {{ put(address, ticker); }});
+                return true;
+            }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe().isDisposed();
         }
     }
 
@@ -549,10 +542,4 @@ public class TickerService
     {
         return currentConversionRate;
     }
-
-    // These ERC20 can't have balance updated from the market service
-    private static final String[] DYNAMIC_BALANCE_TOKENS = {
-            "0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04", //AAVE
-            "0x71fc860f7d3a592a4a98740e39db31d25db65ae8"  //AAVE
-    };
 }

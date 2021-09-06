@@ -1,9 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -12,7 +9,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
@@ -26,7 +22,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -39,7 +34,7 @@ import java.util.List;
  * and Formuler-one, which, too, amounts to a hundred each".
  */
 
-public class Ticket extends Token implements Parcelable
+public class Ticket extends Token
 {
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
@@ -54,57 +49,20 @@ public class Ticket extends Token implements Parcelable
         this.balanceArray = stringHexToBigIntegerList(balances);
     }
 
-    private Ticket(Parcel in) {
-        super(in);
-        balanceArray = new ArrayList<>();
-        int objSize = in.readInt();
-        int interfaceOrdinal = in.readInt();
-        contractType = ContractType.values()[interfaceOrdinal];
-        if (objSize > 0)
-        {
-            Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-            for (Object o : readObjArray)
-            {
-                BigInteger val = (BigInteger)o;
-                balanceArray.add(val);
-            }
-        }
-    }
-
     @Override
     public String getStringBalance() {
-        return String.valueOf(getTicketCount());
+        return String.valueOf(getTokenCount());
     }
 
     @Override
     public boolean hasPositiveBalance() {
-        return (getTicketCount() > 0);
+        return (getTokenCount() > 0);
     }
 
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
         else return Utils.bigIntListToString(balanceArray, true);
-    }
-
-    public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
-        @Override
-        public Ticket createFromParcel(Parcel in) {
-            return new Ticket(in);
-        }
-
-        @Override
-        public Ticket[] newArray(int size) {
-            return new Ticket[size];
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(balanceArray.size());
-        dest.writeInt(contractType.ordinal());
-        if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
     }
 
     /**
@@ -128,7 +86,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public int getTicketCount()
+    public int getTokenCount()
     {
         int count = 0;
         if (balanceArray != null)
@@ -164,18 +122,6 @@ public class Ticket extends Token implements Parcelable
         {
             return R.string.erc875;
         }
-    }
-
-    @Override
-    public int[] getTicketIndices(String ticketIds)
-    {
-        List<BigInteger> indexList = ticketIdStringToIndexList(ticketIds);
-        int[] indicies = new int[indexList.size()];
-        int i = 0;
-        for (Iterator<BigInteger> iterator = indexList.iterator(); iterator.hasNext(); i++) {
-            indicies[i] = iterator.next().intValue();
-        }
-        return indicies;
     }
 
     /*************************************
@@ -289,12 +235,6 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public boolean isMatchedInXML()
-    {
-        return isMatchedInXML;
-    }
-
-    @Override
     public Function getTransferFunction(String to, List<BigInteger> tokenIndices) throws NumberFormatException
     {
         return new Function(
@@ -339,19 +279,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return dynArray;
-    }
-
-    @Override
-    public int interfaceOrdinal()
-    {
-        return contractType.ordinal();
-    }
-
-    @Override
-    public BigInteger getTokenID(int index)
-    {
-        if (balanceArray.size() > index && index >= 0) return balanceArray.get(index);
-        else return BigInteger.valueOf(-1);
     }
 
     @Override
@@ -451,5 +378,11 @@ public class Ticket extends Token implements Parcelable
     public BigDecimal getBalanceRaw()
     {
         return new BigDecimal(getArrayBalance().size());
+    }
+
+    @Override
+    public List<Integer> getStandardFunctions()
+    {
+        return Arrays.asList(R.string.action_use, R.string.action_transfer, R.string.action_sell);
     }
 }

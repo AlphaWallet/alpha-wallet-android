@@ -25,12 +25,10 @@ import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.GasService2;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
-import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.service.NotificationService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -159,7 +157,7 @@ public class RepositoriesModule {
 									   TokenRepositoryType tokenRepository,
 									   Context context,
 									   TickerService tickerService,
-									   OpenseaService openseaService,
+									   OpenSeaService openseaService,
 									   AnalyticsServiceType analyticsService) {
 		return new TokensService(ethereumNetworkRepository, tokenRepository, context, tickerService, openseaService, analyticsService);
 	}
@@ -175,27 +173,14 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new GasService(ethereumNetworkRepository);
+    GasService provideGasService2(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager) {
+		return new GasService(ethereumNetworkRepository, client, realmManager);
 	}
 
 	@Singleton
 	@Provides
-	GasService2 provideGasService2(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager) {
-		return new GasService2(ethereumNetworkRepository, client, realmManager);
-	}
-
-	@Singleton
-	@Provides
-    MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
-                                                 TransactionRepositoryType transactionRepository) {
-		return new MarketQueueService(ctx, okHttpClient, transactionRepository);
-	}
-
-	@Singleton
-	@Provides
-    OpenseaService provideOpenseaService(Context ctx) {
-		return new OpenseaService(ctx);
+	OpenSeaService provideOpenseaService() {
+		return new OpenSeaService();
 	}
 
 	@Singleton

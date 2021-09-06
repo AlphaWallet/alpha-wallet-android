@@ -12,20 +12,21 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
 
 import org.web3j.abi.FunctionEncoder;
@@ -90,6 +91,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
     public static final BigInteger INTERFACE_BALANCES_721_TICKET = new BigInteger ("c84aae17", 16);
     public static final BigInteger INTERFACE_SUPERRARE = new BigInteger ("5b5e139f", 16);
+    public static final BigInteger INTERFACE_ERC1155 = new BigInteger("d9b67a26", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -159,12 +161,14 @@ public class TokenRepository implements TokenRepositoryType {
                                 type = ContractType.ERC721;
                             }
                             break;
+                        case ERC1155:
+                            break;
                         case ERC721:
                         case ERC721_LEGACY:
-                            Map<BigInteger, Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            Map<BigInteger, NFTAsset> NFTBalance = t.getTokenAssets(); //add balance from Opensea
                             t.balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address); //get balance for wallet from contract
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
-                            t = new ERC721Token(tInfo, erc721Balance, t.balance, System.currentTimeMillis(), t.getNetworkName(), type);
+                            t = new ERC721Token(tInfo, NFTBalance, t.balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             t.lastTxTime = tokens[i].lastTxTime;
                             tokens[i] = t;
                             break;
@@ -215,6 +219,13 @@ public class TokenRepository implements TokenRepositoryType {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
                 .fetchAllTokensWithNameIssue(walletAddress, networkFilters);
+    }
+
+    @Override
+    public Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Integer> networkFilters) {
+        if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
+        return localSource
+                .fetchAllTokensWithBlankName(walletAddress, networkFilters);
     }
 
     @Override
@@ -295,11 +306,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<BigDecimal> updateTokenBalance(String walletAddress, int chainId, String tokenAddress, ContractType type)
+    public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
         Wallet wallet = new Wallet(walletAddress);
-        localSource.markBalanceChecked(wallet, chainId, tokenAddress);
-        return updateBalance(wallet, chainId, tokenAddress, type)
+        localSource.markBalanceChecked(wallet, token.tokenInfo.chainId, token.getAddress());
+        return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }
@@ -321,6 +332,12 @@ public class TokenRepository implements TokenRepositoryType {
                     break;
                 case ERC721_LEGACY:
                 case ERC721:
+                    break;
+                case ERC1155:
+                    Token tToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(),
+                            contractType, network.getShortName(), 0);
+                    tToken.setTokenWallet(wallet.address);
+                    balance = tToken.updateBalance(null);
                     break;
                 case ERC721_TICKET:
                     balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
@@ -354,59 +371,20 @@ public class TokenRepository implements TokenRepositoryType {
     public void updateAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals)
     {
         erc721Token.balance = checkUint256Balance(new Wallet(wallet), erc721Token.tokenInfo.chainId, erc721Token.getAddress());
-        localSource.updateERC721Assets(wallet, erc721Token,
+        localSource.updateNFTAssets(wallet, erc721Token,
                 additions, removals);
     }
 
     @Override
-    public void storeAsset(String wallet, Token token, Asset asset)
+    public void storeAsset(String wallet, Token token, BigInteger tokenId, NFTAsset asset)
     {
-        localSource.storeAsset(wallet, token, asset);
+        localSource.storeAsset(wallet, token, tokenId, asset);
     }
 
     @Override
-    public Token[] initERC721Assets(Wallet wallet, Token[] token)
+    public Token[] initNFTAssets(Wallet wallet, Token[] token)
     {
-        return localSource.initERC721Assets(wallet, token);
-    }
-
-    /**
-     * Ensure all tokens received from AmberData have the correct interface.
-     * If not, determine the interface then store. This means there's no need to store again so filter out the tokens we store
-     *
-     * @param wallet
-     * @param tokens
-     * @return
-     */
-    private List<Token> determineTokenTypes(Wallet wallet, Token[] tokens)
-    {
-        List<String> removeList = new ArrayList<>();
-        //check interface spec before storing.
-        for (Token t : tokens)
-        {
-            if (ignoreToken(t))
-            {
-                removeList.add(t.tokenInfo.address);
-                continue;
-            }
-
-            Token st = localSource.fetchToken(t.tokenInfo.chainId, wallet, t.tokenInfo.address.toLowerCase());
-            if (st == null && t.getInterfaceSpec() == ContractType.OTHER)
-            {
-                t.setInterfaceSpec(determineCommonType(t.tokenInfo).blockingGet());
-                st = localSource.saveToken(wallet, t).blockingGet(); //store now so list is updated more quickly at startup
-                if (st != null) removeList.add(st.tokenInfo.address);
-            }
-        }
-
-        //only return tokens that already have their type checked
-        List<Token> updateList = new ArrayList<>();
-        for (Token t : tokens)
-        {
-            if (!removeList.contains(t.tokenInfo.address)) updateList.add(t);
-        }
-
-        return updateList;
+        return localSource.initNFTAssets(wallet, token);
     }
 
     @Override
@@ -442,37 +420,47 @@ public class TokenRepository implements TokenRepositoryType {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
-    private Single<BigDecimal> updateBalance(final Wallet wallet, final int chainId, final String tokenAddress, ContractType type)
+    @Override
+    public String getTokenImageUrl(int networkId, String address)
     {
+        return localSource.getTokenImageUrl(networkId, address);
+    }
+
+    private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
+    {
+        //final int chainId, final String tokenAddress, ContractType type
         return Single.fromCallable(() -> {
                 BigDecimal balance = BigDecimal.valueOf(-1);
                 try
                 {
                     List<BigInteger> balanceArray = null;
 
-                    switch (type)
+                    switch (token.getInterfaceSpec())
                     {
                         case ETHEREUM:
-                            balance = getEthBalance(wallet, chainId);
+                            balance = getEthBalance(wallet, token.tokenInfo.chainId);
                             break;
                         case ERC875:
                         case ERC875_LEGACY:
-                            balanceArray = getBalanceArray875(wallet, chainId, tokenAddress);
+                            balanceArray = getBalanceArray875(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
                             //checking raw balance, this only gives the count of tokens
-                            balance = checkUint256Balance(wallet, chainId, tokenAddress);
+                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
+                            break;
+                        case ERC1155:
+                            balance = token.updateBalance(getRealmInstance(wallet));
                             break;
                         case ERC721_TICKET:
-                            balanceArray = getBalanceArray721Ticket(wallet, chainId, tokenAddress);
+                            balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
                         case MAYBE_ERC20:
-                            balance = checkUint256Balance(wallet, chainId, tokenAddress);
+                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
                             break;
                         case NOT_SET:
                             break;
@@ -485,12 +473,12 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
-                        localSource.updateTokenBalance(wallet, chainId, tokenAddress, balance, balanceArray, type);
+                        localSource.updateTokenBalance(wallet, token, balance, balanceArray);
                     }
 
-                    if (type != ContractType.ETHEREUM && wallet.address.equalsIgnoreCase(tokenAddress))
+                    if (token.isEthereum() && wallet.address.equalsIgnoreCase(token.getWallet()))
                     {
-                        updateNativeToken(wallet, chainId);
+                        updateNativeToken(wallet, token.tokenInfo.chainId);
                     }
                 }
                 catch (Exception e)
@@ -568,7 +556,6 @@ public class TokenRepository implements TokenRepositoryType {
 
             switch (interfaceSpec)
             {
-                case DYNAMIC_CONTRACT:
                 case ETHEREUM:
                     balance = getEthBalance(wallet, tInfo.chainId);
                     break;
@@ -591,7 +578,11 @@ public class TokenRepository implements TokenRepositoryType {
                     balanceArray = checkERC721TicketBalanceArray(wallet, tInfo, token);
                     break;
                 case ERC20:
+                case DYNAMIC_CONTRACT:
                     balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
+                    break;
+                case ERC1155:
+                    balance = token.updateBalance(null);
                     break;
                 case OTHER:
                     //This token has its interface checked in the flow elsewhere
@@ -765,6 +756,12 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal getEthBalance(Wallet wallet, int chainId)
     {
+        //in case chain has an override
+        if (EthereumNetworkRepository.getChainOverrideAddress(chainId).length() > 0)
+        {
+            return checkUint256Balance(wallet, chainId, EthereumNetworkRepository.getChainOverrideAddress(chainId));
+        }
+
         try {
             return new BigDecimal(getService(chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
                     .send()
@@ -779,27 +776,6 @@ public class TokenRepository implements TokenRepositoryType {
             if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
             return BigDecimal.valueOf(-1);
         }
-    }
-
-    private Single<BigDecimal> getEthBalanceInternal(NetworkInfo network, Wallet wallet, boolean pending)
-    {
-        return Single.fromCallable(() -> {
-            try {
-                DefaultBlockParameterName balanceCheckType = pending ? DefaultBlockParameterName.PENDING : DefaultBlockParameterName.LATEST;
-                return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, balanceCheckType)
-                                                  .send()
-                                                  .getBalance());
-            }
-            catch (IOException e)
-            {
-                return BigDecimal.valueOf(-1);
-            }
-            catch (Exception e)
-            {
-                if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
-                return BigDecimal.valueOf(-1);
-            }
-        }).subscribeOn(Schedulers.io());
     }
 
     private List<BigInteger> getBalanceArray875(Wallet wallet, int chainId, String tokenAddress) {
@@ -1371,7 +1347,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             ContractType returnType;
-            //could be ERC721, ERC721T, ERC875 or ERC20
+            //could be ERC721, ERC1155, ERC721T, ERC875 or ERC20
             //try some interface values
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             try
@@ -1380,12 +1356,14 @@ public class TokenRepository implements TokenRepositoryType {
                     returnType = ContractType.ERC721_TICKET;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE))
-                    returnType = ContractType.ERC721_LEGACY;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
-                    returnType = ContractType.ERC721_LEGACY;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))
                     returnType = ContractType.ERC721;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_ERC1155), Boolean.TRUE))
+                    returnType = ContractType.ERC1155;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
+                    returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE))
+                    returnType = ContractType.ERC721_LEGACY;
                 else
                     returnType = ContractType.OTHER;
             }
@@ -1498,6 +1476,69 @@ public class TokenRepository implements TokenRepositoryType {
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
+    }
+
+    public static String callSmartContractFunction(int chainId,
+                                  Function function, String contractAddress, String walletAddr)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = getWeb3jService(chainId).ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+
+            if (!responseValues.isEmpty())
+            {
+                return responseValues.get(0).getValue().toString();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return null;
+    }
+
+    public static List callSmartContractFunctionArray(int chainId,
+                                Function function, String contractAddress, String walletAddr)
+    {
+        try
+        {
+            String encodedFunction = FunctionEncoder.encode(function);
+            org.web3j.protocol.core.methods.response.EthCall ethCall = getWeb3jService(chainId).ethCall(
+                    org.web3j.protocol.core.methods.request.Transaction
+                            .createEthCallTransaction(walletAddr, contractAddress, encodedFunction),
+                    DefaultBlockParameterName.LATEST).send();
+
+            String value = ethCall.getValue();
+            List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
+            Object o;
+            if (values.isEmpty())
+            {
+                values = new ArrayList<>();
+                values.add(new Uint256(CONTRACT_BALANCE_NULL));
+                o = values;
+            }
+            else
+            {
+                o = values.get(0).getValue();
+            }
+            return (List)o;
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
+            return null;
+        }
     }
 
     private boolean ignoreToken(Token t)

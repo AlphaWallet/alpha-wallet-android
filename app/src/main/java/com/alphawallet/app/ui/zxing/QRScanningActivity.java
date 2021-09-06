@@ -9,6 +9,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Lifecycle;
@@ -64,6 +67,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
         {
+            chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
             setContentView(R.layout.activity_full_screen_scanner_fragment);
             initView();
         }
@@ -71,8 +75,6 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         {
             requestCameraPermission();
         }
-
-        chainIdOverride = getIntent().getIntExtra(C.EXTRA_NETWORKID, 0);
     }
 
     private void initView()
@@ -86,6 +88,8 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         browseButton = findViewById(R.id.browse_button);
 
         fullScannerFragment = (FullScannerFragment) getSupportFragmentManager().findFragmentById(R.id.scanner_fragment);
+
+        fullScannerFragment.setChainOverride(chainIdOverride);
 
         if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(C.EXTRA_UNIVERSAL_SCAN))
         {
@@ -132,12 +136,20 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         });
     }
 
+    ActivityResultLauncher<String> getQRImage = registerForActivityResult(new ActivityResultContracts.GetContent(),
+            uri -> {
+                disposable = concertAndHandle(uri)
+                        .observeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onSuccess, this::onError);
+            });
+
     private void pickImage()
     {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), RC_HANDLE_IMAGE_PICKUP);
+        getQRImage.launch("image/*");
     }
 
     // Handles the requesting of the camera permission.
@@ -211,6 +223,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     {
         Intent intent = new Intent(this, WalletConnectActivity.class);
         intent.putExtra("qrCode", qrCode);
+        intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         startActivity(intent);
         setResult(WALLET_CONNECT);
         finish();
@@ -222,23 +235,6 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         Intent intent = new Intent();
         setResult(Activity.RESULT_CANCELED, intent);
         finish();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_HANDLE_IMAGE_PICKUP && resultCode == Activity.RESULT_OK)
-        {
-            if (data != null) {
-                Uri selectedImage = data.getData();
-
-                disposable = concertAndHandle(selectedImage)
-                        .observeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onSuccess, this::onError);
-            }
-        }
     }
 
     private void onError(Throwable throwable)

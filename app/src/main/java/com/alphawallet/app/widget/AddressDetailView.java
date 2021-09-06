@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
 
@@ -54,13 +56,19 @@ public class AddressDetailView extends LinearLayout
         recipientText.setText(a.getResourceId(R.styleable.InputView_label, R.string.recipient));
     }
 
-    public void setupAddress(String address, String ensName)
+    public void setupAddress(String address, String ensName, Token destToken)
     {
         String destStr = (!TextUtils.isEmpty(ensName) ? ensName + " | " : "") + Utils.formatAddress(address);
         textAddressSummary.setText(destStr);
         addressBlockie.setImageBitmap(Blockies.createIcon(address.toLowerCase()));
         textFullAddress.setText(address);
         textEnsName.setText(ensName);
+
+        if (TextUtils.isEmpty(ensName) && destToken != null && !destToken.isEthereum())
+        {
+            ((TextView)findViewById(R.id.label_ens)).setText(R.string.token_text);
+            textEnsName.setText(destToken.getFullName());
+        }
 
         layoutHolder.setOnClickListener(v -> {
             if (layoutDetails.getVisibility() == View.GONE)

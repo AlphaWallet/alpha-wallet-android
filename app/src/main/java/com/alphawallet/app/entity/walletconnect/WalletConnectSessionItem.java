@@ -18,7 +18,7 @@ public class WalletConnectSessionItem
     {
         name = s.getRemotePeerData().getName();
         url = s.getRemotePeerData().getUrl();
-        icon = s.getRemotePeerData().getIcons().get(0);
+        icon = s.getRemotePeerData().getIcons().size() > 0 ? s.getRemotePeerData().getIcons().get(0) : null;
         sessionId = s.getSession().getTopic();
         localSessionId = s.getSessionId();
         chainId = s.getChainId() == 0 ? 1 : s.getChainId(); //older sessions without chainId set must be mainnet

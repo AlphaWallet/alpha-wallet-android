@@ -14,6 +14,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";
     private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
     private static final String NETWORK_FILTER_KEY = "network_filters";
+    private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
     private static final String NOTIFICATIONS_KEY = "notifications";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
@@ -28,6 +29,9 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String SHOWN_WARNING = "shown_warning";
     public static final String PRICE_ALERTS = "price_alerts";
     private static final String SET_NETWORK_FILTERS = "set_filters";
+
+    private static final String RATE_APP_SHOWN = "rate_us_shown";
+    private static final String LAUNCH_COUNT = "launch_count";
 
     private final SharedPreferences pref;
 
@@ -64,6 +68,16 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setActiveBrowserNetwork(int networkId) {
         pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
+    }
+
+    @Override
+    public String getCustomRPCNetworks() {
+        return pref.getString(CUSTOM_NETWORKS_KEY, "");
+    }
+
+    @Override
+    public void setCustomRPCNetworks(String networks) {
+        pref.edit().putString(CUSTOM_NETWORKS_KEY, networks).apply();
     }
 
     @Override
@@ -193,5 +207,31 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void commit()
     {
         pref.edit().commit();
+    }
+
+    @Override
+    public void incrementLaunchCount() {
+        int prevLaunchCount = getLaunchCount();
+        pref.edit().putInt(LAUNCH_COUNT, prevLaunchCount + 1).apply();
+    }
+
+    @Override
+    public void resetLaunchCount() {
+        pref.edit().putInt(LAUNCH_COUNT, 0).apply();
+    }
+
+    @Override
+    public int getLaunchCount() {
+        return pref.getInt(LAUNCH_COUNT, 0);
+    }
+
+    @Override
+    public void setRateAppShown() {
+        pref.edit().putBoolean(RATE_APP_SHOWN, true).apply();
+    }
+
+    @Override
+    public boolean getRateAppShown() {
+        return pref.getBoolean(RATE_APP_SHOWN, false);
     }
 }

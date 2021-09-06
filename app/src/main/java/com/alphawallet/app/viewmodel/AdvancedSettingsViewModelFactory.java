@@ -8,22 +8,26 @@ import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TransactionsService;
 
 public class AdvancedSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
+    private final TransactionsService transactionsService;
 
     public AdvancedSettingsViewModelFactory(
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
             AssetDefinitionService assetDefinitionService,
-            PreferenceRepositoryType preferenceRepository) {
+            PreferenceRepositoryType preferenceRepository,
+            TransactionsService transactionsService) {
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.preferenceRepository = preferenceRepository;
+        this.transactionsService = transactionsService;
     }
 
     @NonNull
@@ -33,7 +37,8 @@ public class AdvancedSettingsViewModelFactory implements ViewModelProvider.Facto
                 localeRepository,
                 currencyRepository,
                 assetDefinitionService,
-                preferenceRepository
+                preferenceRepository,
+                transactionsService
         );
     }
 }

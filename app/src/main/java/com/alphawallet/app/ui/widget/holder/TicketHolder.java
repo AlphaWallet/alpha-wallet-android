@@ -16,6 +16,7 @@ public class TicketHolder extends BaseTicketHolder
 {
     public static final int VIEW_TYPE = 1066;
 
+    @Deprecated
     public TicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service)
     {
         super(resId, parent, ticket, service);

@@ -15,6 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -39,6 +43,7 @@ import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.InputAmount;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import org.web3j.crypto.Keys;
 
@@ -325,33 +330,30 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         }
     }
 
+    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, -1);
+                    NetworkInfo info = viewModel.getNetworkByChain(networkId);
+                    if (info != null)
+                    {
+                        getInfo();
+                        Intent intent = getIntent();
+                        intent.putExtra(KEY_MODE, MODE_POS);
+                        intent.putExtra(C.Key.WALLET, wallet);
+                        intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
+                        finish();
+                        startActivity(intent);
+                    }
+                }
+    });
+
     private void selectNetwork() {
         Intent intent = new Intent(MyAddressActivity.this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == C.REQUEST_SELECT_NETWORK) {
-            if (resultCode == RESULT_OK) {
-                int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
-                NetworkInfo info = viewModel.getNetworkByChain(networkId);
-                if (info != null)
-                {
-                    getInfo();
-                    Intent intent = getIntent();
-                    intent.putExtra(KEY_MODE, MODE_POS);
-                    intent.putExtra(C.Key.WALLET, wallet);
-                    intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
-                    finish();
-                    startActivity(intent);
-                }
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        getNetwork.launch(intent);
     }
 
     @Override
@@ -375,8 +377,10 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     private void getInfo()
     {
+        if (viewModel == null) initViewModel();
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         int fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
 

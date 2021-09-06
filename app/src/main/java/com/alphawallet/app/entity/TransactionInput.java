@@ -98,6 +98,7 @@ public class TransactionInput
             {
                 case "transferFrom":
                 case "safeTransferFrom":
+                case "safeBatchTransferFrom":
                     if (addresses.size() > 1)
                     {
                         address = addresses.get(1); //destination address will be second address
@@ -267,7 +268,11 @@ public class TransactionInput
             case RECEIVE_FROM:
                 break;
             case TRANSFER_FROM:
+            case SAFE_TRANSFER:
                 address = tx.from;
+                break;
+            case SAFE_BATCH_TRANSFER:
+                address = tx.to.equalsIgnoreCase(t.getWallet()) ? tx.from : tx.to;
                 break;
             case REMIX:
             case COMMIT_NFT:
@@ -328,58 +333,6 @@ public class TransactionInput
         return address;
     }
 
-    /*
-    addFunction("transferFrom(address,address,uint16[])", ContractType.ERC875_LEGACY, false);
-        addFunction("transfer(address,uint16[])", ContractType.ERC875_LEGACY, false);
-        addFunction("trade(uint256,uint16[],uint8,bytes32,bytes32)", ContractType.ERC875_LEGACY, true);
-        addFunction("passTo(uint256,uint16[],uint8,bytes32,bytes32,address)", ContractType.ERC875_LEGACY, true);
-        addFunction("loadNewTickets(bytes32[])", ContractType.ERC875_LEGACY, false);
-        addFunction("balanceOf(address)", ContractType.ERC875_LEGACY, false);
-
-        addFunction("transfer(address,uint256)", ContractType.ERC20, false);
-        addFunction("transfer(address,uint)", ContractType.ERC20, false);
-        addFunction("transferFrom(address,address,uint256)", ContractType.ERC20, false);
-        addFunction("approve(address,uint256)", ContractType.ERC20, false);
-        addFunction("approve(address,uint)", ContractType.ERC20, false);
-        addFunction("allocateTo(address,uint256)", ContractType.ERC20, false);
-        addFunction("allowance(address,address)", ContractType.ERC20, false);
-        addFunction("transferFrom(address,address,uint)", ContractType.ERC20, false);
-        addFunction("approveAndCall(address,uint,bytes)", ContractType.ERC20, false);
-        addFunction("balanceOf(address)", ContractType.ERC20, false);
-        addFunction("transferAnyERC20Token(address,uint)", ContractType.ERC20, false);
-        addFunction("delegate(address)", ContractType.ERC20, false);
-        addFunction("mint(address,uint)", ContractType.ERC20, false);
-
-        addFunction("transferFrom(address,address,uint256[])", ContractType.ERC875, false);
-        addFunction("transfer(address,uint256[])", ContractType.ERC875, false);
-        addFunction("trade(uint256,uint256[],uint8,bytes32,bytes32)", ContractType.ERC875, true);
-        addFunction("passTo(uint256,uint256[],uint8,bytes32,bytes32,address)", ContractType.ERC875, true);
-        addFunction("loadNewTickets(uint256[])", ContractType.ERC875, false);
-        addFunction("balanceOf(address)", ContractType.ERC875, false);
-
-        addFunction("endContract()", ContractType.CREATION, false);
-        addFunction("selfdestruct()", ContractType.CREATION, false);
-        addFunction("kill()", ContractType.CREATION, false);
-
-        addFunction("safeTransferFrom(address,address,uint256,bytes)", ContractType.ERC721, false);
-        addFunction("safeTransferFrom(address,address,uint256)", ContractType.ERC721, false);
-        addFunction("transferFrom(address,address,uint256)", ContractType.ERC721, false);
-        addFunction("approve(address,uint256)", ContractType.ERC721, false);
-        addFunction("setApprovalForAll(address,bool)", ContractType.ERC721, false);
-        addFunction("getApproved(address,address,uint256)", ContractType.ERC721, false);
-        addFunction("isApprovedForAll(address,address)", ContractType.ERC721, false);
-        addFunction("transfer(address,uint256)", ContractType.ERC721_LEGACY, false);
-        addFunction("giveBirth(uint256,uint256)", ContractType.ERC721, false);
-        addFunction("breedWithAuto(uint256,uint256)", ContractType.ERC721, false);
-        addFunction("ownerOf(uint256)", ContractType.ERC721, false);
-        addFunction("createSaleAuction(uint256,uint256,uint256,uint256)", ContractType.ERC721, false);
-        addFunction("mixGenes(uint256,uint256,uint256)", ContractType.ERC721, false);
-        addFunction("tokensOfOwner(address)", ContractType.ERC721, false);
-
-        addFunction("dropCurrency(uint32,uint32,uint32,uint8,bytes32,bytes32,address)", ContractType.CURRENCY, true);
-        addFunction("withdraw(uint256)", ContractType.CURRENCY, false);
-     */
-
     public void setOperationType(Transaction tx, String walletAddress)
     {
         if (tx != null && (tx.isConstructor ||
@@ -402,6 +355,9 @@ public class TransactionInput
                 break;
             case "safeTransferFrom":
                 type = interpretSafeTransferFrom(walletAddress);
+                break;
+            case "safeBatchTransferFrom":
+                type = TransactionType.SAFE_BATCH_TRANSFER;
                 break;
             case "transferFrom":
                 type = interpretTransferFrom(walletAddress);
@@ -514,7 +470,7 @@ public class TransactionInput
         String fromAddr = getFirstAddress();
         if (walletAddr == null)
         {
-            return TransactionType.TRANSFER_FROM;
+            return TransactionType.SAFE_TRANSFER;
         }
         else if (destinationAddr.equals(C.BURN_ADDRESS))
         {
@@ -526,7 +482,7 @@ public class TransactionInput
         }
         else if (!destinationAddr.equalsIgnoreCase(walletAddr)) //otherparty in this case will be the first address, the previous owner of the token(s)
         {
-            return TransactionType.TRANSFER_FROM;
+            return TransactionType.SAFE_TRANSFER;
         }
         else
         {

@@ -7,6 +7,7 @@
         <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="colorSurface">#FFFFFF</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
@@ -93,19 +94,14 @@
 
     <style name="SettingsItemSwitchAppearance" parent="Theme.AppCompat.Light">
         <item name="colorControlActivated">@color/azure</item>
-        <item name="colorSwitchThumbNormal">@color/dove</item>
-    </style>
-
-    <style name="ToggleItemSwitchAppearance" parent="Theme.AppCompat.Light">
-        <item name="colorControlActivated">@color/rinkeby</item>
-        <item name="colorSwitchThumbNormal">@color/mainnet</item>
+        <item name="colorSwitchThumbNormal">@color/dusty</item>
     </style>
 
     <style name="MyAddressCopyTextStyle">
         <item name="android:paddingTop">@dimen/dp15</item>
         <item name="android:paddingBottom">@dimen/dp15</item>
-        <item name="android:layout_marginStart">@dimen/dp16</item>
-        <item name="android:layout_marginEnd">@dimen/dp16</item>
+        <item name="android:layout_marginStart">@dimen/dp8</item>
+        <item name="android:layout_marginEnd">@dimen/dp8</item>
         <item name="android:paddingStart">@dimen/dp24</item>
         <item name="android:paddingEnd">@dimen/dp24</item>
         <item name="android:background">@drawable/background_round_grey_5dp</item>

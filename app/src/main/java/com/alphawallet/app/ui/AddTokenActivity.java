@@ -14,6 +14,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -41,7 +43,6 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputView;
-import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     public InputAddress inputAddressView;
     public InputView symbolInputView;
     public InputView decimalsInputView;
-    public InputView nameInputview;
+    public InputView nameInputView;
     private String contractAddress;
     private View networkIcon;
     private NetworkInfo networkInfo;
@@ -104,7 +105,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         symbolInputView = findViewById(R.id.input_symbol);
         decimalsInputView = findViewById(R.id.input_decimal);
-        nameInputview = findViewById(R.id.input_name);
+        nameInputView = findViewById(R.id.input_name);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         currentNetwork = findViewById(R.id.current_network);
@@ -225,9 +226,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         aDialog.setMessage(R.string.error_camera_permission_denied);
         aDialog.setIcon(ERROR);
         aDialog.setButtonText(R.string.button_ok);
-        aDialog.setButtonListener(v -> {
-            aDialog.dismiss();
-                                 });
+        aDialog.setButtonListener(v -> aDialog.dismiss());
         aDialog.show();
     }
 
@@ -273,7 +272,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onTokenInfo(TokenInfo tokenInfo)
     {
-        tokenInfo.addTokenSetupPage(this, viewModel.getNetworkInfo(tokenInfo.chainId).getShortName());
+        tokenInfo.addTokenSetupPage(this);
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -319,7 +318,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         boolean isValid = true;
         String symbol = symbolInputView.getText().toString().toLowerCase();
         String rawDecimals = decimalsInputView.getText().toString();
-        String name = nameInputview.getText().toString();
+        String name = nameInputView.getText().toString();
 
         int decimals = 0;
 
@@ -414,20 +413,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
+    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                setupNetwork(networkId);
+            });
+
     private void selectNetwork() {
         Intent intent = new Intent(AddTokenActivity.this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+        getNetwork.launch(intent);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == C.REQUEST_SELECT_NETWORK && resultCode == RESULT_OK) {
-            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1);
-            setupNetwork(networkId);
-        }
-        else if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
+        if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
                 case FullScannerFragment.SUCCESS:

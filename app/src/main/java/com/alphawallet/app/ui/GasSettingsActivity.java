@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -79,6 +80,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private GasWarningLayout insufficientWarning;
     private ScrollView scroll;
     private final Handler handler = new Handler();
+    private long minGasPrice;
 
     private int customIndex = -1;
 
@@ -101,6 +103,14 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(GasSettingsViewModel.class);
 
+        minGasPrice = getIntent().getLongExtra(C.EXTRA_MIN_GAS_PRICE, -1);
+        if (minGasPrice > 0)
+        {
+            gasSliderView.setupResendSettings(minGasPrice);
+            FrameLayout resendNote = findViewById(R.id.layout_resend_note);
+            resendNote.setVisibility(View.VISIBLE);
+        }
+
         currentGasSpeedIndex = getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
         chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
@@ -110,8 +120,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger());
         customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
-        gasSliderView.initGasPrice(customGasPriceFromWidget);
 
+        gasSliderView.initGasPrice(customGasPriceFromWidget);
         adapter = new CustomAdapter(this);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new ListDivider(this));
@@ -330,6 +340,17 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             }
 
             setCustomGasDetails(position);
+
+            if(minGasPrice > 0)
+            {
+                if(!gs.isCustom && gs.gasPrice.longValue() < minGasPrice)
+                {
+                    ViewGroup.LayoutParams params = holder.itemLayout.getLayoutParams();
+                    params.height = 0;
+                    holder.itemLayout.setLayoutParams(params);
+                    holder.itemLayout.requestLayout();
+                }
+            }
 
             //determine if this amount can be used
             BigDecimal txCost = gasFee.add(sendAmount);

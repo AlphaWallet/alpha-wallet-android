@@ -1,21 +1,27 @@
 package com.alphawallet.app.di;
 
 import com.alphawallet.app.ui.ActivityFragment;
+import com.alphawallet.app.ui.AddCustomRPCNetworkActivity;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.AdvancedSettingsActivity;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.BackupKeyActivity;
-import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.ui.DappBrowserFragment;
+import com.alphawallet.app.ui.Erc1155Activity;
+import com.alphawallet.app.ui.Erc1155AssetDetailActivity;
+import com.alphawallet.app.ui.Erc1155AssetListActivity;
+import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
+import com.alphawallet.app.ui.Erc1155AssetsFragment;
+import com.alphawallet.app.ui.Erc1155InfoFragment;
 import com.alphawallet.app.ui.Erc20DetailActivity;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.GasSettingsActivity;
-import com.alphawallet.app.ui.GasSettingsActivityLegacy;
 import com.alphawallet.app.ui.HelpActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
+import com.alphawallet.app.ui.NameThisWalletActivity;
 import com.alphawallet.app.ui.NewSettingsFragment;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.RedeemSignatureDisplayActivity;
@@ -34,7 +40,7 @@ import com.alphawallet.app.ui.TokenInfoFragment;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
-import com.alphawallet.app.ui.TransferTicketActivity;
+import com.alphawallet.app.ui.TransferNFTActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
@@ -68,16 +74,8 @@ public abstract class BuildersModule {
 	abstract SendActivity bindSendModule();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = ConfirmationModule.class)
-	abstract ConfirmationActivity bindConfirmationModule();
-
-	@ActivityScope
 	@ContributesAndroidInjector(modules = GasSettingsModule.class)
 	abstract GasSettingsActivity bindGasSettingsModule();
-
-	@ActivityScope
-	@ContributesAndroidInjector(modules = GasSettingsModule.class)
-	abstract GasSettingsActivityLegacy bindGasSettingsLegacyModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AddTokenModule.class)
@@ -124,10 +122,6 @@ public abstract class BuildersModule {
 	abstract TransferTicketDetailActivity bindTransferTicketDetailActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = TransferTicketModule.class)
-	abstract TransferTicketActivity bindTransferTicketActivity();
-
-	@ActivityScope
 	@ContributesAndroidInjector(modules = HelpModule.class)
 	abstract HelpActivity bindHelpActivity();
 
@@ -170,6 +164,9 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
 	abstract SelectNetworkActivity bindSelectNetworkActivity();
 
+	@ContributesAndroidInjector(modules = CustomNetworkModule.class)
+	abstract AddCustomRPCNetworkActivity bindAddCustomRPCNetworkActivity();
+
 	@ContributesAndroidInjector(modules = SelectNetworkFilterModule.class)
 	abstract SelectNetworkFilterActivity bindSelectNetworkFilterActivity();
 
@@ -196,14 +193,46 @@ public abstract class BuildersModule {
 	abstract TokenInfoFragment bindTokenInfoFragment();
 
 	@FragmentScope
-	@ContributesAndroidInjector(modules = TokenActivityModule.class)
-	abstract TokenActivityFragment bindTokenActivityFragment();
-
-	@FragmentScope
 	@ContributesAndroidInjector(modules = TokenAlertsModule.class)
 	abstract TokenAlertsFragment bindTokenAlertsFragment();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SetPriceAlertModule.class)
 	abstract SetPriceAlertActivity bindSetPriceAlertActivity();
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = Erc1155Module.class)
+    abstract Erc1155Activity bindErc1155Activity();
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = Erc1155AssetDetailModule.class)
+    abstract Erc1155AssetDetailActivity bindErc1155AssetDetailActivity();
+
+    @FragmentScope
+    @ContributesAndroidInjector(modules = Erc1155InfoModule.class)
+    abstract Erc1155InfoFragment bindErc1155InfoFragment();
+
+    @FragmentScope
+    @ContributesAndroidInjector(modules = Erc1155AssetsModule.class)
+    abstract Erc1155AssetsFragment bindErc1155AssetsFragment();
+
+    @FragmentScope
+    @ContributesAndroidInjector(modules = Erc1155AssetSelectModule.class)
+    abstract Erc1155AssetSelectActivity bindErc1155AssetSelectActivity();
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = Erc1155AssetListModule.class)
+    abstract Erc1155AssetListActivity bindErc1155AssetListActivity();
+
+    @FragmentScope
+    @ContributesAndroidInjector(modules = TokenActivityModule.class)
+    abstract TokenActivityFragment bindTokenActivityFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TransferTicketDetailModule.class)
+	abstract TransferNFTActivity bindTransferNFTActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = NameThisWalletModule.class)
+	abstract NameThisWalletActivity bindNameThisWalletActivity();
 }

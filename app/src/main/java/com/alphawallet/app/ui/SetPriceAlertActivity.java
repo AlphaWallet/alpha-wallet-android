@@ -15,6 +15,7 @@ import com.alphawallet.app.viewmodel.SetPriceAlertViewModel;
 import com.alphawallet.app.viewmodel.SetPriceAlertViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputFiatView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
 
@@ -40,8 +41,6 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
 
         if (getIntent() != null)
         {
-            Token token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-
             setContentView(R.layout.activity_set_price_alert);
             toolbar();
             setTitle(getString(R.string.title_set_new_alert));
@@ -56,6 +55,9 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
 
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(SetPriceAlertViewModel.class);
+
+            int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            Token token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
             newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.name);
 

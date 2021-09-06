@@ -46,6 +46,8 @@ public class TokenInfoViewModel extends BaseViewModel {
         return stats;
     }
 
+    public TokensService getTokensService() { return tokensService; }
+
     public void fetchPortfolio()
     {
         TokenPortfolio tokenPortfolio = new TokenPortfolio();

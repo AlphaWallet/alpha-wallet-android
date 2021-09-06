@@ -41,12 +41,14 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -258,17 +260,14 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     private void onWallet(Wallet wallet) {
-        //TODO: change priority here: First, show name, if blank then scan for ENS
         transactionsService.changeWallet(wallet);
-        if (!TextUtils.isEmpty(wallet.ENSname))
-        {
-            walletName.postValue(wallet.ENSname);
-        }
-        else if (!TextUtils.isEmpty(wallet.name))
+        if (!TextUtils.isEmpty(wallet.name))
         {
             walletName.postValue(wallet.name);
-        }
-        else
+        } else if (!TextUtils.isEmpty(wallet.ENSname))
+        {
+            walletName.postValue(wallet.ENSname);
+        } else
         {
             walletName.postValue("");
             //check for ENS name
@@ -375,10 +374,10 @@ public class HomeViewModel extends BaseViewModel {
 
         intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
+        intent.putExtra(C.EXTRA_NETWORKID, result.chainId);
         intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
-        intent.putExtra(C.EXTRA_TOKEN_ID, (Token)null);
         intent.putExtra(C.EXTRA_AMOUNT, result);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
@@ -429,5 +428,9 @@ public class HomeViewModel extends BaseViewModel {
     public boolean fullScreenSelected()
     {
         return preferenceRepository.getFullScreenState();
+    }
+
+    public void tryToShowRateAppDialog(Activity context) {
+        RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 }

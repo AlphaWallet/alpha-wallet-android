@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.WalletConnectActivity;
@@ -42,6 +43,7 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     private ArrayList<Integer> mSelectedIndices;
     private int mCameraId = -1;
     private int mScanCode = 0;
+    private int chainIdOverride;
 
     private OnQRCodeScannedListener listener;
 
@@ -54,6 +56,7 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         {
             mAutoFocus = state.getBoolean(AUTO_FOCUS_STATE, true);
             mSelectedIndices = state.getIntegerArrayList(SELECTED_FORMATS);
+            chainIdOverride = state.getInt(C.EXTRA_CHAIN_ID, 0);
             mCameraId = state.getInt(CAMERA_ID, -1);
         }
         else
@@ -88,6 +91,7 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         outState.putBoolean(AUTO_FOCUS_STATE, mAutoFocus);
         outState.putIntegerArrayList(SELECTED_FORMATS, mSelectedIndices);
         outState.putInt(CAMERA_ID, mCameraId);
+        outState.putInt(C.EXTRA_CHAIN_ID, chainIdOverride);
     }
 
     @Override
@@ -122,6 +126,7 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     {
         Intent intent = new Intent(getActivity(), WalletConnectActivity.class);
         intent.putExtra("qrCode", qrCode);
+        intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         startActivity(intent);
         getActivity().setResult(QRScanningActivity.WALLET_CONNECT);
         getActivity().finish();
@@ -200,5 +205,10 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     public boolean toggleFlash() throws Exception
     {
         return mScannerView.toggleFlash();
+    }
+
+    public void setChainOverride(int chainOverride)
+    {
+        chainIdOverride = chainOverride;
     }
 }

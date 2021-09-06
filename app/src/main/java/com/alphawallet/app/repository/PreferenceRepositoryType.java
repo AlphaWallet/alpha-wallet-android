@@ -15,6 +15,10 @@ public interface PreferenceRepositoryType {
 
     void setNetworkFilterList(String filters);
 
+    String getCustomRPCNetworks();
+
+    void setCustomRPCNetworks(String networks);
+
     boolean getNotificationsState();
 
     void setNotificationState(boolean state);
@@ -53,4 +57,11 @@ public interface PreferenceRepositoryType {
     void blankHasSetNetworkFilters();
 
     void commit();
+
+    void incrementLaunchCount();
+    int getLaunchCount();
+    void resetLaunchCount();
+
+    void setRateAppShown();
+    boolean getRateAppShown();
 }

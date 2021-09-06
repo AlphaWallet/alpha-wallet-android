@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -149,7 +147,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             Intent intent = new Intent(this, QRScanningActivity.class);
             intent.putExtra("wallet", wallet);
             intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
-            startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -245,33 +243,6 @@ public class WalletConnectSessionActivity extends BaseActivity
                 .setCancelable(false)
                 .create();
         dialog.show();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        switch (requestCode)
-        {
-            case C.REQUEST_UNIVERSAL_SCAN:
-                if(data != null && resultCode == Activity.RESULT_OK)
-                {
-                    if (data.hasExtra(C.EXTRA_QR_CODE))
-                    {
-                        String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
-                        if (qrCode.startsWith("wc:"))
-                        {
-                            Intent intent = new Intent(this, WalletConnectActivity.class);
-                            intent.putExtra("qrCode", qrCode);
-                            startActivity(intent);
-                            setResult(RESULT_OK);
-                            finish();
-                        }
-                    }
-                }
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-                break;
-        }
     }
 
     private void startConnectionCheck()

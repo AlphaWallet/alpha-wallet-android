@@ -21,7 +21,7 @@ public class TokenBalanceSortedItem extends SortedItem<Token> {
     @Override
     public boolean areContentsTheSame(SortedItem newItem) {
         return newItem.viewType == viewType
-                || (((TokenBalanceSortedItem) newItem).value.getTicketCount() == value.getTicketCount())
+                || (((TokenBalanceSortedItem) newItem).value.getTokenCount() == value.getTokenCount())
                 && ((TokenBalanceSortedItem) newItem).value.getFullName().equals(value.getFullName());
     }
 

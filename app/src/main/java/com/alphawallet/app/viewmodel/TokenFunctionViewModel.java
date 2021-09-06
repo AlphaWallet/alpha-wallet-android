@@ -1,20 +1,22 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
@@ -22,23 +24,24 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AssetDisplayActivity;
-import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.ui.Erc20DetailActivity;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
-import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
@@ -49,17 +52,21 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
@@ -78,15 +85,22 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
-    private final OpenseaService openseaService;
+    private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final AnalyticsServiceType analyticsService;
     private Wallet wallet;
+
+    @Nullable
+    private Disposable calcGasCost;
 
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
     private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
+    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
 
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
@@ -96,8 +110,9 @@ public class TokenFunctionViewModel extends BaseViewModel
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService,
-            FetchTransactionsInteract fetchTransactionsInteract)
+            OpenSeaService openseaService,
+            FetchTransactionsInteract fetchTransactionsInteract,
+            AnalyticsServiceType analyticsService)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -108,6 +123,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.analyticsService = analyticsService;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -119,6 +135,9 @@ public class TokenFunctionViewModel extends BaseViewModel
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
     public LiveData<Wallet> walletUpdate() { return walletUpdate; }
     public LiveData<Boolean> newScriptFound() { return newScriptFound; }
+    public MutableLiveData<TransactionData> transactionFinalised() { return transactionFinalised; }
+    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+    public MutableLiveData<Web3Transaction> gasEstimateComplete() { return gasEstimateComplete; }
 
     public void prepare()
     {
@@ -128,7 +147,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void openUniversalLink(Context context, Token token, List<BigInteger> selection) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
@@ -143,14 +163,15 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void startGasPriceUpdate(int chainId)
     {
-        gasService.startGasListener(chainId);
+        gasService.startGasPriceCycle(chainId);
     }
 
     public void showTransferToken(Context ctx, Token token, List<BigInteger> selection)
     {
         Intent intent = new Intent(ctx, TransferTicketDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
 
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(selection, false));
 
@@ -166,7 +187,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
         if (tokenIds == null) tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
@@ -210,59 +232,12 @@ public class TokenFunctionViewModel extends BaseViewModel
         return assetDefinitionService.getTokenScriptResult(token, tokenId);
     }
 
-    public void confirmTransaction(Context ctx, int networkId, String functionData, String toAddress,
-                                   String contractAddress, String additionalDetails, String functionName, String value)
+    public BigInteger calculateMinGasPrice(BigInteger oldGasPrice)
     {
-        Intent intent = new Intent(ctx, ConfirmationActivity.class);
-        intent.putExtra(C.EXTRA_TRANSACTION_DATA, functionData);
-        intent.putExtra(C.EXTRA_NETWORKID, networkId);
-        intent.putExtra(C.EXTRA_NETWORK_NAME, ethereumNetworkRepository.getNetworkByChain(networkId).getShortName());
-        intent.putExtra(C.EXTRA_AMOUNT, value);
-        if (toAddress != null) intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
-        if (contractAddress != null) intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
-        intent.putExtra(C.EXTRA_ACTION_NAME, additionalDetails);
-        intent.putExtra(C.EXTRA_FUNCTION_NAME, functionName);
-        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.TOKENSCRIPT.ordinal());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ctx.startActivity(intent);
-    }
+        BigInteger candidateGasOverridePrice = new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).toBigInteger();
+        BigInteger checkGasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
 
-    public void confirmNativeTransaction(Context ctx, String toAddress, BigDecimal value, Token nativeEth, String info)
-    {
-        Intent intent = new Intent(ctx, ConfirmationActivity.class);
-        intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
-        intent.putExtra(C.EXTRA_AMOUNT, value.toString());
-        intent.putExtra(C.EXTRA_DECIMALS, nativeEth.tokenInfo.decimals);
-        intent.putExtra(C.EXTRA_SYMBOL, nativeEth.getSymbol());
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
-        intent.putExtra(C.EXTRA_ENS_DETAILS, info);
-        intent.putExtra(C.EXTRA_NETWORKID, nativeEth.tokenInfo.chainId);
-        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ETH.ordinal());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ctx.startActivity(intent);
-    }
-
-    public void reSendTransaction(String txHash, Context ctx, Token token, ConfirmationType type)
-    {
-        Transaction tx = fetchTransaction(txHash);
-        Intent intent = new Intent(ctx, ConfirmationActivity.class);
-        intent.putExtra(C.EXTRA_TXHASH, tx.hash);
-        intent.putExtra(C.EXTRA_TRANSACTION_DATA, tx.input);
-        intent.putExtra(C.EXTRA_TO_ADDRESS, tx.to);
-        intent.putExtra(C.EXTRA_AMOUNT, tx.value);
-        intent.putExtra(C.EXTRA_NONCE, tx.nonce);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, tx.to);
-        intent.putExtra(C.EXTRA_GAS_PRICE, tx.gasPrice);
-        intent.putExtra(C.EXTRA_GAS_LIMIT, tx.gasUsed);
-        String symbol = token != null ? token.tokenInfo.symbol : "";
-        intent.putExtra(C.EXTRA_SYMBOL, symbol);
-        //TODO: reverse resolve 'tx.to' ENS
-        //intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
-        intent.putExtra(C.EXTRA_NETWORKID, tx.chainId);
-        intent.putExtra(C.TOKEN_TYPE, type.ordinal());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ctx.startActivity(intent);
+        return checkGasPrice.max(candidateGasOverridePrice); //highest price between adding 2 gwei or 10%
     }
 
     public Token getToken(int chainId, String contractAddress)
@@ -274,7 +249,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(idList, token.getAddress(), true));
         Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.TICKET_RANGE, parcel);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
@@ -282,7 +258,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void stopGasSettingsFetch()
     {
-        gasService.stopGasListener();
+        gasService.stopGasPriceCycle();
     }
 
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
@@ -327,7 +303,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         Intent intent = new Intent(ctx, MyAddressActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -336,7 +313,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(idList, token.getAddress(), true));
         Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.TICKET_RANGE, parcel);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
@@ -345,7 +323,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void sellTicketRouter(Context context, Token token, List<BigInteger> idList) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(idList, false));
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
@@ -353,21 +332,21 @@ public class TokenFunctionViewModel extends BaseViewModel
         context.startActivity(intent);
     }
 
-    public boolean handleFunction(TSAction action, BigInteger tokenId, Token token, Context context)
+    public Web3Transaction handleFunction(TSAction action, BigInteger tokenId, Token token, Context context)
     {
         String functionEffect = action.function.method;
         if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
                 && (action.function.parameters == null || action.function.parameters.size() == 0))
         {
             //no params, this is a native style transaction
-            NativeSend(action, token, context);
+            return NativeSend(action, token, context);
         }
         else
         {
             //what's selected?
             ContractAddress cAddr = new ContractAddress(action.function);
             String functionData = getTransactionBytes(token, tokenId, action.function);
-            if (functionData == null) return false;
+            if (functionData == null) return null;
             //function call may include some value
             String value = "0";
             if (action.function.tx != null && action.function.tx.args.containsKey("value"))
@@ -379,31 +358,36 @@ public class TokenFunctionViewModel extends BaseViewModel
                 functionEffect = BalanceUtils.getScaledValue(value, 18, Token.TOKEN_BALANCE_PRECISION)
                         + " " + currency.getSymbol() + " to " + action.function.method;
             }
-
-            //Form full method representation
-            String fullMethod = action.function.method + "(";
-            boolean firstArg = true;
-            for (MethodArg arg : action.function.parameters)
+            else
             {
-                if (!firstArg) fullMethod += ", ";
-                firstArg = false;
-                fullMethod += arg.parameterType;
-                fullMethod += " ";
-                fullMethod += arg.element.value;
-            }
+                //Form full method representation
+                functionEffect += "(";
+                boolean firstArg = true;
+                for (MethodArg arg : action.function.parameters)
+                {
+                    if (!firstArg) functionEffect += ", ";
+                    firstArg = false;
+                    if (arg.element.ref.equals("tokenId"))
+                    {
+                        functionEffect += "TokenId";
+                    }
+                    else
+                    {
+                        functionEffect += arg.element.value;
+                    }
+                }
 
-            fullMethod += ")";
+                functionEffect += ")";
+            }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
             getAssetDefinitionService().clearCache();
 
-            confirmTransaction(context, cAddr.chainId, functionData, null, cAddr.address, fullMethod, functionEffect, value);
+            return buildWeb3Transaction(functionData, cAddr.address, functionEffect, value);
         }
-
-        return true;
     }
 
-    private void NativeSend(TSAction action, Token token, Context context)
+    private Web3Transaction NativeSend(TSAction action, Token token, Context context)
     {
         boolean isValid = true;
 
@@ -444,12 +428,46 @@ public class TokenFunctionViewModel extends BaseViewModel
         //Clear the cache to refresh any resolved values
         getAssetDefinitionService().clearCache();
 
-        if (isValid) {
-            confirmNativeTransaction(context, to, value, token, extraInfo);
+        if (isValid)
+        {
+            return new Web3Transaction(
+                    new Address(to),
+                    new Address(token.getAddress()),
+                    value.toBigInteger(),
+                    BigInteger.ZERO,
+                    BigInteger.valueOf(C.GAS_LIMIT_MIN),
+                    -1,
+                    "0x",
+                    extraInfo
+            );
+        }
+        else
+        {
+            return null;
         }
     }
 
-    public OpenseaService getOpenseaService()
+    private Web3Transaction buildWeb3Transaction(String functionData,
+                                    String contractAddress, String additionalDetails, String value)
+    {
+        return new Web3Transaction(
+                new Address(contractAddress),
+                new Address(contractAddress),
+                new BigInteger(value),
+                BigInteger.ZERO,
+                BigInteger.ZERO, // notify that we need to calculate gaslimit
+                -1,
+                functionData,
+                additionalDetails
+        );
+    }
+
+    public void onDestroy()
+    {
+        if (calcGasCost != null && !calcGasCost.isDisposed()) { calcGasCost.dispose(); }
+    }
+
+    public OpenSeaService getOpenseaService()
     {
         return openseaService;
     }
@@ -479,6 +497,11 @@ public class TokenFunctionViewModel extends BaseViewModel
         return wallet.type != WalletType.WATCH;
     }
 
+    public Wallet getWallet()
+    {
+        return wallet;
+    }
+
     public Realm getRealmInstance(Wallet w)
     {
         return tokensService.getRealmInstance(w);
@@ -494,16 +517,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         return fetchTransactionsInteract;
     }
 
-    public void showTransactionDetail(Context ctx, String txHash, int chainId)
-    {
-        Intent intent = new Intent(ctx, TransactionDetailActivity.class);
-        intent.putExtra(C.EXTRA_TXHASH, txHash);
-        intent.putExtra(C.EXTRA_CHAIN_ID, chainId);
-        intent.putExtra(C.Key.WALLET, wallet);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        ctx.startActivity(intent);
-    }
-
     public Transaction fetchTransaction(String txHash)
     {
         return fetchTransactionsInteract.fetchCached(wallet.address, txHash);
@@ -512,6 +525,34 @@ public class TokenFunctionViewModel extends BaseViewModel
     public long fetchExpectedTxTime(String txHash)
     {
         return fetchTransactionsInteract.fetchTxCompletionTime(wallet.address, txHash);
+    }
+
+    public void estimateGasLimit(Web3Transaction w3tx, int chainId)
+    {
+        calcGasCost = gasService.calculateGasEstimate(Numeric.hexStringToByteArray(w3tx.payload), chainId, w3tx.contract.toString(), w3tx.value, wallet)
+                .map(this::convertToGasLimit)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(estimate -> buildNewConfirmation(estimate, w3tx),
+                        error -> buildNewConfirmation(BigInteger.ZERO, w3tx)); //node didn't like this tx
+    }
+
+    private void buildNewConfirmation(BigInteger estimate, Web3Transaction w3tx)
+    {
+        gasEstimateComplete.postValue(new Web3Transaction(
+                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate, w3tx.nonce, w3tx.payload, w3tx.description));
+    }
+
+    private BigInteger convertToGasLimit(EthEstimateGas estimate)
+    {
+        if (estimate.hasError())
+        {
+            return BigInteger.ZERO;
+        }
+        else
+        {
+            return estimate.getAmountUsed();
+        }
     }
 
     @Override
@@ -524,7 +565,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_ADDRESS, address);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.putExtra(C.EXTRA_HAS_DEFINITION, hasDefinition);
         context.startActivity(intent);
@@ -534,7 +576,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void showTokenList(Activity activity, Token token)
     {
         Intent intent = new Intent(activity, AssetDisplayActivity.class);
-        intent.putExtra(C.Key.TICKET, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         activity.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
@@ -553,5 +596,41 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void clearFocusToken()
     {
         tokensService.clearFocusToken();
+    }
+
+    public TokensService getTokenService()
+    {
+        return tokensService;
+    }
+
+    public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
+    public void sendTransaction(Web3Transaction finalTx, int chainId, String overridenTxHash)
+    {
+        disposable = createTransactionInteract
+                .createWithSig(wallet, finalTx, chainId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(txData -> processTransaction(txData, wallet, overridenTxHash),
+                        transactionError::postValue);
+    }
+
+    private void processTransaction(TransactionData txData, Wallet wallet, String overridenTxHash)
+    {
+        //remove old tx from database
+        if (!TextUtils.isEmpty(overridenTxHash)) fetchTransactionsInteract.removeOverridenTransaction(wallet, overridenTxHash);
+        //update Activity
+        transactionFinalised.postValue(txData);
+    }
+
+    public void actionSheetConfirm(String mode)
+    {
+        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+        analyticsProperties.setData(mode);
+
+        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 }

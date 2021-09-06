@@ -22,6 +22,7 @@ import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
@@ -41,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +52,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
@@ -73,9 +76,11 @@ public class Utils {
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
-    public  static final String ALPHAWALLET_REPO_NAME = "alphawallet/iconassets";
-    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/" + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private static final String ALPHAWALLET_ICON_REPO = "https://raw.githubusercontent.com/" + ALPHAWALLET_REPO_NAME + "/master/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final String TOKEN_LOGO = "/logo.png";
+    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/master/";
+    private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
+    private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
+    private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -159,6 +164,7 @@ public class Utils {
     public static String getIconisedText(String text)
     {
         if (TextUtils.isEmpty(text)) return "";
+        if (text.length() <= 4) return text;
         String firstWord = getFirstWord(text);
         if (!TextUtils.isEmpty(firstWord))
         {
@@ -234,6 +240,8 @@ public class Utils {
                 return R.color.optimistic_main;
             case OPTIMISTIC_TEST_ID:
                 return R.color.optimistic_test;
+            case CRONOS_TEST_ID:
+                return R.color.cronos_test;
             default:
                 return R.color.mine;
         }
@@ -435,6 +443,20 @@ public class Utils {
         return indexList;
     }
 
+    public static BigInteger parseTokenId(String tokenIdStr)
+    {
+        BigInteger tokenId;
+        try
+        {
+            tokenId = new BigInteger(tokenIdStr);
+        }
+        catch (Exception e)
+        {
+            tokenId = BigInteger.ZERO;
+        }
+
+        return tokenId;
+    }
 
     /**
      * Produce a string CSV of integer IDs given an input list of values
@@ -504,6 +526,17 @@ public class Utils {
         return sb.toString();
     }
 
+    public static Map<BigInteger, BigInteger> getIdMap(List<BigInteger> tokenIds)
+    {
+        Map<BigInteger, BigInteger> tokenMap = new HashMap<>();
+        for (BigInteger tokenId : tokenIds)
+        {
+            tokenMap.put(tokenId, tokenMap.containsKey(tokenId) ? tokenMap.get(tokenId).add(BigInteger.ONE) : BigInteger.ONE);
+        }
+
+        return tokenMap;
+    }
+
     public static boolean isNumeric(String numString)
     {
         if (numString == null || numString.length() == 0) return false;
@@ -551,12 +584,19 @@ public class Utils {
     }
 
     public static String formatAddress(String address) {
-        address = Keys.toChecksumAddress(address);
-        String result = "";
-        String firstSix = address.substring(0, 6);
-        String lastSix = address.substring(address.length()-4);
-        StringBuilder formatted = new StringBuilder(result);
-        return formatted.append(firstSix).append("...").append(lastSix).toString().toLowerCase();
+        if (isAddressValid(address))
+        {
+            address = Keys.toChecksumAddress(address);
+            String result = "";
+            String firstSix = address.substring(0, 6);
+            String lastSix = address.substring(address.length() - 4);
+            StringBuilder formatted = new StringBuilder(result);
+            return formatted.append(firstSix).append("...").append(lastSix).toString().toLowerCase();
+        }
+        else
+        {
+            return "0x";
+        }
     }
 
     /**
@@ -764,6 +804,39 @@ public class Utils {
         }
     }
 
+    @NotNull
+    public static String getTokenAddrFromUrl(String url)
+    {
+        if (!TextUtils.isEmpty(url) && url.startsWith(TRUST_ICON_REPO_BASE))
+        {
+            int start = url.lastIndexOf("/assets/") + "/assets/".length();
+            int end = url.lastIndexOf(TOKEN_LOGO);
+            if (start > 0 && end > 0)
+            {
+                return url.substring(start, end);
+            }
+        }
+
+        return "";
+    }
+
+    @NotNull
+    public static String getTokenAddrFromAWUrl(String url)
+    {
+        if (!TextUtils.isEmpty(url) && url.startsWith(ALPHAWALLET_REPO_NAME))
+        {
+            int start = ALPHAWALLET_REPO_NAME.length();
+            int end = url.lastIndexOf(TOKEN_LOGO);
+            if (end > 0 && end > start)
+            {
+                return url.substring(start, end);
+            }
+        }
+
+        return "";
+    }
+
+    @NotNull
     public static String getTokenImageUrl(int chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;
@@ -816,6 +889,8 @@ public class Utils {
         return !TextUtils.isEmpty(operationName) && context.getString(R.string.contract_call).equals(operationName);
     }
 
+    private static final String IPFS_PREFIX = "ipfs://";
+
     public static String parseIPFS(String URL)
     {
         if (TextUtils.isEmpty(URL)) return URL;
@@ -824,6 +899,10 @@ public class Utils {
         if (ipfsIndex >= 0)
         {
             parsed = "https://ipfs.io" + URL.substring(ipfsIndex);
+        }
+        else if (URL.startsWith(IPFS_PREFIX))
+        {
+            parsed = "https://ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
         }
 
         return parsed;
@@ -842,5 +921,10 @@ public class Utils {
             Log.d("READ_JS_TAG", "Ex", ex);
         }
         return new String(buffer);
+    }
+
+    public static long timeUntil(long eventInMillis)
+    {
+        return eventInMillis - System.currentTimeMillis();
     }
 }

@@ -20,6 +20,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.lifecycle.ViewModelProvider;
@@ -38,7 +40,7 @@ import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -47,6 +49,7 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
@@ -61,6 +64,7 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.tools.Numeric;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
@@ -84,11 +88,11 @@ import io.reactivex.schedulers.Schedulers;
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -150,7 +154,11 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        token = getIntent().getParcelableExtra(TICKET);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(TransferTicketDetailViewModel.class);
+
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = DisplayState.values()[getIntent().getIntExtra(EXTRA_STATE, 0)];
@@ -168,8 +176,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         sendAddress = null;
         ensAddress = null;
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(TransferTicketDetailViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -504,7 +510,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
     }
 
-    private void onError(ErrorEnvelope error)
+    private void onError(@NotNull ErrorEnvelope error)
     {
         hideDialog();
         dialog = new AWalletAlertDialog(this);
@@ -522,7 +528,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         //complete the transfer
         onProgress(true);
 
-        viewModel.createTicketTransfer(
+        viewModel.createTokenTransfer(
                 to,
                 token,
                 token.getTransferListFormat(selection));
@@ -606,9 +612,6 @@ public class TransferTicketDetailActivity extends BaseActivity
                 }
                 break;
 
-            case C.SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
-                break;
             case C.SET_GAS_SETTINGS:
                 if (data != null && actionDialog != null)
                 {
@@ -724,14 +727,20 @@ public class TransferTicketDetailActivity extends BaseActivity
         confirmationDialog.show();
     }
 
+    ActivityResultLauncher<Intent> transferLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
+            });
+
     private void transferLinkFinal(String universalLink)
     {
         //create share intent
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Magic Link");
         sendIntent.setType("text/plain");
-        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
+        transferLinkFinalResult.launch(Intent.createChooser(sendIntent, "Share via"));
     }
 
     private void initDatePicker()
@@ -774,6 +783,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
             addressInput.getAddress();
+
+            if (addressInput.getVisibility() != View.VISIBLE)
+            {
+                // go to next screen
+                viewModel.openTransferState(this, token, Utils.bigIntListToString(selection, false), getNextState());
+            }
         }
     }
 
@@ -912,7 +927,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         //ActionSheet was dismissed
         if (!TextUtils.isEmpty(txHash)) {
             Intent intent = new Intent();
-            intent.putExtra("tx_hash", txHash);
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
             finish();
         }
@@ -952,7 +967,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.setButtonText(R.string.button_ok);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
-            BigInteger gasEstimate = GasService2.getDefaultGasLimit(token, w3tx);
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
         });
 

@@ -23,6 +23,7 @@ import com.alphawallet.app.viewmodel.TokenInfoViewModelFactory;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoHeaderView;
 import com.alphawallet.app.widget.TokenInfoView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.android.material.tabs.TabLayout;
 
 import javax.inject.Inject;
@@ -75,7 +76,11 @@ public class TokenInfoFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            viewModel = new ViewModelProvider(this, viewModelFactory)
+                    .get(TokenInfoViewModel.class);
+
+            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             initTabLayout(view);
             tokenInfoHeaderLayout = view.findViewById(R.id.layout_token_header);
@@ -121,8 +126,7 @@ public class TokenInfoFragment extends BaseFragment {
             tokenInfoLayout.addView(stats1YearLow);
             tokenInfoLayout.addView(stats1YearHigh);
 
-            viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(TokenInfoViewModel.class);
+
 
             viewModel.marketPrice().observe(getViewLifecycleOwner(), this::onMarketPriceChanged);
             // TODO: Create entity for chart data

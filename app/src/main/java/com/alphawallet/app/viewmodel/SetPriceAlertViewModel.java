@@ -6,6 +6,7 @@ import android.content.Intent;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SelectCurrencyActivity;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.google.gson.Gson;
@@ -21,13 +22,16 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 public class SetPriceAlertViewModel extends BaseViewModel {
     private final CurrencyRepositoryType currencyRepository;
     private final PreferenceRepositoryType preferenceRepository;
+    private final TokensService tokensService;
 
     SetPriceAlertViewModel(
             CurrencyRepositoryType currencyRepository,
-            PreferenceRepositoryType preferenceRepository)
+            PreferenceRepositoryType preferenceRepository,
+            TokensService tokensService)
     {
         this.currencyRepository = currencyRepository;
         this.preferenceRepository = preferenceRepository;
+        this.tokensService = tokensService;
     }
 
     public String getDefaultCurrency()
@@ -86,4 +90,6 @@ public class SetPriceAlertViewModel extends BaseViewModel {
         }
         return list;
     }
+
+    public TokensService getTokensService() { return tokensService; }
 }

@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EventResult;

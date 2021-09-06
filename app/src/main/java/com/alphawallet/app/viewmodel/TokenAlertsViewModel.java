@@ -41,6 +41,8 @@ public class TokenAlertsViewModel extends BaseViewModel {
         return priceAlerts;
     }
 
+    public TokensService getTokensService() { return tokensService; }
+
     public void fetchStoredPriceAlerts(Token token)
     {
         this.token = token;
@@ -70,8 +72,9 @@ public class TokenAlertsViewModel extends BaseViewModel {
     public void openAddPriceAlertMenu(Fragment fragment, int requestCode)
     {
         Intent intent = new Intent(fragment.getContext(), SetPriceAlertActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token);
-        fragment.startActivityForResult(intent, requestCode);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        fragment.startActivityForResult(intent, requestCode); //Samoa TODO: de-deprecate (see ActivityResultLauncher paradigm in eg DappBrowserFragment)
     }
 
     public void saveAlert(PriceAlert priceAlert)

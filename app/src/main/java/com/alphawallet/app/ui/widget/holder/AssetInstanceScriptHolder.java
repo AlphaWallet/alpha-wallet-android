@@ -4,14 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatRadioButton;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -23,8 +23,6 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.token.entity.TicketRange;
-
-import static com.alphawallet.app.C.Key.TICKET;
 
 /**
  * Created by James on 26/03/2019.
@@ -127,7 +125,8 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             activeClick = true;
             handler.postDelayed(this, 500);
             Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
-            intent.putExtra(TICKET, token);
+            intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+            intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
             intent.putExtra(C.EXTRA_TOKEN_ID, Utils.bigIntListToString(data.tokenIds, false));
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             getContext().startActivity(intent);

@@ -56,6 +56,10 @@
     <!-- Collectible Grid Item -->
     <dimen name="grid_icon_height">70dp</dimen>
 
+    <!-- Standard Token Icon size -->
+    <dimen name="token_icon">43dp</dimen>
+    <dimen name="token_icon_large">86dp</dimen>
+
     <!-- Dashboard -->
     <dimen name="create_new_wallet_margin_bottom">25dp</dimen>
     <dimen name="divider_margin_top">27dp</dimen>

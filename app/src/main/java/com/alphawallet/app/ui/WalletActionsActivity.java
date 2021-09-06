@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -99,7 +102,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         viewModel.deleteWalletError().observe(this, this::onDeleteError);
         viewModel.exportWalletError().observe(this, this::onExportError);
         viewModel.deleted().observe(this, this::onDeleteWallet);
-        viewModel.exportedStore().observe(this, this::onBackupWallet);
         viewModel.isTaskRunning().observe(this, this::onTaskStatusChanged);
 
         if (isNewWallet) {
@@ -137,16 +139,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
             viewModel.showHome(this);
             finish(); //drop back to home screen, no need to recreate everything
         }
-    }
-
-    private void onBackupWallet(String keystore) {
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, keystore);
-        startActivityForResult(
-                Intent.createChooser(sharingIntent, "Share via"),
-                SHARE_REQUEST_CODE);
     }
 
     private void onDeleteWallet(Boolean isDeleted) {
@@ -261,7 +253,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         intent.putExtra(WALLET, wallet);
         intent.putExtra("TYPE", BackupOperationType.SHOW_SEED_PHRASE);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+        handleBackupWallet.launch(intent);
     }
 
     private void showWalletsActivity() {
@@ -282,46 +274,23 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         aDialog.show();
     }
 
+    ActivityResultLauncher<Intent> handleBackupWallet = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    successOverlay.setVisibility(View.VISIBLE);
+                    handler.postDelayed(this, 1000);
+                    backupSuccessful();
+                    finish();
+                }
+    });
+
     private void exportJSON(Wallet wallet) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra("TYPE", BackupOperationType.BACKUP_KEYSTORE_KEY);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == SHARE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(this, R.string.toast_message_wallet_exported, Toast.LENGTH_SHORT).show();
-                showToolbar();
-                hideDialog();
-                backupSuccessful();
-            } else {
-                aDialog = new AWalletAlertDialog(this);
-                aDialog.setIcon(AWalletAlertDialog.NONE);
-                aDialog.setTitle(R.string.do_manage_make_backup);
-                aDialog.setButtonText(R.string.yes_continue);
-                aDialog.setButtonListener(v -> {
-                    backupSuccessful();
-                    hideDialog();
-                    showToolbar();
-                });
-                aDialog.setSecondaryButtonText(R.string.no_repeat);
-                aDialog.setSecondaryButtonListener(v -> {
-                    onBackupWallet(viewModel.exportedStore().getValue());
-                    hideDialog();
-                });
-                aDialog.show();
-            }
-        } else if (requestCode == C.REQUEST_BACKUP_WALLET && resultCode == RESULT_OK) {
-            successOverlay.setVisibility(View.VISIBLE);
-            handler.postDelayed(this, 1000);
-            backupSuccessful();
-        }
+        handleBackupWallet.launch(intent);
     }
 
     private void backupSuccessful() {
@@ -350,10 +319,9 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.selected_wallet_indicator:
-                copyToClipboard();
-                break;
+        if (v.getId() == R.id.selected_wallet_indicator)
+        {
+            copyToClipboard();
         }
     }
 

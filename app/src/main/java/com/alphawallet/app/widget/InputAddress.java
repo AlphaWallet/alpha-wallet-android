@@ -53,6 +53,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private final ENSHandler ensHandler;
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
+    private int chainOverride;
 
     public InputAddress(Context context, AttributeSet attrs)
     {
@@ -94,6 +95,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
         setViews();
         setImeOptions();
+        chainOverride = 0;
     }
 
     private void getAttrs(Context context, AttributeSet attrs)
@@ -157,6 +159,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             //QR Scanner
             scanQrIcon.setOnClickListener(v -> {
                 Intent intent = new Intent(context, QRScanningActivity.class);
+                intent.putExtra(C.EXTRA_CHAIN_ID, chainOverride);
                 ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
             });
         }
@@ -181,6 +184,15 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
                 }
             }
         }
+        else
+        {
+            editText.setImeOptions(EditorInfo.IME_ACTION_DONE); //add default action
+        }
+
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            hideKeyboard();
+            return false;
+        });
     }
 
     public void setStatus(CharSequence statusTxt)
@@ -353,6 +365,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public String getStatusText()
     {
         return statusText.getText().toString();
+    }
+
+    public void setChainOverrideForWalletConnect(int chainId)
+    {
+        chainOverride = chainId;
     }
 
     public void hideKeyboard()

@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -28,7 +30,7 @@ import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService2;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
@@ -60,7 +62,7 @@ import io.realm.Sort;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class WalletConnectViewModel extends BaseViewModel {
-    private static final String WC_SESSION_DB = "wc_data-db.realm";
+    public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
     protected Disposable disposable;
@@ -69,7 +71,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final RealmManager realmManager;
-    private final GasService2 gasService;
+    private final GasService gasService;
     private final TokensService tokensService;
     private final AnalyticsServiceType analyticsService;
     private final Context context;
@@ -80,6 +82,9 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     private Wallet wallet;
 
+    @Nullable
+    private Disposable prepareDisposable;
+
     private static final String TAG = "WCClientVM";
 
     WalletConnectViewModel(KeyService keyService,
@@ -87,7 +92,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                            CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
                            RealmManager realmManager,
-                           GasService2 gasService,
+                           GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
                            Context ctx) {
@@ -101,6 +106,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
         serviceConnection = startService();
+        prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
                 .subscribe(w -> this.wallet = w, this::onError);
@@ -143,7 +149,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     public void prepare()
     {
-        disposable = genericWalletInteract
+        prepareDisposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
@@ -256,7 +262,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     public WCClient getClient(String sessionId)
     {
         //may fail.
-        if (walletConnectService == null)
+        if (walletConnectService == null || TextUtils.isEmpty(sessionId))
         {
             return null;
         }
@@ -409,9 +415,10 @@ public class WalletConnectViewModel extends BaseViewModel {
         });
     }
 
-    public void recordSignTransaction(Context ctx, Web3Transaction tx, int chainId, String sessionId)
+    public void recordSignTransaction(Context ctx, Web3Transaction tx, String chainIdStr, String sessionId)
     {
         realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
+                int chainId = chainIdStr != null ? Integer.parseInt(chainIdStr) : MAINNET_ID;
                 RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
                 String signType = "Transaction";
                 signMessage.setSessionId(sessionId);
@@ -497,5 +504,13 @@ public class WalletConnectViewModel extends BaseViewModel {
     public boolean connectedToService()
     {
         return walletConnectService != null;
+    }
+
+    public void prepareIfRequired()
+    {
+        if (prepareDisposable == null)
+        {
+            prepare();
+        }
     }
 }

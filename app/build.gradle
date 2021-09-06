@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 158
-        versionName "3.33"
+        versionCode 169
+        versionName "3.4"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -46,11 +46,16 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
-        buildConfigField 'int', 'DB_VERSION', '24'
+        buildConfigField 'int', 'DB_VERSION', '28'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
+        }
+        packagingOptions {
+            jniLibs {
+                useLegacyPackaging true
+            }
         }
     }
     flavorDimensions "targetting"
@@ -107,6 +112,7 @@ android {
             apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
+                implementation 'com.google.android.play:core:1.10.0'
                 implementation 'com.google.firebase:firebase-analytics:19.0.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
@@ -118,7 +124,7 @@ android {
 dependencies {
     implementation project(":lib")
 
-    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  
+    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
     // WARNING!  Don't add depdency on Google Play Services without consulting
     // WARNING!  The China marketing team
     // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
@@ -138,18 +144,19 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
     // Bar code scanning
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    implementation 'com.google.zxing:core:3.3.2'
+    implementation 'com.google.zxing:core:3.3.3'
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
 
@@ -182,8 +189,8 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
 
     // Tests
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.4.6'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '1.7.4'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.2'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
@@ -195,7 +202,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.google.firebase:firebase-crashlytics:18.0.1'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.0'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 

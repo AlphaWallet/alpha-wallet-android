@@ -122,7 +122,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    public static int calculateTokenNameWeight(int chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
+    private int calculateTokenNameWeight(int chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
     {
         int weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
@@ -223,6 +223,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
             case ERC721:
             case ERC875_LEGACY:
             case ERC875:
+            case ERC1155:
             case ERC721_LEGACY:
             case ERC721_TICKET:
             case ERC721_UNDETERMINED:

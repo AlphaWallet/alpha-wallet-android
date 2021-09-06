@@ -9,14 +9,14 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.Erc20DetailRouter;
+import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
-    private final Erc20DetailRouter erc20DetailRouter;
+    private final TokenDetailRouter tokenDetailRouter;
     private final AssetDisplayRouter assetDisplayRouter;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -25,7 +25,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
-                                  Erc20DetailRouter erc20DetailRouter,
+                                  TokenDetailRouter tokenDetailRouter,
                                   AssetDisplayRouter assetDisplayRouter,
                                   GenericWalletInteract genericWalletInteract,
                                   AssetDefinitionService assetDefinitionService,
@@ -33,7 +33,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   ChangeTokenEnableInteract changeTokenEnableInteract,
                                   MyAddressRouter myAddressRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
-        this.erc20DetailRouter = erc20DetailRouter;
+        this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -47,7 +47,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new WalletViewModel(
                 fetchTokensInteract,
-                erc20DetailRouter,
+                tokenDetailRouter,
                 assetDisplayRouter,
                 genericWalletInteract,
                 assetDefinitionService,

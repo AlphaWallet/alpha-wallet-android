@@ -31,7 +31,7 @@ public abstract class C {
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";
     public static final String BINANCE_TEST_NETWORK = "BSC TestNet";
-    public static final String BINANCE_MAIN_NETWORK = "Binance";
+    public static final String BINANCE_MAIN_NETWORK = "Binance (BSC)";
     public static final String HECO_MAIN_NETWORK = "Heco";
     public static final String HECO_TEST_NETWORK = "Heco (Test)";
     public static final String FANTOM_NETWORK = "Fantom Opera";
@@ -42,6 +42,7 @@ public abstract class C {
     public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
     public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
+    public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -65,6 +66,7 @@ public abstract class C {
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
     public static final String MATIC_SYMBOL = "MATIC";
+    public static final String CRONOS_SYMBOL = "tCRO";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -73,6 +75,8 @@ public abstract class C {
     public static final String SAI_TOKEN = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
 
     public static final String XDAI_BRIDGE_DAPP = "https://bridge.xdaichain.com/";
+
+    public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
 
     public static final String GWEI_UNIT = "Gwei";
 
@@ -93,6 +97,8 @@ public abstract class C {
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
+    public static final String EXTRA_NFTASSET_LIST = "NFTASSET_LIST";
+    public static final String EXTRA_NFTASSET = "NFTASSET";
     public static final String ERC875RANGE = "ERC875RANGE";
     public static final String TOKEN_TYPE = "TOKEN_TYPE";
     public static final String MARKET_INSTANCE = "MARKET_INSTANCE";
@@ -115,6 +121,7 @@ public abstract class C {
     public static final String EXTRA_LOCALE = "LOCALE_STRING";
     public static final String EXTRA_PAGE_TITLE = "PTITLE";
     public static final String EXTRA_CURRENCY = "CURRENCY_STRING";
+    public static final String EXTRA_MIN_GAS_PRICE = "_MINGASPRICE";
     public static final String EXTRA_QR_CODE = "QR_SCAN_CODE";
     public static final String EXTRA_UNIVERSAL_SCAN = "UNIVERSAL_SCAN";
     public static final String EXTRA_NONCE = "_NONCE";
@@ -178,6 +185,7 @@ public abstract class C {
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
 
+
     public interface ErrorCode {
         int UNKNOWN = 1;
         int CANT_GET_STORE_PASSWORD = 2;
@@ -188,7 +196,6 @@ public abstract class C {
     public interface Key {
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
-        String TICKET = "ticket";
         String TICKET_RANGE = "ticket_range";
         String MARKETPLACE_EVENT = "marketplace_event";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
@@ -219,6 +226,7 @@ public abstract class C {
 
     // Settings Badge Keys
     public static final String KEY_NEEDS_BACKUP = "needsBackup";
+    public static final String KEY_UPDATE_AVAILABLE = "updateAvailable";
 
     public static final String DEFAULT_CURRENCY_CODE = "USD";
     public static final String ACTION_MY_ADDRESS_SCREEN = "my_address_screen";

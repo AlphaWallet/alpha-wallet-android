@@ -2,13 +2,16 @@ package com.alphawallet.app.repository;
 
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.service.RealmManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -174,7 +177,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
                 final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime, fetchLimit).findAll();
-                Log.d(TAG, "Found " + txs.size() + " TX Results");
+                if (BuildConfig.DEBUG) Log.d(TAG, "Found " + txs.size() + " TX Results");
                 fixBadTXValues(instance, fetchTime, fetchLimit);
 
                 for (RealmTransaction item : txs)
@@ -320,6 +323,40 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //do not record
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Single<Boolean> deleteAllForWallet(String currentAddress)
+    {
+        return Single.fromCallable(() -> {
+            //delete all token and AUX data for this wallet
+            try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
+            {
+                instance.executeTransaction(r -> {
+                    RealmResults<RealmAuxData> data = r.where(RealmAuxData.class)
+                            .findAll();
+                    data.deleteAllFromRealm();
+
+                    RealmResults<RealmTransfer> realmTransfers = r.where(RealmTransfer.class)
+                            .findAll();
+                    realmTransfers.deleteAllFromRealm();
+
+                    RealmResults<RealmTransaction> realmTransactions = r.where(RealmTransaction.class)
+                            .findAll();
+                    realmTransactions.deleteAllFromRealm();
+
+                    RealmResults<RealmToken> realmTokens = r.where(RealmToken.class)
+                            .findAll();
+                    realmTokens.deleteAllFromRealm();
+                });
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     public static void fill(Realm realm, RealmTransaction item, Transaction transaction)

@@ -28,7 +28,6 @@ public class WalletActionsViewModel extends BaseViewModel {
 
     private final MutableLiveData<Integer> saved = new MutableLiveData<>();
     private final MutableLiveData<Boolean> deleted = new MutableLiveData<>();
-    private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isTaskRunning = new MutableLiveData<>();
@@ -60,10 +59,6 @@ public class WalletActionsViewModel extends BaseViewModel {
         return saved;
     }
 
-    public LiveData<String> exportedStore() {
-        return exportedStore;
-    }
-
     public LiveData<Boolean> isTaskRunning() {
         return isTaskRunning;
     }
@@ -87,18 +82,6 @@ public class WalletActionsViewModel extends BaseViewModel {
     private void onDelete(Wallet[] wallets) {
         isTaskRunning.postValue(false);
         deleted.postValue(true);
-    }
-
-    private void onExport(String s) {
-        isTaskRunning.postValue(false);
-        exportedStore.postValue(s);
-    }
-
-    private void onExportWalletError(Throwable throwable) {
-        isTaskRunning.postValue(false);
-        exportWalletError.postValue(
-                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
-                        ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
     public void storeWallet(Wallet wallet) {

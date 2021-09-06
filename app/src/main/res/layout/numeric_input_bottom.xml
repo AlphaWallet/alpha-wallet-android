@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/view_container"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/amount_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:paddingBottom="@dimen/dp16"
+        android:paddingTop="@dimen/dp16"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintTop_toTopOf="@id/guidelineTop">
+
+        <TextView
+            android:id="@+id/select_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/azure"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="top|center_horizontal"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17"
+            android:visibility="visible"
+            android:text="@string/select_amount" />
+
+        <TextView
+            android:id="@+id/select_amount_max"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/azure"
+            android:fontFamily="@font/font_semibold"
+            android:lines="1"
+            android:layout_marginStart="@dimen/dp5"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17"
+            android:visibility="visible"
+            tools:text="(max. 200)" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <ImageView
+        android:id="@+id/image_close"
+        android:contentDescription="@string/action_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginStart="@dimen/dp5"
+        android:background="@color/transparent"
+        app:layout_constraintBottom_toBottomOf="@id/amount_wrapper"
+        app:layout_constraintTop_toTopOf="@id/amount_wrapper"
+        app:layout_constraintStart_toStartOf="@id/view_container"
+        android:src="@drawable/ic_close" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury"
+        app:layout_constraintTop_toBottomOf="@id/amount_wrapper" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/number_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:paddingBottom="@dimen/dp16"
+        android:paddingTop="@dimen/dp16"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintTop_toBottomOf="@id/divider">
+
+        <Button
+            android:id="@+id/number_down"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/ic_minus_circle"
+            android:layout_marginBottom="3dp"/>
+
+        <com.alphawallet.app.ui.widget.entity.NumericInput
+            android:id="@+id/number"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:gravity="center"
+            android:layout_marginTop="2dp"
+            android:completionThreshold="1"
+            android:fontFamily="@font/font_bold"
+            android:imeOptions="actionDone"
+            android:inputType="numberDecimal"
+            android:textColor="@color/black"
+            android:textColorHint="@color/light_gray"
+            tools:text="25"
+            android:textSize="@dimen/sp24" />
+
+        <Button
+            android:id="@+id/number_up"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/ic_add_circle"
+            android:layout_marginBottom="3dp"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.00" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.98" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/number_wrapper" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineInnerRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.96" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineInnerLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.04" />
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

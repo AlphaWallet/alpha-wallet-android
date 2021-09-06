@@ -6,17 +6,21 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.TokensService;
 
 public class SetPriceAlertViewModelFactory implements ViewModelProvider.Factory {
     private final CurrencyRepositoryType currencyRepository;
     private final PreferenceRepositoryType preferenceRepository;
+    private final TokensService tokensService;
 
     public SetPriceAlertViewModelFactory(
             CurrencyRepositoryType currencyRepository,
-            PreferenceRepositoryType preferenceRepository)
+            PreferenceRepositoryType preferenceRepository,
+            TokensService tokensService)
     {
         this.currencyRepository = currencyRepository;
         this.preferenceRepository = preferenceRepository;
+        this.tokensService = tokensService;
     }
 
     @NonNull
@@ -25,7 +29,8 @@ public class SetPriceAlertViewModelFactory implements ViewModelProvider.Factory 
     {
         return (T) new SetPriceAlertViewModel(
                 currencyRepository,
-                preferenceRepository
+                preferenceRepository,
+                tokensService
         );
     }
 }

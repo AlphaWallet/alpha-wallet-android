@@ -20,6 +20,7 @@
         android:required="false" />
 
     <application
+        android:extractNativeLibs="true"
         android:name=".App"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
@@ -143,6 +144,9 @@
             android:enabled="true">
         </service>
 
+        <activity android:name=".ui.NameThisWalletActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/name_this_wallet" />
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
@@ -162,10 +166,6 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.ConfirmationActivity"
-            android:label="@string/title_activity_confirmation" />
-
-        <activity
             android:name=".ui.AddTokenActivity"
             android:label="@string/title_add_token" />
 
@@ -179,10 +179,6 @@
 
         <activity
             android:name=".ui.GasSettingsActivity"
-            android:label="@string/title_send_settings" />
-
-        <activity
-            android:name=".ui.GasSettingsActivityLegacy"
             android:label="@string/title_send_settings" />
 
         <activity
@@ -202,10 +198,6 @@
         <activity
             android:name=".ui.ImportTokenActivity"
             android:label="@string/title_import_token" />
-
-        <activity
-            android:name=".ui.TransferTicketActivity"
-            android:label="@string/label_transfer_ticket" />
 
         <activity
             android:name=".ui.TransferTicketDetailActivity"
@@ -328,6 +320,30 @@
             android:name=".ui.SetPriceAlertActivity"
             android:label="Set New Alert"
             android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name=".ui.AddCustomRPCNetworkActivity"
+            android:label="@string/title_activity_add_custom_rpcnetwork"/>
+
+        <activity
+            android:name=".ui.Erc1155Activity"
+            android:label="ERC1155 Master Activity" />
+
+        <activity
+            android:name=".ui.Erc1155AssetSelectActivity"
+            android:label="ERC1155 Asset Selection" />
+
+        <activity
+            android:name=".ui.Erc1155AssetDetailActivity"
+            android:label="ERC1155 Asset Details" />
+
+        <activity
+            android:name=".ui.Erc1155AssetListActivity"
+            android:label="ERC1155 Asset Details" />
+
+        <activity
+            android:name=".ui.TransferNFTActivity"
+            android:label="NFT Transfer" />
 
     </application>
 

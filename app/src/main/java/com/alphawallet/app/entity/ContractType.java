@@ -24,5 +24,7 @@ public enum ContractType
     LEGACY_DYNAMIC_CONTRACT,
     ETHEREUM_INVISIBLE,
     MAYBE_ERC20,
+    ERC1155,
     CREATION //Placeholder for generic, should be at end of list
+    ;
 }

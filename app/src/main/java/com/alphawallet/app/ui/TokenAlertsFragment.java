@@ -28,6 +28,7 @@ import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.ui.widget.entity.PriceAlertCallback;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModel;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModelFactory;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.List;
 
@@ -61,7 +62,11 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            Token token = getArguments().getParcelable(C.EXTRA_TOKEN_ID);
+            viewModel = new ViewModelProvider(this, viewModelFactory)
+                    .get(TokenAlertsViewModel.class);
+
+            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            Token token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
             layoutAddPriceAlert.setOnClickListener(this);
@@ -74,8 +79,6 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
 
             noAlertsLayout = view.findViewById(R.id.layout_no_alerts);
 
-            viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(TokenAlertsViewModel.class);
             viewModel.priceAlerts().observe(getViewLifecycleOwner(), this::onPriceAlertsUpdated);
             viewModel.fetchStoredPriceAlerts(token);
         }

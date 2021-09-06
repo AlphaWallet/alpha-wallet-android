@@ -69,22 +69,4 @@ public class RealmTransfer extends RealmObject
     {
         this.eventName = eventName;
     }
-
-    public static RealmResults<RealmAuxData> getEventListener(Realm realm, Token token, BigInteger tokenId, int historyCount, long timeLimit)
-    {
-        return getEventQuery(realm, token, tokenId, historyCount, timeLimit).findAllAsync();
-    }
-
-    public static RealmQuery<RealmAuxData> getEventQuery(Realm realm, Token token, BigInteger tokenId, int historyCount, long timeLimit)
-    {
-        String tokenIdHex = tokenId.toString(16);
-        return realm.where(RealmAuxData.class)
-                .endsWith("instanceKey", EVENT_CARDS)
-                .sort("resultTime", Sort.DESCENDING)
-                .greaterThan("resultTime", timeLimit)
-                .equalTo("chainId", token.tokenInfo.chainId)
-                .beginGroup().equalTo("tokenId", "0").or().equalTo("tokenId", tokenIdHex).endGroup()
-                .equalTo("tokenAddress", token.getAddress())
-                .limit(historyCount);
-    }
 }

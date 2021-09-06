@@ -10,7 +10,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.BaseViewCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.tokens.Token;
@@ -61,14 +60,6 @@ public class BaseViewModel extends ViewModel
 		return pushToastMutable;
 	}
 
-	public LiveData<Integer> marketQueueSuccessDialog() {
-		return successDialogMutable;
-	}
-
-	public LiveData<Integer> marketQueueErrorDialog() {
-		return errorDialogMutable;
-	}
-
 	public LiveData<Boolean> refreshTokens() {
 		return refreshTokens;
 	}
@@ -102,36 +93,6 @@ public class BaseViewModel extends ViewModel
 	public static void onPushToast(String message)
 	{
 		pushToastMutable.postValue(message);
-	}
-
-	protected BaseViewCallback processMessages = new BaseViewCallback() {
-		@Override
-		public void queueUpdate(int complete) {
-			onQueueUpdate(complete);
-		}
-
-		@Override
-		public void pushToast(String message) {
-			onPushToast(message);
-		}
-
-		@Override
-		public void showMarketQueueSuccessDialog(Integer resId) {
-			onMarketQueueSuccess(resId);
-		}
-
-		@Override
-		public void showMarketQueueErrorDialog(Integer resId) {
-			onMarketQueueError(resId);
-		}
-	};
-
-	public static void onMarketQueueError(Integer resId) {
-		errorDialogMutable.postValue(resId);
-	}
-
-	public static void onMarketQueueSuccess(Integer resId) {
-		successDialogMutable.postValue(resId);
 	}
 
 	public void showSendToken(Context context, String address, String symbol, int decimals, Token token) {

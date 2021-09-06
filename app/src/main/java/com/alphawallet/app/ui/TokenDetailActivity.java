@@ -7,23 +7,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.gridlayout.widget.GridLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
-import com.alphawallet.app.entity.opensea.Trait;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.ERC721ImageView;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.NFTImageView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 
 import java.math.BigInteger;
@@ -37,7 +39,6 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
@@ -47,7 +48,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
-    private ERC721ImageView assetImage;
+    private NFTImageView assetImage;
     private TextView title;
     private TextView name;
     private TextView desc;
@@ -55,11 +56,11 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     private TextView generation;
     private TextView cooldown;
     private TextView openExternal;
-    private TextView labelAttributes;
-    private GridLayout grid;
+    private NFTAttributeLayout attributeLayout;
     private FunctionButtonBar functionBar;
     private Token token;
-    private Asset asset;
+    private NFTAsset asset;
+    private BigInteger tokenId;
 
     private void initViews() {
         title = findViewById(R.id.title);
@@ -70,15 +71,12 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         generation = findViewById(R.id.generation);
         cooldown = findViewById(R.id.cooldown);
         openExternal = findViewById(R.id.open_external);
-        labelAttributes = findViewById(R.id.label_attributes);
-        grid = findViewById(R.id.grid);
-        grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
-        grid.setUseDefaultMargins(false);
+        attributeLayout = findViewById(R.id.attributes);
         functionBar = findViewById(R.id.layoutButtons);
         if (functionBar != null)
         {
             List<BigInteger> selection = new ArrayList<>();
-            selection.add(new BigInteger(asset.getTokenId(16), 16));
+            selection.add(tokenId);
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, selection);
             functionBar.revealButtons();
         }
@@ -94,8 +92,11 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
                 .get(TokenFunctionViewModel.class);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
-            asset = getIntent().getExtras().getParcelable("asset");
-            token = getIntent().getExtras().getParcelable("token");
+            asset = getIntent().getExtras().getParcelable(C.EXTRA_NFTASSET);
+            String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+            int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            token = viewModel.getToken(chainId, address);
+            tokenId = new BigInteger(getIntent().getExtras().getString(C.EXTRA_TOKEN_ID));
             initViews();
             toolbar();
             setTitle(token.getFullName());
@@ -110,7 +111,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         setDetails(asset);
         setNameAndDesc(asset);
         setExternalLink(asset);
-        setTraits(asset);
+        attributeLayout.bind(token, asset);
     }
 
     @Override
@@ -138,34 +139,10 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void setTraits(Asset asset) {
-        if (asset.getTraits() != null && !asset.getTraits().isEmpty()) {
-            if (asset.getAssetContract().getName().equals("CryptoKitties")) {
-                labelAttributes.setText(R.string.label_cattributes);
-            } else {
-                labelAttributes.setText(R.string.label_attributes);
-            }
-            for (Trait trait : asset.getTraits()) {
-                View attributeView = View.inflate(this, R.layout.item_attribute, null);
-                TextView traitType = attributeView.findViewById(R.id.trait);
-                TextView traitValue = attributeView.findViewById(R.id.value);
-                GridLayout.LayoutParams params = new GridLayout.LayoutParams(
-                        GridLayout.spec(GridLayout.UNDEFINED, 1f),
-                        GridLayout.spec(GridLayout.UNDEFINED, 1f));
-                attributeView.setLayoutParams(params);
-                traitType.setText(trait.getTraitType());
-                traitValue.setText(trait.getValue());
-                grid.addView(attributeView);
-            }
-        } else {
-            labelAttributes.setVisibility(View.GONE);
-        }
-    }
-
-    private void setExternalLink(Asset asset) {
+    private void setExternalLink(NFTAsset asset) {
         if (asset.getExternalLink() != null && !asset.getExternalLink().equals("null")) {
             openExternal.setText(getString(R.string.open_on_external_link,
-                    asset.getAssetContract().getName()));
+                    token.getFullName()));
 
             openExternal.setOnClickListener(v -> {
                 Intent intent = new Intent(TokenDetailActivity.this, HomeActivity.class);
@@ -178,30 +155,30 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void setNameAndDesc(Asset asset) {
+    private void setNameAndDesc(NFTAsset asset) {
         name.setText(asset.getName());
         desc.setText(asset.getDescription());
     }
 
-    private void setDetails(Asset asset) {
-        id.setText(asset.getTokenId());
-        if (asset.getTraitFromType("generation") != null) {
+    private void setDetails(NFTAsset asset) {
+        id.setText(tokenId.toString());
+        if (asset.getAttributeValue("generation") != null) {
             generation.setText(String.format("Gen %s",
-                    asset.getTraitFromType("generation").getValue()));
-        } else if (asset.getTraitFromType("gen") != null) {
+                    asset.getAttributeValue("generation")));
+        } else if (asset.getAttributeValue("gen") != null) {
             generation.setText(String.format("Gen %s",
-                    asset.getTraitFromType("gen").getValue()));
+                    asset.getAttributeValue("gen")));
         } else {
             generation.setVisibility(View.GONE);
         }
 
-        if (asset.getTraitFromType("cooldown_index") != null) {
+        if (asset.getAttributeValue("cooldown_index") != null) {
             cooldown.setText(String.format("%s Cooldown",
                     KittyUtils.parseCooldownIndex(
-                            asset.getTraitFromType("cooldown_index").getValue())));
-        } else if (asset.getTraitFromType("cooldown") != null) { // Non-CK
+                            asset.getAttributeValue("cooldown_index"))));
+        } else if (asset.getAttributeValue("cooldown") != null) { // Non-CK
             cooldown.setText(String.format("%s Cooldown",
-                    asset.getTraitFromType("cooldown").getValue()));
+                    asset.getAttributeValue("cooldown")));
         } else {
             cooldown.setVisibility(View.GONE);
         }
@@ -217,15 +194,27 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         return super.onOptionsItemSelected(item);
     }
 
+    ActivityResultLauncher<Intent> transferDirectDialogResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null)
+                {
+                    Intent i = new Intent();
+                    i.putExtra(C.EXTRA_TXHASH, result.getData().getStringExtra(C.EXTRA_TXHASH));
+                    setResult(RESULT_OK, new Intent());
+                    finish();
+                }
+            });
+
     private void openTransferDirectDialog()
     {
         Intent intent = new Intent(this, TransferTicketDetailActivity.class);
         intent.putExtra(WALLET, new Wallet(token.getWallet()));
-        intent.putExtra(TICKET, token);
-        intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId(16));
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(EXTRA_TOKENID_LIST, tokenId.toString(16));
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivityForResult(intent, C.TERMINATE_ACTIVITY);
+        transferDirectDialogResult.launch(intent);
     }
 
     @Override
@@ -238,25 +227,5 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode)
-        {
-            case C.TERMINATE_ACTIVITY:
-                if (resultCode == RESULT_OK && data != null)
-                {
-                    Intent i = new Intent();
-                    i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
-                    setResult(RESULT_OK, new Intent());
-                    finish();
-                }
-                break;
-            default:
-                break;
-        }
     }
 }

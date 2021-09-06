@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 
 import org.web3j.utils.Convert;
@@ -13,6 +14,7 @@ import java.text.NumberFormat;
 public class BalanceUtils
 {
     private static String weiInEth  = "1000000000000000000";
+    private static int showDecimalPlaces = 5;
 
     private static String getDigitalPattern(int precision)
     {
@@ -142,6 +144,11 @@ public class BalanceUtils
         return scaledValue(value, pattern, decimals);
     }
 
+    public static String getScaledValueMinimal(BigInteger value, long decimals)
+    {
+        return scaledValue(new BigDecimal(value), getDigitalPattern(Token.TOKEN_BALANCE_FOCUS_PRECISION, 0), decimals);
+    }
+
     public static String getScaledValueMinimal(BigDecimal value, long decimals, int max_precision)
     {
         return scaledValue(value, getDigitalPattern(max_precision, 0), decimals);
@@ -149,14 +156,14 @@ public class BalanceUtils
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals)
     {
-        return getScaledValueScientific(value, decimals, 4);
+        return getScaledValueScientific(value, decimals, showDecimalPlaces);
     }
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals, int dPlaces)
     {
         String returnValue;
         BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
-        final NumberFormat formatter = new DecimalFormat("0.####E0");
+        final NumberFormat formatter = new DecimalFormat(CustomViewSettings.getDecimalFormat());
         formatter.setRoundingMode(RoundingMode.DOWN);
         if (value.equals(BigDecimal.ZERO)) //zero balance
         {
@@ -184,7 +191,14 @@ public class BalanceUtils
 
     public static String getScaledValue(BigDecimal value, long decimals, int precision)
     {
-        return scaledValue(value, getDigitalPattern(precision), decimals);
+        try
+        {
+            return scaledValue(value, getDigitalPattern(precision), decimals);
+        }
+        catch (NumberFormatException e)
+        {
+            return "~";
+        }
     }
 
     private static String scaledValue(BigDecimal value, String pattern, long decimals)

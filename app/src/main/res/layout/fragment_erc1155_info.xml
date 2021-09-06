@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?actionBarSize"
+        android:orientation="vertical">
+
+        <com.alphawallet.app.widget.TokenIcon
+            android:id="@+id/token_icon"
+            android:layout_width="@dimen/token_icon_large"
+            android:layout_height="@dimen/token_icon_large"
+            android:layout_margin="@dimen/dp16"
+            android:layout_gravity="center_horizontal"
+            custom:layout_constrainedHeight="true"
+            custom:layout_constrainedWidth="true" />
+
+        <LinearLayout
+            android:id="@+id/layout_token_info"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/token_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_regular"
+            android:padding="@dimen/dp16"
+            tools:text="Description"
+            android:textColor="@color/mine" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

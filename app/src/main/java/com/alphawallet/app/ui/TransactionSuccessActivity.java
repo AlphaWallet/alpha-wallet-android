@@ -31,6 +31,10 @@ public class TransactionSuccessActivity extends BaseActivity implements Standard
         CopyTextView hashText = findViewById(R.id.tx_hash);
         hashText.setText(transactionHash);
 
+        toolbar();
+
+        setTitle(getString(R.string.empty));
+
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_show_tx_details)));
         functionBar.revealButtons();

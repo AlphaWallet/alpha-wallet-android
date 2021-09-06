@@ -10,32 +10,34 @@ import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.LocaleUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import io.reactivex.Single;
+
 public class AdvancedSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
+    private final TransactionsService transactionsService;
 
     AdvancedSettingsViewModel(
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
             AssetDefinitionService assetDefinitionService,
-            PreferenceRepositoryType preferenceRepository) {
+            PreferenceRepositoryType preferenceRepository,
+            TransactionsService transactionsService) {
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.preferenceRepository = preferenceRepository;
-    }
-
-    public String getUserPreferenceLocale()
-    {
-        return localeRepository.getUserPreferenceLocale();
+        this.transactionsService = transactionsService;
     }
 
     public ArrayList<LocaleItem> getLocaleList(Context context) {
@@ -105,5 +107,10 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public void blankFilterSettings()
     {
         preferenceRepository.blankHasSetNetworkFilters();
+    }
+
+    public Single<Boolean> resetTokenData()
+    {
+        return transactionsService.wipeDataForWallet();
     }
 }

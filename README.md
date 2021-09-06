@@ -38,7 +38,7 @@ AlphaWallet's focus is to provide an interface to interact with Ethereum Tokens 
 - [FIFA and UEFA’s blockchain tickets](https://apps.apple.com/au/app/shankai/id1492559481)
 - [Car Ownership portal](https://github.com/AlphaWallet/TokenScript-Examples/tree/master/examples/Karma)
 
-### Full TokenScript Support
+### TokenScript Support
 
 With TokenScript, you can extend your Token’s capabilities to become "smart" and secure, enabling a mobile-native user experience :iphone:
 
@@ -62,6 +62,8 @@ We want to give businesses the whitelabel tools they need to develop their ether
 1. Clone this repository
 1. Run `./gradlew build` to install tools and dependencies.
 
+You can also build it from the commandline just like other Android apps. Note that JDK 8 and 11 are the versions supported by Android.
+
 Find more information in our available [documentation](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/docs/overview.md).
 
 ### Add your token to AlphaWallet
@@ -76,6 +78,36 @@ https://github.com/AlphaWallet/alpha-wallet-android/blob/master/app/src/main/ass
 ## How to Contribute
 
 You can submit feedback and report bugs as Github issues. Please be sure to include your operating system, device, version number, and steps to reproduce reported bugs.
+
+## How to customise the appearance of your wallet fork
+
+If you are forking AlphaWallet, and have a token that you want to be locked visible this can now be done easily. Let's say we want to only show Ethereum Mainnet, and always show the USDC stablecoin.
+
+```
+class CustomViewSettings
+{
+```
+...
+```
+    private static final List<TokenInfo> lockedTokens = Arrays.asList(
+            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, int ChainId)
+            new TokenInfo("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "USD Coin", "USDC", 6, true, EthereumNetworkBase.MAINNET_ID)
+    );
+    
+    private static final List<Integer> lockedChains = Arrays.asList(
+            EthereumNetworkBase.MAINNET_ID
+    );
+```
+Further, you may have your own Dapp that sells or uses the USDC that you want your users to use.
+```
+public static boolean minimiseBrowserURLBar() { return true; } //this removes the ability to enter URL's directly (they can be clicked on within your dapp)
+```
+```
+public abstract class EthereumNetworkBase ...
+{
+    private static final String DEFAULT_HOMEPAGE = "https://my-awesome-nfts.com/usdc/";
+```
+If you are forking AlphaWallet and you have a cool Token, please consider donating a small amount of said Token to `alphawallet.eth` to help fund continuing development of the main repo.
 
 ### Request or submit a feature :postbox:
 

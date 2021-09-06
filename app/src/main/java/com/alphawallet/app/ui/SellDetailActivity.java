@@ -2,16 +2,10 @@ package com.alphawallet.app.ui;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
@@ -23,42 +17,53 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
-
+import com.alphawallet.app.viewmodel.SellDetailModelFactory;
+import com.alphawallet.app.viewmodel.SellDetailViewModel;
+import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.ethereum.EthereumNetworkBase;
+
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.MissingFormatArgumentException;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import com.alphawallet.app.R;
 
-import com.alphawallet.app.viewmodel.SellDetailViewModel;
-import com.alphawallet.app.viewmodel.SellDetailModelFactory;
-import com.alphawallet.app.widget.AWalletConfirmationDialog;
-
-import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.app.C.EXTRA_PRICE;
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.token.tools.Convert.getEthString;
 
 /**
  * Created by James on 21/02/2018.
@@ -115,19 +120,20 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(SellDetailViewModel.class);
         setContentView(R.layout.activity_set_price);
         toolbar();
         setTitle(getString(R.string.empty));
 
-        token = getIntent().getParcelableExtra(TICKET);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         saleStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
         sellPriceValue = getIntent().getDoubleExtra(EXTRA_PRICE, 0.0);
         selection = token.stringHexToBigIntegerList(ticketIds);
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(SellDetailViewModel.class);
         viewModel.prepare(token, wallet);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
@@ -493,13 +499,19 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         dialog.show();
     }
 
+    ActivityResultLauncher<Intent> sellLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
+            });
+
     private void sellLinkFinal(String universalLink) {
         //create share intent
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Magic Link");
         sendIntent.setType("text/plain");
-        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
+        sellLinkFinalResult.launch(Intent.createChooser(sendIntent, "Share via"));
     }
 
     @Override

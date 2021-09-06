@@ -31,11 +31,12 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int MATIC_TEST_ID = 80001;
     public static final int OPTIMISTIC_MAIN_ID = 10;
     public static final int OPTIMISTIC_TEST_ID = 69;
+    public static final int CRONOS_TEST_ID = 338;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String XDAI_RPC_URL = "https://dai.poa.network";
+    public static final String XDAI_RPC_URL = "https://rpc.xdaichain.com";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -45,25 +46,26 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
-    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed1.binance.org:443";
+    public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";
     public static final String FUJI_TEST_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
     public static final String FANTOM_RPC_URL = "https://rpcapi.fantom.network";
-    public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network/";
-    public static final String MATIC_RPC_URL = "https://rpc-mainnet.maticvigil.com/";
-    public static final String MUMBAI_TEST_RPC_URL = "https://rpc-mumbai.maticvigil.com/";
+    public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network";
+    public static final String MATIC_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
+    public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
-
+    public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8545";
+  
     static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
                     MAINNET_ID));
             put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
                     CLASSIC_ID));
-            put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/poa/dai/tx/",
+            put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
                     XDAI_ID));
             put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
                     POA_ID));
@@ -83,7 +85,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     ARTIS_TAU1_ID));
             put(BINANCE_TEST_ID, new NetworkInfo("BSC TestNet (Test)", "BNB", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
                     BINANCE_MAIN_ID));
-            put(BINANCE_MAIN_ID, new NetworkInfo("Binance", "BNB", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",
+            put(BINANCE_MAIN_ID, new NetworkInfo("Binance (BSC)", "BNB", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",
                     BINANCE_TEST_ID));
             put(HECO_ID, new NetworkInfo("Heco", "HT", HECO_RPC_URL, "https://hecoinfo.com/tx/",
                     HECO_ID));
@@ -100,16 +102,16 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(FANTOM_TEST_ID, new NetworkInfo("Fantom (Test)", "FTM", FANTOM_TEST_RPC_URL, "https://explorer.testnet.fantom.network/tx/",
                     FANTOM_TEST_ID));
 
-            put(MATIC_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://explorer.matic.network/tx/",
+            put(MATIC_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://polygonscan.com/tx/",
                     MATIC_ID));
-            put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai-explorer.matic.today/tx/",
+            put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
                     MATIC_TEST_ID));
 
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_URL, "https://optimistic.etherscan.io/tx/",
                     OPTIMISTIC_MAIN_ID));
             put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
                     OPTIMISTIC_TEST_ID));
-
+            put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://cronos-explorer.crypto.org/tx/",CRONOS_TEST_ID));
         }
     };
 

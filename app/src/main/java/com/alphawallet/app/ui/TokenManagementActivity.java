@@ -53,7 +53,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     private boolean isDataChanged;
 
-    private Handler delayHandler = new Handler(Looper.getMainLooper());
+    private final Handler delayHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

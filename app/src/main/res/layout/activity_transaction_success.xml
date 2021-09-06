@@ -43,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp10"
+            android:layout_marginHorizontal="@dimen/dp22"
             android:layout_below="@id/backup_seed_image"
             android:layout_centerHorizontal="true"
             custom:gravity="center"

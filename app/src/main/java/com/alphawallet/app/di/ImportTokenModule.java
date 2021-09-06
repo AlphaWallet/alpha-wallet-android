@@ -1,8 +1,5 @@
 package com.alphawallet.app.di;
 
-import dagger.Module;
-import dagger.Provides;
-
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
@@ -18,6 +15,9 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
  * Created by James on 9/03/2018.

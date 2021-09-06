@@ -14,7 +14,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ImportWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AnalyticsServiceType;
-import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.OnSetWatchWalletListener;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -44,7 +43,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     private String importWalletType = "";
 
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService,
-                          GasService gasService, AnalyticsServiceType analyticsService) {
+                          AnalyticsServiceType analyticsService) {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
         this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), keyService.getContext());

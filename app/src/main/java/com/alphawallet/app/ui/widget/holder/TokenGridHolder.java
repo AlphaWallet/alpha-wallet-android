@@ -32,7 +32,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
 
     public static final int VIEW_TYPE = 2005;
 
-    private final LinearLayout layout;
+    private final LinearLayout clickLayer;
     private final TextView name;
     private final TokenIcon imageIcon;
     private final AssetDefinitionService assetDefinition;
@@ -43,7 +43,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
     public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs) {
         super(resId, parent);
 
-        layout = findViewById(R.id.token_layout);
+        clickLayer = findViewById(R.id.click_layer);
         imageIcon = findViewById(R.id.token_icon);
         name = findViewById(R.id.token_name);
         tokensService = tSvs;
@@ -84,7 +84,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
                 setupIcon(token);
             }*/
 
-            layout.setOnClickListener(v -> {
+            clickLayer.setOnClickListener(v -> {
                 if (onTokenClickListener != null) {
                     onTokenClickListener.onTokenClick(v, token, null, true);
                 }

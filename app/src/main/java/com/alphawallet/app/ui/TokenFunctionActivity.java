@@ -1,16 +1,15 @@
 package com.alphawallet.app.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -35,6 +34,7 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 
@@ -49,7 +49,6 @@ import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
@@ -114,7 +113,8 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         SystemView systemView = findViewById(R.id.system_view);
         systemView.hide();
         functionBar = findViewById(R.id.layoutButtons);
-        initViews(getIntent().getParcelableExtra(TICKET));
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        initViews(viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS)));
         toolbar();
         setTitle(getString(R.string.token_function));
 

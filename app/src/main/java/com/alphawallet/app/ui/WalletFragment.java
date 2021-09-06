@@ -351,7 +351,8 @@ public class WalletFragment extends BaseFragment implements
             selectedToken = view;
             Token clickOrigin = viewModel.getTokenFromService(token);
             if (clickOrigin == null) clickOrigin = token;
-            clickOrigin.clickReact(viewModel, getActivity());
+            viewModel.showTokenDetail(getActivity(), clickOrigin);
+            //clickOrigin.clickReact(viewModel, getActivity());
             handler.postDelayed(this, 700);
         }
     }

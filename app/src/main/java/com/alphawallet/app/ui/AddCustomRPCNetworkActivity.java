@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.URLUtil;
 
@@ -105,7 +106,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
                 symbolInputView.getEditText().setEnabled(false);
                 blockExplorerUrlInputView.getEditText().setEnabled(false);
                 blockExplorerApiUrl.getEditText().setEnabled(false);
-                testNetSwitch.setEnabled(false);
+                findViewById(R.id.view_click_hider).setVisibility(View.VISIBLE); //disable clicking on the switch
             } else {
                 addFunctionBar(true);
             }

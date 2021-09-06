@@ -1,7 +1,6 @@
 package com.alphawallet.app.repository;
 
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
@@ -26,13 +25,12 @@ import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import org.json.JSONException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +43,6 @@ import io.realm.exceptions.RealmException;
 
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
-import static com.alphawallet.app.service.TokensService.PENDING_TIME_LIMIT;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokensRealmSource implements TokenLocalSource {
@@ -172,7 +169,7 @@ public class TokensRealmSource implements TokenLocalSource {
         else return Single.fromCallable(() -> {
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                realm.executeTransactionAsync(r -> saveTokenLocal(r, token));
+                realm.executeTransaction(r -> saveTokenLocal(r, token));
             }
             return token;
         });
@@ -659,12 +656,14 @@ public class TokensRealmSource implements TokenLocalSource {
         writeAssetContract(realm, token);
 
         //Final check to see if the token should be visible
-        if (token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0 && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
+        if ((token.balance.compareTo(BigDecimal.ZERO) > 0 || token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0)
+                && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
             token.tokenInfo.isEnabled = true;
             realmToken.setEnabled(true);
         }
-        else if (!token.isEthereum() && token.getBalanceRaw().compareTo(BigDecimal.ZERO) <= 0 && realmToken.getEnabled() && !realmToken.isVisibilityChanged())
+        else if (!token.isEthereum() && (token.balance.compareTo(BigDecimal.ZERO) <= 0 && token.getBalanceRaw().compareTo(BigDecimal.ZERO) <= 0)
+                && realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
             token.tokenInfo.isEnabled = false;
             realmToken.setEnabled(false);
@@ -708,6 +707,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     //for erc1155 need to check each potential 'removal'.
                     //erc721 gets removed by noting token transfer
                     Map<BigInteger, NFTAsset> liveMap = token.queryAssets(assetMap);
+                    HashSet<BigInteger> deleteList = new HashSet<>();
 
                     for (BigInteger tokenId : liveMap.keySet())
                     {
@@ -717,7 +717,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         if (newAsset.getBalance().compareTo(BigDecimal.ZERO) == 0)
                         {
                             deleteAssets(r, token, Collections.singletonList(tokenId));
-                            liveMap.remove(tokenId);
+                            deleteList.add(tokenId);
                         }
                         else
                         {
@@ -725,6 +725,11 @@ public class TokensRealmSource implements TokenLocalSource {
                             if (oldAsset != null) { newAsset.updateAsset(oldAsset); }
                             writeAsset(r, token, tokenId, newAsset);
                         }
+                    }
+
+                    for (BigInteger tokenId : deleteList)
+                    {
+                        liveMap.remove(tokenId);
                     }
 
                     //update token balance & visibility

@@ -1,11 +1,10 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -25,6 +24,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
     private final NumericInput textAmount;
     private final Button buttonUp;
     private final Button buttonDown;
+    private final ImageView cancel;
     private AmountReadyCallback amountReady;
     private boolean gotFocus;
     private int activePosition = -1;
@@ -37,6 +37,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
         textAmountMax = findViewById(R.id.select_amount_max);
         buttonUp = findViewById(R.id.number_up);
         buttonDown = findViewById(R.id.number_down);
+        cancel = findViewById(R.id.image_close);
         gotFocus = false;
     }
 
@@ -62,6 +63,13 @@ public class NumericInputBottomSheet extends ConstraintLayout
             {
                 textAmount.setText(String.valueOf(currentAmount - 1));
             }
+        });
+        cancel.setOnClickListener(v -> {
+            activePosition = -1;
+            amountReady = null;
+            callback.amountReady(BigDecimal.ZERO, BigDecimal.valueOf(position));
+            setVisibility(View.GONE);
+            KeyboardUtils.hideKeyboard(this);
         });
 
         textAmount.requestFocus();

@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <LinearLayout
@@ -22,7 +23,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            android:text="Balance"
+            tools:text="Balance"
             android:textColor="@color/dove"
             android:textSize="@dimen/sp15" />
 
@@ -35,9 +36,23 @@
             android:fontFamily="@font/font_bold"
             android:gravity="end|center_vertical"
             android:singleLine="true"
-            android:text="-"
+            tools:text="-"
             android:textColor="@color/black"
             android:textSize="@dimen/sp17" />
+
+        <TextView
+            android:id="@+id/value_long"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:ellipsize="end"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="end|center_vertical"
+            android:maxLines="2"
+            tools:text="The smallest of the seven inhabited Aeolian Islands"
+            android:visibility="gone"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp16" />
 
     </LinearLayout>
 

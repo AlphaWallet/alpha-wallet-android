@@ -452,16 +452,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         /* merging static compile time network list with runtime network list */
         List<NetworkInfo> networks = new ArrayList<>();
 
+        addNetworks(additionalNetworks, networks, true);
+        addNetworks(networks, true);
         /* the order is passed to the user interface. So if a user has a token on one
          * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
          * test nets, they are displayed by that order.
          */
         addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, true);
-        addNetworks(additionalNetworks, networks, true);
-        addNetworks(networks, true);
-        addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, false);
         addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(networks, false);
+        addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, false);
         return networks.toArray(new NetworkInfo[0]);
     }
 
@@ -755,7 +755,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         boolean isCustom = customNetworks.map.containsKey(chainId);
         NetworkInfo info = getNetworkByChain(chainId);
-        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : hasRealValue(chainId);
+        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : !hasRealValue(chainId);
 
         return new NetworkInfoExt(info, isTestNetwork, isCustom);
     }

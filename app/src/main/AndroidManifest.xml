@@ -200,10 +200,6 @@
             android:label="@string/title_import_token" />
 
         <activity
-            android:name=".ui.TransferTicketActivity"
-            android:label="@string/label_transfer_ticket" />
-
-        <activity
             android:name=".ui.TransferTicketDetailActivity"
             android:label="@string/label_transfer_ticket_detail" />
 

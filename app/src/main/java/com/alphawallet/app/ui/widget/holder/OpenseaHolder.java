@@ -232,9 +232,10 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
             activeClick = true;
             handler.postDelayed(this, 500);
             Intent intent = new Intent(getContext(), TokenDetailActivity.class);
-            intent.putExtra("asset", token.getAssetForToken( tokenId.toString()));
-            intent.putExtra("token", token);
-            intent.putExtra("tokenId", tokenId.toString());
+            intent.putExtra(C.EXTRA_NFTASSET, token.getAssetForToken(tokenId.toString()));
+            intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+            intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+            intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
             if (activity != null)
             {
                 activity.startActivityForResult(intent, C.TERMINATE_ACTIVITY);

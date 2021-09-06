@@ -9,6 +9,7 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.SellDetailModelFactory;
 
 import dagger.Module;
@@ -24,24 +25,19 @@ public class SellDetailModule {
     @Provides
     SellDetailModelFactory sellDetailModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            GenericWalletInteract genericWalletInteract,
+            TokensService tokensService,
             CreateTransactionInteract createTransactionInteract,
             SellDetailRouter sellDetailRouter,
             KeyService keyService,
             AssetDefinitionService assetDefinitionService) {
         return new SellDetailModelFactory(
-                findDefaultNetworkInteract, genericWalletInteract, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
+                findDefaultNetworkInteract, tokensService, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
     }
 
     @Provides
     FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
             EthereumNetworkRepositoryType networkRepository) {
         return new FindDefaultNetworkInteract(networkRepository);
-    }
-
-    @Provides
-    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

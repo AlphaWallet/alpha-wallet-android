@@ -20,6 +20,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -42,7 +43,7 @@ public class SellDetailViewModel extends BaseViewModel {
     private ParseMagicLink parser;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final GenericWalletInteract genericWalletInteract;
+    private final TokensService tokensService;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
     private final KeyService keyService;
@@ -51,13 +52,13 @@ public class SellDetailViewModel extends BaseViewModel {
     private byte[] linkMessage;
 
     SellDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
-                        GenericWalletInteract genericWalletInteract,
+                        TokensService tokensService,
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
                         KeyService keyService,
                         AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.genericWalletInteract = genericWalletInteract;
+        this.tokensService = tokensService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.keyService = keyService;
@@ -82,6 +83,8 @@ public class SellDetailViewModel extends BaseViewModel {
     {
         return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId).symbol;
     }
+
+    public TokensService getTokensService() { return tokensService; }
 
     public NetworkInfo getNetwork()
     {

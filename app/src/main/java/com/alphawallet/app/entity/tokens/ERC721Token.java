@@ -1,9 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -12,17 +9,14 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 
-import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -37,10 +31,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -49,7 +39,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class ERC721Token extends Token implements Parcelable
+public class ERC721Token extends Token
 {
     private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
 
@@ -86,42 +76,6 @@ public class ERC721Token extends Token implements Parcelable
     public NFTAsset getAssetForToken(BigInteger tokenId)
     {
         return tokenBalanceAssets.get(tokenId);
-    }
-
-    private ERC721Token(Parcel in) {
-        super(in);
-        tokenBalanceAssets = new HashMap<>();
-        //read in the element list
-        int size = in.readInt();
-        for (; size > 0; size--)
-        {
-            BigInteger tokenId = new BigInteger(in.readString(), Character.MAX_RADIX);
-            NFTAsset asset = in.readParcelable(NFTAsset.class.getClassLoader());
-            tokenBalanceAssets.put(tokenId, asset);
-        }
-    }
-
-    public static final Creator<ERC721Token> CREATOR = new Creator<ERC721Token>() {
-        @Override
-        public ERC721Token createFromParcel(Parcel in) {
-            return new ERC721Token(in);
-        }
-
-        @Override
-        public ERC721Token[] newArray(int size) {
-            return new ERC721Token[size];
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(tokenBalanceAssets.size());
-        for (BigInteger assetKey : tokenBalanceAssets.keySet())
-        {
-            dest.writeString(assetKey.toString(Character.MAX_RADIX));
-            dest.writeParcelable(tokenBalanceAssets.get(assetKey), flags);
-        }
     }
 
     @Override

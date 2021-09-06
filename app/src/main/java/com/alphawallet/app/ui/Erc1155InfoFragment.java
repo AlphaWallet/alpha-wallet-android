@@ -22,6 +22,7 @@ import com.alphawallet.app.viewmodel.Erc1155InfoViewModelFactory;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
 
@@ -51,7 +52,11 @@ public class Erc1155InfoFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            token = getArguments().getParcelable(C.EXTRA_TOKEN);
+            viewModel = new ViewModelProvider(this, viewModelFactory)
+                    .get(Erc1155InfoViewModel.class);
+
+            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
             tokenDescription = view.findViewById(R.id.token_description);
@@ -74,9 +79,6 @@ public class Erc1155InfoFragment extends BaseFragment {
                     tokenDescription.setText(assetContract.getDescription());
                 }
             }
-
-            viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(Erc1155InfoViewModel.class);
 
             TokenIcon icon = view.findViewById(R.id.token_icon);
             icon.bindData(token, viewModel.getAssetDefinitionService());

@@ -32,6 +32,7 @@ import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc1155ViewModel;
 import com.alphawallet.app.viewmodel.Erc1155ViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.android.material.tabs.TabLayout;
 
 import java.math.BigInteger;
@@ -62,8 +63,8 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc1155);
         toolbar();
-        getIntentData();
         initViewModel();
+        getIntentData();
         setTitle(token.tokenInfo.name);
         setupViewPager();
     }
@@ -82,7 +83,8 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
     private void getIntentData()
     {
         wallet = getIntent().getParcelableExtra(WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
     }
 
     private void setupViewPager()
@@ -92,7 +94,8 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         TokenActivityFragment tokenActivityFragment = new TokenActivityFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(C.EXTRA_TOKEN, token);
+        bundle.putInt(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
         bundle.putParcelable(WALLET, wallet);
         infoFragment.setArguments(bundle);
         assetsFragment.setArguments(bundle);

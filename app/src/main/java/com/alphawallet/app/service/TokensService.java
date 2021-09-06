@@ -171,7 +171,6 @@ public class TokensService
             Intent intent = new Intent(ADDED_TOKEN);
             intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, new ArrayList<>(Collections.singletonList(new ContractLocator(token.getAddress(), token.tokenInfo.chainId, token.getInterfaceSpec()))));
             context.sendBroadcast(intent);
-            //now add to the balance update list if has balance
         }
     }
 
@@ -441,7 +440,7 @@ public class TokensService
     {
         if (checkUnknownTokenCycle == null || checkUnknownTokenCycle.isDisposed())
         {
-            checkUnknownTokenCycle = Observable.interval(1000, 1500, TimeUnit.MILLISECONDS)
+            checkUnknownTokenCycle = Observable.interval(1000, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkUnknownTokens()).subscribe();
         }
     }
@@ -487,6 +486,7 @@ public class TokensService
     public void addTokenImageUrl(int networkId, String address, String imageUrl)
     {
         tokenRepository.addImageUrl(networkId, address, imageUrl);
+        IconItem.iconLoadClear(address.toLowerCase());
     }
 
     public Single<TokenInfo> update(String address, int chainId) {

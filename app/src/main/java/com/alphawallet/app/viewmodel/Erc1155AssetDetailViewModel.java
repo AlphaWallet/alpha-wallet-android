@@ -50,6 +50,8 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
+    public TokensService getTokensService() { return tokensService; }
+
     public Single<Intent> showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)
     {
         return walletInteract.find()
@@ -60,7 +62,8 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
     {
         Intent intent = new Intent(ctx, Erc1155AssetSelectActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString(16));
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
@@ -76,7 +79,8 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_TOKEN, token);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, false));
         intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

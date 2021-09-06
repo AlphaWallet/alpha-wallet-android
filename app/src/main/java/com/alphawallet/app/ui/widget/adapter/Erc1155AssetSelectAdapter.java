@@ -90,7 +90,7 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
                 holder.tokenId.setVisibility(View.GONE);
             }
 
-            if (item.isAssetMultiple())
+            if (item.isAssetMultiple() || !ERC1155Token.isNFT(pair.first))
             {
                 holder.assetCount.setVisibility(View.VISIBLE);
                 holder.assetCount.setText(context.getString(R.string.asset_count_val, item.getBalance().toString()));

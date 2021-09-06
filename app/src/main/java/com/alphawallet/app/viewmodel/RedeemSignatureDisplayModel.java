@@ -36,6 +36,8 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.service.AssetDefinitionService;
 
@@ -54,7 +56,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memoryPoolInteract;
-    private final AssetDisplayRouter assetDisplayRouter;
+    private final TokensService tokensService;
     private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -83,7 +85,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memoryPoolInteract,
-            AssetDisplayRouter assetDisplayRouter,
+            TokensService tokensService,
             AssetDefinitionService assetDefinitionService) {
         this.genericWalletInteract = genericWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
@@ -91,7 +93,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.memoryPoolInteract = memoryPoolInteract;
-        this.assetDisplayRouter = assetDisplayRouter;
+        this.tokensService = tokensService;
         this.assetDefinitionService = assetDefinitionService;
     }
 
@@ -110,6 +112,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public LiveData<Boolean> signRequest() {
         return signRequest;
     }
+
+    public TokensService getTokensService() { return tokensService; }
 
     @Override
     protected void onCleared() {

@@ -26,7 +26,9 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,13 +59,13 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
         toolbar();
 
+        initViewModel();
+
         getIntentData();
 
         setTitle(token.tokenInfo.name);
 
         initViews();
-
-        initViewModel();
 
         setupFunctionBar();
     }
@@ -88,6 +90,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
         if (!TextUtils.isEmpty(sequenceId)) { addInfoView("Token #", sequenceId); }
         if (asset.isAssetMultiple()) { addInfoView(getString(R.string.balance), asset.getBalance().toString()); }
+        if (!TextUtils.isEmpty(asset.getName())) { addInfoView(getString(R.string.hint_contract_name), asset.getName()); }
         addInfoView("External Link", asset.getExternalLink());
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
         attrs.bind(token, asset);
@@ -98,7 +101,8 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
     private void getIntentData()
     {
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
@@ -127,7 +131,6 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         {
             TokenInfoView v = new TokenInfoView(this, elementName);
             v.setValue(name);
-            if (name.startsWith("http")) { v.setLink(); }
             tokenInfoLayout.addView(v);
         }
     }
@@ -157,6 +160,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         }
         else
         {
+            if (asset.getSelectedBalance().compareTo(BigDecimal.ZERO) == 0) { asset.setSelectedBalance(BigDecimal.ONE); }
             viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
                     .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
         }

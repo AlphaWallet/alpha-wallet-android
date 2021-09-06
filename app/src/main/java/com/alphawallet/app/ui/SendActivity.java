@@ -110,10 +110,11 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 .get(SendViewModel.class);
 
         String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        wallet = getIntent().getParcelableExtra(WALLET);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
-        QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
         int currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
+        wallet = getIntent().getParcelableExtra(WALLET);
+        token = viewModel.getToken(currentChain, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
+
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
 

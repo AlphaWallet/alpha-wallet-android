@@ -10,7 +10,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -74,7 +73,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
- * Created by JB on 11/08/2021.
+ * Created by JB on 11/08/2021.cla
  */
 public class TransferNFTActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
@@ -102,8 +101,11 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_nft);
+        viewModel = new ViewModelProvider(this, viewModelFactory)
+                .get(TransferTicketDetailViewModel.class);
 
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         List<BigInteger> tokenIdList = token.stringHexToBigIntegerList(tokenIds);
@@ -122,8 +124,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         sendAddress = null;
         ensAddress = null;
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(TransferTicketDetailViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -139,7 +139,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        final FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_transfer)));
         functionBar.revealButtons();

@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.view.View;
 
 import com.alphawallet.app.ui.AddTokenActivity;
-import com.alphawallet.app.util.Utils;
 
 public class TokenInfo implements Parcelable {
     public final String address;
@@ -71,11 +70,11 @@ public class TokenInfo implements Parcelable {
         dest.writeInt(chainId);
     }
 
-    public void addTokenSetupPage(AddTokenActivity layout, String chainName) {
+    public void addTokenSetupPage(AddTokenActivity layout) {
         layout.inputAddressView.setAddress(address);
         layout.symbolInputView.setText(symbol);
         layout.decimalsInputView.setText(String.valueOf(decimals));
-        layout.nameInputview.setText(name);
+        layout.nameInputView.setText(name);
         layout.ticketLayout.setVisibility(View.GONE);
     }
 }

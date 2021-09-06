@@ -95,6 +95,16 @@
                     android:theme="@style/SettingsItemSwitchAppearance"
                     android:visibility="visible" />
 
+                <View
+                    android:id="@+id/view_click_hider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:background="@color/transparent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone" />
+
             </FrameLayout>
         </LinearLayout>
     </ScrollView>

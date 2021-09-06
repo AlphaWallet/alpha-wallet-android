@@ -16,6 +16,7 @@ import com.alphawallet.app.interact.SignatureGenerateInteract;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 
 /**
  * Created by James on 22/01/2018.
@@ -29,7 +30,7 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memPoolInteract;
-    private final AssetDisplayRouter assetDisplayRouter;
+    private final TokensService tokensService;
     private final AssetDefinitionService assetDefinitionService;
 
     public RedeemSignatureDisplayModelFactory(
@@ -39,7 +40,7 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
             KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract,
-            AssetDisplayRouter assetDisplayRouter,
+            TokensService tokensService,
             AssetDefinitionService assetDefinitionService) {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
@@ -47,13 +48,13 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.memPoolInteract = memPoolInteract;
-        this.assetDisplayRouter = assetDisplayRouter;
+        this.tokensService = tokensService;
         this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new RedeemSignatureDisplayModel(genericWalletInteract, signatureGenerateInteract, createTransactionInteract, keyService, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
+        return (T) new RedeemSignatureDisplayModel(genericWalletInteract, signatureGenerateInteract, createTransactionInteract, keyService, fetchTokensInteract, memPoolInteract, tokensService, assetDefinitionService);
     }
 }

@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.entity.HeaderItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
@@ -31,6 +32,7 @@ import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
+import com.alphawallet.app.ui.widget.holder.HeaderHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
@@ -170,7 +172,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
-        BinderViewHolder<?> holder = null;
+        BinderViewHolder<?> holder;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
                 TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, realm);
@@ -186,6 +188,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
             case ManageTokensHolder.VIEW_TYPE:
                 holder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
+                break;
+
+            case HeaderHolder.VIEW_TYPE:
+                holder = new HeaderHolder(R.layout.layout_tokens_header, parent);
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
@@ -248,6 +254,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void addSearchTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
             items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress), 0));
+
+            items.add(new HeaderItem("some_header", 1));
         }
     }
 

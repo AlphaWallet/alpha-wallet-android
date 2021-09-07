@@ -238,7 +238,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         symbol = symbol == null ? ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
         int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         tokenMeta = new TokenCardMeta(token);
         viewModel.checkForNewScript(token);
     }

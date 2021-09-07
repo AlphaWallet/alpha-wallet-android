@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -25,7 +24,7 @@ import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
-import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.token.entity.ContractAddress;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;

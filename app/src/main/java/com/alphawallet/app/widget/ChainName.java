@@ -10,8 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.ethereum.EthereumNetworkBase;
 
 /**
  * Created by JB on 3/12/2020.

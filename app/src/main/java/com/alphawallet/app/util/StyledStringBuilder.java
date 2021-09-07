@@ -1,8 +1,8 @@
 package com.alphawallet.app.util;
 
-import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 
 import java.util.ArrayList;
@@ -34,6 +34,15 @@ public class StyledStringBuilder extends SpannableStringBuilder
         return this;
     }
 
+    public SpannableStringBuilder setColor(int colour)
+    {
+        int useStartIndex = startGroup != -1 ? startGroup : startIndex;
+        ForegroundColorSpan fcs = new ForegroundColorSpan(colour);
+        spanners.add(new SpanType(useStartIndex, this.length(), fcs));
+        startGroup = -1;
+        return this;
+    }
+
     public SpannableStringBuilder startStyleGroup()
     {
         startGroup = this.length();
@@ -44,7 +53,7 @@ public class StyledStringBuilder extends SpannableStringBuilder
     {
         for (SpanType s : spanners)
         {
-            setSpan(s.style, s.begin, s.end, Spanned.SPAN_POINT_POINT);
+            setSpan(s.style != null ? s.style : s.styleColour, s.begin, s.end, Spanned.SPAN_POINT_POINT);
         }
     }
 
@@ -53,12 +62,22 @@ public class StyledStringBuilder extends SpannableStringBuilder
         int begin;
         int end;
         StyleSpan style;
+        ForegroundColorSpan styleColour;
 
         public SpanType(int begin, int end, StyleSpan style)
         {
             this.begin = begin;
             this.end = end;
             this.style = style;
+            this.styleColour = null;
+        }
+
+        public SpanType(int begin, int end, ForegroundColorSpan colour)
+        {
+            this.begin = begin;
+            this.end = end;
+            this.style = null;
+            this.styleColour = colour;
         }
     }
 }

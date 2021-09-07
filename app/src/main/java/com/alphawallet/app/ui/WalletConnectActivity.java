@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
@@ -18,7 +19,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
@@ -32,8 +36,11 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.util.StyledStringBuilder;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -93,6 +100,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private WCClient client;
     private WCSession session;
     private WCPeerMeta peerMeta;
+    private WCPeerMeta remotePeerMeta;
 
     private OkHttpClient httpClient;
     private ActionSheetDialog confirmationDialog;
@@ -602,6 +610,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
+
+    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                chainIdOverride = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
+                onSessionRequest(0L, remotePeerMeta, chainIdOverride);
+            });
+
     private void onSessionRequest(Long id, WCPeerMeta peer, int chainId)
     {
         if (peer == null) { finish(); }
@@ -618,15 +634,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerUrl.setText(peer.getUrl());
         signCount.setText(R.string.empty);
         chainName.setChainID(chainIdOverride);
+        remotePeerMeta = peer;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder
                 .setIcon(icon.getDrawable())
                 .setTitle(peer.getName())
-                .setMessage(peer.getUrl())
+                .setMessage(buildMessage(peer.getUrl(), chainIdOverride))
                 .setPositiveButton(R.string.dialog_approve, (d, w) -> {
                     sessionStarted = true;
-                    client.approveSession(Arrays.asList(accounts), chainId);
+                    client.approveSession(Arrays.asList(accounts), chainIdOverride);
                     viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
                             new Gson().toJson(session), new Gson().toJson(peer), chainIdOverride);
                     progressBar.setVisibility(View.GONE);
@@ -638,6 +655,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         switchToDappBrowser();
                     }
                 })
+                .setNeutralButton(R.string.hint_network_chain_id, (d, w) -> {
+                    //pop open the selection dialog
+                    Intent intent = new Intent(this, SelectNetworkActivity.class);
+                    intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+                    intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
+                    getNetwork.launch(intent);
+                })
                 .setNegativeButton(R.string.dialog_reject, (d, w) -> {
                     client.rejectSession(getString(R.string.message_reject_request));
                     finish();
@@ -645,6 +669,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 .setCancelable(false)
                 .create();
         dialog.show();
+    }
+
+    private Spannable buildMessage(String url, int networkId)
+    {
+        StyledStringBuilder sb = new StyledStringBuilder();
+        sb.append(url);
+        sb.startStyleGroup().append("\n\n").append(EthereumNetworkBase.getShortChainName(networkId));
+        sb.setColor(ContextCompat.getColor(this, Utils.getChainColour(networkId)));
+        sb.applyStyles();
+        return sb;
     }
 
     private void onEthSign(Long id, WCEthereumSignMessage message)

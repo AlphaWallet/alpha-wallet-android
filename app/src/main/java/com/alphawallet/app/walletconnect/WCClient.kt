@@ -167,11 +167,13 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+    fun approveSession(accounts: List<String>, _chainId: Int): Boolean {
         if (handshakeId <= 0) { onFailure(Throwable("handshakeId must be greater than 0 on session approve")) }
+        var useChainId: Int = _chainId;
+        if (this.chainId?.toIntOrNull() != 1) useChainId = _chainId;
 
         val result = WCApproveSessionResponse(
-                chainId = this.chainId?.toIntOrNull() ?: chainId,
+                chainId = useChainId,
                 accounts = accounts,
                 peerId = peerId,
                 peerMeta = peerMeta

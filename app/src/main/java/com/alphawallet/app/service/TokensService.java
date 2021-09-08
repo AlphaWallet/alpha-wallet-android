@@ -1073,7 +1073,7 @@ public class TokensService
         String tURL = tokenRepository.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
+            tURL = Utils.getTokenImageUrl(correctedAddr);
         }
 
         return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);

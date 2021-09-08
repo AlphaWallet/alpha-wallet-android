@@ -167,7 +167,7 @@ public class InputAmount extends LinearLayout
         }
         else
         {
-            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getSymbolOrShortName()));
+            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getShortSymbol()));
         }
 
         if (showError)

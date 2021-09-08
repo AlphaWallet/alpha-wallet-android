@@ -131,12 +131,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
 
-            balanceEth.setText(token.getSymbol());
+            balanceEth.setText(token.getName(assetDefinition, token.getTokenCount()));
+            //balanceEth.setText(token.tokenInfo.symbol);
 
             String coinBalance = token.getStringBalance();
             if (!TextUtils.isEmpty(coinBalance)) {
                 balanceCoin.setVisibility(View.VISIBLE);
-                balanceCoin.setText(coinBalance + " " + token.tokenInfo.symbol);
+                balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, token.getSymbol()));
+                //balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, token.tokenInfo.symbol));
             }
 
             primaryElement = false;

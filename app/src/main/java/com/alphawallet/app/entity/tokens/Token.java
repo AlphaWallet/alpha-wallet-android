@@ -25,6 +25,7 @@ import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
+import org.w3c.dom.Text;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Utf8String;
@@ -184,6 +185,26 @@ public class Token
         }
     }
 
+    public String getName(AssetDefinitionService assetDefinition, int count)
+    {
+        //override contract name with TS defined name
+        String name = assetDefinition != null ? assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count) : null;
+        if (name != null) {
+            return sanitiseString(name);
+        } else {
+            return getName();
+        }
+    }
+
+    public String getName()
+    {
+        if (TextUtils.isEmpty(tokenInfo.name) || tokenInfo.name.length() < tokenInfo.symbol.length()) {
+            return sanitiseString(!TextUtils.isEmpty(tokenInfo.symbol) ? tokenInfo.symbol : "");
+        } else {
+            return sanitiseString(!TextUtils.isEmpty(tokenInfo.name) ? tokenInfo.name : "");
+        }
+    }
+
     private String sanitiseString(String str)
     {
         StringBuilder sb = new StringBuilder();
@@ -202,28 +223,32 @@ public class Token
         return sb.toString();
     }
 
-    public String getShortSymbol()
+    private String getShortestNameOrSymbol()
     {
-        return Utils.getShortSymbol(getSymbol());
+        int symbolLength = !TextUtils.isEmpty(tokenInfo.symbol) ? tokenInfo.symbol.length() : 0;
+        int nameLength = !TextUtils.isEmpty(tokenInfo.name) ? tokenInfo.name.length() : 0;
+        if (symbolLength == 0 && nameLength == 0)
+        {
+            return "";
+        }
+        else if (nameLength > 0 && (symbolLength > nameLength || symbolLength == 0))
+        {
+            return tokenInfo.name;
+        }
+        else
+        {
+            return tokenInfo.symbol;
+        }
     }
 
     public String getSymbol()
     {
-        if (tokenInfo.symbol == null) return "";
-        else return tokenInfo.symbol.toUpperCase();
+        return getShortestNameOrSymbol();
     }
 
-    public String getSymbolOrShortName()
+    public String getShortSymbol()
     {
-        String shortSymbol = getShortSymbol();
-        if (TextUtils.isEmpty(shortSymbol))
-        {
-            return Utils.getShortSymbol(tokenInfo.name);
-        }
-        else
-        {
-            return shortSymbol;
-        }
+        return Utils.getShortSymbol(getShortestNameOrSymbol());
     }
 
     public void clickReact(BaseViewModel viewModel, Activity context)

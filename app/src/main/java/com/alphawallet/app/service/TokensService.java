@@ -79,7 +79,6 @@ public class TokensService
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Integer> baseTokenCheck;
-    private long nextTokenCheck;
     private static long openSeaCheck;
     private int openSeaCheckId;
     private boolean appHasFocus = true;
@@ -278,7 +277,6 @@ public class TokensService
     public void startUpdateCycle()
     {
         if (currentAddress == null || (eventTimer != null && !eventTimer.isDisposed())) return;
-        if (nextTokenCheck == 0) nextTokenCheck = System.currentTimeMillis() + 2*DateUtils.SECOND_IN_MILLIS; //delay first checking of Opensea/ERC20 to allow wallet UI to startup
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) { balanceCheckDisposable.dispose(); }
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) { erc20CheckDisposable.dispose(); }
 
@@ -538,11 +536,7 @@ public class TokensService
                     .subscribe(newBalance -> onBalanceChange(newBalance, t), this::onError);
         }
 
-        if (System.currentTimeMillis() > nextTokenCheck)
-        {
-            checkERC20();
-        }
-        else if (System.currentTimeMillis() > openSeaCheck)
+        if (System.currentTimeMillis() > openSeaCheck)
         {
             checkOpenSea();
         }
@@ -568,6 +562,11 @@ public class TokensService
         if (t.isEthereum() && newBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             checkChainVisibility(t);
+        }
+
+        if (t.isEthereum())
+        {
+            checkERC20(t.tokenInfo.chainId);
         }
     }
 
@@ -660,13 +659,12 @@ public class TokensService
         openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
     }
 
-    private void checkERC20()
+    private void checkERC20(int chainId)
     {
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
-            nextTokenCheck = System.currentTimeMillis() + 30 * DateUtils.SECOND_IN_MILLIS;
             //get mainnet ERC20 token tickers
-            erc20CheckDisposable = tickerService.getERC20Tickers(getAllERC20(MAINNET_ID))
+            erc20CheckDisposable = tickerService.getERC20Tickers(chainId, getAllERC20(chainId))
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

@@ -170,11 +170,11 @@ public class TickerService
     public Single<Integer> getERC20Tickers(int chainId, List<TokenCardMeta> erc20Tokens)
     {
         String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
-        if (apiChainName == null || (!canUpdate.containsKey(chainId) && !canUpdate.get(chainId)) || erc20Tokens.size() == 0) return Single.fromCallable(() -> 0);
+        if (apiChainName == null || (canUpdate.containsKey(chainId) && !canUpdate.get(chainId)) || erc20Tokens.size() == 0)
+            return Single.fromCallable(() -> 0);
 
         return Single.fromCallable(() -> {
             int newSize = 0;
-            canUpdate.put(chainId, true);
 
             final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
             try
@@ -189,7 +189,7 @@ public class TickerService
                     isFirst = false;
                 }
 
-                 Request request = new Request.Builder()
+                Request request = new Request.Builder()
                         .url(COINGECKO_API.replace(CHAIN_ID, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
                         .get()
                         .build();
@@ -210,6 +210,7 @@ public class TickerService
                     erc20Tickers.put(t.address, tTicker);
                 }
 
+                canUpdate.put(chainId, false);
                 localSource.updateERC20Tickers(chainId, erc20Tickers);
             }
             catch (Exception e)

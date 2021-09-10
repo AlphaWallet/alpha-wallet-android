@@ -65,22 +65,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private final Handler delayHandler = new Handler(Looper.getMainLooper());
 
-    private final TextWatcher filterTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            delayHandler.removeCallbacksAndMessages(null);
-            delayHandler.postDelayed(() -> {
-                filter(s.toString());
-            }, 750);
-        }
-    };
-
     private boolean gridFlag;
 
     protected final OnTokenClickListener onTokenClickListener;
@@ -185,7 +169,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
-                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, filterTextWatcher);
+                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, (filter, skipDebounce) -> {
+                    delayHandler.removeCallbacksAndMessages(null);
+                    delayHandler.postDelayed(() -> {
+                        filter(filter);
+                    }, skipDebounce ? 0 : 750);
+                });
                 break;
 
             case WarningHolder.VIEW_TYPE:

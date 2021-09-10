@@ -484,7 +484,6 @@ public class TokensService
     public void addTokenImageUrl(int networkId, String address, String imageUrl)
     {
         tokenRepository.addImageUrl(networkId, address, imageUrl);
-        IconItem.iconLoadClear(address.toLowerCase());
     }
 
     public Single<TokenInfo> update(String address, int chainId) {
@@ -1064,17 +1063,17 @@ public class TokensService
         }
     }
 
-    public IconItem fetchIconForToken(Token token)
+    public String getFallbackUrlForToken(Token token)
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
 
         String tURL = tokenRepository.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
+            tURL = Utils.getTokenImageUrl(correctedAddr);
         }
 
-        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
+        return tURL;
     }
 
     public void checkingChain(int chainId)

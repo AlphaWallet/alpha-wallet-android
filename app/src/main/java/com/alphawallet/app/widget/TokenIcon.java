@@ -41,6 +41,7 @@ import org.web3j.crypto.Keys;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
 import static com.alphawallet.app.util.Utils.ALPHAWALLET_REPO_NAME;
+import static com.alphawallet.app.util.Utils.getTWTokenImageUrl;
 
 public class TokenIcon extends ConstraintLayout
 {
@@ -54,7 +55,7 @@ public class TokenIcon extends ConstraintLayout
     private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
     private StatusType currentStatus;
-    private AssetDefinitionService assetSvs;
+    private String fallbackIconUrl;
     private Request currentRq;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -106,16 +107,17 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
         if (token == null) return;
-        this.assetSvs = assetDefinition;
         this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
+        this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
 
-        bind(token, assetDefinition.fetchIconForToken(token));
+        bind(token, getIconUrl(token));
     }
 
     public void bindData(Token token)
     {
         if (token == null) return;
         this.tokenName = token.getFullName();
+        this.fallbackIconUrl = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         bind(token, getIconUrl(token));
     }
 
@@ -123,7 +125,8 @@ public class TokenIcon extends ConstraintLayout
     {
         if (token == null) return;
         this.tokenName = token.getFullName();
-        bind(token, svs.fetchIconForToken(token));
+        this.fallbackIconUrl = svs.getFallbackUrlForToken(token);
+        bind(token, getIconUrl(token));
     }
 
     private void bind(Token token, IconItem iconItem)
@@ -134,7 +137,7 @@ public class TokenIcon extends ConstraintLayout
         displayTokenIcon(iconItem);
     }
 
-    private void setupDefaultIcon()
+    private void setupDefaultIcon(boolean loadFailed)
     {
         if (currentRq != null && currentRq.isRunning()) currentRq.clear(); //clear current load request if this is replacing an old asset that didn't finish loading
         if (token.isEthereum() || EthereumNetworkRepository.getChainOverrideAddress(token.tokenInfo.chainId).equalsIgnoreCase(token.getAddress()))
@@ -145,7 +148,7 @@ public class TokenIcon extends ConstraintLayout
         }
         else
         {
-            setupTextIcon(token);
+            setupTextIcon(token, loadFailed);
         }
     }
 
@@ -154,35 +157,29 @@ public class TokenIcon extends ConstraintLayout
      */
     private void displayTokenIcon(IconItem iconItem)
     {
-        setupDefaultIcon();
+        setupDefaultIcon(iconItem.useTextSymbol());
         if (token.isEthereum()
                 || token.getWallet().equalsIgnoreCase(token.getAddress())
                 || iconItem.useTextSymbol()) return;
 
-        RequestOptions circleCrop;
-
-        //if the main request wasn't checking the AW icon repo, check it if main repo doesn't have an icon
-        if (!iconItem.getUrl().startsWith(ALPHAWALLET_REPO_NAME))
+        if (iconItem.usePrimary())
         {
-            circleCrop = new RequestOptions().circleCrop();
+            currentRq = Glide.with(getContext())
+                    .load(iconItem.getUrl())
+                    .placeholder(R.drawable.ic_token_eth)
+                    .listener(requestListener)
+                    .into(viewTarget).getRequest();
         }
         else
         {
-            circleCrop = new RequestOptions().sizeMultiplier(1.0f); // Placeholder NOP to avoid null
+            loadFromAltRepo();
         }
-
-        currentRq = Glide.with(getContext())
-                .load(iconItem.getUrl())
-                .apply(circleCrop) //only crop if not from AW iconassets repo
-                .placeholder(R.drawable.ic_token_eth)
-                .listener(requestListener)
-                .into(viewTarget).getRequest();
     }
 
     private IconItem getIconUrl(Token token)
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-        String tURL = Utils.getTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
+        String tURL = Utils.getTokenImageUrl(correctedAddr);
         return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
     }
 
@@ -229,18 +226,16 @@ public class TokenIcon extends ConstraintLayout
     }
 
     /**
-     * Attempt to load the icon from the AW icon repo
-     * @param model
+     * Attempt to load the icon from the Database icon or TW icon repo
      */
-    private void loadFromAWRepo(Object model)
+    private void loadFromAltRepo()
     {
-        String addr = Utils.getTokenAddrFromUrl(model.toString());
-
-        if (!TextUtils.isEmpty(addr)) handler.post(() ->
+        handler.post(() ->
                 currentRq = Glide.with(getContext())
-                .load(Utils.getAWIconRepo(addr))
+                .load(this.fallbackIconUrl)
                 .placeholder(R.drawable.ic_token_eth)
-                .listener(requestListenerAW)
+                .apply(new RequestOptions().circleCrop())
+                .listener(requestListenerTW)
                 .into(viewTarget).getRequest());
     }
 
@@ -248,8 +243,9 @@ public class TokenIcon extends ConstraintLayout
      * This method is used to set TextIcon and make Icon hidden as there is no icon available for the token.
      * @param token Token
      */
-    private void setupTextIcon(@NotNull Token token)
+    private void setupTextIcon(@NotNull Token token, boolean loadFailed)
     {
+        if (loadFailed) icon.setVisibility(View.GONE);
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
         //try symbol first
@@ -282,39 +278,39 @@ public class TokenIcon extends ConstraintLayout
     private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            //attempt to load from AW repo
-            if (model != null && !model.toString().startsWith(ALPHAWALLET_REPO_NAME))
-            {
-                loadFromAWRepo(model);
-            }
-            else
-            {
-                if (token != null)
-                {
-                    IconItem.iconLoadFail(token.getAddress());
-                    setupDefaultIcon();
-                }
-            }
+            if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
+
+            loadFromAltRepo();
             return false;
         }
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            textIcon.setVisibility(View.GONE);
+            icon.setVisibility(View.VISIBLE);
+            icon.setImageDrawable(resource);
             return false;
         }
     };
 
-    private final RequestListener<Drawable> requestListenerAW = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListenerTW = new RequestListener<Drawable>() {
         @Override
-        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            setupDefaultIcon();
-            if (token != null) IconItem.iconLoadFail(token.getAddress()); //don't try to load this asset again for this session
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
+        {
+            if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
+
+            icon.setVisibility(View.GONE);
+            if (token != null)
+                IconItem.noIconFound(token.getAddress()); //don't try to load this asset again for this session
             return false;
         }
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            if (assetSvs != null) { assetSvs.storeImageUrl(token.tokenInfo.chainId, model.toString()); } //make a note that AW repo has this asset
+            if (model == null) return false;
+            IconItem.secondaryFound(Utils.getTokenAddrFromUrl(model.toString()));
+            if (token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
+
             textIcon.setVisibility(View.GONE);
             icon.setVisibility(View.VISIBLE);
             icon.setImageDrawable(resource);

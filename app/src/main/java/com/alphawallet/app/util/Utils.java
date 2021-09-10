@@ -837,7 +837,7 @@ public class Utils {
     }
 
     @NotNull
-    public static String getTokenImageUrl(int chainId, String address)
+    public static String getTWTokenImageUrl(int chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;
         String repoChain;
@@ -861,15 +861,6 @@ public class Utils {
             case MATIC_ID:
                 repoChain = "polygon";
                 break;
-            case KOVAN_ID:
-            case RINKEBY_ID:
-            case SOKOL_ID:
-            case ROPSTEN_ID:
-            case ARTIS_SIGMA1_ID:
-            case ARTIS_TAU1_ID:
-                tURL = ALPHAWALLET_ICON_REPO;
-                repoChain = "";
-                break;
             default:
                 repoChain = "ethereum";
                 break;
@@ -877,6 +868,12 @@ public class Utils {
         tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
 
         return tURL;
+    }
+
+    @NotNull
+    public static String getTokenImageUrl(String address)
+    {
+        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
     }
 
     public static String getAWIconRepo(String address)

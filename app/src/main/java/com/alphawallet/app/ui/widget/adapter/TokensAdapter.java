@@ -16,6 +16,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -246,6 +247,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
+    private void addHeaderLayouts() {
+        items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
+        items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
+    }
+
     private void addManageTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
             items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress), Integer.MAX_VALUE));
@@ -405,6 +411,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         addSearchTokensLayout();
+        addHeaderLayouts();
 
         for (TokenCardMeta token : tokens)
         {

@@ -3,7 +3,6 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -14,10 +13,6 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
-
-import static android.view.View.FOCUS_DOWN;
-import static android.view.View.FOCUS_FORWARD;
-
 
 public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
     public static final int VIEW_TYPE = 2021;

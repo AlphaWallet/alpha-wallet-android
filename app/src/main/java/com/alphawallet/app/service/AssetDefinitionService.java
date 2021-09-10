@@ -2511,17 +2511,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return url;
     }
 
-    public IconItem fetchIconForToken(Token token)
+    public String getFallbackUrlForToken(Token token)
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
 
         String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = Utils.getTokenImageUrl(correctedAddr);
+            tURL = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
         }
 
-        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
+        return tURL;
     }
 
     public void storeImageUrl(int chainId, String imageUrl)
@@ -2530,7 +2530,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (!TextUtils.isEmpty(tokenAddress))
         {
             tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
-            IconItem.iconLoadClear(tokenAddress.toLowerCase());
         }
     }
 

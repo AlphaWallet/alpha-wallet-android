@@ -861,15 +861,6 @@ public class Utils {
             case MATIC_ID:
                 repoChain = "polygon";
                 break;
-            case KOVAN_ID:
-            case RINKEBY_ID:
-            case SOKOL_ID:
-            case ROPSTEN_ID:
-            case ARTIS_SIGMA1_ID:
-            case ARTIS_TAU1_ID:
-                tURL = ALPHAWALLET_ICON_REPO;
-                repoChain = "";
-                break;
             default:
                 repoChain = "ethereum";
                 break;

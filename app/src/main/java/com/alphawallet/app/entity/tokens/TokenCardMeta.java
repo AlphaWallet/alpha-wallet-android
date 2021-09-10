@@ -26,6 +26,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final String balance;
     public final String symbol;
 
+
+
+    public final TokenSortGroup group;
+
+
     /*
     Initial value is False as Token considered to be Hidden
      */
@@ -39,6 +44,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.balance = balance;
         this.symbol = symbol;
+        // when the other groups will be added, should be moved to separate function with logic to set group
+        this.group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
     }
 
     public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type)
@@ -50,6 +57,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = 1000;
         this.balance = balance;
         this.symbol = null;
+        this.group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
     }
 
     public TokenCardMeta(Token token)
@@ -61,6 +69,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = 1000;
         this.balance = token.balance.toString();
         this.symbol = token.tokenInfo.symbol;
+        this.group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
     }
 
     protected TokenCardMeta(Parcel in)
@@ -72,6 +81,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
         symbol = in.readString();
+        group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
     }
 
     public static final Creator<TokenCardMeta> CREATOR = new Creator<TokenCardMeta>() {

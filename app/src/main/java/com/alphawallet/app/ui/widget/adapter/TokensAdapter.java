@@ -391,7 +391,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         if (!TextUtils.isEmpty(filter)) {
-            allowThroughFilter = token.symbol.toLowerCase().contains(filter.toLowerCase());
+            allowThroughFilter = token.getFilterText().toLowerCase().contains(filter.toLowerCase());
         }
 
         return allowThroughFilter;

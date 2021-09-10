@@ -107,7 +107,7 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
         if (token == null) return;
-        this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
+        this.tokenName = token.getName(assetDefinition, token.getTokenCount());
         this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
 
         bind(token, getIconUrl(token));
@@ -116,7 +116,7 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token)
     {
         if (token == null) return;
-        this.tokenName = token.getFullName();
+        this.tokenName = token.getName();
         this.fallbackIconUrl = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         bind(token, getIconUrl(token));
     }
@@ -124,7 +124,7 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, @NotNull TokensService svs)
     {
         if (token == null) return;
-        this.tokenName = token.getFullName();
+        this.tokenName = token.getName();
         this.fallbackIconUrl = svs.getFallbackUrlForToken(token);
         bind(token, getIconUrl(token));
     }

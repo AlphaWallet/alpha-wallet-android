@@ -23,15 +23,7 @@ public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
     @Override
     public void bind(@Nullable ManageTokensData data, @NonNull Bundle addition) {
         editSearch.addTextChangedListener(textWatcher);
-        editSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    return true;
-                }
-                return false;
-            }
-        });
+        editSearch.setOnEditorActionListener((textView, actionId, event) -> actionId == EditorInfo.IME_ACTION_SEARCH);
     }
 
     public SearchTokensHolder(int res_id, ViewGroup parent, TextWatcher textWatcher) {

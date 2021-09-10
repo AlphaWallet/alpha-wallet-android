@@ -50,7 +50,7 @@ public interface TokenLocalSource {
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 
     void updateEthTickers(Map<Integer, TokenTicker> ethTickers);
-    void updateERC20Tickers(Map<String, TokenTicker> erc20Tickers);
+    void updateERC20Tickers(int chainId, Map<String, TokenTicker> erc20Tickers);
     void removeOutdatedTickers();
 
     Realm getRealmInstance(Wallet wallet);

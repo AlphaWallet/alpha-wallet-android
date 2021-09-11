@@ -7,20 +7,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
+
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.HeaderItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
@@ -67,7 +67,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private boolean gridFlag;
 
-    protected final OnTokenClickListener onTokenClickListener;
+    protected final TokensAdapterCallback tokensAdapterCallback;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem o1, SortedItem o2) {
@@ -107,15 +107,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
-        this.onTokenClickListener = onTokenClickListener;
+    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
         this.realm = tokensService.getTickerRealmInstance();
     }
 
-    protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
-        this.onTokenClickListener = onTokenClickListener;
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
         this.realm = null;
@@ -136,13 +136,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void filter(String searchString)
+    private void filter(String searchString)
     {
         filter = searchString;
-        filterAdapterItems();
+        items.beginBatchedUpdates();
+        for (int i = 1; i < items.size(); i++) { items.removeItemAt(i); }
+        items.endBatchedUpdates();
+        tokensAdapterCallback.reloadTokens(); //re-fetch all tokens, filtering will be done when setTokens is called after the database load
+                                              //TODO: Optimise - pass the filter term to reload tokens, filter at database level.
     }
-
-
 
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -150,13 +152,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
                 TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, realm);
-                tokenHolder.setOnTokenClickListener(onTokenClickListener);
+                tokenHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenHolder;
                 break;
             }
             case TokenGridHolder.VIEW_TYPE: {
                 TokenGridHolder tokenGridHolder = new TokenGridHolder(R.layout.item_token_grid, parent, assetService, tokensService);
-                tokenGridHolder.setOnTokenClickListener(onTokenClickListener);
+                tokenGridHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenGridHolder;
                 break;
             }
@@ -236,9 +238,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    private void addHeaderLayouts() {
-        items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
-        items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
+    //Only show the header if the item type is added to the list
+    private void addHeaderLayout(TokenCardMeta tcm)
+    {
+        if (tcm.isNFT())
+        {
+            items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
+        }
+        else
+        {
+            items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
+        }
     }
 
     private void addManageTokensLayout() {
@@ -292,6 +302,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.nameWeight);
                 if (debugView) tsi.debug();
                 position = items.add(tsi);
+                addHeaderLayout(token);
             }
 
             if (notify) notifyItemChanged(position);
@@ -400,7 +411,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         addSearchTokensLayout();
-        addHeaderLayouts();
 
         for (TokenCardMeta token : tokens)
         {

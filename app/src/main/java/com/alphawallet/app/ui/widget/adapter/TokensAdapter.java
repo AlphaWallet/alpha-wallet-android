@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.SortedList;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -135,13 +136,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void filter(String searchString)
+    private void filter(String searchString)
     {
         filter = searchString;
-        filterAdapterItems();
+        items.beginBatchedUpdates();
+        for (int i = 1; i < items.size(); i++) { items.removeItemAt(i); }
+        items.endBatchedUpdates();
+        tokensAdapterCallback.reloadTokens(); //re-fetch all tokens, filtering will be done when setTokens is called after the database load
+                                              //TODO: Optimise - pass the filter term to reload tokens, filter at database level.
     }
-
-
 
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -235,9 +238,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    private void addHeaderLayouts() {
-        items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
-        items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
+    //Only show the header if the item type is added to the list
+    private void addHeaderLayout(TokenCardMeta tcm)
+    {
+        if (tcm.isNFT())
+        {
+            items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
+        }
+        else
+        {
+            items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
+        }
     }
 
     private void addManageTokensLayout() {
@@ -291,6 +302,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.nameWeight);
                 if (debugView) tsi.debug();
                 position = items.add(tsi);
+                addHeaderLayout(token);
             }
 
             if (notify) notifyItemChanged(position);
@@ -399,7 +411,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         addSearchTokensLayout();
-        addHeaderLayouts();
 
         for (TokenCardMeta token : tokens)
         {

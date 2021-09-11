@@ -364,7 +364,7 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void reloadTokens()
     {
-        
+        viewModel.reloadTokens();
     }
 
     @Override

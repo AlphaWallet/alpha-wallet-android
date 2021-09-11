@@ -362,6 +362,12 @@ public class WalletFragment extends BaseFragment implements
     }
 
     @Override
+    public void reloadTokens()
+    {
+        
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         currentTabPos = -1;

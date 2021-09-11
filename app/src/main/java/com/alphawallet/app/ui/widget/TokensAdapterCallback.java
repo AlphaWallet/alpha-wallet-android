@@ -10,4 +10,5 @@ public interface TokensAdapterCallback
 {
     void onTokenClick(View view, Token token, List<BigInteger> tokenIds, boolean selected);
     void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds);
+    default void reloadTokens() { };
 }

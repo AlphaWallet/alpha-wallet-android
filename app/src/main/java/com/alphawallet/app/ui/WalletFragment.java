@@ -44,7 +44,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
@@ -81,7 +81,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
  */
 
 public class WalletFragment extends BaseFragment implements
-        OnTokenClickListener,
+        TokensAdapterCallback,
         View.OnClickListener,
         Runnable,
         BackupTokenCallback
@@ -97,7 +97,6 @@ public class WalletFragment extends BaseFragment implements
     private WalletViewModel viewModel;
 
     private SystemView systemView;
-    private ProgressView progressView;
     private TokensAdapter adapter;
     private ImageView addressBlockie;
     private View selectedToken;
@@ -169,15 +168,15 @@ public class WalletFragment extends BaseFragment implements
     private void initViews(View view) {
         refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
-        progressView = view.findViewById(R.id.progress_view);
         recyclerView = view.findViewById(R.id.list);
         addressBlockie = view.findViewById(R.id.user_address_blockie);
 
-        progressView.hide();
         systemView.showProgress(true);
 
         systemView.attachRecyclerView(recyclerView);
         systemView.attachSwipeRefreshLayout(refreshLayout);
+
+        ((ProgressView)view.findViewById(R.id.progress_view)).hide();
     }
 
     private void onDefaultWallet(Wallet wallet)
@@ -352,7 +351,6 @@ public class WalletFragment extends BaseFragment implements
             Token clickOrigin = viewModel.getTokenFromService(token);
             if (clickOrigin == null) clickOrigin = token;
             viewModel.showTokenDetail(getActivity(), clickOrigin);
-            //clickOrigin.clickReact(viewModel, getActivity());
             handler.postDelayed(this, 700);
         }
     }

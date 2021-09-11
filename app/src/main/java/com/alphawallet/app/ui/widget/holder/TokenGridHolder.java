@@ -1,32 +1,20 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokens.ERC721Ticket;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
-import com.bumptech.glide.Glide;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
 
@@ -38,7 +26,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
     private final AssetDefinitionService assetDefinition;
     private final TokensService tokensService;
 
-    private OnTokenClickListener onTokenClickListener;
+    private TokensAdapterCallback tokensAdapterCallback;
 
     public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs) {
         super(resId, parent);
@@ -85,8 +73,8 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
             }*/
 
             clickLayer.setOnClickListener(v -> {
-                if (onTokenClickListener != null) {
-                    onTokenClickListener.onTokenClick(v, token, null, true);
+                if (tokensAdapterCallback != null) {
+                    tokensAdapterCallback.onTokenClick(v, token, null, true);
                 }
             });
         }
@@ -99,7 +87,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
         textIcon.setText(Utils.getIconisedText(token.tokenInfo.name));
     }*/
 
-    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
-        this.onTokenClickListener = onTokenClickListener;
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
     }
 }

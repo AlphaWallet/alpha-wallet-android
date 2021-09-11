@@ -29,11 +29,8 @@ import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.widget.ChainName;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
-import com.google.zxing.common.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -73,7 +70,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final Handler handler = new Handler();
 
     public Token token;
-    private OnTokenClickListener onTokenClickListener;
+    private TokensAdapterCallback tokensAdapterCallback;
 
     private static int counter = 1;
 
@@ -144,7 +141,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             primaryElement = false;
 
             tokenIcon.bindData(token, assetDefinition);
-            tokenIcon.setOnTokenClickListener(onTokenClickListener);
+            tokenIcon.setOnTokenClickListener(tokensAdapterCallback);
 
 
             populateTicker();
@@ -236,9 +233,9 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     @Override
     public void onClick(View v) {
-        if (onTokenClickListener != null) {
+        if (tokensAdapterCallback != null) {
             tokenLayout.setElevation(-10.0f);
-            onTokenClickListener.onTokenClick(v, token, null, true);
+            tokensAdapterCallback.onTokenClick(v, token, null, true);
             handler.postDelayed(clearElevation, 800);
         }
     }
@@ -246,19 +243,19 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public boolean onLongClick(View v)
     {
-        if (onTokenClickListener != null) {
-            onTokenClickListener.onLongTokenClick(v, token, null);
+        if (tokensAdapterCallback != null) {
+            tokensAdapterCallback.onLongTokenClick(v, token, null);
         }
 
         return true;
     }
 
-    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
-        this.onTokenClickListener = onTokenClickListener;
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
-    public void setOnLongClickListener(OnTokenClickListener onTokenClickListener) {
-        this.onTokenClickListener = onTokenClickListener;
+    public void setOnLongClickListener(TokensAdapterCallback tokensAdapterCallback) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
     private void hideIssuerViews() {

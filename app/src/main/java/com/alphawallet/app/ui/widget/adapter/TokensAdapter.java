@@ -7,9 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
+
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
@@ -20,7 +19,7 @@ import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.HeaderItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
@@ -67,7 +66,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private boolean gridFlag;
 
-    protected final OnTokenClickListener onTokenClickListener;
+    protected final TokensAdapterCallback tokensAdapterCallback;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem o1, SortedItem o2) {
@@ -107,15 +106,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
-        this.onTokenClickListener = onTokenClickListener;
+    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
         this.realm = tokensService.getTickerRealmInstance();
     }
 
-    protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
-        this.onTokenClickListener = onTokenClickListener;
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
         this.realm = null;
@@ -150,13 +149,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
                 TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, realm);
-                tokenHolder.setOnTokenClickListener(onTokenClickListener);
+                tokenHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenHolder;
                 break;
             }
             case TokenGridHolder.VIEW_TYPE: {
                 TokenGridHolder tokenGridHolder = new TokenGridHolder(R.layout.item_token_grid, parent, assetService, tokensService);
-                tokenGridHolder.setOnTokenClickListener(onTokenClickListener);
+                tokenGridHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenGridHolder;
                 break;
             }

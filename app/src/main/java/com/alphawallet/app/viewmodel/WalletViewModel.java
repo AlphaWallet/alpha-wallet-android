@@ -222,28 +222,6 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    /*@Override
-    public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
-        boolean isToken = !token.isEthereum();
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
-        tokenDetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
-    }
-
-    @Override
-    public void showTokenList(Activity activity, Token token)
-    {
-        switch (token.getInterfaceSpec())
-        {
-            case ERC1155:
-                boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
-                tokenDetailRouter.openERC1155(activity, token, defaultWallet.getValue(), hasDefinition);
-                break;
-            default:
-                assetDisplayRouter.open(activity, token, defaultWallet.getValue());
-                break;
-        }
-    }*/
-
     public void checkBackup()
     {
         if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;

@@ -65,4 +65,7 @@ public interface TokenLocalSource {
 
     void updateNFTAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
     void storeAsset(String wallet, Token token, BigInteger tokenId, NFTAsset asset);
+
+    void storeATokenAddresses(List<String> addresses);
+    Single<List<String>> getATokenAddresses();
 }

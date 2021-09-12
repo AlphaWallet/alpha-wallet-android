@@ -302,6 +302,13 @@ public class AWRealmMigration implements RealmMigration
             }
             oldVersion++;
         }
+
+        if (oldVersion == 28)
+        {
+            schema.create("RealmAToken")
+                    .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
+            oldVersion++;
+        }
     }
 
     @Override

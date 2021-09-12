@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.repository.entity.RealmAToken;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -25,6 +26,7 @@ import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.realm.Case;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
@@ -49,6 +52,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final String IMAGES_DB = "image_urls_db";
+    public static final String ATOKENS_DB = "a_tokens_db";
     public static final String TICKER_DB = "tickers_db";
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
 
@@ -1278,5 +1282,46 @@ public class TokensRealmSource implements TokenLocalSource {
         eth.setIsEthereum();
         eth.pendingBalance = balance;
         return eth;
+    }
+
+
+    public void storeATokenAddresses(List<String> addresses) {
+        try (Realm realm = realmManager.getRealmInstance(ATOKENS_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                // clean prev
+                r.where(RealmAToken.class).findAll().deleteAllFromRealm();
+
+                RealmList<RealmAToken> list = new RealmList<>();
+                for(String address : addresses) {
+                    RealmAToken rt = new RealmAToken();
+                    rt.address = address;
+                    list.add(rt);
+                }
+                r.insertOrUpdate(list);
+            });
+        }
+    }
+
+    public Single<List<String>> getATokenAddresses() {
+        return Single.fromCallable(() -> {
+
+            try (Realm realm = realmManager.getRealmInstance(ATOKENS_DB))
+            {
+                RealmResults<RealmAToken> rtokens = realm.where(RealmAToken.class).findAll();
+                List<RealmAToken> tokens = new ArrayList<RealmAToken>(rtokens);
+                List<String> result = new ArrayList<>();
+                for(RealmAToken rt : tokens) {
+                    result.add(rt.address);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+
+            return null;
+        });
     }
 }

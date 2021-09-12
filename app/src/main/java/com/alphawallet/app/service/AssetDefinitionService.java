@@ -181,6 +181,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         loadAssetScripts();
     }
 
+    public TokenLocalSource getTokenLocalSource() {
+        return tokenLocalSource;
+    }
+
     /**
      * Load all TokenScripts
      *

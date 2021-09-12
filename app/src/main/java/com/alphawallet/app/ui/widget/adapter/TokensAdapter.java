@@ -7,9 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
+
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
@@ -17,6 +16,7 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
+import com.alphawallet.app.interact.ATokensRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -43,6 +43,9 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
@@ -57,6 +60,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    private final ATokensRepository aTokensRepository;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
     private String walletAddress;
@@ -112,6 +116,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.assetService = aService;
         this.tokensService = tService;
         this.realm = tokensService.getTickerRealmInstance();
+        this.aTokensRepository = new ATokensRepository(aService.getTokenLocalSource());
+        aTokensRepository.getTokensList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::notifyDataSetChanged).isDisposed();
     }
 
     protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
@@ -119,6 +128,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.assetService = aService;
         this.tokensService = null;
         this.realm = null;
+        this.aTokensRepository = new ATokensRepository(aService.getTokenLocalSource());
+        aTokensRepository.getTokensList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::notifyDataSetChanged).isDisposed();
     }
 
     @Override
@@ -239,6 +253,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void addHeaderLayouts() {
         items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
         items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
+        items.add(new HeaderItem("aToken", 3, TokenSortGroup.ATOKEN));
     }
 
     private void addManageTokensLayout() {
@@ -502,6 +517,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void onDestroy(RecyclerView recyclerView)
     {
+        aTokensRepository.dispose();
         //ensure all holders have their realm listeners cleaned up
         if (recyclerView != null)
         {

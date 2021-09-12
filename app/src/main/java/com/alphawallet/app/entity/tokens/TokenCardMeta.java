@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.interact.ATokensRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -26,10 +27,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final String balance;
     private final String filterText;
 
-
-
     public final TokenSortGroup group;
-
 
     /*
     Initial value is False as Token considered to be Hidden
@@ -44,8 +42,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.balance = balance;
         this.filterText = symbol + "'" + name;
-        // when the other groups will be added, should be moved to separate function with logic to set group
-        this.group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
+        this.group = defineSortGroup();
     }
 
     public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type)
@@ -57,7 +54,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = 1000;
         this.balance = balance;
         this.filterText = null;
-        this.group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
+        this.group = defineSortGroup();
     }
 
     public TokenCardMeta(Token token)
@@ -69,7 +66,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = 1000;
         this.balance = token.balance.toString();
         this.filterText = token.getShortSymbol() + "'" + token.getName(); //TODO: will not find AssetDefinition names
-        this.group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
+        this.group = defineSortGroup();
     }
 
     protected TokenCardMeta(Parcel in)
@@ -81,7 +78,18 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
         filterText = in.readString();
-        group = isNFT() ? TokenSortGroup.NFT : TokenSortGroup.GENERAL;
+        group = defineSortGroup();
+    }
+
+    private TokenSortGroup defineSortGroup() {
+        TokenSortGroup tsg = TokenSortGroup.GENERAL;
+        if (isNFT()) {
+            tsg = TokenSortGroup.NFT;
+        } else if (isAToken()) {
+            tsg = TokenSortGroup.ATOKEN;
+        }
+
+        return tsg;
     }
 
     public String getFilterText()
@@ -220,6 +228,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public boolean isEthereum()
     {
         return type == ContractType.ETHEREUM;
+    }
+
+    public boolean isAToken() {
+        return ATokensRepository.isAToken(getAddress());
     }
 
     public boolean isNFT()

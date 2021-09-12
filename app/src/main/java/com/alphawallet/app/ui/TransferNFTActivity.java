@@ -29,7 +29,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
@@ -75,7 +75,7 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
 /**
  * Created by JB on 11/08/2021.cla
  */
-public class TransferNFTActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
+public class TransferNFTActivity extends BaseActivity implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;

@@ -1,7 +1,6 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,7 +21,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
@@ -40,8 +39,6 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
-import static com.alphawallet.app.util.Utils.ALPHAWALLET_REPO_NAME;
-import static com.alphawallet.app.util.Utils.getTWTokenImageUrl;
 
 public class TokenIcon extends ConstraintLayout
 {
@@ -50,7 +47,7 @@ public class TokenIcon extends ConstraintLayout
     private final ImageView statusIcon;
     private final ProgressBar pendingProgress;
 
-    private OnTokenClickListener onTokenClickListener;
+    private TokensAdapterCallback tokensAdapterCallback;
     private Token token;
     private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
@@ -106,7 +103,7 @@ public class TokenIcon extends ConstraintLayout
      */
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
-        if (token == null) return;
+        if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
         this.tokenName = token.getName(assetDefinition, token.getTokenCount());
         this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
 
@@ -259,16 +256,16 @@ public class TokenIcon extends ConstraintLayout
         }
     }
 
-    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback)
     {
-        this.onTokenClickListener = onTokenClickListener;
+        this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
     private void performTokenClick(View v)
     {
-        if (onTokenClickListener != null)
+        if (tokensAdapterCallback != null)
         {
-            onTokenClickListener.onTokenClick(v, token, null, true);
+            tokensAdapterCallback.onTokenClick(v, token, null, true);
         }
     }
 

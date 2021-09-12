@@ -32,7 +32,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.SellDetailModelFactory;
@@ -69,7 +69,7 @@ import static com.alphawallet.token.tools.Convert.getEthString;
  * Created by James on 21/02/2018.
  */
 
-public class SellDetailActivity extends BaseActivity implements OnTokenClickListener, Runnable, SignAuthenticationCallback
+public class SellDetailActivity extends BaseActivity implements TokensAdapterCallback, Runnable, SignAuthenticationCallback
 {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
     public static final int SET_A_PRICE = 1;

@@ -1,12 +1,10 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -25,6 +23,7 @@ public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
 
     EditText editSearch;
     SearchHandler searchHandler;
+    String wallet;
 
     TextWatcher textWatcher = new TextWatcher() {
         @Override
@@ -41,8 +40,15 @@ public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
 
     @Override
     public void bind(@Nullable ManageTokensData data, @NonNull Bundle addition) {
+        if (wallet != null) return; //don't re-bind if view exists
+        if (data != null) wallet = data.walletAddress;
         editSearch.removeTextChangedListener(textWatcher);
         editSearch.addTextChangedListener(textWatcher);
+
+        //Closes the keyboard if we scroll down - uncovers potentially blocked views
+        editSearch.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) { KeyboardUtils.hideKeyboard(v); }
+        });
 
         editSearch.setOnEditorActionListener((textView, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -58,5 +64,6 @@ public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
         super(res_id, parent);
         this.editSearch = findViewById(R.id.edit_search);
         this.searchHandler = handler;
+        this.wallet = null;
     }
 }

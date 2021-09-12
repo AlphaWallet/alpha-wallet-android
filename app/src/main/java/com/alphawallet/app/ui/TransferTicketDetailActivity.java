@@ -41,7 +41,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
@@ -100,7 +100,7 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  */
 
 public class TransferTicketDetailActivity extends BaseActivity
-        implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback {
+        implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
 
     @Inject

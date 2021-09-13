@@ -3,18 +3,24 @@ package com.alphawallet.app.ui.QRScanning;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.OnLifecycleEvent;
 
@@ -48,6 +54,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
 
 /**
  * Created by JB on 12/09/2021.
@@ -62,7 +70,7 @@ public class QRScanner extends BaseActivity
     private TextView flashButton;
     private TextView myAddressButton;
     private TextView browseButton;
-    private boolean torchOn;
+    private boolean torchOn = false;
 
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     public static final int RC_HANDLE_IMAGE_PICKUP = 3;
@@ -73,6 +81,7 @@ public class QRScanner extends BaseActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        hideSystemUI();
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
@@ -88,6 +97,10 @@ public class QRScanner extends BaseActivity
     private void initView()
     {
         setContentView(R.layout.activity_qr_scanner);
+
+        toolbar();
+        setTitle(getString(R.string.qr_scanner));
+
         chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
         barcodeView = findViewById(R.id.scanner_view);
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.AZTEC);
@@ -331,6 +344,12 @@ public class QRScanner extends BaseActivity
     {
         Intent intent = new Intent();
         setResult(Activity.RESULT_CANCELED, intent);
+        finish();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return barcodeView.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -354,6 +373,18 @@ public class QRScanner extends BaseActivity
             intent.putExtra(C.EXTRA_QR_CODE, qrCode);
             setResult(Activity.RESULT_OK, intent);
             finish();
+        }
+    }
+
+    private void hideSystemUI()
+    {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean(FULL_SCREEN_STATE, false))
+        {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowInsetsControllerCompat inset = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+            inset.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            inset.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
         }
     }
 }

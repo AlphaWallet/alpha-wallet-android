@@ -328,6 +328,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         //lbl += " " + ticker.priceSymbol;
         this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(formattedValue);
-        tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
+        tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue(), Float.parseFloat(ticker.percentChange24h));
     }
 }

@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:fontFamily="@font/font_regular"
-        android:textColor="@color/nasty_green"
+        android:textColor="@color/black"
         android:textSize="@dimen/sp20"
-        android:text="+$405.12 (+2.53%) Today" />
+        android:text="--" />
 </LinearLayout>

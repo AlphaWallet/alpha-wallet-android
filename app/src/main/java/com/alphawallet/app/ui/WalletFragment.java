@@ -247,7 +247,18 @@ public class WalletFragment extends BaseFragment implements
                 viewModel.checkBackup();
             }
 
-            largeTitleView.title.setText(TickerService.getCurrencyString(viewModel.getTokensService().getUSDValue()));
+
+            double usdValue = viewModel.getTokensService().getUSDValue();
+
+            double usd24hChange = viewModel.getTokensService().getUSDValueChange();
+            // to avoid NaN
+            double usd24hChangePercents = usdValue != 0 ? ((-(usd24hChange / usdValue)) * 100) : 0.0;
+            if (usdValue != 0.0) {
+                largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(usd24hChange), usd24hChangePercents));
+                largeTitleView.title.setText(TickerService.getCurrencyString(usdValue));
+                int color = ContextCompat.getColor(getContext(), usd24hChange < 0 ? R.color.red : R.color.green);
+                largeTitleView.subtitle.setTextColor(color);
+            }
         });
     }
 

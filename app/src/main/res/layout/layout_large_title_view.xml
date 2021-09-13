@@ -7,15 +7,17 @@
     android:padding="@dimen/dp16">
 
     <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:fontFamily="@font/font_bold"
         android:textColor="@color/black"
         android:textSize="@dimen/sp36"
-        android:text="$14,224.78" />
+        android:text="--" />
 
     <TextView
+        android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

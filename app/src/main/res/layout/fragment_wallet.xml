@@ -24,6 +24,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <com.alphawallet.app.widget.LargeTitleView
+            android:id="@+id/large_title_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|snap"

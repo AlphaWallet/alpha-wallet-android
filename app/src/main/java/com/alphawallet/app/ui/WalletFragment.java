@@ -44,6 +44,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
@@ -55,6 +56,7 @@ import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
+import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
@@ -109,6 +111,7 @@ public class WalletFragment extends BaseFragment implements
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
+    private LargeTitleView largeTitleView;
 
     @Nullable
     @Override
@@ -176,6 +179,8 @@ public class WalletFragment extends BaseFragment implements
         systemView.attachRecyclerView(recyclerView);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
+        largeTitleView = view.findViewById(R.id.large_title_view);
+
         ((ProgressView)view.findViewById(R.id.progress_view)).hide();
     }
 
@@ -241,6 +246,8 @@ public class WalletFragment extends BaseFragment implements
             {
                 viewModel.checkBackup();
             }
+
+            largeTitleView.title.setText(TickerService.getCurrencyString(viewModel.getTokensService().getUSDValue()));
         });
     }
 

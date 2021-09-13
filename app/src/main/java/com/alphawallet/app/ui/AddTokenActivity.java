@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -32,9 +33,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
@@ -431,9 +431,9 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
-                case FullScannerFragment.SUCCESS:
+                case Activity.RESULT_OK:
                     if (data != null) {
-                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                         QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         currentResult = parser.parse(barcode);
@@ -485,7 +485,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                         inputAddressView.setAddress(extracted_address);
                     }
                     break;
-                case QRScanningActivity.DENY_PERMISSION:
+                case QRScanner.DENY_PERMISSION:
                     showCameraDenied();
                     break;
                 default:

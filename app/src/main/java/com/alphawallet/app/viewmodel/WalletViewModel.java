@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -23,7 +22,7 @@ import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -175,7 +174,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     public void showQRCodeScanning(Activity activity) {
-        Intent intent = new Intent(activity, QRScanningActivity.class);
+        Intent intent = new Intent(activity, QRScanner.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }

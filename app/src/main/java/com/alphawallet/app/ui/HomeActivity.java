@@ -82,6 +82,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import leakcanary.LeakCanary;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
@@ -114,7 +115,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
-    private int currentFragmentId;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;

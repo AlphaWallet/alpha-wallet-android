@@ -1,42 +1,26 @@
 package com.alphawallet.app.ui.QRScanning;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.view.Display;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 public class DisplayUtils
 {
-    public static Point getScreenResolution(Context context) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
+    public static Point getScreenResolution(Activity activity) {
         Point screenResolution = new Point();
-        if (android.os.Build.VERSION.SDK_INT >= 13) {
-            display.getSize(screenResolution);
-        } else {
-            screenResolution.set(display.getWidth(), display.getHeight());
-        }
+        WindowMetrics windowMetrics = activity.getWindowManager().getCurrentWindowMetrics();
+        Insets insets = windowMetrics.getWindowInsets()
+                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+
+        screenResolution.set(windowMetrics.getBounds().width() - insets.left - insets.right,
+                windowMetrics.getBounds().height() - insets.top - insets.bottom);
 
         return screenResolution;
     }
-
-    public static int getScreenOrientation(Context context)
-    {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-
-        int orientation = Configuration.ORIENTATION_UNDEFINED;
-        if(display.getWidth()==display.getHeight()){
-            orientation = Configuration.ORIENTATION_SQUARE;
-        } else{
-            if(display.getWidth() < display.getHeight()){
-                orientation = Configuration.ORIENTATION_PORTRAIT;
-            }else {
-                orientation = Configuration.ORIENTATION_LANDSCAPE;
-            }
-        }
-        return orientation;
-    }
-
 }

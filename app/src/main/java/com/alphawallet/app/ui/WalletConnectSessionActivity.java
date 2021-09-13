@@ -22,8 +22,8 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -144,7 +144,7 @@ public class WalletConnectSessionActivity extends BaseActivity
         }
         else if (item.getItemId() == R.id.action_scan)
         {
-            Intent intent = new Intent(this, QRScanningActivity.class);
+            Intent intent = new Intent(this, QRScanner.class);
             intent.putExtra("wallet", wallet);
             intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
             startActivity(intent);

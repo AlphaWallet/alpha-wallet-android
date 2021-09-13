@@ -135,9 +135,6 @@ dependencies {
     implementation "org.web3j:core:4.6.0-android"
 
     // Http client
-    //implementation "com.squareup.retrofit2:retrofit:2.5.0"
-    //implementation "com.squareup.retrofit2:converter-gson:2.5.0"
-    //implementation "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
     implementation "com.google.code.gson:gson:2.8.6"
     implementation "com.squareup.picasso:picasso:2.71828"

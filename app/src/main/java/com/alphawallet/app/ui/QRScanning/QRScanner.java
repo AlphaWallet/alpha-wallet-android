@@ -77,9 +77,7 @@ public class QRScanner extends BaseActivity
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
         {
-            setContentView(R.layout.activity_qr_scanner);
-            chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
-            initComponents();
+            initView();
         }
         else
         {
@@ -87,8 +85,10 @@ public class QRScanner extends BaseActivity
         }
     }
 
-    private void initComponents()
+    private void initView()
     {
+        setContentView(R.layout.activity_qr_scanner);
+        chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
         barcodeView = findViewById(R.id.scanner_view);
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.AZTEC);
         barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
@@ -281,8 +281,8 @@ public class QRScanner extends BaseActivity
                 {
                     if (grantResult == PackageManager.PERMISSION_GRANTED)
                     {
-                        setContentView(R.layout.activity_full_screen_scanner_fragment);
-                        initComponents();
+                        initView();
+                        barcodeView.resume();
                         handled = true;
                     }
                 }

@@ -44,7 +44,6 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private final TextView titleText;
     private final TextView generation;
     private final TextView cooldown;
-    private final TextView statusText;
     private final LinearLayout layoutDetails;
     private final LinearLayout clickLayer;
     private final ProgressBar loadingSpinner;
@@ -64,7 +63,6 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         titleText = findViewById(R.id.name);
         generation = findViewById(R.id.generation);
         cooldown = findViewById(R.id.cooldown);
-        statusText = findViewById(R.id.status);
         itemSelect = findViewById(R.id.radioBox);
         layoutDetails = findViewById(R.id.layout_details);
         loadingSpinner = findViewById(R.id.loading_spinner);

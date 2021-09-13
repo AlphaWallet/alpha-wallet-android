@@ -23,19 +23,17 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.util.Utils;
@@ -254,7 +252,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         }
         else if (item.getItemId() == R.id.action_scan)
         {
-            Intent intent = new Intent(this, QRScanningActivity.class);
+            Intent intent = new Intent(this, QRScanner.class);
             getQRCode.launch(intent);
         }
 
@@ -394,9 +392,9 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     {
         switch (resultCode)
         {
-            case FullScannerFragment.SUCCESS:
+            case Activity.RESULT_OK:
                 if (data != null) {
-                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                    String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                     //if barcode is still null, ensure we don't GPF
                     if (barcode == null) {
@@ -418,7 +416,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                     }
                 }
                 break;
-            case QRScanningActivity.DENY_PERMISSION:
+            case QRScanner.DENY_PERMISSION:
                 showCameraDenied();
                 break;
             default:

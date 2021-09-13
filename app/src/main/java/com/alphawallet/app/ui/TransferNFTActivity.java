@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -30,11 +31,10 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
@@ -264,10 +264,10 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
             case C.BARCODE_READER_REQUEST_CODE:
                 switch (resultCode)
                 {
-                    case FullScannerFragment.SUCCESS:
+                    case Activity.RESULT_OK:
                         if (data != null)
                         {
-                            String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                            String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                             //if barcode is still null, ensure we don't GPF
                             if (barcode == null)
@@ -286,7 +286,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                             addressInput.setAddress(extracted_address);
                         }
                         break;
-                    case QRScanningActivity.DENY_PERMISSION:
+                    case QRScanner.DENY_PERMISSION:
                         showCameraDenied();
                         break;
                     default:

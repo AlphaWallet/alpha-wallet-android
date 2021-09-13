@@ -208,10 +208,6 @@
             android:label="@string/toolbar_header_help" />
 
         <activity
-            android:name=".ui.zxing.QRScanningActivity"
-            android:label="@string/qr_scanner" />
-
-        <activity
             android:name=".ui.TokenDetailActivity"
             android:label="@string/token_details" />
 
@@ -344,6 +340,10 @@
         <activity
             android:name=".ui.TransferNFTActivity"
             android:label="NFT Transfer" />
+
+        <activity
+            android:name=".ui.QRScanning.QRScanner"
+            android:label="@string/qr_scanner" />
 
     </application>
 

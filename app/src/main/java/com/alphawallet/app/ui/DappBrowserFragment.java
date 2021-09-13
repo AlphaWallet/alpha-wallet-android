@@ -79,6 +79,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.WalletConnectService;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
@@ -87,8 +88,6 @@ import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.DappBrowserSwipeInterface;
 import com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.KeyboardUtils;
@@ -1597,10 +1596,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             switch (resultCode)
             {
-                case FullScannerFragment.SUCCESS:
+                case Activity.RESULT_OK:
                     if (data != null)
                     {
-                        qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
                         if (qrCode == null || checkForMagicLink(qrCode)) return;
                         QRParser parser = QRParser.getInstance(EthereumNetworkRepository.extraChains());
                         QRResult result = parser.parse(qrCode);
@@ -1630,10 +1629,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                         }
                     }
                     break;
-                case QRScanningActivity.DENY_PERMISSION:
+                case QRScanner.DENY_PERMISSION:
                     showCameraDenied();
                     break;
-                case QRScanningActivity.WALLET_CONNECT:
+                case QRScanner.WALLET_CONNECT:
                     return;
                 default:
                     break;

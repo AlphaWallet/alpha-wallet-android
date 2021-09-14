@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -166,6 +167,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
     }
 
     private void initViews(View view) {
@@ -241,25 +243,23 @@ public class WalletFragment extends BaseFragment implements
                 adapter.setTokens(metas.toArray(new TokenCardMeta[0]));
                 systemView.hide();
             }
-
-            if (viewModel.getWallet().type != WalletType.WATCH && isVisible)
-            {
-                viewModel.checkBackup();
-            }
-
-
-            double usdValue = viewModel.getTokensService().getUSDValue();
-
-            double usd24hChange = viewModel.getTokensService().getUSDValueChange();
-            // to avoid NaN
-            double usd24hChangePercents = usdValue != 0 ? ((-(usd24hChange / usdValue)) * 100) : 0.0;
-            if (usdValue != 0.0) {
-                largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(usd24hChange), usd24hChangePercents));
-                largeTitleView.title.setText(TickerService.getCurrencyString(usdValue));
-                int color = ContextCompat.getColor(getContext(), usd24hChange < 0 ? R.color.red : R.color.green);
-                largeTitleView.subtitle.setTextColor(color);
-            }
         });
+    }
+
+    //Could the view have been destroyed?
+    private void updateValue(Pair<Double, Double> fiatValues)
+    {
+        // to avoid NaN
+        double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second)/fiatValues.second)*100.0 : 0.0;
+        largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
+        largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
+        int color = ContextCompat.getColor(getContext(), changePercent < 0 ? R.color.red : R.color.green);
+        largeTitleView.subtitle.setTextColor(color);
+
+        if (viewModel.getWallet().type != WalletType.WATCH && isVisible)
+        {
+            viewModel.checkBackup(fiatValues.first);
+        }
     }
 
     private void refreshList()
@@ -406,6 +406,7 @@ public class WalletFragment extends BaseFragment implements
         {
             adapter.setTokens(tokens);
             checkScrollPosition();
+            viewModel.calculateFiatValues();
         }
         systemView.showProgress(false);
     }

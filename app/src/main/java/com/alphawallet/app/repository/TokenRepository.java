@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -196,6 +197,12 @@ public class TokenRepository implements TokenRepositoryType {
     {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource.fetchTokenMetasForUpdate(wallet, networkFilters);
+    }
+
+    @Override
+    public Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Integer> networkFilters)
+    {
+        return localSource.getTotalValue(currentAddress, networkFilters);
     }
 
     @Override

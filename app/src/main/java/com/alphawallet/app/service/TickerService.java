@@ -7,10 +7,12 @@ import android.text.format.DateUtils;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
@@ -46,6 +48,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -73,6 +76,7 @@ public class TickerService
     private static final String CHAIN_ID = "[CHAIN_ID]";
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_ID + "?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
     private static final String COINGECKO_COINS_API = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cxdai%2Cetc&vs_currencies=USD&include_24hr_change=true";
+    private static final String CURRENCY_CONV = "currency";
 
     public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
@@ -119,10 +123,47 @@ public class TickerService
                 .subscribe(this::checkTickers, this::onTickersError).isDisposed();
     }
 
-    private Single<Double> updateCurrencyConversion()
+    public Single<Double> updateCurrencyConversion()
     {
         initCurrency();
-        return convertPair("USD", currentCurrencySymbolTxt);
+        return convertPair("USD", currentCurrencySymbolTxt)
+                .map(this::storeCurrentRate);
+    }
+
+    private Double storeCurrentRate(Double rate)
+    {
+        if (rate == 0.0)
+        {
+            return getStoredTicker();
+        }
+        else
+        {
+            TokenTicker currencyTicker = new TokenTicker(Double.toString(rate), "0", currentCurrencySymbolTxt, null, System.currentTimeMillis());
+            localSource.updateERC20Tickers(0, new HashMap<String, TokenTicker>() {{ put(CURRENCY_CONV, currencyTicker); }});
+            return rate;
+        }
+    }
+
+    private Double getStoredTicker()
+    {
+        try (Realm realm = localSource.getTickerRealmInstance())
+        {
+            String key = TokensRealmSource.databaseKey(0, CURRENCY_CONV);
+            RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                    .equalTo("contract", key)
+                    .findFirst();
+
+            if (realmItem != null)
+            {
+                return Double.parseDouble(realmItem.getPrice());
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return 0.0;
     }
 
     private Single<Integer> fetchTickersSeparatelyIfRequired(int tickerCount)
@@ -384,6 +425,7 @@ public class TickerService
             if (currency1 == null || currency2 == null || currency1.equals(currency2)) return (Double)1.0;
             String conversionURL = "http://currencies.apps.grandtrunk.net/getlatest/" + currency1 + "/" + currency2;
             okhttp3.Response response = null;
+            double rate = 0.0;
 
             try
             {
@@ -399,19 +441,20 @@ public class TickerService
                 if ((resultCode / 100) == 2 && response.body() != null)
                 {
                     String responseBody = response.body().string();
-                    return Double.parseDouble(responseBody);
+                    rate = Double.parseDouble(responseBody);
                 }
             }
             catch (Exception e)
             {
                 e.printStackTrace();
+                rate = 0.0;
             }
             finally
             {
                 if (response != null) response.close();
             }
 
-            return (Double)1.0;
+            return rate;
         });
     }
 

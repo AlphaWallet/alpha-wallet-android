@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import androidx.annotation.Nullable;
@@ -18,10 +19,10 @@ import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -64,8 +65,6 @@ public class TokensService
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
     public static final long PENDING_TIME_LIMIT = 3*DateUtils.MINUTE_IN_MILLIS; //cut off pending chain after 3 minutes
 
-    private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>(); //this is used to compute the USD value of the tokens on an address
-    private static final Map<String, Float> tokenValue24hChangeMap = new ConcurrentHashMap<>();
     private static final Map<Integer, Long> pendingChainMap = new ConcurrentHashMap<>();
     private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
     private final Map<String, Token> tokenStoreList = new ConcurrentHashMap<>(); //used to hold tokens that will be stored
@@ -326,7 +325,6 @@ public class TokensService
         if (tokenStoreDisposable != null && !tokenStoreDisposable.isDisposed()) { tokenStoreDisposable.dispose(); }
 
         IconItem.resetCheck();
-        tokenValueMap.clear();
         pendingChainMap.clear();
         tokenStoreList.clear();
         baseTokenCheck.clear();
@@ -728,35 +726,17 @@ public class TokensService
         pendingChainMap.put(chainId, System.currentTimeMillis() + PENDING_TIME_LIMIT);
     }
 
-    public void addTokenValue(int chainId, String tokenAddress, float value, float percent24hChange)
+    public Single<Pair<Double, Double>> getFiatValuePair()
     {
-        if (EthereumNetworkRepository.hasRealValue(chainId))
-        {
-            if (tokenAddress.equalsIgnoreCase(currentAddress)) tokenAddress = String.valueOf(chainId);
-            tokenValueMap.put(tokenAddress, value);
-            tokenValue24hChangeMap.put(tokenAddress, value * percent24hChange / 100.0f);
-        }
+        return tickerService.updateCurrencyConversion() //ensure we always have currency conversion
+                .flatMap(rate -> tokenRepository.getTotalValue(currentAddress, networkFilter))
+                .map(valuePair -> new Pair<>(valuePair.first * tickerService.getCurrentConversionRate(), // convert to local currency
+                        valuePair.second * tickerService.getCurrentConversionRate()));
     }
 
-    public double getUSDValueChange() {
-        double totalVal = 0.0f;
-        for (Float val : tokenValue24hChangeMap.values())
-        {
-            totalVal += val;
-        }
-
-        return totalVal*tickerService.getCurrentConversionRate();
-    }
-
-    public double getUSDValue()
+    public double convertToUSD(double localFiatValue)
     {
-        double totalVal = 0.0f;
-        for (Float val : tokenValueMap.values())
-        {
-            totalVal += val;
-        }
-
-        return totalVal*tickerService.getCurrentConversionRate();
+        return localFiatValue / tickerService.getCurrentConversionRate();
     }
 
     public void walletHidden()

@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -68,4 +70,6 @@ public interface TokenLocalSource {
 
     void storeATokenAddresses(List<String> addresses);
     Single<List<String>> getATokenAddresses();
+
+    Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Integer> networkFilters);
 }

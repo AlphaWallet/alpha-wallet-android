@@ -320,7 +320,9 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
         //This sets the crypto price value (middle amount)
         BigDecimal currencyChange = new BigDecimal(ticker.price).multiply((
-                new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100)));
+                new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100))); //Should this be the change in fiat value the wallet holds?
+                                                                                           // IE if I have 100 Eth, the Eth ticker shows +10% should this value be
+                                                                                           // 10% of (price of 1 eth) or 10% of (price of 100 eth)?
         //String formattedValue = TickerService.getCurrencyWithoutSymbol(currencyChange.doubleValue());
         String formattedValue =  TickerService.getCurrencyString(currencyChange.doubleValue());
 
@@ -328,6 +330,5 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         //lbl += " " + ticker.priceSymbol;
         this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(formattedValue);
-        tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue(), Float.parseFloat(ticker.percentChange24h));
     }
 }

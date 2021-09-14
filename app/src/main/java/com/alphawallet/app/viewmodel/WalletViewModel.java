@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,8 +19,8 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
@@ -40,6 +41,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
+    private final MutableLiveData<Pair<Double, Double>> fiatValues = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final TokenDetailRouter tokenDetailRouter;
@@ -76,6 +78,7 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Wallet> defaultWallet() { return defaultWallet; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
+    public LiveData<Pair<Double, Double>> onFiatValues() { return fiatValues; }
 
     public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : ""; }
     public WalletType getWalletType() { return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE; }
@@ -221,11 +224,11 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    public void checkBackup()
+    public void checkBackup(double fiatValue)
     {
         if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
         lastBackupCheck = System.currentTimeMillis();
-        double walletUSDValue = tokensService.getUSDValue();
+        double walletUSDValue = tokensService.convertToUSD(fiatValue);
 
         if (walletUSDValue > 0.0)
         {
@@ -268,5 +271,13 @@ public class WalletViewModel extends BaseViewModel
     public boolean isChainToken(int chainId, String tokenAddress)
     {
         return tokensService.isChainToken(chainId, tokenAddress);
+    }
+
+    public void calculateFiatValues()
+    {
+        disposable = tokensService.getFiatValuePair()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(fiatValues::postValue);
     }
 }

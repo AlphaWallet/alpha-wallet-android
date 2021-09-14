@@ -22,12 +22,14 @@ public class RealmTokenTicker extends RealmObject {
         this.id = id;
     }
 
-    public String getContract() {
-        return contract;
+    public String getContract()
+    {
+        return contract.split("-")[0];
     }
 
-    public void setContract(String contract) {
-        this.contract = contract;
+    public int getChain()
+    {
+        return Integer.parseInt(contract.split("-")[1]);
     }
 
     public String getPrice() {

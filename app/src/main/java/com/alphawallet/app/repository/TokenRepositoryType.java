@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SubscribeWrapper;
@@ -81,4 +83,6 @@ public interface TokenRepositoryType {
     
     boolean isEnabled(Token newToken);
     boolean hasVisibilityBeenChanged(Token token);
+
+    Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Integer> networkFilters);
 }

@@ -1,7 +1,6 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,8 +39,6 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
-import static com.alphawallet.app.util.Utils.ALPHAWALLET_REPO_NAME;
-import static com.alphawallet.app.util.Utils.getTWTokenImageUrl;
 
 public class TokenIcon extends ConstraintLayout
 {
@@ -145,6 +142,7 @@ public class TokenIcon extends ConstraintLayout
             textIcon.setVisibility(View.GONE);
             icon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
             icon.setVisibility(View.VISIBLE);
+            findViewById(R.id.circle).setVisibility(View.VISIBLE);
         }
         else
         {

@@ -15,8 +15,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -239,7 +237,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         selectAddress.setVisibility(View.GONE);
         layoutInputAmount.setVisibility(View.VISIBLE);
         amountInput = findViewById(R.id.input_amount);
-        amountInput.setupToken(token, null, viewModel.getTokenService(), this);
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
         updateCryptoAmount(BigDecimal.ZERO);
         setNetworkUi(networkInfo);
     }
@@ -370,7 +368,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             }
             else
             {
-                amountInput.setupToken(token, null, viewModel.getTokenService(), this);
+                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
             }
         }
     }

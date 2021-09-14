@@ -142,6 +142,7 @@ public class TokenIcon extends ConstraintLayout
             textIcon.setVisibility(View.GONE);
             icon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
             icon.setVisibility(View.VISIBLE);
+            findViewById(R.id.circle).setVisibility(View.VISIBLE);
         }
         else
         {

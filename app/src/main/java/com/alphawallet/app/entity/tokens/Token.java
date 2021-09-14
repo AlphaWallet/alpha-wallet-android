@@ -185,6 +185,14 @@ public class Token
         }
     }
 
+    public String getTSName(AssetDefinitionService assetDefinition, int count) {
+        String name = assetDefinition != null ? assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count) : null;
+        if (name != null) {
+            return sanitiseString(name);
+        }
+        return null;
+    }
+
     public String getName(AssetDefinitionService assetDefinition, int count)
     {
         //override contract name with TS defined name

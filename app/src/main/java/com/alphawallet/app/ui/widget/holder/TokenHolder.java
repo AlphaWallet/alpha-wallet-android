@@ -128,13 +128,22 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
 
-            balanceEth.setText(token.getName(assetDefinition, token.getTokenCount()));
-            //balanceEth.setText(token.tokenInfo.symbol);
+            balanceEth.setText(shortTitle());
 
             String coinBalance = token.getStringBalance();
             if (!TextUtils.isEmpty(coinBalance)) {
                 balanceCoin.setVisibility(View.VISIBLE);
-                balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, token.getSymbol()));
+
+                String symbol = token.getSymbol();
+                String name = token.getName();
+                // Use shortest of name and symbol, but abbreviate to 5 characters or less and capitalise.
+                if (symbol.length() > name.length()) {
+                    symbol = name.replace(" ", "").substring(0, Math.min(name.length(), 5)).toUpperCase();
+                } else {
+                    symbol = symbol.substring(0, Math.min(symbol.length(), 5)).toUpperCase();
+                }
+
+                balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, symbol));
                 //balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, token.tokenInfo.symbol));
             }
 
@@ -330,5 +339,23 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         //lbl += " " + ticker.priceSymbol;
         this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(formattedValue);
+    }
+
+    private String shortTitle() {
+        String localizedNameFromAssetDefinition = token.getTSName(assetDefinition, token.getTokenCount());
+        String symbol = token.getSymbol();
+        // 1 Use TokenScript name if available.
+        if (!TextUtils.isEmpty(localizedNameFromAssetDefinition)) {
+            return localizedNameFromAssetDefinition;
+        } else {
+            String name = token.tokenInfo.name;
+            // 3 Use Token symbol.
+            if (TextUtils.isEmpty(name) || name.length() < symbol.length()) {
+                return symbol;
+            } else {
+                // 2 Use Token name if longer than Token symbol.
+                return name;
+            }
+        }
     }
 }

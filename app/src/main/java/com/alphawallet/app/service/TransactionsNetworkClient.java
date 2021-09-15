@@ -64,7 +64,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 19; //increment this to do a one off refresh the AUX database, in case of changed design etc (16)
+    private final int AUX_DATABASE_ID = 22; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
     private final String BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";

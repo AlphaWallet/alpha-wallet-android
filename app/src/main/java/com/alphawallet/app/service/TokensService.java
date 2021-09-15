@@ -2,6 +2,8 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -77,6 +79,7 @@ public class TokensService
     private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
     private final List<Integer> networkFilter;
     private ContractLocator focusToken;
+    private final Handler handler = new Handler(Looper.myLooper());
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Integer> baseTokenCheck;
     private static long openSeaCheck;
@@ -85,6 +88,7 @@ public class TokensService
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
     private int transferCheckChain;
+    private final Runnable storeNewTokens;
 
     @Nullable
     private Disposable eventTimer;
@@ -96,8 +100,6 @@ public class TokensService
     private Disposable balanceCheckDisposable;
     @Nullable
     private Disposable erc20CheckDisposable;
-    @Nullable
-    private Disposable storeErc20Tokens;
     @Nullable
     private Disposable tokenStoreDisposable;
     @Nullable
@@ -123,6 +125,7 @@ public class TokensService
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
         transferCheckChain = 0;
+        storeNewTokens = this::storeTokens;
     }
 
     private void checkUnknownTokens()
@@ -185,10 +188,11 @@ public class TokensService
         //store token to database, update balance
         //check for duplicates
         addToTokenStoreList(token);
-        if (storeErc20Tokens == null)
+
+        //store batches of tokens; wait for 3 seconds then push through a batch
+        if (!handler.hasCallbacks(storeNewTokens))
         {
-            storeErc20Tokens = Observable.interval(0, 100, TimeUnit.MILLISECONDS)
-                    .doOnNext(l -> storeNextToken()).subscribeOn(Schedulers.newThread()).subscribe();
+            handler.postDelayed(storeNewTokens, 3 * DateUtils.SECOND_IN_MILLIS);
         }
     }
 
@@ -203,34 +207,23 @@ public class TokensService
         }
     }
 
-    private void storeNextToken()
+    //Batch store tokens
+    private void storeTokens()
     {
-        //process chains in order
-        if (tokenStoreDisposable == null || tokenStoreDisposable.isDisposed())
-        {
-            if (tokenStoreList.keySet().iterator().hasNext())
-            {
-                String key = tokenStoreList.keySet().iterator().next();
-                Token t = tokenStoreList.get(key);
-                Wallet wallet = new Wallet(t.getWallet());
-                tokenStoreList.remove(key);
-                tokenStoreDisposable = tokenRepository.checkInterface(new Token[]{t}, wallet) //if ERC721 determine the specific contract type
-                        .flatMap(tkns -> tokenRepository.storeTokens(wallet, tkns))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::storedToken, Throwable::printStackTrace);
-            }
-        }
-        else if (storeErc20Tokens != null && !storeErc20Tokens.isDisposed())
-        {
-            storeErc20Tokens.dispose();
-            storeErc20Tokens = null;
-        }
+        if (tokenStoreList.keySet().size() == 0) return;
+        Token[] tokens = tokenStoreList.values().toArray(new Token[0]);
+        Wallet wallet = new Wallet(tokens[0].getWallet());
+        tokenStoreList.clear();
+        tokenStoreDisposable = tokenRepository.checkInterface(tokens, wallet) //if ERC721 determine the specific contract type
+                .flatMap(tkns -> tokenRepository.storeTokens(wallet, tkns))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::storedToken, this::onERC20Error);
     }
 
     private void storedToken(Token[] tokens)
     {
-        tokenStoreDisposable = null;
+        if (BuildConfig.DEBUG) Log.d(TAG, "Stored " + tokens.length + " Tokens");
     }
 
     public TokenTicker getTokenTicker(Token token)

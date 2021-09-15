@@ -4,8 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,7 +44,6 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -56,7 +53,6 @@ import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
@@ -69,7 +65,6 @@ import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
@@ -400,35 +395,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         checkRoot();
         initViews();
 
-        //check clipboard
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        try
-        {
-            if (clipboard != null && clipboard.getPrimaryClip() != null)
+        handler.post(() -> {
+            //check clipboard
+            String magicLink = ImportTokenActivity.getMagiclinkFromClipboard(this);
+            if (magicLink != null)
             {
-                ClipData.Item clipItem = clipboard.getPrimaryClip().getItemAt(0);
-                if (clipItem != null)
-                {
-                    CharSequence clipText = clipItem.getText();
-                    if (clipText != null && clipText.length() > 60 && clipText.length() < 400)
-                    {
-                        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                        if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
-                        {
-                            //valid link, remove from clipboard
-                            ClipData clipData = ClipData.newPlainText("", "");
-                            clipboard.setPrimaryClip(clipData);
-                            //let's try to import the link
-                            viewModel.showImportLink(this, clipText.toString());
-                        }
-                    }
-                }
+                viewModel.showImportLink(this, magicLink);
             }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override

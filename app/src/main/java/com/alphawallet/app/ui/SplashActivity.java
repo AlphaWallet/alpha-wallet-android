@@ -70,7 +70,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
-        ImportTokenActivity importTokenActivity = new ImportTokenActivity();
 
         if (data != null)
         {
@@ -79,11 +78,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             {
                 importPath = data.getPath();
             }
-        }
-        else
-        {
-            //try the clipboard
-            importData = importTokenActivity.getMagiclinkFromClipboard(this);
         }
 
         splashViewModel = new ViewModelProvider(this, splashViewModelFactory)

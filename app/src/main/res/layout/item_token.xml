@@ -173,7 +173,7 @@
                             android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
                             android:text="@string/unknown_balance_without_symbol"
-                            android:textSize="12sp" />
+                            android:textSize="15sp" />
                         <LinearLayout
                             android:id="@+id/root_24_hrs"
                             android:orientation="horizontal"
@@ -194,7 +194,7 @@
                                 android:layout_gravity="center_horizontal"
                                 android:fontFamily="@font/font_regular"
                                 android:text="@string/unknown_balance_without_symbol"
-                                android:textSize="12sp"
+                                android:textSize="15sp"
                                 android:layout_marginEnd="4dp"/>
                         </LinearLayout>
 

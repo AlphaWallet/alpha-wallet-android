@@ -265,7 +265,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     realmTx = r.createObject(RealmTransaction.class, tx.hash);
                 }
 
-                fill(r, realmTx, tx);
+                fill(realmTx, tx);
                 r.insertOrUpdate(realmTx);
             });
         }
@@ -289,7 +289,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         {
             instance.executeTransactionAsync(r -> {
                 RealmTransaction item = r.createObject(RealmTransaction.class, ethTx.getHash());
-                fill(r, item, tx);
+                fill(item, tx);
                 r.insertOrUpdate(item);
             });
         }
@@ -359,7 +359,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
-    public static void fill(Realm realm, RealmTransaction item, Transaction transaction)
+    public static void fill(RealmTransaction item, Transaction transaction)
     {
         item.setError(transaction.error);
         item.setBlockNumber(transaction.blockNumber);

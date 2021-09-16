@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
@@ -38,8 +37,8 @@ import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.google.android.material.tabs.TabLayout;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.google.android.material.tabs.TabLayout;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,8 +68,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Wallet wallet;
     private Token token;
     private TokenCardMeta tokenMeta;
-
-    private FunctionButtonBar functionBar;
     private RecyclerView tokenView;
     private CertifiedToolbarView toolbarView;
 
@@ -168,7 +165,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
-            functionBar = findViewById(R.id.layoutButtons);
+            FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
@@ -228,7 +225,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         setupButtons();
         viewModel.checkTokenScriptValidity(token);
     }
-
 
     private void getIntentData()
     {
@@ -342,6 +338,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             if (activityHistoryList != null)
             {
                 //reset the transaction history
+                activityHistoryList.resetAdapter();
                 activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
                         token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
             }

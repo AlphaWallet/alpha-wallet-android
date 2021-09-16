@@ -3,10 +3,8 @@ package com.alphawallet.app.repository;
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
-import io.realm.RealmObject;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
-import io.realm.annotations.PrimaryKey;
 
 
 /**
@@ -307,6 +305,13 @@ public class AWRealmMigration implements RealmMigration
         {
             schema.create("RealmAToken")
                     .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
+            oldVersion++;
+        }
+
+        if (oldVersion == 29)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransaction");
+            if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
             oldVersion++;
         }
     }

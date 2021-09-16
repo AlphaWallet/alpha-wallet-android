@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -57,7 +58,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private RecyclerView listView;
     private Realm realm;
     private RealmResults<RealmTransaction> realmUpdates;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean checkTimer;
     private long lastUpdateTime = 0;
 
@@ -181,7 +182,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         listView.setLayoutManager(new LinearLayoutManager(getContext()));
         listView.setAdapter(adapter);
         listView.addItemDecoration(new RecycleViewDivider(getContext()));
-        listView.setRecyclerListener(holder -> adapter.onRViewRecycled(holder));
+        listView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
 
         systemView.attachRecyclerView(listView);
         systemView.attachSwipeRefreshLayout(refreshLayout);

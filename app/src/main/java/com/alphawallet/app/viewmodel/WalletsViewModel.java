@@ -1,11 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Context;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.content.Context;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -67,6 +67,15 @@ public class WalletsViewModel extends BaseViewModel
 
     @Nullable
     private Disposable balanceTimerDisposable;
+
+    @Nullable
+    private Disposable walletBalanceUpdate;
+
+    @Nullable
+    private Disposable ensCheck;
+
+    @Nullable
+    private Disposable ensWrappingCheck;
 
     WalletsViewModel(
             SetDefaultWalletInteract setDefaultWalletInteract,
@@ -171,14 +180,14 @@ public class WalletsViewModel extends BaseViewModel
     {
         //check for updates
         //check names first
-        disposable = fetchWalletsInteract.fetch().toObservable()
+        ensWrappingCheck = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
-                .forEach(wallet -> ensResolver.reverseResolveEns(wallet.address)
+                .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
                         .map(ensName -> { wallet.ENSname = ensName; return wallet;})
                         .flatMap(fetchWalletsInteract::updateWalletData)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(w -> { }, this::onError).isDisposed());
+                        .subscribe(w -> { }, this::onError));
 
         updateWallets();
     }
@@ -215,14 +224,24 @@ public class WalletsViewModel extends BaseViewModel
     {
         //loop through wallets and update balance
         disposable = Observable.fromArray(wallets)
-                .forEach(wallet -> tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
+                .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
                         .flatMap(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
-                        .subscribe(w -> { }, e -> { })
-                        .isDisposed());
+                        .subscribe(w -> { }, e -> { }));
 
         progress.postValue(false);
+    }
+
+    @Override
+    public void onCleared()
+    {
+        super.onCleared();
+        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        if (walletBalanceUpdate != null && !walletBalanceUpdate.isDisposed()) walletBalanceUpdate.dispose();
+        if (ensCheck != null && !ensCheck.isDisposed()) ensCheck.dispose();
+        if (ensWrappingCheck != null && !ensWrappingCheck.isDisposed()) ensWrappingCheck.dispose();
     }
 
     private void onCreateWalletError(Throwable throwable)

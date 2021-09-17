@@ -18,7 +18,6 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
@@ -36,7 +35,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
@@ -175,7 +173,7 @@ public class WalletsViewModel extends BaseViewModel
         //check names first
         disposable = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
-                .forEach(wallet -> ensResolver.resolveEnsName(wallet.address)
+                .forEach(wallet -> ensResolver.reverseResolveEns(wallet.address)
                         .map(ensName -> { wallet.ENSname = ensName; return wallet;})
                         .flatMap(fetchWalletsInteract::updateWalletData)
                         .subscribeOn(Schedulers.io())

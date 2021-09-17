@@ -64,7 +64,7 @@ public class NameThisWalletViewModel extends BaseViewModel
             return ;
         }
 
-        ensResolveDisposable = ensResolver.resolveEnsName(wallet.address)
+        ensResolveDisposable = ensResolver.reverseResolveEns(wallet.address)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onENSSuccess);

@@ -143,6 +143,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -1193,14 +1194,22 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 confirmationDialog.show();
                 confirmationDialog.fullExpand();
 
-                viewModel.calculateGasEstimate(wallet, Numeric.hexStringToByteArray(transaction.payload),
-                        activeNetwork.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value))
-                        .map(limit -> convertToGasLimit(limit, transaction.gasLimit))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
-                                Throwable::printStackTrace)
-                        .isDisposed();
+                if (token.isEthereum() || TextUtils.isEmpty(transaction.payload) || transaction.payload.equals("0x"))
+                {
+                    //should be MIN_GAS limit
+                    confirmationDialog.setGasEstimate(BigInteger.valueOf(GAS_LIMIT_MIN));
+                }
+                else
+                {
+                    viewModel.calculateGasEstimate(wallet, Numeric.hexStringToByteArray(transaction.payload),
+                            activeNetwork.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value))
+                            .map(limit -> convertToGasLimit(limit, transaction.gasLimit))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
+                                    Throwable::printStackTrace)
+                            .isDisposed();
+                }
 
                 return;
             }

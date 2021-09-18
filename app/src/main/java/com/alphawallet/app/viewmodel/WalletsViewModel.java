@@ -297,13 +297,6 @@ public class WalletsViewModel extends BaseViewModel
         keyService.failedAuthentication(taskCode);
     }
 
-    @Override
-    public void onCleared()
-    {
-        onPause();
-        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
-    }
-
     public void onPause()
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();

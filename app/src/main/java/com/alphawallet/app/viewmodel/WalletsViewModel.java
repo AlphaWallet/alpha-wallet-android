@@ -63,7 +63,7 @@ public class WalletsViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
-    private Map<String, Wallet> walletBalances = new HashMap<>();
+    private final Map<String, Wallet> walletBalances = new HashMap<>();
 
     @Nullable
     private Disposable balanceTimerDisposable;

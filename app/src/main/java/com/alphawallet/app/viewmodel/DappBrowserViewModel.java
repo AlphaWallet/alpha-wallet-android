@@ -143,11 +143,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void setLastUrl(Context context, String url) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
-    }
-
     public void addToMyDapps(Context context, String title, String url) {
         Intent intent = new Intent(context, AddEditDappActivity.class);
         DApp dapp = new DApp(title, url);

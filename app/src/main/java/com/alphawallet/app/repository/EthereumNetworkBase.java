@@ -687,6 +687,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return dapp;
     }
 
+    public static boolean isWithinHomePage(String url)
+    {
+        String homePageRoot = DEFAULT_HOMEPAGE.substring(0, DEFAULT_HOMEPAGE.length() - 1); //remove final slash
+        return (url != null && url.startsWith(homePageRoot));
+    }
+
     public static boolean isDefaultDapp(String url)
     {
         return url != null && (url.equals(DEFAULT_HOMEPAGE)

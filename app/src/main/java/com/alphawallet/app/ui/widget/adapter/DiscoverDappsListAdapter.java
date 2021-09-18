@@ -31,11 +31,11 @@ import com.bumptech.glide.request.target.Target;
 
 public class DiscoverDappsListAdapter extends RecyclerView.Adapter<DiscoverDappsListAdapter.ViewHolder> {
     private List<DApp> data;
-    private OnDappClickListener listener;
-    private OnDappAddedListener onDappAddedListener;
-    private OnDappRemovedListener onDappRemovedListener;
+    private final OnDappClickListener listener;
+    private final OnDappAddedListener onDappAddedListener;
+    private final OnDappRemovedListener onDappRemovedListener;
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView name, description, remove, add;
 

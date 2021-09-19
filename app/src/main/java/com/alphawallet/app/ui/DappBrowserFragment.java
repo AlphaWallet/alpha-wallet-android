@@ -1417,7 +1417,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         else if (web3 != null)
         {
             sessionHistory = web3.copyBackForwardList();
-            canBrowseBack = web3.canGoBack() || !isOnHomePage();
+            canBrowseBack = !isOnHomePage();
             canBrowseForward = (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1);
         }
 

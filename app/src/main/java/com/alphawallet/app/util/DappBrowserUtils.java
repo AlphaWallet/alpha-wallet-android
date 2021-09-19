@@ -10,18 +10,20 @@ import com.alphawallet.app.entity.DApp;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
 
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
@@ -51,9 +53,9 @@ public class DappBrowserUtils {
 
     public static List<DApp> getMyDapps(Context context) {
         if (context == null) return new ArrayList<>();
-        //load legacy
-        String myDappsJson = loadFromPrefsLegacy(context, "my_dapps", MY_DAPPS_FILE);
-        myDappsJson = myDappsJson != null ? myDappsJson : loadJsonData(MY_DAPPS_FILE, context);
+
+        String myDappsJson = loadJsonData(MY_DAPPS_FILE, context);
+        if (TextUtils.isEmpty(myDappsJson)) myDappsJson = loadFromPrefsLegacy(context, "my_dapps", MY_DAPPS_FILE); //load legacy
 
         List<DApp> dapps = getPrimarySites(context);
 
@@ -67,8 +69,8 @@ public class DappBrowserUtils {
 
     public static List<DApp> getBrowserHistory(Context context) {
         if (context == null) return new ArrayList<>();
-        String historyJson = loadFromPrefsLegacy(context, C.DAPP_BROWSER_HISTORY, DAPPS_HISTORY_FILE); //try legacy data first
-        historyJson = historyJson != null ? historyJson : loadJsonData(DAPPS_HISTORY_FILE, context);
+        String historyJson = loadJsonData(DAPPS_HISTORY_FILE, context);
+        if (TextUtils.isEmpty(historyJson)) blankPrefEntry(context, C.DAPP_BROWSER_HISTORY); //blank legacy
 
         List<DApp> history;
         if (historyJson.isEmpty()) {
@@ -76,18 +78,19 @@ public class DappBrowserUtils {
         } else {
             history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<DApp>>() {
             }.getType());
-            Collections.reverse(history);
         }
         return history;
     }
 
-    public static void storeJsonData(String fName, String json, Context context)
+    private static void storeJsonData(String fName, String json, Context context)
     {
         File file = new File(context.getFilesDir(), fName);
         try (FileOutputStream fos = new FileOutputStream(file))
         {
-            OutputStream os = new BufferedOutputStream(fos);
-            os.write(json.getBytes());
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+            writer.write(json);
+            writer.flush();
+            writer.close();
         }
         catch (Exception e)
         {
@@ -106,6 +109,7 @@ public class DappBrowserUtils {
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append("\n");
             }
+            reader.close();
         }
         catch (Exception e)
         {
@@ -123,10 +127,21 @@ public class DappBrowserUtils {
     }
 
     public static void addToHistory(Context context, DApp dapp) {
-        List<DApp> history = getBrowserHistory(context);
-        if (!history.contains(dapp)) {
-            history.add(dapp);
+        if (dapp == null || isWithinHomePage(dapp.getUrl())) return;
+        List<DApp> history = new ArrayList<>(Collections.singletonList(dapp));
+        history.addAll(getBrowserHistory(context));
+        if (history.size() > 1)
+        {
+            for (int i = 1; i < history.size(); i++)
+            {
+                if (history.get(i).getUrl().equals(dapp.getUrl()))
+                {
+                    history.remove(i); //remove older item
+                    break;
+                }
+            }
         }
+
         saveHistory(context, history);
     }
 
@@ -163,19 +178,14 @@ public class DappBrowserUtils {
         }
     }
 
-    //Legacy data, blanked after first restore
+    //Legacy data, blanked after first restore. TODO: Remove after a few version updates
     private static String loadFromPrefsLegacy(Context context, String key, String fileName)
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String data = prefs.getString("my_dapps", "");
+        String data = prefs.getString(key, "");
         if (!TextUtils.isEmpty(data))
         {
-            PreferenceManager
-                    .getDefaultSharedPreferences(context)
-                    .edit()
-                    .putString(key, "")
-                    .apply();
-
+            blankPrefEntry(context, key);
             storeJsonData(fileName, data, context); //move existing data to file
         }
         else
@@ -184,5 +194,15 @@ public class DappBrowserUtils {
         }
 
         return data;
+    }
+
+    //TODO: Remove after a few version updates
+    private static void blankPrefEntry(Context context, String key)
+    {
+        PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .edit()
+                .putString(key, "")
+                .apply();
     }
 }

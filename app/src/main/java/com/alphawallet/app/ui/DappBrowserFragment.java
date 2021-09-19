@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -125,6 +124,13 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
@@ -169,6 +175,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public static final String CURRENT_FRAGMENT = "currentFragment";
     private static final String CURRENT_URL = "urlInBar";
     private static final String WALLETCONNECT_CHAINID_ERROR = "Error: ChainId missing or not supported";
+    private static final long MAGIC_BUNDLE_VAL = 0xACED00D;
+    private static final String BUNDLE_FILE = "awbrowse";
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
@@ -289,27 +297,18 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
         LocaleUtils.setActiveLocale(getContext());
+        loadOnInit = null;
         int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
         View view = inflater.inflate(webViewID, container, false);
         initViewModel();
         initView(view);
         setupAddressBar();
 
-        loadOnInit = null;
+        attachFragment(DAPP_BROWSER);
 
         // Load url from a link within the app
         if (getArguments() != null && getArguments().getString("url") != null) {
-            String url = getArguments().getString("url");
-            loadOnInit = url;
-        } else {
-            String lastUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, "");
-            if (savedInstanceState != null)
-            {
-                lastUrl = savedInstanceState.getString(CURRENT_URL, "");
-            }
-
-            attachFragment(DAPP_BROWSER);
-            loadOnInit = TextUtils.isEmpty(lastUrl) ? getDefaultDappUrl() : lastUrl;
+            loadOnInit = getArguments().getString("url");
         }
 
         return view;
@@ -320,6 +319,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         Fragment testFrag = getChildFragmentManager().findFragmentByTag(tag);
         if (testFrag != null && testFrag.isVisible() && !testFrag.isDetached())
         {
+            addToBackStack(tag);
             getChildFragmentManager().beginTransaction()
                     .replace(R.id.frame, fragment)
                     .commitAllowingStateLoss();
@@ -392,17 +392,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         detachFragments();
         switch (position) {
             case 0: {
-                addToBackStack(MY_DAPPS);
                 attachFragment(myDappsFragment, MY_DAPPS);
                 break;
             }
             case 1: {
-                addToBackStack(DISCOVER_DAPPS);
                 attachFragment(discoverDappsFragment, DISCOVER_DAPPS);
                 break;
             }
             case 2: {
-                addToBackStack(HISTORY);
                 attachFragment(browserHistoryFragment, HISTORY);
                 break;
             }
@@ -466,12 +463,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             return true;
         });
         if (history != null) history.setOnMenuItemClickListener(menuItem -> {
-            addToBackStack(HISTORY);
             attachFragment(browserHistoryFragment, HISTORY);
             return true;
         });
         if (bookmarks != null) bookmarks.setOnMenuItemClickListener(menuItem -> {
-            addToBackStack(MY_DAPPS);
             attachFragment(myDappsFragment, MY_DAPPS);
             return true;
         });
@@ -483,6 +478,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void initView(@NotNull View view) {
         web3 = view.findViewById(R.id.web3view);
+        Bundle savedState = readBundleFromLocal();
+        if (savedState != null)
+        {
+            web3.restoreState(savedState);
+            String lastUrl = savedState.getString(CURRENT_URL);
+            loadOnInit = TextUtils.isEmpty(lastUrl) ? getDefaultDappUrl() : lastUrl;
+        }
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         webFrame = view.findViewById(R.id.frame);
@@ -725,6 +727,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void addToBackStack(String nextFragment)
     {
+        if (currentFragment != null && !currentFragment.equals(DAPP_BROWSER))
+        {
+            detachFragment(currentFragment);
+        }
         currentFragment = nextFragment;
     }
 
@@ -755,10 +761,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (!isAdded()) return; //the dappBrowserFragment itself may not yet be attached.
         Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
         if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
+            fragment.onDetach();
             getChildFragmentManager().beginTransaction()
                     .remove(fragment)
                     .commitAllowingStateLoss();
         }
+
+        //fragments can only be 1 deep
+        currentFragment = DAPP_BROWSER;
     }
 
     private void initViewModel() {
@@ -1327,7 +1337,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void backPressed()
     {
         if (web3 == null || back == null || back.getAlpha() == 0.3f) return;
-        if (web3.canGoBack())
+        if (!currentFragment.equals(DAPP_BROWSER))
+        {
+            detachFragment(currentFragment);
+            checkBackClickArrowVisibility();
+        }
+        else if (web3.canGoBack())
         {
             checkBackClickArrowVisibility(); //to make arrows function correctly - don't want to wait for web page to load to check back/forwards - this looks clunky
             loadSessionUrl(-1);
@@ -1377,7 +1392,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else
         {
-            nextUrl = getDefaultDappUrl();
+            nextUrl = urlTv.getText().toString();// web3.getUrl();// getDefaultDappUrl();
         }
 
         if (nextUrl.equalsIgnoreCase(getDefaultDappUrl()))
@@ -1452,7 +1467,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         boolean canBrowseBack = false;
         boolean canBrowseForward = false;
 
-        if (web3 != null)
+        if (currentFragment != null && !currentFragment.equals(DAPP_BROWSER))
+        {
+            canBrowseBack = true;
+        }
+        else if (web3 != null)
         {
             sessionHistory = web3.copyBackForwardList();
             canBrowseBack = web3.canGoBack() || !isOnHomePage();
@@ -1784,7 +1803,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         boolean geoAccess = false;
         for (int i = 0; i < permissions.length; i++)
         {
-            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] != -1) geoAccess = true;
+            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] != -1)
+            {
+                geoAccess = true;
+                break;
+            }
         }
         if (!geoAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
         if (geoCallback != null && geoOrigin != null) geoCallback.invoke(geoOrigin, geoAccess, false);
@@ -1795,7 +1818,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         boolean fileAccess = false;
         for (int i = 0; i < permissions.length; i++)
         {
-            if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1) fileAccess = true;
+            if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1)
+            {
+                fileAccess = true;
+                break;
+            }
         }
 
         if (fileAccess) requestUpload();
@@ -1803,13 +1830,87 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+        web3.saveState(outState);
+        //serialise the bundle and store locally
+        writeBundleToLocalStorage(outState);
+
         super.onSaveInstanceState(outState);
-        outState.putString(CURRENT_FRAGMENT, currentFragment);
-        outState.putString(CURRENT_URL, urlTv.getText().toString());
-        PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
-                .putString(CURRENT_FRAGMENT, currentFragment)
-                .putString(CURRENT_URL, urlTv.getText().toString())
-                .apply();
+    }
+
+    private void writeBundleToLocalStorage(Bundle bundle)
+    {
+        File file = new File(getContext().getFilesDir(), BUNDLE_FILE);
+        try (FileOutputStream fos = new FileOutputStream(file))
+        {
+            getSerialisedBundle(bundle).writeTo(fos);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+
+    private ByteArrayOutputStream getSerialisedBundle(Bundle bundle) throws Exception
+    {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(bos))
+        {
+            oos.writeObject(MAGIC_BUNDLE_VAL);
+            Object item;
+            for (String key : bundle.keySet())
+            {
+                item = bundle.get(key);
+                if (item instanceof Serializable)
+                {
+                    oos.writeObject(key);
+                    try
+                    {
+                        oos.writeObject(item);
+                    }
+                    catch (Exception e)
+                    {
+                        oos.writeObject(0);
+                    }
+                }
+            }
+            oos.writeObject(CURRENT_FRAGMENT);
+            oos.writeObject(currentFragment);
+            oos.writeObject(CURRENT_URL);
+            oos.writeObject(urlTv.getText().toString());
+        }
+        return bos;
+    }
+
+    private Bundle readBundleFromLocal()
+    {
+        File file = new File(getContext().getFilesDir(), BUNDLE_FILE);
+        try (FileInputStream fis = new FileInputStream(file))
+        {
+            ObjectInputStream oos = new ObjectInputStream(fis);
+            Object check = oos.readObject();
+            if(!((Long)MAGIC_BUNDLE_VAL).equals(check)) {
+                return null;
+            }
+
+            Bundle bundle = new Bundle();
+
+            while(fis.available()>0)
+            {
+                String key = (String) oos.readObject();
+                Object val = oos.readObject();
+                if(key!=null && val instanceof Serializable && !((Integer)0).equals(val)) {
+                    bundle.putSerializable(key, (Serializable) val);
+                }
+            }
+
+            return bundle;
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return null;
     }
 
     @Override

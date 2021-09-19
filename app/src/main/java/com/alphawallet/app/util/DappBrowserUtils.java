@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.DApp;
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
 
+    //TODO: Move to database
     public static void saveToPrefs(Context context, List<DApp> myDapps) {
         if (context != null)
         {
@@ -45,6 +46,7 @@ public class DappBrowserUtils {
         return new ArrayList<>();
     }
 
+    //TODO: Move to database
     public static List<DApp> getMyDapps(Context context) {
         if (context == null) return new ArrayList<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -60,6 +62,7 @@ public class DappBrowserUtils {
         return dapps;
     }
 
+    //TODO: Remove this from prefs, add to database
     public static List<DApp> getBrowserHistory(Context context) {
         if (context == null) return new ArrayList<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

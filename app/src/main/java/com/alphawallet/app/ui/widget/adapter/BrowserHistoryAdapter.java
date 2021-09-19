@@ -32,10 +32,10 @@ import com.bumptech.glide.request.target.Target;
 
 public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAdapter.ViewHolder> {
     private List<DApp> data;
-    private OnDappClickListener listener;
-    private OnHistoryItemRemovedListener onHistoryItemRemovedListener;
+    private final OnDappClickListener listener;
+    private final OnHistoryItemRemovedListener onHistoryItemRemovedListener;
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView name, url, remove;
 
@@ -94,10 +94,15 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
                 onHistoryItemRemovedListener.onHistoryItemRemoved(dApp));
     }
 
+    public void clear()
+    {
+        data.clear();
+    }
+
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             return false;

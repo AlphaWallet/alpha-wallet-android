@@ -71,6 +71,14 @@ public class BrowserHistoryFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        adapter.clear();
+        onDappClickListener = null;
+    }
+
     private void showOrHideViews() {
         if (adapter.getItemCount() > 0) {
             clear.setVisibility(View.VISIBLE);

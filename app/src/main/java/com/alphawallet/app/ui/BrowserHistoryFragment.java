@@ -1,41 +1,35 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.alphawallet.app.ui.widget.OnDappClickListener;
-import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
-import com.alphawallet.app.ui.widget.adapter.BrowserHistoryAdapter;
-import com.alphawallet.app.util.DappBrowserUtils;
-
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.ui.widget.OnDappClickListener;
+import com.alphawallet.app.ui.widget.adapter.BrowserHistoryAdapter;
+import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+
+import java.util.List;
+
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_REMOVE_HISTORY;
 
 
 public class BrowserHistoryFragment extends Fragment {
     private BrowserHistoryAdapter adapter;
-    private OnDappClickListener onDappClickListener;
-    private OnHistoryItemRemovedListener onHistoryItemRemovedListener;
     private AWalletAlertDialog dialog;
     private TextView clear;
     private TextView noHistory;
-
-    void setCallbacks(OnDappClickListener onDappClickListener,
-                      OnHistoryItemRemovedListener onHistoryItemRemovedListener) {
-        this.onDappClickListener = onDappClickListener;
-        this.onHistoryItemRemovedListener = onHistoryItemRemovedListener;
-    }
 
     @Nullable
     @Override
@@ -44,7 +38,7 @@ public class BrowserHistoryFragment extends Fragment {
         View view = inflater.inflate(R.layout.layout_browser_history, container, false);
         adapter = new BrowserHistoryAdapter(
                 getData(),
-                onDappClickListener,
+                (OnDappClickListener) dapp -> setFragmentResult(DAPP_CLICK, dapp),
                 this::onHistoryItemRemoved);
         RecyclerView list = view.findViewById(R.id.my_dapps_list);
         list.setNestedScrollingEnabled(false);
@@ -76,7 +70,6 @@ public class BrowserHistoryFragment extends Fragment {
     {
         super.onDetach();
         adapter.clear();
-        onDappClickListener = null;
     }
 
     private void showOrHideViews() {
@@ -96,10 +89,17 @@ public class BrowserHistoryFragment extends Fragment {
     }
 
     private void onHistoryItemRemoved(DApp dapp) {
-        onHistoryItemRemovedListener.onHistoryItemRemoved(dapp);
         DappBrowserUtils.removeFromHistory(getContext(), dapp);
         adapter.setDapps(getData());
         showOrHideViews();
+        setFragmentResult(DAPP_REMOVE_HISTORY, dapp);
+    }
+
+    private void setFragmentResult(String key, DApp dapp)
+    {
+        Bundle result = new Bundle();
+        result.putParcelable(key, dapp);
+        getParentFragmentManager().setFragmentResult(DAPP_CLICK, result);
     }
 
     private List<DApp> getData() {

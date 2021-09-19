@@ -79,9 +79,7 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
-import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
-import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
 import com.alphawallet.app.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.DappBrowserSwipeInterface;
@@ -162,7 +160,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
-        URLLoadInterface, ItemClickListener, OnDappClickListener, OnDappHomeNavClickListener, OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
+        URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
         ActionSheetCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
@@ -173,6 +171,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public static final String SEARCH = "SEARCH";
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
+    public static final String DAPP_CLICK = "dapp_click";
+    public static final String DAPP_REMOVE_HISTORY = "dapp_remove";
     private static final String CURRENT_URL = "urlInBar";
     private static final String WALLETCONNECT_CHAINID_ERROR = "Error: ChainId missing or not supported";
     private static final long MAGIC_BUNDLE_VAL = 0xACED00D;
@@ -209,9 +209,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private boolean homePressed;
     private AddEthereumChainPrompt addCustomChainDialog;
 
-    private final Fragment myDappsFragment;
+    /*private final Fragment myDappsFragment;
     private final Fragment discoverDappsFragment;
-    private final Fragment browserHistoryFragment;
+    private final Fragment browserHistoryFragment;*/
 
     private Toolbar toolbar;
     private ImageView back;
@@ -241,9 +241,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     public DappBrowserFragment()
     {
-        myDappsFragment = new MyDappsFragment();
-        discoverDappsFragment = new DiscoverDappsFragment();
-        browserHistoryFragment = new BrowserHistoryFragment();
+        //myDappsFragment = new MyDappsFragment();
+        //discoverDappsFragment = new DiscoverDappsFragment();
+        //browserHistoryFragment = new BrowserHistoryFragment();
     }
 
     @Override
@@ -251,28 +251,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         LocaleUtils.setActiveLocale(getContext());
         super.onCreate(savedInstanceState);
 
-        getChildFragmentManager().addFragmentOnAttachListener((fManager, f) -> {
-            if (getContext() != null && f.getTag() != null)
-            {
-                switch (f.getTag())
-                {
-                    case DISCOVER_DAPPS:
-                        ((DiscoverDappsFragment) f).setCallbacks(this);
-                        break;
-                    case MY_DAPPS:
-                        ((MyDappsFragment) f).setCallbacks(this);
-                        break;
-                    case HISTORY:
-                        ((BrowserHistoryFragment) f).setCallbacks(this, this);
-                        break;
-                    case DAPP_BROWSER:
-                        break;
-                    default:
-                        //no init
-                        break;
-                }
-            }
-        });
+        getChildFragmentManager()
+                .setFragmentResultListener(DAPP_CLICK, this, (requestKey, bundle) -> {
+                    DApp dapp = bundle.getParcelable(DAPP_CLICK);
+                    DApp removedDapp = bundle.getParcelable(DAPP_REMOVE_HISTORY);
+                    addToBackStack(DAPP_BROWSER);
+                    if (dapp != null) { loadUrl(dapp.getUrl()); }
+                    else if (removedDapp != null) { adapter.removeSuggestion(removedDapp); }
+                });
     }
 
     @Override
@@ -314,22 +300,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         return view;
     }
 
-    private void attachFragment(Fragment fragment, String tag)
-    {
-        Fragment testFrag = getChildFragmentManager().findFragmentByTag(tag);
-        if (testFrag != null && testFrag.isVisible() && !testFrag.isDetached())
-        {
-            addToBackStack(tag);
-            getChildFragmentManager().beginTransaction()
-                    .replace(R.id.frame, fragment)
-                    .commitAllowingStateLoss();
-        }
-        else if (tag != null && getHost() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
-        {
-            showFragment(fragment, tag);
-        }
-    }
-
     private void attachFragment(String tag) {
         if (tag != null && getHost() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
         {
@@ -337,13 +307,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             switch (tag)
             {
                 case DISCOVER_DAPPS:
-                    f = discoverDappsFragment;
+                    f = new DiscoverDappsFragment();
                     break;
                 case MY_DAPPS:
-                    f = myDappsFragment;
+                    f = new MyDappsFragment();
                     break;
                 case HISTORY:
-                    f = browserHistoryFragment;
+                    f = new BrowserHistoryFragment();
                     break;
                 case DAPP_BROWSER: //special case - dapp browser is no fragments loaded
                     addToBackStack(DAPP_BROWSER);
@@ -390,34 +360,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void onDappHomeNavClick(int position) {
         detachFragments();
-        switch (position) {
-            case 0: {
-                attachFragment(myDappsFragment, MY_DAPPS);
-                break;
-            }
-            case 1: {
-                attachFragment(discoverDappsFragment, DISCOVER_DAPPS);
-                break;
-            }
-            case 2: {
-                attachFragment(browserHistoryFragment, HISTORY);
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    @Override
-    public void onDappClick(@NotNull DApp dapp) {
         addToBackStack(DAPP_BROWSER);
-        loadUrl(dapp.getUrl());
-    }
-
-    @Override
-    public void onHistoryItemRemoved(DApp dApp) {
-        adapter.removeSuggestion(dApp);
     }
 
     @Override
@@ -463,11 +406,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             return true;
         });
         if (history != null) history.setOnMenuItemClickListener(menuItem -> {
-            attachFragment(browserHistoryFragment, HISTORY);
+            attachFragment(HISTORY);
             return true;
         });
         if (bookmarks != null) bookmarks.setOnMenuItemClickListener(menuItem -> {
-            attachFragment(myDappsFragment, MY_DAPPS);
+            attachFragment(MY_DAPPS);
             return true;
         });
         if (clearCache != null) clearCache.setOnMenuItemClickListener(menuItem -> {

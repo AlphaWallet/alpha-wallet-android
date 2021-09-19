@@ -209,10 +209,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private boolean homePressed;
     private AddEthereumChainPrompt addCustomChainDialog;
 
-    /*private final Fragment myDappsFragment;
-    private final Fragment discoverDappsFragment;
-    private final Fragment browserHistoryFragment;*/
-
     private Toolbar toolbar;
     private ImageView back;
     private ImageView next;
@@ -220,7 +216,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private ImageView refresh;
     private TextView currentNetwork;
     private ImageView currentNetworkCircle;
-    private LinearLayout currentNetworkClicker;
     private FrameLayout webFrame;
     private TextView balance;
     private TextView symbol;
@@ -238,13 +233,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     @Nullable
     private Disposable disposable;
-
-    public DappBrowserFragment()
-    {
-        //myDappsFragment = new MyDappsFragment();
-        //discoverDappsFragment = new DiscoverDappsFragment();
-        //browserHistoryFragment = new BrowserHistoryFragment();
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -467,7 +455,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             clearAddressBar();
         });
 
-        currentNetworkClicker = view.findViewById(R.id.network_holder);
+        LinearLayout currentNetworkClicker = view.findViewById(R.id.network_holder);
         currentNetworkClicker.setOnClickListener(v -> openNetworkSelection());
         currentNetwork = view.findViewById(R.id.network_text);
         currentNetworkCircle = view.findViewById(R.id.network_colour);

@@ -26,7 +26,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -48,7 +47,6 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -272,7 +270,7 @@ public class HomeViewModel extends BaseViewModel {
             walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
-                    .resolveEnsName(wallet.address)
+                    .reverseResolveEns(wallet.address)
                     .map(ensName -> { wallet.ENSname = ensName; return wallet; })
                     .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                     .observeOn(AndroidSchedulers.mainThread())

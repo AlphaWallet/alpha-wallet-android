@@ -273,7 +273,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         if(TextUtils.isEmpty(displayName))
         {
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), getApplicationContext())
-                    .resolveEnsName(displayAddress)
+                    .reverseResolveEns(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();

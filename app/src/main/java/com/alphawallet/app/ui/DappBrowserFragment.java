@@ -225,6 +225,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private String geoOrigin;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private String walletConnectSession;
+    private boolean focusFlag;
 
     private String currentWebpageTitle;
     private String currentFragment;
@@ -238,6 +239,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void onCreate(@Nullable Bundle savedInstanceState) {
         LocaleUtils.setActiveLocale(getContext());
         super.onCreate(savedInstanceState);
+        focusFlag = false;
 
         getChildFragmentManager()
                 .setFragmentResultListener(DAPP_CLICK, this, (requestKey, bundle) -> {
@@ -417,6 +419,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             String lastUrl = savedState.getString(CURRENT_URL);
             loadOnInit = TextUtils.isEmpty(lastUrl) ? getDefaultDappUrl() : lastUrl;
         }
+        else
+        {
+            loadOnInit = getDefaultDappUrl();
+        }
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         webFrame = view.findViewById(R.id.frame);
@@ -519,7 +525,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         // Both these are required, the onFocus listener is required to respond to the first click.
         urlTv.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && getActivity() != null) openURLInputView();
+            //see if we have focus flag
+            if (hasFocus && focusFlag && getActivity() != null) openURLInputView();
         });
 
         urlTv.setOnClickListener(v -> {
@@ -554,13 +561,23 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void comeIntoFocus()
     {
-        if (viewModel != null) { viewModel.checkForNetworkChanges(); }
+        if (viewModel != null)
+        {
+            viewModel.checkForNetworkChanges();
+        }
+        if (urlTv != null)
+        {
+            urlTv.clearFocus();
+            KeyboardUtils.hideKeyboard(urlTv);
+        }
+        focusFlag = true;
     }
 
     @Override
     public void leaveFocus()
     {
-        if (web3 != null) web3.clearFocus();
+        focusFlag = false;
+        if (web3 != null) web3.requestFocus();
         if (urlTv != null) urlTv.clearFocus();
     }
 

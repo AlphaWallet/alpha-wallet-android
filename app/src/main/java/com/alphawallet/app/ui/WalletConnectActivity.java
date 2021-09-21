@@ -568,8 +568,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onResume();
         startMessageCheck();
-        Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        orientation = display.getRotation();
+        orientation = this.getDisplay().getRotation();
     }
 
     private void displaySessionStatus(String sessionId)
@@ -581,9 +580,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (remotePeerData != null)
         {
-            Glide.with(this)
-                    .load(remotePeerData.getIcons().get(0))
-                    .into(icon);
+            if (remotePeerData.getIcons().isEmpty())
+            {
+                icon.setImageResource(R.drawable.ic_coin_eth_small);
+            }
+            else
+            {
+                Glide.with(this)
+                        .load(remotePeerData.getIcons().get(0))
+                        .into(icon);
+            }
             peerName.setText(remotePeerData.getName());
             peerUrl.setText(remotePeerData.getUrl());
             chainName.setChainID(viewModel.getChainId(sessionId));

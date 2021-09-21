@@ -99,7 +99,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void startTxListener()
     {
-        if (viewModel.defaultWallet().getValue() == null || TextUtils.isEmpty(viewModel.defaultWallet().getValue().address))
+        if (viewModel == null || viewModel.defaultWallet().getValue() == null || TextUtils.isEmpty(viewModel.defaultWallet().getValue().address))
             return;
 
         realmUpdates = realm.where(RealmTransaction.class).greaterThan("timeStamp", lastUpdateTime).findAllAsync();

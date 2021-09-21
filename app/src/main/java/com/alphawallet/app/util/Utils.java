@@ -1,8 +1,11 @@
 package com.alphawallet.app.util;
 
 import android.content.Context;
+import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
@@ -38,6 +41,7 @@ import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -923,5 +927,31 @@ public class Utils {
     public static long timeUntil(long eventInMillis)
     {
         return eventInMillis - System.currentTimeMillis();
+    }
+
+    //TODO: detect various App Library installs and re-direct appropriately
+    public static boolean verifyInstallerId(Context context) {
+        try
+        {
+            PackageManager packageManager = context.getPackageManager();
+            String installingPackageName;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                final InstallSourceInfo installer = packageManager.getInstallSourceInfo(context.getPackageName());
+                installingPackageName = installer.getInstallingPackageName();
+            }
+            else
+            {
+                installingPackageName = packageManager.getInstallerPackageName(context.getPackageName());
+            }
+            // A list with valid installers package name
+            List<String> validInstallers = new ArrayList<>(Arrays.asList("com.android.vending", "com.google.android.feedback"));
+
+            // true if your app has been downloaded from Play Store
+            return installingPackageName != null && validInstallers.contains(installingPackageName);
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            return false;
+        }
     }
 }

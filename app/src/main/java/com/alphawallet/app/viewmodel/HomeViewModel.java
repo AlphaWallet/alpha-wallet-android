@@ -40,13 +40,13 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -429,6 +429,10 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void tryToShowRateAppDialog(Activity context) {
-        RateApp.showRateTheApp(context, preferenceRepository, false);
+        //only if installed from PlayStore
+        if (Utils.verifyInstallerId(context))
+        {
+            RateApp.showRateTheApp(context, preferenceRepository, false);
+        }
     }
 }

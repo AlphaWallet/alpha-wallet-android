@@ -69,8 +69,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    private static int counter = 1;
-
     public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
         super(R.layout.item_token, parent);

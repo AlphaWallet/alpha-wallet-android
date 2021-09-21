@@ -198,10 +198,13 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
                         t.getUpdateTime(), t.getLastTxTime(), t.getContractType());
 
-                if (!tokenMeta.balance.equals(meta.balance))
+                if (tokenMeta == null)
+                {
+                    tokenMeta = meta;
+                }
+                else if (!tokenMeta.balance.equals(meta.balance))
                 {
                     playNotification();
-                    tokenMeta = meta;
                 }
 
                 tokenViewAdapter.updateToken(meta, true);

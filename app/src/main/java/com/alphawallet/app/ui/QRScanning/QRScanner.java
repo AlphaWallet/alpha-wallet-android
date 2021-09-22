@@ -107,6 +107,7 @@ public class QRScanner extends BaseActivity
         barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
         barcodeView.initializeFromIntent(getIntent());
         barcodeView.decodeContinuous(callback);
+        barcodeView.setStatusText("");
 
         beepManager = new BeepManager(this);
 

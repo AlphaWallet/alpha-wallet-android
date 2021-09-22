@@ -9,10 +9,7 @@ import com.alphawallet.app.util.Utils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import static com.alphawallet.app.entity.ContractType.ERC1155;
 
 /**
  * Created by James on 27/01/2018.
@@ -40,7 +37,7 @@ public class TokenFactory
                 {
                     tokenInfo = new TokenInfo(tokenInfo.address, tokenInfo.name, tokenInfo.symbol, 0, tokenInfo.isEnabled, tokenInfo.chainId);
                 }
-                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), balance, updateBlancaTime, networkName, type);
+                thisToken = new ERC721Token(tokenInfo, null, balance, updateBlancaTime, networkName, type);
                 if (balance.compareTo(BigDecimal.ZERO) >=0)
                 {
                     thisToken.balance = balance;
@@ -48,7 +45,7 @@ public class TokenFactory
                 break;
             case ERC1155:
                 tokenInfo = new TokenInfo(tokenInfo.address, tokenInfo.name, tokenInfo.symbol, 0, tokenInfo.isEnabled, tokenInfo.chainId);
-                thisToken = new ERC1155Token(tokenInfo, new HashMap<>(), updateBlancaTime, networkName);
+                thisToken = new ERC1155Token(tokenInfo, null, updateBlancaTime, networkName);
                 thisToken.balance = balance;
                 break;
             case NOT_SET:
@@ -158,7 +155,7 @@ public class TokenFactory
             case ERC721:
             case ERC721_LEGACY:
             case ERC721_UNDETERMINED:
-                thisToken = new ERC721Token(tokenInfo, new HashMap<>(), BigDecimal.ZERO, currentTime, networkName, type);
+                thisToken = new ERC721Token(tokenInfo, null, BigDecimal.ZERO, currentTime, networkName, type);
                 break;
             case ETHEREUM:
                 String[] split = tokenInfo.address.split("-");
@@ -173,7 +170,7 @@ public class TokenFactory
                 thisToken.pendingBalance = BigDecimal.ZERO;
                 break;
             case ERC1155:
-                thisToken = new ERC1155Token(tokenInfo, new HashMap<>(), currentTime, networkName);
+                thisToken = new ERC1155Token(tokenInfo, null, currentTime, networkName);
                 break;
             case ERC20:
             case DYNAMIC_CONTRACT:

@@ -25,6 +25,7 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import java.io.File;
@@ -32,9 +33,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.Completable;
@@ -113,9 +111,10 @@ public class SplashViewModel extends ViewModel
                 .isDisposed();
     }
 
+    //TODO: Move to HomeActivity/HomeViewModel
     public void checkVersionUpdate(Context ctx, long updateTime)
     {
-        if (!isPlayStoreInstalled(ctx))
+        if (!Utils.verifyInstallerId(ctx))
         {
             //check the current install version string against the current version on the alphawallet page
             //current version number as string
@@ -131,18 +130,6 @@ public class SplashViewModel extends ViewModel
                 checkWebsiteAPKFileData(updateTime, ctx);
             }
         }
-    }
-
-    private boolean isPlayStoreInstalled(Context ctx)
-    {
-        // A list with valid installers package name
-        List<String> validInstallers = new ArrayList<>(Arrays.asList("com.android.vending", "com.google.android.feedback"));
-
-        // The package name of the app that has installed your app
-        final String installer = ctx.getPackageManager().getInstallerPackageName(ctx.getPackageName());
-
-        // true if your app has been downloaded from Play Store
-        return installer != null && validInstallers.contains(installer);
     }
 
     private String stripFilename(String name)

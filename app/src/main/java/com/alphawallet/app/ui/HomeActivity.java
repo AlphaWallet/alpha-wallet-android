@@ -306,7 +306,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         viewModel.tryToShowRateAppDialog(this);
-        UpdateUtils.checkForUpdates(this, this);
+        if (Utils.verifyInstallerId(this))
+        {
+            UpdateUtils.checkForUpdates(this, this);
+        }
+        else
+        {
+            //TODO: Check we are using latest version on github, since we're using a downloaded/manually installed version
+            //First check that this the package name is "io.stormbird.wallet" - it could be a fork
+        }
     }
 
     private void onBackup(String address)

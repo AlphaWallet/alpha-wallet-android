@@ -76,6 +76,6 @@
   {"name": "Matic Testnet Faucet", "description": "Matic Faucet to access Mumbai and Goerli testnet tokens", "url": "https://faucet.matic.network/", "category": "Tool"},
   {"name": "NAOS Finance", "description": "A DeFi lending protocol allowing lenders and SME borrowers to facilitate permissionless and borderless loaning/borrowing transactions", "url": "https://naos.finance", "category": "Finance"},
   {"name": "DASLA", "description": "A DAS (Decentralized Account System) account registration tool.", "url": "https://das.la", "category": "Tool"}
-  
+  {"name": "DAS", "description": "A cross-chain decentralized account system.", "url": "https://da.systems/", "category": "Tool"}
 ]
 

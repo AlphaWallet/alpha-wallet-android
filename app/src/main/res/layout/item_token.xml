@@ -91,11 +91,13 @@
                     android:layout_marginBottom="8dp"
                     android:orientation="horizontal">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/layout_extended_info"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:gravity="bottom"
                         android:orientation="horizontal">
 
                         <TextView
@@ -103,52 +105,59 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:fontFamily="@font/font_semibold"
+                            android:layout_gravity="bottom"
+                            android:gravity="bottom"
                             android:text="@string/issuer"
                             android:textColor="@color/colorPrimaryDark"
                             android:textSize="12sp"
-                            android:visibility="gone"/>
+                            android:visibility="visible"/>
 
                         <TextView
                             android:id="@+id/issuer"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
+                            android:gravity="bottom"
+                            android:layout_gravity="bottom"
                             android:layout_marginEnd="2dp"
                             android:fontFamily="@font/font_semibold"
                             android:textColor="@color/colorPrimaryDark"
-                            tools:text="Ethereum"
+                            tools:text="Ethereumg"
                             android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/balance_currency"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center_horizontal"
+                            android:layout_gravity="center_horizontal|bottom"
+                            android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
                             tools:text="$108.73"
                             android:textSize="12sp"
-                            android:visibility="gone"/>
+                            android:visibility="visible"/>
 
                         <View
                             android:id="@+id/contract_seperator"
                             android:layout_width="1dp"
                             android:layout_height="match_parent"
+                            android:gravity="center_vertical"
                             android:layout_marginBottom="2dp"
                             android:layout_marginLeft="5dp"
                             android:layout_marginRight="5dp"
                             android:layout_marginTop="2dp"
                             android:background="@color/colorPrimaryDark"
-                            android:visibility="gone" />
+                            android:visibility="visible" />
 
                         <TextView
                             android:id="@+id/contract_type"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:fontFamily="@font/font_regular"
-                            android:text="@string/erc20"
                             android:textColor="@color/colorPrimaryDark"
-                            android:textSize="11sp"
-                            android:visibility="gone"
+                            android:layout_gravity="bottom"
+                            android:gravity="bottom"
+                            android:textSize="12sp"
+                            android:visibility="visible"
                             tools:text="@string/erc20" />
 
                         <TextView
@@ -157,7 +166,7 @@
                             android:text=" "
                             android:textSize="12sp"/>
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <LinearLayout
                         android:id="@+id/layout_appreciation"
@@ -165,8 +174,8 @@
                         android:layout_weight="1"
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical|end"
-                        android:paddingEnd="@dimen/dp16"
+                        android:gravity="bottom|end"
+                        android:paddingEnd="@dimen/dp12"
                         android:visibility="gone">
 
                         <TextView
@@ -174,6 +183,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
+                            android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
                             android:text="@string/unknown_balance_without_symbol"
@@ -184,6 +194,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
+                            android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
                             android:textSize="12sp" />

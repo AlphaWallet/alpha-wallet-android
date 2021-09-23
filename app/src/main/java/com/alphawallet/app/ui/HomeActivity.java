@@ -266,16 +266,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         else if (intent != null && intent.getStringExtra("url") != null)
         {
             String url = getIntent().getStringExtra("url");
-
-            bundle = new Bundle();
-            bundle.putString("url", url);
-            dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
-            //remove navbar if running as pure browser. clicking back will send you back to the Action/click that took you there
-            boolean isNavBarShown = intent.getBooleanExtra("showNavBar", false);
-            if (!isNavBarShown) {
-                setNavBarVisibility(View.GONE);
-            }
+            ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
         }
 
         if (bundle != null)

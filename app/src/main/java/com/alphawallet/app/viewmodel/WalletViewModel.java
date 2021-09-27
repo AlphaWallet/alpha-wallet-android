@@ -19,6 +19,7 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AssetDisplayRouter;
+import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -51,6 +52,7 @@ public class WalletViewModel extends BaseViewModel
     private final TokensService tokensService;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final MyAddressRouter myAddressRouter;
+    private final ManageWalletsRouter manageWalletsRouter;
     private long lastBackupCheck = 0;
 
     WalletViewModel(
@@ -61,7 +63,8 @@ public class WalletViewModel extends BaseViewModel
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
-            MyAddressRouter myAddressRouter)
+            MyAddressRouter myAddressRouter,
+            ManageWalletsRouter manageWalletsRouter)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -71,6 +74,7 @@ public class WalletViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
+        this.manageWalletsRouter = manageWalletsRouter;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -279,5 +283,9 @@ public class WalletViewModel extends BaseViewModel
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(fiatValues::postValue);
+    }
+
+    public void showManageWallets(Context context, boolean clearStack) {
+        manageWalletsRouter.open(context, clearStack);
     }
 }

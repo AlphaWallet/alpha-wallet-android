@@ -195,6 +195,11 @@ public class WalletFragment extends BaseFragment implements
         addressBlockie.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
         addressBlockie.setVisibility(View.VISIBLE);
 
+        addressBlockie.setOnClickListener(v -> {
+            // open wallets activity
+            viewModel.showManageWallets(getContext(), false);
+        });
+
         //Do we display new user backup popup?
         ((HomeActivity) getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
         startRealmListener(wallet);

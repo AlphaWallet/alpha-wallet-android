@@ -9,6 +9,7 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AssetDisplayRouter;
+import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -23,6 +24,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final MyAddressRouter myAddressRouter;
+    private final ManageWalletsRouter manageWalletsRouter;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   TokenDetailRouter tokenDetailRouter,
@@ -31,7 +33,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   AssetDefinitionService assetDefinitionService,
                                   TokensService tokensService,
                                   ChangeTokenEnableInteract changeTokenEnableInteract,
-                                  MyAddressRouter myAddressRouter) {
+                                  MyAddressRouter myAddressRouter,
+                                  ManageWalletsRouter manageWalletsRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
@@ -40,6 +43,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.tokensService = tokensService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
+        this.manageWalletsRouter = manageWalletsRouter;
     }
 
     @NonNull
@@ -53,6 +57,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 assetDefinitionService,
                 tokensService,
                 changeTokenEnableInteract,
-                myAddressRouter);
+                myAddressRouter,
+                manageWalletsRouter);
     }
 }

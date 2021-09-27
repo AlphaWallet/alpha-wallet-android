@@ -609,7 +609,7 @@
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
     <string name="toast_token_data_cleared">Token Data cleared</string>
-    <string name="your_wallets">Your Wallets</string>
+    <string name="your_wallets">Connected Wallets</string>
     <string name="action_copy">Copy</string>
     <string name="title_version_support_warning">Important Update</string>
     <string name="message_version_support_warning">Starting Version 3.0, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
@@ -838,5 +838,7 @@
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
     <string name="wallet_total_change">%1$s (%2$.2f%%) Today</string>
+    <string name="title_wallets_summary">Wallets</string>
+    <string name="summary">Summary</string>
 
 </resources>

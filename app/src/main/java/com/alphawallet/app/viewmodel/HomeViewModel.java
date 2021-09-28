@@ -6,10 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -392,9 +390,7 @@ public class HomeViewModel extends BaseViewModel {
      **/
     public void identify(Context ctx)
     {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-
-        String uuid = prefs.getString(C.PREF_UNIQUE_ID, "");
+        String uuid = preferenceRepository.getUniqueId();
 
         if (uuid.isEmpty())
         {
@@ -402,7 +398,7 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         analyticsService.identify(uuid);
-        prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
+        preferenceRepository.setUniqueId(uuid);
     }
 
     public void actionSheetConfirm(String mode)
@@ -434,5 +430,33 @@ public class HomeViewModel extends BaseViewModel {
         {
             RateApp.showRateTheApp(context, preferenceRepository, false);
         }
+    }
+
+    public boolean shouldShowRootWarning() {
+        return preferenceRepository.showShowRootWarning();
+    }
+
+    public void setShowRootWarning(boolean shouldShow) {
+        preferenceRepository.setShowRootWarning(shouldShow);
+    }
+
+    public int getUpdateWarnings() {
+        return preferenceRepository.getUpdateWarningCount();
+    }
+
+    public void setUpdateWarningCount(int warns) {
+        preferenceRepository.setUpdateWarningCount(warns);
+    }
+
+    public int getUpdateAsks() {
+        return preferenceRepository.getUpdateAsksCount();
+    }
+
+    public void setUpdateAsksCount(int asks) {
+        preferenceRepository.setUpdateAsksCount(asks);
+    }
+
+    public void setInstallTime(int time) {
+        preferenceRepository.setInstallTime(time);
     }
 }

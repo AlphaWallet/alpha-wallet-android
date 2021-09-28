@@ -2,9 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -357,8 +355,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     private void onSave() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (zeroBalanceToken && pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false))
+        if (zeroBalanceToken && viewModel.shouldHideZeroBalanceTokens())
         {
             userAddingZeroBalanceToken();
         }
@@ -378,8 +375,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         aDialog.setButtonText(R.string.dialog_switch_zero_balance_tokens_on);
         aDialog.setButtonListener(v -> {
             aDialog.dismiss();
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, false).apply();
+            viewModel.hideZeroBalanceTokens();
             inputAddressView.getAddress();
         });
         aDialog.setSecondaryButtonText(R.string.action_cancel);

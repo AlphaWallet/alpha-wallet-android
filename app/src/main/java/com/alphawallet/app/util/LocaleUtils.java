@@ -1,14 +1,18 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.app.repository.SharedPreferenceRepository.DEVICE_COUNTRY;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.DEVICE_LOCALE;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 
@@ -50,15 +54,15 @@ public class LocaleUtils {
         PreferenceManager
                 .getDefaultSharedPreferences(ctx)
                 .edit()
-                .putString("device_locale", getCurrentLanguage())
-                .putString("device_country", getCurrentCountry())
+                .putString(DEVICE_LOCALE, getCurrentLanguage())
+                .putString(DEVICE_COUNTRY, getCurrentCountry())
                 .apply();
     }
 
     public static Locale getDeviceLocale(Context ctx)
     {
-        String deviceLocaleStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_locale", "en");
-        String deviceCountryStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_country", "US");
+        String deviceLocaleStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString(DEVICE_LOCALE, "en");
+        String deviceCountryStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString(DEVICE_COUNTRY, "US");
         return new Locale(deviceLocaleStr, deviceCountryStr);
     }
 

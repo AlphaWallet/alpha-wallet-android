@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -470,10 +469,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void checkRoot()
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (RootUtil.isDeviceRooted() && pref.getBoolean("should_show_root_warning", true))
+        if (RootUtil.isDeviceRooted() && viewModel.shouldShowRootWarning())
         {
-            pref.edit().putBoolean("should_show_root_warning", false).apply();
+            viewModel.setShowRootWarning(false);
             AWalletAlertDialog dialog = new AWalletAlertDialog(this);
             dialog.setTitle(R.string.root_title);
             dialog.setMessage(R.string.root_body);
@@ -585,8 +583,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             hideDialog();
             updatePrompt = false;
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            int warns = pref.getInt("update_warns", 0) + 1;
+            int warns = viewModel.getUpdateWarnings() + 1;
             if (warns < 3)
             {
                 AWalletConfirmationDialog cDialog = new AWalletConfirmationDialog(this);
@@ -605,7 +602,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 warns = 0;
             }
 
-            pref.edit().putInt("update_warns", warns).apply();
+            viewModel.setUpdateWarningCount(warns);
         }
     }
 
@@ -766,8 +763,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         buildVersion = build;
         //display download ready popup
         //Possibly only show this once per day otherwise too annoying!
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        int asks = pref.getInt("update_asks", 0) + 1;
+        int asks = viewModel.getUpdateAsks() + 1;
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.new_version_title);
         dialog.setSmallText(R.string.new_version);
@@ -791,7 +787,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         dialog.setSecondaryButtonListener(v -> {
             //only dismiss twice before we stop warning.
-            pref.edit().putInt("update_asks", asks).apply();
+            viewModel.setUpdateAsksCount(asks);
             dialog.dismiss();
         });
         this.dialog = dialog;
@@ -995,8 +991,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         //Blank install time here so that next time the app runs the install time will be correctly set up
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        pref.edit().putLong("install_time", 0).apply();
+        viewModel.setInstallTime(0);
         finish();
     }
 

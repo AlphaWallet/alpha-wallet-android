@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -118,12 +117,11 @@ public class SplashViewModel extends ViewModel
         {
             //check the current install version string against the current version on the alphawallet page
             //current version number as string
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-            int asks = pref.getInt("update_asks", 0);
+            int asks = preferenceRepository.getUpdateAsksCount();
             if (updateTime == 0 || asks == 2) // if user cancels update twice stop asking them until the next release
             {
-                pref.edit().putInt("update_asks", 0).apply();
-                pref.edit().putLong("install_time", System.currentTimeMillis()).apply();
+                preferenceRepository.setUpdateAsksCount(0);
+                setInstallTime(System.currentTimeMillis());
             }
             else
             {
@@ -351,5 +349,13 @@ public class SplashViewModel extends ViewModel
     public void setDefaultBrowser()
     {
         preferenceRepository.setActiveBrowserNetwork(MAINNET_ID);
+    }
+
+    public long getInstallTime() {
+        return preferenceRepository.getInstallTime();
+    }
+
+    public void setInstallTime(long time) {
+        preferenceRepository.setInstallTime(time);
     }
 }

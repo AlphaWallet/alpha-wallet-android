@@ -25,6 +25,14 @@
             app:showAsAction="withText" />
 
         <item
+            android:id="@+id/action_network"
+            android:icon="@drawable/ic_network_2"
+            android:orderInCategory="17"
+            android:title="@string/action_update_network"
+            app:showAsAction="withText" />
+
+
+        <item
             android:id="@+id/action_share"
             android:icon="@drawable/ic_dapp_share"
             android:orderInCategory="20"

@@ -465,11 +465,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             case DAPP_BROWSER:
             {
-                if (getSelectedItem() == DAPP_BROWSER)
-                {
-                    ((DappBrowserFragment) dappBrowserFragment).homePressed();
-                }
-                else
+                if (getSelectedItem() != DAPP_BROWSER)
                 {
                     showPage(DAPP_BROWSER);
                 }

@@ -526,7 +526,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
-        refresh.setOnClickListener(v -> reloadPage());
+        if (refresh != null) {
+            refresh.setOnClickListener(v -> reloadPage());
+        }
 
         back = view.findViewById(R.id.back);
         back.setOnClickListener(v -> backPressed());
@@ -897,7 +899,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 if (newProgress == 100) {
                     progressBar.setVisibility(View.GONE);
                     swipeRefreshLayout.setRefreshing(false);
-                    refresh.setEnabled(true);
+                    if (refresh != null) {
+                        refresh.setEnabled(true);
+                    }
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(newProgress);
@@ -1562,7 +1566,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void reloadPage() {
         if (currentFragment.equals(DAPP_BROWSER))
         {
-            refresh.setEnabled(false);
+            if (refresh != null) {
+                refresh.setEnabled(false);
+            }
             web3.reload();
         }
     }

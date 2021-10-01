@@ -442,6 +442,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         final MenuItem bookmarks = toolbar.getMenu().findItem(R.id.action_my_dapps);
         final MenuItem clearCache = toolbar.getMenu().findItem(R.id.action_clear_cache);
         final MenuItem network = toolbar.getMenu().findItem(R.id.action_network);
+        final MenuItem setAsHomePage = toolbar.getMenu().findItem(R.id.action_set_as_homepage);
 
         if (reload != null) reload.setOnMenuItemClickListener(menuItem -> {
             reloadPage();
@@ -487,6 +488,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             });
 
             updateNetworkMenuItem();
+        }
+
+        if (setAsHomePage != null) {
+            setAsHomePage.setOnMenuItemClickListener(menuItem -> {
+               viewModel.setHomePage(getContext(), urlTv.getText().toString());
+               return true;
+            });
         }
     }
 
@@ -2065,6 +2073,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private String getDefaultDappUrl()
     {
-        return EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
+        String customHome = viewModel.getHomePage(getContext());
+        return customHome != null ? customHome : EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
     }
 }

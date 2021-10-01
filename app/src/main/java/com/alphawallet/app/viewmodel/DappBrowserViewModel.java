@@ -149,6 +149,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
                 .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
     }
 
+    public void setHomePage(Context context, String url) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putString(C.DAPP_HOMEPAGE_KEY, url).apply();
+    }
+
+    public String getHomePage(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_HOMEPAGE_KEY, null);
+    }
+
     public void addToMyDapps(Context context, String title, String url) {
         Intent intent = new Intent(context, AddEditDappActivity.class);
         DApp dapp = new DApp(title, url);

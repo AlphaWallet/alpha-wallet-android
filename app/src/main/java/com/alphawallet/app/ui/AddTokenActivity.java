@@ -7,6 +7,8 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -80,10 +82,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     public InputView decimalsInputView;
     public InputView nameInputView;
     private String contractAddress;
-    private View networkIcon;
     private NetworkInfo networkInfo;
-    private TextView currentNetwork;
-    private RelativeLayout selectNetworkLayout;
     private QRResult currentResult;
     private InputView tokenType;
     private ContractType contractType;
@@ -99,6 +98,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         setContentView(R.layout.activity_add_token);
 
+        setTitle(getString(R.string.title_add_token));
+
         toolbar();
 
         symbolInputView = findViewById(R.id.input_symbol);
@@ -106,12 +107,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         nameInputView = findViewById(R.id.input_name);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        currentNetwork = findViewById(R.id.current_network);
-        networkIcon = findViewById(R.id.network_icon);
         tokenType = findViewById(R.id.input_token_type);
-        selectNetworkLayout = findViewById(R.id.select_network_layout);
-        selectNetworkLayout.setOnClickListener(v -> selectNetwork());
-        selectNetworkLayout.setVisibility(View.VISIBLE);
         tokenType.setVisibility(View.GONE);
 
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
@@ -196,6 +192,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             onNoContractFound(true);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_network, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_networks)
+        {
+            selectNetwork();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -403,8 +415,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         networkInfo = viewModel.getNetworkInfo(chainId);
         if (networkInfo != null)
         {
-            currentNetwork.setText(networkInfo.name);
-            Utils.setChainColour(networkIcon, networkInfo.chainId);
             viewModel.setPrimaryChain(chainId);
         }
     }

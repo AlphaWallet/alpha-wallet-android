@@ -7,8 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.Contract;
-import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
@@ -20,12 +18,11 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.SendActivity;
-import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -56,6 +53,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final PreferenceRepositoryType sharedPreference;
 
     private boolean foundNetwork;
     private int networkCount;
@@ -84,7 +82,8 @@ public class AddTokenViewModel extends BaseViewModel {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            PreferenceRepositoryType sharedPreference) {
         this.addTokenInteract = addTokenInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -92,6 +91,7 @@ public class AddTokenViewModel extends BaseViewModel {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.sharedPreference = sharedPreference;
     }
 
     public void save(int chainId, String address, String name, String symbol, int decimals, ContractType contractType)
@@ -370,5 +370,15 @@ public class AddTokenViewModel extends BaseViewModel {
     public Token getToken(int chainId, String address)
     {
         return tokensService.getToken(chainId, address);
+    }
+
+    public boolean shouldHideZeroBalanceTokens()
+    {
+        return sharedPreference.shouldShowZeroBalanceTokens();
+    }
+
+    public void hideZeroBalanceTokens()
+    {
+        sharedPreference.setShowZeroBalanceTokens(false);
     }
 }

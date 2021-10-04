@@ -2,7 +2,6 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.alphawallet.app.C;
@@ -24,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
+
+import androidx.preference.PreferenceManager;
 
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";

@@ -6,13 +6,13 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;

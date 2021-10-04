@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.BuildConfig;
@@ -50,6 +49,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_CODE_KEY;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_SYMBOL_KEY;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -62,6 +63,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
+import androidx.preference.PreferenceManager;
 
 public class TickerService
 {
@@ -530,8 +533,8 @@ public class TickerService
     private void initCurrency()
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        currentCurrencySymbolTxt = pref.getString("currency_locale", "USD");
-        currentCurrencySymbol = pref.getString("currency_symbol", "$");
+        currentCurrencySymbolTxt = pref.getString(CURRENCY_CODE_KEY, "USD");
+        currentCurrencySymbol = pref.getString(CURRENCY_SYMBOL_KEY, "$");
     }
 
     /**

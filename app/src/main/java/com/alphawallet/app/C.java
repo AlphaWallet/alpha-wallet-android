@@ -201,6 +201,7 @@ public abstract class C {
         String FROM_SETTINGS = "from_settings";
     }
 
+    public static final String DAPP_HOMEPAGE_KEY = "dappHomePage";
     public static final String DAPP_LASTURL_KEY = "dappURL";
     public static final String DAPP_BROWSER_HISTORY = "DAPP_BROWSER_HISTORY";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";

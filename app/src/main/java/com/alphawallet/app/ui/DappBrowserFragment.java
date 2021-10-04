@@ -214,8 +214,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private ImageView next;
     private ImageView clear;
     private ImageView refresh;
-    private TextView currentNetwork;
-    private ImageView currentNetworkCircle;
     private FrameLayout webFrame;
     private TextView balance;
     private TextView symbol;
@@ -231,6 +229,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private String currentFragment;
 
     private DAppFunction dAppFunction;
+
+    private View home;
 
     @Nullable
     private Disposable disposable;
@@ -331,7 +331,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         detachFragment(SEARCH);
     }
 
-    public void homePressed()
+    private void homePressed()
     {
         homePressed = true;
         detachFragments();
@@ -372,6 +372,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         final MenuItem history = toolbar.getMenu().findItem(R.id.action_history);
         final MenuItem bookmarks = toolbar.getMenu().findItem(R.id.action_my_dapps);
         final MenuItem clearCache = toolbar.getMenu().findItem(R.id.action_clear_cache);
+        final MenuItem network = toolbar.getMenu().findItem(R.id.action_network);
+        final MenuItem setAsHomePage = toolbar.getMenu().findItem(R.id.action_set_as_homepage);
 
         if (reload != null) reload.setOnMenuItemClickListener(menuItem -> {
             reloadPage();
@@ -407,6 +409,26 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             viewModel.onClearBrowserCacheClicked(getContext());
             return true;
         });
+
+        if (network != null) {
+            network.setOnMenuItemClickListener(menuItem -> {
+                openNetworkSelection();
+                return true;
+            });
+
+            updateNetworkMenuItem();
+        }
+
+        if (setAsHomePage != null) {
+            setAsHomePage.setOnMenuItemClickListener(menuItem -> {
+               viewModel.setHomePage(getContext(), urlTv.getText().toString());
+               return true;
+            });
+        }
+    }
+
+    private void updateNetworkMenuItem() {
+        toolbar.getMenu().findItem(R.id.action_network).setTitle(getString(R.string.network_menu_item, activeNetwork.getShortName()));
     }
 
     private void initView(@NotNull View view) {
@@ -432,6 +454,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         toolbar = view.findViewById(R.id.address_bar);
         layoutNavigation = view.findViewById(R.id.layout_navigator);
 
+        home = view.findViewById(R.id.home);
+
+        home.setOnClickListener(v -> homePressed());
+
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
         MenuInflater inflater = new MenuInflater(LocaleUtils.getActiveLocaleContext(getContext()));
@@ -449,7 +475,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
-        refresh.setOnClickListener(v -> reloadPage());
+        if (refresh != null) {
+            refresh.setOnClickListener(v -> reloadPage());
+        }
 
         back = view.findViewById(R.id.back);
         back.setOnClickListener(v -> backPressed());
@@ -462,10 +490,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             clearAddressBar();
         });
 
-        LinearLayout currentNetworkClicker = view.findViewById(R.id.network_holder);
-        currentNetworkClicker.setOnClickListener(v -> openNetworkSelection());
-        currentNetwork = view.findViewById(R.id.network_text);
-        currentNetworkCircle = view.findViewById(R.id.network_colour);
         balance = view.findViewById(R.id.balance);
         symbol = view.findViewById(R.id.symbol);
         web3.setWebLoadCallback(this);
@@ -584,7 +608,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     // TODO: Move all nav stuff to widget
     private void openURLInputView() {
         urlTv.setAdapter(null);
-        expandCollapseView(currentNetwork, false);
         expandCollapseView(layoutNavigation, false);
 
         disposable = Observable.zip(
@@ -699,7 +722,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (toolbar != null)
         {
             toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
-            expandCollapseView(currentNetwork, true);
             expandCollapseView(layoutNavigation, true);
             clear.setVisibility(View.GONE);
             urlTv.dismissDropDown();
@@ -765,8 +787,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         //setup network selection and init web3 with updated chain
         activeNetwork = viewModel.getNetworkInfo(chainId);
-        currentNetwork.setText(activeNetwork.getShortName());
-        Utils.setChainColour(currentNetworkCircle, activeNetwork.chainId);
+
+        updateNetworkMenuItem();
+
         viewModel.findWallet();
     }
 
@@ -776,9 +799,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         this.activeNetwork = networkInfo;
         if (networkInfo != null)
         {
-            currentNetwork.setText(networkInfo.getShortName());
-            Utils.setChainColour(currentNetworkCircle, networkInfo.chainId);
             viewModel.findWallet();
+
+            if (networkChanged) {
+                updateNetworkMenuItem();
+            }
 
             if (networkChanged && isOnHomePage())
                 resetDappBrowser(); //trigger a reset if on homepage
@@ -842,7 +867,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 if (newProgress == 100) {
                     progressBar.setVisibility(View.GONE);
                     swipeRefreshLayout.setRefreshing(false);
-                    refresh.setEnabled(true);
+                    if (refresh != null) {
+                        refresh.setEnabled(true);
+                    }
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(newProgress);
@@ -1526,7 +1553,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void reloadPage() {
         if (currentFragment.equals(DAPP_BROWSER))
         {
-            refresh.setEnabled(false);
+            if (refresh != null) {
+                refresh.setEnabled(false);
+            }
             web3.reload();
         }
     }
@@ -2105,6 +2134,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private String getDefaultDappUrl()
     {
-        return EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
+        String customHome = viewModel.getHomePage(getContext());
+        return customHome != null ? customHome : EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
     }
 }

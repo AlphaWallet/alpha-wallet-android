@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -140,6 +141,20 @@ public class DappBrowserViewModel extends BaseViewModel  {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
                         error -> dAppFunction.DAppError(error, message));
+    }
+
+    public void setLastUrl(Context context, String url) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
+    }
+
+    public void setHomePage(Context context, String url) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putString(C.DAPP_HOMEPAGE_KEY, url).apply();
+    }
+
+    public String getHomePage(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_HOMEPAGE_KEY, null);
     }
 
     public void addToMyDapps(Context context, String title, String url) {

@@ -61,8 +61,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Wallet wallet;
     private Token token;
     private TokenCardMeta tokenMeta;
-
-    private FunctionButtonBar functionBar;
     private RecyclerView tokenView;
     private CertifiedToolbarView toolbarView;
 
@@ -156,7 +154,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
-            functionBar = findViewById(R.id.layoutButtons);
+            FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
@@ -200,10 +198,13 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
                         t.getUpdateTime(), t.getLastTxTime(), t.getContractType());
 
-                if (!tokenMeta.balance.equals(meta.balance))
+                if (tokenMeta == null)
+                {
+                    tokenMeta = meta;
+                }
+                else if (!tokenMeta.balance.equals(meta.balance))
                 {
                     playNotification();
-                    tokenMeta = meta;
                 }
 
                 tokenViewAdapter.updateToken(meta, true);
@@ -275,6 +276,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             if (activityHistoryList != null)
             {
                 //reset the transaction history
+                activityHistoryList.resetAdapter();
                 activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
                         token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
             }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
@@ -54,7 +56,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TextView contractType;
     private final View contractSeparator;
     private final View layoutAppreciation;
-    private final LinearLayout extendedInfo;
+    private final LinearLayoutCompat extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TokensService tokensService;
     private final TextView pendingText;
@@ -64,12 +66,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private boolean primaryElement;
     private final Realm realm;
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
-
-    private static int counter = 1;
 
     public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {

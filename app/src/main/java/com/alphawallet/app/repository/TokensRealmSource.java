@@ -1086,14 +1086,14 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void updateERC20Tickers(final Map<String, TokenTicker> erc20Tickers)
+    public void updateERC20Tickers(int chainId, final Map<String, TokenTicker> erc20Tickers)
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
             realm.executeTransaction(r -> {
                 for (String tokenAddress : erc20Tickers.keySet())
                 {
-                    writeTickerToRealm(r, erc20Tickers.get(tokenAddress), MAINNET_ID, tokenAddress);
+                    writeTickerToRealm(r, erc20Tickers.get(tokenAddress), chainId, tokenAddress);
                 }
             });
         }

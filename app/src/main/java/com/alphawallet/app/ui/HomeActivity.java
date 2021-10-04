@@ -4,8 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -46,7 +43,6 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -56,7 +52,6 @@ import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
@@ -69,7 +64,6 @@ import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
@@ -114,7 +108,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
-    private int currentFragmentId;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -272,16 +265,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         else if (intent != null && intent.getStringExtra("url") != null)
         {
             String url = getIntent().getStringExtra("url");
-
-            bundle = new Bundle();
-            bundle.putString("url", url);
-            dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
-            //remove navbar if running as pure browser. clicking back will send you back to the Action/click that took you there
-            boolean isNavBarShown = intent.getBooleanExtra("showNavBar", false);
-            if (!isNavBarShown) {
-                setNavBarVisibility(View.GONE);
-            }
+            ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
         }
 
         if (bundle != null)
@@ -312,7 +297,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         viewModel.tryToShowRateAppDialog(this);
-        UpdateUtils.checkForUpdates(this, this);
+        if (Utils.verifyInstallerId(this))
+        {
+            UpdateUtils.checkForUpdates(this, this);
+        }
+        else
+        {
+            //TODO: Check we are using latest version on github, since we're using a downloaded/manually installed version
+            //First check that this the package name is "io.stormbird.wallet" - it could be a fork
+        }
     }
 
     private void onBackup(String address)
@@ -401,35 +394,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         checkRoot();
         initViews();
 
-        //check clipboard
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        try
-        {
-            if (clipboard != null && clipboard.getPrimaryClip() != null)
+        handler.post(() -> {
+            //check clipboard
+            String magicLink = ImportTokenActivity.getMagiclinkFromClipboard(this);
+            if (magicLink != null)
             {
-                ClipData.Item clipItem = clipboard.getPrimaryClip().getItemAt(0);
-                if (clipItem != null)
-                {
-                    CharSequence clipText = clipItem.getText();
-                    if (clipText != null && clipText.length() > 60 && clipText.length() < 400)
-                    {
-                        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                        if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
-                        {
-                            //valid link, remove from clipboard
-                            ClipData clipData = ClipData.newPlainText("", "");
-                            clipboard.setPrimaryClip(clipData);
-                            //let's try to import the link
-                            viewModel.showImportLink(this, clipText.toString());
-                        }
-                    }
-                }
+                viewModel.showImportLink(this, magicLink);
             }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
@@ -493,10 +465,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void checkRoot()
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (RootUtil.isDeviceRooted() && pref.getBoolean("should_show_root_warning", true))
+        if (RootUtil.isDeviceRooted() && viewModel.shouldShowRootWarning())
         {
-            pref.edit().putBoolean("should_show_root_warning", false).apply();
+            viewModel.setShowRootWarning(false);
             AWalletAlertDialog dialog = new AWalletAlertDialog(this);
             dialog.setTitle(R.string.root_title);
             dialog.setMessage(R.string.root_body);
@@ -608,8 +579,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             hideDialog();
             updatePrompt = false;
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            int warns = pref.getInt("update_warns", 0) + 1;
+            int warns = viewModel.getUpdateWarnings() + 1;
             if (warns < 3)
             {
                 AWalletConfirmationDialog cDialog = new AWalletConfirmationDialog(this);
@@ -628,7 +598,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 warns = 0;
             }
 
-            pref.edit().putInt("update_warns", warns).apply();
+            viewModel.setUpdateWarningCount(warns);
         }
     }
 
@@ -789,8 +759,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         buildVersion = build;
         //display download ready popup
         //Possibly only show this once per day otherwise too annoying!
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        int asks = pref.getInt("update_asks", 0) + 1;
+        int asks = viewModel.getUpdateAsks() + 1;
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.new_version_title);
         dialog.setSmallText(R.string.new_version);
@@ -814,7 +783,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         dialog.setSecondaryButtonListener(v -> {
             //only dismiss twice before we stop warning.
-            pref.edit().putInt("update_asks", asks).apply();
+            viewModel.setUpdateAsksCount(asks);
             dialog.dismiss();
         });
         this.dialog = dialog;
@@ -1018,8 +987,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         //Blank install time here so that next time the app runs the install time will be correctly set up
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        pref.edit().putLong("install_time", 0).apply();
+        viewModel.setInstallTime(0);
         finish();
     }
 

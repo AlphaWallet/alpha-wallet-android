@@ -246,7 +246,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     .findFirst();
 
             if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
-            TransactionsRealmCache.fill(instance, realmTx, tx);
+            TransactionsRealmCache.fill(realmTx, tx);
             instance.commitTransaction();
         }
         catch (Exception e)

@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,11 +29,10 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
@@ -209,9 +209,9 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         else if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
-                case FullScannerFragment.SUCCESS:
+                case Activity.RESULT_OK:
                     if (data != null) {
-                        String qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                         //if barcode is still null, ensure we don't GPF
                         if (qrCode == null)
@@ -272,7 +272,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                         }
                     }
                     break;
-                case QRScanningActivity.DENY_PERMISSION:
+                case QRScanner.DENY_PERMISSION:
                     showCameraDenied();
                     break;
                 default:

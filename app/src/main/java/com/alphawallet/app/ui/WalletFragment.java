@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -697,10 +696,8 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initNotificationView(View view) {
-        final String key = "marshmallow_version_support_warning_shown";
         NotificationView notificationView = view.findViewById(R.id.notification);
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean hasShownWarning = pref.getBoolean(key, false);
+        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
 
         if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             notificationView.setNotificationBackgroundColor(R.color.indigo);
@@ -709,7 +706,7 @@ public class WalletFragment extends BaseFragment implements
             notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
             notificationView.setPrimaryButtonListener(() -> {
                 notificationView.setVisibility(View.GONE);
-                pref.edit().putBoolean(key, true).apply();
+                viewModel.setMarshMallowWarning(true);
             });
         } else {
             notificationView.setVisibility(View.GONE);

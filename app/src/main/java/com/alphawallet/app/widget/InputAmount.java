@@ -387,6 +387,7 @@ public class InputAmount extends LinearLayout
                 exactAmount = token.balance;
                 updateAllFundsAmount();
             }
+            handler.post(setCursor);
         });
     }
 
@@ -414,6 +415,15 @@ public class InputAmount extends LinearLayout
                 amountReadyCallback.amountReady(exactAmount, new BigDecimal(gasPriceEstimate));
                 amountReady = false;
             }
+        }
+    };
+
+    private final Runnable setCursor = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            editText.setSelection(editText.getText().length());
         }
     };
 

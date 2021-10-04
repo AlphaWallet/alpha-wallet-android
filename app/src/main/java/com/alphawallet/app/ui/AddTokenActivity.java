@@ -1,9 +1,8 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -32,9 +31,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
@@ -357,8 +355,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     private void onSave() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (zeroBalanceToken && pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false))
+        if (zeroBalanceToken && viewModel.shouldHideZeroBalanceTokens())
         {
             userAddingZeroBalanceToken();
         }
@@ -378,8 +375,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         aDialog.setButtonText(R.string.dialog_switch_zero_balance_tokens_on);
         aDialog.setButtonListener(v -> {
             aDialog.dismiss();
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, false).apply();
+            viewModel.hideZeroBalanceTokens();
             inputAddressView.getAddress();
         });
         aDialog.setSecondaryButtonText(R.string.action_cancel);
@@ -431,9 +427,9 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
-                case FullScannerFragment.SUCCESS:
+                case Activity.RESULT_OK:
                     if (data != null) {
-                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                         QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         currentResult = parser.parse(barcode);
@@ -485,7 +481,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                         inputAddressView.setAddress(extracted_address);
                     }
                     break;
-                case QRScanningActivity.DENY_PERMISSION:
+                case QRScanner.DENY_PERMISSION:
                     showCameraDenied();
                     break;
                 default:

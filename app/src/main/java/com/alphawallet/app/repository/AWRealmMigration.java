@@ -302,6 +302,13 @@ public class AWRealmMigration implements RealmMigration
             }
             oldVersion++;
         }
+
+        if (oldVersion == 28)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransaction");
+            if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
+            oldVersion++;
+        }
     }
 
     @Override

@@ -2,9 +2,10 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;

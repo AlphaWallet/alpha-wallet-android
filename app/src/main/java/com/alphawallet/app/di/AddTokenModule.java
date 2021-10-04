@@ -6,6 +6,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
@@ -27,9 +28,17 @@ public class AddTokenModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            PreferenceRepositoryType sharedPreference) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, genericWalletInteract, fetchTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
+                addTokenInteract,
+                genericWalletInteract,
+                fetchTokensInteract,
+                ethereumNetworkRepository,
+                fetchTransactionsInteract,
+                assetDefinitionService,
+                tokensService,
+                sharedPreference);
     }
 
     @Provides

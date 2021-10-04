@@ -2,17 +2,21 @@ package com.alphawallet.app.viewmodel;
 
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
 public class MyAddressViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokenService;
+    private final AssetDefinitionService assetDefinitionService;
 
     MyAddressViewModel(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            TokensService tokensService) {
+            TokensService tokensService,
+            AssetDefinitionService assetDefinitionService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenService = tokensService;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public TokensService getTokenService() {
@@ -25,5 +29,10 @@ public class MyAddressViewModel extends BaseViewModel {
 
     public NetworkInfo getNetworkByChain(int chainId) {
         return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

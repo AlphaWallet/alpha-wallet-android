@@ -9,6 +9,7 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
@@ -21,6 +22,7 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final PreferenceRepositoryType sharedPreference;
 
     public AddTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
@@ -29,7 +31,8 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            PreferenceRepositoryType sharedPreference) {
         this.addTokenInteract = addTokenInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -37,11 +40,20 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.sharedPreference = sharedPreference;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AddTokenViewModel(addTokenInteract, genericWalletInteract, fetchTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
+        return (T) new AddTokenViewModel(
+                addTokenInteract,
+                genericWalletInteract,
+                fetchTokensInteract,
+                ethereumNetworkRepository,
+                fetchTransactionsInteract,
+                assetDefinitionService,
+                tokensService,
+                sharedPreference);
     }
 }

@@ -330,8 +330,16 @@ public class NewSettingsFragment extends BaseFragment {
 
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
-        if (wallet.address != null) {
-            myAddressSetting.setSubtitle(wallet.address);
+        if (wallet.address != null)
+        {
+            if (!wallet.ENSname.isEmpty())
+            {
+                changeWalletSetting.setSubtitle(wallet.ENSname + " | " + wallet.address);
+            }
+            else
+            {
+                changeWalletSetting.setSubtitle(wallet.address);
+            }
         }
 
         switch (wallet.authLevel) {

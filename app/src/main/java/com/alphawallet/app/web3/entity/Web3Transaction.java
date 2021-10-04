@@ -202,9 +202,12 @@ public class Web3Transaction implements Parcelable {
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(String.valueOf(nonce));
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.payload)).append(":\n ");
-        sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(payload);
+        if (!TextUtils.isEmpty(payload))
+        {
+            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.payload)).append(":\n ");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append(payload);
+        }
 
         sb.startStyleGroup().append("\n").append(ctx.getString(R.string.subtitle_network)).append(":\n ");
         sb.setStyle(new StyleSpan(Typeface.BOLD));

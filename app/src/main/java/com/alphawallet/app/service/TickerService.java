@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.BuildConfig;
@@ -50,13 +49,22 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_CODE_KEY;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_SYMBOL_KEY;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
+import androidx.preference.PreferenceManager;
 
 public class TickerService
 {
@@ -65,7 +73,8 @@ public class TickerService
     private static final String BLOCKSCOUT = "https://blockscout.com/poa/[CORE]/api?module=stats&action=ethprice";
     private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
-    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
+    private static final String CHAIN_ID = "[CHAIN_ID]";
+    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_ID + "?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
     private static final String COINGECKO_COINS_API = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cxdai%2Cetc&vs_currencies=USD&include_24hr_change=true";
 
     public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
@@ -80,7 +89,7 @@ public class TickerService
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
-    private boolean canUpdate = false;
+    private static final Map<Integer, Boolean> canUpdate = new ConcurrentHashMap<>();
 
     public TickerService(OkHttpClient httpClient, Gson gson, Context ctx, TokenLocalSource localSource)
     {
@@ -89,6 +98,7 @@ public class TickerService
         this.context = ctx;
         this.localSource = localSource;
 
+        resetTickerUpdate();
         initCurrency();
     }
 
@@ -128,7 +138,7 @@ public class TickerService
 
     private Single<Integer> updateTickersFromOracle(double conversionRate)
     {
-        canUpdate = true;
+        resetTickerUpdate();
         currentConversionRate = conversionRate;
         return Single.fromCallable(() -> {
             int tickerSize = 0;
@@ -160,13 +170,15 @@ public class TickerService
         });
     }
 
-    public Single<Integer> getERC20Tickers(List<TokenCardMeta> erc20Tokens)
+    public Single<Integer> getERC20Tickers(int chainId, List<TokenCardMeta> erc20Tokens)
     {
-        if (!canUpdate || erc20Tokens.size() == 0) return Single.fromCallable(() -> 0);
+        String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
+        if (apiChainName == null || (canUpdate.containsKey(chainId) && !canUpdate.get(chainId)) || erc20Tokens.size() == 0)
+            return Single.fromCallable(() -> 0);
 
         return Single.fromCallable(() -> {
             int newSize = 0;
-            canUpdate = false;
+
             final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
             try
             {
@@ -180,8 +192,8 @@ public class TickerService
                     isFirst = false;
                 }
 
-                 Request request = new Request.Builder()
-                        .url(COINGECKO_API.replace(CONTRACT_ADDR, sb.toString()))
+                Request request = new Request.Builder()
+                        .url(COINGECKO_API.replace(CHAIN_ID, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
                         .get()
                         .build();
 
@@ -201,7 +213,8 @@ public class TickerService
                     erc20Tickers.put(t.address, tTicker);
                 }
 
-                localSource.updateERC20Tickers(erc20Tickers);
+                canUpdate.put(chainId, false);
+                localSource.updateERC20Tickers(chainId, erc20Tickers);
             }
             catch (Exception e)
             {
@@ -472,12 +485,12 @@ public class TickerService
         }
     }
 
-    public void addCustomTicker(String address, TokenTicker ticker)
+    public void addCustomTicker(int chainId, String address, TokenTicker ticker)
     {
         if (ticker != null && address != null)
         {
             Single.fromCallable(() -> {
-                localSource.updateERC20Tickers(new HashMap<String, TokenTicker>()
+                localSource.updateERC20Tickers(chainId, new HashMap<String, TokenTicker>()
                 {{ put(address, ticker); }});
                 return true;
             }).subscribeOn(Schedulers.io())
@@ -520,8 +533,8 @@ public class TickerService
     private void initCurrency()
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        currentCurrencySymbolTxt = pref.getString("currency_locale", "USD");
-        currentCurrencySymbol = pref.getString("currency_symbol", "$");
+        currentCurrencySymbolTxt = pref.getString(CURRENCY_CODE_KEY, "USD");
+        currentCurrencySymbol = pref.getString(CURRENCY_SYMBOL_KEY, "$");
     }
 
     /**
@@ -542,4 +555,28 @@ public class TickerService
     {
         return currentConversionRate;
     }
+
+    private void resetTickerUpdate()
+    {
+        for (Integer chainId : coinGeckoChainIdToAPIName.keySet())
+        {
+            canUpdate.put(chainId, true);
+        }
+    }
+
+    private static final Map<Integer, String> coinGeckoChainIdToAPIName = new HashMap<Integer, String>(){{
+        put(MAINNET_ID, "ethereum");
+        put(XDAI_ID, "xdai");
+        put(BINANCE_MAIN_ID, "binance-smart-chain");
+        put(MATIC_ID, "polygon-pos");
+        put(CLASSIC_ID, "ethereum-classic");
+        put(FANTOM_ID, "fantom");
+        put(AVALANCHE_ID, "avalanche");
+        put(HECO_ID, "huobi-token");
+        put(66, "okex-chain");
+        put(1666600000, "harmony-shard-0");
+        put(321, "kucoin-community-chain");
+        put(88, "tomochain");
+        put(42220, "celo");
+    }};
 }

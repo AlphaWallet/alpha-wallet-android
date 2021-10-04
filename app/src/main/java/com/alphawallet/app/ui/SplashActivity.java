@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -70,7 +69,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
-        ImportTokenActivity importTokenActivity = new ImportTokenActivity();
 
         if (data != null)
         {
@@ -79,11 +77,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             {
                 importPath = data.getPath();
             }
-        }
-        else
-        {
-            //try the clipboard
-            importData = importTokenActivity.getMagiclinkFromClipboard(this);
         }
 
         splashViewModel = new ViewModelProvider(this, splashViewModelFactory)
@@ -117,12 +110,11 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
     private long getAppLastUpdateTime()
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        long currentInstallDate = pref.getLong("install_time", 0);
+        long currentInstallDate = splashViewModel.getInstallTime();
 
         if (currentInstallDate == 0)
         {
-            pref.edit().putLong("install_time", System.currentTimeMillis()).apply();
+            splashViewModel.setInstallTime(System.currentTimeMillis());
         }
 
         try

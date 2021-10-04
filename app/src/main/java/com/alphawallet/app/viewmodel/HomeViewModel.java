@@ -6,10 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -26,7 +24,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -41,14 +38,13 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.UpdateUtils;
+import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -272,7 +268,7 @@ public class HomeViewModel extends BaseViewModel {
             walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
-                    .resolveEnsName(wallet.address)
+                    .reverseResolveEns(wallet.address)
                     .map(ensName -> { wallet.ENSname = ensName; return wallet; })
                     .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                     .observeOn(AndroidSchedulers.mainThread())
@@ -394,9 +390,7 @@ public class HomeViewModel extends BaseViewModel {
      **/
     public void identify(Context ctx)
     {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-
-        String uuid = prefs.getString(C.PREF_UNIQUE_ID, "");
+        String uuid = preferenceRepository.getUniqueId();
 
         if (uuid.isEmpty())
         {
@@ -404,7 +398,7 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         analyticsService.identify(uuid);
-        prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
+        preferenceRepository.setUniqueId(uuid);
     }
 
     public void actionSheetConfirm(String mode)
@@ -431,6 +425,38 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void tryToShowRateAppDialog(Activity context) {
-        RateApp.showRateTheApp(context, preferenceRepository, false);
+        //only if installed from PlayStore
+        if (Utils.verifyInstallerId(context))
+        {
+            RateApp.showRateTheApp(context, preferenceRepository, false);
+        }
+    }
+
+    public boolean shouldShowRootWarning() {
+        return preferenceRepository.showShowRootWarning();
+    }
+
+    public void setShowRootWarning(boolean shouldShow) {
+        preferenceRepository.setShowRootWarning(shouldShow);
+    }
+
+    public int getUpdateWarnings() {
+        return preferenceRepository.getUpdateWarningCount();
+    }
+
+    public void setUpdateWarningCount(int warns) {
+        preferenceRepository.setUpdateWarningCount(warns);
+    }
+
+    public int getUpdateAsks() {
+        return preferenceRepository.getUpdateAsksCount();
+    }
+
+    public void setUpdateAsksCount(int asks) {
+        preferenceRepository.setUpdateAsksCount(asks);
+    }
+
+    public void setInstallTime(int time) {
+        preferenceRepository.setInstallTime(time);
     }
 }

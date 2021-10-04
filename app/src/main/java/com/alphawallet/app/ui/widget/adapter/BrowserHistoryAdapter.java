@@ -36,6 +36,7 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView name, url, remove;
+        View urlHolder;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -43,6 +44,7 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
             icon = itemView.findViewById(R.id.icon);
             name = itemView.findViewById(R.id.name);
             url = itemView.findViewById(R.id.url);
+            urlHolder = itemView.findViewById(R.id.url_layout);
         }
     }
 
@@ -86,6 +88,7 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
                     .into(viewHolder.icon);
 
             viewHolder.icon.setOnClickListener(v -> listener.onDappClick(dApp));
+            viewHolder.urlHolder.setOnClickListener(v -> listener.onDappClick(dApp));
         }
 
         viewHolder.remove.setOnClickListener(v ->

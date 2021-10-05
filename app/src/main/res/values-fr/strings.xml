@@ -823,5 +823,6 @@
     <string name="network_menu_item">Network: %1$s</string>
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">Réseaux</string>
+    <string name="exchange_with_oneinch">Exchange with 1inch</string>
 
 </resources>

@@ -56,6 +56,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -400,7 +401,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         });
     }
 
-    public void recordSign(Signable signable, String sessionId)
+    public void recordSign(Signable signable, String sessionId, Realm.Transaction.OnSuccess onSuccess)
     {
         realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
             RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
@@ -412,7 +413,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             signMessage.setSignType(signType);
             signMessage.setSignTime(System.currentTimeMillis());
             signMessage.setSignMessage(signable.getUserMessage());
-        });
+        }, onSuccess);
     }
 
     public void recordSignTransaction(Context ctx, Web3Transaction tx, String chainIdStr, String sessionId)

@@ -303,8 +303,7 @@ public class GasWidget extends LinearLayout implements Runnable
     private RealmQuery<RealmGasSpread> getGasQuery()
     {
         return tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
-                .equalTo("chainId", token.tokenInfo.chainId)
-                .sort("timeStamp", Sort.DESCENDING);
+                .equalTo("chainId", token.tokenInfo.chainId);
     }
 
     private void startGasListener()

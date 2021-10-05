@@ -365,7 +365,6 @@ public class InputAmount extends LinearLayout
             {
                 RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
                             .equalTo("chainId", token.tokenInfo.chainId)
-                            .sort("timeStamp", Sort.DESCENDING)
                             .findFirst();
 
                 if (gasSpread != null && gasSpread.getGasPrice().standard.compareTo(BigInteger.ZERO) > 0)

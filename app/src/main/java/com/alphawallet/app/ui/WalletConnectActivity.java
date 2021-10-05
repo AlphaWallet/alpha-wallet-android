@@ -759,16 +759,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             public void DAppReturn(byte[] data, Signable message)
             {
                 //store sign
-                viewModel.recordSign(signable, getSessionId());
-                viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
-                confirmationDialog.success();
-                updateSignCount();
-                if (fromDappBrowser)
-                {
-                    confirmationDialog.forceDismiss();
-                    switchToDappBrowser();
-                }
-                requestId = 0;
+                viewModel.recordSign(signable, getSessionId(), () -> {
+                    viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
+                    confirmationDialog.success();
+                    updateSignCount();
+                    if (fromDappBrowser)
+                    {
+                        confirmationDialog.forceDismiss();
+                        switchToDappBrowser();
+                    }
+                    requestId = 0;
+                });
             }
         };
 

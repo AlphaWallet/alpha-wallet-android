@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -50,7 +51,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     private String importData;
     private String importPath = null;
     private String importPassData = null;
-    private Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
     private String errorMessage;
 
     @Override

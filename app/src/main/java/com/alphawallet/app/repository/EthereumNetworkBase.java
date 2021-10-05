@@ -35,6 +35,9 @@ import java.util.Set;
 
 import io.reactivex.Single;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
@@ -125,6 +128,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
     public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
+    public static final String ARBITRUM_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getInfuraKey();
+    public static final String ARBITRUM_FALLBACK_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String ARBITRUM_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey();
+    public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
 
     //This optional list creates a defined order in which tokens are displayed
     static final int[] orderList = {
@@ -231,6 +238,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/api?"));
+
+            put(ARBITRUM_MAIN_ID, new NetworkInfo(C.ARBITRUM_ONE_NETWORK, C.ARBITRUM_SYMBOL,
+                    ARBITRUM_MAINNET_RPC,
+                    "https://arbiscan.io/tx/", ARBITRUM_MAIN_ID, ARBITRUM_FALLBACK_MAINNET_RPC,
+                    "https://api.arbiscan.io/api?"));
+            put(ARBITRUM_TEST_ID, new NetworkInfo(C.ARBITRUM_TEST_NETWORK, C.ARBITRUM_TEST_SYMBOL,
+                    ARBITRUM_TEST_RPC_URL,
+                    "https://rinkeby-explorer.arbitrum.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
+                    "https://rinkeby-explorer.arbitrum.io/api?")); //doesn't work yet
         }
     };
     
@@ -492,6 +508,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case FANTOM_ID:
             case MATIC_ID:
             case OPTIMISTIC_MAIN_ID:
+            case ARBITRUM_MAIN_ID:
                 return true;
             default:
                 if (customNetworks.mapToTestNet.containsKey(chainId)) {
@@ -565,6 +582,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return R.drawable.ic_optimism_testnet_logo;
             case CRONOS_TEST_ID:
                 return R.drawable.ic_cronos;
+            case ARBITRUM_MAIN_ID:
+                return R.drawable.ic_icons_arbitrum;
+            case ARBITRUM_TEST_ID:
+                return R.drawable.ic_icons_arbitrum_test;
             default:
                 return R.drawable.ic_ethereum_logo;
         }

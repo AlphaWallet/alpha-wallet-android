@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
@@ -246,6 +248,10 @@ public class Utils {
                 return R.color.optimistic_test;
             case CRONOS_TEST_ID:
                 return R.color.cronos_test;
+            case ARBITRUM_MAIN_ID:
+                return R.color.arbitrum_main;
+            case ARBITRUM_TEST_ID:
+                return R.color.arbitrum_test;
             default:
                 return R.color.mine;
         }

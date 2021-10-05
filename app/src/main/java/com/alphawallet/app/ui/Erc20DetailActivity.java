@@ -24,6 +24,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
@@ -32,7 +33,7 @@ import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.ethereum.EthereumNetworkBase;
+//import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +49,7 @@ import io.realm.RealmResults;
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
 {
@@ -84,7 +86,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             symbol = savedInstanceState.getString(C.EXTRA_ACTION_NAME);
             wallet = savedInstanceState.getParcelable(WALLET);
-            int chainId = savedInstanceState.getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            int chainId = savedInstanceState.getInt(C.EXTRA_CHAIN_ID, MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, savedInstanceState.getString(C.EXTRA_ADDRESS));
         }
         else
@@ -169,7 +171,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         tokenMeta = new TokenCardMeta(token);
         viewModel.checkForNewScript(token);
@@ -350,6 +352,29 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             String queryPath = "?use=v2&inputCurrency=" + (token.isEthereum() ? ETH_SYMBOL : token.getAddress());
             openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
         }
+        else if (actionId == R.string.exchange_with_oneinch)
+        {
+            openDapp(formatOneInchCall(token));
+        }
+    }
+
+    private String formatOneInchCall(Token token)
+    {
+        String token1;
+        String token2;
+        if (token.isERC20())
+        {
+            token1 = token.getAddress();
+            token2 = EthereumNetworkBase.getNetworkInfo(token.tokenInfo.chainId).symbol;
+        }
+        else
+        {
+            token1 = token.tokenInfo.symbol;
+            token2 = "";
+        }
+
+        return C.ONEINCH_EXCHANGE_DAPP.replace("[CHAIN]", String.valueOf(token.tokenInfo.chainId))
+                .replace("[TOKEN1]", token1).replace("[TOKEN2]", token2);
     }
 
     private void openDapp(String dappURL)

@@ -98,11 +98,31 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_EthereumNetworkBase_getBSCExplorerKey( JNIEnv* env, jobject thiz )
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getBSCExplorerKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getBSCExplorerKey(env);
 #else
     return (*env)->NewStringUTF(env, "");
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getEtherscanKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, etherscanKey);
+#else
+    return "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_GasService_getEtherscanKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, etherscanKey);
+#else
+    return "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
 #endif
 }

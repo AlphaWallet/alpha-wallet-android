@@ -22,7 +22,6 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
@@ -49,7 +48,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
-import static com.alphawallet.app.repository.EthereumNetworkBase.getBSCExplorerKey;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -67,12 +65,19 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String ERC721_QUERY = "tokennfttx";
     private final int AUX_DATABASE_ID = 23; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
-    private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
-    private final String BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
+    private final String ETHERSCAN_API_KEY;
+    private final String BSC_EXPLORER_API_KEY;
 
     private final OkHttpClient httpClient;
     private final Gson gson;
     private final RealmManager realmManager;
+
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getEtherscanKey();
+    public static native String getBSCExplorerKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -82,6 +87,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         this.httpClient = httpClient;
         this.gson = gson;
         this.realmManager = realmManager;
+
+        BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
+        ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
     }
 
     @Override

@@ -135,8 +135,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private RealmQuery<RealmGasSpread> getGasQuery()
     {
         return viewModel.getTickerRealm().where(RealmGasSpread.class)
-                .equalTo("chainId", chainId)
-                .sort("timeStamp", Sort.DESCENDING);
+                .equalTo("chainId", chainId);
     }
 
     private void startGasListener()

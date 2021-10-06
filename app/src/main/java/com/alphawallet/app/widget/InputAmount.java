@@ -3,6 +3,7 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -65,7 +66,7 @@ public class InputAmount extends LinearLayout
     private AssetDefinitionService assetService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private AmountReadyCallback amountReadyCallback;
     private boolean amountReady;
 

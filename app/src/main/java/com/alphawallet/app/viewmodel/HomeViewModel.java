@@ -153,40 +153,6 @@ public class HomeViewModel extends BaseViewModel {
 
     }
 
-    public ServiceConnection startService(Context context)
-    {
-        ServiceConnection serviceConnection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                //Service walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
-                Log.d(TAG, "Service connected");
-                /*for (String sessionId : clientBuffer.keySet())
-                {
-                    Log.d(TAG, "put from buffer: " + sessionId);
-                    WCClient c = clientBuffer.get(sessionId);
-                    walletConnectService.putClient(sessionId, c);
-                }
-                clientBuffer.clear();*/
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                //walletConnectService = null;
-                Log.d(TAG, "Service disconnected");
-            }
-        };
-
-        Intent i = new Intent(context, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        context.startService(i);
-        context.bindService(i, serviceConnection, Context.BIND_ABOVE_CLIENT);
-
-        return serviceConnection;
-    }
-
     private void onDefaultWallet(final Wallet wallet)
     {
         defaultWallet.setValue(wallet);

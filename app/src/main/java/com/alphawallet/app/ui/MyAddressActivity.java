@@ -221,25 +221,35 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         setContentView(R.layout.activity_eip681);
         initViews();
-        getInfo();
-        //Generate QR link for receive payment.
-        //Initially just generate simple payment.
-        //need ticker so user can see how much $USD the value is
-        //get token ticker
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
         titleView.setVisibility(View.VISIBLE);
         displayAddress = Keys.toChecksumAddress(wallet.address);
         networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
-        if (token == null) token = viewModel.getTokenService().getToken(networkInfo.chainId, wallet.address);
         currentMode = MODE_POS;
         address.setVisibility(View.GONE);
         selectAddress.setVisibility(View.GONE);
         layoutInputAmount.setVisibility(View.VISIBLE);
+
         amountInput = findViewById(R.id.input_amount);
+        setupPOSMode(networkInfo);
+    }
+
+    private void setupPOSMode(NetworkInfo info)
+    {
+        if (token == null) token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        amountInput.setAmount("");
         updateCryptoAmount(BigDecimal.ZERO);
-        setNetworkUi(networkInfo);
+
+        if (token != null && token.isERC20())
+        {
+            selectNetworkLayout.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            setNetworkUi(info);
+        }
     }
 
     private void showAddress()
@@ -336,13 +346,11 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
                     NetworkInfo info = viewModel.getNetworkByChain(networkId);
                     if (info != null)
                     {
+                        networkInfo = info;
                         getInfo();
-                        Intent intent = getIntent();
-                        intent.putExtra(KEY_MODE, MODE_POS);
-                        intent.putExtra(C.Key.WALLET, wallet);
-                        intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
-                        finish();
-                        startActivity(intent);
+                        token = null;
+                        overrideNetwork = networkId;
+                        setupPOSMode(info);
                     }
                 }
     });

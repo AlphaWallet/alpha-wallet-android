@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -385,7 +384,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onResume();
         viewModel.prepare();
-        viewModel.getWalletName();
+        viewModel.getWalletName(this);
         viewModel.setErrorCallback(this);
         if (homeReceiver == null)
         {
@@ -850,7 +849,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void openWalletConnect(String sessionId)
     {
         Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
         intent.putExtra("session", sessionId);
         startActivity(intent);
     }

@@ -1,9 +1,14 @@
 package com.alphawallet.app.ui;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +32,7 @@ import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
+import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.widget.ChainName;
 import com.bumptech.glide.Glide;
 
@@ -55,10 +61,7 @@ public class WalletConnectSessionActivity extends BaseActivity
     private Wallet wallet;
     private List<WalletConnectSessionItem> wcSessions;
 
-    private final Handler handler = new Handler();
-
-    @Nullable
-    private Disposable connectionCheck;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private int connectionCount = -1;
 
@@ -203,16 +206,7 @@ public class WalletConnectSessionActivity extends BaseActivity
                 startActivity(intent);
             });
 
-            WCClient client = viewModel.getClient(session.sessionId);
-            if (client == null || !client.isConnected())
-            {
-                holder.statusIcon.setVisibility(View.GONE);
-            }
-            else
-            {
-                holder.statusIcon.setVisibility(View.VISIBLE);
-                holder.statusIcon.setImageResource(R.drawable.ic_connected);
-            }
+            setupClient(session.sessionId, holder);
 
             holder.clickLayer.setOnLongClickListener(v -> {
                 //delete this entry?
@@ -226,6 +220,21 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             return wcSessions.size();
         }
+    }
+
+    private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)
+    {
+        viewModel.getClient(this, sessionId, client -> handler.post(() -> {
+            if (client == null || !client.isConnected())
+            {
+                holder.statusIcon.setVisibility(View.GONE);
+            }
+            else
+            {
+                holder.statusIcon.setVisibility(View.VISIBLE);
+                holder.statusIcon.setImageResource(R.drawable.ic_connected);
+            }
+        }));
     }
 
     private void dialogConfirmDelete(WalletConnectSessionItem session)
@@ -245,27 +254,25 @@ public class WalletConnectSessionActivity extends BaseActivity
         dialog.show();
     }
 
+    private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(C.WALLET_CONNECT_COUNT_CHANGE))
+            {
+                handler.post(() -> adapter.notifyDataSetChanged());
+                connectionCount = intent.getIntExtra("count", 0);
+            }
+        }
+    };
+
     private void startConnectionCheck()
     {
-        if (connectionCheck != null && !connectionCheck.isDisposed()) connectionCheck.dispose();
-
-        connectionCheck = Observable.interval(0, 10, TimeUnit.SECONDS)
-                .doOnNext(l -> checkConnections()).subscribe();
-    }
-
-    private void checkConnections()
-    {
-        int connections = viewModel.getConnectionCount();
-        if (connectionCount >= 0 && connections != connectionCount)
-        {
-            handler.post(() -> adapter.notifyDataSetChanged());
-        }
-
-        connectionCount = connections;
+        registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
     }
 
     private void stopConnectionCheck()
     {
-        if (connectionCheck != null && !connectionCheck.isDisposed()) connectionCheck.dispose();
+        unregisterReceiver(walletConnectChangeReceiver);
     }
 }

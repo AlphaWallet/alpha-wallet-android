@@ -161,6 +161,14 @@ public abstract class C {
             "com.stormbird.wallet.RESET_TRANSACTIONS";
     public static final String WALLET_CONNECT_REQUEST =
             "com.stormbird.wallet.WALLET_CONNECT";
+    public static final String WALLET_CONNECT_NEW_SESSION =
+            "com.stormbird.wallet.WC_NEW_SESSION";
+    public static final String WALLET_CONNECT_FAIL =
+            "com.stormbird.wallet.WC_FAIL";
+    public static final String WALLET_CONNECT_COUNT_CHANGE =
+            "com.stormbird.wallet.WC_CCHANGE";
+    public static final String WALLET_CONNECT_CLIENT_TERMINATE =
+            "com.stormbird.wallet.WC_CLIENT_TERMINATE";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";

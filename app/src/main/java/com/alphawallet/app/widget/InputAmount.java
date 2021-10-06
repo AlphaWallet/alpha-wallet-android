@@ -156,6 +156,7 @@ public class InputAmount extends LinearLayout
     {
         exactAmount = BigDecimal.ZERO;
         editText.setText(ethAmount);
+        handler.post(setCursor);
     }
 
     public void showError(boolean showError, int customError)

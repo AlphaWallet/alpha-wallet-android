@@ -3,10 +3,11 @@ package com.alphawallet.app.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -108,6 +109,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
+    private ServiceConnection walletConnectService;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -306,6 +308,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             //TODO: Check we are using latest version on github, since we're using a downloaded/manually installed version
             //First check that this the package name is "io.stormbird.wallet" - it could be a fork
         }
+
+        walletConnectService = viewModel.startService(this);
     }
 
     private void onBackup(String address)
@@ -385,7 +389,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onResume();
         viewModel.prepare();
-        viewModel.getWalletName();
+        viewModel.getWalletName(this);
         viewModel.setErrorCallback(this);
         if (homeReceiver == null)
         {
@@ -850,7 +854,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void openWalletConnect(String sessionId)
     {
         Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
         intent.putExtra("session", sessionId);
         startActivity(intent);
     }

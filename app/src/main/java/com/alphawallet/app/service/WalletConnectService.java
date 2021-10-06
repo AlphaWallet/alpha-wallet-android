@@ -25,6 +25,10 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import kotlin.Unit;
 
+import static com.alphawallet.app.C.WALLET_CONNECT_CLIENT_TERMINATE;
+import static com.alphawallet.app.C.WALLET_CONNECT_COUNT_CHANGE;
+import static com.alphawallet.app.C.WALLET_CONNECT_FAIL;
+import static com.alphawallet.app.C.WALLET_CONNECT_NEW_SESSION;
 import static com.alphawallet.app.C.WALLET_CONNECT_REQUEST;
 
 /**
@@ -56,6 +60,12 @@ public class WalletConnectService extends Service
                 case CONNECT:
                     Log.d(TAG, "SERVICE CONNECT");
                     break;
+                case APPROVE:
+                    approveRequest(intent);
+                    break;
+                case REJECT:
+                    rejectRequest(intent);
+                    break;
                 case DISCONNECT:
                     Log.d(TAG, "SERVICE DISCONNECT");
                     //kill any active connection
@@ -74,6 +84,12 @@ public class WalletConnectService extends Service
             if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
     }
 
     private final IBinder mBinder = new LocalBinder();
@@ -156,13 +172,18 @@ public class WalletConnectService extends Service
     {
         Log.d(TAG, "Add session: " + sessionId);
         clientMap.put(sessionId, client);
+        broadcastConnectionCount(clientMap.size());
         clientTimes.put(sessionId, System.currentTimeMillis());
         setupClient(client);
         startSessionPinger();
     }
 
-    public void rejectRequest(String sessionId, long id, String message)
+    private void rejectRequest(Intent intent)
     {
+        String sessionId = intent.getStringExtra("sessionId");
+        long id = intent.getLongExtra("id", 0L);
+        String message = intent.getStringExtra("message");
+
         WCClient c = clientMap.get(sessionId);
         if (c != null && c.isConnected())
         {
@@ -170,9 +191,14 @@ public class WalletConnectService extends Service
         }
     }
 
-    public void approveRequest(String sessionId, long id, String message)
+    private void approveRequest(Intent intent)
     {
+        String sessionId = intent.getStringExtra("sessionId");
+        long id = intent.getLongExtra("id", 0L);
+        String message = intent.getStringExtra("message");
+
         WCClient c = clientMap.get(sessionId);
+
         if (c != null && c.isConnected())
         {
             c.approveRequest(id, message);
@@ -185,6 +211,7 @@ public class WalletConnectService extends Service
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, peer, client.chainIdVal()));
+            broadcastSessionEvent(WALLET_CONNECT_NEW_SESSION, client.sessionId());
             Log.d(TAG, "On Request: " + peer.getName());
             return Unit.INSTANCE;
         });
@@ -194,6 +221,13 @@ public class WalletConnectService extends Service
             if (client.sessionId() == null) return Unit.INSTANCE;
             Log.d(TAG, "On Fail: " + throwable.getMessage());
             signRequests.add(new WCRequest(client.sessionId(), throwable, client.chainIdVal()));
+            broadcastSessionEvent(WALLET_CONNECT_FAIL, client.sessionId());
+            return Unit.INSTANCE;
+        });
+
+        client.setOnDisconnect((code, reason) -> {
+            Log.d(TAG, "Terminate session?");
+            terminateClient(client.sessionId());
             return Unit.INSTANCE;
         });
 
@@ -222,6 +256,20 @@ public class WalletConnectService extends Service
             switchToWalletConnectApprove(client.sessionId());
             return Unit.INSTANCE;
         });
+    }
+
+    private void broadcastSessionEvent(String command, String sessionId)
+    {
+        Intent intent = new Intent(command);
+        intent.putExtra("sessionid", sessionId);
+        sendBroadcast(intent);
+    }
+
+    private void broadcastConnectionCount(int count)
+    {
+        Intent intent = new Intent(WALLET_CONNECT_COUNT_CHANGE);
+        intent.putExtra("count", count);
+        sendBroadcast(intent);
     }
 
     private void switchToWalletConnectApprove(String sessionId)
@@ -281,14 +329,21 @@ public class WalletConnectService extends Service
         for (String removeKey : removeKeyList)
         {
             Log.d(TAG, "Removing Key: " + removeKey);
-            clientMap.remove(removeKey);
-            if (clientMap.size() == 0 && pingTimer != null && !pingTimer.isDisposed())
-            {
-                Log.d(TAG, "Stop timer & service");
-                pingTimer.dispose();
-                pingTimer = null;
-                stopSelf();
-            }
+            terminateClient(removeKey);
+        }
+    }
+
+    private void terminateClient(String sessionKey)
+    {
+        clientMap.remove(sessionKey);
+        broadcastConnectionCount(clientMap.size());
+        broadcastSessionEvent(WALLET_CONNECT_CLIENT_TERMINATE, sessionKey);
+        if (clientMap.size() == 0 && pingTimer != null && !pingTimer.isDisposed())
+        {
+            Log.d(TAG, "Stop timer & service");
+            pingTimer.dispose();
+            pingTimer = null;
+            stopSelf();
         }
     }
 

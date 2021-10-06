@@ -62,7 +62,7 @@ public class DappBrowserUtils {
 
         List<DApp> dapps = getPrimarySites(context);
 
-        if (!myDappsJson.isEmpty()) {
+        if (!TextUtils.isEmpty(myDappsJson)) {
             dapps.addAll(new Gson().fromJson(myDappsJson, new TypeToken<ArrayList<DApp>>() {
             }.getType()));
         }

@@ -202,14 +202,24 @@ public class Token
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        str = sb.toString();
+
+        //Don't convert to Html if name contains any kind of link; protect user from potential link spam
+        if (str.toLowerCase().contains("<a href="))
         {
-            return Html.fromHtml(sb.toString(), FROM_HTML_MODE_COMPACT).toString();
+            return str;
         }
         else
         {
-            //noinspection deprecation
-            return Html.fromHtml(sb.toString()).toString();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
+            }
+            else
+            {
+                //noinspection deprecation
+                return Html.fromHtml(str).toString();
+            }
         }
     }
 

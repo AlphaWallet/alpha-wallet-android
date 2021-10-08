@@ -113,6 +113,7 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
     private LargeTitleView largeTitleView;
+    private long lastTokenUpdateTime = Long.MAX_VALUE;
 
     @Nullable
     @Override
@@ -218,13 +219,18 @@ public class WalletFragment extends BaseFragment implements
     private void setRealmListener()
     {
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
-                .like("address", ADDRESS_FORMAT).findAllAsync();
+                .like("address", ADDRESS_FORMAT)
+                .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;
             List<TokenCardMeta> metas = new ArrayList<>();
+            long updateTime = 0;
             //make list
             for (RealmToken t : realmTokens)
             {
+                long tokenUpdateTime = t.getUpdateTime();
+                if (tokenUpdateTime > updateTime) updateTime = tokenUpdateTime;
+                if (tokenUpdateTime < lastTokenUpdateTime) continue;
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
                 if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
@@ -233,10 +239,13 @@ public class WalletFragment extends BaseFragment implements
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
                         t.getUpdateTime(), viewModel.getAssetDefinitionService(), t.getName(), t.getSymbol(), t.getContractType());
                 meta.lastTxUpdate = t.getLastTxTime();
+                meta.isEnabled = t.isEnabled();
                 metas.add(meta);
             }
 
-            updateMetas(metas);
+            if (metas.size() > 0) updateMetas(metas);
+
+            lastTokenUpdateTime = updateTime + 1;
         });
     }
 
@@ -725,10 +734,8 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initNotificationView(View view) {
-        final String key = "marshmallow_version_support_warning_shown";
         NotificationView notificationView = view.findViewById(R.id.notification);
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean hasShownWarning = pref.getBoolean(key, false);
+        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
 
         if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             notificationView.setNotificationBackgroundColor(R.color.indigo);
@@ -737,7 +744,7 @@ public class WalletFragment extends BaseFragment implements
             notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
             notificationView.setPrimaryButtonListener(() -> {
                 notificationView.setVisibility(View.GONE);
-                pref.edit().putBoolean(key, true).apply();
+                viewModel.setMarshMallowWarning(true);
             });
         } else {
             notificationView.setVisibility(View.GONE);

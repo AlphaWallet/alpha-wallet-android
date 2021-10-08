@@ -1,6 +1,8 @@
 package com.alphawallet.app.interact;
 
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.TransactionData;
@@ -47,7 +49,8 @@ public class CreateTransactionInteract
     public Single<TransactionData> createWithSig(Wallet from, Web3Transaction web3Tx, int chainId)
     {
         return transactionRepository.createTransactionWithSig(from, web3Tx.recipient.toString(), web3Tx.value,
-                        web3Tx.gasPrice, web3Tx.gasLimit, web3Tx.nonce, Numeric.hexStringToByteArray(web3Tx.payload), chainId)
+                        web3Tx.gasPrice, web3Tx.gasLimit, web3Tx.nonce,
+                        !TextUtils.isEmpty(web3Tx.payload) ? Numeric.hexStringToByteArray(web3Tx.payload) : new byte[0], chainId)
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread());
     }

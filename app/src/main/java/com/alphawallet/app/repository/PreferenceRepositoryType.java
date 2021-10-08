@@ -64,4 +64,25 @@ public interface PreferenceRepositoryType {
 
     void setRateAppShown();
     boolean getRateAppShown();
+
+    void setShowZeroBalanceTokens(boolean shouldShow);
+    boolean shouldShowZeroBalanceTokens();
+
+    boolean showShowRootWarning();
+    void setShowRootWarning(boolean shouldShow);
+
+    int getUpdateWarningCount();
+    void setUpdateWarningCount(int count);
+
+    int getUpdateAsksCount();
+    void setUpdateAsksCount(int count);
+
+    long getInstallTime();
+    void setInstallTime(long time);
+
+    String getUniqueId();
+    void setUniqueId(String uuid);
+
+    boolean isMarshMallowWarningShown();
+    void setMarshMallowWarning(boolean shown);
 }

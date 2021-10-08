@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -145,10 +146,8 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
                     token.getFullName()));
 
             openExternal.setOnClickListener(v -> {
-                Intent intent = new Intent(TokenDetailActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("url", asset.getExternalLink());
-                startActivity(intent);
+                Intent launchBrowser = new Intent(Intent.ACTION_VIEW, Uri.parse(asset.getExternalLink()));
+                startActivity(launchBrowser);
             });
         } else {
             openExternal.setVisibility(View.GONE);

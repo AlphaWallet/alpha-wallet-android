@@ -4,6 +4,7 @@ package com.alphawallet.app.di;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
@@ -29,7 +30,8 @@ public class WalletModule {
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
-            ManageWalletsRouter manageWalletsRouter) {
+            ManageWalletsRouter manageWalletsRouter,
+            PreferenceRepositoryType preferenceRepository) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 tokenDetailRouter,
@@ -39,7 +41,8 @@ public class WalletModule {
                 tokensService,
                 changeTokenEnableInteract,
                 myAddressRouter,
-                manageWalletsRouter);
+                manageWalletsRouter,
+                preferenceRepository);
     }
 
     @Provides

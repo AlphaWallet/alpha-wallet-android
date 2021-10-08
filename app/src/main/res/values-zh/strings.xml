@@ -803,4 +803,8 @@
     <string name="wallet_total_change">%1$s (%2$.2f%%) Today</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>
+    <string name="network_menu_item">Network: %1$s</string>
+    <string name="action_set_as_homepage">Set as Home Page</string>
+    <string name="action_networks">网络</string>
+    <string name="exchange_with_oneinch">Exchange with 1inch</string>
 </resources>

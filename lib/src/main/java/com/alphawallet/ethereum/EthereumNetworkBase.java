@@ -32,6 +32,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int OPTIMISTIC_MAIN_ID = 10;
     public static final int OPTIMISTIC_TEST_ID = 69;
     public static final int CRONOS_TEST_ID = 338;
+    public static final int ARBITRUM_MAIN_ID = 42161;
+    public static final int ARBITRUM_TEST_ID = 421611;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -58,6 +60,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
     public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8545";
+    public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    public static final String ARBITRUM_TEST_RPC_URL = "https://arbitrum-rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
   
     static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
@@ -112,6 +116,10 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
                     OPTIMISTIC_TEST_ID));
             put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://cronos-explorer.crypto.org/tx/",CRONOS_TEST_ID));
+            put(ARBITRUM_MAIN_ID, new NetworkInfo("Arbitrum One","AETH", ARBITRUM_RPC_URL, "https://arbiscan.io/tx/",
+                    ARBITRUM_MAIN_ID));
+            put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Test", "ARETH", ARBITRUM_TEST_RPC_URL, "https://rinkeby-explorer.arbitrum.io/tx/",
+                    ARBITRUM_TEST_ID));
         }
     };
 

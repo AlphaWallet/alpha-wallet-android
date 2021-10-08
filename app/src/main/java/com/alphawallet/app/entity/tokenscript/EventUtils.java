@@ -253,7 +253,7 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetBlockByHash(blockHash.trim(), false).send();
-                if (BuildConfig.DEBUG) System.out.println(txResult.getResult());
+                //if (BuildConfig.DEBUG) System.out.println("TS EVENT: " + txResult.getResult().getHash());
             }
             catch (IOException | NullPointerException e)
             {
@@ -272,7 +272,7 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetTransactionByHash(blockHash.trim()).send();
-                if (BuildConfig.DEBUG) System.out.println(txResult.getResult());
+                //if (BuildConfig.DEBUG) System.out.println("TS EVENT: " + txResult.getResult().getHash());
             }
             catch (IOException | NullPointerException e)
             {

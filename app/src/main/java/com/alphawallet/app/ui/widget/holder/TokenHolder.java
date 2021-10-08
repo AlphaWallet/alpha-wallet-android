@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
@@ -67,12 +69,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private boolean primaryElement;
     private final Realm realm;
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
-
-    private static int counter = 1;
 
     public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
     {
@@ -134,17 +134,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             if (!TextUtils.isEmpty(coinBalance)) {
                 balanceCoin.setVisibility(View.VISIBLE);
 
-                String symbol = token.getSymbol();
-                String name = token.getName();
-                // Use shortest of name and symbol, but abbreviate to 5 characters or less and capitalise.
-                if (symbol.length() > name.length()) {
-                    symbol = name.replace(" ", "").substring(0, Math.min(name.length(), 5)).toUpperCase();
-                } else {
-                    symbol = symbol.substring(0, Math.min(symbol.length(), 5)).toUpperCase();
-                }
+                String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
+                        .toUpperCase();
 
                 balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, symbol));
-                //balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, token.tokenInfo.symbol));
             }
 
             primaryElement = false;
@@ -338,19 +331,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private String shortTitle() {
         String localizedNameFromAssetDefinition = token.getTSName(assetDefinition, token.getTokenCount());
-        String symbol = token.getSymbol();
         // 1 Use TokenScript name if available.
         if (!TextUtils.isEmpty(localizedNameFromAssetDefinition)) {
             return localizedNameFromAssetDefinition;
         } else {
-            String name = token.tokenInfo.name;
-            // 3 Use Token symbol.
-            if (TextUtils.isEmpty(name) || name.length() < symbol.length()) {
-                return symbol;
-            } else {
-                // 2 Use Token name if longer than Token symbol.
-                return name;
-            }
+            return token.getName();
         }
     }
 }

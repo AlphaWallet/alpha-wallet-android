@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
@@ -25,6 +26,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final MyAddressRouter myAddressRouter;
     private final ManageWalletsRouter manageWalletsRouter;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   TokenDetailRouter tokenDetailRouter,
@@ -34,7 +36,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   TokensService tokensService,
                                   ChangeTokenEnableInteract changeTokenEnableInteract,
                                   MyAddressRouter myAddressRouter,
-                                  ManageWalletsRouter manageWalletsRouter) {
+                                  ManageWalletsRouter manageWalletsRouter,
+                                  PreferenceRepositoryType preferenceRepository) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
@@ -44,6 +47,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
+        this.preferenceRepository = preferenceRepository;
     }
 
     @NonNull
@@ -58,6 +62,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 tokensService,
                 changeTokenEnableInteract,
                 myAddressRouter,
-                manageWalletsRouter);
+                manageWalletsRouter,
+                preferenceRepository);
     }
 }

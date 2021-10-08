@@ -65,9 +65,9 @@ public class CustomViewSettings
     //Does main wallet page show tokens with zero balance? NB: any 'Locked' tokens above will always be shown
     public static boolean showZeroBalance() { return false; }
 
-    public static boolean tokenCanBeDisplayed(ContractType type, String balance, int chainId, String contractAddress)
+    public static boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
-        return showZeroBalance() || type == ContractType.ETHEREUM || !balance.equals("0") || isLockedToken(chainId, contractAddress);
+        return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
     }
 
     private static boolean isLockedToken(int chainId, String contractAddress)

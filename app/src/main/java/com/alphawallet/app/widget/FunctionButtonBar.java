@@ -55,8 +55,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, TokensAdapterCallback, View.OnClickListener {
@@ -589,30 +592,40 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      */
     private boolean setupCustomTokenActions()
     {
-        int chainId = token.tokenInfo.chainId;
-
-        if (chainId == MATIC_ID && token.isNonFungible()) {
+        if (token.tokenInfo.chainId == MATIC_ID && token.isNonFungible()) {
             return false;
         }
 
-        String address = token.getAddress();
-
-        switch (chainId)
+        switch (token.tokenInfo.chainId)
         {
             case MAINNET_ID:
-                switch (address.toLowerCase())
+                switch (token.getAddress().toLowerCase())
                 {
                     case C.DAI_TOKEN:
                     case C.SAI_TOKEN:
                         addFunction(R.string.convert_to_xdai);
                         return true;
+                    default:
+                        if (token.isERC20())
+                        {
+                            addFunction(R.string.exchange_with_oneinch);
+                        }
+                        return true;
+                }
+            case BINANCE_MAIN_ID:
+            case OPTIMISTIC_MAIN_ID:
+            case ARBITRUM_MAIN_ID:
+                if (token.isERC20())
+                {
+                    addFunction(R.string.exchange_with_oneinch);
+                    return true;
                 }
                 break;
             case MATIC_ID:
                 {
                     addFunction(R.string.swap_with_quickswap);
+                    return true;
                 }
-                break;
         }
         return false;
     }

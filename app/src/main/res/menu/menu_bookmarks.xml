@@ -4,51 +4,67 @@
 
     <group android:id="@+id/dapp_browser_menu">
         <item
-            android:id="@+id/action_add_to_my_dapps"
-            android:icon="@drawable/ic_plus"
-            android:orderInCategory="15"
-            android:title="@string/add_to_my_dapps"
-            app:showAsAction="withText" />
-
-        <item
-            android:id="@+id/action_my_dapps"
-            android:icon="@drawable/ic_my_dapps"
-            android:orderInCategory="16"
-            android:title="@string/my_dapps"
-            app:showAsAction="withText" />
-
-        <item
             android:id="@+id/action_reload"
             android:icon="@drawable/ic_dapp_reload"
-            android:orderInCategory="17"
+            android:orderInCategory="1"
             android:title="@string/action_reload"
             app:showAsAction="withText" />
 
         <item
             android:id="@+id/action_share"
             android:icon="@drawable/ic_dapp_share"
-            android:orderInCategory="20"
+            android:orderInCategory="2"
             android:title="@string/action_share"
             app:showAsAction="withText" />
 
         <item
-            android:id="@+id/action_scan"
-            android:icon="@drawable/ic_camera_scan"
-            android:orderInCategory="22"
-            android:title="@string/action_scan_dapp"
+            android:id="@+id/action_add_to_my_dapps"
+            android:icon="@drawable/ic_plus"
+            android:orderInCategory="3"
+            android:title="@string/add_to_my_dapps"
+            app:showAsAction="withText" />
+
+        <item
+            android:id="@+id/action_my_dapps"
+            android:icon="@drawable/ic_my_dapps"
+            android:orderInCategory="4"
+            android:title="@string/my_dapps"
             app:showAsAction="withText" />
 
         <item
             android:id="@+id/action_history"
             android:icon="@drawable/ic_dapp_history"
-            android:orderInCategory="25"
+            android:orderInCategory="5"
             android:title="@string/history"
             app:showAsAction="withText" />
 
         <item
+            android:id="@+id/action_set_as_homepage"
+            android:icon="@drawable/ic_home"
+            android:orderInCategory="6"
+            android:title="@string/action_set_as_homepage"
+            app:showAsAction="withText" />
+
+
+        <item
+            android:id="@+id/action_network"
+            android:icon="@drawable/ic_network_2"
+            android:orderInCategory="7"
+            android:title="@string/action_update_network"
+            app:showAsAction="withText" />
+
+        <item
+            android:id="@+id/action_scan"
+            android:icon="@drawable/ic_camera_scan"
+            android:orderInCategory="8"
+            android:title="@string/action_scan_dapp"
+            app:showAsAction="withText" />
+
+
+        <item
             android:id="@+id/action_clear_cache"
             android:icon="@drawable/ic_settings_cache"
-            android:orderInCategory="30"
+            android:orderInCategory="9"
             android:title="@string/title_clear_browser_cache"
             app:showAsAction="withText" />
     </group>

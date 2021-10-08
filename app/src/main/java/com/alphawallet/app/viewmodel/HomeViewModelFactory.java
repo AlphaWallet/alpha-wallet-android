@@ -30,7 +30,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final Context context;
     private final MyAddressRouter myAddressRouter;
     private final TransactionsService transactionsService;
     private final TickerService tickerService;
@@ -46,7 +45,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            Context context,
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
             TickerService tickerService,
@@ -60,7 +58,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.context = context;
         this.myAddressRouter = myAddressRouter;
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
@@ -80,7 +77,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 fetchWalletsInteract,
                 currencyRepository,
                 ethereumNetworkRepository,
-                context,
                 myAddressRouter,
                 transactionsService,
                 tickerService,

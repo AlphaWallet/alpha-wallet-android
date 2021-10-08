@@ -28,9 +28,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -51,7 +51,7 @@ public class ERC721Token extends Token
         }
         else
         {
-            tokenBalanceAssets = new HashMap<>();
+            tokenBalanceAssets = new ConcurrentHashMap<>();
         }
         setInterfaceSpec(type);
     }
@@ -213,6 +213,23 @@ public class ERC721Token extends Token
     }
 
     @Override
+    public boolean checkBalanceChange(Token oldToken)
+    {
+        if (super.checkBalanceChange(oldToken)) return true;
+        if (getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        {
+            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
+            NFTAsset oldAsset = oldToken.getAssetForToken(tokenId);
+            if (newAsset == null || oldAsset == null || !newAsset.equals(oldAsset))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String convertValue(String prefix, String value, int precision)
     {
         precision++;
@@ -343,7 +360,11 @@ public class ERC721Token extends Token
             NFTAsset checkAsset = assetMap.get(checkId);
             //check balance
             String owner = callSmartContractFunction(web3j, ownerOf(checkId), getAddress(), getWallet());
-            if (owner.toLowerCase().equals(getWallet()))
+            if (owner == null) //play it safe. If there's no 'ownerOf' for an ERC721, it's something custom like ENS
+            {
+                checkAsset.setBalance(BigDecimal.ONE);
+            }
+            else if (owner.toLowerCase().equals(getWallet()))
             {
                 checkAsset.setBalance(BigDecimal.ONE);
             }

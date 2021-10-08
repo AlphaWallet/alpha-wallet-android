@@ -1,6 +1,7 @@
 package com.alphawallet.app.service;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -48,7 +49,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
-import static com.alphawallet.app.repository.EthereumNetworkBase.getBSCExplorerKey;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -56,6 +56,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
+    private static final String TAG = "TXNETCLIENT";
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
     public static final int TRANSFER_RESULT_MAX = 250; //check 200 records when we first get a new account
@@ -66,12 +67,19 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String ERC721_QUERY = "tokennfttx";
     private final int AUX_DATABASE_ID = 23; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
-    private final String ETHERSCAN_API_KEY = "&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
-    private final String BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
+    private final String ETHERSCAN_API_KEY;
+    private final String BSC_EXPLORER_API_KEY;
 
     private final OkHttpClient httpClient;
     private final Gson gson;
     private final RealmManager realmManager;
+
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getEtherscanKey();
+    public static native String getBSCExplorerKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -81,6 +89,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         this.httpClient = httpClient;
         this.gson = gson;
         this.realmManager = realmManager;
+
+        BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
+        ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
     }
 
     @Override
@@ -529,6 +540,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 token = createNewERC721Token(eventMap.get(contract).get(0), networkInfo, walletAddress, false);
                 newToken = true;
+                if (BuildConfig.DEBUG) Log.d(TAG, "Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (tokenDecimal >= 0 && token == null)
             {
@@ -536,10 +548,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 token = new Token(info, BigDecimal.ZERO, 0, networkInfo.getShortName(),
                         tokenDecimal > 0 ? ContractType.ERC20 : ContractType.MAYBE_ERC20);
                 token.setTokenWallet(walletAddress);
+                newToken = true;
+                if (BuildConfig.DEBUG) Log.d(TAG, "Discover ERC20: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (token == null)
             {
                 svs.addUnknownTokenToCheck(new ContractAddress(networkInfo.chainId, ev0.contractAddress));
+                if (BuildConfig.DEBUG) Log.d(TAG, "Discover unknown: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
                 continue;
             }
 
@@ -549,7 +564,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             else //not NFT
             {
-                svs.storeToken(token);
+                if (newToken) svs.storeToken(token);
             }
 
             //Send to storage as soon as each token is done

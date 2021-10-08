@@ -155,11 +155,10 @@ public class RepositoriesModule {
 	@Provides
 	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
 									   TokenRepositoryType tokenRepository,
-									   Context context,
 									   TickerService tickerService,
 									   OpenSeaService openseaService,
 									   AnalyticsServiceType analyticsService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, context, tickerService, openseaService, analyticsService);
+		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
 	}
 
 	@Singleton
@@ -200,9 +199,9 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
     AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager,
-														 EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService,
-														 TokenLocalSource tls, TransactionRepositoryType trt, AlphaWalletService alphaService) {
-		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, trt, alphaService);
+														 TokensService tokensService, TokenLocalSource tls, TransactionRepositoryType trt,
+														 AlphaWalletService alphaService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, tokensService, tls, trt, alphaService);
 	}
 
 	@Singleton

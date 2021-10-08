@@ -1,11 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
-import android.content.Context;
-
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -25,7 +22,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final AddTokenInteract addTokenInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
     private final AssetDefinitionService assetDefinitionService;
@@ -37,7 +33,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
                                 EthereumNetworkRepositoryType networkRepository,
                                 TokensService tokensService,
                                 FetchTransactionsInteract fetchTransactionsInteract,
-                                AddTokenInteract addTokenInteract,
                                 CreateTransactionInteract createTransactionInteract,
                                 GasService gasService,
                                 AssetDefinitionService assetDefinitionService,
@@ -49,7 +44,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
         this.tokensService = tokensService;
         this.gasService = gasService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.addTokenInteract = addTokenInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
@@ -61,7 +55,7 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new SendViewModel(myAddressRouter, networkRepository, tokensService,
-                fetchTransactionsInteract, addTokenInteract, createTransactionInteract, gasService,
+                fetchTransactionsInteract, createTransactionInteract, gasService,
                 assetDefinitionService, keyService, analyticsService, preferenceRepository);
     }
 }

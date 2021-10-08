@@ -777,7 +777,13 @@
     <string name="select_dappbrowser_network">Kết nối tới mạng</string>
     <string name="choose_network_preference">Tùy chọn mạng</string>
     <string name="please_select_at_least_one_network">Vui lòng chọn ít nhất một mạng.</string>
+    <string name="token_info_portfolio">Portfolio</string>
+    <string name="enter_target_price">Enter Target Price</string>
+    <string name="title_set_new_alert">Set New Alert</string>
+    <string name="action_save_alert">Save Alert</string>
+    <string name="alerts_will_appear_here">Alerts will appear here</string>
     <string name="token_text">Token</string>
+    <string name="buy_eth">Buy ETH</string>
     <string name="reload_token_data_desc">Reset all cached token data (eg recorded balance etc). AlphaWallet will re-load the current status of your wallet. Doesn\'t affect the keys or assets.</string>
     <string name="title_activity_add_custom_rpcnetwork">Add Custom RPC Network</string>
     <string name="hint_network_name">Tên mạng</string>
@@ -825,4 +831,8 @@
     <string name="wallet_total_change">%1$s (%2$.2f%%) Today</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>
+    <string name="network_menu_item">Network: %1$s</string>
+    <string name="action_set_as_homepage">Set as Home Page</string>
+    <string name="action_networks">Mạng lưới</string>
+    <string name="exchange_with_oneinch">Exchange with 1inch</string>
 </resources>

@@ -312,8 +312,49 @@ public class AWRealmMigration implements RealmMigration
         {
             RealmObjectSchema realmData = schema.get("RealmTransaction");
             if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
+            oldVersion = 31;
+        }
+
+        if (oldVersion == 30)
+        {
             oldVersion++;
         }
+
+        if (oldVersion == 31)
+        {
+            schema.remove("RealmGasSpread");
+            schema.create("RealmGasSpread")
+                    .addField("chainId", int.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("timeStamp", long.class)
+                    .addField("rapid", String.class)
+                    .addField("fast", String.class)
+                    .addField("standard", String.class)
+                    .addField("slow", String.class)
+                    .addField("baseFee", String.class);
+
+            oldVersion++;
+        }
+
+        if (oldVersion == 32)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAToken");
+            if (realmData == null)
+            {
+                schema.create("RealmAToken")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
+            }
+
+            schema.remove("RealmGasSpread");
+            schema.create("RealmGasSpread")
+                    .addField("chainId", int.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("timeStamp", long.class)
+                    .addField("rapid", String.class)
+                    .addField("fast", String.class)
+                    .addField("standard", String.class)
+                    .addField("slow", String.class)
+                    .addField("baseFee", String.class);
+        }
+
     }
 
     @Override

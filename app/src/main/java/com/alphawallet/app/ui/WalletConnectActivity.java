@@ -1,18 +1,17 @@
 package com.alphawallet.app.ui;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -48,6 +47,7 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -77,16 +77,14 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 
-public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface
+public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface, WalletConnectCallback
 {
     private static final String TAG = "WCClient";
     private static final String DEFAULT_IDON = "https://example.walletconnect.org/favicon.ico";
@@ -132,11 +130,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private boolean waitForWalletConnectSession = false;
     private int orientation;
     private long requestId = 0;
-
-    private final Handler handler = new Handler();
-
-    @Nullable
-    private Disposable messageCheck;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -199,26 +192,20 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         retrieveQrCode();
         String newSessionId = getSessionId();
         Log.d(TAG, "Received New Intent: " + newSessionId + " (" + sessionId + ")");
-        client = viewModel.getClient(newSessionId);
-
-        if (!viewModel.connectedToService())
-        {
-            //wait for service to connect
-            waitForWalletConnectSession = true;
-            viewModel.prepareIfRequired();
-        }
-        else if (client == null || !client.isConnected())
-        {
-            //TODO: ERROR!
-            showErrorDialogTerminate(getString(R.string.session_terminated));
-            infoLayout.setVisibility(View.GONE);
-        }
-        else
-        {
-            //setup the screen
-            Log.d(TAG, "Resume Connection session: " + newSessionId);
-            displaySessionStatus(newSessionId);
-        }
+        viewModel.getClient(this, newSessionId, client -> {
+            if (client == null || !client.isConnected())
+            {
+                //TODO: ERROR!
+                showErrorDialogTerminate(getString(R.string.session_terminated));
+                infoLayout.setVisibility(View.GONE);
+            }
+            else
+            {
+                //setup the screen
+                Log.d(TAG, "Resume Connection session: " + newSessionId);
+                setClient(client);
+            }
+        });
     }
 
     private void handleStartFromWCMessage(String sessionIdFromService)
@@ -229,14 +216,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             //restore different session
             session = viewModel.getSession(sessionIdFromService);
-            client = viewModel.getClient(sessionIdFromService);
-            setClientDisconnect(client);
+            viewModel.getClient(this, sessionIdFromService, this::setClient);
             qrCode = null;
             fromDappBrowser = false;
         }
+        else
+        {
+            //init UI
+            displaySessionStatus(sessionIdFromService);
+        }
+    }
 
-        //init UI
-        displaySessionStatus(sessionIdFromService);
+    private void setClient(WCClient receivedClient)
+    {
+        client = receivedClient;
+        displaySessionStatus(client.sessionId());
     }
 
     private void retrieveQrCode()
@@ -286,6 +280,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.serviceReady().observe(this, this::onServiceReady);
+
+        viewModel.startService(this);
     }
 
     private void initViews()
@@ -331,41 +327,39 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
             else //existing session, rebuild the session data
             {
-                client = viewModel.getClient(sessionId);
-                Log.d(TAG, "Resume Session: " + getSessionId());
                 //try to retrieve the session from database
+                final String thisConnectionId = connectionId;
                 session = viewModel.getSession(sessionId);
                 peerId = viewModel.getPeerId(sessionId);
                 displaySessionStatus(sessionId);
 
-                if (client == null || !client.isConnected())
-                {
-                    if (!fromSessionActivity && (session == null || client == null))
+                viewModel.getClient(this, sessionId, client -> {
+                    Log.d(TAG, "Resume Session: " + getSessionId());
+
+                    if (client == null || !client.isConnected())
                     {
-                        showErrorDialogTerminate(getString(R.string.session_terminated));
-                        infoLayout.setVisibility(View.GONE);
+                        if (client == null || (!fromSessionActivity && session == null))
+                        {
+                            showErrorDialogTerminate(getString(R.string.session_terminated));
+                            infoLayout.setVisibility(View.GONE);
+                        }
+                        else
+                        {
+                            //attempt to restart the session; this will allow session 'force' close
+                            initWalletConnectPeerMeta();
+                            startClient();
+                            initWalletConnectSession(peerId, thisConnectionId);
+                            startup = false;
+                        }
                     }
                     else
                     {
-                        //attempt to restart the session; this will allow session 'force' close
-                        initWalletConnectPeerMeta();
-                        client = startClient();
-                        initWalletConnectSession(peerId, connectionId);
-                        startup = false;
-                        return;
+                        viewModel.getPendingRequest(this, getSessionId());
+                        setClient(client);
                     }
-                }
+                });
 
                 startup = false;
-                if (requestId > 0)
-                {
-                    WCRequest rq = viewModel.getCurrentRequest();
-                    if (rq != null && rq.id == requestId)
-                    {
-                        if (BuildConfig.DEBUG) System.out.println("WC: " + rq.sessionId);
-                        actionMessage(rq);
-                    }
-                }
                 return;
             }
 
@@ -380,23 +374,48 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         startup = false;
     }
 
+    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Received message");
+            String action = intent.getAction();
+            switch (action)
+            {
+                case C.WALLET_CONNECT_REQUEST:
+                case C.WALLET_CONNECT_NEW_SESSION:
+                    getPendingRequest();
+                    break;
+                case C.WALLET_CONNECT_FAIL:
+                    //TODO
+                    break;
+                case C.WALLET_CONNECT_CLIENT_TERMINATE:
+                    String sessionId = intent.getStringExtra("sessionid");
+                    if (client != null && client.sessionId().equals(sessionId))
+                    {
+                        finish();
+                    }
+                    break;
+            }
+        }
+    };
+
+    private void getPendingRequest()
+    {
+        viewModel.getPendingRequest(this, getSessionId());
+    }
+
+    @Override
+    public void receiveRequest(WCRequest request)
+    {
+        actionMessage(request);
+    }
+
     private void startMessageCheck()
     {
-        if (messageCheck != null && !messageCheck.isDisposed()) messageCheck.dispose();
-
-        messageCheck = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
-                .doOnNext(l -> checkMessages()).subscribe();
-    }
-
-    private void stopMessageCheck()
-    {
-        if (messageCheck != null && !messageCheck.isDisposed()) messageCheck.dispose();
-    }
-
-    private void checkMessages()
-    {
-        WCRequest rq = viewModel.getPendingRequest(getSessionId());
-        actionMessage(rq);
+        IntentFilter filter = new IntentFilter(C.WALLET_CONNECT_REQUEST);
+        filter.addAction(C.WALLET_CONNECT_NEW_SESSION);
+        filter.addAction(C.WALLET_CONNECT_FAIL);
+        registerReceiver(walletConnectActionReceiver, filter);
     }
 
     private void actionMessage(WCRequest rq)
@@ -506,12 +525,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         client = startClient();
 
         client.setOnWCOpen(peerId -> {
-            viewModel.putClient(getSessionId(), client);
+            viewModel.putClient(this, getSessionId(), client);
             Log.d(TAG, "On Open: " + peerId);
             return Unit.INSTANCE;
         });
-
-        setClientDisconnect(client);
     }
 
     private WCClient startClient()
@@ -524,33 +541,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 .retryOnConnectionFailure(true)
                 .build();
         return new WCClient(new GsonBuilder(), httpClient);
-    }
-
-    public void setClientDisconnect(WCClient thisClient)
-    {
-        thisClient.setOnDisconnect((code, reason) -> {
-            Log.d(TAG, "Terminate session?");
-            if (viewModel != null) viewModel.pruneSession(client.sessionId());
-            if (terminateSession)
-            {
-                Log.d(TAG, "WalletConnect terminated from dialog");
-                shutDown();
-            }
-            else if (!sessionStarted)
-            {
-                runOnUiThread(() -> {
-                    showErrorDialog("WalletConnect refused session.");
-                });
-            }
-            else
-            {
-                //normal disconnect
-                Log.d(TAG, "WalletConnect terminated from peer");
-                shutDown();
-            }
-            sessionStarted = false;
-            return Unit.INSTANCE;
-        });
     }
 
     @Override
@@ -568,8 +558,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onResume();
         startMessageCheck();
-        Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        orientation = display.getRotation();
+        orientation = this.getDisplay().getRotation();
     }
 
     private void displaySessionStatus(String sessionId)
@@ -581,9 +570,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (remotePeerData != null)
         {
-            Glide.with(this)
-                    .load(remotePeerData.getIcons().get(0))
-                    .into(icon);
+            if (remotePeerData.getIcons().isEmpty())
+            {
+                icon.setImageResource(R.drawable.ic_coin_eth_small);
+            }
+            else
+            {
+                Glide.with(this)
+                        .load(remotePeerData.getIcons().get(0))
+                        .into(icon);
+            }
             peerName.setText(remotePeerData.getName());
             peerUrl.setText(remotePeerData.getUrl());
             chainName.setChainID(viewModel.getChainId(sessionId));
@@ -688,8 +684,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         switch (message.getType())
         {
             case MESSAGE:
-                signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_MESSAGE);
-                break;
+                // see https://docs.walletconnect.org/json-rpc-api-methods/ethereum
+                // WalletConnect doesn't provide access to deprecated eth_sign
+                // Instead it uses sign_personal for both
+                // signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_MESSAGE);
+                // break;
+                // Drop through
             case PERSONAL_MESSAGE:
                 signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_PERSONAL_MESSAGE);
                 break;
@@ -715,12 +715,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onFailure(Throwable throwable)
     {
-        if (!checkValidity())
-        {
-            killSession();
-            return;
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                 .setMessage(throwable.getMessage())
@@ -753,16 +747,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             public void DAppReturn(byte[] data, Signable message)
             {
                 //store sign
-                viewModel.recordSign(signable, getSessionId());
-                viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
-                confirmationDialog.success();
-                updateSignCount();
-                if (fromDappBrowser)
-                {
-                    confirmationDialog.forceDismiss();
-                    switchToDappBrowser();
-                }
-                requestId = 0;
+                viewModel.recordSign(signable, getSessionId(), () -> {
+                    viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
+                    confirmationDialog.success();
+                    updateSignCount();
+                    if (fromDappBrowser)
+                    {
+                        confirmationDialog.forceDismiss();
+                        switchToDappBrowser();
+                    }
+                    requestId = 0;
+                });
             }
         };
 
@@ -796,7 +791,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 requestId = 0;
                 showErrorDialogCancel(getString(R.string.title_dialog_error), getString(R.string.message_authentication_failed));
-                viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_authentication_failed));
+                viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
                 confirmationDialog.dismiss();
                 if (fromDappBrowser) switchToDappBrowser();
             }
@@ -867,18 +862,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void monitorForShutdown()
-    {
-        if (client == null || session == null || !client.isConnected())
-        {
-            finish();
-        }
-        else
-        {
-            handler.postDelayed(this::monitorForShutdown, 500);
-        }
-    }
-
     private void killSession()
     {
         terminateSession = true;
@@ -897,7 +880,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void onPause()
     {
         super.onPause();
-        stopMessageCheck();
+        unregisterReceiver(walletConnectActionReceiver);
     }
 
     @Override
@@ -909,12 +892,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialog(String message)
     {
-        if (!checkValidity())
-        {
-            killSession();
-            return;
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
                 .setMessage(message)
@@ -935,21 +912,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialogCancel(String title, String message)
     {
-        if (!checkValidity())
-        {
-            killSession();
-            return;
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(R.string.action_cancel, (d, w) -> {
                     d.dismiss();
-//                    if (fromPhoneBrowser || fromDappBrowser)
-//                    {
-//                        finish();
-//                    }
                 })
                 .setCancelable(false)
                 .create();
@@ -971,26 +938,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void shutDown()
+    @Override
+    public void finish()
     {
-        finish();
-        handler.postDelayed(this::shutDown, 500);
+        super.finish();
     }
 
     private void endSessionDialog()
     {
-        if (!checkValidity())
-        {
-            killSession();
-            return;
-        }
-
         runOnUiThread(() -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
             AlertDialog dialog = builder.setTitle(R.string.dialog_title_disconnect_session)
                     .setPositiveButton(R.string.dialog_ok, (d, w) -> {
                         killSession();
-                        monitorForShutdown();
                     })
                     .setNegativeButton(R.string.action_cancel, (d, w) -> {
                         d.dismiss();
@@ -1000,19 +960,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
     }
 
-    private boolean checkValidity()
-    {
-        return (WalletConnectActivity.this != null && !WalletConnectActivity.this.isDestroyed() && !WalletConnectActivity.this.isFinishing());
-    }
-
     private void showErrorDialogTerminate(String message)
     {
-        if (!checkValidity())
-        {
-            killSession();
-            return;
-        }
-
         runOnUiThread(() -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
             AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
@@ -1070,11 +1019,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             showErrorDialogCancel(peerName.getText().toString(), getString(R.string.message_transaction_not_sent));
             if (requestCode == C.REQUEST_TRANSACTION_CALLBACK)
             {
-                viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_authentication_failed));
+                viewModel.rejectRequest(this, getSessionId(), lastId, getString(R.string.message_authentication_failed));
             }
             else
             {
-                viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_reject_request));
+                viewModel.rejectRequest(this, getSessionId(), lastId, getString(R.string.message_reject_request));
             }
         }
     }
@@ -1088,12 +1037,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
             viewModel.recordSignTransaction(getApplicationContext(), web3Tx, client.getChainId(), getSessionId());
-            viewModel.approveRequest(getSessionId(), lastId, hashData);
+            viewModel.approveRequest(this, getSessionId(), lastId, hashData);
         }
         else if (web3Tx != null)
         {
             showErrorDialogCancel(getString(R.string.title_wallet_connect), getString(R.string.message_transaction_not_sent));
-            viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_reject_request));
+            viewModel.rejectRequest(this, getSessionId(), lastId, getString(R.string.message_reject_request));
         }
 
         if (fromDappBrowser)
@@ -1126,7 +1075,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 viewModel.recordSignTransaction(getApplicationContext(), web3Tx, client.getChainId(), getSessionId());
                 updateSignCount();
-                viewModel.approveRequest(getSessionId(), web3Tx.leafPosition, hashData);
+                viewModel.approveRequest(getApplication(), getSessionId(), web3Tx.leafPosition, hashData);
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
                 if (fromDappBrowser) switchToDappBrowser();
                 confirmationDialog.transactionWritten(hashData);
@@ -1137,7 +1086,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             public void transactionError(long callbackId, Throwable error)
             {
                 confirmationDialog.dismiss();
-                viewModel.rejectRequest(getSessionId(), lastId, getString(R.string.message_authentication_failed));
+                viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
                 requestId = 0;
             }
         };
@@ -1151,7 +1100,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         //actionsheet dismissed - if action not completed then user cancelled
         if (!actionCompleted)
         {
-            viewModel.rejectRequest(getSessionId(), callbackId, getString(R.string.message_reject_request));
+            viewModel.rejectRequest(this, getSessionId(), callbackId, getString(R.string.message_reject_request));
         }
 
         if (fromDappBrowser) switchToDappBrowser();
@@ -1183,7 +1132,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 viewModel.recordSignTransaction(getApplicationContext(), tx, client.getChainId(), getSessionId());
                 updateSignCount();
-                viewModel.approveRequest(getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
+                viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
                 if (fromDappBrowser) switchToDappBrowser();
                 requestId = 0;

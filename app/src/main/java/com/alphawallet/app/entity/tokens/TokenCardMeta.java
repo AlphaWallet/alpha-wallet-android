@@ -67,6 +67,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.balance = token.balance.toString();
         this.filterText = token.getShortSymbol() + "'" + token.getName(); //TODO: will not find AssetDefinition names
         this.group = defineSortGroup();
+        this.isEnabled = true;
     }
 
     protected TokenCardMeta(Parcel in)
@@ -287,7 +288,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
                 {
                     updateWeight = 0.5f; //1 minute
                 }
-                else if (hasPositiveBalance())
+                else if (hasPositiveBalance() && isEnabled)
                 {
                     updateWeight = 0.3f; //100 seconds
                 }

@@ -1,6 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,9 +36,12 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.WalletConnectService;
+import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
@@ -56,6 +60,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -74,9 +79,6 @@ public class WalletConnectViewModel extends BaseViewModel {
     private final GasService gasService;
     private final TokensService tokensService;
     private final AnalyticsServiceType analyticsService;
-    private final Context context;
-    private WalletConnectService walletConnectService;
-    private final ServiceConnection serviceConnection;
 
     private final HashMap<String, WCClient> clientBuffer = new HashMap<>();
 
@@ -94,32 +96,29 @@ public class WalletConnectViewModel extends BaseViewModel {
                            RealmManager realmManager,
                            GasService gasService,
                            TokensService tokensService,
-                           AnalyticsServiceType analyticsService,
-                           Context ctx) {
+                           AnalyticsServiceType analyticsService) {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.realmManager = realmManager;
-        this.context = ctx;
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
-        serviceConnection = startService();
         prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
                 .subscribe(w -> this.wallet = w, this::onError);
     }
 
-    public ServiceConnection startService()
+    public void startService(Context context)
     {
-        ServiceConnection serviceConnection = new ServiceConnection()
+        ServiceConnection connection = new ServiceConnection()
         {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
             {
-                walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
                 Log.d(TAG, "Service connected");
                 for (String sessionId : clientBuffer.keySet())
                 {
@@ -134,7 +133,6 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceDisconnected(ComponentName name)
             {
-                walletConnectService = null;
                 Log.d(TAG, "Service disconnected");
             }
         };
@@ -142,9 +140,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         Intent i = new Intent(context, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
         context.startService(i);
-        context.bindService(i, serviceConnection, Context.BIND_ABOVE_CLIENT);
-
-        return serviceConnection;
+        context.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
     }
 
     public void prepare()
@@ -257,34 +253,6 @@ public class WalletConnectViewModel extends BaseViewModel {
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
-    }
-
-    public WCClient getClient(String sessionId)
-    {
-        //may fail.
-        if (walletConnectService == null || TextUtils.isEmpty(sessionId))
-        {
-            return null;
-        }
-        else
-        {
-            Log.d(TAG, "fetch: " + sessionId);
-            return walletConnectService.getClient(sessionId);
-        }
-    }
-
-    public void putClient(String sessionId, WCClient client)
-    {
-        if (walletConnectService == null)
-        {
-            clientBuffer.put(sessionId, client);
-            Log.d(TAG, "buffering: " + sessionId);
-        }
-        else
-        {
-            Log.d(TAG, "put: " + sessionId);
-            walletConnectService.putClient(sessionId, client);
-        }
     }
 
     public WCSession getSession(String sessionId)
@@ -400,7 +368,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         });
     }
 
-    public void recordSign(Signable signable, String sessionId)
+    public void recordSign(Signable signable, String sessionId, Realm.Transaction.OnSuccess onSuccess)
     {
         realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
             RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
@@ -412,7 +380,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             signMessage.setSignType(signType);
             signMessage.setSignTime(System.currentTimeMillis());
             signMessage.setSignMessage(signable.getUserMessage());
-        });
+        }, onSuccess);
     }
 
     public void recordSignTransaction(Context ctx, Web3Transaction tx, String chainIdStr, String sessionId)
@@ -458,32 +426,102 @@ public class WalletConnectViewModel extends BaseViewModel {
         return sessions;
     }
 
-    public WCRequest getPendingRequest(String sessionId)
+    public void getPendingRequest(WalletConnectActivity activity, String sessionId)
     {
-        if (walletConnectService != null) return walletConnectService.getPendingRequest(sessionId);
-        else return null;
+        ServiceConnection connection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service)
+            {
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                ((WalletConnectCallback)activity).receiveRequest(walletConnectService.getPendingRequest(sessionId));
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name)
+            {
+                //walletConnectService = null;
+                Log.d(TAG, "Service disconnected");
+            }
+        };
+
+        Intent i = new Intent(activity, WalletConnectService.class);
+        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
+        activity.startService(i);
+        activity.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
     }
 
-    public WCRequest getCurrentRequest()
+    public void getCurrentRequest(WalletConnectActivity activity)
     {
-        if (walletConnectService != null) return walletConnectService.getCurrentRequest();
-        else return null;
+        getPendingRequest(activity, "");
     }
 
-    public void rejectRequest(String sessionId, long id, String message)
+    public void getClient(Activity activity, String sessionId, GetClientCallback clientCb)
     {
-        if (walletConnectService != null) walletConnectService.rejectRequest(sessionId, id, message);
+        ServiceConnection connection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service)
+            {
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                clientCb.getClient(walletConnectService.getClient(sessionId));
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name)
+            {
+                Log.d(TAG, "Service disconnected");
+            }
+        };
+
+        Intent i = new Intent(activity, WalletConnectService.class);
+        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
+        activity.startService(i);
+        activity.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
     }
 
-    public void approveRequest(String sessionId, long id, String message)
+    public void putClient(Activity activity, String sessionId, WCClient client)
     {
-        if (walletConnectService != null) walletConnectService.approveRequest(sessionId, id, message);
+        ServiceConnection connection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service)
+            {
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                walletConnectService.putClient(sessionId, client);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name)
+            {
+                Log.d(TAG, "Service disconnected");
+            }
+        };
+
+        Intent i = new Intent(activity, WalletConnectService.class);
+        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
+        activity.startService(i);
+        activity.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
     }
 
-    public int getConnectionCount()
+    public void rejectRequest(Context ctx, String sessionId, long id, String message)
     {
-        if (walletConnectService != null) return walletConnectService.getConnectionCount();
-        else return 0;
+        Intent bIntent = new Intent(ctx, WalletConnectService.class);
+        bIntent.setAction(String.valueOf(WalletConnectActions.REJECT.ordinal()));
+        bIntent.putExtra("sessionId", sessionId);
+        bIntent.putExtra("id", id);
+        bIntent.putExtra("message", message);
+        ctx.startService(bIntent);
+    }
+
+    public void approveRequest(Context ctx, String sessionId, long id, String message)
+    {
+        Intent bIntent = new Intent(ctx, WalletConnectService.class);
+        bIntent.setAction(String.valueOf(WalletConnectActions.APPROVE.ordinal()));
+        bIntent.putExtra("sessionId", sessionId);
+        bIntent.putExtra("id", id);
+        bIntent.putExtra("message", message);
+        ctx.startService(bIntent);
     }
 
     public String getNetworkSymbol(int chainId)
@@ -499,11 +537,6 @@ public class WalletConnectViewModel extends BaseViewModel {
         analyticsProperties.setData("(WC)" + mode); //disambiguate signs/sends etc through WC
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
-    }
-
-    public boolean connectedToService()
-    {
-        return walletConnectService != null;
     }
 
     public void prepareIfRequired()

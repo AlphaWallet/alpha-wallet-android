@@ -14,7 +14,6 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -47,7 +46,6 @@ public class SendViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final AddTokenInteract addTokenInteract;
     private final GasService gasService;
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
@@ -59,7 +57,6 @@ public class SendViewModel extends BaseViewModel {
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                          TokensService tokensService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         AddTokenInteract addTokenInteract,
                          CreateTransactionInteract createTransactionInteract,
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
@@ -71,7 +68,6 @@ public class SendViewModel extends BaseViewModel {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.addTokenInteract = addTokenInteract;
         this.gasService = gasService;
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
@@ -116,8 +112,7 @@ public class SendViewModel extends BaseViewModel {
 
     private void gotTokenUpdate(TokenInfo tokenInfo, String walletAddress)
     {
-        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
-                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, new Wallet(walletAddress)))
+        disposable = tokensService.addToken(tokenInfo, walletAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(finalisedToken::postValue, this::onError);

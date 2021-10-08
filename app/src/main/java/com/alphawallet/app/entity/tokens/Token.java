@@ -2,6 +2,8 @@ package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -25,7 +27,6 @@ import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
-import org.w3c.dom.Text;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Utf8String;
@@ -47,6 +48,7 @@ import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+import static android.text.Html.FROM_HTML_MODE_COMPACT;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
 public class Token
@@ -170,7 +172,7 @@ public class Token
         if (isBad()) return TokensService.UNKNOWN_CONTRACT;
         String name = tokenInfo.name == null ? "" : tokenInfo.name;
         String symbol = (tokenInfo.symbol == null || tokenInfo.symbol.length() == 0) ? "" : " (" + tokenInfo.symbol.toUpperCase() + ")";
-        return name + symbol;
+        return sanitiseString(name + symbol);
     }
 
     public String getFullName(AssetDefinitionService assetDefinition, int count)
@@ -228,7 +230,25 @@ public class Token
             }
         }
 
-        return sb.toString();
+        str = sb.toString();
+
+        //Don't convert to Html if name contains any kind of link; protect user from potential link spam
+        if (str.toLowerCase().contains("<a href="))
+        {
+            return str;
+        }
+        else
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
+            }
+            else
+            {
+                //noinspection deprecation
+                return Html.fromHtml(str).toString();
+            }
+        }
     }
 
     private String getShortestNameOrSymbol()
@@ -290,9 +310,7 @@ public class Token
     public Map<BigInteger, NFTAsset> getTokenAssets() {
         return null;
     }
-    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId) {
-        return null;
-    }
+
     public Map<BigInteger, NFTAsset> getCollectionMap() { return null; }
 
     public List<BigInteger> ticketIdStringToIndexList(String userList)
@@ -323,6 +341,11 @@ public class Token
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
+    }
+
+    public boolean checkBalanceChange(Token oldToken)
+    {
+        return !getFullBalance().equals(oldToken.getFullBalance()) || !getFullName().equals(oldToken.getFullName());
     }
 
     public void setIsEthereum()

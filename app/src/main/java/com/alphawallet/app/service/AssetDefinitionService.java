@@ -138,7 +138,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private FileObserver fileObserverQ;                    //Observer for Android Q directory
     private final NotificationService notificationService;
     private final RealmManager realmManager;
-    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokensService;
     private final TokenLocalSource tokenLocalSource;
     private final AlphaWalletService alphaWalletService;
@@ -160,7 +159,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     *  This is shorthand in the project to indicate this is a singleton that other classes inject.
     *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
-                                  RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService,
+                                  RealmManager rm, TokensService tokensService,
                                   TokenLocalSource trs, TransactionRepositoryType trt,
                                   AlphaWalletService alphaService)
     {
@@ -169,7 +168,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetChecked = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
-        ethereumNetworkRepository = eth;
         alphaWalletService = alphaService;
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions

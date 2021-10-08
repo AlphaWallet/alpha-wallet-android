@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -51,6 +52,7 @@ public class WalletViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
+    private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
     private final ManageWalletsRouter manageWalletsRouter;
     private long lastBackupCheck = 0;
@@ -64,7 +66,8 @@ public class WalletViewModel extends BaseViewModel
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
-            ManageWalletsRouter manageWalletsRouter)
+            ManageWalletsRouter manageWalletsRouter,
+            PreferenceRepositoryType preferenceRepository)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -75,6 +78,7 @@ public class WalletViewModel extends BaseViewModel
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
+        this.preferenceRepository = preferenceRepository;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -285,7 +289,16 @@ public class WalletViewModel extends BaseViewModel
                 .subscribe(fiatValues::postValue);
     }
 
-    public void showManageWallets(Context context, boolean clearStack) {
+    public void showManageWallets(Context context, boolean clearStack)
+    {
         manageWalletsRouter.open(context, clearStack);
+    }
+
+    public boolean isMarshMallowWarningShown() {
+        return preferenceRepository.isMarshMallowWarningShown();
+    }
+
+    public void setMarshMallowWarning(boolean shown) {
+        preferenceRepository.setMarshMallowWarning(shown);
     }
 }

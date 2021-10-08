@@ -1,8 +1,9 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

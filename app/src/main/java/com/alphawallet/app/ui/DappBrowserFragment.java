@@ -427,8 +427,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
-    private void updateNetworkMenuItem() {
-        toolbar.getMenu().findItem(R.id.action_network).setTitle(getString(R.string.network_menu_item, activeNetwork.getShortName()));
+    private void updateNetworkMenuItem()
+    {
+        if (activeNetwork != null)
+            toolbar.getMenu().findItem(R.id.action_network).setTitle(getString(R.string.network_menu_item, activeNetwork.getShortName()));
     }
 
     private void initView(@NotNull View view) {

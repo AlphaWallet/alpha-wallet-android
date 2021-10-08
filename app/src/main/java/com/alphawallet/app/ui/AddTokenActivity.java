@@ -282,7 +282,11 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onTokenInfo(TokenInfo tokenInfo)
     {
-        tokenInfo.addTokenSetupPage(this);
+        inputAddressView.setAddress(tokenInfo.address);
+        symbolInputView.setText(tokenInfo.symbol);
+        decimalsInputView.setText(String.valueOf(tokenInfo.decimals));
+        nameInputView.setText(tokenInfo.name);
+        ticketLayout.setVisibility(View.GONE);
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -509,5 +513,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     public void addressReady(String address, String ensName)
     {
         saveFinal(address);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (viewModel != null) viewModel.stopScan();
     }
 }

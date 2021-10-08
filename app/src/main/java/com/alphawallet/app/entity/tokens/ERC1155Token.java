@@ -413,7 +413,27 @@ public class ERC1155Token extends Token
         //check balances
         for (NFTAsset a : assets.values())
         {
-            if (!a.needsLoading() && !a.requiresReplacement()) return true;
+            if (!a.needsLoading() && !a.requiresReplacement())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkBalanceChange(Token oldToken)
+    {
+        if (super.checkBalanceChange(oldToken)) return true;
+        if (getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+        for (BigInteger tokenId : assets.keySet())
+        {
+            NFTAsset newAsset = assets.get(tokenId);
+            NFTAsset oldAsset = oldToken.getAssetForToken(tokenId);
+            if (newAsset == null || oldAsset == null || !newAsset.equals(oldAsset))
+            {
+                return true;
+            }
         }
         return false;
     }

@@ -94,6 +94,7 @@ public class RealmToken extends RealmObject {
 
     public void setBalance(String balance) {
         this.balance = balance;
+        addedTime = System.currentTimeMillis();
     }
 
     public boolean getEnabled() {

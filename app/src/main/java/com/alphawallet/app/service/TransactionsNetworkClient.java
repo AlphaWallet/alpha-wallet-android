@@ -1,6 +1,7 @@
 package com.alphawallet.app.service;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -55,6 +56,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
+    private static final String TAG = "TXNETCLIENT";
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
     public static final int TRANSFER_RESULT_MAX = 250; //check 200 records when we first get a new account
@@ -538,6 +540,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 token = createNewERC721Token(eventMap.get(contract).get(0), networkInfo, walletAddress, false);
                 newToken = true;
+                if (BuildConfig.DEBUG) Log.d(TAG, "Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (tokenDecimal >= 0 && token == null)
             {
@@ -545,10 +548,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 token = new Token(info, BigDecimal.ZERO, 0, networkInfo.getShortName(),
                         tokenDecimal > 0 ? ContractType.ERC20 : ContractType.MAYBE_ERC20);
                 token.setTokenWallet(walletAddress);
+                newToken = true;
+                if (BuildConfig.DEBUG) Log.d(TAG, "Discover ERC20: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (token == null)
             {
                 svs.addUnknownTokenToCheck(new ContractAddress(networkInfo.chainId, ev0.contractAddress));
+                if (BuildConfig.DEBUG) Log.d(TAG, "Discover unknown: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
                 continue;
             }
 
@@ -558,7 +564,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             else //not NFT
             {
-                svs.storeToken(token);
+                if (newToken) svs.storeToken(token);
             }
 
             //Send to storage as soon as each token is done

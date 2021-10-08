@@ -199,6 +199,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             {
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
                         t.getUpdateTime(), t.getLastTxTime(), t.getContractType());
+                meta.isEnabled = t.isEnabled();
 
                 if (tokenMeta == null)
                 {

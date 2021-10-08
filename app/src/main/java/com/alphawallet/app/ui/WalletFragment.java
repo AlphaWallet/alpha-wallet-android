@@ -109,6 +109,7 @@ public class WalletFragment extends BaseFragment implements
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
+    private long lastTokenUpdateTime = Long.MAX_VALUE;
 
     @Nullable
     @Override
@@ -206,13 +207,18 @@ public class WalletFragment extends BaseFragment implements
     private void setRealmListener()
     {
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
-                .like("address", ADDRESS_FORMAT).findAllAsync();
+                .like("address", ADDRESS_FORMAT)
+                .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;
             List<TokenCardMeta> metas = new ArrayList<>();
+            long updateTime = 0;
             //make list
             for (RealmToken t : realmTokens)
             {
+                long tokenUpdateTime = t.getUpdateTime();
+                if (tokenUpdateTime > updateTime) updateTime = tokenUpdateTime;
+                if (tokenUpdateTime < lastTokenUpdateTime) continue;
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
                 if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
@@ -221,10 +227,13 @@ public class WalletFragment extends BaseFragment implements
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
                         t.getUpdateTime(), viewModel.getAssetDefinitionService(), t.getName(), t.getSymbol(), t.getContractType());
                 meta.lastTxUpdate = t.getLastTxTime();
+                meta.isEnabled = t.isEnabled();
                 metas.add(meta);
             }
 
-            updateMetas(metas);
+            if (metas.size() > 0) updateMetas(metas);
+
+            lastTokenUpdateTime = updateTime + 1;
         });
     }
 

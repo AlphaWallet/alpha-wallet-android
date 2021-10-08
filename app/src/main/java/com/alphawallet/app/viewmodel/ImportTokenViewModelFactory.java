@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -27,7 +26,6 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final TokensService tokensService;
     private final AlphaWalletService alphaWalletService;
-    private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
@@ -39,7 +37,6 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
                                        FetchTokensInteract fetchTokensInteract,
                                        TokensService tokensService,
                                        AlphaWalletService alphaWalletService,
-                                       AddTokenInteract addTokenInteract,
                                        EthereumNetworkRepositoryType ethereumNetworkRepository,
                                        AssetDefinitionService assetDefinitionService,
                                        FetchTransactionsInteract fetchTransactionsInteract,
@@ -50,7 +47,6 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokensService = tokensService;
         this.alphaWalletService = alphaWalletService;
-        this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -61,7 +57,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(genericWalletInteract, createTransactionInteract, fetchTokensInteract, tokensService, alphaWalletService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
+        return (T) new ImportTokenViewModel(genericWalletInteract, createTransactionInteract, fetchTokensInteract, tokensService, alphaWalletService, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 }
 

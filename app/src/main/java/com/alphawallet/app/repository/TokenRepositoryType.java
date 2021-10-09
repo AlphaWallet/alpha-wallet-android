@@ -27,11 +27,10 @@ public interface TokenRepositoryType {
     Single<BigDecimal> updateTokenBalance(String walletAddress, Token token);
     Single<ContractLocator> getTokenResponse(String address, int chainId, String method);
     Single<Token[]> checkInterface(Token[] tokens, Wallet wallet);
-    Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
-    Completable setVisibilityChanged(Wallet wallet, Token token);
+    void setEnable(Wallet wallet, Token token, boolean isEnabled);
+    void setVisibilityChanged(Wallet wallet, Token token);
     Single<TokenInfo> update(String address, int chainId);
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
-    Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
     Single<TokenTicker> getEthTicker(int chainId);
     TokenTicker getTokenTicker(Token token);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);

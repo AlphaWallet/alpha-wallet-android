@@ -78,6 +78,10 @@ public class TokensRealmSource implements TokenLocalSource {
                     }
                 });
             }
+            catch (Exception e)
+            {
+                //
+            }
             return items;
         });
     }
@@ -480,31 +484,6 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress)
-    {
-        if (tokenAddress == null) tokenAddress = wallet.address; //base chain update
-        String key = databaseKey(chainId, tokenAddress.toLowerCase());
-        try (Realm realm = realmManager.getRealmInstance(wallet))
-        {
-            realm.executeTransaction(r -> {
-                RealmToken realmToken = r.where(RealmToken.class)
-                        .equalTo("address", key)
-                        .equalTo("chainId", chainId)
-                        .findFirst();
-
-                if (realmToken != null)
-                {
-                    realmToken.setUpdateTime(System.currentTimeMillis());
-                }
-            });
-        }
-        catch (Exception e)
-        {
-            //
-        }
-    }
-
-    @Override
     public boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray)
     {
         boolean balanceChanged = false;
@@ -578,13 +557,17 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 realm.executeTransaction(r -> saveToken(r, token));
             }
-            else if (realmToken != null && token.checkRealmBalanceChange(realmToken))
+            else if (realmToken != null)
             {
-                realm.executeTransaction(r -> {
-                    token.setRealmBalance(realmToken);
-                    realmToken.updateTokenInfoIfRequired(token.tokenInfo);
-                    token.setRealmInterfaceSpec(realmToken);
-                });
+                Token oldToken = convertSingle(realmToken, realm, null, wallet);
+                if (token.checkBalanceChange(oldToken))
+                {
+                    realm.executeTransaction(r -> {
+                        token.setRealmBalance(realmToken);
+                        realmToken.updateTokenInfoIfRequired(token.tokenInfo);
+                        token.setRealmInterfaceSpec(realmToken);
+                    });
+                }
             }
         }
         catch (Exception ex)
@@ -624,6 +607,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 .equalTo("chainId", token.tokenInfo.chainId)
                 .findFirst();
 
+        boolean wasNew = false;
+
         if (realmToken == null)
         {
             if (BuildConfig.DEBUG) Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address + " : " + token.balance.toString());
@@ -631,34 +616,39 @@ public class TokensRealmSource implements TokenLocalSource {
             realmToken.setName(token.tokenInfo.name);
             realmToken.setSymbol(token.tokenInfo.symbol);
             realmToken.setDecimals(token.tokenInfo.decimals);
-            realmToken.setUpdateTime(token.updateBlancaTime);
             token.setRealmBalance(realmToken);
             token.setRealmInterfaceSpec(realmToken);
             token.setRealmLastBlock(realmToken);
             realmToken.setEnabled(token.tokenInfo.isEnabled);
             realmToken.setChainId(token.tokenInfo.chainId);
+            wasNew = true;
         }
         else
         {
             if (BuildConfig.DEBUG) Log.d(TAG, "Update Token: " + token.getFullName());
             realmToken.updateTokenInfoIfRequired(token.tokenInfo);
+            Token oldToken = convertSingle(realmToken, realm, null, new Wallet(token.getWallet()));
 
-            if (token.checkRealmBalanceChange(realmToken))
+            if (token.checkBalanceChange(oldToken))
             {
                 //has token changed?
-                realmToken.setUpdateTime(token.updateBlancaTime);
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmBalance(realmToken);
                 token.setRealmLastBlock(realmToken);
+                writeAssetContract(realm, token);
             }
         }
 
-        writeAssetContract(realm, token);
+        if (wasNew && BuildConfig.DEBUG && realmToken.isEnabled())
+        {
+            Log.d(TAG, "Save New Token already enabled");
+        }
 
         //Final check to see if the token should be visible
         if ((token.balance.compareTo(BigDecimal.ZERO) > 0 || token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0)
                 && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
+            if (wasNew && BuildConfig.DEBUG) Log.d(TAG, "Save New Token set enable");
             token.tokenInfo.isEnabled = true;
             realmToken.setEnabled(true);
         }
@@ -825,20 +815,23 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                     .sort("addedTime", Sort.ASCENDING)
-                    .beginGroup().equalTo("isEnabled", true).or().like("address", wallet.address + "*", Case.INSENSITIVE).endGroup()
-                    .like("address", ADDRESS_FORMAT)
+                    //.beginGroup().equalTo("isEnabled", true).or().like("address", wallet.address + "*", Case.INSENSITIVE).endGroup()
+                    .beginGroup().equalTo("isEnabled", true).or().equalTo("visibilityChanged", false)
+                        .or().like("address", wallet.address + "*", Case.INSENSITIVE).endGroup()
+                    //.like("address", ADDRESS_FORMAT)
                     .findAll();
 
             for (RealmToken t : realmItems)
             {
                 if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) ||
-                        (t.getContractType() != ContractType.ETHEREUM && !t.getEnabled()) ||
+                        (!t.getEnabled() && t.isVisibilityChanged()) || // Don't update tokens hidden by user
                         (ethereumNetworkRepository.isChainContract(t.getChainId(), t.getTokenAddress()))) continue;
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(),
                         convertStringBalance(t.getBalance(), t.getContractType()), t.getUpdateTime(),
                         null, t.getName(), t.getSymbol(), t.getContractType());
                 meta.lastTxUpdate = t.getLastTxTime();
+                meta.isEnabled = t.isEnabled();
 
                 tokenMetas.add(meta);
 
@@ -859,6 +852,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, null, "", "", ContractType.ETHEREUM);
                 meta.lastTxUpdate = 0;
+                meta.isEnabled = true;
                 tokenMetas.add(meta);
             }
         }
@@ -909,6 +903,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), t.getContractType());
                     meta.lastTxUpdate = t.getLastTxTime();
                     tokenMetas.add(meta);
+                    meta.isEnabled = t.isEnabled();
                 }
 
                 removeLocalTickers(realm); //delete any local tickers, these have all moved into a single realm
@@ -1009,6 +1004,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType());
                     meta.lastTxUpdate = t.getLastTxTime();
+                    meta.isEnabled = t.isEnabled();
                     tokenMetas.add(meta);
                 }
             }

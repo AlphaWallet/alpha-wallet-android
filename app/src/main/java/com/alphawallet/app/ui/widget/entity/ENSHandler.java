@@ -6,13 +6,13 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -239,7 +239,7 @@ public class ENSHandler implements Runnable
             initENSHandler();
             host.setWaitingSpinner(true);
 
-            disposable = ensResolver.resolveEnsName(to)
+            disposable = ensResolver.reverseResolveEns(to)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
@@ -263,7 +263,7 @@ public class ENSHandler implements Runnable
     //Given an Ethereum address, check if we can find a matching ENS name
     public Single<String> resolveENSNameFromAddress(String address)
     {
-        return ensResolver.resolveEnsName(address);
+        return ensResolver.reverseResolveEns(address);
     }
 
     /**

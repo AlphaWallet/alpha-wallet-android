@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
 public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
 {
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
-    private static final String validator = "[^a-f^A-F^0-9]";
+    private static final String validator = "[^0x^\\s^a-f^A-F^0-9]";
+    private static final Pattern findKey = Pattern.compile("($|\\s?|0x?)([0-9a-fA-F]{64})($|\\s?)");
 
     private PasswordInputView privateKey;
     private Button importButton;
@@ -84,20 +85,27 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
 
         if (!TextUtils.isEmpty(value))
         {
-            value = Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
+            final Matcher matcher = findKey.matcher(value);
+            if (matcher.find())
+            {
+                value = matcher.group(2);
+            }
+
+            //value = Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
             if (value.length() == 64)
             {
+                privateKey.setText(value);
                 onImportPrivateKeyListener.onPrivateKey(value);
-                return;
             }
             else
             {
                 privateKey.setError(getString(R.string.suggestion_private_key));
-                return;
             }
         }
-
-        privateKey.setError(getString(R.string.error_field_required));
+        else
+        {
+            privateKey.setError(getString(R.string.error_field_required));
+        }
     }
 
     private void updateButtonState(boolean enabled)
@@ -136,8 +144,11 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
         {
             updateButtonState(false);
             privateKey.setError(R.string.private_key_check);
+            return;
         }
-        else if (value.length() > 10)
+
+        final Matcher privateKeyMatch = findKey.matcher(value);
+        if (privateKeyMatch.find())
         {
             updateButtonState(true);
         }
@@ -150,7 +161,15 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     public String getPrivateKey()
     {
         String value = privateKey.getText().toString();
-        return Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
+        final Matcher matcher = findKey.matcher(value);
+        if (matcher.find())
+        {
+            return matcher.group(2);
+        }
+        else
+        {
+            return "";
+        }
     }
 
     @Override

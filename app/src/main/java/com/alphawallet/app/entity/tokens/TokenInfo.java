@@ -69,12 +69,4 @@ public class TokenInfo implements Parcelable {
         dest.writeInt(isEnabled ? 1 : 0);
         dest.writeInt(chainId);
     }
-
-    public void addTokenSetupPage(AddTokenActivity layout) {
-        layout.inputAddressView.setAddress(address);
-        layout.symbolInputView.setText(symbol);
-        layout.decimalsInputView.setText(String.valueOf(decimals));
-        layout.nameInputView.setText(name);
-        layout.ticketLayout.setVisibility(View.GONE);
-    }
 }

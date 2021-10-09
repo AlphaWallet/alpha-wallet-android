@@ -311,54 +311,19 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
         Wallet wallet = new Wallet(walletAddress);
-        localSource.markBalanceChecked(wallet, token.tokenInfo.chainId, token.getAddress());
         return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }
 
-    @Override
-    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType contractType)
+    private Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType contractType)
     {
-        return Single.fromCallable(() -> {
-            TokenFactory tf      = new TokenFactory();
-            NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-            //check balance before we store it
-            List<BigInteger> balanceArray = null;
-            BigDecimal       balance      = BigDecimal.ZERO;
-            switch (contractType)
-            {
-                case ERC875:
-                case ERC875_LEGACY:
-                    balanceArray = checkERC875BalanceArray(wallet, tokenInfo, null);
-                    break;
-                case ERC721_LEGACY:
-                case ERC721:
-                    break;
-                case ERC1155:
-                    Token tToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(),
-                            contractType, network.getShortName(), 0);
-                    tToken.setTokenWallet(wallet.address);
-                    balance = tToken.updateBalance(null);
-                    break;
-                case ERC721_TICKET:
-                    balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
-                    break;
-                case ETHEREUM:
-                case ERC20:
-                    balance = wrappedCheckUint256Balance(wallet, tokenInfo, null); //this checks Uint256 balance
-                    if (balance.compareTo(BigDecimal.ZERO) < 0) balance = BigDecimal.ZERO;
-                    break;
-                default:
-                    break;
-            }
+        TokenFactory tf = new TokenFactory();
+        NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+        Token newToken = tf.createToken(tokenInfo, contractType, network.getShortName());
 
-            Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), contractType, network.getShortName(), 0);
-            newToken.setTokenWallet(wallet.address);
-            if (!tokenInfo.isEnabled) updateTokenVisibility(newToken);
-
-            return newToken;
-        }).flatMap(nToken -> localSource.saveToken(wallet, nToken));
+        return localSource.saveToken(wallet, newToken)
+                .flatMap(t-> updateBalance(network, wallet, t).map(bal -> newToken));
     }
 
     @Override
@@ -366,7 +331,8 @@ public class TokenRepository implements TokenRepositoryType {
     {
         if (tokens.length == 0) return Single.fromCallable(() -> tokens);
         return updateBalances(wallet, tokens)
-                .flatMap(tkns -> localSource.saveTokens(wallet, tokens));
+                .flatMap(tkns -> localSource.saveTokens(wallet, tokens))
+                .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -403,17 +369,15 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable setEnable(Wallet wallet, Token token, boolean isEnabled)
+    public void setEnable(Wallet wallet, Token token, boolean isEnabled)
     {
         localSource.setEnable(wallet, token, isEnabled);
-        return Completable.fromAction(() -> {});
     }
 
     @Override
-    public Completable setVisibilityChanged(Wallet wallet, Token token)
+    public void setVisibilityChanged(Wallet wallet, Token token)
     {
         localSource.setVisibilityChanged(wallet, token);
-        return Completable.fromAction(() -> {});
     }
 
     @Override
@@ -430,7 +394,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
-        //final int chainId, final String tokenAddress, ContractType type
         return Single.fromCallable(() -> {
                 BigDecimal balance = BigDecimal.valueOf(-1);
                 try
@@ -449,8 +412,13 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
+                        case ERC20:
+                        case DYNAMIC_CONTRACT:
                             //checking raw balance, this only gives the count of tokens
                             balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
+                            break;
+                        case MAYBE_ERC20:
+                            balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
                             break;
                         case ERC1155:
                             balance = token.updateBalance(getRealmInstance(wallet));
@@ -459,13 +427,7 @@ public class TokenRepository implements TokenRepositoryType {
                             balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
-                        case ERC20:
-                        case DYNAMIC_CONTRACT:
-                        case MAYBE_ERC20:
-                            balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
-                            break;
                         case NOT_SET:
-                            break;
                         case OTHER:
                             //This token has its interface checked in the flow elsewhere
                             break;
@@ -476,6 +438,10 @@ public class TokenRepository implements TokenRepositoryType {
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
                         localSource.updateTokenBalance(wallet, token, balance, balanceArray);
+                    }
+                    else
+                    {
+                        balance = token.balance;
                     }
 
                     if (token.isEthereum() && wallet.address.equalsIgnoreCase(token.getWallet()))
@@ -539,71 +505,8 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token)
     {
         if (token == null) return Single.fromCallable(() -> null);
-        else return Single.fromCallable(() -> {
-            Token updated = updateTokenBalance(network, wallet, token);
-            localSource.updateTokenBalance(network, wallet, updated);
-            return updated;
-        });
-    }
-
-    private Token updateTokenBalance(NetworkInfo network, Wallet wallet, final Token token)
-    {
-        TokenFactory tFactory = new TokenFactory();
-        try
-        {
-            List<BigInteger> balanceArray = null;
-            BigDecimal balance = BigDecimal.ZERO;
-            TokenInfo tInfo = token.tokenInfo;
-            ContractType interfaceSpec = token.getInterfaceSpec();
-
-            switch (interfaceSpec)
-            {
-                case ETHEREUM:
-                    balance = getEthBalance(wallet, tInfo.chainId);
-                    break;
-                case NOT_SET:
-                    if (token.tokenInfo.name != null && token.tokenInfo.name.length() > 0)
-                    {
-                        Log.d(TAG, "NOT SET: " + token.getFullName());
-                    }
-                    break;
-                case ERC875:
-                case ERC875_LEGACY:
-                    balanceArray = checkERC875BalanceArray(wallet, tInfo, token);
-                    break;
-                case ERC721_LEGACY:
-                    break;
-                case ERC721:
-                    balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address);
-                    break;
-                case ERC721_TICKET:
-                    balanceArray = checkERC721TicketBalanceArray(wallet, tInfo, token);
-                    break;
-                case ERC20:
-                case DYNAMIC_CONTRACT:
-                    balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
-                    break;
-                case ERC1155:
-                    balance = token.updateBalance(null);
-                    break;
-                case OTHER:
-                    //This token has its interface checked in the flow elsewhere
-                    break;
-                default:
-                    break;
-            }
-
-            Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), token.lastBlockCheck);
-            updated.setTokenWallet(wallet.address);
-            updated.balanceChanged = true;
-            updated.pendingBalance = balance;
-            return updated;
-        }
-        catch (Exception e)
-        {
-            if (LOG_CONTRACT_EXCEPTION_EVENTS) e.printStackTrace();
-            return token;
-        }
+        else return localSource.saveToken(wallet, token)
+            .flatMap(t -> updateBalance(network, wallet, t).map(bal -> token));
     }
 
     private BigDecimal checkUint256Balance(@NonNull Wallet wallet, int chainId, String tokenAddress)
@@ -663,6 +566,7 @@ public class TokenRepository implements TokenRepositoryType {
                     List<BigInteger> testBalance = getBalanceArray721Ticket(wallet, tokenInfo);
                     if (testBalance != null && testBalance.size() > 0)
                     {
+                        //change interface
                         addToken(wallet, tokenInfo, ContractType.ERC721_TICKET)
                                 .subscribe(this::updateInService).isDisposed();
                         balance = token.balance;
@@ -691,63 +595,6 @@ public class TokenRepository implements TokenRepositoryType {
     {
         t.walletUIUpdateRequired = true;
         TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec());
-    }
-
-    /**
-     * This is for popular tokens - the heuristic is to only show newly discovered popular tokens if they have balance
-     * Only at wallet init do we see this - when unknown token is added, we set isEnabled to false.
-     *
-     * @param newToken
-     */
-    private void updateTokenVisibility(Token newToken)
-    {
-        if (!localSource.hasVisibilityBeenChanged(newToken)
-                && newToken.hasPositiveBalance()) //only tokens on unknown discovery list have default isEnabled = false
-        {
-            newToken.tokenInfo.isEnabled = true;
-        }
-    }
-
-    /**
-     * Checks the balance array for an ERC875 token.
-     * The balance function returns a value of NODE_COMMS_ERROR in the first entry if there was a comms error.
-     * In the event of a comms error, just use the previously obtained balance of the token
-     * @param wallet
-     * @param tInfo
-     * @param token
-     * @return
-     */
-    private List<BigInteger> checkERC875BalanceArray(Wallet wallet, TokenInfo tInfo, Token token)
-    {
-        List<BigInteger> balance = getBalanceArray875(wallet, tInfo);
-        return checkBalanceArrayValidity(balance, token);
-    }
-
-    // Only works with 721 tickets that have a special getBalances function which returns an array of uint256
-    private List<BigInteger> checkERC721TicketBalanceArray(Wallet wallet, TokenInfo tInfo, Token token)
-    {
-        List<BigInteger> balance = getBalanceArray721Ticket(wallet, tInfo);
-        return checkBalanceArrayValidity(balance, token);
-    }
-
-    private List<BigInteger> checkBalanceArrayValidity(List<BigInteger> balance, Token token)
-    {
-        if (balance.size() > 0)
-        {
-            BigInteger firstVal = balance.get(0);
-            if (firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
-            {
-                //comms error, use previous token balance
-                if (token != null) balance = token.getArrayBalance();
-                else balance.clear();
-            }
-            else if (firstVal.compareTo(BigInteger.valueOf(CONTRACT_BALANCE_NULL)) == 0)
-            {
-                //token could have been terminated
-                balance.clear();
-            }
-        }
-        return balance;
     }
 
     @Override

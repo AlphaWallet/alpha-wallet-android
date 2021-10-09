@@ -5,8 +5,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -29,12 +31,15 @@ import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static android.content.Context.CLIPBOARD_SERVICE;
 
 /**
  * Created by JB on 28/10/2020.
  */
-public class InputAddress extends RelativeLayout implements ItemClickListener, ENSCallback
+public class InputAddress extends RelativeLayout implements ItemClickListener, ENSCallback, TextWatcher
 {
     private final AutoCompleteTextView editText;
     private final TextView labelText;
@@ -54,6 +59,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
     private int chainOverride;
+    private final Pattern findAddress = Pattern.compile("($|\\s?)(0x)([0-9a-fA-F]{40})($|\\s?)");
 
     public InputAddress(Context context, AttributeSet attrs)
     {
@@ -70,6 +76,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         scanQrIcon = findViewById(R.id.img_scan_qr);
         boxLayout = findViewById(R.id.box_layout);
         errorText = findViewById(R.id.error_text);
+        editText.addTextChangedListener(this);
 
         if (handleENS)
         {
@@ -271,6 +278,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         if (addressReadyCallback != null)
         {
             addressReadyCallback.resolvedAddress(address, ens);
+            addressReadyCallback.addressValid(true);
         }
     }
 
@@ -281,6 +289,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         if (addressReadyCallback != null)
         {
             addressReadyCallback.addressReady(getInputAddress(), getENS());
+            addressReadyCallback.addressValid(true);
         }
         else
         {
@@ -413,5 +422,26 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public int getInputLength()
     {
         return editText.getText().length();
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after)
+    {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count)
+    {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s)
+    {
+        if (addressReadyCallback == null) return;
+
+        final Matcher privateKeyMatch = findAddress.matcher(s.toString());
+        addressReadyCallback.addressValid(privateKeyMatch.find());
     }
 }

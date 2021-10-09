@@ -3,6 +3,7 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -65,7 +66,7 @@ public class InputAmount extends LinearLayout
     private AssetDefinitionService assetService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private AmountReadyCallback amountReadyCallback;
     private boolean amountReady;
 
@@ -156,6 +157,7 @@ public class InputAmount extends LinearLayout
     {
         exactAmount = BigDecimal.ZERO;
         editText.setText(ethAmount);
+        handler.post(setCursor);
     }
 
     public void showError(boolean showError, int customError)
@@ -365,7 +367,6 @@ public class InputAmount extends LinearLayout
             {
                 RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
                             .equalTo("chainId", token.tokenInfo.chainId)
-                            .sort("timeStamp", Sort.DESCENDING)
                             .findFirst();
 
                 if (gasSpread != null && gasSpread.getGasPrice().standard.compareTo(BigInteger.ZERO) > 0)
@@ -387,6 +388,7 @@ public class InputAmount extends LinearLayout
                 exactAmount = token.balance;
                 updateAllFundsAmount();
             }
+            handler.post(setCursor);
         });
     }
 
@@ -414,6 +416,15 @@ public class InputAmount extends LinearLayout
                 amountReadyCallback.amountReady(exactAmount, new BigDecimal(gasPriceEstimate));
                 amountReady = false;
             }
+        }
+    };
+
+    private final Runnable setCursor = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            editText.setSelection(editText.getText().length());
         }
     };
 

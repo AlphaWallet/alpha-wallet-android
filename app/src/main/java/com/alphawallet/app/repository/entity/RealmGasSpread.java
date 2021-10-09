@@ -13,31 +13,28 @@ import io.realm.annotations.PrimaryKey;
 public class RealmGasSpread extends RealmObject
 {
     @PrimaryKey
-    private long timeStamp;
     private int chainId;
 
     private String rapid;
     private String fast;
     private String standard;
     private String slow;
+    private String baseFee;
+    private long timeStamp;
 
     public int getChainId()
     {
         return chainId;
     }
 
-    public void setChainId(int chainId)
-    {
-        this.chainId = chainId;
-    }
-
-    public void setGasSpread(GasPriceSpread spread, int chain)
+    public void setGasSpread(GasPriceSpread spread, long time)
     {
         rapid = spread.rapid.toString();
         fast = spread.fast.toString();
         standard = spread.standard.toString();
         slow = spread.slow.toString();
-        chainId = chain;
+        baseFee = spread.baseFee.toString();
+        timeStamp = time;
     }
 
     // All chains except main net - gas price isn't important
@@ -47,11 +44,12 @@ public class RealmGasSpread extends RealmObject
         fast = "0";
         standard = gasPrice.toString();
         slow = "0";
+        baseFee = "0";
         chainId = chain;
     }
 
     public GasPriceSpread getGasPrice()
     {
-        return new GasPriceSpread(rapid, fast, standard, slow, timeStamp);
+        return new GasPriceSpread(rapid, fast, standard, slow, baseFee, timeStamp);
     }
 }

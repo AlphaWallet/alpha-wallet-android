@@ -1,7 +1,5 @@
 package com.alphawallet.app.di;
 
-import android.content.Context;
-
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -29,8 +27,7 @@ class WalletConnectModule {
             RealmManager realmManager,
             GasService gasService,
             TokensService tokensService,
-            AnalyticsServiceType analyticsServiceType,
-            Context context) {
+            AnalyticsServiceType analyticsServiceType) {
         return new WalletConnectViewModelFactory(
                 keyService,
                 findDefaultNetworkInteract,
@@ -39,8 +36,7 @@ class WalletConnectModule {
                 realmManager,
                 gasService,
                 tokensService,
-                analyticsServiceType,
-                context);
+                analyticsServiceType);
     }
 
     @Provides

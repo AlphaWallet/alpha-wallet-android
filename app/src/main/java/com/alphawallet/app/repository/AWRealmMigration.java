@@ -309,6 +309,24 @@ public class AWRealmMigration implements RealmMigration
             if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
             oldVersion++;
         }
+
+        if (oldVersion == 29)
+        {
+            oldVersion = 31;
+        }
+
+        if (oldVersion == 31)
+        {
+            schema.remove("RealmGasSpread");
+            schema.create("RealmGasSpread")
+                    .addField("chainId", int.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("timeStamp", long.class)
+                    .addField("rapid", String.class)
+                    .addField("fast", String.class)
+                    .addField("standard", String.class)
+                    .addField("slow", String.class)
+                    .addField("baseFee", String.class);
+        }
     }
 
     @Override

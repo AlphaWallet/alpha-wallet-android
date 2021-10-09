@@ -67,7 +67,7 @@ public class SupportSettingsActivity extends BaseActivity {
                 .withListener(this::onTwitterClicked)
                 .build();
 
-        reddit = new SettingsItemView.Builder(this)
+        /*reddit = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_logo_reddit)
                 .withTitle(R.string.reddit)
                 .withListener(this::onRedditClicked)
@@ -83,7 +83,7 @@ public class SupportSettingsActivity extends BaseActivity {
                 .withIcon(R.drawable.ic_settings_blog)
                 .withTitle(R.string.title_blog)
                 .withListener(this::onBlogClicked)
-                .build();
+                .build();*/
 
         faq = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_settings_faq)
@@ -109,15 +109,18 @@ public class SupportSettingsActivity extends BaseActivity {
         if (MediaLinks.AWALLET_TWITTER_URL != null) {
             supportSettingsLayout.addView(twitter);
         }
-        if (MediaLinks.AWALLET_REDDIT_URL != null) {
+
+        /*if (MediaLinks.AWALLET_REDDIT_URL != null) {
             supportSettingsLayout.addView(reddit);
         }
+
         if (MediaLinks.AWALLET_FACEBOOK_URL != null) {
             supportSettingsLayout.addView(facebook);
         }
+
         if (MediaLinks.AWALLET_BLOG_URL != null) {
             supportSettingsLayout.addView(blog);
-        }
+        }*/
         supportSettingsLayout.addView(faq);
     }
 

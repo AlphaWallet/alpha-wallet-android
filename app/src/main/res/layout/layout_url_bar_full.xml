@@ -13,13 +13,17 @@
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
+
+
         <RelativeLayout
             android:id="@+id/address_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
             android:orientation="horizontal"
-            android:paddingStart="5dp">
+            android:paddingStart="5dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <LinearLayout
                 android:id="@+id/layout_navigator"
@@ -84,15 +88,22 @@
                 android:tint="@color/light_gray"
                 android:visibility="gone" />
 
+
             <LinearLayout
+                android:layout_marginStart="@dimen/dp12"
+                android:layout_marginEnd="@dimen/dp12"
                 android:id="@+id/network_holder"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
-                android:ellipsize="end">
-
-                <include layout="@layout/item_network_select"/>
-
+                android:orientation="horizontal"
+                android:ellipsize="end"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_home"/>
             </LinearLayout>
 
         </RelativeLayout>

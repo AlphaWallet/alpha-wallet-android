@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.BuildConfig;
@@ -50,6 +49,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_CODE_KEY;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_SYMBOL_KEY;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -58,10 +60,13 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
+import androidx.preference.PreferenceManager;
 
 public class TickerService
 {
@@ -127,6 +132,7 @@ public class TickerService
 
     private Single<Integer> fetchTickersSeparatelyIfRequired(int tickerCount)
     {
+        //check base chain tickers
         if (tickerCount > 0) return Single.fromCallable(() -> tickerCount);
         else return fetchEthAndXdai(tickerCount)
                 .flatMap(count -> fetchBlockScoutTicker(CLASSIC_ID, "etc", count))
@@ -222,6 +228,20 @@ public class TickerService
         });
     }
 
+    private void checkPeggedTickers(int chainId, TokenTicker ticker)
+    {
+        switch (chainId)
+        {
+            case MAINNET_ID:
+                //add pegged chains
+                ethTickers.put(ARBITRUM_MAIN_ID, ticker);
+                ethTickers.put(OPTIMISTIC_MAIN_ID, ticker);
+                break;
+            default:
+                break;
+        }
+    }
+
     private void addToTokenTickers(BigInteger tickerInfo, long tickerTime)
     {
         try
@@ -244,6 +264,7 @@ public class TickerService
                     changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", tickerTime);
 
             ethTickers.put(chainId.intValue(), tTicker);
+            checkPeggedTickers(chainId.intValue(), tTicker);
         }
         catch (Exception e)
         {
@@ -530,8 +551,8 @@ public class TickerService
     private void initCurrency()
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        currentCurrencySymbolTxt = pref.getString("currency_locale", "USD");
-        currentCurrencySymbol = pref.getString("currency_symbol", "$");
+        currentCurrencySymbolTxt = pref.getString(CURRENCY_CODE_KEY, "USD");
+        currentCurrencySymbol = pref.getString(CURRENCY_SYMBOL_KEY, "$");
     }
 
     /**
@@ -570,6 +591,7 @@ public class TickerService
         put(FANTOM_ID, "fantom");
         put(AVALANCHE_ID, "avalanche");
         put(HECO_ID, "huobi-token");
+        put(ARBITRUM_MAIN_ID, "arbitrum-one");
         put(66, "okex-chain");
         put(1666600000, "harmony-shard-0");
         put(321, "kucoin-community-chain");

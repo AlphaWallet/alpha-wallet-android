@@ -2,15 +2,18 @@ package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Environment;
-import android.preference.PreferenceManager;
+import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
@@ -26,7 +29,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -41,15 +44,16 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.util.UpdateUtils;
+import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 
@@ -81,7 +85,6 @@ public class HomeViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsService transactionsService;
     private final TickerService tickerService;
-    private final Context context;
     private final MyAddressRouter myAddressRouter;
     private final AnalyticsServiceType analyticsService;
 
@@ -102,7 +105,6 @@ public class HomeViewModel extends BaseViewModel {
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            Context context,
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
             TickerService tickerService,
@@ -116,7 +118,6 @@ public class HomeViewModel extends BaseViewModel {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.context = context;
         this.myAddressRouter = myAddressRouter;
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
@@ -251,15 +252,15 @@ public class HomeViewModel extends BaseViewModel {
         ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
-    public void getWalletName() {
+    public void getWalletName(Context context) {
         disposable = fetchWalletsInteract
                 .getWallet(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWallet, this::onError);
+                .subscribe(wallet -> onWallet(context, wallet), this::onError);
     }
 
-    private void onWallet(Wallet wallet) {
+    private void onWallet(Context context, Wallet wallet) {
         transactionsService.changeWallet(wallet);
         if (!TextUtils.isEmpty(wallet.name))
         {
@@ -272,7 +273,7 @@ public class HomeViewModel extends BaseViewModel {
             walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
-                    .resolveEnsName(wallet.address)
+                    .reverseResolveEns(wallet.address)
                     .map(ensName -> { wallet.ENSname = ensName; return wallet; })
                     .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                     .observeOn(AndroidSchedulers.mainThread())
@@ -361,7 +362,7 @@ public class HomeViewModel extends BaseViewModel {
 
         if(qrCode == null)
         {
-            Toast.makeText(context, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -394,9 +395,7 @@ public class HomeViewModel extends BaseViewModel {
      **/
     public void identify(Context ctx)
     {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-
-        String uuid = prefs.getString(C.PREF_UNIQUE_ID, "");
+        String uuid = preferenceRepository.getUniqueId();
 
         if (uuid.isEmpty())
         {
@@ -404,7 +403,7 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         analyticsService.identify(uuid);
-        prefs.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
+        preferenceRepository.setUniqueId(uuid);
     }
 
     public void actionSheetConfirm(String mode)
@@ -431,6 +430,38 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void tryToShowRateAppDialog(Activity context) {
-        RateApp.showRateTheApp(context, preferenceRepository, false);
+        //only if installed from PlayStore
+        if (Utils.verifyInstallerId(context))
+        {
+            RateApp.showRateTheApp(context, preferenceRepository, false);
+        }
+    }
+
+    public boolean shouldShowRootWarning() {
+        return preferenceRepository.showShowRootWarning();
+    }
+
+    public void setShowRootWarning(boolean shouldShow) {
+        preferenceRepository.setShowRootWarning(shouldShow);
+    }
+
+    public int getUpdateWarnings() {
+        return preferenceRepository.getUpdateWarningCount();
+    }
+
+    public void setUpdateWarningCount(int warns) {
+        preferenceRepository.setUpdateWarningCount(warns);
+    }
+
+    public int getUpdateAsks() {
+        return preferenceRepository.getUpdateAsksCount();
+    }
+
+    public void setUpdateAsksCount(int asks) {
+        preferenceRepository.setUpdateAsksCount(asks);
+    }
+
+    public void setInstallTime(int time) {
+        preferenceRepository.setInstallTime(time);
     }
 }

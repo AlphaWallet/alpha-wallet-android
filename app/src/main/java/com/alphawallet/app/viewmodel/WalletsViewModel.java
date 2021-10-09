@@ -182,7 +182,7 @@ public class WalletsViewModel extends BaseViewModel
         //check names first
         ensWrappingCheck = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
-                .forEach(wallet -> ensCheck = ensResolver.resolveEnsName(wallet.address)
+                .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
                         .map(ensName -> { wallet.ENSname = ensName; return wallet;})
                         .flatMap(fetchWalletsInteract::updateWalletData)
                         .subscribeOn(Schedulers.io())

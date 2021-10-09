@@ -43,6 +43,8 @@ public abstract class C {
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
     public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
+    public static final String ARBITRUM_TEST_NETWORK = "Arbitrum (Test)";
+    public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -67,6 +69,8 @@ public abstract class C {
     public static final String AVALANCHE_SYMBOL = "AVAX";
     public static final String MATIC_SYMBOL = "MATIC";
     public static final String CRONOS_SYMBOL = "tCRO";
+    public static final String ARBITRUM_SYMBOL = "AETH";
+    public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -77,6 +81,7 @@ public abstract class C {
     public static final String XDAI_BRIDGE_DAPP = "https://bridge.xdaichain.com/";
 
     public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
+    public static final String ONEINCH_EXCHANGE_DAPP   = "https://app.1inch.io/#/[CHAIN]/swap/[TOKEN1]/[TOKEN2]";
 
     public static final String GWEI_UNIT = "Gwei";
 
@@ -156,6 +161,14 @@ public abstract class C {
             "com.stormbird.wallet.RESET_TRANSACTIONS";
     public static final String WALLET_CONNECT_REQUEST =
             "com.stormbird.wallet.WALLET_CONNECT";
+    public static final String WALLET_CONNECT_NEW_SESSION =
+            "com.stormbird.wallet.WC_NEW_SESSION";
+    public static final String WALLET_CONNECT_FAIL =
+            "com.stormbird.wallet.WC_FAIL";
+    public static final String WALLET_CONNECT_COUNT_CHANGE =
+            "com.stormbird.wallet.WC_CCHANGE";
+    public static final String WALLET_CONNECT_CLIENT_TERMINATE =
+            "com.stormbird.wallet.WC_CLIENT_TERMINATE";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
@@ -201,6 +214,7 @@ public abstract class C {
         String FROM_SETTINGS = "from_settings";
     }
 
+    public static final String DAPP_HOMEPAGE_KEY = "dappHomePage";
     public static final String DAPP_LASTURL_KEY = "dappURL";
     public static final String DAPP_BROWSER_HISTORY = "DAPP_BROWSER_HISTORY";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";

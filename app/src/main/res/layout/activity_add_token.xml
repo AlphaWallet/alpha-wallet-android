@@ -6,7 +6,8 @@
     android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_network_switch_toolbar" />
+    <include
+        layout="@layout/layout_app_bar" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -23,18 +24,6 @@
             android:orientation="vertical"
             android:paddingLeft="15dp"
             android:paddingRight="15dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/title_add_token"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
 
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_address_view"

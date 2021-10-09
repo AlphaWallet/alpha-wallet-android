@@ -4,7 +4,6 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokenRepository;
 
 import org.web3j.abi.FunctionEncoder;
@@ -74,13 +73,13 @@ public class EnsResolver {
     /**
      * This function takes ensName (eg 'scotty.eth') and returns the matching Ethereum Address.
      * NOTE: It is highly important to check the node is synced before resolving, as this could be an attack
-     * @param contractId
+     * @param ensName
      * @return
      */
-    public String resolve(String contractId)
+    public String resolve(String ensName)
     {
-        String contractAddress = contractId;
-        if (isValidEnsName(contractId, addressLength))
+        String contractAddress = ensName;
+        if (isValidEnsName(ensName, addressLength))
         {
             try
             {
@@ -88,9 +87,9 @@ public class EnsResolver {
                 {
                     throw new EnsResolutionException("Node is not currently synced");
                 }
-                else if (contractId.endsWith(".crypto")) //check crypto namespace
+                else if (ensName.endsWith(".crypto")) //check crypto namespace
                 {
-                    byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
                     BigInteger nameId = new BigInteger(nameHash);
                     String resolverAddress = getContractData(MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId));
                     if (!TextUtils.isEmpty(resolverAddress))
@@ -100,10 +99,10 @@ public class EnsResolver {
                 }
                 else
                 {
-                    String resolverAddress = lookupResolver(contractId);
+                    String resolverAddress = lookupResolver(ensName);
                     if (!TextUtils.isEmpty(resolverAddress))
                     {
-                        byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+                        byte[] nameHash = NameHash.nameHashAsBytes(ensName);
                         //now attempt to get the address of this ENS
                         contractAddress = getContractData(MAINNET_ID, resolverAddress, getAddr(nameHash));
                     }
@@ -116,7 +115,7 @@ public class EnsResolver {
 
             if (!Utils.isAddressValid(contractAddress))
             {
-                throw new RuntimeException("Unable to resolve address for name: " + contractId);
+                throw new RuntimeException("Unable to resolve address for name: " + ensName);
             }
             else
             {
@@ -125,7 +124,7 @@ public class EnsResolver {
         }
         else
         {
-            return contractId;
+            return ensName;
         }
     }
 

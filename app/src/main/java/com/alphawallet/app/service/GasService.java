@@ -1,7 +1,5 @@
 package com.alphawallet.app.service;
 
-import android.text.format.DateUtils;
-
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GasPriceSpread;
@@ -21,6 +19,8 @@ import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.tx.gas.ContractGasProvider;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -48,9 +48,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
  */
 public class GasService implements ContractGasProvider
 {
-    private final static String GAS_NOW_API = "https://www.gasnow.org/api/v3/gas/price?utm_source=AlphaWallet";
     public final static long FETCH_GAS_PRICE_INTERVAL_SECONDS = 15;
-    private final static long TWELVE_HOURS = 12 * DateUtils.HOUR_IN_MILLIS;
 
     private final EthereumNetworkRepositoryType networkRepository;
     private final OkHttpClient httpClient;
@@ -58,9 +56,18 @@ public class GasService implements ContractGasProvider
     private int currentChainId;
     private Web3j web3j;
     private BigInteger currentGasPrice;
+    private final String ETHERSCAN_API_KEY;
+
+    private final List<Integer> chainsWithEtherscanPrice = Arrays.asList(1, 42, 3, 4, 5, 56, 128, 137, 10, 69);
 
     @Nullable
     private Disposable gasFetchDisposable;
+
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getEtherscanKey();
 
     public GasService(EthereumNetworkRepositoryType networkRepository, OkHttpClient httpClient, RealmManager realm)
     {
@@ -71,6 +78,7 @@ public class GasService implements ContractGasProvider
         currentChainId = MAINNET_ID;
 
         web3j = null;
+        ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
     }
 
     public void startGasPriceCycle(int chainId)
@@ -144,9 +152,9 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateCurrentGasPrices()
     {
-        if (currentChainId == MAINNET_ID)
+        if (chainsWithEtherscanPrice.contains(currentChainId))
         {
-            return updateGasNow();
+            return updateEtherscanGasPrices();
         }
         else
         {
@@ -199,14 +207,17 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    private Single<Boolean> updateGasNow()
+    private Single<Boolean> updateEtherscanGasPrices()
     {
+        final int chainId = currentChainId;
         return Single.fromCallable(() -> {
+            String apiUrl = networkRepository.getNetworkByChain(chainId).etherscanTxUrl + "module=gastracker&action=gasoracle";
+            if (apiUrl.contains("etherscan")) apiUrl += ETHERSCAN_API_KEY;
             boolean update = false;
             try
             {
                 Request request = new Request.Builder()
-                        .url(GAS_NOW_API)
+                        .url(apiUrl)
                         .get()
                         .build();
                 okhttp3.Response response = httpClient.newCall(request)
@@ -217,7 +228,7 @@ public class GasService implements ContractGasProvider
                     String result = response.body()
                             .string();
                     GasPriceSpread gps = new GasPriceSpread(result);
-                    updateRealm(gps, MAINNET_ID);
+                    updateRealm(gps, chainId);
                     update = true;
                     currentGasPrice = gps.standard;
                 }
@@ -242,17 +253,12 @@ public class GasService implements ContractGasProvider
     {
         realmManager.getRealmInstance(TICKER_DB).executeTransactionAsync(r -> {
             RealmGasSpread rgs = r.where(RealmGasSpread.class)
-                    .equalTo("timeStamp", gasPriceSpread.timeStamp)
+                    .equalTo("chainId", chainId)
                     .findFirst();
             if (rgs == null)
-                rgs = r.createObject(RealmGasSpread.class, gasPriceSpread.timeStamp);
+                rgs = r.createObject(RealmGasSpread.class, chainId);
 
-            rgs.setGasSpread(gasPriceSpread, chainId);
-
-            //remove old results
-            r.where(RealmGasSpread.class)
-                    .lessThan("timeStamp", gasPriceSpread.timeStamp - TWELVE_HOURS)
-                    .findAll().deleteAllFromRealm();
+            rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
         });
     }
 

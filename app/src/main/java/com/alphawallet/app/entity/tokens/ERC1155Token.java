@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.realm.Realm;
 
@@ -69,7 +70,7 @@ public class ERC1155Token extends Token
         }
         else
         {
-            assets = new HashMap<>();
+            assets = new ConcurrentHashMap<>();
         }
         setInterfaceSpec(ContractType.ERC1155);
     }
@@ -90,16 +91,6 @@ public class ERC1155Token extends Token
     public NFTAsset getAssetForToken(String tokenIdStr)
     {
         return assets.get(parseTokenId(tokenIdStr));
-    }
-
-    //TODO: Handle various collection formats; may need to specify collection
-    @Override
-    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId)
-    {
-        return new HashMap<BigInteger, NFTAsset>()
-        {{
-            put(tokenId, assets.get(tokenId));
-        }};
     }
 
     public boolean isNonFungible()
@@ -422,7 +413,27 @@ public class ERC1155Token extends Token
         //check balances
         for (NFTAsset a : assets.values())
         {
-            if (!a.needsLoading() && !a.requiresReplacement()) return true;
+            if (!a.needsLoading() && !a.requiresReplacement())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkBalanceChange(Token oldToken)
+    {
+        if (super.checkBalanceChange(oldToken)) return true;
+        if (getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+        for (BigInteger tokenId : assets.keySet())
+        {
+            NFTAsset newAsset = assets.get(tokenId);
+            NFTAsset oldAsset = oldToken.getAssetForToken(tokenId);
+            if (newAsset == null || oldAsset == null || !newAsset.equals(oldAsset))
+            {
+                return true;
+            }
         }
         return false;
     }

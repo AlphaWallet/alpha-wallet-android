@@ -1149,10 +1149,15 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public TokenTicker getCurrentTicker(Token token)
     {
+        return getCurrentTicker(databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
+    }
+
+    @Override
+    public TokenTicker getCurrentTicker(String key)
+    {
         TokenTicker tt = null;
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
-            String key = databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase());
             RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
                     .equalTo("contract", key)
                     .findFirst();

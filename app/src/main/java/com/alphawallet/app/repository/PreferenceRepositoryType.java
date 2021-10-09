@@ -33,6 +33,8 @@ public interface PreferenceRepositoryType {
 
     void setDefaultCurrency(CurrencyItem currency);
 
+    String getDefaultCurrencySymbol();
+
     String getUserPreferenceLocale();
 
     void setUserPreferenceLocale(String locale);

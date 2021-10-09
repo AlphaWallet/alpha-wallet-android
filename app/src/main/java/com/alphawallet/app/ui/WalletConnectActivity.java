@@ -1073,7 +1073,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             @Override
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
             {
-                viewModel.recordSignTransaction(getApplicationContext(), web3Tx, client.getChainId(), getSessionId());
+                viewModel.recordSignTransaction(getApplicationContext(), web3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
                 updateSignCount();
                 viewModel.approveRequest(getApplication(), getSessionId(), web3Tx.leafPosition, hashData);
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
@@ -1091,7 +1091,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.sendTransaction(finalTx, client.chainIdVal(), callback);
+        viewModel.sendTransaction(finalTx, viewModel.getChainId(getSessionId()), callback);
     }
 
     @Override
@@ -1130,7 +1130,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             @Override
             public void DAppReturn(byte[] data, Signable message)
             {
-                viewModel.recordSignTransaction(getApplicationContext(), tx, client.getChainId(), getSessionId());
+                viewModel.recordSignTransaction(getApplicationContext(), tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
                 updateSignCount();
                 viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
@@ -1139,7 +1139,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), client.chainIdVal());
+        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), viewModel.getChainId(getSessionId()));
         if (fromDappBrowser) switchToDappBrowser();
     }
 }

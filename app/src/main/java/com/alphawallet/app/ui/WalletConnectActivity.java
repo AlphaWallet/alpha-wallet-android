@@ -1036,7 +1036,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (resultCode == RESULT_OK && web3Tx != null)
         {
             String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
-            viewModel.recordSignTransaction(getApplicationContext(), web3Tx, client.getChainId(), getSessionId());
+            viewModel.recordSignTransaction(getApplicationContext(), web3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
             viewModel.approveRequest(this, getSessionId(), lastId, hashData);
         }
         else if (web3Tx != null)

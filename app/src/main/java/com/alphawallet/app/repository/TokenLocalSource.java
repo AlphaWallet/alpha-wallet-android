@@ -59,6 +59,7 @@ public interface TokenLocalSource {
     Realm getTickerRealmInstance();
 
     TokenTicker getCurrentTicker(Token token);
+    TokenTicker getCurrentTicker(String key);
 
     void setVisibilityChanged(Wallet wallet, Token token);
 

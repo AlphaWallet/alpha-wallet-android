@@ -77,9 +77,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private TextView address;
     private LinearLayout layoutInputAmount;
     private LinearLayout selectAddress;
-    private TextView currentNetwork;
-    private RelativeLayout selectNetworkLayout;
-    private View networkIcon;
     private NetworkInfo networkInfo;
     private int currentMode = MODE_ADDRESS;
     private int overrideNetwork;
@@ -125,15 +122,11 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViews() {
         toolbar();
         titleView = findViewById(R.id.title_my_address);
-        currentNetwork = findViewById(R.id.current_network);
-        selectNetworkLayout = findViewById(R.id.select_network_layout);
-        if (selectNetworkLayout != null) selectNetworkLayout.setOnClickListener(v -> selectNetwork());
         layoutInputAmount = findViewById(R.id.layout_define_request);
         selectAddress = findViewById(R.id.layout_select_address);
         address =  findViewById(R.id.address);
         qrImageView = findViewById(R.id.qr_image);
         selectAddress = findViewById(R.id.layout_select_address);
-        networkIcon = findViewById(R.id.network_icon);
         qrImageView.setBackgroundResource(R.color.white);
         ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
@@ -143,12 +136,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViewModel() {
         viewModel = new ViewModelProvider(this, myAddressViewModelFactory)
                 .get(MyAddressViewModel.class);
-    }
-
-    private void setNetworkUi(NetworkInfo networkInfo)
-    {
-        currentNetwork.setText(networkInfo.name);
-        Utils.setChainColour(networkIcon, networkInfo.chainId);
     }
 
     @Override
@@ -180,6 +167,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         {
             menu.findItem(R.id.action_receive_payment)
                     .setVisible(false);
+            menu.findItem(R.id.action_networks)
+                    .setVisible(false);
         }
         //if dev mode, and token is not ethereum show contract
         boolean devMode = (checkWritePermission() && EthereumNetworkRepository.extraChains() == null);
@@ -187,11 +176,16 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         {        //remove contract address
             menu.findItem(R.id.action_show_contract)
                     .setVisible(false);
+            menu.findItem(R.id.action_networks)
+                    .setVisible(true);
+
         }
 
         if (currentMode == MODE_ADDRESS)
         {
             menu.findItem(R.id.action_my_address)
+                    .setVisible(false);
+            menu.findItem(R.id.action_networks)
                     .setVisible(false);
         }
 
@@ -212,6 +206,9 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         else if (item.getItemId() == R.id.action_my_address)
         {
             showAddress();
+        }
+        else if (item.getItemId() == R.id.action_networks) {
+            selectNetwork();
         }
 
         return super.onOptionsItemSelected(item);
@@ -241,15 +238,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
         amountInput.setAmount("");
         updateCryptoAmount(BigDecimal.ZERO);
-
-        if (token != null && token.isERC20())
-        {
-            selectNetworkLayout.setVisibility(View.INVISIBLE);
-        }
-        else
-        {
-            setNetworkUi(info);
-        }
     }
 
     private void showAddress()

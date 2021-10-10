@@ -163,6 +163,10 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         setupNetwork(EthereumNetworkRepository.getOverrideToken().chainId);
         viewModel.prepare();
+
+        if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
+            runOnUiThread(() -> onActivityResult(C.BARCODE_READER_REQUEST_CODE, Activity.RESULT_OK, getIntent()));
+        }
     }
 
     private void onTokenType(Token contractTypeToken)

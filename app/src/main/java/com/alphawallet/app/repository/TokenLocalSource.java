@@ -26,7 +26,6 @@ public interface TokenLocalSource {
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
     void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
     boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray);
-    void markBalanceChecked(Wallet wallet, int chainId, String tokenAddress);
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
     void createBaseNetworkTokens(String walletAddress);
@@ -60,6 +59,7 @@ public interface TokenLocalSource {
     Realm getTickerRealmInstance();
 
     TokenTicker getCurrentTicker(Token token);
+    TokenTicker getCurrentTicker(String key);
 
     void setVisibilityChanged(Wallet wallet, Token token);
 

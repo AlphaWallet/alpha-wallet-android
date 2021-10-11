@@ -1,18 +1,17 @@
 package com.alphawallet.app.service;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.tools.Numeric;
-import com.google.gson.Gson;
 
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
@@ -47,10 +46,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_CODE_KEY;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.CURRENCY_SYMBOL_KEY;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
@@ -66,8 +64,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
-import androidx.preference.PreferenceManager;
-
 public class TickerService
 {
     private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
@@ -75,16 +71,16 @@ public class TickerService
     private static final String BLOCKSCOUT = "https://blockscout.com/poa/[CORE]/api?module=stats&action=ethprice";
     private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
-    private static final String CHAIN_ID = "[CHAIN_ID]";
-    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_ID + "?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
-    private static final String COINGECKO_COINS_API = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cxdai%2Cetc&vs_currencies=USD&include_24hr_change=true";
+    private static final String CHAIN_IDS = "[CHAIN_ID]";
+    private static final String COINGECKO_CHAIN_CALL = "https://api.coingecko.com/api/v3/simple/price?ids=" + CHAIN_IDS + "&vs_currencies=usd&include_24hr_change=true";
+    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
+    private static final String CURRENCY_CONV = "currency";
 
     public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
 
     private final OkHttpClient httpClient;
-    private final Gson gson;
-    private final Context context;
+    private final PreferenceRepositoryType sharedPrefs;
     private final TokenLocalSource localSource;
     private final Map<Integer, TokenTicker> ethTickers = new ConcurrentHashMap<>();
     private Disposable tickerUpdateTimer;
@@ -93,11 +89,10 @@ public class TickerService
     private static String currentCurrencySymbol;
     private static final Map<Integer, Boolean> canUpdate = new ConcurrentHashMap<>();
 
-    public TickerService(OkHttpClient httpClient, Gson gson, Context ctx, TokenLocalSource localSource)
+    public TickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource)
     {
         this.httpClient = httpClient;
-        this.gson = gson;
-        this.context = ctx;
+        this.sharedPrefs = sharedPrefs;
         this.localSource = localSource;
 
         resetTickerUpdate();
@@ -124,19 +119,71 @@ public class TickerService
                 .subscribe(this::checkTickers, this::onTickersError).isDisposed();
     }
 
-    private Single<Double> updateCurrencyConversion()
+    public Single<Double> updateCurrencyConversion()
     {
         initCurrency();
-        return convertPair("USD", currentCurrencySymbolTxt);
+        return convertPair("USD", currentCurrencySymbolTxt)
+                .map(this::storeCurrentRate);
+    }
+
+    private Double storeCurrentRate(Double rate)
+    {
+        if (rate == 0.0)
+        {
+            TokenTicker tt = localSource.getCurrentTicker(TokensRealmSource.databaseKey(0, CURRENCY_CONV));
+            if (tt != null) { return Double.parseDouble(tt.price); }
+            else { return 0.0; }
+        }
+        else
+        {
+            TokenTicker currencyTicker = new TokenTicker(Double.toString(rate), "0", currentCurrencySymbolTxt, null, System.currentTimeMillis());
+            localSource.updateERC20Tickers(0, new HashMap<String, TokenTicker>() {{ put(CURRENCY_CONV, currencyTicker); }});
+            return rate;
+        }
     }
 
     private Single<Integer> fetchTickersSeparatelyIfRequired(int tickerCount)
     {
         //check base chain tickers
-        if (tickerCount > 0) return Single.fromCallable(() -> tickerCount);
-        else return fetchEthAndXdai(tickerCount)
-                .flatMap(count -> fetchBlockScoutTicker(CLASSIC_ID, "etc", count))
-                .flatMap(count -> fetchBlockScoutTicker(POA_ID, "core", count));
+        if (receivedAllChainPairs()) return Single.fromCallable(() -> tickerCount);
+        else return fetchCoinGeckoChainPrices(); //fetch directly
+    }
+
+    private Single<Integer> fetchCoinGeckoChainPrices()
+    {
+        return Single.fromCallable(() -> {
+            int tickers = 0;
+            try
+            {
+                Request request = new Request.Builder()
+                        .url(getCoinGeckoChainCall())
+                        .get()
+                        .build();
+                Response response = httpClient.newCall(request)
+                        .execute();
+                if (response.code() / 200 == 1)
+                {
+                    String result = response.body()
+                            .string();
+                    JSONObject data = new JSONObject(result);
+                    for (ChainPair p : chainPairs)
+                    {
+                        if (!data.has(p.chainSymbol)) continue;
+                        JSONObject tickerData = (JSONObject) data.get(p.chainSymbol);
+                        TokenTicker tTicker = decodeCoinGeckoTicker(tickerData);
+                        ethTickers.put(p.chainId, tTicker);
+                        checkPeggedTickers(p.chainId, tTicker);
+                        tickers++;
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            return tickers;
+        });
     }
 
     private Single<Integer> updateTickersFromOracle(double conversionRate)
@@ -196,7 +243,7 @@ public class TickerService
                 }
 
                 Request request = new Request.Builder()
-                        .url(COINGECKO_API.replace(CHAIN_ID, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
+                        .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
                         .get()
                         .build();
 
@@ -272,88 +319,6 @@ public class TickerService
         }
     }
 
-    private Single<Integer> fetchEthAndXdai(int tickerCount)
-    {
-        return Single.fromCallable(() -> {
-            int newTickers = 0;
-            try
-            {
-                Request request = new Request.Builder()
-                        .url(COINGECKO_COINS_API)
-                        .get()
-                        .build();
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-                if (response.code() / 200 == 1)
-                {
-                    List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string());
-
-                    for (CoinGeckoTicker t : tickers)
-                    {
-                        BigDecimal changeValue = new BigDecimal(t.usdChange);
-                        TokenTicker tTicker = new TokenTicker(String.valueOf(t.usdPrice * currentConversionRate),
-                                changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
-
-                        //store ticker
-                        int id = MAINNET_ID;
-                        switch (t.address)
-                        {
-                            case "ethereum":
-                                id = MAINNET_ID;
-                                break;
-                            case "xdai":
-                                id = XDAI_ID;
-                                break;
-                            default:
-                                break;
-                        }
-
-                        ethTickers.put(id, tTicker);
-                        newTickers++;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return tickerCount + newTickers;
-        });
-    }
-
-    private Single<Integer> fetchBlockScoutTicker(int chainId, String core, int tickers)
-    {
-        return Single.fromCallable(() -> {
-            int newTickers = 0;
-            try
-            {
-                Request request = new Request.Builder()
-                        .url(BLOCKSCOUT.replace("[CORE]", core))
-                        .get()
-                        .build();
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-                if (response.code() / 200 == 1)
-                {
-                    String result = response.body()
-                            .string();
-                    JSONObject stateData = new JSONObject(result);
-                    JSONObject data = stateData.getJSONObject("result");
-                    TokenTicker tt = decodeBlockScoutTicker(data);
-                    ethTickers.put(chainId, tt);
-                    newTickers = 1;
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return tickers + newTickers;
-        });
-    }
-
     private void checkTickers(int tickerSize)
     {
         if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
@@ -381,22 +346,24 @@ public class TickerService
         return tokenTicker;
     }
 
-    private TokenTicker decodeBlockScoutTicker(JSONObject eth)
+    private TokenTicker decodeCoinGeckoTicker(JSONObject eth)
     {
-        TokenTicker ticker = null;
+        TokenTicker tTicker;
         try
         {
-            double usdPrice = eth.getDouble("ethusd");// getString("price");
-            String localePrice = String.valueOf(usdPrice * currentConversionRate);
-            ticker = new TokenTicker(localePrice, "0.00", currentCurrencySymbolTxt, "", System.currentTimeMillis());
+            double usdPrice = eth.getDouble("usd");
+            BigDecimal changeValue = BigDecimal.valueOf(eth.getDouble("usd_24h_change"));
+
+            tTicker = new TokenTicker(String.valueOf(usdPrice * currentConversionRate),
+                    changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            ticker = new TokenTicker();
+            tTicker = new TokenTicker();
         }
 
-        return ticker;
+        return tTicker;
     }
 
     public Single<Double> convertPair(String currency1, String currency2)
@@ -405,6 +372,7 @@ public class TickerService
             if (currency1 == null || currency2 == null || currency1.equals(currency2)) return (Double)1.0;
             String conversionURL = "http://currencies.apps.grandtrunk.net/getlatest/" + currency1 + "/" + currency2;
             okhttp3.Response response = null;
+            double rate = 0.0;
 
             try
             {
@@ -420,19 +388,20 @@ public class TickerService
                 if ((resultCode / 100) == 2 && response.body() != null)
                 {
                     String responseBody = response.body().string();
-                    return Double.parseDouble(responseBody);
+                    rate = Double.parseDouble(responseBody);
                 }
             }
             catch (Exception e)
             {
                 e.printStackTrace();
+                rate = 0.0;
             }
             finally
             {
                 if (response != null) response.close();
             }
 
-            return (Double)1.0;
+            return rate;
         });
     }
 
@@ -550,9 +519,8 @@ public class TickerService
 
     private void initCurrency()
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        currentCurrencySymbolTxt = pref.getString(CURRENCY_CODE_KEY, "USD");
-        currentCurrencySymbol = pref.getString(CURRENCY_SYMBOL_KEY, "$");
+        currentCurrencySymbolTxt = sharedPrefs.getDefaultCurrency();
+        currentCurrencySymbol = sharedPrefs.getDefaultCurrencySymbol();
     }
 
     /**
@@ -598,4 +566,52 @@ public class TickerService
         put(88, "tomochain");
         put(42220, "celo");
     }};
+
+    private static class ChainPair
+    {
+        final int chainId;
+        final String chainSymbol;
+
+        public ChainPair(int chainId, String chainSymbol)
+        {
+            this.chainId = chainId;
+            this.chainSymbol = chainSymbol;
+        }
+    }
+
+    private static final ChainPair[] chainPairs = {
+            new ChainPair(MAINNET_ID, "ethereum"),
+            new ChainPair(CLASSIC_ID, "ethereum-classic"),
+            new ChainPair(POA_ID, "poa-network"),
+            new ChainPair(XDAI_ID, "xdai"),
+            new ChainPair(BINANCE_MAIN_ID, "binancecoin"),
+            new ChainPair(HECO_ID, "huobi-token"),
+            new ChainPair(AVALANCHE_ID, "avalanche-2"),
+            new ChainPair(FANTOM_ID, "fantom"),
+            new ChainPair(MATIC_ID, "matic-network")
+    };
+
+    private String getCoinGeckoChainCall()
+    {
+        StringBuilder tokenList = new StringBuilder();
+        boolean firstPair = true;
+        for (ChainPair cp : chainPairs)
+        {
+            if (!firstPair) tokenList.append(",");
+            firstPair = false;
+            tokenList.append(cp.chainSymbol);
+        }
+
+        return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString());
+    }
+
+    private boolean receivedAllChainPairs()
+    {
+        for (ChainPair cp : chainPairs)
+        {
+            if (!ethTickers.containsKey(cp.chainId)) { return false; }
+        }
+
+        return true;
+    }
 }

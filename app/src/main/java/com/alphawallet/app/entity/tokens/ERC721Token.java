@@ -213,6 +213,23 @@ public class ERC721Token extends Token
     }
 
     @Override
+    public boolean checkBalanceChange(Token oldToken)
+    {
+        if (super.checkBalanceChange(oldToken)) return true;
+        if (getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        {
+            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
+            NFTAsset oldAsset = oldToken.getAssetForToken(tokenId);
+            if (newAsset == null || oldAsset == null || !newAsset.equals(oldAsset))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String convertValue(String prefix, String value, int precision)
     {
         precision++;

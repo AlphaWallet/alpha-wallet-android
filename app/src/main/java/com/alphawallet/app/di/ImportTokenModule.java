@@ -1,6 +1,5 @@
 package com.alphawallet.app.di;
 
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -33,14 +32,13 @@ public class ImportTokenModule {
             FetchTokensInteract fetchTokensInteract,
             TokensService tokensService,
             AlphaWalletService alphaWalletService,
-            AddTokenInteract addTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             AssetDefinitionService assetDefinitionService,
             FetchTransactionsInteract fetchTransactionsInteract,
             GasService gasService,
             KeyService keyService) {
         return new ImportTokenViewModelFactory(
-                genericWalletInteract, createTransactionInteract, fetchTokensInteract, tokensService, alphaWalletService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
+                genericWalletInteract, createTransactionInteract, fetchTokensInteract, tokensService, alphaWalletService, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 
     @Provides
@@ -56,12 +54,6 @@ public class ImportTokenModule {
     @Provides
     FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
         return new FetchTokensInteract(tokenRepository);
-    }
-
-    @Provides
-    AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository) {
-        return new AddTokenInteract(tokenRepository);
     }
 
     @Provides

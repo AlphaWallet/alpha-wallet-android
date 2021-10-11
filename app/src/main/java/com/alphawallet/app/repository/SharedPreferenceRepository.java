@@ -136,6 +136,11 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
+    public String getDefaultCurrencySymbol() {
+        return pref.getString(CURRENCY_SYMBOL_KEY, C.DEFAULT_CURRENCY_CODE);
+    }
+
+    @Override
     public String getUserPreferenceLocale()
     {
         return pref.getString(USER_LOCALE_PREF, "");

@@ -56,12 +56,11 @@ open class WCClient(
     var accounts: List<String>? = null
         private set
 
-    var chainId: String? = null
-        private set
+    private var chainId: String? = null
 
     fun chainIdVal(): Int
     {
-        return chainId?.toInt() ?: EthereumNetworkBase.MAINNET_ID
+        return chainId?.toInt() ?: 0
     }
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
@@ -150,27 +149,11 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun connect4(session: WCSession, peerMeta: WCPeerMeta, peerId: String = UUID.randomUUID().toString(), remotePeerId: String? = null) {
-        if (this.session != null && this.session?.topic != session.topic) {
-            killSession()
-        }
-
-        this.session = session
-        this.peerMeta = peerMeta
-        this.peerId = peerId
-        this.remotePeerId = remotePeerId
-
-        val request = Request.Builder()
-            .url(session.bridge)
-            .build()
-
-        socket = httpClient.newWebSocket(request, this)
-    }
-
     fun approveSession(accounts: List<String>, _chainId: Int): Boolean {
         if (handshakeId <= 0) { onFailure(Throwable("handshakeId must be greater than 0 on session approve")) }
         var useChainId: Int = _chainId;
         if (this.chainId?.toIntOrNull() != 1) useChainId = _chainId;
+        chainId = useChainId.toString();
 
         val result = WCApproveSessionResponse(
                 chainId = useChainId,

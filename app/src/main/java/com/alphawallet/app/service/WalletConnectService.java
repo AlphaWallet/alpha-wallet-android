@@ -301,7 +301,8 @@ public class WalletConnectService extends Service
         for (String sessionKey : clientMap.keySet())
         {
             WCClient c = clientMap.get(sessionKey);
-            if (c.isConnected() && c.getChainId() != null && c.getAccounts() != null)
+            if (c == null) return;
+            if (c.isConnected() && c.chainIdVal() != 0 && c.getAccounts() != null)
             {
                 Log.d(TAG, "Ping Key: " + sessionKey);
                 c.approveSession(c.getAccounts(), c.chainIdVal());

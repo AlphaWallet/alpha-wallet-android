@@ -109,7 +109,6 @@ public class WalletFragment extends BaseFragment implements
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
-    private long lastTokenUpdateTime = Long.MAX_VALUE;
 
     @Nullable
     @Override
@@ -191,34 +190,30 @@ public class WalletFragment extends BaseFragment implements
 
         //Do we display new user backup popup?
         ((HomeActivity) getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
-        startRealmListener(wallet);
     }
 
-    private void startRealmListener(Wallet wallet)
+    private void setRealmListener(long updateTime)
     {
-        if (realmId == null || !realmId.equalsIgnoreCase(wallet.address))
+        if (realmUpdates != null)
         {
-            realmId = wallet.address;
-            realm = viewModel.getRealmInstance(wallet);
-            setRealmListener();
+            realmUpdates.removeAllChangeListeners();
+            realm.removeAllChangeListeners();
         }
-    }
 
-    private void setRealmListener()
-    {
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
                 .like("address", ADDRESS_FORMAT)
+                .greaterThan("addedTime", updateTime)
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;
+            long lastUpdateTime = updateTime;
             List<TokenCardMeta> metas = new ArrayList<>();
-            long updateTime = 0;
+            //long updateTime = 0;
             //make list
             for (RealmToken t : realmTokens)
             {
-                long tokenUpdateTime = t.getUpdateTime();
-                if (tokenUpdateTime > updateTime) updateTime = tokenUpdateTime;
-                if (tokenUpdateTime < lastTokenUpdateTime) continue;
+                if (t.getUpdateTime() > lastUpdateTime) lastUpdateTime = t.getUpdateTime();
+                //if (tokenUpdateTime < lastTokenUpdateTime) continue;
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
                 if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
@@ -231,9 +226,12 @@ public class WalletFragment extends BaseFragment implements
                 metas.add(meta);
             }
 
-            if (metas.size() > 0) updateMetas(metas);
-
-            lastTokenUpdateTime = updateTime + 1;
+            if (metas.size() > 0)
+            {
+                final long thisUpdateTime = lastUpdateTime;
+                updateMetas(metas);
+                handler.postDelayed(() -> setRealmListener(thisUpdateTime), 500);
+            }
         });
     }
 
@@ -394,6 +392,16 @@ public class WalletFragment extends BaseFragment implements
             checkScrollPosition();
         }
         systemView.showProgress(false);
+
+        long lastTokenUpdate = 0;
+        for (TokenCardMeta tcm : tokens)
+        {
+            if (tcm.lastUpdate > lastTokenUpdate) lastTokenUpdate = tcm.lastUpdate;
+        }
+
+        realmId = viewModel.getWallet().address;
+        realm = viewModel.getRealmInstance(viewModel.getWallet());
+        setRealmListener(lastTokenUpdate);
     }
 
     /**

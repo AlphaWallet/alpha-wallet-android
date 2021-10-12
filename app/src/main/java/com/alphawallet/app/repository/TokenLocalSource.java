@@ -24,7 +24,6 @@ import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 public interface TokenLocalSource {
     Single<Token> saveToken(Wallet wallet, Token token);
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
-    void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
     boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray);
     Token fetchToken(int chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);

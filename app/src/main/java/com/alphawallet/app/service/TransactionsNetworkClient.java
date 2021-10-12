@@ -51,6 +51,7 @@ import okhttp3.Request;
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 
@@ -514,7 +515,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             return eventCount;
         }).observeOn(Schedulers.io());
@@ -621,6 +622,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)
     {
+        if (TextUtils.isEmpty(networkInfo.etherscanTxUrl)) return "";
         if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
         okhttp3.Response response;
         String result = "0";
@@ -637,7 +639,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             Request request = new Request.Builder()
                     .url(fullUrl)
-                    .get()
+                    .header("User-Agent", "Chrome/74.0.3729.169")
+                    .method("GET", null)
+                    .addHeader("Content-Type", "application/json")
                     .build();
 
             response = httpClient.newCall(request).execute();
@@ -656,7 +660,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (networkInfo.chainId != ARTIS_TAU1_ID && BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return result;
@@ -682,6 +686,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             Request request = new Request.Builder()
                     .url(fullUrl + args)
                     .get()
+                    .addHeader("Content-Type", "application/json")
                     .build();
 
             response = httpClient.newCall(request).execute();

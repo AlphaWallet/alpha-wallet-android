@@ -298,7 +298,8 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<BigDecimal> fetchChainBalance(String walletAddress, int chainId)
     {
-        return Single.fromCallable(() -> updateNativeToken(new Wallet(walletAddress), chainId));
+        Token baseToken = fetchToken(chainId, walletAddress, walletAddress);
+        return updateTokenBalance(walletAddress, baseToken);
     }
 
     @Override
@@ -443,11 +444,6 @@ public class TokenRepository implements TokenRepositoryType {
                     {
                         balance = token.balance;
                     }
-
-                    if (token.isEthereum() && wallet.address.equalsIgnoreCase(token.getWallet()))
-                    {
-                        updateNativeToken(wallet, token.tokenInfo.chainId);
-                    }
                 }
                 catch (Exception e)
                 {
@@ -468,30 +464,6 @@ public class TokenRepository implements TokenRepositoryType {
             }
             return tokens;
         });
-    }
-
-    /**
-     * Used for an edge condition where you are looking at an account that's also contract
-     *
-     * @param wallet
-     * @param chainId
-     */
-    private BigDecimal updateNativeToken(Wallet wallet, int chainId)
-    {
-        TokenFactory tFactory = new TokenFactory();
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-        TokenInfo tInfo = new TokenInfo("eth", network.name, network.symbol, 18, true, network.chainId);
-        BigDecimal balance = getEthBalance(wallet, chainId);
-        //get current balance
-        Token dbToken = fetchToken(chainId, wallet.address, "eth");
-        if (!balance.equals(BigDecimal.valueOf(-1)) && (dbToken == null || !dbToken.balance.equals(balance)))
-        {
-            if (dbToken == null) dbToken = tFactory.createToken(tInfo, balance, null, System.currentTimeMillis(), ContractType.ETHEREUM, network.getShortName(), System.currentTimeMillis());
-            else dbToken.balance = balance;
-            localSource.updateTokenBalance(network, wallet, dbToken);
-        }
-
-        return balance;
     }
 
     /**

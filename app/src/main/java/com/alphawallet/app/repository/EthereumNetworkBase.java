@@ -246,7 +246,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(ARBITRUM_TEST_ID, new NetworkInfo(C.ARBITRUM_TEST_NETWORK, C.ARBITRUM_TEST_SYMBOL,
                     ARBITRUM_TEST_RPC_URL,
                     "https://rinkeby-explorer.arbitrum.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
-                    "https://rinkeby-explorer.arbitrum.io/api?")); //doesn't work yet
+                    "")); //no transaction API
         }
     };
     

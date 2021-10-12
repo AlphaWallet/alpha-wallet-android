@@ -108,12 +108,13 @@ Java_com_alphawallet_app_service_TransactionsNetworkClient_getBSCExplorerKey( JN
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_service_TransactionsNetworkClient_getEtherscanKey( JNIEnv* env, jobject thiz )
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getEtherscanKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, etherscanKey);
 #else
-    return "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    const jstring key = "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    return (*env)->NewStringUTF(env, key);
 #endif
 }
 
@@ -123,6 +124,7 @@ Java_com_alphawallet_app_service_GasService_getEtherscanKey( JNIEnv* env, jobjec
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, etherscanKey);
 #else
-    return "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    const jstring key = "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    return (*env)->NewStringUTF(env, key);
 #endif
 }

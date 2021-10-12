@@ -464,4 +464,9 @@ public class HomeViewModel extends BaseViewModel {
     public void setInstallTime(int time) {
         preferenceRepository.setInstallTime(time);
     }
+
+    public void restartTokensService()
+    {
+        transactionsService.restartService();
+    }
 }

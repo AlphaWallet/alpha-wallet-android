@@ -45,6 +45,8 @@ import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 public class NewSettingsFragment extends BaseFragment {
@@ -493,10 +495,17 @@ public class NewSettingsFragment extends BaseFragment {
         // TODO: Implementation
     }
 
+    ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                //send instruction to restart tokenService
+                Bundle r = new Bundle();
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, r);
+            });
+
     private void onSelectNetworksSettingClicked() {
         Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
-        getActivity().startActivity(intent);
+        networkSettingsHandler.launch(intent);
     }
 
     ActivityResultLauncher<Intent> advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),

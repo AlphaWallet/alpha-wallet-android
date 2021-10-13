@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.TextUtils;
@@ -77,7 +78,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private Button primaryButton;
     private Button secondaryButton;
     private ImageButton moreButton;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private AssetDefinitionService assetService;
     private WalletType walletType = WalletType.NOT_DEFINED;
 
@@ -216,6 +217,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         else if (action.buttonId == R.string.action_buy_crypto)
         {
             buyFunctionInterface.handleBuyFunction(token);
+        }
+        else if (action.buttonId == R.string.generate_payment_request) {
+            buyFunctionInterface.handleGeneratePaymentRequest(token);
         }
         else
         {
@@ -554,7 +558,10 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
 
-        //TODO: Update Token name with result from selection
+        if (!token.isNonFungible())
+        {
+            addFunction(new ItemClick(context.getString(R.string.generate_payment_request), R.string.generate_payment_request));
+        }
     }
 
     private void addTokenScriptFunctions(Map<String, TSAction> availableFunctions, Token token, BigInteger tokenId)

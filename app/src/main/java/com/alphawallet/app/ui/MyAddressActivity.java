@@ -164,7 +164,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
                         .setVisible(false);
                 break;
             case MODE_POS:
-                menu.findItem(R.id.action_receive_payment)
+                menu.findItem(R.id.action_my_address)
                         .setVisible(false);
                 menu.findItem(R.id.action_show_contract)
                         .setVisible(false);
@@ -175,13 +175,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
                 menu.findItem(R.id.action_networks)
                         .setVisible(false);
                 break;
-        }
-
-        //Never show receive for NFT, if we happen to get here
-        if (token != null && token.isNonFungible())
-        {
-            menu.findItem(R.id.action_receive_payment)
-                    .setVisible(false);
         }
 
         //Only show contract if we've come from a token and the token is not base chain
@@ -197,11 +190,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_receive_payment)
-        {
-            showPointOfSaleMode();
-        }
-        else if (item.getItemId() == R.id.action_show_contract)
+        if (item.getItemId() == R.id.action_show_contract)
         {
             showContract();
         }

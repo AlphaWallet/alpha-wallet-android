@@ -180,7 +180,7 @@ dependencies {
     implementation "com.google.dagger:dagger-android:2.22"
 
     //Use Leak Canary for debug builds only
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     // Image Loader
     implementation 'com.github.bumptech.glide:glide:4.12.0'

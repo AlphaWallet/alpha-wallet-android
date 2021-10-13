@@ -217,6 +217,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         {
             buyFunctionInterface.handleBuyFunction(token);
         }
+        else if (action.buttonId == R.string.generate_payment_request) {
+            buyFunctionInterface.handleGeneratePaymentRequest(token);
+        }
         else
         {
             handleStandardFunctionClick(action);
@@ -711,6 +714,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         OnRampContract contract = onRampRepository.getContract(token);
         String symbol = contract.getSymbol().isEmpty()? context.getString(R.string.crypto) : token.tokenInfo.symbol;
+        addFunction(new ItemClick(context.getString(R.string.generate_payment_request), R.string.generate_payment_request));
         addFunction(new ItemClick(context.getString(R.string.action_buy_crypto, symbol), R.string.action_buy_crypto));
     }
 }

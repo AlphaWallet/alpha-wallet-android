@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AddressMode;
 import com.alphawallet.app.entity.BuyCryptoInterface;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
@@ -49,6 +50,7 @@ import io.realm.RealmResults;
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.ui.MyAddressActivity.KEY_MODE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
@@ -394,5 +396,16 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         Intent intent = viewModel.getBuyIntent(wallet.address, token);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    @Override
+    public void handleGeneratePaymentRequest(Token token) {
+        Intent intent = new Intent(this, MyAddressActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.putExtra(KEY_MODE, AddressMode.MODE_POS.ordinal());
+        this.startActivity(intent);
     }
 }

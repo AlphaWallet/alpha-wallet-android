@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
@@ -40,6 +41,7 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AddTokenRouter;
+import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
@@ -47,21 +49,30 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.service.WalletConnectService;
+import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
+import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.WCClient;
+import com.alphawallet.app.widget.AddWalletView;
+import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.ParseMagicLink;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.io.File;
 import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import jnr.ffi.annotations.In;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
@@ -87,6 +98,7 @@ public class HomeViewModel extends BaseViewModel {
     private final TickerService tickerService;
     private final MyAddressRouter myAddressRouter;
     private final AnalyticsServiceType analyticsService;
+    private final ExternalBrowserRouter externalBrowserRouter;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -94,6 +106,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private BottomSheetDialog dialog;
 
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
@@ -108,7 +121,8 @@ public class HomeViewModel extends BaseViewModel {
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
             TickerService tickerService,
-            AnalyticsServiceType analyticsService) {
+            AnalyticsServiceType analyticsService,
+            ExternalBrowserRouter externalBrowserRouter ) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -122,6 +136,7 @@ public class HomeViewModel extends BaseViewModel {
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
         this.analyticsService = analyticsService;
+        this.externalBrowserRouter = externalBrowserRouter;
     }
 
     @Override
@@ -331,8 +346,9 @@ public class HomeViewModel extends BaseViewModel {
             switch (qrResult.type)
             {
                 case ADDRESS:
-                    showSend(activity, qrResult); //For now, direct an ETH address to send screen
+                    //showSend(activity, qrResult); //For now, direct an ETH address to send screen
                     //TODO: Issue #1504: bottom-screen popup to choose between: Add to Address book, Sent to Address, or Watch Wallet
+                    showActionSheet(activity, qrResult);
                     break;
                 case PAYMENT:
                     showSend(activity, qrResult);
@@ -364,6 +380,61 @@ public class HomeViewModel extends BaseViewModel {
         {
             Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showActionSheet(Activity activity, QRResult qrResult) {
+
+        View.OnClickListener listener = v -> {
+            switch (v.getId()) {
+                case R.id.send_to_this_address_action:
+                    showSend(activity, qrResult);
+                    break;
+                case R.id.add_custom_token_action: {
+                    Intent intent = new Intent(activity, AddTokenActivity.class);
+                    intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
+                    activity.startActivity(intent);
+                }
+                    break;
+                case R.id.watch_account_action: {
+                    Intent intent = new Intent(activity, ImportWalletActivity.class);
+                    intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
+                    intent.putExtra(C.EXTRA_STATE, "watch");
+                    activity.startActivity(intent);
+                }
+                    break;
+                case R.id.open_in_etherscan_action:
+                    String etherScanUrl = MagicLinkInfo.getEtherscanURLbyNetwork(qrResult.chainId);
+                    if (etherScanUrl != null) {
+                        String url = etherScanUrl + "token/" + qrResult.getAddress();
+                        externalBrowserRouter.open(activity, Uri.parse(url));
+                    }
+                    break;
+                case R.id.close_action:
+                    break;
+            }
+
+            dialog.dismiss();
+        };
+
+        QRCodeActionsView contentView = new QRCodeActionsView(activity);
+
+        contentView.setOnSendToAddressClickListener(listener);
+        contentView.setOnAddCustonTokenClickListener(listener);
+
+
+        contentView.setOnWatchWalletClickListener(listener);
+
+        contentView.setOnOpenInEtherscanClickListener(listener);
+
+        contentView.setOnCloseActionListener(listener);
+
+        dialog = new BottomSheetDialog(activity);
+        dialog.setContentView(contentView);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) contentView.getParent());
+        dialog.setOnShowListener(dialog -> behavior.setPeekHeight(contentView.getHeight()));
+        dialog.show();
     }
 
     public void showSend(Activity ctx, QRResult result)

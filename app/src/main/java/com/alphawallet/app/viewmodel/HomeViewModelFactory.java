@@ -13,6 +13,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AddTokenRouter;
+import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
@@ -34,6 +35,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final TransactionsService transactionsService;
     private final TickerService tickerService;
     private final AnalyticsServiceType analyticsService;
+    private final ExternalBrowserRouter externalBrowserRouter;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -48,7 +50,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
             TickerService tickerService,
-            AnalyticsServiceType analyticsService) {
+            AnalyticsServiceType analyticsService,
+            ExternalBrowserRouter externalBrowserRouter) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -62,6 +65,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
         this.analyticsService = analyticsService;
+        this.externalBrowserRouter = externalBrowserRouter;
     }
 
     @NonNull
@@ -80,7 +84,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 myAddressRouter,
                 transactionsService,
                 tickerService,
-                analyticsService
+                analyticsService,
+                externalBrowserRouter
         );
     }
 }

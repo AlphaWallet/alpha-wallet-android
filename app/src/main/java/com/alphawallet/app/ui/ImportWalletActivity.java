@@ -3,6 +3,7 @@ package com.alphawallet.app.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -136,6 +137,8 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         importWalletViewModel.wallet().observe(this, this::onWallet);
         importWalletViewModel.badSeed().observe(this, this::onBadSeed);
         importWalletViewModel.watchExists().observe(this, this::onWatchExists);
+
+
     }
 
     @Override
@@ -172,6 +175,11 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         {
             ((SetWatchWalletFragment) pages.get(ImportType.WATCH_FORM_INDEX.ordinal()).second)
                     .setOnSetWatchWalletListener(importWalletViewModel);
+        }
+
+        if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
+            // wait till import wallet fragment will be available
+            new Handler().postDelayed(() -> handleScanQR(Activity.RESULT_OK, getIntent()), 500);
         }
     }
 

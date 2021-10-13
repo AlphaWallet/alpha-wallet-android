@@ -11,7 +11,7 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
     private final String MATIC_API = "maticvigil.com/api/v2/transactions";
 
     public  String backupNodeUrl = null;
-    public  String etherscanTxUrl = null; //This is used by the API call to fetch transactions
+    public  String etherscanAPI = null; //This is used by the API call to fetch transactions
 
     public NetworkInfo(
             String name,
@@ -20,10 +20,10 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
             String etherscanUrl,
             int chainId,
             String backupNodeUrl,
-            String etherscanTxUrl) {
+            String etherscanAPI) {
         super(name, symbol, rpcServerUrl, etherscanUrl, chainId);
         this.backupNodeUrl = backupNodeUrl;
-        this.etherscanTxUrl = etherscanTxUrl;
+        this.etherscanAPI = etherscanAPI;
     }
 
     public String getShortName()
@@ -36,7 +36,7 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
 
     public boolean usesSeparateNFTTransferQuery()
     {
-        return (etherscanTxUrl != null && !etherscanTxUrl.contains(BLOCKSCOUT_API) && !etherscanTxUrl.contains(MATIC_API) && !etherscanTxUrl.contains(COVALENT));
+        return (etherscanAPI != null && !etherscanAPI.contains(BLOCKSCOUT_API) && !etherscanAPI.contains(MATIC_API) && !etherscanAPI.contains(COVALENT));
     }
 
     @Nullable

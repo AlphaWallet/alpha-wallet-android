@@ -26,6 +26,7 @@ import org.web3j.protocol.http.HttpService;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,6 +75,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
 
     private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
+
+    private static final String GAS_API = "module=gastracker&action=gasoracle";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -238,7 +241,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
                     "https://cronos-explorer.crypto.org/api?"));
-
             put(ARBITRUM_MAIN_ID, new NetworkInfo(C.ARBITRUM_ONE_NETWORK, C.ARBITRUM_SYMBOL,
                     ARBITRUM_MAINNET_RPC,
                     "https://arbiscan.io/tx/", ARBITRUM_MAIN_ID, ARBITRUM_FALLBACK_MAINNET_RPC,
@@ -249,6 +251,34 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "")); //no transaction API
         }
     };
+
+    //Does the chain have a gas oracle?
+    //Add it to this list here if so. Note that so far, all gas oracles follow the same format:
+    //  <etherscanAPI from the above list> + GAS_API
+    //If the gas oracle you're adding doesn't follow this spec then you'll have to change the getGasOracle method
+    private static final List<Integer> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, MATIC_ID);
+
+    //These chains don't allow custom gas
+    private static final List<Integer> hasLockedGas = Arrays.asList(ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID, OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID);
+
+    @Override
+    public String getGasOracle(int chainId)
+    {
+        if (hasGasOracleAPI.contains(chainId) && networkMap.containsKey(chainId))
+        {
+            return networkMap.get(chainId).etherscanAPI + GAS_API;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    @Override
+    public boolean hasLockedGas(int chainId)
+    {
+        return hasLockedGas.contains(chainId);
+    }
     
     static final Map<Integer, String> addressOverride = new HashMap<Integer, String>() {
         {

@@ -1,5 +1,7 @@
 package com.alphawallet.app.service;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GasPriceSpread;
@@ -44,7 +46,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
  * Created by JB on 18/11/2020.
  *
  * Starts a cycle to update the gas settings stored in the database
- * Service automatically cleans up after itself - erasing readings older than 12 hours
  */
 public class GasService implements ContractGasProvider
 {
@@ -57,8 +58,6 @@ public class GasService implements ContractGasProvider
     private Web3j web3j;
     private BigInteger currentGasPrice;
     private final String ETHERSCAN_API_KEY;
-
-    private final List<Integer> chainsWithEtherscanPrice = Arrays.asList(1, 42, 3, 4, 5, 56, 128, 137, 10, 69);
 
     @Nullable
     private Disposable gasFetchDisposable;
@@ -152,9 +151,11 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateCurrentGasPrices()
     {
-        if (chainsWithEtherscanPrice.contains(currentChainId))
+        String gasOracleAPI = networkRepository.getGasOracle(currentChainId);
+        if (!TextUtils.isEmpty(gasOracleAPI))
         {
-            return updateEtherscanGasPrices();
+            if (gasOracleAPI.contains("etherscan")) gasOracleAPI += ETHERSCAN_API_KEY;
+            return updateEtherscanGasPrices(gasOracleAPI);
         }
         else
         {
@@ -167,7 +168,8 @@ public class GasService implements ContractGasProvider
     {
         if (EthereumNetworkRepository.hasGasOverride(currentChainId))
         {
-            updateRealm(new GasPriceSpread(EthereumNetworkRepository.gasOverrideValue(currentChainId)), currentChainId);
+            updateRealm(new GasPriceSpread(EthereumNetworkRepository.gasOverrideValue(currentChainId),
+                    networkRepository.hasLockedGas(currentChainId)), currentChainId);
             currentGasPrice = EthereumNetworkRepository.gasOverrideValue(currentChainId);
             return Single.fromCallable(() -> true);
         }
@@ -183,7 +185,7 @@ public class GasService implements ContractGasProvider
     private Boolean updateGasPrice(EthGasPrice ethGasPrice, int chainId)
     {
         currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
-        updateRealm(new GasPriceSpread(currentGasPrice), chainId);
+        updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
         return true;
     }
 
@@ -207,17 +209,15 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    private Single<Boolean> updateEtherscanGasPrices()
+    private Single<Boolean> updateEtherscanGasPrices(String gasOracleAPI)
     {
         final int chainId = currentChainId;
         return Single.fromCallable(() -> {
-            String apiUrl = networkRepository.getNetworkByChain(chainId).etherscanTxUrl + "module=gastracker&action=gasoracle";
-            if (apiUrl.contains("etherscan")) apiUrl += ETHERSCAN_API_KEY;
             boolean update = false;
             try
             {
                 Request request = new Request.Builder()
-                        .url(apiUrl)
+                        .url(gasOracleAPI)
                         .get()
                         .build();
                 okhttp3.Response response = httpClient.newCall(request)

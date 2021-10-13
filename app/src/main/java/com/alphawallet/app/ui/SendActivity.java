@@ -141,7 +141,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
         QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
 
-        if (result != null && result.type == EIP681Type.PAYMENT)
+        if (result != null && (result.type == EIP681Type.PAYMENT || result.type == EIP681Type.TRANSFER))
         {
             handleClick("", R.string.action_next);
         }

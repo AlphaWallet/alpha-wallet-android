@@ -6,6 +6,7 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -48,7 +49,7 @@ public class ENSHandler implements Runnable
     private TextWatcher ensTextWatcher;
     private final Handler handler;
     private final AutoCompleteAddressAdapter adapterUrl;
-    private AWEnsResolver ensResolver;
+    private final AWEnsResolver ensResolver;
     private final float standardTextSize;
 
     @Nullable
@@ -58,10 +59,10 @@ public class ENSHandler implements Runnable
 
     public ENSHandler(InputAddress host, AutoCompleteAddressAdapter adapter)
     {
-        this.handler = new Handler();
+        this.handler = new Handler(Looper.getMainLooper());
         this.adapterUrl = adapter;
         this.host = host;
-        this.ensResolver = null;
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext());
 
         standardTextSize = host.getTextSize();
 
@@ -147,12 +148,11 @@ public class ENSHandler implements Runnable
         {
             if (Utils.isAddressValid(host.getInputText()) && TextUtils.isEmpty(host.getStatusText()))
             {
-                if (ensResolver != null) {
-                    //check our known ENS names list for a match
-                    String ensName = ensResolver.checkENSHistoryForAddress(host.getInputText());
-                    if (!TextUtils.isEmpty(ensName)) {
-                        host.setStatus(ensName);
-                    }
+                //check our known ENS names list for a match
+                String ensName = ensResolver.checkENSHistoryForAddress(host.getInputText());
+                if (!TextUtils.isEmpty(ensName))
+                {
+                    host.setStatus(ensName);
                 }
             }
 
@@ -237,7 +237,6 @@ public class ENSHandler implements Runnable
         //is this an address? If so, attempt reverse lookup or resolve from known ENS addresses
         if (Utils.isAddressValid(to))
         {
-            initENSHandler();
             host.setWaitingSpinner(true);
 
             disposable = ensResolver.reverseResolveEns(to)
@@ -247,7 +246,6 @@ public class ENSHandler implements Runnable
         }
         else if (canBeENSName(to))
         {
-            initENSHandler();
             host.setWaitingSpinner(true);
 
             disposable = ensResolver.resolveENSAddress(to)
@@ -348,13 +346,5 @@ public class ENSHandler implements Runnable
     {
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(host.getContext()).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
-    }
-
-    private void initENSHandler()
-    {
-        if (ensResolver == null)
-        {
-            this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext());
-        }
     }
 }

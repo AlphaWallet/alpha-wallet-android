@@ -147,11 +147,12 @@ public class ENSHandler implements Runnable
         {
             if (Utils.isAddressValid(host.getInputText()) && TextUtils.isEmpty(host.getStatusText()))
             {
-                //check our known ENS names list for a match
-                String ensName = ensResolver.checkENSHistoryForAddress(host.getInputText());
-                if (!TextUtils.isEmpty(ensName))
-                {
-                    host.setStatus(ensName);
+                if (ensResolver != null) {
+                    //check our known ENS names list for a match
+                    String ensName = ensResolver.checkENSHistoryForAddress(host.getInputText());
+                    if (!TextUtils.isEmpty(ensName)) {
+                        host.setStatus(ensName);
+                    }
                 }
             }
 

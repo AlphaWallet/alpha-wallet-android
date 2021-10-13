@@ -10,9 +10,7 @@ import android.webkit.URLUtil;
 
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModel;
@@ -96,7 +94,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             chainIdInputView.setText(String.valueOf(ext.info.chainId));
             symbolInputView.setText(ext.info.symbol);
             blockExplorerUrlInputView.setText(ext.info.etherscanUrl);
-            blockExplorerApiUrl.setText(ext.info.etherscanTxUrl);
+            blockExplorerApiUrl.setText(ext.info.etherscanAPI);
             testNetSwitch.setChecked(ext.isTestNetwork);
             // disable editing for hardcoded networks
             if (!ext.isCustomNetwork) {

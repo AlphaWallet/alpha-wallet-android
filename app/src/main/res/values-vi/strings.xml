@@ -826,4 +826,6 @@
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">Mạng lưới</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="action_send_to_this_address">Send to this Address</string>
+    <string name="action_open_in_etherscan">Open in Etherscan</string>
 </resources>

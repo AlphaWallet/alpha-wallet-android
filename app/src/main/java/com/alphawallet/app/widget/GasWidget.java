@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -57,7 +58,7 @@ public class GasWidget extends LinearLayout implements Runnable
     private Activity baseActivity;
     private StandardFunctionInterface functionInterface;
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final TextView speedText;
     private final TextView timeEstimate;
@@ -327,6 +328,14 @@ public class GasWidget extends LinearLayout implements Runnable
             {
                 currentGasSpeedIndex = customGasSpeedIndex;
                 forceCustomGas = false;
+            }
+
+            TextView editTxt = findViewById(R.id.edit_text);
+
+            if (gs.lockedGas && editTxt.getVisibility() == View.VISIBLE)
+            {
+                findViewById(R.id.edit_text).setVisibility(View.GONE);
+                setOnClickListener(null);
             }
             //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
             handler.post(this);

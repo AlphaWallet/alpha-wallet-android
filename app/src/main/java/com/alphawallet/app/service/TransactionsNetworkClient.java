@@ -347,7 +347,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanTransaction[] readTransactions(NetworkInfo networkInfo, String walletAddress, String tokenAddress, String firstBlock, boolean ascending, int page, int pageSize) throws JSONException
     {
         if (networkInfo == null) return new EtherscanTransaction[0];
-        if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransactions(walletAddress, tokenAddress, networkInfo, ascending, page, pageSize); }
+        if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransactions(walletAddress, tokenAddress, networkInfo, ascending, page, pageSize); }
         okhttp3.Response response;
         String result = null;
         String fullUrl;
@@ -355,10 +355,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String sort = "asc";
         if (!ascending) sort = "desc";
 
-        if (!TextUtils.isEmpty(networkInfo.etherscanTxUrl))
+        if (!TextUtils.isEmpty(networkInfo.etherscanAPI))
         {
             StringBuilder sb = new StringBuilder();
-            sb.append(networkInfo.etherscanTxUrl);
+            sb.append(networkInfo.etherscanAPI);
             sb.append("module=account&action=txlist&address=");
             sb.append(tokenAddress);
             if (ascending)
@@ -384,7 +384,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 sb.append(pageSize);
             }
 
-            if (networkInfo.etherscanTxUrl.contains("etherscan"))
+            if (networkInfo.etherscanAPI.contains("etherscan"))
             {
                 sb.append(ETHERSCAN_API_KEY);
             }
@@ -622,14 +622,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)
     {
-        if (TextUtils.isEmpty(networkInfo.etherscanTxUrl)) return "";
-        if (networkInfo.etherscanTxUrl.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
+        if (TextUtils.isEmpty(networkInfo.etherscanAPI)) return "";
+        if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
         okhttp3.Response response;
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
-        String APIKEY_TOKEN = networkInfo.etherscanTxUrl.contains("etherscan") ? ETHERSCAN_API_KEY : "";
-        String fullUrl = networkInfo.etherscanTxUrl + "module=account&action=" + queryType +
+        String APIKEY_TOKEN = networkInfo.etherscanAPI.contains("etherscan") ? ETHERSCAN_API_KEY : "";
+        String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +
                 "&address=" + walletAddress +
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
@@ -677,7 +677,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         String covalent = "" + networkInfo.chainId + "/address/" + accountAddress.toLowerCase() + "/transactions_v2/?";
         String args = "block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize;
-        String fullUrl = networkInfo.etherscanTxUrl.replace(COVALENT, covalent);
+        String fullUrl = networkInfo.etherscanAPI.replace(COVALENT, covalent);
         okhttp3.Response response;
         String result = null;
 

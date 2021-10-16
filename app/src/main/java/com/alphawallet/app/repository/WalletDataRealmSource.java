@@ -175,6 +175,7 @@ public class WalletDataRealmSource {
             wallet.ENSname = d.getENSName();
             wallet.balance = balance(d);
             wallet.name = d.getName();
+            wallet.ENSAvatar = d.getENSAvatar();
         }
     }
 

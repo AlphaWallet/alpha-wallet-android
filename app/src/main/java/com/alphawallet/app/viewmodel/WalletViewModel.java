@@ -288,6 +288,6 @@ public class WalletViewModel extends BaseViewModel
 
     public void saveAvatar(Wallet wallet)
     {
-        genericWalletInteract.updateWalletInfo(wallet, wallet.name);
+        genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
     }
 }

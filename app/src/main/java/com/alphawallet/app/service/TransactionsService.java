@@ -266,6 +266,14 @@ public class TransactionsService
         }
     }
 
+    public void restartService()
+    {
+        stopAllChainUpdate();
+        tokensService.stopUpdateCycle();
+        tokensService.startUpdateCycle();
+        fetchTransactions();
+    }
+
     public void lostFocus()
     {
         tokensService.appOutOfFocus();

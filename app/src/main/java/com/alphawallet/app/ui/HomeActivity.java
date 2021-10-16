@@ -43,6 +43,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -115,6 +116,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
     public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
     public static final String STORED_PAGE = "currentPage";
+    public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
 
     public HomeActivity()
     {
@@ -305,6 +307,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             //TODO: Check we are using latest version on github, since we're using a downloaded/manually installed version
             //First check that this the package name is "io.stormbird.wallet" - it could be a fork
         }
+
+        //TODO: Move all fragment comms to this model - see all instances of ((HomeActivity)getActivity()).
+        getSupportFragmentManager()
+                .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> viewModel.restartTokensService());
     }
 
     private void onBackup(String address)

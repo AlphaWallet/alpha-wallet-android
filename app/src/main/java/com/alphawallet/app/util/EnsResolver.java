@@ -115,7 +115,8 @@ public class EnsResolver {
 
             if (!Utils.isAddressValid(contractAddress))
             {
-                throw new RuntimeException("Unable to resolve address for name: " + ensName);
+                //throw new RuntimeException("Unable to resolve address for name: " + ensName);
+                return "";
             }
             else
             {
@@ -149,7 +150,8 @@ public class EnsResolver {
             }
             catch (Exception e)
             {
-                throw new RuntimeException("Unable to execute Ethereum request", e);
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
+                return "";
             }
 
             if (!isValidEnsName(name, addressLength))
@@ -165,6 +167,30 @@ public class EnsResolver {
         {
             throw new EnsResolutionException("Address is invalid: " + address);
         }
+    }
+
+    public String resolveAvatar(String ensName)
+    {
+        if (isValidEnsName(ensName, addressLength))
+        {
+            try
+            {
+                String resolverAddress = lookupResolver(ensName);
+                if (!TextUtils.isEmpty(resolverAddress))
+                {
+                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
+                    //now attempt to get the address of this ENS
+                    return getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash));
+                }
+            }
+            catch (Exception e)
+            {
+                //
+                e.printStackTrace();
+            }
+        }
+
+        return "";
     }
 
     private String lookupResolver(String ensName) throws Exception
@@ -183,6 +209,16 @@ public class EnsResolver {
                             Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
                             {
                             }));
+    }
+
+    private Function getAvatar(byte[] nameHash)
+    {
+        return new Function("text",
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
+                                    new org.web3j.abi.datatypes.Utf8String("avatar")),
+                Arrays.<TypeReference<?>>asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
+                {
+                }));
     }
 
     private Function getResolverOf(BigInteger nameId)
@@ -284,7 +320,6 @@ public class EnsResolver {
     }
 
     public static boolean isValidEnsName(String input, int addressLength) {
-        return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !Utils.isAddressValid(input));
+        return input != null && input.contains(".") && input.length() > 4;
     }
 }

@@ -7,7 +7,7 @@
     android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_network_switch_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:id="@+id/layout_holder"

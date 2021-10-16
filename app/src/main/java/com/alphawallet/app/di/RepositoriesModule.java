@@ -64,8 +64,8 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-	TickerService provideTickerService(OkHttpClient httpClient, Gson gson, Context context, TokenLocalSource localSource) {
-		return new TickerService(httpClient, gson, context, localSource);
+	TickerService provideTickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource) {
+		return new TickerService(httpClient, sharedPrefs, localSource);
     }
 
 	@Singleton

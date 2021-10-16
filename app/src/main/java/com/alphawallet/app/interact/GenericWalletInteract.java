@@ -1,5 +1,6 @@
 package com.alphawallet.app.interact;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.util.BalanceUtils;
 
@@ -16,6 +17,8 @@ import java.math.BigDecimal;
 
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
+
+import android.util.Log;
 
 public class GenericWalletInteract
 {
@@ -81,22 +84,21 @@ public class GenericWalletInteract
 		return b.compareTo(BigDecimal.ZERO) > 0;
 	}
 
-	public Single<Wallet> updateWalletName(Wallet wallet, String name) {
+	public void updateWalletInfo(Wallet wallet, String name, Realm.Transaction.OnSuccess onSuccess)
+	{
 		wallet.name = name;
-		return walletRepository.updateWalletData(wallet);
+		walletRepository.updateWalletData(wallet, onSuccess);
 	}
 
-	public Single<Wallet> updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)
+	public void updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)
 	{
 		String newBalanceStr = BalanceUtils.getScaledValueFixed(newBalance, ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
 		if (!newBalance.equals(BigDecimal.valueOf(-1)) && !wallet.balance.equals(newBalanceStr))
 		{
 			wallet.balance = newBalanceStr;
-			return walletRepository.updateWalletData(wallet);
-		}
-		else
-		{
-			return Single.fromCallable(() -> wallet);
+			walletRepository.updateWalletData(wallet, () -> {
+				if (BuildConfig.DEBUG) Log.d(getClass().getCanonicalName(), "Updated balance");
+			});
 		}
 	}
 

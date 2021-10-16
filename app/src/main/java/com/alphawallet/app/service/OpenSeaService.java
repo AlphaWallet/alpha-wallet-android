@@ -275,7 +275,7 @@ public class OpenSeaService
         return jsonResult;
     }
 
-    public void resetOffetRead()
+    public void resetOffsetRead()
     {
         pageOffset = 0;
     }

@@ -1,5 +1,8 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,14 +14,21 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
+import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
+import java.io.InterruptedIOException;
+import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -36,6 +46,7 @@ public class AWEnsResolver extends EnsResolver
     private static final String DAS_LOOKUP = "https://indexer.da.systems/";
     private static final String DAS_NAME = "[DAS_NAME]";
     private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
+    private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private final Context context;
     private final OkHttpClient client;
 
@@ -82,6 +93,146 @@ public class AWEnsResolver extends EnsResolver
             }
             return ensName;
         });
+    }
+
+    public Single<String> getENSUrl(String ensName)
+    {
+        return Single.fromCallable(() -> {
+            String locator = resolveAvatar(ensName);
+            if (!TextUtils.isEmpty(locator))
+            {
+                return locator;
+            }
+            else
+            {
+                return "";
+            }
+        }).flatMap(this::convertLocator);
+    }
+
+    public Single<String> convertLocator(String locator)
+    {
+        if (TextUtils.isEmpty(locator)) return Single.fromCallable(() -> "");
+        return Single.fromCallable(() -> {
+            String url = "";
+            switch (getLocatorType(locator))
+            {
+                case EIP155:
+                    url = getEip155Url(locator);
+                    break;
+                case IPFS:
+                    url = Utils.parseIPFS(locator);
+                    break;
+                case HTTPS:
+                    url = locator;
+                    break;
+                case UNKNOWN:
+                    url = "";
+                    break;
+            }
+
+            return url;
+        });
+    }
+
+    private String getEip155Url(String locator)
+    {
+        final Pattern findKey = Pattern.compile("(eip155:)([0-9]+)(\\/)([0-9a-zA-Z]+)(:)(0?x?[0-9a-fA-F]{40})(\\/)([0-9]+)");
+        final Matcher matcher = findKey.matcher(locator);
+
+        try
+        {
+            if (matcher.find())
+            {
+                int chainId = Integer.parseInt(Objects.requireNonNull(matcher.group(2)));
+                String tokenAddress = Numeric.prependHexPrefix(matcher.group(6));
+                String tokenId = matcher.group(8);
+
+                JSONObject asset = fetchOpenseaAsset(chainId, tokenAddress, tokenId);
+
+                if (asset != null && asset.has(OPENSEA_IMAGE_PREVIEW))
+                {
+                    return asset.getString(OPENSEA_IMAGE_PREVIEW);
+                }
+                else
+                {
+                    //TODO: fetch metadata directly
+                    return "";
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return "";
+    }
+
+    private JSONObject fetchOpenseaAsset(int chainId, String tokenAddress, String tokenId)
+    {
+        String apiBase;
+        switch (chainId)
+        {
+            case 1:
+                apiBase = "https://api.opensea.io";
+                break;
+            case 4:
+                apiBase = "https://rinkeby-api.opensea.io";
+                break;
+            default:
+                return null;
+        }
+
+        try
+        {
+            Request request = new Request.Builder()
+                    .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)
+                    .get()
+                    .build();
+
+            okhttp3.Response response = client.newCall(request).execute();
+            String jsonResult = response.body().string();
+            return new JSONObject(jsonResult);
+        }
+        catch (InterruptedIOException e)
+        {
+            //If user switches account or network during a fetch
+            //this exception is going to be thrown because we're terminating the API call
+            //Don't display error
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private LocatorType getLocatorType(String locator)
+    {
+        String[] sp = locator.split(":");
+        if (sp.length > 1)
+        {
+            switch (sp[0])
+            {
+                case "eip155":
+                    return LocatorType.EIP155;
+                case "ipfs":
+                    return LocatorType.IPFS;
+                case "https":
+                    return LocatorType.HTTPS;
+                default:
+                    break;
+            }
+        }
+
+        return LocatorType.UNKNOWN;
+    }
+
+    private enum LocatorType
+    {
+        EIP155, IPFS, HTTPS, UNKNOWN
     }
 
     //Only checks wallet history for ENS name
@@ -230,5 +381,10 @@ public class AWEnsResolver extends EnsResolver
                 .writeTimeout(7, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
+    }
+
+    public void checkENSAvatar(String address)
+    {
+
     }
 }

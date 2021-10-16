@@ -160,9 +160,9 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Wallet> updateWalletData(Wallet wallet)
+	public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
 	{
-		return walletDataRealmSource.updateWalletData(wallet);
+		walletDataRealmSource.updateWalletData(wallet, onSuccess);
 	}
 
 	@Override

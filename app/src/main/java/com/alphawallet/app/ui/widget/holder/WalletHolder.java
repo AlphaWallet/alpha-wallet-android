@@ -3,26 +3,29 @@ package com.alphawallet.app.ui.widget.holder;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.ui.WalletActionsActivity;
+import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
-import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.UserAvatar;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
+public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
+{
 
 	public static final int VIEW_TYPE = 1001;
 	public final static String IS_DEFAULT_ADDITION = "is_default";
@@ -30,7 +33,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 	private final LinearLayout manageWalletLayout;
 	private final ImageView manageWalletBtn;
-	private final ImageView walletIcon;
+	private final UserAvatar walletIcon;
 	private final LinearLayout walletClickLayout;
 	private final TextView walletBalanceText;
 	private final TextView walletBalanceCurrency;
@@ -89,7 +92,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 				walletNameText.setVisibility(View.GONE);
 			}
 
-			walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
+			walletIcon.bind(wallet, this);
 
 			String walletBalance = wallet.balance;
 			if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
@@ -198,5 +201,11 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 				getContext().startActivity(intent);
 				break;
 		}
+	}
+
+	@Override
+	public void avatarFound(Wallet wallet)
+	{
+		if (clickCallback != null) clickCallback.ensAvatar(wallet);
 	}
 }

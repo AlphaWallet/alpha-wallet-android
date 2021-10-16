@@ -17,7 +17,7 @@
     app:popupTheme="@style/AppTheme.PopupOverlay"
     app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
-    <ImageView
+    <com.alphawallet.app.widget.UserAvatar
         android:id="@+id/user_address_blockie"
         android:layout_width="30dp"
         android:layout_height="30dp"

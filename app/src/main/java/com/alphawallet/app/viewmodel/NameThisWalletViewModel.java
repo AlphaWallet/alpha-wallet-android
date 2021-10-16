@@ -18,6 +18,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
@@ -75,8 +76,9 @@ public class NameThisWalletViewModel extends BaseViewModel
         ensName.setValue(address);
     }
 
-    public Single<Wallet> setWalletName(String name) {
-        return genericWalletInteract.updateWalletName(defaultWallet.getValue(), name);
+    public void setWalletName(String name, Realm.Transaction.OnSuccess onSuccess)
+    {
+        genericWalletInteract.updateWalletInfo(defaultWallet.getValue(), name, onSuccess);
     }
 }
 

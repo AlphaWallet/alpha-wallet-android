@@ -358,4 +358,9 @@ public class SplashViewModel extends ViewModel
     public void setInstallTime(long time) {
         preferenceRepository.setInstallTime(time);
     }
+
+    public int getLastFragmentId()
+    {
+        return preferenceRepository.getLastFragmentPage();
+    }
 }

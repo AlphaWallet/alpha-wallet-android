@@ -31,6 +31,7 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -539,5 +540,15 @@ public class HomeViewModel extends BaseViewModel {
     public void restartTokensService()
     {
         transactionsService.restartService();
+    }
+
+    public void storeCurrentFragmentId(int ordinal)
+    {
+        preferenceRepository.storeLastFragmentPage(ordinal);
+    }
+
+    public int getLastFragmentId()
+    {
+        return preferenceRepository.getLastFragmentPage();
     }
 }

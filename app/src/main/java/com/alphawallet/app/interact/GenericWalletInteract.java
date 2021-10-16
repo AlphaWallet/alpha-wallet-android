@@ -81,9 +81,10 @@ public class GenericWalletInteract
 		return b.compareTo(BigDecimal.ZERO) > 0;
 	}
 
-	public Single<Wallet> updateWalletName(Wallet wallet, String name) {
+	public void updateWalletInfo(Wallet wallet, String name, Realm.Transaction.OnSuccess onSuccess)
+	{
 		wallet.name = name;
-		return walletRepository.updateWalletData(wallet);
+		walletRepository.updateWalletData(wallet, onSuccess);
 	}
 
 	public Single<Wallet> updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)

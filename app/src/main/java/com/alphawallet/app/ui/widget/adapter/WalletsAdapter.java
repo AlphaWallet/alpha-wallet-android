@@ -27,6 +27,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     private Wallet defaultWallet = null;
     private final Context context;
     private final Realm realm;
+    private final GenericWalletInteract walletInteract;
 
     public WalletsAdapter(Context ctx,
             OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract) {
@@ -34,6 +35,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
+        this.walletInteract = genericWalletInteract;
     }
 
     @NotNull
@@ -167,6 +169,12 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     public void onWalletClicked(Wallet wallet)
     {
         onSetWalletDefaultListener.onSetDefault(wallet);
+    }
+
+    @Override
+    public void ensAvatar(Wallet wallet)
+    {
+        walletInteract.updateWalletInfo(wallet, wallet.name);
     }
 
     public void onDestroy()

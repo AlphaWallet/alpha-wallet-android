@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,12 +20,14 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.util.AWEnsResolver;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -225,28 +229,6 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    /*@Override
-    public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
-        boolean isToken = !token.isEthereum();
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
-        tokenDetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
-    }
-
-    @Override
-    public void showTokenList(Activity activity, Token token)
-    {
-        switch (token.getInterfaceSpec())
-        {
-            case ERC1155:
-                boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
-                tokenDetailRouter.openERC1155(activity, token, defaultWallet.getValue(), hasDefinition);
-                break;
-            default:
-                assetDisplayRouter.open(activity, token, defaultWallet.getValue());
-                break;
-        }
-    }*/
-
     public void checkBackup()
     {
         if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
@@ -302,5 +284,10 @@ public class WalletViewModel extends BaseViewModel
 
     public void setMarshMallowWarning(boolean shown) {
         preferenceRepository.setMarshMallowWarning(shown);
+    }
+
+    public void saveAvatar(Wallet wallet)
+    {
+        genericWalletInteract.updateWalletInfo(wallet, wallet.name);
     }
 }

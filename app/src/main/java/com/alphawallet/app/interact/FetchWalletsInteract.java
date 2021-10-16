@@ -39,7 +39,7 @@ public class FetchWalletsInteract {
     }
 
     public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess) {
-        return accountRepository.updateWalletData(wallet, onSuccess);
+        accountRepository.updateWalletData(wallet, onSuccess);
     }
 
     /**

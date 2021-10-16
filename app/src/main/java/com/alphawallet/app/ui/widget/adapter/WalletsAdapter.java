@@ -174,7 +174,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     @Override
     public void ensAvatar(Wallet wallet)
     {
-        walletInteract.updateWalletInfo(wallet, wallet.name);
+        walletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
     }
 
     public void onDestroy()

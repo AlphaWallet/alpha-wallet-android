@@ -94,14 +94,8 @@ public class NameThisWalletActivity extends BaseActivity implements StandardFunc
     }
 
     private void updateNameAndExit() {
-        viewModel.setWalletName()
-        disposable = viewModel.setWalletName(inputName.getText().toString()).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(n -> {
-                    finish();
-                });
+        viewModel.setWalletName(inputName.getText().toString(), this::finish);
     }
-
 
     @Override
     protected void onResume() {

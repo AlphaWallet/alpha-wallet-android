@@ -14,6 +14,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
+import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -144,7 +145,7 @@ public class AWEnsResolver extends EnsResolver
             if (matcher.find())
             {
                 int chainId = Integer.parseInt(Objects.requireNonNull(matcher.group(2)));
-                String tokenAddress = matcher.group(6);
+                String tokenAddress = Numeric.prependHexPrefix(matcher.group(6));
                 String tokenId = matcher.group(8);
 
                 JSONObject asset = fetchOpenseaAsset(chainId, tokenAddress, tokenId);

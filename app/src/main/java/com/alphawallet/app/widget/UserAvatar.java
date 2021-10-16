@@ -2,6 +2,9 @@ package com.alphawallet.app.widget;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import static java.lang.Thread.sleep;
+
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -11,6 +14,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
@@ -28,6 +32,8 @@ import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
 
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -72,7 +78,7 @@ public class UserAvatar extends androidx.appcompat.widget.AppCompatImageView
         bind(wallet, null);
     }
 
-    public void bind(Wallet wallet, AvatarWriteCallback avCallback)
+    public void bind(final Wallet wallet, AvatarWriteCallback avCallback)
     {
         if (iconRequest != null && iconRequest.isRunning()) iconRequest.clear();
         if (loadAvatarDisposable != null && !loadAvatarDisposable.isDisposed()) loadAvatarDisposable.dispose();
@@ -82,11 +88,12 @@ public class UserAvatar extends androidx.appcompat.widget.AppCompatImageView
         //does wallet have an Avatar?
         if (!TextUtils.isEmpty(wallet.ENSAvatar) && wallet.ENSAvatar.length() > 1)
         {
-            loadAvatar(wallet.ENSAvatar, null, wallet);
+            loadAvatar(wallet.ENSAvatar, null, wallet, true);
         }
         else
         {
             setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
+            if (wallet.ENSAvatar != null && wallet.ENSAvatar.length() == 1) return;
         }
 
         if (avCallback != null)
@@ -94,13 +101,30 @@ public class UserAvatar extends androidx.appcompat.widget.AppCompatImageView
             loadAvatarDisposable = ensResolver.getENSUrl(wallet.ENSname)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(iconUrl -> loadAvatar(iconUrl, avCallback, wallet));
+                    .subscribe(iconUrl -> loadAvatar(iconUrl, avCallback, wallet, false), this::onError);
         }
     }
 
-    private void loadAvatar(String iconUrl, AvatarWriteCallback avCallback, Wallet wallet)
+    private void onError(Throwable throwable)
     {
-        if (!TextUtils.isEmpty(iconUrl))
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
+    }
+
+    @Override
+    public void onDetachedFromWindow()
+    {
+        super.onDetachedFromWindow();
+        if (iconRequest != null && iconRequest.isRunning()) iconRequest.clear();
+        if (loadAvatarDisposable != null && !loadAvatarDisposable.isDisposed())
+        {
+            loadAvatarDisposable.dispose();
+            loadAvatarDisposable = null;
+        }
+    }
+
+    private void loadAvatar(String iconUrl, AvatarWriteCallback avCallback, Wallet wallet, boolean alwaysLoad)
+    {
+        if ((loadAvatarDisposable != null || alwaysLoad) && !TextUtils.isEmpty(iconUrl))
         {
             wallet.ENSAvatar = iconUrl;
             if (avCallback != null) avCallback.avatarFound(wallet);
@@ -108,6 +132,10 @@ public class UserAvatar extends androidx.appcompat.widget.AppCompatImageView
                     .load(iconUrl)
                     .apply(new RequestOptions().circleCrop())
                     .into(viewTarget).getRequest();
+        }
+        else
+        {
+            wallet.ENSAvatar = "-";
         }
     }
 }

@@ -533,11 +533,11 @@
     <string name="reimport_wallet_title">Re-Import Wallet?</string>
     <string name="provide_authentication">Provide authentication to create key</string>
     <string name="import_error">Import Error, Try re-import again.</string>
-    <string name="watch_exists">Wallet %1$s already full wallet - no need to watch</string>
+    <string name="watch_exists">Wallet %1$s already imported with key</string>
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
     <string name="lock_seed_phrase">Lock Seed Phrase</string>
     <string name="no_key">No Key found</string>
-    <string name="pending_transaction">Pending Transaction ...</string>
+    <string name="pending_transaction">Pending Transaction …</string>
     <string name="title_enable_debug">Local Scripts Not Enabled</string>
     <string name="need_to_enable_debug">To use local TokenScripts you need to enable TokenScript override. Go to Settings, then click \'Enable TokenScript Override\'.</string>
     <string name="too_many_fails">Too many fingerprint fails. Use PIN or wait 30 seconds</string>

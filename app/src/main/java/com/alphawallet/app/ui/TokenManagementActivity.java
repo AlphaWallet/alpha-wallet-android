@@ -178,6 +178,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     private void setRealmListener()
     {
+        if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         realmUpdates = realm.where(RealmToken.class)
                 .like("address", ADDRESS_FORMAT)
                 .findAllAsync();

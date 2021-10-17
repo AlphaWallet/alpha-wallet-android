@@ -149,6 +149,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
     private void setTokenListener()
     {
+        if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {

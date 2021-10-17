@@ -309,6 +309,7 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private void startGasListener()
     {
+        if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery().findFirstAsync();
         realmGasSpread.addChangeListener(realmToken -> {
             if (realmGasSpread.isValid())

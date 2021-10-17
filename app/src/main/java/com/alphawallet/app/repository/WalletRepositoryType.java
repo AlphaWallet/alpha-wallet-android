@@ -32,7 +32,7 @@ public interface WalletRepositoryType {
     Single<Wallet[]> storeWallets(Wallet[] wallets);
 
     Single<Wallet> storeWallet(Wallet wallet);
-    Single<Wallet> updateWalletData(Wallet wallet);
+    void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess);
 
     Single<String> getName(String address);
 

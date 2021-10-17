@@ -99,6 +99,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void startTxListener()
     {
+        if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         if (viewModel == null || viewModel.defaultWallet().getValue() == null || TextUtils.isEmpty(viewModel.defaultWallet().getValue().address))
             return;
 

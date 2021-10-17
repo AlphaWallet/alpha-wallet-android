@@ -192,6 +192,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private void setTokenListener()
     {
         if (realm == null) realm = viewModel.getRealmInstance(wallet);
+        if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
                 .greaterThan("addedTime", System.currentTimeMillis()- 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();

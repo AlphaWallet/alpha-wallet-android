@@ -1,9 +1,12 @@
 package com.alphawallet.app.web3;
 
-import android.app.Activity;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.N;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.text.TextUtils;
@@ -16,8 +19,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import androidx.fragment.app.FragmentActivity;
-
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
@@ -26,9 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import okhttp3.HttpUrl;
-
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.N;
 
 public class Web3ViewClient extends WebViewClient {
 
@@ -113,11 +112,16 @@ public class Web3ViewClient extends WebViewClient {
         if (request == null) {
             return null;
         }
-        else if (request.getUrl().toString().contains(".auth0.com/")) //don't inject into auth0 pages
+
+        if (isInjected
+                || request.getUrl().toString().contains("infura")
+                || request.getUrl().toString().contains(".auth0.com/")
+                || handleTrustedExtension(request.getUrl().toString()))
         {
             return super.shouldInterceptRequest(view, request);
         }
-        else if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame()) {
+        else if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame())
+        {
              if (request.getMethod().equalsIgnoreCase("GET")
                      && (request.getUrl().toString().contains(".js")
                         || request.getUrl().toString().contains("json")
@@ -129,13 +133,7 @@ public class Web3ViewClient extends WebViewClient {
                     }
                 }
             }
-            super.shouldInterceptRequest(view, request);
-            return null;
-        }
-        //check for known extensions
-        else if (handleTrustedExtension(request.getUrl().toString()))
-        {
-            return null;
+            return super.shouldInterceptRequest(view, request);
         }
 
         HttpUrl httpUrl = HttpUrl.parse(request.getUrl().toString());
@@ -166,28 +164,12 @@ public class Web3ViewClient extends WebViewClient {
     }
 
     private void injectScriptFile(WebView view) {
-        Log.d("W3VIEW", "Inject: ");
+        if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: ");
         view.post(() -> injectScriptFileFinal(view));
     }
 
     public void injectScriptFileFinal(WebView view) {
-        Log.d("W3VIEW", "Inject2: ");
-        isInjected = true;
-        String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
-        byte[] buffer = js.getBytes();
-        String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
-
-        view.loadUrl("javascript:(function() {" +
-                "var parent = document.getElementsByTagName('head').item(0);" +
-                "var script = document.createElement('script');" +
-                "script.type = 'text/javascript';" +
-                // Tell the browser to BASE64-decode the string into your script !!!
-                "script.innerHTML = window.atob('" + encoded + "');" +
-                "parent.appendChild(script)" +
-                "})()");
-    }
-
-    public void injectScriptFile2(WebView view) {
+        if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: " + view.getUrl());
         isInjected = true;
         String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
         byte[] buffer = js.getBytes();
@@ -298,7 +280,7 @@ public class Web3ViewClient extends WebViewClient {
     private boolean isIntentAvailable(Intent intent)
     {
         final PackageManager packageManager = context.getPackageManager();
-        List list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         return list.size() > 0;
     }
 

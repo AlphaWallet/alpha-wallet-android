@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.WalletPage;
 
 import java.util.Locale;
 
@@ -36,6 +37,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String DEVICE_LOCALE = "device_locale";
     public static final String DEVICE_COUNTRY = "device_country";
     public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
+    private static final String LAST_FRAGMENT_ID = "lastfrag_id";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -304,5 +306,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setMarshMallowWarning(boolean shown) {
         pref.edit().putBoolean(MARSHMALLOW_SUPPORT_WARNING, true).apply();
+    }
+
+    @Override
+    public void storeLastFragmentPage(int ordinal)
+    {
+        pref.edit().putInt(LAST_FRAGMENT_ID, ordinal).apply();
+    }
+
+    @Override
+    public int getLastFragmentPage()
+    {
+        return pref.getInt(LAST_FRAGMENT_ID, -1);
     }
 }

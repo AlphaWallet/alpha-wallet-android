@@ -249,14 +249,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
 
+        int lastId = viewModel.getLastFragmentId();
+
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
         {
             showPage(SETTINGS);
         }
-        else
+        else if (lastId >= 0 && lastId < WalletPage.values().length)
         {
-            WalletPage previousPage = savedInstanceState == null ? WALLET : WalletPage.values()[savedInstanceState.getInt(STORED_PAGE, WALLET.ordinal())];
-            showPage(previousPage);
+            showPage(WalletPage.values()[lastId]);
+            viewModel.storeCurrentFragmentId(-1);
         }
 
         if (CustomViewSettings.hideDappBrowser())
@@ -427,8 +429,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
         super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
+        if (getSelectedItem() != null)
+        {
+            viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+        int oldPage = savedInstanceState.getInt(STORED_PAGE);
+        if (oldPage >= 0 && oldPage < WalletPage.values().length)
+        {
+            showPage(WalletPage.values()[oldPage]);
+        }
     }
 
     @Override
@@ -497,6 +514,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onDestroy()
     {
+        viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
         super.onDestroy();
         viewModel.onClean();
         if (homeReceiver != null)

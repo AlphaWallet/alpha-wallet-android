@@ -1,19 +1,16 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.IBinder;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -30,8 +27,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletConnectActions;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -49,7 +44,6 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
@@ -58,24 +52,18 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.io.File;
 import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import jnr.ffi.annotations.In;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";

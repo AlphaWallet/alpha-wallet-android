@@ -1,5 +1,7 @@
 package com.alphawallet.app.widget;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
 import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -35,8 +37,6 @@ import com.alphawallet.app.util.Utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static android.content.Context.CLIPBOARD_SERVICE;
-
 /**
  * Created by JB on 28/10/2020.
  */
@@ -60,7 +60,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
     private int chainOverride;
-    private final Pattern findAddress = Pattern.compile("($|\\s?)(0x)([0-9a-fA-F]{40})($|\\s?)");
+    private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
     private final float standardTextSize;
 
     public InputAddress(Context context, AttributeSet attrs)
@@ -79,6 +79,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         boxLayout = findViewById(R.id.box_layout);
         errorText = findViewById(R.id.error_text);
         editText.addTextChangedListener(this);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
 
         if (handleENS)
         {

@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.viewmodel.SendViewModel;
-import com.alphawallet.app.viewmodel.SendViewModelFactory;
 import com.alphawallet.app.viewmodel.TransactionSuccessViewModel;
 import com.alphawallet.app.viewmodel.TransactionSuccessViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;

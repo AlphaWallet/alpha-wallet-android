@@ -1,5 +1,7 @@
 package com.alphawallet.app.widget;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
 import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -11,6 +13,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
@@ -33,8 +36,6 @@ import com.alphawallet.app.util.Utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.content.Context.CLIPBOARD_SERVICE;
 
 /**
  * Created by JB on 28/10/2020.
@@ -60,6 +61,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private AddressReadyCallback addressReadyCallback = null;
     private int chainOverride;
     private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
+    private final float standardTextSize;
 
     public InputAddress(Context context, AttributeSet attrs)
     {
@@ -104,6 +106,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         setViews();
         setImeOptions();
         chainOverride = 0;
+        standardTextSize = editText.getTextSize();
     }
 
     private void getAttrs(Context context, AttributeSet attrs)
@@ -410,11 +413,6 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         displayCheckingDialog(false);
     }
 
-    public float getTextSize()
-    {
-        return editText.getTextSize();
-    }
-
     public AutoCompleteTextView getInputView()
     {
         return editText;
@@ -434,7 +432,17 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count)
     {
-
+        setStatus(null);
+        float ts = editText.getTextSize();
+        int amount = getInputLength();
+        if (amount > 30 && ts == standardTextSize && !noCam)
+        {
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
+        }
+        else if (amount <= 30 && ts < standardTextSize)
+        {
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize);
+        }
     }
 
     @Override
@@ -444,5 +452,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
         final Matcher privateKeyMatch = findAddress.matcher(s.toString());
         addressReadyCallback.addressValid(privateKeyMatch.find());
+
+        setStatus(null);
+        if (!TextUtils.isEmpty(getInputText()))
+        {
+            ensHandler.checkAddress();
+        }
     }
 }

@@ -118,6 +118,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 	private void startRealmListener()
 	{
+		if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
 		realmUpdate = realm.where(RealmWalletData.class)
 				.equalTo("address", wallet.address).findAllAsync();
 		realmUpdate.addChangeListener(realmWallets -> {

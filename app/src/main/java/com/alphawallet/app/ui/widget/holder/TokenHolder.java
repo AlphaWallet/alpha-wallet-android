@@ -308,6 +308,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void startTickerRealmListener()
     {
+        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
         realmUpdate = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
                 .findAllAsync();

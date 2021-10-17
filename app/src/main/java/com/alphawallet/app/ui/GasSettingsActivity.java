@@ -140,6 +140,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private void startGasListener()
     {
+        if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery().findFirstAsync();
         realmGasSpread.addChangeListener(realmToken -> {
             if (realmGasSpread.isValid())

@@ -79,6 +79,7 @@ import dagger.android.AndroidInjection;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.WalletPage.SETTINGS;
@@ -313,6 +314,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //TODO: Move all fragment comms to this model - see all instances of ((HomeActivity)getActivity()).
         getSupportFragmentManager()
                 .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> viewModel.restartTokensService());
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> showAndRefreshWallet());
     }
 
     private void onBackup(String address)

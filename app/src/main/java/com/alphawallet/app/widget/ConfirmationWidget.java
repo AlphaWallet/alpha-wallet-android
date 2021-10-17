@@ -104,6 +104,8 @@ public class ConfirmationWidget extends RelativeLayout
     //listen for transaction completion
     private void createCompletionListener(Realm realm, String txHash)
     {
+        if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
+
         realmTransactionUpdates = realm.where(RealmTransaction.class)
                 .equalTo("hash", txHash)
                 .findAllAsync();

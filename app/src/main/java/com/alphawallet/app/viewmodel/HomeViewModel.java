@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.TextUtils;
 
 import android.view.View;
@@ -535,16 +536,17 @@ public class HomeViewModel extends BaseViewModel {
         transactionsService.restartService();
     }
 
-    public void tryToShowEmailPrompt(Activity activity) {
-        showEmailPrompt(activity, preferenceRepository);
+    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
+        showEmailPrompt(context, successOverlay, handler, onSuccessRunnable);
     }
-    private void showEmailPrompt(Activity activity, PreferenceRepositoryType preferenceRepository) {
+    private void showEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
         if (preferenceRepository.getLaunchCount() == 4) {
-            EmailPromptView emailPromptView = new EmailPromptView(activity);
-            emailPromptDialog = new BottomSheetDialog(activity);
+            EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
+            emailPromptDialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
             emailPromptDialog.setContentView(emailPromptView);
             emailPromptDialog.setCancelable(true);
             emailPromptDialog.setCanceledOnTouchOutside(true);
+            emailPromptView.setParentDialog(emailPromptDialog);
             BottomSheetBehavior behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
             emailPromptDialog.setOnShowListener(dialog -> behavior.setPeekHeight(emailPromptView.getHeight()));
             emailPromptDialog.show();

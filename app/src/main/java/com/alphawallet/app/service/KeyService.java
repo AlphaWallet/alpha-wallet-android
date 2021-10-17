@@ -373,7 +373,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 }
                 break;
             case WATCH:
-                returnSig.failMessage = context.getString(R.string.watch_wallet);
+                returnSig.failMessage = context.getString(R.string.action_watch_account);
                 break;
             case NOT_DEFINED:
             case TEXT_MARKER:

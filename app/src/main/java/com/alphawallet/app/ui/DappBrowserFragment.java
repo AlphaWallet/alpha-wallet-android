@@ -985,6 +985,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         if (loadOnInit != null)
         {
+            web3.clearCache(false); //on restart with stored app, we usually need this
             addToBackStack(DAPP_BROWSER);
             web3.resetView();
             web3.loadUrl(Utils.formatUrl(loadOnInit));

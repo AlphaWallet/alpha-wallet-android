@@ -128,7 +128,7 @@ public class Web3ViewClient extends WebViewClient {
                         || request.getUrl().toString().contains("css"))) {
                 synchronized (lock) {
                     if (!isInjected) {
-                        injectScriptFile(view, request.getUrl().toString());
+                        injectScriptFile(view);
                         isInjected = true;
                     }
                 }
@@ -163,7 +163,7 @@ public class Web3ViewClient extends WebViewClient {
         }
     }
 
-    private void injectScriptFile(WebView view, String url) {
+    private void injectScriptFile(WebView view) {
         if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: ");
         view.post(() -> injectScriptFileFinal(view));
     }

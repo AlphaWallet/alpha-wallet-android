@@ -59,7 +59,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
     private int chainOverride;
-    private final Pattern findAddress = Pattern.compile("($|\\s?)(0x)([0-9a-fA-F]{40})($|\\s?)");
+    private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
 
     public InputAddress(Context context, AttributeSet attrs)
     {
@@ -77,6 +77,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         boxLayout = findViewById(R.id.box_layout);
         errorText = findViewById(R.id.error_text);
         editText.addTextChangedListener(this);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
 
         if (handleENS)
         {

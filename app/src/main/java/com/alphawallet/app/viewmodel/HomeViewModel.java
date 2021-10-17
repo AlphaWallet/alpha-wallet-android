@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
@@ -52,6 +53,7 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MagicLinkInfo;
@@ -374,32 +376,34 @@ public class HomeViewModel extends BaseViewModel {
     private void showActionSheet(Activity activity, QRResult qrResult) {
 
         View.OnClickListener listener = v -> {
-            switch (v.getId()) {
-                case R.id.send_to_this_address_action:
-                    showSend(activity, qrResult);
-                    break;
-                case R.id.add_custom_token_action: {
-                    Intent intent = new Intent(activity, AddTokenActivity.class);
-                    intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
-                    activity.startActivity(intent);
+            if (v.getId() == R.id.send_to_this_address_action)
+            {
+                showSend(activity, qrResult);
+            }
+            else if (v.getId() == R.id.add_custom_token_action)
+            {
+                Intent intent = new Intent(activity, AddTokenActivity.class);
+                intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
+                activity.startActivity(intent);
+            }
+            else if (v.getId() == R.id.watch_account_action)
+            {
+                Intent intent = new Intent(activity, ImportWalletActivity.class);
+                intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
+                intent.putExtra(C.EXTRA_STATE, "watch");
+                activity.startActivity(intent);
+            }
+            else if (v.getId() == R.id.open_in_etherscan_action)
+            {
+                String etherScanUrl = MagicLinkInfo.getEtherscanURLbyNetwork(qrResult.chainId);
+                if (etherScanUrl != null) {
+                    String url = etherScanUrl + "token/" + qrResult.getAddress();
+                    externalBrowserRouter.open(activity, Uri.parse(url));
                 }
-                    break;
-                case R.id.watch_account_action: {
-                    Intent intent = new Intent(activity, ImportWalletActivity.class);
-                    intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
-                    intent.putExtra(C.EXTRA_STATE, "watch");
-                    activity.startActivity(intent);
-                }
-                    break;
-                case R.id.open_in_etherscan_action:
-                    String etherScanUrl = MagicLinkInfo.getEtherscanURLbyNetwork(qrResult.chainId);
-                    if (etherScanUrl != null) {
-                        String url = etherScanUrl + "token/" + qrResult.getAddress();
-                        externalBrowserRouter.open(activity, Uri.parse(url));
-                    }
-                    break;
-                case R.id.close_action:
-                    break;
+            }
+            else if (v.getId() == R.id.close_action)
+            {
+                //NOP
             }
 
             dialog.dismiss();
@@ -538,5 +542,19 @@ public class HomeViewModel extends BaseViewModel {
     public int getLastFragmentId()
     {
         return preferenceRepository.getLastFragmentPage();
+    }
+
+    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
+        if (preferenceRepository.getLaunchCount() == 4) {
+            EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
+            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+            emailPromptDialog.setContentView(emailPromptView);
+            emailPromptDialog.setCancelable(true);
+            emailPromptDialog.setCanceledOnTouchOutside(true);
+            emailPromptView.setParentDialog(emailPromptDialog);
+            BottomSheetBehavior behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
+            emailPromptDialog.setOnShowListener(dialog -> behavior.setPeekHeight(emailPromptView.getHeight()));
+            emailPromptDialog.show();
+        }
     }
 }

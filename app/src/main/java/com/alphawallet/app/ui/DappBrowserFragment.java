@@ -776,8 +776,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
-        setupWeb3();
-        startBalanceListener();
+        if (activeNetwork != null)
+        {
+            setupWeb3();
+            startBalanceListener();
+        }
     }
 
     /**

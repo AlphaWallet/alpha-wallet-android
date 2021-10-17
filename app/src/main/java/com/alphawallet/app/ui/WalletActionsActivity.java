@@ -1,12 +1,14 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
+import static com.alphawallet.app.C.Key.WALLET;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,28 +22,23 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
-import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.SettingsItemView;
+import com.alphawallet.app.widget.UserAvatar;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-
-import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
 public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback
 {
@@ -49,7 +46,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
 
-    private ImageView walletIcon;
+    private UserAvatar walletIcon;
     private TextView walletBalance;
     private TextView walletBalanceCurrency;
     private TextView walletNameText;
@@ -184,7 +181,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         inputAddress = findViewById(R.id.input_ens);
         walletSelectedIcon.setOnClickListener(this);
 
-        walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
+        walletIcon.bind(wallet);
 
         walletBalance.setText(wallet.balance);
         walletBalanceCurrency.setText(wallet.balanceSymbol);

@@ -223,7 +223,7 @@ public class TokensService
             stopUpdateCycle();
             addLockedTokens();
             openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
-            openseaService.resetOffetRead();
+            openseaService.resetOffsetRead();
         }
     }
 

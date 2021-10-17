@@ -9,9 +9,12 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
+import com.alphawallet.app.repository.entity.RealmWCSession;
+import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.RealmManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
@@ -348,6 +352,22 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     RealmResults<RealmToken> realmTokens = r.where(RealmToken.class)
                             .findAll();
                     realmTokens.deleteAllFromRealm();
+
+                    RealmResults<RealmNFTAsset> realmAssets = r.where(RealmNFTAsset.class)
+                            .findAll();
+                    realmAssets.deleteAllFromRealm();
+
+                    //now delete all the wallet info (not key info!)
+                    RealmWalletData walletData = r.where(RealmWalletData.class)
+                            .equalTo("address", currentAddress, Case.INSENSITIVE)
+                            .findFirst();
+
+                    if (walletData != null)
+                    {
+                        walletData.setBalance("0");
+                        walletData.setENSName("");
+                        walletData.setENSAvatar("");
+                    }
                 });
             }
             catch (Exception e)

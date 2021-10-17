@@ -310,7 +310,7 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
 
-        if (oldVersion == 29)
+        if (oldVersion == 29 || oldVersion == 30)
         {
             oldVersion = 31;
         }
@@ -326,6 +326,17 @@ public class AWRealmMigration implements RealmMigration
                     .addField("standard", String.class)
                     .addField("slow", String.class)
                     .addField("baseFee", String.class);
+            oldVersion++;
+        }
+
+        if (oldVersion == 32 || oldVersion == 33)
+        {
+            RealmObjectSchema realmData = schema.get("RealmWalletData");
+            if (realmData != null && !realmData.hasField("ENSAvatar"))
+            {
+                realmData.addField("ENSAvatar", String.class);
+            }
+            oldVersion++;
         }
     }
 

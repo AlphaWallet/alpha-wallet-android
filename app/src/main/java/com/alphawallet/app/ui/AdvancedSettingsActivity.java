@@ -1,5 +1,12 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.CHANGED_LOCALE;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.EXTRA_CURRENCY;
+import static com.alphawallet.app.C.EXTRA_LOCALE;
+import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.RESET_WALLET;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -29,8 +36,6 @@ import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.bumptech.glide.Glide;
 
-import org.jetbrains.annotations.NotNull;
-
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
@@ -38,13 +43,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.C.CHANGED_LOCALE;
-import static com.alphawallet.app.C.CHANGE_CURRENCY;
-import static com.alphawallet.app.C.EXTRA_CURRENCY;
-import static com.alphawallet.app.C.EXTRA_LOCALE;
-import static com.alphawallet.app.C.EXTRA_STATE;
-import static com.alphawallet.app.C.RESET_WALLET;
 
 public class AdvancedSettingsActivity extends BaseActivity {
     @Inject
@@ -212,10 +210,9 @@ public class AdvancedSettingsActivity extends BaseActivity {
         if (resetResult)
         {
             Toast.makeText(this, getString(R.string.toast_token_data_cleared), Toast.LENGTH_SHORT).show();
-            sendBroadcast(new Intent(RESET_WALLET)); // refresh token and transaction lists
             Intent intent = new Intent();
             setResult(RESULT_OK, intent);
-            intent.putExtra("close", true);
+            intent.putExtra(RESET_WALLET, true);
             finish();
         }
     }

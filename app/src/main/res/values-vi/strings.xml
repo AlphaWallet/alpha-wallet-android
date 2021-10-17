@@ -828,4 +828,8 @@
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
     <string name="action_send_to_this_address">Send to this Address</string>
     <string name="action_open_in_etherscan">Open in Etherscan</string>
+    <string name="stay_updated">Stay Updated</string>
+    <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
+    <string name="hint_email_address">Email Address</string>
+    <string name="action_want_to_receive_email">I want to receive such emails</string>
 </resources>

@@ -43,7 +43,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -299,6 +298,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         viewModel.tryToShowRateAppDialog(this);
+        viewModel.tryToShowEmailPrompt(this, successOverlay, handler, this);
+
         if (Utils.verifyInstallerId(this))
         {
             UpdateUtils.checkForUpdates(this, this);

@@ -537,9 +537,6 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
-        showEmailPrompt(context, successOverlay, handler, onSuccessRunnable);
-    }
-    private void showEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
         if (preferenceRepository.getLaunchCount() == 4) {
             EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
             emailPromptDialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);

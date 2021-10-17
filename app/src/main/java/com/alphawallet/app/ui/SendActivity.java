@@ -656,9 +656,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
 
-            // successful transaction - try to show rate the app
-            viewModel.tryToShowRateAppDialog(this);
-
             finish();
         }
     }

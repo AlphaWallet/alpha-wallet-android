@@ -448,8 +448,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             loadOnInit = getDefaultDappUrl();
         }
 
-        System.out.println("YOLESS: Load on init: " + loadOnInit);
-
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         webFrame = view.findViewById(R.id.frame);
@@ -753,6 +751,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         activeNetwork = viewModel.getActiveNetwork();
+        viewModel.findWallet();
     }
 
     private void startBalanceListener()
@@ -984,11 +983,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setOnEthCallListener(this);
         web3.setOnWalletAddEthereumChainObjectListener(this);
 
-        System.out.println("YOLESS: try load on init ");
-
         if (loadOnInit != null)
         {
-            System.out.println("YOLESS: Load on init2: " + loadOnInit);
             addToBackStack(DAPP_BROWSER);
             web3.resetView();
             web3.loadUrl(Utils.formatUrl(loadOnInit));
@@ -1853,6 +1849,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             oos.writeObject(CURRENT_FRAGMENT);
             oos.writeObject(currentFragment);
             oos.writeObject(CURRENT_URL);
+            String uurl = urlTv.getText().toString();
+            String uurl2 = web3.getUrl();
             oos.writeObject(urlTv.getText().toString());
         }
         return bos;

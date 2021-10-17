@@ -113,22 +113,10 @@ public class Web3ViewClient extends WebViewClient {
             return null;
         }
 
-        //if (BuildConfig.DEBUG) System.out.println("YOLESS: test: " + request.getUrl().toString());
-
-        if (request.getUrl().toString().contains("infura")) return super.shouldInterceptRequest(view, request);
-
-        if (isInjected)
-        {
-            System.out.println("YOLESS: skip inject: " + request.getUrl().toString());
-            return super.shouldInterceptRequest(view, request);
-        }
-
-
-        if (request.getUrl().toString().contains(".auth0.com/")) //don't inject into auth0 pages
-        {
-            return super.shouldInterceptRequest(view, request);
-        }
-        else if (request.getUrl().toString().contains("analytics"))
+        if (isInjected
+                || request.getUrl().toString().contains("infura")
+                || request.getUrl().toString().contains(".auth0.com/")
+                || handleTrustedExtension(request.getUrl().toString()))
         {
             return super.shouldInterceptRequest(view, request);
         }
@@ -136,24 +124,16 @@ public class Web3ViewClient extends WebViewClient {
         {
              if (request.getMethod().equalsIgnoreCase("GET")
                      && (request.getUrl().toString().contains(".js")
-                        /*|| request.getUrl().toString().contains("json")*/
+                        || request.getUrl().toString().contains("json")
                         || request.getUrl().toString().contains("css"))) {
                 synchronized (lock) {
                     if (!isInjected) {
-                        System.out.println("YOLESS: inject test: " + request.getUrl().toString());
-                        testInject(view, request.getUrl().toString());
                         injectScriptFile(view, request.getUrl().toString());
                         isInjected = true;
                     }
                 }
             }
-            //return super.shouldInterceptRequest(view, request);
-            return null;
-        }
-        //check for known extensions
-        else if (handleTrustedExtension(request.getUrl().toString()))
-        {
-            return null;
+            return super.shouldInterceptRequest(view, request);
         }
 
         HttpUrl httpUrl = HttpUrl.parse(request.getUrl().toString());
@@ -161,12 +141,6 @@ public class Web3ViewClient extends WebViewClient {
             return null;
         }
         Map<String, String> headers = request.getRequestHeaders();
-
-        if (isInjected)
-        {
-            System.out.println("YOLESS: skip inject2: " + request.getUrl().toString());
-            return super.shouldInterceptRequest(view, request);
-        }
 
         JsInjectorResponse response;
         try {
@@ -179,7 +153,6 @@ public class Web3ViewClient extends WebViewClient {
         } else if (TextUtils.isEmpty(response.data)){
             return null;
         } else {
-            System.out.println("YOLESS: inject3: " + request.getUrl().toString());
             ByteArrayInputStream inputStream = new ByteArrayInputStream(response.data.getBytes());
             WebResourceResponse webResourceResponse = new WebResourceResponse(
                     response.mime, response.charset, inputStream);
@@ -190,31 +163,13 @@ public class Web3ViewClient extends WebViewClient {
         }
     }
 
-    private void testInject(WebView view, String url)
-    {
-        //determine injection location
-        //first determine if script has JS
-        //view.evaluateJavascript();
-
-        /*view.loadUrl("javascript:(function() {" +
-                "var parent = document.getElementsByTagName('head').item(0);" +
-                "var script = document.createElement('script');" +
-                "script.type = 'text/javascript';" +
-                // Tell the browser to BASE64-decode the string into your script !!!
-                "script.innerHTML = window.atob('" + encoded + "');" +
-                "parent.appendChild(script)" +
-                "})()");*/
-    }
-
     private void injectScriptFile(WebView view, String url) {
         if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: ");
-        if (BuildConfig.DEBUG) System.out.println("YOLESS: Inject: " + url);
         view.post(() -> injectScriptFileFinal(view));
     }
 
     public void injectScriptFileFinal(WebView view) {
-        if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: ");
-        if (BuildConfig.DEBUG) System.out.println("YOLESS: Inject2: " + view.getUrl());
+        if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: " + view.getUrl());
         isInjected = true;
         String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
         byte[] buffer = js.getBytes();

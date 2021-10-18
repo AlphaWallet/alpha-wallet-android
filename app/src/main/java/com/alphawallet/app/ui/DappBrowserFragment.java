@@ -778,8 +778,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         this.wallet = wallet;
         if (activeNetwork != null)
         {
+            boolean needsReload = loadOnInit == null;
             setupWeb3();
             startBalanceListener();
+            if (needsReload) reloadPage();
         }
     }
 

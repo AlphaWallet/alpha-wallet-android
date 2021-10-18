@@ -698,7 +698,7 @@
     <string name="new_balance">(待确认: %1$s %2$s)</string>
     <string name="set_speed_title">设定交易确认速度</string>
     <string name="gas_price_widget">燃料价格: %1$s</string>
-    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the %1$s live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">自己设定</string>
     <string name="nonce_optional">Nonce (可选的)</string>
     <string name="calc_gas_limit">正在计算燃料限制</string>

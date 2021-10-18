@@ -28,6 +28,7 @@ public class SupportSettingsActivity extends BaseActivity {
     private SettingsItemView facebook;
     private SettingsItemView blog;
     private SettingsItemView faq;
+    private SettingsItemView github;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +86,12 @@ public class SupportSettingsActivity extends BaseActivity {
                 .withListener(this::onBlogClicked)
                 .build();*/
 
+        github = new SettingsItemView.Builder(this)
+                .withIcon(R.drawable.ic_logo_github)
+                .withTitle(R.string.github)
+                .withListener(this::onGitHubClicked)
+                .build();
+
         faq = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_settings_faq)
                 .withTitle(R.string.title_faq)
@@ -110,6 +117,10 @@ public class SupportSettingsActivity extends BaseActivity {
             supportSettingsLayout.addView(twitter);
         }
 
+        if (MediaLinks.AWALLET_GITHUB != null) {
+            supportSettingsLayout.addView(github);
+        }
+
         /*if (MediaLinks.AWALLET_REDDIT_URL != null) {
             supportSettingsLayout.addView(reddit);
         }
@@ -130,6 +141,19 @@ public class SupportSettingsActivity extends BaseActivity {
         if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME)) {
             intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
         }
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
+    }
+
+    private void onGitHubClicked() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
+
         try {
             startActivity(intent);
         } catch (Exception e) {

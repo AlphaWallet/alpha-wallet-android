@@ -454,7 +454,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         addressReadyCallback.addressValid(privateKeyMatch.find());
 
         setStatus(null);
-        if (!TextUtils.isEmpty(getInputText()))
+        if (ensHandler != null && !TextUtils.isEmpty(getInputText()))
         {
             ensHandler.checkAddress();
         }

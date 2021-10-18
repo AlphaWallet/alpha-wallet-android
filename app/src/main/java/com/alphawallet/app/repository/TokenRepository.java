@@ -288,9 +288,10 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
         Wallet wallet = new Wallet(walletAddress);
-        return updateBalance(network, wallet, token)
+        return updateBalance(wallet, token)
+                .map(bal -> token)
+                .flatMap(tok -> localSource.saveToken(wallet, tok))
                 .observeOn(Schedulers.newThread())
                 .toObservable();
     }
@@ -322,9 +323,10 @@ public class TokenRepository implements TokenRepositoryType {
         TokenFactory tf = new TokenFactory();
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
         Token newToken = tf.createToken(tokenInfo, contractType, network.getShortName());
-
-        return localSource.saveToken(wallet, newToken)
-                .flatMap(t-> updateBalance(network, wallet, t).map(bal -> newToken));
+        return updateBalance(wallet, newToken)
+                .map(bal -> newToken)
+                .flatMap(tok -> localSource.saveToken(wallet, tok))
+                .observeOn(Schedulers.newThread());
     }
 
     @Override
@@ -464,21 +466,6 @@ public class TokenRepository implements TokenRepositoryType {
             }
             return tokens;
         });
-    }
-
-    /**
-     * Obtain live balance of token from Ethereum blockchain and cache into Realm
-     *
-     * @param network
-     * @param wallet
-     * @param token
-     * @return
-     */
-    private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token)
-    {
-        if (token == null) return Single.fromCallable(() -> null);
-        else return localSource.saveToken(wallet, token)
-            .flatMap(t -> updateBalance(network, wallet, t).map(bal -> token));
     }
 
     private BigDecimal checkUint256Balance(@NonNull Wallet wallet, int chainId, String tokenAddress)

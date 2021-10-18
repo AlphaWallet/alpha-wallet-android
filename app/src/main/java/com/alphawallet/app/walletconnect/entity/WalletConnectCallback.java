@@ -7,5 +7,5 @@ import com.alphawallet.app.entity.walletconnect.WCRequest;
  */
 public interface WalletConnectCallback
 {
-    void receiveRequest(WCRequest request);
+    boolean receiveRequest(WCRequest request);
 }

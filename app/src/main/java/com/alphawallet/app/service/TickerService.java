@@ -1,7 +1,24 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
 import android.text.format.DateUtils;
-import android.util.ArrayMap;
+
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
@@ -40,7 +57,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -52,24 +68,6 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
-
-import androidx.annotation.Nullable;
 
 public class TickerService
 {

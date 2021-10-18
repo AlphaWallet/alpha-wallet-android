@@ -70,7 +70,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            e.printStackTrace();
         }
 
         return new byte[0];

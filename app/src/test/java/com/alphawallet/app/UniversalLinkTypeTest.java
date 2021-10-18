@@ -101,7 +101,7 @@ public class UniversalLinkTypeTest
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -131,7 +131,7 @@ public class UniversalLinkTypeTest
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            e.printStackTrace();
         }
 
         return address;

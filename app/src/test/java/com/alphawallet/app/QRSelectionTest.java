@@ -1,5 +1,8 @@
 package com.alphawallet.app;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.MessagePair;
@@ -34,9 +37,6 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.realm.Realm;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class QRSelectionTest
 {
@@ -278,7 +278,7 @@ public class QRSelectionTest
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -313,7 +313,7 @@ public class QRSelectionTest
         }
         catch (IOException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -327,7 +327,7 @@ public class QRSelectionTest
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            e.printStackTrace();
         }
 
         return address;

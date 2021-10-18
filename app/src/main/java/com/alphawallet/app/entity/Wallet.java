@@ -3,6 +3,7 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
@@ -116,4 +117,9 @@ public class Wallet implements Parcelable {
 			balance = BalanceUtils.getScaledValueFixed(BigDecimal.ZERO, 0, Token.TOKEN_BALANCE_PRECISION);
 		}
 	}
+
+    public boolean canSign()
+    {
+		return BuildConfig.DEBUG || type != WalletType.WATCH;
+    }
 }

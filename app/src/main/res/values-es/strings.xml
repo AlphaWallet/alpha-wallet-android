@@ -804,4 +804,6 @@
     <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
     <string name="hint_email_address">Email Address</string>
     <string name="action_want_to_receive_email">I want to receive such emails</string>
+    <string name="email_is_invalid">Please provide valid email address</string>
+    <string name="github">Github (problema del informe)</string>
 </resources>

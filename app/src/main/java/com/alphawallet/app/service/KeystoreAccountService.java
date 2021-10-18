@@ -280,7 +280,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         if (BuildConfig.DEBUG) Log.d("RealmDebug", "gotcredentials + " + address);
@@ -459,7 +459,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
         catch (IndexOutOfBoundsException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return sigBytes;

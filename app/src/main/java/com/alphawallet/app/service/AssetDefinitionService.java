@@ -195,7 +195,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         List<String> handledHashes = checkRealmScriptsForChanges();
@@ -256,7 +256,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return handledHashes;
@@ -333,7 +333,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -362,7 +362,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -409,7 +409,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return td;
@@ -487,7 +487,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         if (fileList.size() == 0) finishLoading();
@@ -726,7 +726,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return result;
@@ -805,7 +805,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         finally
         {
@@ -892,7 +892,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void onError(Throwable throwable)
     {
-        throwable.printStackTrace();
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
     private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
@@ -1039,7 +1039,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             finally
             {
@@ -1109,7 +1109,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return false;
     }
@@ -1123,7 +1123,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return td;
@@ -1154,7 +1154,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return null;

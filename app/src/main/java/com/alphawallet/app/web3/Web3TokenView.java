@@ -406,7 +406,7 @@ public class Web3TokenView extends WebView
 
     private void loadingError(Throwable e)
     {
-        e.printStackTrace();
+        if (BuildConfig.DEBUG) e.printStackTrace();
     }
 
     private void renderTicketHolder(Token token, TokenDefinition td, TicketRange range, AssetDefinitionService assetService, boolean iconified)

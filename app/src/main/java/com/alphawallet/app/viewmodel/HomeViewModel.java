@@ -191,7 +191,7 @@ public class HomeViewModel extends BaseViewModel {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return filterPass;
@@ -266,21 +266,27 @@ public class HomeViewModel extends BaseViewModel {
                 .subscribe(wallet -> onWallet(context, wallet), this::onError);
     }
 
-    private void onWallet(Context context, Wallet wallet) {
+    private void onWallet(Context context, Wallet wallet)
+    {
         transactionsService.changeWallet(wallet);
         if (!TextUtils.isEmpty(wallet.name))
         {
             walletName.postValue(wallet.name);
-        } else if (!TextUtils.isEmpty(wallet.ENSname))
+        }
+        else if (!TextUtils.isEmpty(wallet.ENSname))
         {
             walletName.postValue(wallet.ENSname);
-        } else
+        }
+        else
         {
             walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
                     .reverseResolveEns(wallet.address)
-                    .map(ensName -> { wallet.ENSname = ensName; return wallet; })
+                    .map(ensName -> {
+                        wallet.ENSname = ensName;
+                        return wallet;
+                    })
                     .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())

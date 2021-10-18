@@ -15,6 +15,7 @@ import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -136,7 +137,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         catch (PackageManager.NameNotFoundException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return currentInstallDate;

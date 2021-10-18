@@ -278,7 +278,7 @@ public class QRSelectionTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -313,7 +313,7 @@ public class QRSelectionTest
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -327,7 +327,7 @@ public class QRSelectionTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return address;

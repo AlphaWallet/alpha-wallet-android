@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QRResult;
@@ -166,7 +167,7 @@ public class QRParser {
         catch (Exception e)
         {
             // No action
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return false;

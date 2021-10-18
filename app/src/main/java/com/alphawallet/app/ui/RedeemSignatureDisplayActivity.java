@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -202,7 +203,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

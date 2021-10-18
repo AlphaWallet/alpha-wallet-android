@@ -379,7 +379,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 functionMapComplete.release();
             }
             callStandardFunctions.showWaitSpinner(false);
@@ -646,7 +646,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         //get the available map for this collection

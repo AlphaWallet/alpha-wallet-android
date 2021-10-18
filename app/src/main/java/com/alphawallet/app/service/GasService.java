@@ -235,7 +235,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return update;

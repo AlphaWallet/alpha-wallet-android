@@ -276,7 +276,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         catch (Exception e)
         {
             //do not record
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -325,7 +325,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         catch (Exception e)
         {
             //do not record
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

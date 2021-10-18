@@ -327,7 +327,7 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             try (Realm realm = realmManager.getWalletTypeRealmInstance())
             {
@@ -338,7 +338,7 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             //now delete the token data
             Realm realm = realmManager.getRealmInstance(wallet);
@@ -412,7 +412,7 @@ public class WalletDataRealmSource {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
             onSuccess.onSuccess();
         }
     }

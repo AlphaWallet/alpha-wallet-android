@@ -46,6 +46,7 @@ public class TokenIcon extends ConstraintLayout
     private final TextView textIcon;
     private final ImageView statusIcon;
     private final ProgressBar pendingProgress;
+    private final ImageView statusBackground;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -66,6 +67,7 @@ public class TokenIcon extends ConstraintLayout
         textIcon = findViewById(R.id.text_icon);
         statusIcon = findViewById(R.id.status_icon);
         pendingProgress = findViewById(R.id.pending_progress);
+        statusBackground = findViewById(R.id.status_icon_background);
         statusIcon.setVisibility(isInEditMode() ? View.VISIBLE : View.GONE);
         currentStatus = StatusType.NONE;
 
@@ -130,6 +132,8 @@ public class TokenIcon extends ConstraintLayout
     {
         this.handler.removeCallbacks(null);
         this.token = token;
+
+        statusBackground.setVisibility(View.GONE);
 
         displayTokenIcon(iconItem);
     }
@@ -204,7 +208,8 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(R.drawable.ic_transaction_rejected);
                 break;
             case CONSTRUCTOR:
-                statusIcon.setImageResource(R.drawable.ic_ethereum_logo);
+                statusIcon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
+                statusBackground.setVisibility(View.VISIBLE);
                 break;
             case SELF:
                 statusIcon.setImageResource(R.drawable.ic_send_self_small);

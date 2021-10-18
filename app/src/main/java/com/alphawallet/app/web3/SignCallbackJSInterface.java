@@ -114,7 +114,7 @@ public class SignCallbackJSInterface
             {
                 EthereumTypedMessage message = new EthereumTypedMessage(null, "", getDomainName(), callbackId);
                 onSignTypedMessageListener.onSignTypedMessage(message);
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
         });
     }

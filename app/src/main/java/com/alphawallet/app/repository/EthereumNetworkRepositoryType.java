@@ -71,6 +71,5 @@ public interface EthereumNetworkRepositoryType {
     NetworkInfoExt getNetworkInfoExt(int chainId);
 
     boolean isChainContract(int chainId, String address);
-    String getGasOracle(int chainId);
     boolean hasLockedGas(int chainId);
 }

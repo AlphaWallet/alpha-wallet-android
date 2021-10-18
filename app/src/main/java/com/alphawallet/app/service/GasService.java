@@ -151,7 +151,7 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateCurrentGasPrices()
     {
-        String gasOracleAPI = networkRepository.getGasOracle(currentChainId);
+        String gasOracleAPI = EthereumNetworkRepository.getGasOracle(currentChainId);
         if (!TextUtils.isEmpty(gasOracleAPI))
         {
             if (gasOracleAPI.contains("etherscan")) gasOracleAPI += ETHERSCAN_API_KEY;

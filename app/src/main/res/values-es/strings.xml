@@ -698,7 +698,7 @@
     <string name="new_balance">(Nuevo: %1$s %2$s)</string>
     <string name="set_speed_title">Velocidad de la Transacción</string>
     <string name="gas_price_widget">Precio del gas: %1$s</string>
-    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the %1$s live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">Establece tu propio</string>
     <string name="nonce_optional">Nonce (opcional)</string>
     <string name="calc_gas_limit">Calcular el Límite de gas</string>

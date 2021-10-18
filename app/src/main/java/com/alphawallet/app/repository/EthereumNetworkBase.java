@@ -261,8 +261,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //These chains don't allow custom gas
     private static final List<Integer> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID);
 
-    @Override
-    public String getGasOracle(int chainId)
+    public static String getGasOracle(int chainId)
     {
         if (hasGasOracleAPI.contains(chainId) && networkMap.containsKey(chainId))
         {

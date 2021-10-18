@@ -88,7 +88,7 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 // no action
             }
             return ensName;
@@ -203,7 +203,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return null;

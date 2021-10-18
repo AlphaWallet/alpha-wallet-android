@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -488,7 +489,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                             }
                             catch (Exception e)
                             {
-                                e.printStackTrace();
+                                if (BuildConfig.DEBUG) e.printStackTrace();
                             }
                         }
 

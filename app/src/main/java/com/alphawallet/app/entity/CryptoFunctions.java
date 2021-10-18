@@ -8,6 +8,7 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import android.util.Base64;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.CryptoFunctionsInterface;
@@ -66,7 +67,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return msgData;
@@ -82,7 +83,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return new byte[0];

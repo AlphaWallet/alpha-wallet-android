@@ -178,7 +178,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             finally
             {
@@ -924,7 +924,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //write event list
             for (EtherscanEvent ev : events)
             {
-                boolean scanAsNFT = isNFT || (ev.tokenDecimal.length() == 0 && ev.tokenID.length() > 0);
+                boolean scanAsNFT = isNFT || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0) && (ev.tokenID != null && ev.tokenID.length() > 0));
                 Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
 
                 //find tx name

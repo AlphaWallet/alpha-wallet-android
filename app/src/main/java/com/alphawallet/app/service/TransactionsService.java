@@ -343,7 +343,7 @@ public class TransactionsService
                                     .subscribe().isDisposed();
                         }
                     }).exceptionally(throwable -> {
-                        throwable.printStackTrace();
+                        if (BuildConfig.DEBUG) throwable.printStackTrace();
                         return null;
                     });
                 }

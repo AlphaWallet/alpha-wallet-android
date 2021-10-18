@@ -866,7 +866,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         catch (Exception e)
         {
             confDialog = null;
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return confDialog;

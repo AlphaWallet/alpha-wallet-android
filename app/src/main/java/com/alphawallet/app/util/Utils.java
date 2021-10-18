@@ -18,6 +18,7 @@ import android.webkit.URLUtil;
 import androidx.annotation.RawRes;
 import androidx.core.content.ContextCompat;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -400,7 +401,7 @@ public class Utils {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return false;
     }

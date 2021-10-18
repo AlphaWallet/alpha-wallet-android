@@ -380,10 +380,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             walletTitle = getString(R.string.toolbar_header_wallet);
         }
 
-        if (viewPager.getCurrentItem() == WALLET.ordinal())
+        ((WalletFragment) walletFragment).setToolbarTitle(walletTitle);
+
+        /*if (viewPager.getCurrentItem() == WALLET.ordinal())
         {
             setTitle(walletTitle);
-        }
+        }*/
     }
 
     private void onError(ErrorEnvelope errorEnvelope)

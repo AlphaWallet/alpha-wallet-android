@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import android.provider.MediaStore;
 import android.widget.LinearLayout;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.MediaLinks;
@@ -145,7 +146,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -158,7 +159,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -174,7 +175,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -191,7 +192,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -205,7 +206,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -222,7 +223,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -238,7 +239,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -255,7 +256,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -271,7 +272,7 @@ public class SupportSettingsActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -186,7 +187,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

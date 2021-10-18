@@ -116,6 +116,18 @@
         tools:text="UEFA" />
 
     <ImageView
+        android:id="@+id/status_icon_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/grey_circle"
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
+        app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
+
+    <ImageView
         android:id="@+id/status_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"

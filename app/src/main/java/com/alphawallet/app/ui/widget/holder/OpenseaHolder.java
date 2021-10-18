@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -116,7 +117,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
 
     private void handleError(Throwable e, BigInteger tokenId)
     {
-        e.printStackTrace();
+        if (BuildConfig.DEBUG) e.printStackTrace();
         NFTAsset asset = token.getAssetForToken(tokenId.toString());
         loadingSpinner.setVisibility(View.GONE);
         String assetName;

@@ -841,7 +841,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         finally
         {
@@ -908,7 +908,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return tokenMetas;

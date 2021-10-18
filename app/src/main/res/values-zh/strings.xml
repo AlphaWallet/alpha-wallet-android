@@ -806,4 +806,5 @@
     <string name="action_want_to_receive_email">I want to receive such emails</string>
     <string name="email_is_invalid">Please provide valid email address</string>
     <string name="github">吉图布 (報告問題)</string>
+    <string name="chains_to_scan">Chains to scan</string>
 </resources>

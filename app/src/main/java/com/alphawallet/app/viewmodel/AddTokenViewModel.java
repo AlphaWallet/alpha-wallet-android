@@ -1,10 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
+import android.content.Context;
+import android.content.Intent;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.content.Context;
-import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
@@ -29,8 +30,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -44,6 +43,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<Token> tokentype = new MutableLiveData<>();
     private final MutableLiveData<Token> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
+    private final MutableLiveData<Integer> scanCount = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GenericWalletInteract genericWalletInteract;
@@ -56,7 +56,6 @@ public class AddTokenViewModel extends BaseViewModel {
     private boolean foundNetwork;
     private int networkCount;
     private int primaryChainId = 1;
-    private String testAddress;
 
     public MutableLiveData<Wallet> wallet() {
         return wallet;
@@ -69,6 +68,7 @@ public class AddTokenViewModel extends BaseViewModel {
     public LiveData<TokenInfo> tokenInfo() {
         return tokenInfo;
     }
+    public LiveData<Integer> chainScanCount() { return scanCount; }
 
     @Nullable
     Disposable scanNetworksDisposable;
@@ -192,7 +192,6 @@ public class AddTokenViewModel extends BaseViewModel {
     public void prepare()
     {
         findWallet();
-        testAddress = null;
     }
 
     public void showSend(Context ctx, QRResult result, Token token)
@@ -238,9 +237,9 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public void testNetworks(String address, NetworkInfo networkInfo)
     {
-        testAddress = address;
         foundNetwork = false;
         networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
+        scanCount.postValue(networkCount);
         //String address, String name, String symbol, int decimals, boolean isEnabled, int chainId
         TokenInfo tokenInfo = new TokenInfo(address, "", "", 0, true, networkInfo.chainId);
         //first test the network selected, then do all the
@@ -266,6 +265,7 @@ public class AddTokenViewModel extends BaseViewModel {
             //try the other networks
             ethereumNetworkRepository.getAllActiveNetworks();
             networkCount--;
+            scanCount.postValue(networkCount);
 
             for (int networkId : getNetworkIds())
             {
@@ -315,9 +315,9 @@ public class AddTokenViewModel extends BaseViewModel {
     private void checkNetworkCount()
     {
         networkCount--;
+        scanCount.postValue(networkCount);
         if (networkCount == 0 && !foundNetwork)
         {
-            testAddress = null;
             noContract.postValue(true);
         }
     }
@@ -333,6 +333,11 @@ public class AddTokenViewModel extends BaseViewModel {
     public Token getToken(int chainId, String address)
     {
         return tokensService.getToken(chainId, address);
+    }
+
+    public Token getChainToken(int chainId)
+    {
+        return tokensService.getServiceToken(chainId);
     }
 
     public boolean shouldHideZeroBalanceTokens()

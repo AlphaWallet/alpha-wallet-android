@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 170
-        versionName "3.40.1"
+        versionCode 171
+        versionName "3.40.2"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -55,6 +55,12 @@ android {
         packagingOptions {
             jniLibs {
                 useLegacyPackaging true
+            }
+        }
+
+        externalNativeBuild {
+            cmake {
+                cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\"";
             }
         }
     }

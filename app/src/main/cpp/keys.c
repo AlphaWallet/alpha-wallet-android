@@ -9,6 +9,12 @@
 #   define HAS_KEYS 0
 #endif
 
+#ifdef IFKEY
+#   define HAS_INFURA 1
+#else
+#   define HAS_INFURA 0
+#endif
+
 JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_EthereumNetworkBase_getAmberDataKey( JNIEnv* env, jobject thiz )
 {
@@ -25,6 +31,8 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getInfuraKey( JNIEnv* en
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, infuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, IFKEY);
 #else
     const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);
@@ -91,6 +99,8 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, secondaryInfuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, IFKEY);
 #else
     const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);

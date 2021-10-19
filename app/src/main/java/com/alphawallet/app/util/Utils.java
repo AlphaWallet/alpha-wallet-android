@@ -869,6 +869,9 @@ public class Utils {
             case AVALANCHE_ID:
                 repoChain = "avalanche";
                 break;
+            case OPTIMISTIC_MAIN_ID:
+                repoChain = "optimism";
+                break;
             case MATIC_ID:
                 repoChain = "polygon";
                 break;

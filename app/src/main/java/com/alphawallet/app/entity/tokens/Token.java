@@ -925,14 +925,13 @@ public class Token
     {
         setupClient();
 
-        try
-        {
-            Request request = new Request.Builder()
+        Request request = new Request.Builder()
                     .url(Utils.parseIPFS(tokenURI))
                     .get()
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             return response.body().string();
         }
         catch (Exception e)

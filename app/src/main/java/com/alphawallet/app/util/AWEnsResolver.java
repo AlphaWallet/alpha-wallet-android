@@ -184,14 +184,14 @@ public class AWEnsResolver extends EnsResolver
                 return null;
         }
 
-        try
-        {
-            Request request = new Request.Builder()
+
+        Request request = new Request.Builder()
                     .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)
                     .get()
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             String jsonResult = response.body().string();
             return new JSONObject(jsonResult);
         }
@@ -343,15 +343,15 @@ public class AWEnsResolver extends EnsResolver
     private String resolveDAS(String ensName)
     {
         String payload = DAS_PAYLOAD.replace(DAS_NAME, ensName);
-        try
-        {
-            RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
-            Request request = new Request.Builder()
+
+        RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
+        Request request = new Request.Builder()
                     .url(DAS_LOOKUP)
                     .post(requestBody)
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             //get result
             String result = response.body() != null ? response.body().string() : "";
 

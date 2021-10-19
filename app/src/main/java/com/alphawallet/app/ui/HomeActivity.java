@@ -381,11 +381,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         ((WalletFragment) walletFragment).setToolbarTitle(walletTitle);
-
-        /*if (viewPager.getCurrentItem() == WALLET.ordinal())
-        {
-            setTitle(walletTitle);
-        }*/
     }
 
     private void onError(ErrorEnvelope errorEnvelope)

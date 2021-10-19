@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -201,7 +202,7 @@ public class WalletFragment extends BaseFragment implements
 
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
                 .like("address", ADDRESS_FORMAT)
-                .greaterThan("addedTime", updateTime)
+                .greaterThan("addedTime", (updateTime - 2*DateUtils.MINUTE_IN_MILLIS))
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;

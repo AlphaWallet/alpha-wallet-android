@@ -163,14 +163,12 @@ public class TickerService
     {
         return Single.fromCallable(() -> {
             int tickers = 0;
-            try
+            Request request = new Request.Builder()
+                    .url(getCoinGeckoChainCall())
+                    .get()
+                    .build();
+            try (Response response = httpClient.newCall(request).execute())
             {
-                Request request = new Request.Builder()
-                        .url(getCoinGeckoChainCall())
-                        .get()
-                        .build();
-                Response response = httpClient.newCall(request)
-                        .execute();
                 if (response.code() / 200 == 1)
                 {
                     String result = response.body()
@@ -245,26 +243,25 @@ public class TickerService
             if (apiChainName == null) return 0;
 
             final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
-            try
+
+            //build ticker header
+            StringBuilder sb = new StringBuilder();
+            boolean isFirst = true;
+            for (TokenCardMeta t : erc20Tokens)
             {
-                //build ticker header
-                StringBuilder sb = new StringBuilder();
-                boolean isFirst = true;
-                for (TokenCardMeta t : erc20Tokens)
-                {
-                    if (!isFirst) sb.append(",");
-                    sb.append(t.getAddress());
-                    isFirst = false;
-                }
+                if (!isFirst) sb.append(",");
+                sb.append(t.getAddress());
+                isFirst = false;
+            }
 
-                Request request = new Request.Builder()
-                        .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
-                        .get()
-                        .build();
+            Request request = new Request.Builder()
+                    .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
+                    .get()
+                    .build();
 
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-
+            try (okhttp3.Response response = httpClient.newCall(request)
+                    .execute())
+            {
                 List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string());
                 newSize = tickers.size();
 
@@ -314,16 +311,14 @@ public class TickerService
         else
         {
             //fetch next token
-            try
+            Request request = new Request.Builder()
+                    .url(DEXGURU_API.replace(CHAIN_IDS, dexGuruChainIdToAPISymbol.get(tcm.getChain())).replace(CONTRACT_ADDR, tcm.getAddress()))
+                    .get()
+                    .build();
+
+            try (okhttp3.Response response = httpClient.newCall(request)
+                        .execute())
             {
-                Request request = new Request.Builder()
-                        .url(DEXGURU_API.replace(CHAIN_IDS, dexGuruChainIdToAPISymbol.get(tcm.getChain())).replace(CONTRACT_ADDR, tcm.getAddress()))
-                        .get()
-                        .build();
-
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-
                 if ((response.code() / 100) == 2 && response.body() != null)
                 {
                     DexGuruTicker t = new DexGuruTicker(response.body().string());
@@ -444,19 +439,17 @@ public class TickerService
         return Single.fromCallable(() -> {
             if (currency1 == null || currency2 == null || currency1.equals(currency2)) return (Double)1.0;
             String conversionURL = "http://currencies.apps.grandtrunk.net/getlatest/" + currency1 + "/" + currency2;
-            okhttp3.Response response = null;
+
             double rate = 0.0;
 
-            try
-            {
-                Request request = new Request.Builder()
-                        .url(conversionURL)
-                        .addHeader("Connection","close")
-                        .get()
-                        .build();
-                response = httpClient.newCall(request)
-                        .execute();
+            Request request = new Request.Builder()
+                    .url(conversionURL)
+                    .addHeader("Connection","close")
+                    .get()
+                    .build();
 
+            try (okhttp3.Response response = httpClient.newCall(request).execute())
+            {
                 int resultCode = response.code();
                 if ((resultCode / 100) == 2 && response.body() != null)
                 {
@@ -468,10 +461,6 @@ public class TickerService
             {
                 e.printStackTrace();
                 rate = 0.0;
-            }
-            finally
-            {
-                if (response != null) response.close();
             }
 
             return rate;

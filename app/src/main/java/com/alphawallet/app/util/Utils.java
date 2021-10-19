@@ -864,7 +864,7 @@ public class Utils {
                 repoChain = "poa";
                 break;
             case BINANCE_MAIN_ID:
-                repoChain = "binance";
+                repoChain = "smartchain";
                 break;
             case AVALANCHE_ID:
                 repoChain = "avalanche";

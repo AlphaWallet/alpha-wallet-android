@@ -150,7 +150,7 @@ public class ENSHandler implements Runnable
             if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);
-            host.ENSResolved(resolvedAddress, ensDomain);
+            host.ENSResolved(ensDomain, resolvedAddress);
         }
         else
         {
@@ -205,6 +205,7 @@ public class ENSHandler implements Runnable
         else if (canBeENSName(to))
         {
             host.setWaitingSpinner(true);
+            host.ENSName(to);
 
             disposable = ensResolver.resolveENSAddress(to)
                     .subscribeOn(Schedulers.io())

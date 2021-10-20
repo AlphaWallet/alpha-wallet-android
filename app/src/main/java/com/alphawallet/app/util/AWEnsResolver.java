@@ -64,14 +64,11 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> reverseResolveEns(String address)
     {
         return Single.fromCallable(() -> {
-            String ensName = checkENSHistoryForAddress(address); //First check known ENS names
+            String ensName = "";
 
             try
             {
-                if (TextUtils.isEmpty(ensName))
-                {
-                    ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
-                }
+                ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
@@ -98,14 +95,17 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> getENSUrl(String ensName)
     {
         return Single.fromCallable(() -> {
-            String locator = resolveAvatar(ensName);
-            if (!TextUtils.isEmpty(locator))
+            if (TextUtils.isEmpty(ensName))
             {
-                return locator;
+                return "";
+            }
+            else if (Utils.isAddressValid(ensName))
+            {
+                return resolveAvatarFromAddress(ensName);
             }
             else
             {
-                return "";
+                return resolveAvatar(ensName);
             }
         }).flatMap(this::convertLocator);
     }
@@ -381,10 +381,5 @@ public class AWEnsResolver extends EnsResolver
                 .writeTimeout(7, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-    }
-
-    public void checkENSAvatar(String address)
-    {
-
     }
 }

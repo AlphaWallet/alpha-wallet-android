@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -57,7 +58,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private final NFTImageView tokenImageView;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean activeClick;
     private final Activity activity;
     private final boolean clickThrough;

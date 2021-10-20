@@ -2,6 +2,8 @@ package com.alphawallet.app.widget;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+
 import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
@@ -46,6 +49,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private final TextView labelText;
     private final TextView pasteItem;
     private final TextView statusText;
+    private final UserAvatar avatar;
     private final ProgressBar ensCheckSpinner;
     private final ImageButton scanQrIcon;
     private final RelativeLayout boxLayout;
@@ -78,6 +82,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         scanQrIcon = findViewById(R.id.img_scan_qr);
         boxLayout = findViewById(R.id.box_layout);
         errorText = findViewById(R.id.error_text);
+        avatar = findViewById(R.id.avatar);
         editText.addTextChangedListener(this);
         editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
 
@@ -107,6 +112,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         setImeOptions();
         chainOverride = 0;
         standardTextSize = editText.getTextSize();
+        avatar.resetBinding();
     }
 
     private void getAttrs(Context context, AttributeSet attrs)
@@ -212,6 +218,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             statusText.setVisibility(View.GONE);
             statusText.setText(R.string.empty);
+            avatar.setVisibility(View.GONE);
+            avatar.resetBinding();
             if (errorText.getVisibility() == View.VISIBLE) //cancel error
             {
                 setBoxColour(BoxStatus.SELECTED);
@@ -227,6 +235,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public void setError(CharSequence errorTxt)
     {
         statusText.setVisibility(View.GONE);
+        avatar.setVisibility(View.GONE);
+        avatar.resetBinding();
         setBoxColour(BoxStatus.ERROR);
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(errorTxt);
@@ -279,11 +289,27 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         errorText.setVisibility(View.GONE);
         setWaitingSpinner(false);
+        bindAvatar(address, ens);
         if (addressReadyCallback != null)
         {
             addressReadyCallback.resolvedAddress(address, ens);
             addressReadyCallback.addressValid(true);
         }
+    }
+
+    @Override
+    public void ENSName(String name)
+    {
+        //start searching the avatar
+        bindAvatar(ZERO_ADDRESS, name);
+    }
+
+    private void bindAvatar(String address, String ensName)
+    {
+        avatar.setVisibility(View.VISIBLE);
+        Wallet temp = new Wallet(address);
+        temp.ENSname = ensName;
+        avatar.bindAndFind(temp);
     }
 
     @Override
@@ -450,8 +476,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         if (addressReadyCallback == null) return;
 
-        final Matcher privateKeyMatch = findAddress.matcher(s.toString());
-        addressReadyCallback.addressValid(privateKeyMatch.find());
+        final Matcher addressMatch = findAddress.matcher(s.toString());
+        addressReadyCallback.addressValid(addressMatch.find());
 
         setStatus(null);
         if (ensHandler != null && !TextUtils.isEmpty(getInputText()))

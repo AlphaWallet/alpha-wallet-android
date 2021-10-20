@@ -923,6 +923,8 @@ public class Token
 
     private String loadMetaData(String tokenURI)
     {
+        if (TextUtils.isEmpty(tokenURI)) return "";
+
         setupClient();
 
         Request request = new Request.Builder()

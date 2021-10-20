@@ -232,16 +232,32 @@ public class WalletDataRealmSource {
         return deleteWallet(wallet) //refresh data
         .flatMap(deletedWallet -> Single.fromCallable(() -> {
             storeKeyData(wallet);
-            storeWalletData(wallet, () -> {
-                if (BuildConfig.DEBUG) Log.d("RealmDebug", "stored " + wallet.address);
-            });
+            storeWalletData(wallet);
             return wallet;
         }));
     }
 
     public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
     {
-        storeWalletData(wallet, onSuccess);
+        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmWalletData item = r.where(RealmWalletData.class)
+                        .equalTo("address", wallet.address, Case.INSENSITIVE)
+                        .findFirst();
+                if (item == null) item = r.createObject(RealmWalletData.class, wallet.address);
+                item.setName(wallet.name);
+                item.setENSName(wallet.ENSname);
+                item.setBalance(wallet.balance);
+                item.setENSAvatar(wallet.ENSAvatar);
+                if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedwalletdata " + wallet.address);
+            }, onSuccess);
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+            onSuccess.onSuccess();
+        }
     }
 
     public Single<String> getName(String address) {
@@ -394,7 +410,7 @@ public class WalletDataRealmSource {
         }
     }
 
-    private void storeWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
+    private void storeWalletData(Wallet wallet)
     {
         try (Realm realm = realmManager.getWalletDataRealmInstance())
         {
@@ -408,12 +424,11 @@ public class WalletDataRealmSource {
                 item.setBalance(wallet.balance);
                 item.setENSAvatar(wallet.ENSAvatar);
                 if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedwalletdata " + wallet.address);
-            }, onSuccess);
+            });
         }
         catch (Exception e)
         {
             if (BuildConfig.DEBUG) e.printStackTrace();
-            onSuccess.onSuccess();
         }
     }
 

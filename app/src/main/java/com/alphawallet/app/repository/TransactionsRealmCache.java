@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
+
 import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
@@ -9,11 +11,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.repository.entity.RealmNFTAsset;
-import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.repository.entity.RealmTransfer;
-import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.RealmManager;
 
@@ -355,27 +353,17 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //delete all token and AUX data for this wallet
             try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
             {
-                instance.executeTransaction(r -> {
-                    RealmResults<RealmAuxData> data = r.where(RealmAuxData.class)
-                            .findAll();
-                    data.deleteAllFromRealm();
+                instance.executeTransaction(r -> instance.deleteAll());
+                instance.refresh();
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
 
-                    RealmResults<RealmTransfer> realmTransfers = r.where(RealmTransfer.class)
-                            .findAll();
-                    realmTransfers.deleteAllFromRealm();
-
-                    RealmResults<RealmTransaction> realmTransactions = r.where(RealmTransaction.class)
-                            .findAll();
-                    realmTransactions.deleteAllFromRealm();
-
-                    RealmResults<RealmToken> realmTokens = r.where(RealmToken.class)
-                            .findAll();
-                    realmTokens.deleteAllFromRealm();
-
-                    RealmResults<RealmNFTAsset> realmAssets = r.where(RealmNFTAsset.class)
-                            .findAll();
-                    realmAssets.deleteAllFromRealm();
-
+            try (Realm walletRealm = realmManager.getWalletDataRealmInstance())
+            {
+                walletRealm.executeTransaction(r -> {
                     //now delete all the wallet info (not key info!)
                     RealmWalletData walletData = r.where(RealmWalletData.class)
                             .equalTo("address", currentAddress, Case.INSENSITIVE)
@@ -388,10 +376,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                         walletData.setENSAvatar("");
                     }
                 });
-            }
-            catch (Exception e)
-            {
-                return false;
             }
 
             return true;

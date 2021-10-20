@@ -5,17 +5,11 @@ import android.util.Log;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmKeyType;
-import com.alphawallet.app.repository.entity.RealmNFTAsset;
-import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -356,13 +350,15 @@ public class WalletDataRealmSource {
             {
                 if (BuildConfig.DEBUG) e.printStackTrace();
             }
-            //now delete the token data
-            Realm realm = realmManager.getRealmInstance(wallet);
 
-            File databaseFile = new File(realm.getConfiguration().getPath());
-            if (databaseFile.exists())
+            try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                databaseFile.delete();
+                instance.executeTransaction(r -> instance.deleteAll());
+                instance.refresh();
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return wallet;

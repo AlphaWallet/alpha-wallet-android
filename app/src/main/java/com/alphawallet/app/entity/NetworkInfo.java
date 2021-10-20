@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 
+import com.alphawallet.app.util.Utils;
+
 public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
     private final String BLOCKSCOUT_API = "blockscout";
     private final String MATIC_API = "maticvigil.com/api/v2/transactions";
@@ -54,14 +56,24 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
         }
     }
 
-    public Uri getEtherscanAddressUri(String toAddress)
+    public Uri getEtherscanAddressUri(String value)
     {
         if (etherscanUrl != null)
         {
-            return Uri.parse(etherscanUrl)
+            String explorer = etherscanUrl;
+            if (Utils.isAddressValid(value))
+            {
+                explorer = explorer.substring(0, explorer.lastIndexOf("tx/"));
+                explorer += "address/";
+            }
+            else if (!Utils.isTransactionHash(value))
+            {
+                return Uri.EMPTY;
+            }
+
+            return Uri.parse(explorer)
                     .buildUpon()
-                    .appendEncodedPath("address")
-                    .appendEncodedPath(toAddress)
+                    .appendEncodedPath(value)
                     .build();
         }
         else

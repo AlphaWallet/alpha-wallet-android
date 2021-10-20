@@ -5,7 +5,7 @@ package com.alphawallet.app.util.das;
  */
 public class DASResult
 {
-    public int errno;
-    public String errmsg;
-    public DASData data;
+    int errno;
+    String errmsg;
+    DASData data;
 }

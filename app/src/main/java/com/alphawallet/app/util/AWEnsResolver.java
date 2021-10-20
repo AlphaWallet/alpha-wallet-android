@@ -1,8 +1,5 @@
 package com.alphawallet.app.util;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,7 +20,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.InterruptedIOException;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -363,6 +359,10 @@ public class AWEnsResolver extends EnsResolver
             if (ethLookup != null)
             {
                 return ethLookup.getAddress();
+            }
+            else
+            {
+                return dasResult.getEthOwner();
             }
         }
         catch (Exception e)

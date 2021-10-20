@@ -614,7 +614,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                         addFunction(R.string.convert_to_xdai);
                         return true;
                     default:
-                        if (token.isERC20())
+                        if (token.isERC20() || token.isEthereum())
                         {
                             addFunction(R.string.exchange_with_oneinch);
                         }
@@ -623,7 +623,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             case BINANCE_MAIN_ID:
             case OPTIMISTIC_MAIN_ID:
             case ARBITRUM_MAIN_ID:
-                if (token.isERC20())
+                if (token.isERC20() || token.isEthereum())
                 {
                     addFunction(R.string.exchange_with_oneinch);
                     return true;

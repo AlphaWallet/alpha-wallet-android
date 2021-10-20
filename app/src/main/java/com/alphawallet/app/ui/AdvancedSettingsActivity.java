@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_LOCALE;
 import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.PAGE_LOADED;
 import static com.alphawallet.app.C.RESET_WALLET;
 
 import android.Manifest;
@@ -57,6 +58,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
     private SettingsItemView changeCurrency;
     private SettingsItemView fullScreenSettings;
     private SettingsItemView refreshTokenDatabase;
+    private AWalletAlertDialog waitDialog = null;
 
     @Nullable
     private Disposable clearTokenCache;
@@ -187,11 +189,17 @@ public class AdvancedSettingsActivity extends BaseActivity {
     }
 
     private void onReloadTokenDataClicked() {
+        if (clearTokenCache != null && !clearTokenCache.isDisposed())
+        {
+            Toast.makeText(this, getString(R.string.token_data_being_cleared), Toast.LENGTH_SHORT).show();
+            return;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(AdvancedSettingsActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_reload_token_data)
                 .setMessage(R.string.reload_token_data_desc)
                 .setPositiveButton(R.string.action_reload, (d, w) -> {
                     //delete all Token data for this wallet
+                    showWaitDialog();
                     clearTokenCache = viewModel.resetTokenData()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -205,8 +213,31 @@ public class AdvancedSettingsActivity extends BaseActivity {
         dialog.show();
     }
 
+    private void showWaitDialog()
+    {
+        if (waitDialog != null && waitDialog.isShowing()) return;
+        waitDialog = new AWalletAlertDialog(this);
+        waitDialog.setTitle(getString(R.string.title_reload_token_data));
+        waitDialog.setIcon(AWalletAlertDialog.NONE);
+        waitDialog.setProgressMode();
+        waitDialog.setCancelable(true);
+        waitDialog.setOnCancelListener(v -> {
+            if (clearTokenCache != null && !clearTokenCache.isDisposed()) clearTokenCache.dispose();
+        });
+        waitDialog.show();
+    }
+
+    private void removeWaitDialog()
+    {
+        if (waitDialog != null && waitDialog.isShowing())
+        {
+            waitDialog.dismiss();
+        }
+    }
+
     private void showResetResult(boolean resetResult)
     {
+        removeWaitDialog();
         if (resetResult)
         {
             Toast.makeText(this, getString(R.string.toast_token_data_cleared), Toast.LENGTH_SHORT).show();
@@ -214,6 +245,10 @@ public class AdvancedSettingsActivity extends BaseActivity {
             setResult(RESULT_OK, intent);
             intent.putExtra(RESET_WALLET, true);
             finish();
+        }
+        else
+        {
+            Toast.makeText(this, getString(R.string.error_deleting_account), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -302,10 +337,16 @@ public class AdvancedSettingsActivity extends BaseActivity {
         //Check if selected currency code is previous selected one then don't update
         if(viewModel.getDefaultCurrency().equals(currencyCode)) return;
 
-        viewModel.updateCurrency(currencyCode);
-
-        //send broadcast to HomeActivity about change
-        sendBroadcast(new Intent(CHANGE_CURRENCY));
+        viewModel.updateCurrency(currencyCode)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(res -> {
+                    Intent intent = new Intent();
+                    setResult(RESULT_OK, intent);
+                    intent.putExtra(CHANGE_CURRENCY, true);
+                    finish();
+                })
+        .isDisposed();
     }
 
     @Override

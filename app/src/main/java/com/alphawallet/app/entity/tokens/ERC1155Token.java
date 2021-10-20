@@ -4,6 +4,7 @@ package com.alphawallet.app.entity.tokens;
 import android.app.Activity;
 import android.util.Pair;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
@@ -619,7 +620,7 @@ public class ERC1155Token extends Token
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return new BigDecimal(assets.keySet().size());

@@ -204,7 +204,7 @@ public class QRScanner extends BaseActivity
     ActivityResultLauncher<String> getQRImage = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
                 disposable = concertAndHandle(uri)
-                        .observeOn(Schedulers.io())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onSuccess, this::onError);
             });

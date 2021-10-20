@@ -18,6 +18,7 @@ import android.webkit.URLUtil;
 import androidx.annotation.RawRes;
 import androidx.core.content.ContextCompat;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -400,7 +401,7 @@ public class Utils {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return false;
     }
@@ -863,10 +864,13 @@ public class Utils {
                 repoChain = "poa";
                 break;
             case BINANCE_MAIN_ID:
-                repoChain = "binance";
+                repoChain = "smartchain";
                 break;
             case AVALANCHE_ID:
                 repoChain = "avalanche";
+                break;
+            case OPTIMISTIC_MAIN_ID:
+                repoChain = "optimism";
                 break;
             case MATIC_ID:
                 repoChain = "polygon";
@@ -959,5 +963,19 @@ public class Utils {
         {
             return false;
         }
+    }
+
+    public static boolean isTransactionHash(String input)
+    {
+        if (input == null || (input.length() != 66 && input.length() != 64)) return false;
+        String cleanInput = Numeric.cleanHexPrefix(input);
+
+        try {
+            Numeric.toBigIntNoPrefix(cleanInput);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return cleanInput.length() == 64;
     }
 }

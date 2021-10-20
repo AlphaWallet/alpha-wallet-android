@@ -230,8 +230,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private DAppFunction dAppFunction;
 
-    private View home;
-
     @Nullable
     private Disposable disposable;
 
@@ -447,6 +445,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             loadOnInit = getDefaultDappUrl();
         }
+
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         webFrame = view.findViewById(R.id.frame);
@@ -456,7 +455,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         toolbar = view.findViewById(R.id.address_bar);
         layoutNavigation = view.findViewById(R.id.layout_navigator);
 
-        home = view.findViewById(R.id.home);
+        View home = view.findViewById(R.id.home);
 
         home.setOnClickListener(v -> homePressed());
 
@@ -750,6 +749,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         activeNetwork = viewModel.getActiveNetwork();
+        viewModel.findWallet();
     }
 
     private void startBalanceListener()
@@ -774,8 +774,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
-        setupWeb3();
-        startBalanceListener();
+        if (activeNetwork != null)
+        {
+            boolean needsReload = loadOnInit == null;
+            setupWeb3();
+            startBalanceListener();
+            if (needsReload) reloadPage();
+        }
     }
 
     /**
@@ -983,8 +988,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         if (loadOnInit != null)
         {
+            web3.clearCache(false); //on restart with stored app, we usually need this
             addToBackStack(DAPP_BROWSER);
-            web3.loadUrl(Utils.formatUrl(loadOnInit), getWeb3Headers());
+            web3.resetView();
+            web3.loadUrl(Utils.formatUrl(loadOnInit));
             setUrlText(Utils.formatUrl(loadOnInit));
             loadOnInit = null;
         }
@@ -1334,7 +1341,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             //load homepage
             homePressed = true;
-            web3.loadUrl(getDefaultDappUrl(), getWeb3Headers());
+            web3.resetView();
+            web3.loadUrl(getDefaultDappUrl());
             setUrlText(getDefaultDappUrl());
             checkBackClickArrowVisibility();
         }
@@ -1503,7 +1511,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         addToBackStack(DAPP_BROWSER);
         cancelSearchSession();
         if (checkForMagicLink(urlText)) return true;
-        web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
+        web3.resetView();
+        web3.loadUrl(Utils.formatUrl(urlText));
         setUrlText(Utils.formatUrl(urlText));
         web3.requestFocus();
         Activity current = getActivity();
@@ -1528,28 +1537,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             cancelSearchSession();
             addToBackStack(DAPP_BROWSER);
             setUrlText(Utils.formatUrl(urlText));
-            web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
+            web3.resetView();
+            web3.loadUrl(Utils.formatUrl(urlText));
             //ensure focus isn't on the keyboard
             KeyboardUtils.hideKeyboard(urlTv);
             web3.requestFocus();
         }
-    }
-
-    /* Required for CORS requests */
-    @NotNull
-    @Contract(" -> new")
-    private Map<String, String> getWeb3Headers()
-    {
-        //headers
-        return new HashMap<String, String>() {{
-            put("Connection", "close");
-            put("Content-Type", "text/plain");
-            put("Access-Control-Allow-Origin", "*");
-            put("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
-            put("Access-Control-Max-Age", "600");
-            put("Access-Control-Allow-Credentials", "true");
-            put("Access-Control-Allow-Headers", "accept, authorization, Content-Type");
-        }};
     }
 
     public void reloadPage() {
@@ -1558,6 +1551,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             if (refresh != null) {
                 refresh.setEnabled(false);
             }
+            web3.resetView();
             web3.reload();
         }
     }
@@ -1594,7 +1588,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         web3.clearHistory();
         web3.stopLoading();
-        web3.loadUrl(getDefaultDappUrl(), getWeb3Headers());
+        web3.resetView();
+        web3.loadUrl(getDefaultDappUrl());
         setUrlText(getDefaultDappUrl());
     }
 
@@ -1858,6 +1853,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             oos.writeObject(CURRENT_FRAGMENT);
             oos.writeObject(currentFragment);
             oos.writeObject(CURRENT_URL);
+            String uurl = urlTv.getText().toString();
+            String uurl2 = web3.getUrl();
             oos.writeObject(urlTv.getText().toString());
         }
         return bos;

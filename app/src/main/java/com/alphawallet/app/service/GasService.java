@@ -151,7 +151,7 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateCurrentGasPrices()
     {
-        String gasOracleAPI = networkRepository.getGasOracle(currentChainId);
+        String gasOracleAPI = EthereumNetworkRepository.getGasOracle(currentChainId);
         if (!TextUtils.isEmpty(gasOracleAPI))
         {
             if (gasOracleAPI.contains("etherscan")) gasOracleAPI += ETHERSCAN_API_KEY;
@@ -214,15 +214,12 @@ public class GasService implements ContractGasProvider
         final int chainId = currentChainId;
         return Single.fromCallable(() -> {
             boolean update = false;
-            try
+            Request request = new Request.Builder()
+                    .url(gasOracleAPI)
+                    .get()
+                    .build();
+            try (okhttp3.Response response = httpClient.newCall(request).execute())
             {
-                Request request = new Request.Builder()
-                        .url(gasOracleAPI)
-                        .get()
-                        .build();
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-
                 if (response.code() / 200 == 1)
                 {
                     String result = response.body()
@@ -235,7 +232,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return update;

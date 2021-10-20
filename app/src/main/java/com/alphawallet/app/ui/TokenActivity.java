@@ -582,7 +582,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singletonList(tokenId)), null)
@@ -594,7 +594,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void onError(Throwable throwable)
     {
-        throwable.printStackTrace();
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
         displayFunction(attrs.toString());
     }
 

@@ -168,7 +168,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         // Fetch attributes local to this action and add them to the injected token properties
@@ -220,7 +220,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void onError(Throwable throwable)
     {
-        throwable.printStackTrace();
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
         displayFunction(attrs.toString());
     }
 

@@ -51,7 +51,6 @@ public class SendViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
-    private final PreferenceRepositoryType preferenceRepository;
 
     public SendViewModel(MyAddressRouter myAddressRouter,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -61,8 +60,7 @@ public class SendViewModel extends BaseViewModel {
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
                          KeyService keyService,
-                         AnalyticsServiceType analyticsService,
-                         PreferenceRepositoryType preferenceRepository)
+                         AnalyticsServiceType analyticsService)
     {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = ethereumNetworkRepositoryType;
@@ -73,7 +71,6 @@ public class SendViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.analyticsService = analyticsService;
-        this.preferenceRepository = preferenceRepository;
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -177,9 +174,5 @@ public class SendViewModel extends BaseViewModel {
         analyticsProperties.setData(mode);
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
-    }
-
-    public void tryToShowRateAppDialog(Activity context) {
-        RateApp.showRateTheApp(context, preferenceRepository, true);
     }
 }

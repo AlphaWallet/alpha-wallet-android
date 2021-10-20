@@ -343,7 +343,7 @@ public class TransactionsService
                                     .subscribe().isDisposed();
                         }
                     }).exceptionally(throwable -> {
-                        throwable.printStackTrace();
+                        if (BuildConfig.DEBUG) throwable.printStackTrace();
                         return null;
                     });
                 }
@@ -410,5 +410,10 @@ public class TransactionsService
         stopAllChainUpdate();
 
         return transactionsCache.deleteAllForWallet(tokensService.getCurrentAddress());
+    }
+
+    public Single<Boolean> wipeTickerData()
+    {
+        return transactionsCache.deleteAllTickers();
     }
 }

@@ -27,7 +27,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
     private final AnalyticsServiceType analyticsService;
-    private final PreferenceRepositoryType preferenceRepository;
 
     public SendViewModelFactory(MyAddressRouter myAddressRouter,
                                 EthereumNetworkRepositoryType networkRepository,
@@ -37,8 +36,7 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
                                 GasService gasService,
                                 AssetDefinitionService assetDefinitionService,
                                 KeyService keyService,
-                                AnalyticsServiceType analyticsService,
-                                PreferenceRepositoryType preferenceRepository) {
+                                AnalyticsServiceType analyticsService) {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = networkRepository;
         this.tokensService = tokensService;
@@ -48,7 +46,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.analyticsService = analyticsService;
-        this.preferenceRepository = preferenceRepository;
     }
 
     @NonNull
@@ -56,6 +53,6 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new SendViewModel(myAddressRouter, networkRepository, tokensService,
                 fetchTransactionsInteract, createTransactionInteract, gasService,
-                assetDefinitionService, keyService, analyticsService, preferenceRepository);
+                assetDefinitionService, keyService, analyticsService);
     }
 }

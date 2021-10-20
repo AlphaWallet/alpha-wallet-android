@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Ticket;
@@ -125,7 +126,7 @@ public class AlphaWalletService
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return dsigDescriptor;
@@ -153,7 +154,7 @@ public class AlphaWalletService
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return result;

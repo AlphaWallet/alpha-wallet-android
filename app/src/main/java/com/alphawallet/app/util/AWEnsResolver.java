@@ -1,8 +1,5 @@
 package com.alphawallet.app.util;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,7 +20,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.InterruptedIOException;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -64,14 +60,11 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> reverseResolveEns(String address)
     {
         return Single.fromCallable(() -> {
-            String ensName = checkENSHistoryForAddress(address); //First check known ENS names
+            String ensName = "";
 
             try
             {
-                if (TextUtils.isEmpty(ensName))
-                {
-                    ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
-                }
+                ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
@@ -88,7 +81,7 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 // no action
             }
             return ensName;
@@ -98,14 +91,17 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> getENSUrl(String ensName)
     {
         return Single.fromCallable(() -> {
-            String locator = resolveAvatar(ensName);
-            if (!TextUtils.isEmpty(locator))
+            if (TextUtils.isEmpty(ensName))
             {
-                return locator;
+                return "";
+            }
+            else if (Utils.isAddressValid(ensName))
+            {
+                return resolveAvatarFromAddress(ensName);
             }
             else
             {
-                return "";
+                return resolveAvatar(ensName);
             }
         }).flatMap(this::convertLocator);
     }
@@ -184,14 +180,14 @@ public class AWEnsResolver extends EnsResolver
                 return null;
         }
 
-        try
-        {
-            Request request = new Request.Builder()
+
+        Request request = new Request.Builder()
                     .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)
                     .get()
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             String jsonResult = response.body().string();
             return new JSONObject(jsonResult);
         }
@@ -203,7 +199,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return null;
@@ -343,15 +339,15 @@ public class AWEnsResolver extends EnsResolver
     private String resolveDAS(String ensName)
     {
         String payload = DAS_PAYLOAD.replace(DAS_NAME, ensName);
-        try
-        {
-            RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
-            Request request = new Request.Builder()
+
+        RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
+        Request request = new Request.Builder()
                     .url(DAS_LOOKUP)
                     .post(requestBody)
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             //get result
             String result = response.body() != null ? response.body().string() : "";
 
@@ -363,6 +359,10 @@ public class AWEnsResolver extends EnsResolver
             if (ethLookup != null)
             {
                 return ethLookup.getAddress();
+            }
+            else
+            {
+                return dasResult.getEthOwner();
             }
         }
         catch (Exception e)
@@ -381,10 +381,5 @@ public class AWEnsResolver extends EnsResolver
                 .writeTimeout(7, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-    }
-
-    public void checkENSAvatar(String address)
-    {
-
     }
 }

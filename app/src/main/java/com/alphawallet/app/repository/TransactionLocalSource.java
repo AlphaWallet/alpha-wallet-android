@@ -34,4 +34,6 @@ public interface TransactionLocalSource {
     long fetchTxCompletionTime(Wallet wallet, String hash);
 
     Single<Boolean> deleteAllForWallet(String currentAddress);
+
+    Single<Boolean> deleteAllTickers();
 }

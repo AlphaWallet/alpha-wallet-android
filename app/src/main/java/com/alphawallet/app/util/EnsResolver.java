@@ -2,6 +2,7 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenRepository;
@@ -110,7 +111,8 @@ public class EnsResolver {
             }
             catch (Exception e)
             {
-                throw new RuntimeException("Unable to execute Ethereum request", e);
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
+                return "";
             }
 
             if (!Utils.isAddressValid(contractAddress))
@@ -186,7 +188,29 @@ public class EnsResolver {
             catch (Exception e)
             {
                 //
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+        }
+
+        return "";
+    }
+
+    public String resolveAvatarFromAddress(String address)
+    {
+        if (Utils.isAddressValid(address))
+        {
+            String reverseName = Numeric.cleanHexPrefix(address.toLowerCase()) + REVERSE_NAME_SUFFIX;
+            try
+            {
+                String resolverAddress = lookupResolver(reverseName);
+                byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
+                String avatar = getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash));
+                return avatar;
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
             }
         }
 

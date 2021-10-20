@@ -2,6 +2,8 @@ package com.alphawallet.app.entity;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -110,7 +112,7 @@ public class EthereumProtocolParser
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
             return null;
         }
 

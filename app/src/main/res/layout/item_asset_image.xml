@@ -10,20 +10,30 @@
         android:id="@+id/image_asset"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
+        android:visibility="gone"
         tools:src="@drawable/ic_token_eth"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/web_view_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
         <WebView
             android:id="@+id/image_web_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_alignParentTop="true" />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/white_circle"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
 </LinearLayout>

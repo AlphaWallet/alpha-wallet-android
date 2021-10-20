@@ -1,16 +1,23 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
+
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -82,8 +89,6 @@ import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
 
-import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
-
 public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface, WalletConnectCallback
 {
     private static final String TAG = "WCClient";
@@ -128,7 +133,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private boolean terminateSession = false;
     private boolean sessionStarted = false;
     private boolean waitForWalletConnectSession = false;
-    private int orientation;
     private long requestId = 0;
 
     @Override
@@ -405,20 +409,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     }
 
     @Override
-    public void receiveRequest(WCRequest request)
-    {
-        actionMessage(request);
-    }
-
-    private void startMessageCheck()
-    {
-        IntentFilter filter = new IntentFilter(C.WALLET_CONNECT_REQUEST);
-        filter.addAction(C.WALLET_CONNECT_NEW_SESSION);
-        filter.addAction(C.WALLET_CONNECT_FAIL);
-        registerReceiver(walletConnectActionReceiver, filter);
-    }
-
-    private void actionMessage(WCRequest rq)
+    public boolean receiveRequest(WCRequest rq)
     {
         if (rq != null)
         {
@@ -427,16 +418,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             switch (rq.type)
             {
                 case MESSAGE:
+                    if (watchOnly(rq.id)) return false;
                     runOnUiThread(() -> {
                         onEthSign(rq.id, rq.sign);
                     });
                     break;
                 case SIGN_TX:
+                    if (watchOnly(rq.id)) return false;
                     runOnUiThread(() -> {
                         onEthSignTransaction(rq.id, rq.tx, useChainId);
                     });
                     break;
                 case SEND_TX:
+                    if (watchOnly(rq.id)) return false;
                     runOnUiThread(() -> {
                         onEthSendTransaction(rq.id, rq.tx, useChainId);
                     });
@@ -454,6 +448,39 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     break;
             }
         }
+
+        return true;
+    }
+
+    private boolean watchOnly(long id)
+    {
+        if (!viewModel.getWallet().canSign())
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
+            AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
+                    .setMessage(R.string.watch_wallet)
+                    .setPositiveButton(R.string.action_close, (d, w) -> {
+                        //send reject signal
+                        viewModel.rejectRequest(getApplication(), getSessionId(), id, getString(R.string.message_authentication_failed));
+                        d.dismiss();
+                    })
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void startMessageCheck()
+    {
+        IntentFilter filter = new IntentFilter(C.WALLET_CONNECT_REQUEST);
+        filter.addAction(C.WALLET_CONNECT_NEW_SESSION);
+        filter.addAction(C.WALLET_CONNECT_FAIL);
+        registerReceiver(walletConnectActionReceiver, filter);
     }
 
     private String getSessionId()
@@ -548,7 +575,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onSaveInstanceState(state);
         //need to preserve the orientation and current signing request
-        state.putInt("ORIENTATION", orientation);
+        state.putInt("ORIENTATION", getResources().getConfiguration().orientation);
         state.putLong("SESSIONID", requestId);
         if (confirmationDialog != null) confirmationDialog.closingActionSheet();
     }
@@ -558,7 +585,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onResume();
         startMessageCheck();
-        orientation = this.getDisplay().getRotation();
     }
 
     private void displaySessionStatus(String sessionId)
@@ -840,7 +866,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         catch (Exception e)
         {
             confDialog = null;
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return confDialog;

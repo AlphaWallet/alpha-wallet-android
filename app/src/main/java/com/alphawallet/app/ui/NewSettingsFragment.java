@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 
 import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
@@ -510,9 +511,14 @@ public class NewSettingsFragment extends BaseFragment {
     ActivityResultLauncher<Intent> advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 Intent data = result.getData();
-                if (data != null && data.getBooleanExtra(RESET_WALLET, false))
+                if (data == null) return;
+                if (data.getBooleanExtra(RESET_WALLET, false))
                 {
                     getParentFragmentManager().setFragmentResult(RESET_WALLET, new Bundle());
+                }
+                else if (data.getBooleanExtra(CHANGE_CURRENCY, false))
+                {
+                    getParentFragmentManager().setFragmentResult(CHANGE_CURRENCY, new Bundle());
                 }
             });
 

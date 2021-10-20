@@ -78,6 +78,7 @@ import dagger.android.AndroidInjection;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
@@ -318,6 +319,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         getSupportFragmentManager()
                 .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> showAndRefreshWallet());
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
+                    viewModel.updateTickers();
+                    showAndRefreshWallet();
+                });
     }
 
     private void onBackup(String address)
@@ -833,11 +840,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (Utils.isAddressValid(keyAddress)) backupWalletSuccess(keyAddress);
     }
 
+    //Deprecated
     @Override
     public void changeCurrency()
     {
-        ((WalletFragment) walletFragment).indicateFetch();
-        viewModel.updateTickers();
+
     }
 
     @Override

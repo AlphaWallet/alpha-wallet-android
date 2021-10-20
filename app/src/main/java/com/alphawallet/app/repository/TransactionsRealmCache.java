@@ -31,6 +31,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
+import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
 
@@ -327,6 +328,24 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //do not record
             if (BuildConfig.DEBUG) e.printStackTrace();
         }
+    }
+
+    @Override
+    public Single<Boolean> deleteAllTickers()
+    {
+        return Single.fromCallable(() -> {
+            try (Realm instance = realmManager.getRealmInstance(TICKER_DB))
+            {
+                instance.executeTransaction(r -> instance.deleteAll());
+                instance.refresh();
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     @Override

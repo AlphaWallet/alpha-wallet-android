@@ -36,6 +36,7 @@ public class QRCodeActionsView extends FrameLayout implements View.OnClickListen
         findViewById(R.id.close_action).setOnClickListener(this);
     }
 
+    //TODO: Refactor with if/else
     @Override
     public void onClick(View view) {
         switch (view.getId()) {

@@ -401,10 +401,13 @@ public class HomeViewModel extends BaseViewModel {
             }
             else if (v.getId() == R.id.open_in_etherscan_action)
             {
-                String etherScanUrl = MagicLinkInfo.getEtherscanURLbyNetwork(qrResult.chainId);
-                if (etherScanUrl != null) {
-                    String url = etherScanUrl + "token/" + qrResult.getAddress();
-                    externalBrowserRouter.open(activity, Uri.parse(url));
+                NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(qrResult.chainId);
+                if (info == null) return;
+
+                Uri blockChainInfoUrl = info.getEtherscanAddressUri(qrResult.getAddress());
+
+                if (blockChainInfoUrl != Uri.EMPTY) {
+                    externalBrowserRouter.open(activity, blockChainInfoUrl);
                 }
             }
             else if (v.getId() == R.id.close_action)

@@ -964,4 +964,18 @@ public class Utils {
             return false;
         }
     }
+
+    public static boolean isTransactionHash(String input)
+    {
+        if (input == null || (input.length() != 66 && input.length() != 64)) return false;
+        String cleanInput = Numeric.cleanHexPrefix(input);
+
+        try {
+            Numeric.toBigIntNoPrefix(cleanInput);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return cleanInput.length() == 64;
+    }
 }

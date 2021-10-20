@@ -411,4 +411,9 @@ public class TransactionsService
 
         return transactionsCache.deleteAllForWallet(tokensService.getCurrentAddress());
     }
+
+    public Single<Boolean> wipeTickerData()
+    {
+        return transactionsCache.deleteAllTickers();
+    }
 }

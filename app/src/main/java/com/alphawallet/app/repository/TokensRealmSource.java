@@ -514,7 +514,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (BuildConfig.DEBUG) Log.d(TAG, "Zero out ERC721 balance: " + realmToken.getName() + " :" + token.getAddress());
                     balanceChanged = true;
                 }
-                else if (!newBalance.equals(currentBalance))
+                else if (!newBalance.equals(currentBalance) || !checkEthToken(realm, token))
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setBalance(newBalance);
@@ -544,6 +544,17 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         return balanceChanged;
+    }
+
+    private boolean checkEthToken(Realm realm, Token token)
+    {
+        if (!token.isEthereum()) return true;
+        RealmToken realmToken = realm.where(RealmToken.class)
+                .equalTo("address", databaseKey(token.tokenInfo.chainId, "eth"))
+                .equalTo("chainId", token.tokenInfo.chainId)
+                .findFirst();
+
+        return realmToken != null;
     }
 
     private void updateEthToken(Realm realm, Token token, String newBalance)

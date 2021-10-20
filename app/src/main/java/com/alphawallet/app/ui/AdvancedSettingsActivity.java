@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_LOCALE;
 import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.PAGE_LOADED;
 import static com.alphawallet.app.C.RESET_WALLET;
 
 import android.Manifest;
@@ -336,10 +337,16 @@ public class AdvancedSettingsActivity extends BaseActivity {
         //Check if selected currency code is previous selected one then don't update
         if(viewModel.getDefaultCurrency().equals(currencyCode)) return;
 
-        viewModel.updateCurrency(currencyCode);
-
-        //send broadcast to HomeActivity about change
-        sendBroadcast(new Intent(CHANGE_CURRENCY));
+        viewModel.updateCurrency(currencyCode)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(res -> {
+                    Intent intent = new Intent();
+                    setResult(RESULT_OK, intent);
+                    intent.putExtra(CHANGE_CURRENCY, true);
+                    finish();
+                })
+        .isDisposed();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
+import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
 import android.util.Log;
 
@@ -27,9 +28,6 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
-
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
-import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
 

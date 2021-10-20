@@ -77,10 +77,12 @@ public class UserAvatar extends LinearLayout
         image.setVisibility(View.GONE);
         webLayout.setVisibility(View.GONE);
         state = BindingState.NONE;
+        walletAddress = null;
     }
 
     public void bindAndFind(@NonNull Wallet wallet)
     {
+        walletAddress = wallet.address;
         if ((state == BindingState.NONE || state == BindingState.BLOCKIE) && !wallet.address.equalsIgnoreCase(ZERO_ADDRESS))
         {
             bind(wallet, null);
@@ -89,6 +91,10 @@ public class UserAvatar extends LinearLayout
         if ((state == BindingState.NONE || state == BindingState.BLOCKIE) && !TextUtils.isEmpty(wallet.ENSname))
         {
             resolveAvatar(wallet, null);
+        }
+        else if (state == BindingState.SCANNING_ENS)
+        {
+            setBlockie(wallet.address);
         }
     }
 
@@ -130,6 +136,7 @@ public class UserAvatar extends LinearLayout
 
     private void onError(Throwable throwable)
     {
+        setBlockie(walletAddress);
         if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 

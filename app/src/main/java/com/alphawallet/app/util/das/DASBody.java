@@ -10,7 +10,7 @@ public class DASBody
 {
     String jsonrpc;
     int id;
-    DASResult result;
+    public DASResult result;
     public final Map<String, DASRecord> records = new HashMap<>();
 
     public void buildMap()
@@ -21,6 +21,18 @@ public class DASBody
         for (DASRecord record : result.data.account_data.records)
         {
             records.put(record.key, record);
+        }
+    }
+
+    public String getEthOwner()
+    {
+        if (result != null && result.data != null && result.data.account_data != null)
+        {
+            return result.data.account_data.getEthOwner();
+        }
+        else
+        {
+            return null;
         }
     }
 }

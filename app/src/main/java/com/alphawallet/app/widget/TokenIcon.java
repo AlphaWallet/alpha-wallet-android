@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -233,6 +234,15 @@ public class TokenIcon extends ConstraintLayout
      */
     private void loadFromAltRepo()
     {
+        if (getContext() instanceof Activity)
+        {
+            Activity myAct = (Activity) getContext();
+            if (myAct.isFinishing() || myAct.isDestroyed())
+            {
+                return;
+            }
+        }
+
         handler.post(() ->
                 currentRq = Glide.with(getContext())
                 .load(this.fallbackIconUrl)

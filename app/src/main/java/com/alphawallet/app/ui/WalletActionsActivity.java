@@ -103,7 +103,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         if (isNewWallet) {
             wallet.name = getString(R.string.wallet_name_template, walletCount);
-            viewModel.storeWallet(wallet);
+            viewModel.updateWallet(wallet);
         }
     }
 
@@ -230,7 +230,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     private void saveWalletName() {
 //        wallet.name = walletNameText.getText().toString();
-        viewModel.storeWallet(wallet);
+        viewModel.updateWallet(wallet);
         if (isNewWallet) {
             viewModel.showHome(this);
             finish(); //drop back to home screen, no need to recreate everything
@@ -340,7 +340,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         {
             wallet.ENSname = ensName;
             //update database
-            viewModel.storeWallet(wallet);
+            viewModel.updateWallet(wallet);
             successOverlay.setVisibility(View.VISIBLE);
             handler.postDelayed(this, 1000);
         }

@@ -511,7 +511,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onDestroy()
     {
-        viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
+        if (getSelectedItem() != null) viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
         super.onDestroy();
         viewModel.onClean();
         if (homeReceiver != null)

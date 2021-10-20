@@ -609,6 +609,7 @@
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
     <string name="toast_token_data_cleared">Token Data cleared</string>
+    <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
     <string name="your_wallets">Your Wallets</string>
     <string name="action_copy">Copy</string>
     <string name="title_version_support_warning">Important Update</string>

@@ -206,6 +206,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private DappBrowserSuggestionsAdapter adapter;
     private AlertDialog chainSwapDialog;
     private String loadOnInit; //Web3 needs to be fully set up and initialised before any dapp loading can be done
+    private String directUrl;  // used to avoid reload the page with old url
     private boolean homePressed;
     private AddEthereumChainPrompt addCustomChainDialog;
 
@@ -428,7 +429,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void updateNetworkMenuItem()
     {
         if (activeNetwork != null)
+        {
             toolbar.getMenu().findItem(R.id.action_network).setTitle(getString(R.string.network_menu_item, activeNetwork.getShortName()));
+            symbol.setText(activeNetwork.getShortName());
+        }
     }
 
     private void initView(@NotNull View view) {
@@ -471,7 +475,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
         refresh = view.findViewById(R.id.refresh);
-        setupMenu(view);
+
 
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
@@ -496,6 +500,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setWebLoadCallback(this);
 
         webFrame.setOnApplyWindowInsetsListener(resizeListener);
+
+        setupMenu(view);
     }
 
     private void displayNothingToShare() {
@@ -779,7 +785,17 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             boolean needsReload = loadOnInit == null;
             setupWeb3();
             startBalanceListener();
-            if (needsReload) reloadPage();
+            if (needsReload)
+            {
+                if (directUrl == null)
+                {
+                    reloadPage();
+                } else
+                    {
+                    loadDirect(directUrl);
+                    directUrl = null;
+                }
+            }
         }
     }
 
@@ -797,7 +813,26 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         updateNetworkMenuItem();
 
-        viewModel.findWallet();
+        // no need of extra call of findWallet as it will be called on viewModel.setNetwork() -> onNetworkChanged()
+        // viewModel.findWallet();
+    }
+
+    public void switchNetworkAndLoadUrl(int chainId, String url)
+    {
+        if (activeNetwork != null && activeNetwork.chainId == chainId)
+        {
+            loadDirect(url);
+        } else
+        {
+            directUrl = url;
+
+            viewModel.setNetwork(chainId);
+
+            //setup network selection and init web3 with updated chain
+            activeNetwork = viewModel.getNetworkInfo(chainId);
+
+            updateNetworkMenuItem();
+        }
     }
 
     private void onNetworkChanged(NetworkInfo networkInfo)

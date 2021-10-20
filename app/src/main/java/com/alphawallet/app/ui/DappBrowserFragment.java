@@ -228,6 +228,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private String currentWebpageTitle;
     private String currentFragment;
 
+    // These two members are for loading a Dapp with an associated chain change.
+    // Some multi-chain Dapps have a watchdog thread that checks the chain
+    // This thread stays in operation until a new page load is complete.
+    private String loadUrlAfterReload;
+    private static volatile int forceChainChange = 0;
+
     private DAppFunction dAppFunction;
 
     @Nullable
@@ -419,8 +425,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         if (setAsHomePage != null) {
             setAsHomePage.setOnMenuItemClickListener(menuItem -> {
-               viewModel.setHomePage(getContext(), urlTv.getText().toString());
-               return true;
+                viewModel.setHomePage(getContext(), urlTv.getText().toString());
+                return true;
             });
         }
     }
@@ -428,7 +434,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void updateNetworkMenuItem()
     {
         if (activeNetwork != null)
+        {
             toolbar.getMenu().findItem(R.id.action_network).setTitle(getString(R.string.network_menu_item, activeNetwork.getShortName()));
+            symbol.setText(activeNetwork.getShortName());
+        }
     }
 
     private void initView(@NotNull View view) {
@@ -471,7 +480,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
         refresh = view.findViewById(R.id.refresh);
-        setupMenu(view);
+
 
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
@@ -496,6 +505,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setWebLoadCallback(this);
 
         webFrame.setOnApplyWindowInsetsListener(resizeListener);
+
+        setupMenu(view);
     }
 
     private void displayNothingToShare() {
@@ -588,7 +599,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         if (viewModel != null)
         {
-            viewModel.checkForNetworkChanges();
+            if (viewModel.getActiveNetwork() == null || activeNetwork.chainId != viewModel.getActiveNetwork().chainId)
+            {
+                viewModel.checkForNetworkChanges();
+            }
         }
         if (urlTv != null)
         {
@@ -783,21 +797,18 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
-    /**
-     * Called by openDapp(Dapp url) to automatically switch to the required network when required
-     * @param chainId
-     */
-    public void switchNetwork(int chainId)
+    public void switchNetworkAndLoadUrl(int chainId, String url)
     {
-        if (activeNetwork != null && activeNetwork.chainId == chainId) return; //not required
-        viewModel.setNetwork(chainId);
+        forceChainChange = chainId; //avoid prompt to change chain for 1inch
+        loadUrlAfterReload = url;   //after reload with new chain inject, page is clean to load the correct site
 
-        //setup network selection and init web3 with updated chain
         activeNetwork = viewModel.getNetworkInfo(chainId);
-
         updateNetworkMenuItem();
-
-        viewModel.findWallet();
+        viewModel.setNetwork(chainId);
+        startBalanceListener();
+        setupWeb3();
+        web3.resetView();
+        web3.reload();
     }
 
     private void onNetworkChanged(NetworkInfo networkInfo)
@@ -806,9 +817,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         this.activeNetwork = networkInfo;
         if (networkInfo != null)
         {
-            viewModel.findWallet();
-
             if (networkChanged) {
+                viewModel.findWallet();
                 updateNetworkMenuItem();
             }
 
@@ -826,7 +836,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             result -> {
                 int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
                 loadNewNetwork(networkId);
-                reloadPage();
             });
 
     private void launchNetworkPicker()
@@ -1029,6 +1038,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             balance.setVisibility(View.GONE);
             symbol.setVisibility(View.GONE);
             viewModel.setNetwork(newNetworkId);
+            onNetworkChanged(viewModel.getNetworkInfo(newNetworkId));
         }
         //refresh URL page
         reloadPage();
@@ -1106,6 +1116,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         int chainId = chainObj.getChainId();
         final NetworkInfo info = viewModel.getNetworkInfo(chainId);
 
+        if (forceChainChange != 0)
+        {
+            forceChainChange = 0;
+            return; //No action if chain change is forced
+        }
+
         // handle unknown network
         if (info == null) {
             // show add custom chain dialog
@@ -1118,7 +1134,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             return;
         }
 
-        //Don't show dialog if network doesn't need to be changed or if alredy showing
+        //Don't show dialog if network doesn't need to be changed or if already showing
         if (activeNetwork.chainId == chainId || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
@@ -1447,7 +1463,18 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void onWebpageLoadComplete()
     {
-        handler.post(this::setBackForwardButtons); //execute on UI thread
+        handler.post(() -> {
+            setBackForwardButtons();
+            if (loadUrlAfterReload != null)
+            {
+                loadUrl(loadUrlAfterReload);
+                loadUrlAfterReload = null;
+                if (forceChainChange != 0)
+                {
+                    handler.postDelayed(() -> forceChainChange = 0, 3000);
+                }
+            }
+        }); //execute on UI thread
     }
 
     private void setBackForwardButtons()

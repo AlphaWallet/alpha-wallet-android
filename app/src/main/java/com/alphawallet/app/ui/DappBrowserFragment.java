@@ -230,8 +230,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private DAppFunction dAppFunction;
 
-    private View home;
-
     @Nullable
     private Disposable disposable;
 
@@ -457,7 +455,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         toolbar = view.findViewById(R.id.address_bar);
         layoutNavigation = view.findViewById(R.id.layout_navigator);
 
-        home = view.findViewById(R.id.home);
+        View home = view.findViewById(R.id.home);
 
         home.setOnClickListener(v -> homePressed());
 

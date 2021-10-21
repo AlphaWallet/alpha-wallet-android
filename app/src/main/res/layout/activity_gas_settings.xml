@@ -54,6 +54,7 @@
             android:textSize="@dimen/sp13"
             android:gravity="center_horizontal"
             android:autoLink="web"
+            android:visibility="gone"
             android:text="@string/gas_message"/>
 
         <com.alphawallet.app.ui.widget.entity.GasWarningLayout

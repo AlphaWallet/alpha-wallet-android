@@ -13,9 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
 
 /**
@@ -27,7 +26,7 @@ public class AddressDetailView extends LinearLayout
     private final TextView textFullAddress;
     private final TextView textEnsName;
     private final ImageView recipientDetails;
-    private final ImageView addressBlockie;
+    private final UserAvatar userAvatar;
     private final LinearLayout layoutDetails;
     private final LinearLayout layoutHolder;
 
@@ -39,7 +38,7 @@ public class AddressDetailView extends LinearLayout
         textFullAddress = findViewById(R.id.text_recipient_address);
         textEnsName = findViewById(R.id.text_ens_name);
         recipientDetails = findViewById(R.id.image_more);
-        addressBlockie = findViewById(R.id.blockie);
+        userAvatar = findViewById(R.id.blockie);
         layoutDetails = findViewById(R.id.layout_detail);
         layoutHolder = findViewById(R.id.layout_holder);
         getAttrs(context, attrs);
@@ -60,7 +59,7 @@ public class AddressDetailView extends LinearLayout
     {
         String destStr = (!TextUtils.isEmpty(ensName) ? ensName + " | " : "") + Utils.formatAddress(address);
         textAddressSummary.setText(destStr);
-        addressBlockie.setImageBitmap(Blockies.createIcon(address.toLowerCase()));
+        userAvatar.bind(new Wallet(address), wallet -> { /*NOP, here to enable lookup of ENS avatar*/ });
         textFullAddress.setText(address);
         textEnsName.setText(ensName);
 

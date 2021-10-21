@@ -1,11 +1,14 @@
 package com.alphawallet.app.widget;
 
+import static com.alphawallet.app.util.Utils.loadFile;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.TypedValue;
@@ -14,6 +17,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -28,23 +32,21 @@ import com.bumptech.glide.request.target.Target;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.alphawallet.app.util.Utils.loadFile;
-
 /**
  * Created by JB on 30/05/2021.
  */
 public class NFTImageView extends LinearLayout
 {
     private final ImageView image;
-    private final LinearLayout webLayout;
+    private final RelativeLayout webLayout;
     private final WebView webView;
     private final LinearLayout holdingView;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
-        inflate(context, R.layout.item_erc721_image, this);
+        inflate(context, R.layout.item_asset_image, this);
         image = findViewById(R.id.image_asset);
         webLayout = findViewById(R.id.web_view_wrapper);
         webView = findViewById(R.id.image_web_view);

@@ -29,12 +29,14 @@ import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Web3View extends WebView {
@@ -88,6 +90,29 @@ public class Web3View extends WebView {
     {
         checkDOMUsage(url);
         super.loadUrl(url, additionalHttpHeaders);
+    }
+
+    @Override
+    public void loadUrl(@NonNull String url)
+    {
+        loadUrl(url, getWeb3Headers());
+    }
+
+    /* Required for CORS requests */
+    @NotNull
+    @Contract(" -> new")
+    private Map<String, String> getWeb3Headers()
+    {
+        //headers
+        return new HashMap<String, String>() {{
+            put("Connection", "close");
+            put("Content-Type", "text/plain");
+            put("Access-Control-Allow-Origin", "*");
+            put("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
+            put("Access-Control-Max-Age", "600");
+            put("Access-Control-Allow-Credentials", "true");
+            put("Access-Control-Allow-Headers", "accept, authorization, Content-Type");
+        }};
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -288,6 +313,11 @@ public class Web3View extends WebView {
             }
         }
     };
+
+    public void resetView()
+    {
+        webViewClient.resetInject();
+    }
 
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;

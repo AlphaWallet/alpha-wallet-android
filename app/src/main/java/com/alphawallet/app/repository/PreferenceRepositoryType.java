@@ -84,4 +84,7 @@ public interface PreferenceRepositoryType {
 
     boolean isMarshMallowWarningShown();
     void setMarshMallowWarning(boolean shown);
+
+    void storeLastFragmentPage(int ordinal);
+    int getLastFragmentPage();
 }

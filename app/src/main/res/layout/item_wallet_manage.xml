@@ -31,7 +31,7 @@
             android:src="@drawable/ic_menu"
             android:visibility="gone" />
 
-        <ImageView
+        <com.alphawallet.app.widget.UserAvatar
             android:id="@+id/wallet_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"

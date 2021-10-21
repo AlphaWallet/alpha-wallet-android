@@ -178,7 +178,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             finally
             {
@@ -348,7 +348,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         if (networkInfo == null) return new EtherscanTransaction[0];
         if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransactions(walletAddress, tokenAddress, networkInfo, ascending, page, pageSize); }
-        okhttp3.Response response;
+
         String result = null;
         String fullUrl;
 
@@ -395,15 +395,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             fullUrl = sb.toString();
 
-            try
+            Request request = new Request.Builder()
+                    .url(fullUrl)
+                    .get()
+                    .build();
+
+            try (okhttp3.Response response = httpClient.newCall(request).execute())
             {
-                Request request = new Request.Builder()
-                        .url(fullUrl)
-                        .get()
-                        .build();
-
-                response = httpClient.newCall(request).execute();
-
                 if (response.body() == null) return new EtherscanTransaction[0];
 
                 result = response.body().string();
@@ -624,7 +622,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         if (TextUtils.isEmpty(networkInfo.etherscanAPI)) return "";
         if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
-        okhttp3.Response response;
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
@@ -635,17 +632,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
                 "&sort=asc" + APIKEY_TOKEN;
 
-        try
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .header("User-Agent", "Chrome/74.0.3729.169")
+                .method("GET", null)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        try (okhttp3.Response response = httpClient.newCall(request).execute())
         {
-            Request request = new Request.Builder()
-                    .url(fullUrl)
-                    .header("User-Agent", "Chrome/74.0.3729.169")
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
-            response = httpClient.newCall(request).execute();
-
             result = response.body().string();
             if (result.length() < 80 && result.contains("No transactions found"))
             {
@@ -678,19 +673,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String covalent = "" + networkInfo.chainId + "/address/" + accountAddress.toLowerCase() + "/transactions_v2/?";
         String args = "block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize;
         String fullUrl = networkInfo.etherscanAPI.replace(COVALENT, covalent);
-        okhttp3.Response response;
         String result = null;
 
-        try
+        Request request = new Request.Builder()
+                .url(fullUrl + args)
+                .get()
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        try (okhttp3.Response response = httpClient.newCall(request).execute())
         {
-            Request request = new Request.Builder()
-                    .url(fullUrl + args)
-                    .get()
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
-            response = httpClient.newCall(request).execute();
-
             if (response.body() == null) return new EtherscanTransaction[0];
 
             result = response.body().string();
@@ -924,7 +916,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //write event list
             for (EtherscanEvent ev : events)
             {
-                boolean scanAsNFT = isNFT || (ev.tokenDecimal.length() == 0 && ev.tokenID.length() > 0);
+                boolean scanAsNFT = isNFT || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0) && (ev.tokenID != null && ev.tokenID.length() > 0));
                 Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
 
                 //find tx name

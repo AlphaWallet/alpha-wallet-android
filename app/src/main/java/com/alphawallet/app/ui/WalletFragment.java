@@ -1,7 +1,11 @@
 package com.alphawallet.app.ui;
 
+import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
+
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -9,11 +13,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -45,18 +49,19 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
+import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.app.widget.UserAvatar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
@@ -70,11 +75,6 @@ import dagger.android.support.AndroidSupportInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-import static android.app.Activity.RESULT_OK;
-import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
-
 /**
  * Created by justindeguzman on 2/28/18.
  */
@@ -83,7 +83,8 @@ public class WalletFragment extends BaseFragment implements
         OnTokenClickListener,
         View.OnClickListener,
         Runnable,
-        BackupTokenCallback
+        BackupTokenCallback,
+        AvatarWriteCallback
 {
     private static final String TAG = "WFRAG";
     private static final int TAB_ALL = 0;
@@ -98,7 +99,7 @@ public class WalletFragment extends BaseFragment implements
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
-    private ImageView addressBlockie;
+    private UserAvatar addressAvatar;
     private View selectedToken;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private String importFileName;
@@ -108,7 +109,6 @@ public class WalletFragment extends BaseFragment implements
     private int currentTabPos = -1;
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
-    private String realmId;
 
     @Nullable
     @Override
@@ -170,7 +170,7 @@ public class WalletFragment extends BaseFragment implements
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
         recyclerView = view.findViewById(R.id.list);
-        addressBlockie = view.findViewById(R.id.user_address_blockie);
+        addressAvatar = view.findViewById(R.id.user_address_blockie);
 
         progressView.hide();
         systemView.showProgress(true);
@@ -185,8 +185,8 @@ public class WalletFragment extends BaseFragment implements
             adapter.setWalletAddress(wallet.address);
         }
 
-        addressBlockie.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
-        addressBlockie.setVisibility(View.VISIBLE);
+        addressAvatar.bind(wallet, this);
+        addressAvatar.setVisibility(View.VISIBLE);
 
         //Do we display new user backup popup?
         ((HomeActivity) getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
@@ -202,18 +202,16 @@ public class WalletFragment extends BaseFragment implements
 
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
                 .like("address", ADDRESS_FORMAT)
-                .greaterThan("addedTime", updateTime)
+                .greaterThan("addedTime", (updateTime - 2*DateUtils.MINUTE_IN_MILLIS))
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;
             long lastUpdateTime = updateTime;
             List<TokenCardMeta> metas = new ArrayList<>();
-            //long updateTime = 0;
             //make list
             for (RealmToken t : realmTokens)
             {
                 if (t.getUpdateTime() > lastUpdateTime) lastUpdateTime = t.getUpdateTime();
-                //if (tokenUpdateTime < lastTokenUpdateTime) continue;
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId())) continue;
                 if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
@@ -399,7 +397,6 @@ public class WalletFragment extends BaseFragment implements
             if (tcm.lastUpdate > lastTokenUpdate) lastTokenUpdate = tcm.lastUpdate;
         }
 
-        realmId = viewModel.getWallet().address;
         realm = viewModel.getRealmInstance(viewModel.getWallet());
         setRealmListener(lastTokenUpdate);
     }
@@ -600,6 +597,13 @@ public class WalletFragment extends BaseFragment implements
     public void setImportFilename(String fName)
     {
         importFileName = fName;
+    }
+
+    @Override
+    public void avatarFound(Wallet wallet)
+    {
+        //write to database
+        viewModel.saveAvatar(wallet);
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {

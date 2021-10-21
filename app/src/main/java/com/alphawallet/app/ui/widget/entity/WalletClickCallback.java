@@ -9,4 +9,5 @@ import com.alphawallet.app.entity.Wallet;
 public interface WalletClickCallback
 {
     void onWalletClicked(Wallet wallet);
+    void ensAvatar(Wallet wallet);
 }

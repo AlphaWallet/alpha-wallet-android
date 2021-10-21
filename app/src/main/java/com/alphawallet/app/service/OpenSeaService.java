@@ -251,14 +251,13 @@ public class OpenSeaService
         sb.append("&offset=");
         sb.append(offset);
 
-        try
-        {
-            Request request = new Request.Builder()
-                    .url(sb.toString())
-                    .get()
-                    .build();
+        Request request = new Request.Builder()
+                .url(sb.toString())
+                .get()
+                .build();
 
-            okhttp3.Response response = httpClient.newCall(request).execute();
+        try (okhttp3.Response response = httpClient.newCall(request).execute())
+        {
             jsonResult = response.body().string();
         }
         catch (InterruptedIOException e)
@@ -275,7 +274,7 @@ public class OpenSeaService
         return jsonResult;
     }
 
-    public void resetOffetRead()
+    public void resetOffsetRead()
     {
         pageOffset = 0;
     }

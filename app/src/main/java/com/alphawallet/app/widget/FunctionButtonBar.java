@@ -379,7 +379,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 functionMapComplete.release();
             }
             callStandardFunctions.showWaitSpinner(false);
@@ -614,7 +614,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                         addFunction(R.string.convert_to_xdai);
                         return true;
                     default:
-                        if (token.isERC20())
+                        if (token.isERC20() || token.isEthereum())
                         {
                             addFunction(R.string.exchange_with_oneinch);
                         }
@@ -623,7 +623,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             case BINANCE_MAIN_ID:
             case OPTIMISTIC_MAIN_ID:
             case ARBITRUM_MAIN_ID:
-                if (token.isERC20())
+                if (token.isERC20() || token.isEthereum())
                 {
                     addFunction(R.string.exchange_with_oneinch);
                     return true;
@@ -646,7 +646,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         //get the available map for this collection

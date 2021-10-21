@@ -102,9 +102,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void findWallet() {
-            disposable = genericWalletInteract
-                    .find()
-                    .subscribe(this::onDefaultWallet, this::onError);
+        disposable = genericWalletInteract
+                .find()
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public NetworkInfo getActiveNetwork()
@@ -128,9 +128,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
         if (activeNetwork.getValue() != null && wallet != null)
         {
             disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), activeNetwork.getValue().chainId)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(Schedulers.io())
-                            .subscribe(w -> { }, e -> { });
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(w -> { }, e -> { });
         }
     }
 
@@ -166,11 +166,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void share(Context context, String url) {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND);
-            intent.putExtra(Intent.EXTRA_TEXT, url);
-            intent.setType("text/plain");
-            context.startActivity(intent);
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, url);
+        intent.setType("text/plain");
+        context.startActivity(intent);
     }
 
     public void onClearBrowserCacheClicked(Context context) {
@@ -196,7 +196,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             ethereumNetworkRepository.setActiveBrowserNetwork(info);
             gasService.startGasPriceCycle(chainId);
-            activeNetwork.postValue(info);
+            activeNetwork.setValue(info);
+            //activeNetwork.postValue(info);
         }
     }
 

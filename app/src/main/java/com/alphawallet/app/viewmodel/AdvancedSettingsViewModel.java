@@ -65,8 +65,10 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
         return currencyRepository.getCurrencyList();
     }
 
-    public void updateCurrency(String currencyCode){
+    public Single<Boolean> updateCurrency(String currencyCode){
         currencyRepository.setDefaultCurrency(currencyCode);
+        //delete tickers from realm
+        return transactionsService.wipeTickerData();
     }
 
     public boolean createDirectory() {

@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+   <TextView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="@string/stay_updated"
+       android:layout_marginTop="35dp"
+       android:layout_marginStart="@dimen/dp20"
+       android:layout_marginEnd="@dimen/dp20"
+
+       android:fontFamily="@font/font_bold"
+       android:textSize="24sp"
+       android:textColor="@color/black"/>
+
+    <TextView
+        android:fontFamily="@font/font_regular"
+        android:textSize="17sp"
+        android:layout_marginTop="@dimen/dp16"
+        android:layout_marginStart="@dimen/dp20"
+        android:layout_marginEnd="@dimen/dp20"
+
+        android:textColor="@color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/email_prompt_hint"/>
+
+    <com.alphawallet.app.widget.InputView
+        android:id="@+id/email_input"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginStart="@dimen/dp12"
+        android:layout_marginEnd="@dimen/dp12"
+        custom:label="@string/hint_email_address"/>
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp8"
+
+        />
+</LinearLayout>
+
+

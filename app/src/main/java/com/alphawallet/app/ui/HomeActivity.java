@@ -43,7 +43,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -79,6 +78,8 @@ import dagger.android.AndroidInjection;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.WalletPage.SETTINGS;
@@ -249,14 +250,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
 
+        int lastId = viewModel.getLastFragmentId();
+
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
         {
             showPage(SETTINGS);
         }
-        else
+        else if (lastId >= 0 && lastId < WalletPage.values().length)
         {
-            WalletPage previousPage = savedInstanceState == null ? WALLET : WalletPage.values()[savedInstanceState.getInt(STORED_PAGE, WALLET.ordinal())];
-            showPage(previousPage);
+            showPage(WalletPage.values()[lastId]);
+            viewModel.storeCurrentFragmentId(-1);
         }
 
         if (CustomViewSettings.hideDappBrowser())
@@ -298,6 +301,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         viewModel.tryToShowRateAppDialog(this);
+        viewModel.tryToShowEmailPrompt(this, successOverlay, handler, this);
+
         if (Utils.verifyInstallerId(this))
         {
             UpdateUtils.checkForUpdates(this, this);
@@ -311,6 +316,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //TODO: Move all fragment comms to this model - see all instances of ((HomeActivity)getActivity()).
         getSupportFragmentManager()
                 .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> viewModel.restartTokensService());
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> showAndRefreshWallet());
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
+                    viewModel.updateTickers();
+                    showAndRefreshWallet();
+                });
     }
 
     private void onBackup(String address)
@@ -373,10 +387,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             walletTitle = getString(R.string.toolbar_header_wallet);
         }
 
-        if (viewPager.getCurrentItem() == WALLET.ordinal())
-        {
-            setTitle(walletTitle);
-        }
+        ((WalletFragment) walletFragment).setToolbarTitle(walletTitle);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -422,8 +433,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
         super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
+        if (getSelectedItem() != null)
+        {
+            viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+        int oldPage = savedInstanceState.getInt(STORED_PAGE);
+        if (oldPage >= 0 && oldPage < WalletPage.values().length)
+        {
+            showPage(WalletPage.values()[oldPage]);
+        }
     }
 
     @Override
@@ -492,6 +518,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onDestroy()
     {
+        if (getSelectedItem() != null) viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
         super.onDestroy();
         viewModel.onClean();
         if (homeReceiver != null)
@@ -813,11 +840,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (Utils.isAddressValid(keyAddress)) backupWalletSuccess(keyAddress);
     }
 
+    //Deprecated
     @Override
     public void changeCurrency()
     {
-        ((WalletFragment) walletFragment).indicateFetch();
-        viewModel.updateTickers();
+
     }
 
     @Override
@@ -1066,8 +1093,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     String url = data.getStringExtra(C.DAPP_URL_LOAD);
                     int chainId = data.getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-                    ((DappBrowserFragment)dappBrowserFragment).switchNetwork(chainId);
-                    ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
+                    ((DappBrowserFragment)dappBrowserFragment).switchNetworkAndLoadUrl(chainId, url);
                     showPage(DAPP_BROWSER);
                 }
                 else if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.EXTRA_TXHASH))

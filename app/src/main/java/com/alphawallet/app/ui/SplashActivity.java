@@ -15,12 +15,14 @@ import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
@@ -62,10 +64,16 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
-        setContentView(R.layout.activity_splash);
-        super.onCreate(savedInstanceState);
 
+        super.onCreate(savedInstanceState);
+        TokensService.setWalletStartup();
         LocaleUtils.setDeviceLocale(getBaseContext());
+
+        //detect previous launch
+        splashViewModel = new ViewModelProvider(this, splashViewModelFactory)
+                .get(SplashViewModel.class);
+        splashViewModel.setLocale(getApplicationContext());
+        splashViewModel.setCurrency();
 
         // Get the intent that started this activity
         Intent intent = getIntent();
@@ -80,20 +88,24 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             }
         }
 
-        splashViewModel = new ViewModelProvider(this, splashViewModelFactory)
-                .get(SplashViewModel.class);
-        splashViewModel.wallets().observe(this, this::onWallets);
-        splashViewModel.createWallet().observe(this, this::onWalletCreate);
-        splashViewModel.setLocale(getApplicationContext());
-        splashViewModel.setCurrency();
+        int lastId = splashViewModel.getLastFragmentId();
+        if (lastId >= 0 && lastId < WalletPage.values().length)
+        {
+            new HomeRouter().openWithIntent(this, importPassData);
+            finish();
+        }
+        else
+        {
+            setContentView(R.layout.activity_splash);
+            splashViewModel.wallets().observe(this, this::onWallets);
+            splashViewModel.createWallet().observe(this, this::onWalletCreate);
 
-        long getAppUpdateTime = getAppLastUpdateTime();
+            long getAppUpdateTime = getAppLastUpdateTime();
 
-        splashViewModel.fetchWallets();
-        splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
-        splashViewModel.cleanAuxData(getApplicationContext());
-
-        TokensService.setWalletStartup();
+            splashViewModel.fetchWallets();
+            splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
+            splashViewModel.cleanAuxData(getApplicationContext());
+        }
     }
 
     protected Activity getThisActivity()
@@ -125,7 +137,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         catch (PackageManager.NameNotFoundException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return currentInstallDate;

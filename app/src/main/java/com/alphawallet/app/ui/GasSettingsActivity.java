@@ -7,6 +7,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +32,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -43,6 +46,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
 import com.alphawallet.app.widget.GasSliderView;
+import com.alphawallet.token.tools.Numeric;
 
 import org.w3c.dom.Text;
 
@@ -50,12 +54,19 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmQuery;
+import io.realm.Sort;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.token.entity.TSSelection.decodeParam;
 
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
@@ -149,6 +160,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private void startGasListener()
     {
+        if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery().findFirstAsync();
         realmGasSpread.addChangeListener(realmToken -> {
             if (realmGasSpread.isValid())
@@ -293,6 +305,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         {
             int position = holder.getAbsoluteAdapterPosition();
             BigDecimal useGasLimit = presetGasLimit;
+            int position = holder.getAbsoluteAdapterPosition();
             GasSpeed gs = gasSpeeds.get(position);
             holder.speedName.setText(gs.speed);
 
@@ -448,18 +461,33 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 {
                     GasSpeed gs = gasSpeeds.get(position);
                     gasSliderView.initGasPriceMax(gs.gasPrice);
-                    notice.setVisibility(View.VISIBLE);
                     gasSliderView.setVisibility(View.GONE);
                     hideGasWarning();
+
+                    setGasMessage(notice);
                 }
             }
-
         }
 
         @Override
         public int getItemCount()
         {
             return gasSpeeds.size();
+        }
+    }
+
+    private void setGasMessage(TextView notice)
+    {
+        String oracleAPI = EthereumNetworkRepository.getGasOracle(chainId);
+        if (!TextUtils.isEmpty(oracleAPI))
+        {
+            Pattern extractDomain = Pattern.compile("(https:\\/\\/)(api-?\\S?\\S?)(\\.)([a-z.]+)(\\/api\\?)", Pattern.MULTILINE);
+            Matcher matcher = extractDomain.matcher(oracleAPI);
+            if (matcher.find())
+            {
+                notice.setVisibility(View.VISIBLE);
+                notice.setText(getString(R.string.gas_message, matcher.group(4)));
+            }
         }
     }
 

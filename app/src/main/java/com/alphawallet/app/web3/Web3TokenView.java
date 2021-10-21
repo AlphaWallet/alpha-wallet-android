@@ -406,7 +406,7 @@ public class Web3TokenView extends WebView
 
     private void loadingError(Throwable e)
     {
-        e.printStackTrace();
+        if (BuildConfig.DEBUG) e.printStackTrace();
     }
 
     private void renderTicketHolder(Token token, TokenDefinition td, TicketRange range, AssetDefinitionService assetService, boolean iconified)
@@ -474,6 +474,7 @@ public class Web3TokenView extends WebView
         String base64 = android.util.Base64.encodeToString(unencodedPage.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         loadData(base64, "text/html; charset=utf-8", "base64");
 
+        if (realmAuxUpdates != null) realmAuxUpdates.removeAllChangeListeners();
         //TODO: Re-do this to use the JavaScript minimal interface
         //now set realm listener ready to refresh view
         Realm realm = assetService.getEventRealm();

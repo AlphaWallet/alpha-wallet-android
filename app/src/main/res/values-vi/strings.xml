@@ -74,7 +74,7 @@
     <string name="action_more_details">Chi tiết</string>
     <string name="action_add_wallet">Thêm ví</string>
     <string name="action_add_token">Thêm loại tiền</string>
-    <string name="action_open_etherscan">Xem trên Etherscan</string>
+    <string name="action_open_etherscan">Xem trên Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly (Mua với thẻ tín dụng)</string>
@@ -608,6 +608,7 @@
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Đã xóa bộ nhớ cache của trình duyệt</string>
     <string name="toast_token_data_cleared">Token Data cleared</string>
+    <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
     <string name="your_wallets">Ví của bạn</string>
     <string name="action_copy">Sao chép</string>
     <string name="title_version_support_warning">Important Update</string>
@@ -728,7 +729,7 @@
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">Set Speed</string>
     <string name="gas_price_widget">Gas Price: %1$s</string>
-    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the %1$s live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">Set Your Own</string>
     <string name="nonce_optional">Nonce (optional)</string>
     <string name="calc_gas_limit">Calculating Gas Limit</string>
@@ -827,5 +828,11 @@
     <string name="action_networks">Mạng lưới</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
     <string name="action_send_to_this_address">Send to this Address</string>
-    <string name="action_open_in_etherscan">Open in Etherscan</string>
+    <string name="stay_updated">Stay Updated</string>
+    <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
+    <string name="hint_email_address">Email Address</string>
+    <string name="action_want_to_receive_email">I want to receive such emails</string>
+    <string name="email_is_invalid">Please provide valid email address</string>
+    <string name="github">Github (vấn đề báo cáo)</string>
+    <string name="chains_to_scan">Chains to scan</string>
 </resources>

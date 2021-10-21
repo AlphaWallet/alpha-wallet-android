@@ -289,7 +289,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         }
 
         @Override
-        public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int position)
+        public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int p)
         {
             int position = holder.getAbsoluteAdapterPosition();
             BigDecimal useGasLimit = presetGasLimit;

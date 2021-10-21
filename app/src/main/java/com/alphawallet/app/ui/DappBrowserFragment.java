@@ -1028,6 +1028,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                forceChainChange = networkId;
                 loadNewNetwork(networkId);
             });
 
@@ -1118,7 +1119,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         if (forceChainChange != 0)
         {
-            forceChainChange = 0;
             return; //No action if chain change is forced
         }
 
@@ -1471,7 +1471,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 loadUrlAfterReload = null;
                 if (forceChainChange != 0)
                 {
-                    handler.postDelayed(() -> forceChainChange = 0, 3000);
+                    handler.postDelayed(() -> forceChainChange = 0, 5000);
                 }
             }
         }); //execute on UI thread

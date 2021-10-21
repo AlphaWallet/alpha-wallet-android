@@ -3,11 +3,9 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -46,15 +44,11 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
 import com.alphawallet.app.widget.GasSliderView;
-import com.alphawallet.token.tools.Numeric;
-
-import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,10 +57,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmQuery;
-import io.realm.Sort;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.token.entity.TSSelection.decodeParam;
 
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
@@ -303,7 +293,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         @Override
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int p)
         {
-            int position = holder.getAbsoluteAdapterPosition();
             BigDecimal useGasLimit = presetGasLimit;
             int position = holder.getAbsoluteAdapterPosition();
             GasSpeed gs = gasSpeeds.get(position);
@@ -445,7 +434,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             return costStr;
         }
-
 
         private void setCustomGasDetails(int position)
         {

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -336,7 +335,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 }
                 if (warningType != Warning.OFF)
                 {
-                    Log.d("SPEED","BOOP");
                     holder.speedName.setVisibility(View.GONE);
                     holder.warning.setVisibility(View.VISIBLE);
                     switch (warningType)

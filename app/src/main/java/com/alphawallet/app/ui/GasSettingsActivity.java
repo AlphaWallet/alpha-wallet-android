@@ -293,7 +293,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         @Override
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int p)
         {
-            int position = holder.getAbsoluteAdapterPosition();
             BigDecimal useGasLimit = presetGasLimit;
             int position = holder.getAbsoluteAdapterPosition();
             GasSpeed gs = gasSpeeds.get(position);
@@ -435,7 +434,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             return costStr;
         }
-
 
         private void setCustomGasDetails(int position)
         {

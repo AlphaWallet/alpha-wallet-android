@@ -2,22 +2,17 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -632,7 +627,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 chainIdOverride = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
@@ -647,7 +641,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         String[] accounts = {viewModel.getWallet().address};
         String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
 
-        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : chainId;
+        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
 
         Glide.with(this)
                 .load(displayIcon)

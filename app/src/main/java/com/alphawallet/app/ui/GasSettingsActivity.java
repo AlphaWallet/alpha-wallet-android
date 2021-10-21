@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -296,32 +297,20 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             int position = holder.getAbsoluteAdapterPosition();
             GasSpeed gs = gasSpeeds.get(position);
             holder.speedName.setText(gs.speed);
+
+            holder.speedName.setVisibility(View.VISIBLE);
+            holder.warning.setVisibility(View.GONE);
+
             holder.checkbox.setSelected(position == currentGasSpeedIndex);
             holder.itemLayout.setOnClickListener(v -> {
                 if (position == customIndex && currentGasSpeedIndex != customIndex)
                 {
                     gasSliderView.initGasLimit(customGasLimit.toBigInteger());
                     gasSliderView.reportPosition();
-
-                    if (warningType != Warning.OFF)
-                    {
-                        holder.speedName.setVisibility(View.GONE);
-                        holder.warning.setVisibility(View.VISIBLE);
-                        switch (warningType)
-                        {
-                            case LOW:
-                                holder.warningText.setText(R.string.speed_too_low);
-                            case HIGH:
-                                holder.warningText.setText(R.string.speed_high_gas);
-                            case INSUFFICIENT:
-                                holder.warningText.setText(R.string.insufficient_gas);
-                        }
-                    }
                 }
                 else if (position != customIndex && currentGasSpeedIndex == customIndex)
                 {
                     hideGasWarning();
-                    warningType = Warning.OFF;
                 }
                 currentGasSpeedIndex = position;
                 notifyDataSetChanged();
@@ -344,6 +333,28 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     gs.seconds = getExpectedTransactionTime(gs.gasPrice);
                     speedGwei = context.getString(R.string.bracketed, context.getString(R.string.set_your_speed));
                     useGasLimit = customGasLimit;
+                }
+                if (warningType != Warning.OFF)
+                {
+                    Log.d("SPEED","BOOP");
+                    holder.speedName.setVisibility(View.GONE);
+                    holder.warning.setVisibility(View.VISIBLE);
+                    switch (warningType)
+                    {
+                        case LOW:
+                            holder.warningText.setText(R.string.speed_too_low);
+                            break;
+                        case HIGH:
+                            holder.warningText.setText(R.string.speed_high_gas);
+                            break;
+                        case INSUFFICIENT:
+                            holder.warningText.setText(R.string.insufficient_gas);
+                    }
+                }
+                else
+                {
+                    holder.warning.setVisibility(View.GONE);
+                    holder.speedName.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -394,6 +405,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             holder.speedCostEth.setText("");
             holder.speedCostFiat.setText("");
             holder.speedTime.setText("");
+
+            holder.speedName.setVisibility(View.VISIBLE);
+            holder.warning.setVisibility(View.GONE);
         }
 
         private String getGasCost(String gasAmountInBase)

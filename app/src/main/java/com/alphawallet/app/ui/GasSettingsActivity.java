@@ -1,10 +1,11 @@
 package com.alphawallet.app.ui;
 
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -15,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ScrollView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -42,13 +43,11 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
 import com.alphawallet.app.widget.GasSliderView;
-import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,10 +56,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmQuery;
-import io.realm.Sort;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.token.entity.TSSelection.decodeParam;
 
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
@@ -85,11 +80,19 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private BigInteger customGasPriceFromWidget;
     private GasWarningLayout gasWarning;
     private GasWarningLayout insufficientWarning;
-    private ScrollView scroll;
-    private final Handler handler = new Handler();
     private long minGasPrice;
 
     private int customIndex = -1;
+
+    private enum Warning
+    {
+        OFF,
+        LOW,
+        HIGH,
+        INSUFFICIENT
+    }
+
+    private Warning warningType = Warning.OFF;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,7 +107,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         recyclerView = findViewById(R.id.list);
         gasWarning = findViewById(R.id.gas_warning_bubble);
         insufficientWarning = findViewById(R.id.insufficient_bubble);
-        scroll = findViewById(R.id.setting_scroll);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         viewModel = new ViewModelProvider(this, viewModelFactory)
@@ -262,6 +264,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             final TextView speedTime;
             final View itemLayout;
 
+            final LinearLayout warning;
+            final TextView warningText;
+
             CustomViewHolder(View view)
             {
                 super(view);
@@ -272,6 +277,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 speedTime = view.findViewById(R.id.text_speed_time);
                 itemLayout = view.findViewById(R.id.layout_list_item);
                 speedGwei = view.findViewById(R.id.text_gwei);
+
+                warning = view.findViewById(R.id.layout_speed_warning);
+                warningText = view.findViewById(R.id.text_speed_warning);
             }
         }
 
@@ -294,10 +302,26 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 {
                     gasSliderView.initGasLimit(customGasLimit.toBigInteger());
                     gasSliderView.reportPosition();
+
+                    if (warningType != Warning.OFF)
+                    {
+                        holder.speedName.setVisibility(View.GONE);
+                        holder.warning.setVisibility(View.VISIBLE);
+                        switch (warningType)
+                        {
+                            case LOW:
+                                holder.warningText.setText(R.string.speed_too_low);
+                            case HIGH:
+                                holder.warningText.setText(R.string.speed_high_gas);
+                            case INSUFFICIENT:
+                                holder.warningText.setText(R.string.insufficient_gas);
+                        }
+                    }
                 }
                 else if (position != customIndex && currentGasSpeedIndex == customIndex)
                 {
                     hideGasWarning();
+                    warningType = Warning.OFF;
                 }
                 currentGasSpeedIndex = position;
                 notifyDataSetChanged();
@@ -348,7 +372,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             }
 
             setCustomGasDetails(position);
-
             if(minGasPrice > 0)
             {
                 if(!gs.isCustom && gs.gasPrice.longValue() < minGasPrice)
@@ -397,6 +420,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             return costStr;
         }
+
 
         private void setCustomGasDetails(int position)
         {
@@ -457,7 +481,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 double upperBound = ug.gasPrice.doubleValue();
                 if (lowerBound <= dGasPrice && (upperBound >= dGasPrice))
                 {
-                    expectedTime = extrapolateTime(lg.seconds, ug.seconds, dGasPrice, lowerBound, upperBound);
                     double timeDiff = lg.seconds - ug.seconds;
                     double extrapolateFactor = (dGasPrice - lowerBound) / (upperBound - lowerBound);
                     expectedTime = (long) ((double) lg.seconds - extrapolateFactor * timeDiff);
@@ -494,7 +517,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     return expectedTime; //exit here so we don't hit the speed_slow catcher
                 }
             }
-
             hideGasWarning(); // Didn't need a gas warning: custom gas is within bounds
         }
 
@@ -536,11 +558,13 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         TextView body = findViewById(R.id.bubble_body);
         if (high)
         {
+            warningType = Warning.HIGH;
             heading.setText(getString(R.string.high_gas_setting));
             body.setText(getString(R.string.body_high_gas));
         }
         else
         {
+            warningType = Warning.LOW;
             heading.setText(getString(R.string.low_gas_setting));
             body.setText(getString(R.string.body_low_gas));
         }
@@ -550,8 +574,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (gasWarning.getVisibility() != View.VISIBLE) //no need to re-apply
         {
-            handler.postDelayed(() -> scroll.fullScroll(View.FOCUS_DOWN), 100);
-
             gasWarning.setVisibility(View.VISIBLE);
 
             EditText gas_price_entry = findViewById(R.id.gas_price_entry);
@@ -563,6 +585,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private void hideGasWarning()
     {
         gasWarning.setVisibility(View.GONE);
+        warningType = Warning.OFF;
 
         EditText gas_price_entry = findViewById(R.id.gas_price_entry);
         gas_price_entry.setTextColor(getColor(R.color.dove));
@@ -573,6 +596,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (txCost.compareTo(availableBalance) > 0)
         {
+            warningType = Warning.INSUFFICIENT;
             insufficientWarning.setVisibility(View.VISIBLE);
         }
         else

@@ -15,7 +15,30 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/layout_gas_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.1"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:src="@drawable/ic_red_warning"/>
+
+            <TextView
+                android:id="@+id/text_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/danger"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/insufficient_gas"
+                android:textSize="@dimen/sp20"/>
+
+        </LinearLayout>
         <TextView
             android:id="@+id/text_speed"
             android:layout_width="wrap_content"

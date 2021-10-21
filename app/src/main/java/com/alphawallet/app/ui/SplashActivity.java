@@ -75,6 +75,10 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         splashViewModel.setLocale(getApplicationContext());
         splashViewModel.setCurrency();
 
+        long getAppUpdateTime = getAppLastUpdateTime();
+        splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
+        splashViewModel.cleanAuxData(getApplicationContext());
+
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
@@ -91,6 +95,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         int lastId = splashViewModel.getLastFragmentId();
         if (lastId >= 0 && lastId < WalletPage.values().length)
         {
+            if (checkIntents(importData, importPath)) { return; }
             new HomeRouter().openWithIntent(this, importPassData);
             finish();
         }
@@ -99,12 +104,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             setContentView(R.layout.activity_splash);
             splashViewModel.wallets().observe(this, this::onWallets);
             splashViewModel.createWallet().observe(this, this::onWalletCreate);
-
-            long getAppUpdateTime = getAppLastUpdateTime();
-
             splashViewModel.fetchWallets();
-            splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
-            splashViewModel.cleanAuxData(getApplicationContext());
         }
     }
 
@@ -168,53 +168,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
-            //there is at least one account here
-
-            //See if this is a valid import magiclink
-            if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
-            {
-                try
-                {
-                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                    if (parser.parseUniversalLink(importData).chainId > 0)
-                    {
-                        new ImportTokenRouter().open(this, importData);
-                        finish();
-                        return;
-                    }
-                }
-                catch (SalesOrderMalformed ignored) { }
-            }
-            else if (importData != null && importData.startsWith("wc:"))
-            {
-                importPassData = WalletConnectActivity.WC_INTENT + importData;
-                WCSession session = WCSession.Companion.from(importData);
-                if (session == null)
-                {
-                    //this is a 'signing' intent, used with an existing, active connection
-                    Intent intent = new Intent(this, WalletConnectActivity.class);
-                    intent.putExtra("qrCode", importPassData);
-                    //re-open the existing activity, when using WalletConnect locally (that is, with a browser app running on the same device)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    if (!startActivityIfNeeded(intent, 0))
-                    {
-                        //didn't need to start a new activity,
-                    }
-                    setResult(RESULT_OK);
-                    finish();
-                }
-                else
-                {
-                    handler.post(this);
-                }
-                return;
-            }
-            else if (importPath != null)
-            {
-                boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !splashViewModel.checkDebugDirectory();
-                splashViewModel.importScriptFile(this, importData, useAppExternalDir);
-            }
-
+            if (checkIntents(importData, importPath)) { return; }
             handler.postDelayed(this, CustomViewSettings.startupDelay());
         }
     }
@@ -239,6 +193,51 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         {
             splashViewModel.fetchWallets();
         }
+    }
+
+    private boolean checkIntents(String importData, String importPath)
+    {
+        if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
+        {
+            try
+            {
+                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                if (parser.parseUniversalLink(importData).chainId > 0)
+                {
+                    new ImportTokenRouter().open(this, importData);
+                    finish();
+                    return true;
+                }
+            }
+            catch (SalesOrderMalformed ignored) { }
+        }
+        else if (importData != null && importData.startsWith("wc:"))
+        {
+            importPassData = WalletConnectActivity.WC_INTENT + importData;
+            WCSession session = WCSession.Companion.from(importData);
+            if (session == null)
+            {
+                //this is a 'signing' intent, used with an existing, active connection
+                Intent intent = new Intent(this, WalletConnectActivity.class);
+                intent.putExtra("qrCode", importPassData);
+                //re-open the existing activity, when using WalletConnect locally (that is, with a browser app running on the same device)
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                setResult(RESULT_OK);
+                finish();
+                return true;
+            }
+            else
+            {
+                handler.post(this);
+            }
+        }
+        else if (importPath != null)
+        {
+            boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !splashViewModel.checkDebugDirectory();
+            splashViewModel.importScriptFile(this, importData, useAppExternalDir);
+        }
+
+        return false;
     }
 
     @Override

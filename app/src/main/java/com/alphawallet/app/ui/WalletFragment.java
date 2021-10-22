@@ -202,7 +202,7 @@ public class WalletFragment extends BaseFragment implements
 
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
                 .like("address", ADDRESS_FORMAT)
-                .greaterThan("addedTime", (updateTime - 2*DateUtils.MINUTE_IN_MILLIS))
+                .greaterThan("addedTime", (updateTime + 1))
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             if (!isVisible && realmTokens.size() == 0) return;
@@ -483,7 +483,12 @@ public class WalletFragment extends BaseFragment implements
     {
         super.onDestroy();
         //viewModel.clearProcess();
-        if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
+        handler.removeCallbacksAndMessages(null);
+        if (realmUpdates != null)
+        {
+            realmUpdates.removeAllChangeListeners();
+            realm.removeAllChangeListeners();
+        }
         if (realm != null && !realm.isClosed()) realm.close();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
     }

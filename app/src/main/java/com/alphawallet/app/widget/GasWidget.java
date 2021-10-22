@@ -404,6 +404,10 @@ public class GasWidget extends LinearLayout implements Runnable
         {
             checkCustomGasPrice(gasSpeeds.get(customGasSpeedIndex).gasPrice);
         }
+        else
+        {
+            speedWarning.setVisibility(View.GONE);
+        }
         checkSufficientGas();
         manageWarnings();
     }
@@ -452,11 +456,22 @@ public class GasWidget extends LinearLayout implements Runnable
         double lowerBound = lg.gasPrice.doubleValue();
         double upperBound = ug.gasPrice.doubleValue();
 
-        if (dGasPrice < lowerBound)
+        if (resendGasPrice.compareTo(BigInteger.ZERO) > 0)
+        {
+            if (dGasPrice > (3.0 * resendGasPrice.doubleValue()))
+            {
+                showCustomSpeedWarning(true);
+            }
+            else
+            {
+                speedWarning.setVisibility(View.GONE);
+            }
+        }
+        else if (dGasPrice < lowerBound)
         {
             showCustomSpeedWarning(false);
         }
-        else if (dGasPrice > 1.5 * upperBound)
+        else if (dGasPrice > 2.0 * upperBound)
         {
             showCustomSpeedWarning(true);
         }

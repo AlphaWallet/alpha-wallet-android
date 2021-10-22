@@ -349,6 +349,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             setCustomGasDetails(position);
 
+            //This collapses the view if it's not required, eg for re-send transaction
+            //This hides the views that aren't selectable due to gas too low
             if(minGasPrice > 0)
             {
                 if(!gs.isCustom && gs.gasPrice.longValue() < minGasPrice)

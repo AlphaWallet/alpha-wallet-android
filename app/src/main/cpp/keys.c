@@ -139,7 +139,6 @@ Java_com_alphawallet_app_service_GasService_getEtherscanKey( JNIEnv* env, jobjec
 #endif
 }
 
-
 JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_widget_EmailPromptView_getMailchimpKey(JNIEnv *env, jclass clazz) {
 #if (HAS_KEYS == 1)
@@ -148,6 +147,14 @@ Java_com_alphawallet_app_widget_EmailPromptView_getMailchimpKey(JNIEnv *env, jcl
     const jstring key = "--";
     return (*env)->NewStringUTF(env, key);
 #endif
-
 }
 
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_GasService_getPolygonScanKey(JNIEnv *env, jobject thiz) {
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, polygonScanKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

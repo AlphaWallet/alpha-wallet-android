@@ -103,19 +103,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         {
             //how long has this TX been pending
             findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
-            List<Integer> functionList = new ArrayList<>(Collections.singletonList(R.string.speedup_transaction));
-            functionList.add(R.string.action_open_etherscan);
-            functionList.add(R.string.cancel_transaction);
             blockNumber = "";
 
-            functionBar.setupFunctions(this, functionList);
             viewModel.startPendingTimeDisplay(transaction.hash);
             viewModel.latestTx().observe(this, this::onTxUpdated);
         }
-        else
-        {
-            functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
-        }
+        List<Integer> functionList = new ArrayList<>(Collections.singletonList(R.string.action_open_etherscan));
+        functionBar.setupFunctions(this, functionList);
 
         setupVisibilities();
 

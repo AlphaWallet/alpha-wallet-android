@@ -234,10 +234,10 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public BigInteger calculateMinGasPrice(BigInteger oldGasPrice)
     {
-        BigInteger candidateGasOverridePrice = new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).toBigInteger();
-        BigInteger checkGasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
-
-        return checkGasPrice.max(candidateGasOverridePrice); //highest price between adding 2 gwei or 10%
+        //get 0.1GWEI in wei
+        BigInteger zeroPointOneWei = BalanceUtils.gweiToWei(BigDecimal.valueOf(0.1));
+        return new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).setScale(18, RoundingMode.UP).toBigInteger()
+                .add(zeroPointOneWei);
     }
 
     public Token getToken(int chainId, String contractAddress)

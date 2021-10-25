@@ -23,8 +23,10 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 
+import static com.alphawallet.app.C.PAGE_LOADED;
 import static com.alphawallet.app.C.WALLET_CONNECT_CLIENT_TERMINATE;
 import static com.alphawallet.app.C.WALLET_CONNECT_COUNT_CHANGE;
 import static com.alphawallet.app.C.WALLET_CONNECT_FAIL;
@@ -45,6 +47,9 @@ public class WalletConnectService extends Service
     private WCRequest currentRequest = null;
 
     private static final String TAG = "WCClientSvs";
+
+    @Nullable
+    private Disposable messagePump;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
@@ -238,6 +243,7 @@ public class WalletConnectService extends Service
             //see if this connection is live, if so then bring WC request to foreground
             switchToWalletConnectApprove(client.sessionId());
             Log.d(TAG, "Sign Request: " + message.toString());
+            startMessagePump();
             return Unit.INSTANCE;
         });
 
@@ -246,6 +252,7 @@ public class WalletConnectService extends Service
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, transaction, true, client.chainIdVal()));
             switchToWalletConnectApprove(client.sessionId());
+            startMessagePump();
             return Unit.INSTANCE;
         });
 
@@ -254,6 +261,7 @@ public class WalletConnectService extends Service
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal()));
             switchToWalletConnectApprove(client.sessionId());
+            startMessagePump();
             return Unit.INSTANCE;
         });
     }
@@ -359,5 +367,27 @@ public class WalletConnectService extends Service
     {
         String sessionId = c.sessionId();
         if (sessionId != null) clientTimes.put(sessionId, System.currentTimeMillis());
+    }
+
+    private void startMessagePump()
+    {
+        if (messagePump != null && !messagePump.isDisposed()) messagePump.dispose();
+
+        messagePump = Observable.interval(2000, 2000, TimeUnit.MILLISECONDS)
+                .doOnNext(l -> checkMessages())
+                .observeOn(Schedulers.newThread()).subscribe();
+    }
+
+    private void checkMessages()
+    {
+        WCRequest rq = signRequests.peek();
+        if (rq != null)
+        {
+            switchToWalletConnectApprove(rq.sessionId);
+        }
+        else if (messagePump != null && !messagePump.isDisposed())
+        {
+            messagePump.dispose();
+        }
     }
 }

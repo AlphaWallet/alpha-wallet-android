@@ -544,7 +544,6 @@ public class NewSettingsFragment extends BaseFragment {
 
         if (pendingUpdate > 0)
         {
-            final int thisPendingUpdate = pendingUpdate; //avoid OS reclaiming the value
             updateLayout.setVisibility(View.VISIBLE);
             TextView current = view.findViewById(R.id.text_detail_current);
             TextView available = view.findViewById(R.id.text_detail_available);

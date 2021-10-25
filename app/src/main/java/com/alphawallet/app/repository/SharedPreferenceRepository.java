@@ -53,9 +53,10 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getString(CURRENT_ACCOUNT_ADDRESS_KEY, null);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setCurrentWalletAddress(String address) {
-        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).apply();
+        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).commit(); //use commit as the value may be used immediately
     }
 
     @Override

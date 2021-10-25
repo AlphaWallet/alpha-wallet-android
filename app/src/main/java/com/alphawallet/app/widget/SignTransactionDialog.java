@@ -122,7 +122,13 @@ public class SignTransactionDialog
         final BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle(activity.getString(R.string.unlock_private_key));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
+        if (!hasDeviceCredential && !hasStrongBiometric)
+        {
+            //device is completely unlocked ... go direct to callback
+            authCallback.authenticatePass(callbackId);
+            return;
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
         {
             promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
 

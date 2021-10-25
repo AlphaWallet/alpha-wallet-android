@@ -11,6 +11,7 @@ import android.webkit.URLUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModel;
@@ -147,6 +148,16 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
                 Integer.parseInt(chainIdInputView.getText().toString());
             } catch (NumberFormatException ex) {
                 chainIdInputView.setError(getString(R.string.error_must_numeric));
+                return false;
+            }
+        }
+
+        int newChainId = Integer.parseInt(chainIdInputView.getText().toString());
+        int chainId = getIntent().getIntExtra(CHAIN_ID, -1);
+        if (newChainId != chainId) {
+            EthereumNetworkRepositoryType.NetworkInfoExt networkInfo = viewModel.getNetworkInfo(newChainId);
+            if (networkInfo.info != null) {
+                chainIdInputView.setError(getString(R.string.error_chainid_already_taken));
                 return false;
             }
         }

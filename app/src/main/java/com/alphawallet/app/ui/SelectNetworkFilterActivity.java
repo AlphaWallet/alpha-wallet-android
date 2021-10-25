@@ -1,19 +1,30 @@
 package com.alphawallet.app.ui;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.ui.widget.adapter.MultiSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
 import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModelFactory;
 import com.alphawallet.app.widget.TestNetDialog;
+import com.alphawallet.ethereum.NetworkInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,11 +106,47 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<NetworkItem> testNetList = viewModel.getNetworkList(false);
 
         MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener() {
+
+            private void showPopup(View view, int chainId) {
+                LayoutInflater inflater = LayoutInflater.from(SelectNetworkFilterActivity.this);
+                View popupView = inflater.inflate(R.layout.popup_view_delete_network, null);
+
+
+                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
+                popupView.findViewById(R.id.popup_view).setOnClickListener(v -> {
+                    // view network
+                    Intent intent = new Intent(SelectNetworkFilterActivity.this, AddCustomRPCNetworkActivity.class);
+                    intent.putExtra(CHAIN_ID, chainId);
+                    startActivity(intent);
+                    popupWindow.dismiss();
+                });
+
+                EthereumNetworkRepositoryType.NetworkInfoExt ext = viewModel.getNetworkInfoExt(chainId);
+                if (ext.isCustomNetwork) {
+                    popupView.findViewById(R.id.popup_delete).setOnClickListener(v -> {
+                        // delete network
+                        viewModel.removeCustomNetwork(chainId);
+                        popupWindow.dismiss();
+                        setupFilterList();
+                    });
+                } else {
+                    popupView.findViewById(R.id.popup_delete).setVisibility(View.GONE);
+                }
+
+                popupView.measure(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                popupWindow.setHeight(popupView.getMeasuredHeight());
+
+                popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+                popupWindow.setElevation(5);
+
+                popupWindow.showAsDropDown(view);
+            }
+
             @Override
-            public void onEditNetwork(int chainId) {
-                Intent intent = new Intent(SelectNetworkFilterActivity.this, AddCustomRPCNetworkActivity.class);
-                intent.putExtra(CHAIN_ID, chainId);
-                startActivity(intent);
+            public void onEditNetwork(int chainId, View parent) {
+                showPopup(parent, chainId);
             }
         };
 

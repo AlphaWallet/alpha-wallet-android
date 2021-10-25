@@ -22,7 +22,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     private boolean hasClicked = false;
 
     public interface EditNetworkListener {
-        void onEditNetwork(int chainId);
+        void onEditNetwork(int chainId, View parent);
     }
 
     private EditNetworkListener editListener;
@@ -71,14 +71,9 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.manageView.setVisibility(View.VISIBLE);
-            holder.manageView.setOnClickListener(v -> manageListener(position));
+            holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));
             holder.checkbox.setSelected(item.isSelected());
         }
-    }
-
-    private void manageListener(final int position)
-    {
-        editListener.onEditNetwork(networkList.get(position).getChainId());
     }
 
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)

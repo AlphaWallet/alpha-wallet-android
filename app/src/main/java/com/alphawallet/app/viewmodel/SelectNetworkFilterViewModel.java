@@ -70,6 +70,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getNetworkByChain(chainId);
     }
 
+    public EthereumNetworkRepositoryType.NetworkInfoExt getNetworkInfoExt(int chainId) {
+        return this.networkRepository.getNetworkInfoExt(chainId);
+    }
+
     public boolean mainNetActive()
     {
         return preferenceRepository.isActiveMainnet();
@@ -89,5 +93,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         }
 
         return networkList;
+    }
+
+    public void removeCustomNetwork(int chainId) {
+        networkRepository.removeCustomRPCNetwork(chainId);
     }
 }

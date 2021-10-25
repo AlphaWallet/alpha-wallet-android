@@ -295,7 +295,7 @@ public class EnsResolver {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, int chainId) throws Exception
+            Function function, String contractAddress, long chainId) throws Exception
     {
         try
         {
@@ -314,7 +314,7 @@ public class EnsResolver {
         }
     }
 
-    private <T> T getContractData(int chainId, String address, Function function) throws Exception
+    private <T> T getContractData(long chainId, String address, Function function) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address, chainId);
 

@@ -22,7 +22,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     private boolean hasClicked = false;
 
     public interface EditNetworkListener {
-        void onEditNetwork(int chainId);
+        void onEditNetwork(long chainId);
     }
 
     private EditNetworkListener editListener;
@@ -34,15 +34,15 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         editListener = editNetworkListener;
     }
 
-    public Integer[] getSelectedItems()
+    public Long[] getSelectedItems()
     {
-        List<Integer> enabledIds = new ArrayList<>();
+        List<Long> enabledIds = new ArrayList<>();
         for (NetworkItem data : networkList)
         {
             if (data.isSelected()) enabledIds.add(data.getChainId());
         }
 
-        return enabledIds.toArray(new Integer[0]);
+        return enabledIds.toArray(new Long[0]);
     }
 
     public boolean hasSelectedItems()

@@ -81,7 +81,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         viewModel.transactionError().observe(this, this::txError);
 
         String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
         viewModel.fetchTransaction(wallet, txHash, chainId);
     }

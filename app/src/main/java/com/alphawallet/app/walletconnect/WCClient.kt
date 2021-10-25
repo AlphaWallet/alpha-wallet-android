@@ -149,9 +149,9 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, _chainId: Int): Boolean {
+    fun approveSession(accounts: List<String>, _chainId: Long): Boolean {
         if (handshakeId <= 0) { onFailure(Throwable("handshakeId must be greater than 0 on session approve")) }
-        var useChainId: Int = _chainId;
+        var useChainId: Long = _chainId;
         if (this.chainId?.toIntOrNull() != 1) useChainId = _chainId;
         chainId = useChainId.toString();
 
@@ -174,14 +174,14 @@ open class WCClient(
         return socket?.send("ping") ?: false
     }
 
-    fun updateSession(accounts: List<String>? = null, chainId: Int? = null, approved: Boolean = true): Boolean {
+    fun updateSession(accounts: List<String>? = null, chainId: Long? = null, approved: Boolean = true): Boolean {
         val request = JsonRpcRequest(
                 id = Date().time,
                 method = WCMethod.SESSION_UPDATE,
                 params = listOf(
                         WCSessionUpdate(
                                 approved = approved,
-                                chainId = this.chainId?.toIntOrNull() ?: chainId,
+                                chainId = this.chainId?.toLongOrNull() ?: chainId,
                                 accounts = accounts
                         )
                 )

@@ -17,9 +17,9 @@ public class TransactionMeta extends ActivityMeta
 {
     public final boolean isPending;
     public final String contractAddress;
-    public final int chainId;
+    public final long chainId;
 
-    public TransactionMeta(String hash, long timeStamp, String contractAddress, int chainId, String blockNumber)
+    public TransactionMeta(String hash, long timeStamp, String contractAddress, long chainId, String blockNumber)
     {
         super(timeStamp, hash);
         this.isPending = blockNumber.equals("0") || blockNumber.equals("-2");

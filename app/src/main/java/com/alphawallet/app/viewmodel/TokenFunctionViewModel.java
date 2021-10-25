@@ -161,7 +161,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         super.onCleared();
     }
 
-    public void startGasPriceUpdate(int chainId)
+    public void startGasPriceUpdate(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
     }
@@ -214,7 +214,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         sig.postValue(failSig);
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction, int chainId) {
+    public void signMessage(Signable message, DAppFunction dAppFunction, long chainId) {
         disposable = createTransactionInteract.sign(wallet, message, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -240,7 +240,7 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .add(zeroPointOneWei);
     }
 
-    public Token getToken(int chainId, String contractAddress)
+    public Token getToken(long chainId, String contractAddress)
     {
         return tokensService.getToken(chainId, contractAddress);
     }
@@ -266,7 +266,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public Token getCurrency(int chainId)
+    public Token getCurrency(long chainId)
     {
         return tokensService.getToken(chainId, wallet.address);
     }
@@ -527,7 +527,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         return fetchTransactionsInteract.fetchTxCompletionTime(wallet.address, txHash);
     }
 
-    public void estimateGasLimit(Web3Transaction w3tx, int chainId)
+    public void estimateGasLimit(Web3Transaction w3tx, long chainId)
     {
         calcGasCost = gasService.calculateGasEstimate(Numeric.hexStringToByteArray(w3tx.payload), chainId, w3tx.contract.toString(), w3tx.value, wallet)
                 .map(this::convertToGasLimit)
@@ -608,7 +608,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, int chainId, String overridenTxHash)
+    public void sendTransaction(Web3Transaction finalTx, long chainId, String overridenTxHash)
     {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)

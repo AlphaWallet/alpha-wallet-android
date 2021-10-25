@@ -65,7 +65,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         if(!tokenLocator.isError())
         {
             ContractInfo originContract = tokenLocator.getContracts();
-            int chainId;
+            long chainId;
             String address;
 
             //sweep to see if there's a mainnet holding contract
@@ -150,7 +150,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         message.append(context.getString(R.string.origin_token_title));
         if (tokenLocator != null)
         {
-            for (int chainId : tokenLocator.addresses.keySet())
+            for (long chainId : tokenLocator.addresses.keySet())
             {
                 String chainName = MagicLinkInfo.getNetworkNameById(chainId);
                 for (String address : tokenLocator.addresses.get(chainId))

@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import com.alphawallet.app.repository.entity.RealmGasSpread;
+
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
@@ -336,6 +338,35 @@ public class AWRealmMigration implements RealmMigration
             {
                 realmData.addField("ENSAvatar", String.class);
             }
+            oldVersion++;
+        }
+
+        if (oldVersion == 34)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmToken");
+            if (realmToken.hasField("chainId")) realmToken.removeField("chainId");
+            realmToken.addField("chainId", long.class);
+
+            RealmObjectSchema realmData = schema.get("RealmAuxData");
+            realmData.removeField("chainId");
+            realmData.addField("chainId", long.class);
+
+            realmData = schema.get("RealmGasSpread");
+            realmData.removeField("chainId");
+            realmData.addField("chainId", long.class, FieldAttribute.PRIMARY_KEY);
+
+            realmData = schema.get("RealmToken");
+            realmData.removeField("chainId");
+            realmData.addField("chainId", long.class);
+
+            realmData = schema.get("RealmTransaction");
+            realmData.removeField("chainId");
+            realmData.addField("chainId", long.class);
+
+            realmData = schema.get("RealmWCSession");
+            realmData.removeField("chainId");
+            realmData.addField("chainId", long.class);
+
             oldVersion++;
         }
     }

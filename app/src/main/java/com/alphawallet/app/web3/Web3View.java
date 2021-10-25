@@ -147,11 +147,11 @@ public class Web3View extends WebView {
         return webViewClient.getJsInjectorClient().getWalletAddress();
     }
 
-    public void setChainId(int chainId) {
+    public void setChainId(long chainId) {
         webViewClient.getJsInjectorClient().setChainId(chainId);
     }
 
-    public int getChainId() {
+    public long getChainId() {
         return webViewClient.getJsInjectorClient().getChainId();
     }
 

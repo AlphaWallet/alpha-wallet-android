@@ -12,7 +12,7 @@ public class WalletConnectSessionItem
     public final String icon;
     public final String sessionId;
     public final String localSessionId;
-    public final int chainId;
+    public final long chainId;
 
     public WalletConnectSessionItem(RealmWCSession s)
     {

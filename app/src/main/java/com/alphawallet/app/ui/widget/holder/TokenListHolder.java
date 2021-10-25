@@ -26,7 +26,7 @@ public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements 
     final SwitchMaterial switchEnabled;
     final View overlay;
     final TokenIcon tokenIcon;
-    int chainId;
+    long chainId;
 
     //need to cache this locally, unless we cache every string we need in the constructor
     private final AssetDefinitionService assetDefinition;

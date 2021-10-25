@@ -65,7 +65,7 @@ public class AlphaWalletService
         }
     }
 
-    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, int chainId, MagicLinkData order)
+    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, long chainId, MagicLinkData order)
     {
         switch (order.contractType)
         {
@@ -132,7 +132,7 @@ public class AlphaWalletService
         return dsigDescriptor;
     }
 
-    private Observable<Integer> sendFeemasterCurrencyTransaction(String url, int networkId, String address, MagicLinkData order)
+    private Observable<Integer> sendFeemasterCurrencyTransaction(String url, long networkId, String address, MagicLinkData order)
     {
         return Observable.fromCallable(() -> {
             Integer result = 500; //fail by default
@@ -199,7 +199,7 @@ public class AlphaWalletService
 
     private Single<Integer> sendFeemasterTransaction(
             String url,
-            int networkId,
+            long networkId,
             String toAddress,
             long expiry,
             String indices,
@@ -293,7 +293,7 @@ public class AlphaWalletService
         return sb.toString();
     }
 
-    public Single<Boolean> checkFeemasterService(String url, int chainId, String address)
+    public Single<Boolean> checkFeemasterService(String url, long chainId, String address)
     {
         return Single.fromCallable(() -> {
             Boolean result = false;

@@ -88,12 +88,12 @@ public class TickerService
     private final OkHttpClient httpClient;
     private final PreferenceRepositoryType sharedPrefs;
     private final TokenLocalSource localSource;
-    private final Map<Integer, TokenTicker> ethTickers = new ConcurrentHashMap<>();
+    private final Map<Long, TokenTicker> ethTickers = new ConcurrentHashMap<>();
     private Disposable tickerUpdateTimer;
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
-    private static final Map<Integer, Boolean> canUpdate = new ConcurrentHashMap<>();
+    private static final Map<Long, Boolean> canUpdate = new ConcurrentHashMap<>();
     private static final ConcurrentLinkedQueue<TokenCardMeta> dexGuruQuery = new ConcurrentLinkedQueue<>();
 
     @Nullable
@@ -228,7 +228,7 @@ public class TickerService
         });
     }
 
-    public Single<Integer> getERC20Tickers(int chainId, List<TokenCardMeta> erc20Tokens)
+    public Single<Integer> getERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
         final String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
         final String dexGuruName = dexGuruChainIdToAPISymbol.get(chainId);
@@ -343,17 +343,12 @@ public class TickerService
         }
     }
 
-    private void checkPeggedTickers(int chainId, TokenTicker ticker)
+    private void checkPeggedTickers(long chainId, TokenTicker ticker)
     {
-        switch (chainId)
+        if (chainId == MAINNET_ID)
         {
-            case MAINNET_ID:
-                //add pegged chains
-                ethTickers.put(ARBITRUM_MAIN_ID, ticker);
-                ethTickers.put(OPTIMISTIC_MAIN_ID, ticker);
-                break;
-            default:
-                break;
+            ethTickers.put(ARBITRUM_MAIN_ID, ticker);
+            ethTickers.put(OPTIMISTIC_MAIN_ID, ticker);
         }
     }
 
@@ -378,8 +373,8 @@ public class TickerService
             TokenTicker tTicker = new TokenTicker(String.valueOf(price * currentConversionRate),
                     changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", tickerTime);
 
-            ethTickers.put(chainId.intValue(), tTicker);
-            checkPeggedTickers(chainId.intValue(), tTicker);
+            ethTickers.put(chainId.longValue(), tTicker);
+            checkPeggedTickers(chainId.longValue(), tTicker);
         }
         catch (Exception e)
         {
@@ -395,7 +390,7 @@ public class TickerService
         localSource.removeOutdatedTickers();
     }
 
-    public TokenTicker getEthTicker(int chainId)
+    public TokenTicker getEthTicker(long chainId)
     {
         return ethTickers.get(chainId);
     }
@@ -526,7 +521,7 @@ public class TickerService
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
-    public void addCustomTicker(int chainId, TokenTicker ticker)
+    public void addCustomTicker(long chainId, TokenTicker ticker)
     {
         if (ticker != null)
         {
@@ -534,7 +529,7 @@ public class TickerService
         }
     }
 
-    public void addCustomTicker(int chainId, String address, TokenTicker ticker)
+    public void addCustomTicker(long chainId, String address, TokenTicker ticker)
     {
         if (ticker != null && address != null)
         {
@@ -610,7 +605,7 @@ public class TickerService
         dexGuruQuery.clear();
     }
 
-    private static final Map<Integer, String> coinGeckoChainIdToAPIName = new HashMap<Integer, String>(){{
+    private static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>(){{
         put(MAINNET_ID, "ethereum");
         put(XDAI_ID, "xdai");
         put(BINANCE_MAIN_ID, "binance-smart-chain");
@@ -620,14 +615,14 @@ public class TickerService
         put(AVALANCHE_ID, "avalanche");
         put(HECO_ID, "huobi-token");
         put(ARBITRUM_MAIN_ID, "arbitrum-one");
-        put(66, "okex-chain");
-        put(1666600000, "harmony-shard-0");
-        put(321, "kucoin-community-chain");
-        put(88, "tomochain");
-        put(42220, "celo");
+        put(66L, "okex-chain");
+        put(1666600000L, "harmony-shard-0");
+        put(321L, "kucoin-community-chain");
+        put(88L, "tomochain");
+        put(42220L, "celo");
     }};
 
-    private static final Map<Integer, String> dexGuruChainIdToAPISymbol = new HashMap<Integer, String>(){{
+    private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{
         put(MAINNET_ID, "eth");
         put(BINANCE_MAIN_ID, "bsc");
         put(MATIC_ID, "polygon");
@@ -636,10 +631,10 @@ public class TickerService
 
     private static class ChainPair
     {
-        final int chainId;
+        final long chainId;
         final String chainSymbol;
 
-        public ChainPair(int chainId, String chainSymbol)
+        public ChainPair(long chainId, String chainSymbol)
         {
             this.chainId = chainId;
             this.chainSymbol = chainSymbol;

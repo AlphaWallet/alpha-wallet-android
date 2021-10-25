@@ -110,7 +110,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount)
+    public Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, long chainId, String tokenAddress, int historyCount)
     {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
@@ -143,7 +143,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters)
+    public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Long> networkFilters)
     {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
@@ -170,7 +170,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit)
+    public Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, List<Long> networkFilters, long fetchTime, int fetchLimit)
     {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
@@ -278,7 +278,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Transaction storeRawTx(Wallet wallet, int chainId, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
+    public Transaction storeRawTx(Wallet wallet, long chainId, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
     {
         if (rawTx.getResult() == null) return null;
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();

@@ -36,7 +36,7 @@ public class ScriptTool implements AttributeInterface
     private File tokenScriptFile;
     private Address userAddress = Address.DEFAULT;
 
-    private Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
+    private Map<Long, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
 
 
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
@@ -132,7 +132,7 @@ public class ScriptTool implements AttributeInterface
             ContractInfo holdingContract = definition.contracts.get(definition.holdingToken);
             System.out.println("Holding Token Name: " + definition.holdingToken);
             System.out.println("Token Addresses: ");
-            for (Integer chainId : holdingContract.addresses.keySet())
+            for (Long chainId : holdingContract.addresses.keySet())
             {
                 for (String addr : holdingContract.addresses.get(chainId))
                 {
@@ -153,7 +153,7 @@ public class ScriptTool implements AttributeInterface
 
             System.out.println();
 
-            for (Integer chainId : holdingContract.addresses.keySet())
+            for (Long chainId : holdingContract.addresses.keySet())
             {
                 for (String addr : holdingContract.addresses.get(chainId))
                 {

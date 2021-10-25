@@ -60,11 +60,11 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public int getActiveBrowserNetwork() {
-        int selectedNetwork;
+    public long getActiveBrowserNetwork() {
+        long selectedNetwork;
         try
         {
-            selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            selectedNetwork = pref.getLong(DEFAULT_NETWORK_NAME_KEY, 0);
         }
         catch (ClassCastException e) //previously we used string
         {
@@ -76,8 +76,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public void setActiveBrowserNetwork(int networkId) {
-        pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
+    public void setActiveBrowserNetwork(long networkId) {
+        pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
     }
 
     @Override

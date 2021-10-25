@@ -125,7 +125,7 @@ public class TransactionsService
      */
     private void checkTransactions()
     {
-        List<Integer> filters = tokensService.getNetworkFilters();
+        List<Long> filters = tokensService.getNetworkFilters();
         if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
                 (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
@@ -141,7 +141,7 @@ public class TransactionsService
         }
     }
 
-    private boolean readTokenMoves(int chainId, boolean isNFT)
+    private boolean readTokenMoves(long chainId, boolean isNFT)
     {
         if (BuildConfig.DEBUG) Log.d(TAG,"Check transfers: " + chainId + " : NFT=" + isNFT);
         //check if this route has combined NFT
@@ -189,15 +189,15 @@ public class TransactionsService
         }
     }
 
-    public Single<TransactionMeta[]> fetchAndStoreTransactions(int chainId, long lastTxTime)
+    public Single<TransactionMeta[]> fetchAndStoreTransactions(long chainId, long lastTxTime)
     {
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
         return transactionsClient.fetchMoreTransactions(tokensService.getCurrentAddress(), network, lastTxTime);
     }
 
-    private List<Integer> getPendingChains()
+    private List<Long> getPendingChains()
     {
-        List<Integer> pendingChains = new ArrayList<>();
+        List<Long> pendingChains = new ArrayList<>();
         Transaction[] pendingTransactions = fetchPendingTransactions();
         for (Transaction tx : pendingTransactions)
         {
@@ -391,7 +391,7 @@ public class TransactionsService
         return transaction;
     }
 
-    private Transaction storeRawTx(EthBlock ethBlock, int chainId, EthGetTransactionReceipt receipt, EthTransaction txDetails, String currentWallet)
+    private Transaction storeRawTx(EthBlock ethBlock, long chainId, EthGetTransactionReceipt receipt, EthTransaction txDetails, String currentWallet)
     {
         if (ethBlock != null && ethBlock.getBlock() != null && receipt != null && receipt.getResult() != null)
         {

@@ -28,14 +28,14 @@ public class FetchTransactionsInteract {
         this.tokenRepository = tokenRepositoryType;
     }
 
-    public Single<ActivityMeta[]> fetchTransactionMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit) {
+    public Single<ActivityMeta[]> fetchTransactionMetas(Wallet wallet, List<Long> networkFilters, long fetchTime, int fetchLimit) {
         return transactionRepository
                 .fetchCachedTransactionMetas(wallet, networkFilters, fetchTime, fetchLimit)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters)
+    public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Long> networkFilters)
     {
         return transactionRepository.fetchEventMetas(wallet, networkFilters);
     }

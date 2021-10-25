@@ -63,7 +63,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private final ENSHandler ensHandler;
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
-    private int chainOverride;
+    private long chainOverride;
     private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
     private final float standardTextSize;
 
@@ -406,7 +406,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         return statusText.getText().toString();
     }
 
-    public void setChainOverrideForWalletConnect(int chainId)
+    public void setChainOverrideForWalletConnect(long chainId)
     {
         chainOverride = chainId;
     }

@@ -57,7 +57,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         if (intent != null)
         {
             localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
-            int selectedChainId = intent.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+            long selectedChainId = intent.getIntExtra(C.EXTRA_CHAIN_ID, -1);
 
             // Previous active network was deselected, get the first item in filtered networks
             if (selectedChainId == -1)
@@ -77,7 +77,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
                 hideSwitches();
                 List<NetworkInfo> filteredNetworks = new ArrayList<>();
-                for (Integer chainId : viewModel.getFilterNetworkList())
+                for (Long chainId : viewModel.getFilterNetworkList())
                 {
                     filteredNetworks.add(viewModel.getNetworkByChain(chainId));
                 }
@@ -93,7 +93,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         }
     }
 
-    void setupList(Integer selectedNetwork, List<NetworkInfo> availableNetworks)
+    void setupList(Long selectedNetwork, List<NetworkInfo> availableNetworks)
     {
         boolean isMainNetActive = viewModel.mainNetActive();
 
@@ -133,7 +133,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         setupFilters(selectedNetwork, availableNetworks);
     }
 
-    private void setupFilters(Integer selectedNetwork, List<NetworkInfo> availableNetworks)
+    private void setupFilters(Long selectedNetwork, List<NetworkInfo> availableNetworks)
     {
         ArrayList<NetworkItem> mainNetList = new ArrayList<>();
         ArrayList<NetworkItem> testNetList = new ArrayList<>();
@@ -201,7 +201,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     protected void handleSetNetworks()
     {
-        int selectedNetwork = mainnetSwitch.isChecked() ? mainNetAdapter.getSelectedItem() : testNetAdapter.getSelectedItem();
+        long selectedNetwork = mainnetSwitch.isChecked() ? mainNetAdapter.getSelectedItem() : testNetAdapter.getSelectedItem();
         Intent intent = new Intent();
         intent.putExtra(C.EXTRA_CHAIN_ID, selectedNetwork);
         setResult(RESULT_OK, intent);

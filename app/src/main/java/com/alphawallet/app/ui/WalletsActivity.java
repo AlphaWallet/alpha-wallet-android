@@ -67,7 +67,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private boolean requiresHomeRefresh;
     private String dialogError;
-    private final int balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
+    private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

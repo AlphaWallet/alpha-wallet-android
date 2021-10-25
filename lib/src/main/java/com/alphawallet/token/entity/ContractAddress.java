@@ -6,10 +6,10 @@ package com.alphawallet.token.entity;
  */
 public class ContractAddress
 {
-    public final int chainId;
+    public final long chainId;
     public final String address;
 
-    public ContractAddress(int chainId, String address)
+    public ContractAddress(long chainId, String address)
     {
         this.chainId = chainId;
         this.address = address;

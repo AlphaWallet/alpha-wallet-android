@@ -110,7 +110,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
     public MutableLiveData<Throwable> transactionError() { return transactionError; }
 
-    public void prepare(final int chainId, final String walletAddr)
+    public void prepare(final long chainId, final String walletAddr)
     {
         walletAddress = walletAddr;
         currentBlockUpdateDisposable = Observable.interval(0, 6, TimeUnit.SECONDS)
@@ -163,7 +163,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
     }
 
-    public Token getToken(int chainId, String address)
+    public Token getToken(long chainId, String address)
     {
         return tokenService.getTokenOrBase(chainId, address);
     }
@@ -184,12 +184,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
         return networkInfo != null && !networkInfo.getEtherscanUri(tx.hash).equals(Uri.EMPTY);
     }
 
-    public String getNetworkName(int chainId)
+    public String getNetworkName(long chainId)
     {
         return networkInteract.getNetworkName(chainId);
     }
 
-    public String getNetworkSymbol(int chainId)
+    public String getNetworkSymbol(long chainId)
     {
         return networkInteract.getNetworkInfo(chainId).symbol;
     }
@@ -200,7 +200,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed()) currentBlockUpdateDisposable.dispose();
     }
 
-    public void fetchTransaction(Wallet wallet, String txHash, int chainId)
+    public void fetchTransaction(Wallet wallet, String txHash, long chainId)
     {
         Transaction tx = fetchTransactionsInteract.fetchCached(wallet.address, txHash);
         if (tx == null || tx.gas.startsWith("0x"))
@@ -218,7 +218,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
     }
 
-    private void storeTx(EthTransaction rawTx, Wallet wallet, int chainId, Web3j web3j)
+    private void storeTx(EthTransaction rawTx, Wallet wallet, long chainId, Web3j web3j)
     {
         //need to fetch the tx block time
         if (rawTx == null)
@@ -257,7 +257,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         return tx;
     }
 
-    public void startGasCycle(int chainId)
+    public void startGasCycle(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
     }
@@ -290,7 +290,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId, String overridenTxHash)
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId, String overridenTxHash)
     {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)

@@ -117,7 +117,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
                 .get(TokenFunctionViewModel.class);
 
         String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getToken(chainId, address);
 
         setContentView(R.layout.activity_asset_display);

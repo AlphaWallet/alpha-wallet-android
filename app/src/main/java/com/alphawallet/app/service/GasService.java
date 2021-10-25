@@ -53,7 +53,7 @@ public class GasService implements ContractGasProvider
     private final EthereumNetworkRepositoryType networkRepository;
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
-    private int currentChainId;
+    private long currentChainId;
     private Web3j web3j;
     private BigInteger currentGasPrice;
     private final String ETHERSCAN_API_KEY;
@@ -76,7 +76,7 @@ public class GasService implements ContractGasProvider
         this.httpClient = httpClient;
         this.realmManager = realm;
         gasFetchDisposable = null;
-        currentChainId = MAINNET_ID;
+        this.currentChainId = MAINNET_ID;
 
         web3j = null;
         ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
@@ -84,7 +84,7 @@ public class GasService implements ContractGasProvider
         keyFail = false;
     }
 
-    public void startGasPriceCycle(int chainId)
+    public void startGasPriceCycle(long chainId)
     {
         updateChainId(chainId);
         if (gasFetchDisposable == null || gasFetchDisposable.isDisposed())
@@ -102,7 +102,7 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    public void updateChainId(int chainId)
+    public void updateChainId(long chainId)
     {
         if (networkRepository.getNetworkByChain(chainId) == null)
         {
@@ -191,21 +191,21 @@ public class GasService implements ContractGasProvider
         }
         else
         {
-            final int nodeId = currentChainId;
+            final long nodeId = currentChainId;
             return Single.fromCallable(() -> web3j
                     .ethGasPrice().send())
                     .map(price -> updateGasPrice(price, nodeId));
         }
     }
 
-    private Boolean updateGasPrice(EthGasPrice ethGasPrice, int chainId)
+    private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId)
     {
         currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
         updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
         return true;
     }
 
-    private BigInteger fixGasPrice(BigInteger gasPrice, int chainId)
+    private BigInteger fixGasPrice(BigInteger gasPrice, long chainId)
     {
         if (gasPrice.compareTo(BigInteger.ZERO) > 0)
         {
@@ -214,11 +214,11 @@ public class GasService implements ContractGasProvider
         else
         {
             //gas price from node is zero
-            switch (chainId)
+            switch ((int)chainId)
             {
                 default:
                     return gasPrice;
-                case ARTIS_TAU1_ID:
+                case (int)ARTIS_TAU1_ID:
                     //this node incorrectly returns gas price zero, use 1 Gwei
                     return new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
             }
@@ -227,7 +227,7 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateEtherscanGasPrices(String gasOracleAPI)
     {
-        final int chainId = currentChainId;
+        final long chainId = currentChainId;
         return Single.fromCallable(() -> {
             boolean update = false;
             Request request = new Request.Builder()
@@ -269,7 +269,7 @@ public class GasService implements ContractGasProvider
      * @param gasPriceSpread
      * @param chainId
      */
-    private void updateRealm(final GasPriceSpread gasPriceSpread, final int chainId)
+    private void updateRealm(final GasPriceSpread gasPriceSpread, final long chainId)
     {
         realmManager.getRealmInstance(TICKER_DB).executeTransaction(r -> {
             RealmGasSpread rgs = r.where(RealmGasSpread.class)
@@ -282,7 +282,7 @@ public class GasService implements ContractGasProvider
         });
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, int chainId, String toAddress, BigInteger amount, Wallet wallet)
+    public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)

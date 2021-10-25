@@ -17,7 +17,7 @@ public class WCRequest
     public final WCEthereumSignMessage sign;
     public final WCPeerMeta peer;
     public final SignType type;
-    public final int chainId;
+    public final long chainId;
     public final Throwable throwable;
 
     public WCRequest(String sessionId, long id, WCEthereumSignMessage msg)
@@ -32,7 +32,7 @@ public class WCRequest
         throwable = null;
     }
 
-    public WCRequest(String sessionId, long id, WCEthereumTransaction tx, boolean signOnly, int chainId)
+    public WCRequest(String sessionId, long id, WCEthereumTransaction tx, boolean signOnly, long chainId)
     {
         this.sessionId = sessionId;
         this.id = id;
@@ -44,7 +44,7 @@ public class WCRequest
         throwable = null;
     }
 
-    public WCRequest(String sessionId, long id, WCPeerMeta pm, int chainId)
+    public WCRequest(String sessionId, long id, WCPeerMeta pm, long chainId)
     {
         this.sessionId = sessionId;
         this.id = id;
@@ -56,7 +56,7 @@ public class WCRequest
         throwable = null;
     }
 
-    public WCRequest(String sessionId, Throwable t, int chainId)
+    public WCRequest(String sessionId, Throwable t, long chainId)
     {
         this.sessionId = sessionId;
         this.id = 0;

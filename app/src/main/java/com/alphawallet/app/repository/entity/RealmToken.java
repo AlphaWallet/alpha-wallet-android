@@ -28,7 +28,7 @@ public class RealmToken extends RealmObject {
     private int interfaceSpec;
     private String auxData;
     private long lastBlockRead;
-    private int chainId;
+    private long chainId;
     private long earliestTxBlock;
     private boolean visibilityChanged;
     private String erc1155BlockRead;
@@ -150,8 +150,8 @@ public class RealmToken extends RealmObject {
     }
     public long getLastBlock() { return lastBlockRead; }
 
-    public int getChainId() { return chainId; }
-    public void setChainId(int chainId) { this.chainId = chainId; }
+    public long getChainId() { return chainId; }
+    public void setChainId(long chainId) { this.chainId = chainId; }
 
     public long getLastTxTime()
     {

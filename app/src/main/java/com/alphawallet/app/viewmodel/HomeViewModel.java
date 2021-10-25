@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -44,6 +45,7 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
@@ -58,10 +60,14 @@ import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.ParseMagicLink;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.Locale;
 import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -97,6 +103,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
     private BottomSheetDialog dialog;
 
     HomeViewModel(
@@ -145,6 +152,10 @@ public class HomeViewModel extends BaseViewModel {
 
     public LiveData<String> backUpMessage() {
         return backUpMessage;
+    }
+
+    public LiveData<Boolean> splashReset() {
+        return splashActivity;
     }
 
     public void prepare() {
@@ -263,7 +274,13 @@ public class HomeViewModel extends BaseViewModel {
                 .getWallet(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> onWallet(context, wallet), this::onError);
+                .subscribe(wallet -> onWallet(context, wallet), this::walletError);
+    }
+
+    private void walletError(Throwable throwable)
+    {
+        //no wallets
+        splashActivity.postValue(true);
     }
 
     private void onWallet(Context context, Wallet wallet)
@@ -564,6 +581,82 @@ public class HomeViewModel extends BaseViewModel {
             BottomSheetBehavior behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
             emailPromptDialog.setOnShowListener(dialog -> behavior.setPeekHeight(emailPromptView.getHeight()));
             emailPromptDialog.show();
+        }
+    }
+
+    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
+    {
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = ctx.getResources().getConfiguration().getLocales().get(0);
+        }
+        else
+        {
+            locale = ctx.getResources().getConfiguration().locale;
+        }
+
+        return new TokenDefinition(
+                xmlInputStream, locale, null);
+    }
+
+    public void importScriptFile(Context ctx, String importData, boolean appExternal)
+    {
+        try
+        {
+            InputStream iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            TokenDefinition td = parseFile(ctx, iStream);
+            if (td.holdingToken == null || td.holdingToken.length() == 0) return; //tokenscript with no holding token is currently meaningless. Is this always the case?
+
+            byte[] writeBuffer = new byte[32768];
+            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+            newFileName = newFileName + ".tsml";
+
+            if (appExternal)
+            {
+                newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
+            }
+            else
+            {
+                newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+            }
+
+            //Store
+            iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            FileOutputStream fos = new FileOutputStream(newFileName);
+
+            while (iStream.available() > 0)
+            {
+                fos.write(writeBuffer, 0, iStream.read(writeBuffer));
+            }
+
+            iStream.close();
+            fos.flush();
+            fos.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean checkDebugDirectory()
+    {
+        File directory = new File(Environment.getExternalStorageDirectory()
+                + File.separator + ALPHAWALLET_DIR);
+
+        return directory.exists();
+    }
+
+    public void setWalletStartup()
+    {
+        TokensService.setWalletStartup();
+    }
+
+    public void setCurrencyAndLocale(Context context)
+    {
+        if (TextUtils.isEmpty(localeRepository.getUserPreferenceLocale()))
+        {
+            localeRepository.setLocale(context, localeRepository.getActiveLocale());
         }
     }
 }

@@ -309,7 +309,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private void onDefaultWallet(Wallet wallet)
     {
         address.setText(viewModel.getWallet().address);
-
         Log.d(TAG, "Open Connection: " + getSessionId());
 
         String peerId;
@@ -353,7 +352,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     }
                     else
                     {
-                        viewModel.getPendingRequest(this, getSessionId());
+                        getPendingRequest();
                         setClient(client);
                     }
                 });

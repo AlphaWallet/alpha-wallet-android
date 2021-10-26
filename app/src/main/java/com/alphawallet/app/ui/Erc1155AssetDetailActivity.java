@@ -101,7 +101,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
     private void getIntentData()
     {
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));

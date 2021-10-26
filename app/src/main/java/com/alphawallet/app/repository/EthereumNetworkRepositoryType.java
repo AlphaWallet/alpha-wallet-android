@@ -33,7 +33,7 @@ public interface EthereumNetworkRepositoryType {
 
     void setActiveBrowserNetwork(NetworkInfo networkInfo);
 
-    NetworkInfo getNetworkByChain(int chainId);
+    NetworkInfo getNetworkByChain(long chainId);
 
     Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
 
@@ -42,15 +42,15 @@ public interface EthereumNetworkRepositoryType {
 
     void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
-    String getNameById(int id);
+    String getNameById(long chainId);
 
-    List<Integer> getFilterNetworkList();
-    List<Integer> getSelectedFilters(boolean isMainNet);
-    Integer getDefaultNetwork(boolean isMainNet);
+    List<Long> getFilterNetworkList();
+    List<Long> getSelectedFilters(boolean isMainNet);
+    Long getDefaultNetwork(boolean isMainNet);
 
-    void setFilterNetworkList(Integer[] networkList);
+    void setFilterNetworkList(Long[] networkList);
 
-    List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters);
+    List<ContractLocator> getAllKnownContracts(List<Long> networkFilters);
 
     Single<Token[]> getBlankOverrideTokens(Wallet wallet);
 
@@ -60,17 +60,16 @@ public interface EthereumNetworkRepositoryType {
 
     KnownContract readContracts();
 
-    boolean getIsPopularToken(int chainId, String address);
+    boolean getIsPopularToken(long chainId, String address);
 
     String getCurrentWalletAddress();
     boolean hasSetNetworkFilters();
     boolean isMainNetSelected();
 
+    void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId);
+    NetworkInfoExt getNetworkInfoExt(long chainId);
+    void removeCustomRPCNetwork(long chainId);
 
-    void addCustomRPCNetwork(String networkName, String rpcUrl, int chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Integer oldChainId);
-    NetworkInfoExt getNetworkInfoExt(int chainId);
-    void removeCustomRPCNetwork(int chainId);
-
-    boolean isChainContract(int chainId, String address);
-    boolean hasLockedGas(int chainId);
+    boolean isChainContract(long chainId, String address);
+    boolean hasLockedGas(long chainId);
 }

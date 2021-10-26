@@ -92,13 +92,6 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
         }
     }
 
-    /*private void setupIcon(@NotNull Token token) {
-        imageIcon.setVisibility(View.GONE);
-        textIcon.setVisibility(View.VISIBLE);
-        textIcon.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
-        textIcon.setText(Utils.getIconisedText(token.tokenInfo.name));
-    }*/
-
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
     }

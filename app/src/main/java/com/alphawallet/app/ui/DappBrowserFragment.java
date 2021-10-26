@@ -232,7 +232,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     // Some multi-chain Dapps have a watchdog thread that checks the chain
     // This thread stays in operation until a new page load is complete.
     private String loadUrlAfterReload;
-    private static volatile int forceChainChange = 0;
+    private static volatile long forceChainChange = 0;
 
     private DAppFunction dAppFunction;
 
@@ -772,8 +772,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
         realmUpdate = viewModel.getRealmInstance(wallet).where(RealmToken.class)
-                .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth"))
-                .equalTo("chainId", activeNetwork.chainId).findAllAsync();
+                .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth")).findAllAsync();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance
             if (realmTokens.size() == 0) return;
@@ -797,7 +796,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
-    public void switchNetworkAndLoadUrl(int chainId, String url)
+    public void switchNetworkAndLoadUrl(long chainId, String url)
     {
         forceChainChange = chainId; //avoid prompt to change chain for 1inch
         loadUrlAfterReload = url;   //after reload with new chain inject, page is clean to load the correct site
@@ -834,7 +833,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     ActivityResultLauncher<Intent> getNewNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 loadNewNetwork(networkId);
             });
 
@@ -1027,12 +1026,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 forceChainChange = networkId;
                 loadNewNetwork(networkId);
             });
 
-    private void loadNewNetwork(int newNetworkId)
+    private void loadNewNetwork(long newNetworkId)
     {
         if (activeNetwork == null || activeNetwork.chainId != newNetworkId)
         {
@@ -1114,7 +1113,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
     {
         // read chain value
-        int chainId = chainObj.getChainId();
+        long chainId = chainObj.getChainId();
         final NetworkInfo info = viewModel.getNetworkInfo(chainId);
 
         if (forceChainChange != 0)

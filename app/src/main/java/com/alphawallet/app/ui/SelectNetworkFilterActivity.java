@@ -107,7 +107,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
 
         MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener() {
 
-            private void showPopup(View view, int chainId) {
+            private void showPopup(View view, long chainId) {
                 LayoutInflater inflater = LayoutInflater.from(SelectNetworkFilterActivity.this);
                 View popupView = inflater.inflate(R.layout.popup_view_delete_network, null);
 
@@ -145,7 +145,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
             }
 
             @Override
-            public void onEditNetwork(int chainId, View parent) {
+            public void onEditNetwork(long chainId, View parent) {
                 showPopup(parent, chainId);
             }
         };
@@ -160,7 +160,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     @Override
     protected void handleSetNetworks()
     {
-        List<Integer> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
+        List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
 

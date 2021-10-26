@@ -23,12 +23,12 @@ import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_AD
  */
 public class TokenTransferData extends ActivityMeta implements Parcelable
 {
-    public final int chainId;
+    public final long chainId;
     public final String tokenAddress;
     public final String eventName;
     public final String transferDetail;
 
-    public TokenTransferData(String hash, int chainId, String tokenAddress, String eventName, String transferDetail, long transferTime)
+    public TokenTransferData(String hash, long chainId, String tokenAddress, String eventName, String transferDetail, long transferTime)
     {
         super(transferTime, hash, true);
         this.chainId = chainId;
@@ -75,7 +75,7 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
     protected TokenTransferData(Parcel in)
     {
         super(in.readLong(), in.readString(), true);
-        chainId = in.readInt();
+        chainId = in.readLong();
         tokenAddress = in.readString();
         eventName = in.readString();
         transferDetail = in.readString();
@@ -104,7 +104,7 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
     {
         dest.writeLong(timeStamp);
         dest.writeString(hash);
-        dest.writeInt(chainId);
+        dest.writeLong(chainId);
         dest.writeString(tokenAddress);
         dest.writeString(eventName);
         dest.writeString(transferDetail);

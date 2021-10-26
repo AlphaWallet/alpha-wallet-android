@@ -197,72 +197,6 @@ public class Utils {
         }
     }
 
-    public static int getChainColour(int chainId)
-    {
-        switch (chainId)
-        {
-            case MAINNET_ID:
-                return R.color.mainnet;
-            case CLASSIC_ID:
-                return R.color.classic;
-            case POA_ID:
-                return R.color.poa;
-            case KOVAN_ID:
-                return R.color.kovan;
-            case ROPSTEN_ID:
-                return R.color.ropsten;
-            case SOKOL_ID:
-                return R.color.sokol;
-            case RINKEBY_ID:
-                return R.color.rinkeby;
-            case GOERLI_ID:
-                return R.color.goerli;
-            case XDAI_ID:
-                return R.color.xdai;
-            case ARTIS_SIGMA1_ID:
-                return R.color.artis_sigma1;
-            case ARTIS_TAU1_ID:
-                return R.color.artis_tau1;
-            case BINANCE_MAIN_ID:
-                return R.color.binance_main;
-            case BINANCE_TEST_ID:
-                return R.color.binance_test;
-            case HECO_ID:
-                return R.color.heco_main;
-            case HECO_TEST_ID:
-                return R.color.heco_test;
-            case FANTOM_ID:
-                return R.color.fantom_main;
-            case FANTOM_TEST_ID:
-                return R.color.fantom_test;
-            case AVALANCHE_ID:
-                return R.color.avalanche_main;
-            case FUJI_TEST_ID:
-                return R.color.avalanche_test;
-            case MATIC_ID:
-                return R.color.polygon_main;
-            case MATIC_TEST_ID:
-                return R.color.polygon_test;
-            case OPTIMISTIC_MAIN_ID:
-                return R.color.optimistic_main;
-            case OPTIMISTIC_TEST_ID:
-                return R.color.optimistic_test;
-            case CRONOS_TEST_ID:
-                return R.color.cronos_test;
-            case ARBITRUM_MAIN_ID:
-                return R.color.arbitrum_main;
-            case ARBITRUM_TEST_ID:
-                return R.color.arbitrum_test;
-            default:
-                return R.color.mine;
-        }
-    }
-
-    public static void setChainColour(View view, int chainId)
-    {
-        view.getBackground().setTint(ContextCompat.getColor(view.getContext(), getChainColour(chainId)));
-    }
-
     /**
      * This is here rather than in the Signable class because Signable is cross platform not Android specific
      *
@@ -411,11 +345,11 @@ public class Utils {
         return address != null && address.length() > 0 && WalletUtils.isValidAddress(address);
     }
 
-    public static String intArrayToString(Integer[] values)
+    public static String longArrayToString(Long[] values)
     {
         StringBuilder store = new StringBuilder();
         boolean firstValue = true;
-        for (int network : values)
+        for (long network : values)
         {
             if (!firstValue) store.append(",");
             store.append(network);
@@ -425,17 +359,17 @@ public class Utils {
         return store.toString();
     }
 
-    public static List<Integer> intListToArray(String list)
+    public static List<Long> longListToArray(String list)
     {
-        List<Integer> idList = new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
         //convert to array
         String[] split = list.split(",");
         for (String s : split)
         {
-            Integer value;
+            Long value;
             try
             {
-                value = Integer.valueOf(s);
+                value = Long.valueOf(s);
                 idList.add(value);
             }
             catch (NumberFormatException e)
@@ -847,40 +781,26 @@ public class Utils {
         return "";
     }
 
+    private static final Map<Long, String> twChainNames = new HashMap<Long, String>() {
+        {
+            put(CLASSIC_ID, "classic");
+            put(XDAI_ID, "xdai");
+            put(POA_ID, "poa");
+            put(BINANCE_MAIN_ID, "smartchain");
+            put(AVALANCHE_ID, "avalanche");
+            put(OPTIMISTIC_MAIN_ID, "optimism");
+            put(MATIC_ID, "polygon");
+            put(MAINNET_ID, "ethereum");
+        }
+    };
+
     @NotNull
-    public static String getTWTokenImageUrl(int chainId, String address)
+    public static String getTWTokenImageUrl(long chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;
-        String repoChain;
-        switch (chainId)
-        {
-            case CLASSIC_ID:
-                repoChain = "classic";
-                break;
-            case XDAI_ID:
-                repoChain = "xdai";
-                break;
-            case POA_ID:
-                repoChain = "poa";
-                break;
-            case BINANCE_MAIN_ID:
-                repoChain = "smartchain";
-                break;
-            case AVALANCHE_ID:
-                repoChain = "avalanche";
-                break;
-            case OPTIMISTIC_MAIN_ID:
-                repoChain = "optimism";
-                break;
-            case MATIC_ID:
-                repoChain = "polygon";
-                break;
-            default:
-                repoChain = "ethereum";
-                break;
-        }
+        String repoChain = twChainNames.get(chainId);
+        if (repoChain == null) repoChain = "ethereum";
         tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
-
         return tURL;
     }
 

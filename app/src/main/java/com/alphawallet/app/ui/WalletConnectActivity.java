@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -121,7 +122,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private SignAuthenticationCallback signCallback;
     private long lastId;
-    private int chainIdOverride;
+    private long chainIdOverride;
 
     private boolean startup = false;
     private boolean switchConnection = false;
@@ -408,7 +409,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (rq != null)
         {
             requestId = rq.id;
-            int useChainId = viewModel.getChainId(getSessionId());
+            long useChainId = viewModel.getChainId(getSessionId());
             switch (rq.type)
             {
                 case MESSAGE:
@@ -628,19 +629,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                chainIdOverride = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
                 Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
                 onSessionRequest(0L, remotePeerMeta, chainIdOverride);
             });
 
-    private void onSessionRequest(Long id, WCPeerMeta peer, int chainId)
+    private void onSessionRequest(Long id, WCPeerMeta peer, long chainId)
     {
         if (peer == null) { finish(); }
 
         String[] accounts = {viewModel.getWallet().address};
         String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
 
-        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);
 
         Glide.with(this)
                 .load(displayIcon)
@@ -686,12 +687,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         dialog.show();
     }
 
-    private Spannable buildMessage(String url, int networkId)
+    private Spannable buildMessage(String url, long networkId)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
         sb.append(url);
         sb.startStyleGroup().append("\n\n").append(EthereumNetworkBase.getShortChainName(networkId));
-        sb.setColor(ContextCompat.getColor(this, Utils.getChainColour(networkId)));
+        sb.setColor(ContextCompat.getColor(this, EthereumNetworkBase.getChainColour(networkId)));
         sb.applyStyles();
         return sb;
     }
@@ -720,7 +721,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         doSignMessage(signable);
     }
 
-    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, int chainId)
+    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
         final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
@@ -821,7 +822,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         confirmationDialog.show();
     }
 
-    private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, int chainId)
+    private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
         final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
@@ -829,7 +830,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (confirmationDialog != null) confirmationDialog.show();
     }
 
-    private ActionSheetDialog generateTransactionRequest(Web3Transaction w3Tx, int chainId)
+    private ActionSheetDialog generateTransactionRequest(Web3Transaction w3Tx, long chainId)
     {
         ActionSheetDialog confDialog = null;
         try

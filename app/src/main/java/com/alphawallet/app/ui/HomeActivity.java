@@ -1134,7 +1134,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.DAPP_URL_LOAD))
                 {
                     String url = data.getStringExtra(C.DAPP_URL_LOAD);
-                    int chainId = data.getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+                    long chainId = data.getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
                     ((DappBrowserFragment)dappBrowserFragment).switchNetworkAndLoadUrl(chainId, url);
                     showPage(DAPP_BROWSER);
                 }

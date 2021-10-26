@@ -77,7 +77,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private final List<GasSpeed> gasSpeeds = new ArrayList<>();
     private int currentGasSpeedIndex = -1;
-    private int chainId;
+    private long chainId;
     private BigDecimal presetGasLimit;
     private BigDecimal customGasLimit;
     private BigDecimal availableBalance;
@@ -119,7 +119,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         }
 
         currentGasSpeedIndex = getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-        chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
         presetGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT_PRESET));
         availableBalance = new BigDecimal(getIntent().getStringExtra(C.EXTRA_TOKEN_BALANCE));

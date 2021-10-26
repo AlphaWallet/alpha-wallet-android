@@ -290,7 +290,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void removeToken(int chainId, String tokenAddress) {
+    public void removeToken(long chainId, String tokenAddress) {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
         for (int i = 0; i < items.size(); i++) {
             Object si = items.get(i);

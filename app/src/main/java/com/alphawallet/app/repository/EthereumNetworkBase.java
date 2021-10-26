@@ -4,6 +4,7 @@ package com.alphawallet.app.repository;
  * between projects including non-Android projects */
 
 import android.text.TextUtils;
+import android.view.View;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -62,11 +63,15 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
+import androidx.core.content.ContextCompat;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
@@ -92,6 +97,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static native String getAmberDataKey();
     public static native String getInfuraKey();
     public static native String getSecondaryInfuraKey();
+
+    private static final List<Long> chains = new ArrayList<>();
 
     //Fallback nodes: these nodes are used if there's no Amberdata key, and also as a fallback in case the primary node times out while attempting a call
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
@@ -135,16 +142,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String ARBITRUM_FALLBACK_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String ARBITRUM_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey();
     public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/" + getInfuraKey();
+    public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/" + getInfuraKey();
+    public static final String PALM_RPC_FALLBACK_URL = "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String PALM_TEST_RPC_FALLBACK_URL = "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();
 
-    //This optional list creates a defined order in which tokens are displayed
-    static final int[] orderList = {
-            MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, KOVAN_ID, ROPSTEN_ID, SOKOL_ID,
-            RINKEBY_ID, GOERLI_ID, ARTIS_TAU1_ID, BINANCE_TEST_ID, BINANCE_MAIN_ID, HECO_ID, HECO_TEST_ID,
-            AVALANCHE_ID, FUJI_TEST_ID, FANTOM_ID, FANTOM_TEST_ID, MATIC_ID, MATIC_TEST_ID, OPTIMISTIC_MAIN_ID,
-            OPTIMISTIC_TEST_ID, CRONOS_TEST_ID
-    };
+    //All chains that have fiat/real value (not testnet) must be put here
+    static final List<Long> hasValue = Arrays.asList(
+            MAINNET_ID, POA_ID, CLASSIC_ID, XDAI_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID);
 
-    static final Map<Integer, NetworkInfo> networkMap = new HashMap<Integer, NetworkInfo>() {
+    static final Map<Long, NetworkInfo> networkMap = new HashMap<Long, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
@@ -246,22 +254,101 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://arbiscan.io/tx/", ARBITRUM_MAIN_ID, ARBITRUM_FALLBACK_MAINNET_RPC,
                     "https://api.arbiscan.io/api?"));
             put(ARBITRUM_TEST_ID, new NetworkInfo(C.ARBITRUM_TEST_NETWORK, C.ARBITRUM_TEST_SYMBOL,
-                    ARBITRUM_TEST_RPC_URL,
+                    ARBITRUM_TESTNET_RPC,
                     "https://rinkeby-explorer.arbitrum.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
                     "")); //no transaction API
+            put(PALM_ID, new NetworkInfo(C.PALM_NAME, C.PALM_SYMBOL,
+                    PALM_RPC_URL,
+                    "https://explorer.palm.io/tx/", PALM_ID, PALM_RPC_FALLBACK_URL,
+                    "https://explorer.palm.io/api?"));
+            put(PALM_TEST_ID, new NetworkInfo(C.PALM_TEST_NAME, C.PALM_SYMBOL,
+                    PALM_TEST_RPC_URL,
+                    "https://explorer.palm-uat.xyz/tx/", PALM_TEST_ID, PALM_TEST_RPC_FALLBACK_URL,
+                    "https://explorer.palm-uat.xyz/api?"));
         }
     };
+
+    static final Map<Long, Integer> chainLogos = new HashMap<Long, Integer>() {
+        {
+            put(MAINNET_ID, R.drawable.ic_token_eth);
+            put(KOVAN_ID, R.drawable.kovan_logo);
+            put(ROPSTEN_ID, R.drawable.ropsten_logo);
+            put(RINKEBY_ID, R.drawable.rinkeby_logo);
+            put(CLASSIC_ID, R.drawable.classic_logo);
+            put(POA_ID, R.drawable.ic_poa_logo);
+            put(SOKOL_ID, R.drawable.ic_poa_sokol);
+            put(XDAI_ID, R.drawable.xdai_logo);
+            put(GOERLI_ID, R.drawable.goerli_logo);
+            put(ARTIS_SIGMA1_ID, R.drawable.ic_artis_sigma_logo);
+            put(ARTIS_TAU1_ID, R.drawable.ic_artis_tau_logo);
+            put(BINANCE_MAIN_ID, R.drawable.ic_binance_logo);
+            put(BINANCE_TEST_ID, R.drawable.ic_binance_test_logo);
+            put(HECO_ID, R.drawable.ic_heco_logo);
+            put(HECO_TEST_ID, R.drawable.ic_heco_logo);
+            put(FANTOM_ID, R.drawable.ic_fantom);
+            put(FANTOM_TEST_ID, R.drawable.ic_icons_fantom_test);
+            put(AVALANCHE_ID, R.drawable.ic_icons_tokens_avalanche);
+            put(FUJI_TEST_ID, R.drawable.ic_icons_tokens_avalanche_testnet);
+            put(MATIC_ID, R.drawable.ic_icons_polygon);
+            put(MATIC_TEST_ID, R.drawable.ic_icons_matic);
+            put(OPTIMISTIC_MAIN_ID, R.drawable.ic_optimism_logo);
+            put(OPTIMISTIC_TEST_ID, R.drawable.ic_optimism_testnet_logo);
+            put(CRONOS_TEST_ID, R.drawable.ic_cronos);
+            put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_arbitrum);
+            put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
+            put(PALM_ID, R.drawable.palm_logo);
+            put(PALM_TEST_ID, R.drawable.palm_logo_test);
+        }
+    };
+
+    static final Map<Long, Integer> chainColours = new HashMap<Long, Integer>() {
+        {
+            put(MAINNET_ID, R.color.mainnet);
+            put(KOVAN_ID, R.color.kovan);
+            put(ROPSTEN_ID, R.color.ropsten);
+            put(RINKEBY_ID, R.color.rinkeby);
+            put(CLASSIC_ID, R.color.classic);
+            put(POA_ID, R.color.poa);
+            put(SOKOL_ID, R.color.sokol);
+            put(XDAI_ID, R.color.xdai);
+            put(GOERLI_ID, R.color.goerli);
+            put(ARTIS_SIGMA1_ID, R.color.artis_sigma1);
+            put(ARTIS_TAU1_ID, R.color.artis_tau1);
+            put(BINANCE_MAIN_ID, R.color.binance_main);
+            put(BINANCE_TEST_ID, R.color.binance_test);
+            put(HECO_ID, R.color.heco_main);
+            put(HECO_TEST_ID, R.color.heco_test);
+            put(FANTOM_ID, R.color.fantom_main);
+            put(FANTOM_TEST_ID, R.color.fantom_test);
+            put(AVALANCHE_ID, R.color.avalanche_main);
+            put(FUJI_TEST_ID, R.color.avalanche_test);
+            put(MATIC_ID, R.color.polygon_main);
+            put(MATIC_TEST_ID, R.color.polygon_test);
+            put(OPTIMISTIC_MAIN_ID, R.color.optimistic_main);
+            put(OPTIMISTIC_TEST_ID, R.color.optimistic_test);
+            put(CRONOS_TEST_ID, R.color.cronos_test);
+            put(ARBITRUM_MAIN_ID, R.color.arbitrum_main);
+            put(ARBITRUM_TEST_ID, R.color.arbitrum_test);
+            put(PALM_ID, R.color.palm_main);
+            put(PALM_TEST_ID, R.color.palm_test);
+        }
+    };
+
+    public static void setChainColour(View view, long chainId)
+    {
+        view.getBackground().setTint(ContextCompat.getColor(view.getContext(), getChainColour(chainId)));
+    }
 
     //Does the chain have a gas oracle?
     //Add it to this list here if so. Note that so far, all gas oracles follow the same format:
     //  <etherscanAPI from the above list> + GAS_API
     //If the gas oracle you're adding doesn't follow this spec then you'll have to change the getGasOracle method
-    private static final List<Integer> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, MATIC_ID);
+    private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, MATIC_ID);
 
     //These chains don't allow custom gas
-    private static final List<Integer> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID);
+    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID);
 
-    public static String getGasOracle(int chainId)
+    public static String getGasOracle(long chainId)
     {
         if (hasGasOracleAPI.contains(chainId) && networkMap.containsKey(chainId))
         {
@@ -273,13 +360,25 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    public static int getChainOrdinal(long chainId)
+    {
+        if (chains.contains(chainId))
+        {
+            return chains.indexOf(chainId);
+        }
+        else
+        {
+            return 500 + (int)chainId%500; //fixed ID above 500
+        }
+    }
+
     @Override
-    public boolean hasLockedGas(int chainId)
+    public boolean hasLockedGas(long chainId)
     {
         return hasLockedGas.contains(chainId);
     }
     
-    static final Map<Integer, String> addressOverride = new HashMap<Integer, String>() {
+    static final Map<Long, String> addressOverride = new HashMap<Long, String>() {
         {
             put(OPTIMISTIC_MAIN_ID, "0x4200000000000000000000000000000000000006");
             put(OPTIMISTIC_TEST_ID, "0x4200000000000000000000000000000000000006");
@@ -294,8 +393,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     static class CustomNetworks {
         private ArrayList<NetworkInfo> list = new ArrayList<>();
-        transient private Map<Integer, NetworkInfo> map = new HashMap<>();
-        private Map<Integer, Boolean> mapToTestNet = new HashMap<>();
+        transient private Map<Long, NetworkInfo> map = new HashMap<>();
+        private Map<Long, Boolean> mapToTestNet = new HashMap<>();
         transient private PreferenceRepositoryType preferences;
 
         public CustomNetworks(PreferenceRepositoryType preferences) {
@@ -316,7 +415,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             }
         }
 
-        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Integer oldChainId)
+        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Long oldChainId)
         {
             if (oldChainId != null) {
                 for (NetworkInfo in : list) {
@@ -336,7 +435,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             preferences.setCustomRPCNetworks(networks);
         }
 
-        public void remove(int chainId) {
+        public void remove(long chainId) {
             for (NetworkInfo in : list) {
                 if (in.chainId == chainId) {
                     list.remove(in);
@@ -361,6 +460,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         this.additionalNetworks = additionalNetworks;
         this.useTestNets = useTestNets;
 
+        chains.clear();
+        chains.addAll(networkMap.keySet());
         this.customNetworks = new CustomNetworks(this.preferences);
     }
 
@@ -374,41 +475,46 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private void addNetworks(List<NetworkInfo> result, boolean withValue)
     {
-        for (int networkId : orderList)
+        if (withValue)
         {
-            if (EthereumNetworkRepository.hasRealValue(networkId) == withValue) result.add(networkMap.get(networkId));
-        }
-
-        //Add in case no order was specified
-        for (NetworkInfo info : networkMap.values())
-        {
-            if (EthereumNetworkRepository.hasRealValue(info.chainId) == withValue && !result.contains(info))
+            for (long networkId : hasValue)
             {
-                result.add(info);
+                result.add(networkMap.get(networkId));
+            }
+        }
+        else
+        {
+            //Add in case no order was specified
+            for (NetworkInfo info : networkMap.values())
+            {
+                if (!hasValue.contains(info.chainId) && !result.contains(info))
+                {
+                    result.add(info);
+                }
             }
         }
     }
 
-    public static String getChainOverrideAddress(int id) {
-        return addressOverride.containsKey(id) ? addressOverride.get(id) : "";
+    public static String getChainOverrideAddress(long chainId) {
+        return addressOverride.containsKey(chainId) ? addressOverride.get(chainId) : "";
     }
 
     @Override
-    public String getNameById(int id)
+    public String getNameById(long chainId)
     {
-        NetworkInfo info = customNetworks.map.get(id);
+        NetworkInfo info = customNetworks.map.get(chainId);
         if (info != null) {
             return info.name;
         }
 
-        if (networkMap.containsKey(id)) return networkMap.get(id).name;
-        else return "Unknown: " + id;
+        if (networkMap.containsKey(chainId)) return networkMap.get(chainId).name;
+        else return "Unknown: " + chainId;
     }
 
     @Override
     public NetworkInfo getActiveBrowserNetwork()
     {
-        int activeNetwork = preferences.getActiveBrowserNetwork();
+        long activeNetwork = preferences.getActiveBrowserNetwork();
         NetworkInfo info = customNetworks.map.get(activeNetwork);
         if (info != null) {
             return info;
@@ -418,7 +524,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public NetworkInfo getNetworkByChain(int chainId)
+    public NetworkInfo getNetworkByChain(long chainId)
     {
         NetworkInfo info = customNetworks.map.get(chainId);
         if (info != null) {
@@ -448,19 +554,19 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public List<Integer> getFilterNetworkList()
+    public List<Long> getFilterNetworkList()
     {
         return getSelectedFilters(preferences.isActiveMainnet());
     }
 
     @Override
-    public List<Integer> getSelectedFilters(boolean isMainNet)
+    public List<Long> getSelectedFilters(boolean isMainNet)
     {
         String filterList = preferences.getNetworkFilterList();
-        List<Integer> storedIds = Utils.intListToArray(filterList);
-        List<Integer> selectedIds = new ArrayList<>();
+        List<Long> storedIds = Utils.longListToArray(filterList);
+        List<Long> selectedIds = new ArrayList<>();
 
-        for (Integer networkId : storedIds)
+        for (Long networkId : storedIds)
         {
             if (hasRealValue(networkId) == isMainNet) { selectedIds.add(networkId); }
         }
@@ -476,15 +582,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public Integer getDefaultNetwork(boolean isMainNet)
+    public Long getDefaultNetwork(boolean isMainNet)
     {
         return isMainNet ? MAINNET_ID : RINKEBY_ID;
     }
 
     @Override
-    public void setFilterNetworkList(Integer[] networkList)
+    public void setFilterNetworkList(Long[] networkList)
     {
-        String store = Utils.intArrayToString(networkList);
+        String store = Utils.longArrayToString(networkList);
         preferences.setNetworkFilterList(store.toString());
     }
 
@@ -538,32 +644,19 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         onNetworkChangedListeners.add(onNetworkChanged);
     }
 
-    public static boolean hasRealValue(int chainId)
+    public static boolean hasRealValue(long chainId)
     {
-        switch (chainId)
+        if (customNetworks.mapToTestNet.containsKey(chainId))
         {
-            case MAINNET_ID:
-            case POA_ID:
-            case CLASSIC_ID:
-            case XDAI_ID:
-            case ARTIS_SIGMA1_ID:
-            case BINANCE_MAIN_ID:
-            case HECO_ID:
-            case AVALANCHE_ID:
-            case FANTOM_ID:
-            case MATIC_ID:
-            case OPTIMISTIC_MAIN_ID:
-            case ARBITRUM_MAIN_ID:
-                return true;
-            default:
-                if (customNetworks.mapToTestNet.containsKey(chainId)) {
-                    return customNetworks.mapToTestNet.get(chainId) == false;
-                }
-                return false;
+            return !customNetworks.mapToTestNet.get(chainId);
+        }
+        else
+        {
+            return hasValue.contains(chainId);
         }
     }
 
-    public static String getSecondaryNodeURL(int networkId)
+    public static String getSecondaryNodeURL(long networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
         if (info == null) {
@@ -577,66 +670,30 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     //TODO: Fold this into file and add to database
-    public static int getChainLogo(int networkId) {
-        switch (networkId)
+    public static int getChainLogo(long networkId) {
+        if (chainLogos.containsKey(networkId))
         {
-            case MAINNET_ID:
-                return R.drawable.ic_token_eth;
-            case KOVAN_ID:
-                return R.drawable.kovan_logo;
-            case ROPSTEN_ID:
-                return R.drawable.ropsten_logo;
-            case RINKEBY_ID:
-                return R.drawable.rinkeby_logo;
-            case POA_ID:
-                return R.drawable.ic_poa_logo;
-            case SOKOL_ID:
-                return R.drawable.ic_poa_sokol;
-            case CLASSIC_ID:
-                return R.drawable.classic_logo;
-            case XDAI_ID:
-                return R.drawable.xdai_logo;
-            case GOERLI_ID:
-                return R.drawable.goerli_logo;
-            case ARTIS_SIGMA1_ID:
-                return R.drawable.ic_artis_sigma_logo;
-            case ARTIS_TAU1_ID:
-                return R.drawable.ic_artis_tau_logo;
-            case BINANCE_MAIN_ID:
-                return R.drawable.ic_binance_logo;
-            case BINANCE_TEST_ID:
-                return R.drawable.ic_binance_test_logo;
-            case HECO_ID:
-            case HECO_TEST_ID:
-                return R.drawable.ic_heco_logo;
-            case FANTOM_ID:
-                return R.drawable.ic_fantom;
-            case FANTOM_TEST_ID:
-                return R.drawable.ic_icons_fantom_test;
-            case AVALANCHE_ID:
-                return R.drawable.ic_icons_tokens_avalanche;
-            case FUJI_TEST_ID:
-                return R.drawable.ic_icons_tokens_avalanche_testnet;
-            case MATIC_ID:
-                return R.drawable.ic_icons_polygon;
-            case MATIC_TEST_ID:
-                return R.drawable.ic_icons_matic;
-            case OPTIMISTIC_MAIN_ID:
-                return R.drawable.ic_optimism_logo;
-            case OPTIMISTIC_TEST_ID:
-                return R.drawable.ic_optimism_testnet_logo;
-            case CRONOS_TEST_ID:
-                return R.drawable.ic_cronos;
-            case ARBITRUM_MAIN_ID:
-                return R.drawable.ic_icons_arbitrum;
-            case ARBITRUM_TEST_ID:
-                return R.drawable.ic_icons_arbitrum_test;
-            default:
-                return R.drawable.ic_ethereum_logo;
+            return chainLogos.get(networkId);
+        }
+        else
+        {
+            return R.drawable.rinkeby_logo;
         }
     }
 
-    public static String getNodeURLByNetworkId(int networkId)
+    public static int getChainColour(long chainId)
+    {
+        if (chainColours.containsKey(chainId))
+        {
+            return chainColours.get(chainId);
+        }
+        else
+        {
+            return R.color.text_black;
+        }
+    }
+
+    public static String getNodeURLByNetworkId(long networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
         if (info == null) {
@@ -651,7 +708,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      * @param networkId
      * @return
      */
-    public static String getDefaultNodeURL(int networkId) {
+    public static String getDefaultNodeURL(long networkId) {
         NetworkInfo info = networkMap.get(networkId);
         if (info == null) {
             info = customNetworks.map.get(networkId);
@@ -660,7 +717,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         else return "";
     }
 
-    public static String getEtherscanURLbyNetworkAndHash(int networkId, String txHash)
+    public static String getEtherscanURLbyNetworkAndHash(long networkId, String txHash)
     {
         NetworkInfo info = networkMap.get(networkId);
         if (info == null) {
@@ -677,7 +734,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static int getNetworkIdFromName(String name)
+    public static long getNetworkIdFromName(String name)
     {
         if (!TextUtils.isEmpty(name)) {
             for (NetworkInfo NETWORK : customNetworks.map.values()) {
@@ -694,12 +751,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return 0;
     }
 
-    public static boolean hasGasOverride(int chainId)
+    public static boolean hasGasOverride(long chainId)
     {
         return false;
     }
 
-    public static BigInteger gasOverrideValue(int chainId)
+    public static BigInteger gasOverrideValue(long chainId)
     {
         return BigInteger.valueOf(1);
     }
@@ -709,12 +766,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static void addRequiredCredentials(int chainId, HttpService publicNodeService)
+    public static void addRequiredCredentials(long chainId, HttpService publicNodeService)
     {
 
     }
 
-    public static List<Integer> addDefaultNetworks()
+    public static List<Long> addDefaultNetworks()
     {
         return new ArrayList<>(Collections.singletonList(MAINNET_ID));
     }
@@ -725,7 +782,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public boolean isChainContract(int chainId, String address)
+    public boolean isChainContract(long chainId, String address)
     {
         return (addressOverride.containsKey(chainId) && address.equalsIgnoreCase(addressOverride.get(chainId)));
     }
@@ -735,18 +792,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return false;
     }
 
-    public static int getPriorityOverride(Token token)
+    public static long getPriorityOverride(Token token)
     {
         if (token.isEthereum()) return token.tokenInfo.chainId + 1;
         else return 0;
     }
 
-    public static int decimalOverride(String address, int chainId)
+    public static int decimalOverride(String address, long chainId)
     {
         return 0;
     }
 
-    public static String defaultDapp(int chainId)
+    public static String defaultDapp(long chainId)
     {
         String dapp = (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
         return dapp;
@@ -817,12 +874,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return preferences.isActiveMainnet();
     }
 
-    public void addCustomRPCNetwork(String networkName, String rpcUrl, int chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Integer oldChainId) {
+    public void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
         NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, explorerApiUrl);
         customNetworks.addCustomNetwork(info, isTestnet, oldChainId);
     }
 
-    public NetworkInfoExt getNetworkInfoExt(int chainId) {
+    public NetworkInfoExt getNetworkInfoExt(long chainId) {
 
         boolean isCustom = customNetworks.map.containsKey(chainId);
         NetworkInfo info = getNetworkByChain(chainId);
@@ -831,17 +888,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return new NetworkInfoExt(info, isTestNetwork, isCustom);
     }
 
-    public void removeCustomRPCNetwork(int chainId) {
+
+    public void removeCustomRPCNetwork(long chainId) {
         customNetworks.remove(chainId);
     }
 
-    public static NetworkInfo getNetworkInfo(int chainId) {
+    public static NetworkInfo getNetworkInfo(long chainId) {
         NetworkInfo info = networkMap.get(chainId);
         if (info == null) info = customNetworks.map.get(chainId);
         return info;
     }
 
-    public static String getShortChainName(int chainId)
+    public static String getShortChainName(long chainId)
     {
         NetworkInfo info = networkMap.get(chainId);
         if (info == null) info = customNetworks.map.get(chainId);
@@ -862,7 +920,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static String getChainSymbol(int chainId)
+    public static String getChainSymbol(long chainId)
     {
         NetworkInfo info = networkMap.get(chainId);
         if (info == null) info = customNetworks.map.get(chainId);

@@ -17,7 +17,7 @@ public class QRResult implements Parcelable
     private String protocol;
     private String address; //becomes the token address for a transfer
     private String functionStr;
-    public int chainId;
+    public long chainId;
     public BigInteger weiValue;
     public String functionDetail;
     public BigInteger gasLimit;
@@ -64,7 +64,7 @@ public class QRResult implements Parcelable
     {
         protocol = in.readString();
         address = in.readString();
-        chainId = in.readInt();
+        chainId = in.readLong();
         functionStr = in.readString();
         functionDetail = in.readString();
         gasLimit = new BigInteger(in.readString(), 16);
@@ -102,7 +102,7 @@ public class QRResult implements Parcelable
     {
         p.writeString(protocol);
         p.writeString(address);
-        p.writeInt(chainId);
+        p.writeLong(chainId);
         p.writeString(functionStr);
         p.writeString(functionDetail);
         p.writeString(gasLimit.toString(16));

@@ -2,8 +2,6 @@ package com.alphawallet.app.repository.entity;
 
 import com.alphawallet.app.entity.GasPriceSpread;
 
-import java.math.BigInteger;
-
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -13,7 +11,7 @@ import io.realm.annotations.PrimaryKey;
 public class RealmGasSpread extends RealmObject
 {
     @PrimaryKey
-    private int chainId;
+    private long chainId;
 
     private String rapid;
     private String fast;
@@ -22,7 +20,7 @@ public class RealmGasSpread extends RealmObject
     private String baseFee;
     private long timeStamp;
 
-    public int getChainId()
+    public long getChainId()
     {
         return chainId;
     }

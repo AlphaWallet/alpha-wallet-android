@@ -17,7 +17,7 @@ class SpawnableLinkGenerator {
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;
-    private static final int chainId = 100;
+    private static final long chainId = 100;
 
     // Time todo put in right format & set each time
     private static final String date = "20240706210000+0300";

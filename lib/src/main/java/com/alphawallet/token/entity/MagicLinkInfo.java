@@ -67,7 +67,7 @@ public class MagicLinkInfo
     private static final String artisSigma1Etherscan = "https://explorer.sigma1.artis.network/";
     private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
 
-    public static String getNetworkNameById(int networkId) {
+    public static String getNetworkNameById(long networkId) {
         NetworkInfo info = EthereumNetworkBase.getNetworkByChain(networkId);
         if (info != null)
         {
@@ -79,39 +79,39 @@ public class MagicLinkInfo
         }
     }
 
-    public static String getMagicLinkDomainFromNetworkId(int networkId) {
-        switch (networkId) {
+    public static String getMagicLinkDomainFromNetworkId(long networkId) {
+        switch ((int)networkId) {
             case 0:
                 return legacyMagicLinkDomain;
-            case MAINNET_ID:
+            case (int)MAINNET_ID:
             default:
                 return mainnetMagicLinkDomain;
-            case KOVAN_ID:
+            case (int)KOVAN_ID:
                 return kovanMagicLinkDomain;
-            case ROPSTEN_ID:
+            case (int)ROPSTEN_ID:
                 return ropstenMagicLinkDomain;
-            case RINKEBY_ID:
+            case (int)RINKEBY_ID:
                 return rinkebyMagicLinkDomain;
-            case POA_ID:
+            case (int)POA_ID:
                 return poaMagicLinkDomain;
-            case SOKOL_ID:
+            case (int)SOKOL_ID:
                 return sokolMagicLinkDomain;
-            case CLASSIC_ID:
+            case (int)CLASSIC_ID:
                 return classicMagicLinkDomain;
-            case XDAI_ID:
+            case (int)XDAI_ID:
                 return xDaiMagicLinkDomain;
-            case GOERLI_ID:
+            case (int)GOERLI_ID:
                 return goerliMagicLinkDomain;
-            case ARTIS_SIGMA1_ID:
+            case (int)ARTIS_SIGMA1_ID:
                 return artisSigma1MagicLinkDomain;
-            case ARTIS_TAU1_ID:
+            case (int)ARTIS_TAU1_ID:
                 return artisTau1MagicLinkDomain;
         }
     }
 
     //For testing you will not have the correct domain (localhost)
     //To test, alter the else statement to return the network you wish to test
-    public static int getNetworkIdFromDomain(String domain) {
+    public static long getNetworkIdFromDomain(String domain) {
         switch(domain) {
             case mainnetMagicLinkDomain:
             default:
@@ -142,39 +142,39 @@ public class MagicLinkInfo
     }
 
     //TODO: Refactor to use the centralised source
-    public static String getEtherscanURLbyNetwork(int networkId) {
-        switch (networkId) {
-            case MAINNET_ID:
+    public static String getEtherscanURLbyNetwork(long networkId) {
+        switch ((int)networkId) {
+            case (int)MAINNET_ID:
             default:
                 return mainNetEtherscan;
-            case KOVAN_ID:
+            case (int)KOVAN_ID:
                 return kovanEtherscan;
-            case ROPSTEN_ID:
+            case (int)ROPSTEN_ID:
                 return ropstenEtherscan;
-            case RINKEBY_ID:
+            case (int)RINKEBY_ID:
                 return rinkebyEtherscan;
-            case POA_ID:
+            case (int)POA_ID:
                 return poaEtherscan;
-            case SOKOL_ID:
+            case (int)SOKOL_ID:
                 return sokolEtherscan;
-            case CLASSIC_ID:
+            case (int)CLASSIC_ID:
                 return classicEtherscan;
-            case XDAI_ID:
+            case (int)XDAI_ID:
                 return xDaiEtherscan;
-            case GOERLI_ID:
+            case (int)GOERLI_ID:
                 return goerliEtherscan;
-            case ARTIS_SIGMA1_ID:
+            case (int)ARTIS_SIGMA1_ID:
                 return artisSigma1Etherscan;
-            case ARTIS_TAU1_ID:
+            case (int)ARTIS_TAU1_ID:
                 return artisTau1Etherscan;
         }
     }
 
-    public static int identifyChainId(String link)
+    public static long identifyChainId(String link)
     {
         if (link == null || link.length() == 0) return 0;
 
-        int chainId = 0;
+        long chainId = 0;
         //split out the chainId from the magiclink
         int index = link.indexOf(mainnetMagicLinkDomain);
         int dSlash = link.indexOf("://");
@@ -193,7 +193,7 @@ public class MagicLinkInfo
         return chainId;
     }
 
-    public static String generatePrefix(int chainId)
+    public static String generatePrefix(long chainId)
     {
         return "https://" + getMagicLinkDomainFromNetworkId(chainId) + "/";
     }

@@ -11,12 +11,12 @@ public class FindDefaultNetworkInteract {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
-    public String getNetworkName(int chainId)
+    public String getNetworkName(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).getShortName();
     }
 
-    public NetworkInfo getNetworkInfo(int chainId)
+    public NetworkInfo getNetworkInfo(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId);
     }

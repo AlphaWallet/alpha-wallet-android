@@ -189,7 +189,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return DappBrowserUtils.getDappsList(context);
     }
 
-    public void setNetwork(int chainId)
+    public void setNetwork(long chainId)
     {
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
         if (info != null)
@@ -247,7 +247,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         ctx.startActivity(intent);
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, int chainId, SendTransactionInterface callback)
+    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
     {
         if (finalTx.isConstructor())
         {
@@ -277,7 +277,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
     }
 
-    public void updateGasPrice(int chainId)
+    public void updateGasPrice(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
     }
@@ -317,17 +317,17 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return tokensService;
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
 
-    public String getNetworkNodeRPC(int chainId)
+    public String getNetworkNodeRPC(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
     }
 
-    public NetworkInfo getNetworkInfo(int chainId)
+    public NetworkInfo getNetworkInfo(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId);
     }
@@ -340,7 +340,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void addCustomChain(WalletAddEthereumChainObject chainObject) {
         this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
-                chainObject.nativeCurrency.symbol, "", "", false, -1);
+                chainObject.nativeCurrency.symbol, "", "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())
                 .subscribeOn(Schedulers.io())

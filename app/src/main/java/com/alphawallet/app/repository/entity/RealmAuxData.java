@@ -34,7 +34,7 @@ public class RealmAuxData extends RealmObject
 {
     @PrimaryKey
     private String instanceKey; //should be token address, token Id, chainId
-    private int chainId;
+    private long chainId;
     private String tokenAddress;
     private String tokenId;
     private String functionId;
@@ -47,7 +47,7 @@ public class RealmAuxData extends RealmObject
         return instanceKey;
     }
 
-    public int getChainId()
+    public long getChainId()
     {
         return chainId;
     }
@@ -66,7 +66,7 @@ public class RealmAuxData extends RealmObject
         else return "";
     }
 
-    public int getExtendId()
+    public long getExtendId()
     {
         String[] split = instanceKey.split("-");
         if (split.length > 3)
@@ -74,14 +74,14 @@ public class RealmAuxData extends RealmObject
             String extendId = split[3];
             if (extendId != null && extendId.length() > 0 && Character.isDigit(extendId.charAt(0)))
             {
-                return Integer.parseInt(extendId);
+                return Long.parseLong(extendId);
             }
         }
 
         return 0;
     }
 
-    public void setChainId(int chainId)
+    public void setChainId(long chainId)
     {
         this.chainId = chainId;
     }

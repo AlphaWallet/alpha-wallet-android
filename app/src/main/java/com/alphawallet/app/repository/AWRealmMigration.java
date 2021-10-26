@@ -344,51 +344,34 @@ public class AWRealmMigration implements RealmMigration
 
         if (oldVersion == 34)
         {
-            RealmObjectSchema realmToken = schema.get("RealmToken");
-            realmToken.addField("temp_chainId", long.class)
-                    .transform(new RealmObjectSchema.Function() {
-                        @Override
-                        public void apply(DynamicRealmObject obj) {
-                            obj.setLong("temp_chainId", (long)obj.getInt("chainId"));
-                        }
-                    })
+            RealmObjectSchema realmData = schema.get("RealmToken");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
                     .removeField("chainId")
                     .renameField("temp_chainId", "chainId");
 
-            RealmObjectSchema realmData = schema.get("RealmAuxData");
+            realmData = schema.get("RealmAuxData");
             realmData.addField("temp_chainId", long.class)
-                    .transform(new RealmObjectSchema.Function() {
-                        @Override
-                        public void apply(DynamicRealmObject obj) {
-                            obj.setLong("temp_chainId", (long)obj.getInt("chainId"));
-                        }
-                    })
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
                     .removeField("chainId")
                     .renameField("temp_chainId", "chainId");
 
             realmData = schema.get("RealmGasSpread");
-            realmData.removeField("chainId");
-            realmData.addField("chainId", long.class, FieldAttribute.PRIMARY_KEY);
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId")
+                    .addPrimaryKey("chainId");
 
             realmData = schema.get("RealmTransaction");
             realmData.addField("temp_chainId", long.class)
-                    .transform(new RealmObjectSchema.Function() {
-                        @Override
-                        public void apply(DynamicRealmObject obj) {
-                            obj.setLong("temp_chainId", (long)obj.getInt("chainId"));
-                        }
-                    })
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
                     .removeField("chainId")
                     .renameField("temp_chainId", "chainId");
 
             realmData = schema.get("RealmWCSession");
             realmData.addField("temp_chainId", long.class)
-                    .transform(new RealmObjectSchema.Function() {
-                        @Override
-                        public void apply(DynamicRealmObject obj) {
-                            obj.setLong("temp_chainId", (long)obj.getInt("chainId"));
-                        }
-                    })
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
                     .removeField("chainId")
                     .renameField("temp_chainId", "chainId");
 

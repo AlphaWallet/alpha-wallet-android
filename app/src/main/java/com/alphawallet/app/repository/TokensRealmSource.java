@@ -805,10 +805,8 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                     .sort("addedTime", Sort.ASCENDING)
-                    //.beginGroup().equalTo("isEnabled", true).or().like("address", wallet.address + "*", Case.INSENSITIVE).endGroup()
                     .beginGroup().equalTo("isEnabled", true).or().equalTo("visibilityChanged", false)
                         .or().like("address", wallet.address + "*", Case.INSENSITIVE).endGroup()
-                    //.like("address", ADDRESS_FORMAT)
                     .findAll();
 
             for (RealmToken t : realmItems)

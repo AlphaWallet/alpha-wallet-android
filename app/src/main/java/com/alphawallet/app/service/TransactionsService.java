@@ -1,7 +1,9 @@
 package com.alphawallet.app.service;
 
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Pair;
 
 import androidx.annotation.Nullable;
@@ -50,6 +52,9 @@ public class TransactionsService
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
     private boolean nftCheck;
+
+    private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
+    private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
@@ -112,6 +117,9 @@ public class TransactionsService
 
     public void startUpdateCycle()
     {
+        chainTransferCheckTimes.clear();
+        chainTransactionCheckTimes.clear();
+
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
             fetchTransactions();
@@ -172,7 +180,7 @@ public class TransactionsService
     private void readTokenMoves(long chainId, boolean isNFT)
     {
         //check if this route has combined NFT
-        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
         if (isNFT)
         {
             tokensService.checkingChain(chainId);
@@ -181,7 +189,7 @@ public class TransactionsService
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(isNFT), this::gotReadErr);
+                .subscribe(count -> handleMoveCheck(info.chainId, isNFT), this::gotReadErr);
     }
 
     private void gotReadErr(Throwable e)
@@ -190,8 +198,9 @@ public class TransactionsService
         if (BuildConfig.DEBUG) e.printStackTrace();
     }
 
-    private void handleMoveCheck(boolean isNFT)
+    private void handleMoveCheck(long chainId, boolean isNFT)
     {
+        chainTransferCheckTimes.put(chainId, System.currentTimeMillis());
         if (isNFT) tokensService.checkingChain(0); //this flags to TokensService that the check is complete. This avoids race condition
         eventFetch = null;
     }
@@ -201,7 +210,7 @@ public class TransactionsService
         if (tokensService.getCurrentAddress() == null) return;
         if (fetchTransactionDisposable == null)
         {
-            Token t = tokensService.getRequiresTransactionUpdate();
+            Token t = getRequiresTransactionUpdate();
 
             if (t != null)
             {
@@ -215,6 +224,40 @@ public class TransactionsService
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
             }
+        }
+    }
+
+    private Token getRequiresTransactionUpdate()
+    {
+        List<Long> chains = tokensService.getNetworkFilters();
+
+        long timeIndex = 1;
+        long oldestCheck = Long.MAX_VALUE;
+        long checkChainId = 0;
+
+        for (Long chainId : chains)
+        {
+            long checkTime = chainTransactionCheckTimes.get(chainId, 0L);
+            if (checkTime == 0L)
+            {
+                chainTransactionCheckTimes.put(chainId, timeIndex++);
+            }
+            else if (checkTime < oldestCheck)
+            {
+                oldestCheck = checkTime;
+                checkChainId = chainId;
+            }
+        }
+
+        //check lowest value
+        if ((System.currentTimeMillis() - oldestCheck) > 45* DateUtils.SECOND_IN_MILLIS)
+        {
+            chainTransactionCheckTimes.put(checkChainId, System.currentTimeMillis());
+            return tokensService.getServiceToken(checkChainId);
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -404,7 +447,6 @@ public class TransactionsService
                 case SEND:
                     if (BuildConfig.DEBUG) Log.d(TAG, "Trigger check for " + t.getFullName());
                     //setup next check to be for this chain
-                    //find in index
                     setNextTransferCheck(transaction.chainId, t.isNonFungible());
                 default:
                     break;

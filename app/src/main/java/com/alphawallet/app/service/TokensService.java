@@ -66,7 +66,7 @@ public class TokensService
     private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>(); //this is used to compute the USD value of the tokens on an address
     private static final Map<Long, Long> pendingChainMap = new ConcurrentHashMap<>();
     private static final Map<String, LongSparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedDeque<Token> tokenStoreList = new ConcurrentLinkedDeque<>(); //used to hold tokens that will be stored
+    private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
     private String currentAddress = null;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -758,6 +758,9 @@ public class TokensService
      * Token update heuristic - calculates which token should be updated next
      * @return
      */
+
+    //TODO: Integrate the transfer check update time into the priority calculation
+    //TODO: If we have done a transfer check recently then we don't need to check balance here
     public Token getNextInBalanceUpdateQueue()
     {
         //pull all tokens from this wallet out of DB
@@ -785,9 +788,10 @@ public class TokensService
             float updateFactor = weighting * (float) lastCheckDiff;
             long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS; //normal minimum update frequency for token 30 seconds
 
-            if (lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
+            if (!check.isEthereum() && lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
             {
                 cutoffCheck = 120*DateUtils.SECOND_IN_MILLIS;
+                updateFactor = 0.5f * updateFactor;
             }
 
             if (isFocusToken(check))
@@ -886,48 +890,6 @@ public class TokensService
 
         //set network filter prefs
         ethereumNetworkRepository.setFilterNetworkList(networkFilter.toArray(new Long[0]));
-    }
-
-    /**
-     * Determine if the token or chain requires a transaction fetch
-     * @param pendingTxChains
-     * @return
-     */
-    public Token getRequiresTransactionUpdate()
-    {
-        //pull all tokens from this wallet out of DB
-        TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), networkFilter);
-
-        //calculate update based on last update time & importance
-        long currentTime = System.currentTimeMillis();
-        Token highestToken = null;
-        long highestDiff = 0;
-
-        for (TokenCardMeta check : tokenList)
-        {
-            Token token = getToken(check.getChain(), check.getAddress());
-            if (token == null) continue;
-            if (!token.needsTransactionCheck()) continue;
-            long timeIntervalCheck = getTokenTimeInterval(token);
-            if (timeIntervalCheck == 0) continue;
-
-            if (focusToken != null && token.tokenInfo.chainId == focusToken.chainId)
-            {
-                timeIntervalCheck = 10*DateUtils.SECOND_IN_MILLIS;
-            }
-
-            if (currentTime >= (token.lastTxCheck + timeIntervalCheck))
-            {
-                long diff = currentTime - (token.lastTxCheck + timeIntervalCheck);
-                if (diff > highestDiff)
-                {
-                    highestDiff = diff;
-                    highestToken = token;
-                }
-            }
-        }
-
-        return highestToken;
     }
 
     /**
@@ -1104,5 +1066,15 @@ public class TokensService
     public void checkingChain(long chainId)
     {
         transferCheckChain = chainId;
+    }
+
+    public void addBalanceCheck(Token token)
+    {
+        for (Token t : tokenStoreList)
+        {
+            if (t.equals(token)) return;
+        }
+
+        tokenStoreList.add(token);
     }
 }

@@ -561,9 +561,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
             }
-            else //not NFT
+            else if (newToken) // new Fungible token
             {
-                if (newToken) svs.storeToken(token);
+                svs.storeToken(token);
+            }
+            else
+            {
+                //instruct tokensService to update balance
+                svs.addBalanceCheck(token);
             }
 
             //Send to storage as soon as each token is done

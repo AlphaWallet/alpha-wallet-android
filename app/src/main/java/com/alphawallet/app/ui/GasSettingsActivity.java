@@ -334,30 +334,27 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     speedGwei = context.getString(R.string.bracketed, context.getString(R.string.set_your_speed));
                     useGasLimit = customGasLimit;
                 }
-                if (warningType != Warning.OFF)
+
+                holder.speedName.setVisibility(View.GONE);
+                holder.warning.setVisibility(View.VISIBLE);
+
+                switch (warningType)
                 {
-                    Log.d("SPEED","BOOP");
-                    holder.speedName.setVisibility(View.GONE);
-                    holder.warning.setVisibility(View.VISIBLE);
-                    switch (warningType)
-                    {
-                        case LOW:
-                            holder.warningText.setText(R.string.speed_too_low);
-                            break;
-                        case HIGH:
-                            holder.warningText.setText(R.string.speed_high_gas);
-                            break;
-                        case INSUFFICIENT:
-                            holder.warningText.setText(R.string.insufficient_gas);
-                    }
-                }
-                else
-                {
-                    holder.warning.setVisibility(View.GONE);
-                    holder.speedName.setVisibility(View.VISIBLE);
+                    case OFF:
+                        holder.warning.setVisibility(View.GONE);
+                        holder.speedName.setVisibility(View.VISIBLE);
+                        break;
+                    case LOW:
+                        holder.warningText.setText(R.string.speed_too_low);
+                        break;
+                    case HIGH:
+                        holder.warningText.setText(R.string.speed_high_gas);
+                        break;
+                    case INSUFFICIENT:
+                        holder.warningText.setText(R.string.insufficient_gas);
+                        break;
                 }
             }
-
 
             BigDecimal gasFee = new BigDecimal(gs.gasPrice).multiply(useGasLimit);
 

@@ -37,6 +37,7 @@
         <activity
             android:launchMode="singleTask"
             android:name=".ui.HomeActivity"
+            android:theme="@style/SplashTheme"
             android:label="@string/toolbar_header_wallet"
             android:windowSoftInputMode="adjustPan"
             >

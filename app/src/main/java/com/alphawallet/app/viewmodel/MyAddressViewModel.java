@@ -27,7 +27,7 @@ public class MyAddressViewModel extends BaseViewModel {
         return ethereumNetworkRepository;
     }
 
-    public NetworkInfo getNetworkByChain(int chainId) {
+    public NetworkInfo getNetworkByChain(long chainId) {
         return ethereumNetworkRepository.getNetworkByChain(chainId);
     }
 

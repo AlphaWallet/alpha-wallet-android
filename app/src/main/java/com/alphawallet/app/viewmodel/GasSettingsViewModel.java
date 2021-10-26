@@ -40,7 +40,7 @@ public class GasSettingsViewModel extends BaseViewModel {
         return new BigDecimal(gasPrice.getValue().multiply(gasLimit.getValue()));
     }
 
-    public Token getBaseCurrencyToken(int chainId)
+    public Token getBaseCurrencyToken(long chainId)
     {
         return tokensService.getToken(chainId, tokensService.getCurrentAddress());
     }

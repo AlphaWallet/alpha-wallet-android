@@ -6,12 +6,12 @@ package com.alphawallet.app.entity;
  */
 public class UnknownToken
 {
-    public int chainId;
+    public long chainId;
     public String name;
     public String address;
     public boolean isPopular;
 
-    public UnknownToken(int chainId, String address, boolean isPopular)
+    public UnknownToken(long chainId, String address, boolean isPopular)
     {
         this.chainId = chainId;
         this.address = address;

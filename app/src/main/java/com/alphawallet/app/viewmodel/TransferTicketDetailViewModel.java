@@ -264,7 +264,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         keyService.completeAuthentication(signData);
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
@@ -279,7 +279,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         keyService.completeAuthentication(signData);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId)
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)
@@ -287,7 +287,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                         transactionError::postValue);
     }
 
-    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, int chainId) {
+    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, long chainId) {
         Token token = tokensService.getToken(chainId, contractAddress);
         List<BigInteger> tokenIds = token.stringHexToBigIntegerList(tokenId);
         return TokenRepository.createERC721TransferFunction(to, token, tokenIds);

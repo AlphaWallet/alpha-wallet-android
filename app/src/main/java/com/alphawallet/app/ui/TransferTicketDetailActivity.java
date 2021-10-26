@@ -157,7 +157,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
 
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
@@ -824,7 +824,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         final String txSendAddress = sendAddress;
         sendAddress = null;
 
-        final byte[] transactionBytes = viewModel.getERC721TransferBytes(txSendAddress,token.getAddress(),ticketIds,token.tokenInfo.chainId);
+        final byte[] transactionBytes = viewModel.getERC721TransferBytes(txSendAddress,token.getAddress(),ticketIds, token.tokenInfo.chainId);
         if (token.isEthereum())
         {
             checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);

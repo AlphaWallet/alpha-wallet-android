@@ -96,7 +96,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
 
         MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener() {
             @Override
-            public void onEditNetwork(int chainId) {
+            public void onEditNetwork(long chainId) {
                 Intent intent = new Intent(SelectNetworkFilterActivity.this, AddCustomRPCNetworkActivity.class);
                 intent.putExtra(CHAIN_ID, chainId);
                 startActivity(intent);
@@ -113,7 +113,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     @Override
     protected void handleSetNetworks()
     {
-        List<Integer> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
+        List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
 

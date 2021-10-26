@@ -157,7 +157,7 @@ public class QRParser {
     {
         try
         {
-            int chainId = MagicLinkInfo.identifyChainId(data);
+            long chainId = MagicLinkInfo.identifyChainId(data);
 
             if (chainId > 0) //see if it's a valid link
             {

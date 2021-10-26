@@ -97,7 +97,7 @@ public class TransactionDecoder
         return thisData;
     }
 
-    public TransactionInput decodeInput(Web3Transaction web3Tx, int chainId, String walletAddress)
+    public TransactionInput decodeInput(Web3Transaction web3Tx, long chainId, String walletAddress)
     {
         TransactionInput thisData = decodeInput(web3Tx.payload);
         Transaction tx = new Transaction(web3Tx, chainId, walletAddress);

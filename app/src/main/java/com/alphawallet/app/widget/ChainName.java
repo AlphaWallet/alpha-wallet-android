@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.util.Utils;
 
 /**
  * Created by JB on 3/12/2020.
@@ -28,15 +27,15 @@ public class ChainName extends LinearLayout
         getAttrs(context, attrs);
     }
 
-    public void setChainID(int chainId)
+    public void setChainID(long chainId)
     {
-        Utils.setChainColour(chainName, chainId);
+        EthereumNetworkBase.setChainColour(chainName, chainId);
         chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
     }
 
-    public void invertChainID(int chainId)
+    public void invertChainID(long chainId)
     {
-        chainName.setTextColor(getContext().getColor(Utils.getChainColour(chainId)));
+        chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
         chainName.setBackgroundResource(0);
     }
 

@@ -269,7 +269,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, int chainId)
+    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, long chainId)
     {
         txList.clear();
         for (EtherscanTransaction etx : myTxs)
@@ -561,9 +561,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
             }
-            else //not NFT
+            else if (newToken) // new Fungible token
             {
-                if (newToken) svs.storeToken(token);
+                svs.storeToken(token);
+            }
+            else
+            {
+                //instruct tokensService to update balance
+                svs.addBalanceCheck(token);
             }
 
             //Send to storage as soon as each token is done
@@ -706,7 +711,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return getEtherscanTransactionsFromCovalent(result, walletAddress, networkInfo);
     }
 
-    private long getTokenBlockRead(Realm instance, int chainId, boolean isNFT)
+    private long getTokenBlockRead(Realm instance, long chainId, boolean isNFT)
     {
         RealmAuxData rd = instance.where(RealmAuxData.class)
                 .equalTo("instanceKey", BLOCK_ENTRY + chainId)
@@ -722,7 +727,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeTokenBlockRead(Realm instance, int chainId, long lastBlockChecked, boolean isNFT)
+    private void writeTokenBlockRead(Realm instance, long chainId, long lastBlockChecked, boolean isNFT)
     {
         instance.executeTransaction(r -> {
             RealmAuxData rd = r.where(RealmAuxData.class)
@@ -745,7 +750,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         });
     }
 
-    private long getOldestBlockRead(Realm instance, int chainId, long lastTxTime)
+    private long getOldestBlockRead(Realm instance, long chainId, long lastTxTime)
     {
         long txBlockRead = 0;
         try
@@ -770,14 +775,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return txBlockRead;
     }
 
-    private long getFirstTransactionBlock(Realm instance, int chainId, String walletAddress)
+    private long getFirstTransactionBlock(Realm instance, long chainId, String walletAddress)
     {
         long txBlockRead = 0;
         try
         {
             RealmToken realmToken = instance.where(RealmToken.class)
                     .equalTo("address", databaseKey(chainId, walletAddress))
-                    .equalTo("chainId", chainId)
                     .findFirst();
 
             if (realmToken != null)
@@ -793,7 +797,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return txBlockRead;
     }
 
-    private List<TransactionMeta> fetchOlderThan(String walletAddress, long fetchTime, int chainId)
+    private List<TransactionMeta> fetchOlderThan(String walletAddress, long fetchTime, long chainId)
     {
         List<TransactionMeta> metas = new ArrayList<>();
         try (Realm instance = realmManager.getRealmInstance(walletAddress.toLowerCase()))
@@ -819,14 +823,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return metas;
     }
 
-    private void storeLatestBlockRead(String walletAddress, int chainId, String tokenAddress, String lastBlockRead)
+    private void storeLatestBlockRead(String walletAddress, long chainId, String tokenAddress, String lastBlockRead)
     {
         try (Realm instance = realmManager.getRealmInstance(walletAddress))
         {
             instance.executeTransactionAsync(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", databaseKey(chainId, tokenAddress))
-                        .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (realmToken != null)
@@ -842,14 +845,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void storeEarliestBlockRead(Realm instance, int chainId, String walletAddress, long earliestBlock)
+    private void storeEarliestBlockRead(Realm instance, long chainId, String walletAddress, long earliestBlock)
     {
         try
         {
             instance.executeTransactionAsync(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", databaseKey(chainId, walletAddress))
-                        .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (realmToken != null)
@@ -864,7 +866,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    public void deleteAllChainTransactions(Realm instance, int chainId, String walletAddress)
+    public void deleteAllChainTransactions(Realm instance, long chainId, String walletAddress)
     {
         try
         {
@@ -887,11 +889,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void resetBlockRead(Realm r, int chainId, String walletAddress)
+    private void resetBlockRead(Realm r, long chainId, String walletAddress)
     {
         RealmToken realmToken = r.where(RealmToken.class)
                 .equalTo("address", databaseKey(chainId, walletAddress))
-                .equalTo("chainId", chainId)
                 .findFirst();
 
         if (realmToken != null)
@@ -993,7 +994,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @param chainId networkId
      * @param txFetches map of transactions that need writing. Note we use a map to de-duplicate
      */
-    private void fetchRequiredTransactions(Realm instance, int chainId, Map<String, Transaction> txFetches)
+    private void fetchRequiredTransactions(Realm instance, long chainId, Map<String, Transaction> txFetches)
     {
         //TODO: this should go into the TX service, or be loaded at view time.
         instance.executeTransactionAsync(r -> {

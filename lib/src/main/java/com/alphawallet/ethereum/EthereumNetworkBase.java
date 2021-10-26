@@ -8,32 +8,34 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class EthereumNetworkBase { // implements EthereumNetworkRepositoryType
-    public static final int MAINNET_ID = 1;
-    public static final int CLASSIC_ID = 61;
-    public static final int POA_ID = 99;
-    public static final int KOVAN_ID = 42;
-    public static final int ROPSTEN_ID = 3;
-    public static final int SOKOL_ID = 77;
-    public static final int RINKEBY_ID = 4;
-    public static final int XDAI_ID = 100;
-    public static final int GOERLI_ID = 5;
-    public static final int ARTIS_SIGMA1_ID = 246529;
-    public static final int ARTIS_TAU1_ID = 246785;
-    public static final int BINANCE_TEST_ID = 97;
-    public static final int BINANCE_MAIN_ID = 56;
-    public static final int HECO_ID = 128;
-    public static final int HECO_TEST_ID = 256;
-    public static final int FANTOM_ID = 250;
-    public static final int FANTOM_TEST_ID = 4002;
-    public static final int AVALANCHE_ID = 43114;
-    public static final int FUJI_TEST_ID = 43113;
-    public static final int MATIC_ID = 137;
-    public static final int MATIC_TEST_ID = 80001;
-    public static final int OPTIMISTIC_MAIN_ID = 10;
-    public static final int OPTIMISTIC_TEST_ID = 69;
-    public static final int CRONOS_TEST_ID = 338;
-    public static final int ARBITRUM_MAIN_ID = 42161;
-    public static final int ARBITRUM_TEST_ID = 421611;
+    public static final long MAINNET_ID = 1;
+    public static final long CLASSIC_ID = 61;
+    public static final long POA_ID = 99;
+    public static final long KOVAN_ID = 42;
+    public static final long ROPSTEN_ID = 3;
+    public static final long SOKOL_ID = 77;
+    public static final long RINKEBY_ID = 4;
+    public static final long XDAI_ID = 100;
+    public static final long GOERLI_ID = 5;
+    public static final long ARTIS_SIGMA1_ID = 246529;
+    public static final long ARTIS_TAU1_ID = 246785;
+    public static final long BINANCE_TEST_ID = 97;
+    public static final long BINANCE_MAIN_ID = 56;
+    public static final long HECO_ID = 128;
+    public static final long HECO_TEST_ID = 256;
+    public static final long FANTOM_ID = 250;
+    public static final long FANTOM_TEST_ID = 4002;
+    public static final long AVALANCHE_ID = 43114;
+    public static final long FUJI_TEST_ID = 43113;
+    public static final long MATIC_ID = 137;
+    public static final long MATIC_TEST_ID = 80001;
+    public static final long OPTIMISTIC_MAIN_ID = 10;
+    public static final long OPTIMISTIC_TEST_ID = 69;
+    public static final long CRONOS_TEST_ID = 338;
+    public static final long ARBITRUM_MAIN_ID = 42161;
+    public static final long ARBITRUM_TEST_ID = 421611;
+    public static final long PALM_ID = 0x2a15c308dL; //11297108109
+    public static final long PALM_TEST_ID = 0x2a15c3083L; //11297108099
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -62,8 +64,10 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8545";
     public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARBITRUM_TEST_RPC_URL = "https://arbitrum-rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
   
-    static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
+    static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
                     MAINNET_ID));
@@ -120,14 +124,19 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     ARBITRUM_MAIN_ID));
             put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Test", "ARETH", ARBITRUM_TEST_RPC_URL, "https://rinkeby-explorer.arbitrum.io/tx/",
                     ARBITRUM_TEST_ID));
+
+            put(PALM_ID, new NetworkInfo("PALM","PALM", PALM_RPC_URL, "https://explorer.palm.io/tx/",
+                    PALM_ID));
+            put(PALM_TEST_ID, new NetworkInfo("PALM (Test)", "PALM", PALM_TEST_RPC_URL, "https://explorer.palm-uat.xyz/tx/",
+                    PALM_TEST_ID));
         }
     };
 
-    public static NetworkInfo getNetworkByChain(int chainId) {
+    public static NetworkInfo getNetworkByChain(long chainId) {
         return networkMap.get(chainId);
     }
 
-    public static String getShortChainName(int chainId)
+    public static String getShortChainName(long chainId)
     {
         NetworkInfo info = networkMap.get(chainId);
         if (info != null)
@@ -147,7 +156,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
         }
     }
 
-    public static String getChainSymbol(int chainId)
+    public static String getChainSymbol(long chainId)
     {
         NetworkInfo info = networkMap.get(chainId);
         if (info != null)

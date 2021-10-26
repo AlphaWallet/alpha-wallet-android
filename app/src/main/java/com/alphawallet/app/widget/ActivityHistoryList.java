@@ -188,7 +188,7 @@ public class ActivityHistoryList extends LinearLayout
         }
     }
 
-    private RealmQuery<RealmTransaction> getContractListener(int chainId, String tokenAddress, int count)
+    private RealmQuery<RealmTransaction> getContractListener(long chainId, String tokenAddress, int count)
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)
@@ -198,7 +198,7 @@ public class ActivityHistoryList extends LinearLayout
                 .limit(count);
     }
 
-    private RealmQuery<RealmTransaction> getEthListener(int chainId, Wallet wallet, int count)
+    private RealmQuery<RealmTransaction> getEthListener(long chainId, Wallet wallet, int count)
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)

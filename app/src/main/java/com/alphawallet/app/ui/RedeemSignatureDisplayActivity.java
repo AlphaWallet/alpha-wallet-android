@@ -86,7 +86,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel = new ViewModelProvider(this, redeemSignatureDisplayModelFactory)
                 .get(RedeemSignatureDisplayModel.class);
 
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);

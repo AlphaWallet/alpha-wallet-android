@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
 import com.alphawallet.token.tools.Numeric;
@@ -140,7 +141,7 @@ public class AWEnsResolver extends EnsResolver
         {
             if (matcher.find())
             {
-                int chainId = Integer.parseInt(Objects.requireNonNull(matcher.group(2)));
+                long chainId = Long.parseLong(Objects.requireNonNull(matcher.group(2)));
                 String tokenAddress = Numeric.prependHexPrefix(matcher.group(6));
                 String tokenId = matcher.group(8);
 
@@ -165,21 +166,10 @@ public class AWEnsResolver extends EnsResolver
         return "";
     }
 
-    private JSONObject fetchOpenseaAsset(int chainId, String tokenAddress, String tokenId)
+    private JSONObject fetchOpenseaAsset(long chainId, String tokenAddress, String tokenId)
     {
-        String apiBase;
-        switch (chainId)
-        {
-            case 1:
-                apiBase = "https://api.opensea.io";
-                break;
-            case 4:
-                apiBase = "https://rinkeby-api.opensea.io";
-                break;
-            default:
-                return null;
-        }
-
+        String apiBase = OpenSeaService.apiMap.get(chainId);
+        if (apiBase == null) return null;
 
         Request request = new Request.Builder()
                     .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)

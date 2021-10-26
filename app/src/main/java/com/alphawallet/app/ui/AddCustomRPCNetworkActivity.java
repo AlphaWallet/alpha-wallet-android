@@ -83,7 +83,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
         initViewModel();
 
-        int chainId = getIntent().getIntExtra(CHAIN_ID, -1);
+        long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
 
         if (chainId >= 0) {
             // get network info and fill ui
@@ -144,7 +144,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             return false;
         } else {
             try {
-                Integer.parseInt(chainIdInputView.getText().toString());
+                Long.parseLong(chainIdInputView.getText().toString());
             } catch (NumberFormatException ex) {
                 chainIdInputView.setError(getString(R.string.error_must_numeric));
                 return false;
@@ -190,15 +190,15 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     public void handleClick(String action, int actionId)
     {
         if (validateInputs()) {
-            int oldChainId = getIntent().getIntExtra(CHAIN_ID, -1);
+            long oldChainId = getIntent().getLongExtra(CHAIN_ID, -1);
 
             // add network
             viewModel.addNetwork(nameInputView.getText().toString(),
                     rpcUrlInputView.getText().toString(),
-                    Integer.parseInt(chainIdInputView.getText().toString()),
+                    Long.parseLong(chainIdInputView.getText().toString()),
                     symbolInputView.getText().toString(),
                     blockExplorerUrlInputView.getText().toString(),
-                    blockExplorerApiUrl.getText().toString(), testNetSwitch.isChecked(), oldChainId != -1 ? oldChainId : null);
+                    blockExplorerApiUrl.getText().toString(), testNetSwitch.isChecked(), oldChainId != -1L ? oldChainId : null);
             finish();
         } else {
             handler.postDelayed(this::resetValidateErrors, 2000);

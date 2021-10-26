@@ -130,7 +130,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(() -> onDefaultWallet(wallet), this::onError);
     }
 
-    public void onPrepare(int chainId)
+    public void onPrepare(long chainId)
     {
         walletBalances.clear();
         progress.postValue(true);

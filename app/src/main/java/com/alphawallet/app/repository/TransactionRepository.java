@@ -70,7 +70,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+	public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
 	{
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
@@ -95,7 +95,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
 	{
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
@@ -128,7 +128,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, int chainId) {
+	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 
@@ -169,7 +169,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	 * @return
 	 */
 	@Override
-	public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, int chainId) {
+	public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, long chainId) {
 		TransactionData txData = new TransactionData();
 
 		return getRawTransaction(txData.nonce, w3tx.gasPrice, w3tx.gasLimit, w3tx.value, w3tx.payload)
@@ -183,7 +183,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	// Called for constructors from web3 Dapp transaction
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
+	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, long chainId) {
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 
@@ -210,13 +210,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.subscribeOn(Schedulers.io());
 	}
 
-	private BigInteger gasPriceForNode(int chainId, BigInteger gasPrice)
+	private BigInteger gasPriceForNode(long chainId, BigInteger gasPrice)
 	{
 		if (EthereumNetworkRepository.hasGasOverride(chainId)) return EthereumNetworkRepository.gasOverrideValue(chainId);
 		else return gasPrice;
 	}
 
-	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, int chainId, String data, String contractAddr)
+	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, long chainId, String data, String contractAddr)
 	{
 		return Single.fromCallable(() -> {
 			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
@@ -229,7 +229,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		});
 	}
 
-	private Single<String> storeUnconfirmedTransaction(Wallet from, String txHash, String toAddress, BigInteger value, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, int chainId, String data)
+	private Single<String> storeUnconfirmedTransaction(Wallet from, String txHash, String toAddress, BigInteger value, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, long chainId, String data)
 	{
 		return Single.fromCallable(() -> {
 
@@ -254,7 +254,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					data));
 	}
 
-	private Single<byte[]> signEncodeRawTransaction(RawTransaction rtx, Wallet wallet, int chainId)
+	private Single<byte[]> signEncodeRawTransaction(RawTransaction rtx, Wallet wallet, long chainId)
 	{
 		return Single.fromCallable(() -> TransactionEncoder.encode(rtx))
 				.flatMap(encoded -> accountKeystoreService.signTransaction(wallet, encoded, chainId))
@@ -277,12 +277,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId) {
+	public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, long chainId) {
 		return accountKeystoreService.signMessage(wallet, message, chainId);
 	}
 
 	@Override
-	public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, int chainId) {
+	public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, long chainId) {
 		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
 	}
 
@@ -305,19 +305,19 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit)
+	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, List<Long> networkFilters, long fetchTime, int fetchLimit)
 	{
 		return inDiskCache.fetchActivityMetas(wallet, networkFilters, fetchTime, fetchLimit);
 	}
 
 	@Override
-	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount)
+	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, long chainId, String tokenAddress, int historyCount)
 	{
 		return inDiskCache.fetchActivityMetas(wallet, chainId, tokenAddress, historyCount);
 	}
 
 	@Override
-	public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters)
+	public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Long> networkFilters)
 	{
 		return inDiskCache.fetchEventMetas(wallet, networkFilters);
 	}

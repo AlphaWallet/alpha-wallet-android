@@ -111,7 +111,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
 
         String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getToken(chainId, address);
 
         if (token == null)

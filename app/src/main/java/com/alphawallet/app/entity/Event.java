@@ -10,7 +10,7 @@ public class Event implements Parcelable
 {
     private final String eventText;
     private final long timeStamp;
-    private final int chainId;
+    private final long chainId;
 
     @Override
     public int describeContents()
@@ -18,7 +18,7 @@ public class Event implements Parcelable
         return 0;
     }
 
-    public Event(String eventTxt, long timeStamp, int chainId)
+    public Event(String eventTxt, long timeStamp, long chainId)
     {
         this.eventText = eventTxt;
         this.timeStamp = timeStamp;
@@ -29,7 +29,7 @@ public class Event implements Parcelable
     {
         eventText = in.readString();
         timeStamp = in.readLong();
-        chainId = in.readInt();
+        chainId = in.readLong();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class Event implements Parcelable
     {
         dest.writeString(eventText);
         dest.writeLong(timeStamp);
-        dest.writeInt(chainId);
+        dest.writeLong(chainId);
     }
 
     public static final Creator<Transaction> CREATOR = new Creator<Transaction>()
@@ -63,5 +63,5 @@ public class Event implements Parcelable
         String hash = eventText + "-" + timeStamp;
         return String.valueOf(hash.hashCode());
     }
-    public int getChainId() { return chainId; }
+    public long getChainId() { return chainId; }
 }

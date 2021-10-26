@@ -31,7 +31,7 @@ public class SelectNetworkViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public List<Integer> getFilterNetworkList()
+    public List<Long> getFilterNetworkList()
     {
         return networkRepository.getFilterNetworkList();
     }
@@ -57,12 +57,12 @@ public class SelectNetworkViewModel extends BaseViewModel {
         preferenceRepository.setShownTestNetWarning();
     }
 
-    public NetworkInfo getNetworkByChain(int chainId)
+    public NetworkInfo getNetworkByChain(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public boolean isMainNet(int networkId)
+    public boolean isMainNet(long networkId)
     {
         return EthereumNetworkBase.hasRealValue(networkId);
     }

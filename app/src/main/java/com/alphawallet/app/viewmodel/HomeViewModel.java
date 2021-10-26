@@ -658,5 +658,6 @@ public class HomeViewModel extends BaseViewModel {
         {
             localeRepository.setLocale(context, localeRepository.getActiveLocale());
         }
+        currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
     }
 }

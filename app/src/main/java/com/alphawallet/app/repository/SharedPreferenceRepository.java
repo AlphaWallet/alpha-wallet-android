@@ -59,6 +59,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).commit(); //use commit as the value may be used immediately
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public long getActiveBrowserNetwork() {
         long selectedNetwork;
@@ -66,10 +67,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         {
             selectedNetwork = pref.getLong(DEFAULT_NETWORK_NAME_KEY, 0);
         }
-        catch (ClassCastException e) //previously we used string
+        catch (ClassCastException e) //previously we used Integer or String
         {
-            selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
-            setActiveBrowserNetwork(selectedNetwork);
+            try
+            {
+                selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            }
+            catch (ClassCastException string)
+            {
+                selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
+            }
+            pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, selectedNetwork).commit(); //commit as we need to update this immediately
         }
 
         return selectedNetwork;

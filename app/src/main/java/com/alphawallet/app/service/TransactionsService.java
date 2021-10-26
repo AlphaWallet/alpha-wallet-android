@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -26,6 +27,7 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,8 +36,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.service.TransactionsNetworkClient.TRANSFER_RESULT_MAX;
 
 /**
  * Created by JB on 8/07/2020.
@@ -57,13 +57,13 @@ public class TransactionsService
     @Nullable
     private Disposable fetchTransactionDisposable;
     @Nullable
-    private Disposable eventTimer;
+    private Disposable transactionCheckCycle;
     @Nullable
-    private Disposable erc20EventCheckCycle;
+    private Disposable tokenTransferCheckCycle;
     @Nullable
     private Disposable eventFetch;
     @Nullable
-    private Disposable pendingTransactionFetch;
+    private Disposable pendingTransactionCheckCycle;
 
     public TransactionsService(TokensService tokensService,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -91,28 +91,28 @@ public class TransactionsService
             fetchTransactionDisposable.dispose();
         fetchTransactionDisposable = null;
         //reset transaction timers
-        if (eventTimer == null || eventTimer.isDisposed())
+        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
-            eventTimer = Observable.interval(0, 15, TimeUnit.SECONDS)
+            transactionCheckCycle = Observable.interval(0, 15, TimeUnit.SECONDS)
                     .doOnNext(l -> checkTransactionQueue()).subscribe();
         }
 
-        if (erc20EventCheckCycle == null || erc20EventCheckCycle.isDisposed())
+        if (tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())
         {
-            erc20EventCheckCycle = Observable.interval(2, 15, TimeUnit.SECONDS)
-                    .doOnNext(l -> checkTransactions()).subscribe();
+            tokenTransferCheckCycle = Observable.interval(2, 17, TimeUnit.SECONDS) //attempt to not interfere with transaction check
+                    .doOnNext(l -> checkTransfers()).subscribe();
         }
 
-        if (pendingTransactionFetch == null || pendingTransactionFetch.isDisposed())
+        if (pendingTransactionCheckCycle == null || pendingTransactionCheckCycle.isDisposed())
         {
-            pendingTransactionFetch = Observable.interval(15, 30, TimeUnit.SECONDS)
+            pendingTransactionCheckCycle = Observable.interval(15, 30, TimeUnit.SECONDS)
                     .doOnNext(l -> checkPendingTransactions()).subscribe();
         }
     }
 
     public void startUpdateCycle()
     {
-        if (eventTimer == null || eventTimer.isDisposed())
+        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
             fetchTransactions();
         }
@@ -120,39 +120,68 @@ public class TransactionsService
     }
 
     /**
-     * Start the token transaction checker
      * This uses the Etherscan API routes returning ERC20 and ERC721 token transfers, both incoming and outgoing.
      */
-    private void checkTransactions()
+    private void checkTransfers()
     {
         List<Long> filters = tokensService.getNetworkFilters();
         if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
                 (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
-        if (currentChainIndex >= filters.size()) currentChainIndex = 0;
 
-        if (readTokenMoves(filters.get(currentChainIndex), nftCheck) && !nftCheck) //check NFTs for same chain on next iteration or advance to next chain
+        readTokenMoves(filters.get(currentChainIndex), nftCheck); //check NFTs for same chain on next iteration or advance to next chain
+        Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
+        currentChainIndex = pendingChainData.first;
+        nftCheck = pendingChainData.second;
+    }
+
+    private Pair<Integer, Boolean> getNextChainIndex(int currentIndex, boolean nftCheck, List<Long> filters)
+    {
+        if (filters.size() == 0) return new Pair<>(currentIndex, nftCheck);
+
+        while (true)
         {
-            nftCheck = true;
+            currentIndex++;
+            if (currentIndex >= filters.size())
+            {
+                nftCheck = !nftCheck;
+                currentIndex = 0;
+            }
+            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(filters.get(currentIndex));
+            if (!nftCheck || info.usesSeparateNFTTransferQuery()) break;
         }
-        else
+
+        return new Pair<>(currentIndex, nftCheck);
+    }
+
+    /**
+     * Sets up the next check to be on the chain that we just detected a transaction on if the transaction appeared to be a token move
+     * @param chainId
+     * @param isNft
+     */
+    private void setNextTransferCheck(long chainId, boolean isNft)
+    {
+        List<Long> filters = tokensService.getNetworkFilters();
+        if (filters.contains(chainId))
         {
-            nftCheck = false;
-            currentChainIndex++;
+            currentChainIndex = filters.indexOf(chainId);
+            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+            nftCheck = isNft && info.usesSeparateNFTTransferQuery();
         }
     }
 
-    private boolean readTokenMoves(long chainId, boolean isNFT)
+    private void readTokenMoves(long chainId, boolean isNFT)
     {
-        if (BuildConfig.DEBUG) Log.d(TAG,"Check transfers: " + chainId + " : NFT=" + isNFT);
         //check if this route has combined NFT
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (isNFT) tokensService.checkingChain(chainId);
+        if (isNFT)
+        {
+            tokensService.checkingChain(chainId);
+        }
+        if (BuildConfig.DEBUG) Log.d(TAG,"Check transfers: " + chainId + " : NFT=" + isNFT);
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(count -> handleMoveCheck(isNFT), this::gotReadErr);
-
-        return info.usesSeparateNFTTransferQuery();
     }
 
     private void gotReadErr(Throwable e)
@@ -172,7 +201,7 @@ public class TransactionsService
         if (tokensService.getCurrentAddress() == null) return;
         if (fetchTransactionDisposable == null)
         {
-            Token t = tokensService.getRequiresTransactionUpdate(getPendingChains());
+            Token t = tokensService.getRequiresTransactionUpdate();
 
             if (t != null)
             {
@@ -282,23 +311,15 @@ public class TransactionsService
 
     private void stopAllChainUpdate()
     {
-        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
-        {
-            fetchTransactionDisposable.dispose();
-        }
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed()) { fetchTransactionDisposable.dispose(); }
+        if (transactionCheckCycle != null && !transactionCheckCycle.isDisposed()) { transactionCheckCycle.dispose(); }
+        if (pendingTransactionCheckCycle != null && !pendingTransactionCheckCycle.isDisposed()) { pendingTransactionCheckCycle.dispose(); }
+        if (tokenTransferCheckCycle != null && !tokenTransferCheckCycle.isDisposed()) { tokenTransferCheckCycle.dispose(); }
+
         fetchTransactionDisposable = null;
-
-        if (eventTimer != null && !eventTimer.isDisposed())
-        {
-            eventTimer.dispose();
-        }
-
-        if (erc20EventCheckCycle != null && !erc20EventCheckCycle.isDisposed())
-        {
-            erc20EventCheckCycle.dispose();
-            erc20EventCheckCycle = null;
-        }
-        eventTimer = null;
+        transactionCheckCycle = null;
+        pendingTransactionCheckCycle = null;
+        tokenTransferCheckCycle = null;
     }
 
     public void markPending(Transaction tx)
@@ -381,8 +402,10 @@ public class TransactionsService
                 case TRANSFER_FROM:
                 case RECEIVED:
                 case SEND:
-                    if (BuildConfig.DEBUG) Log.d(TAG, "Checking Token moves for " + t.getFullName());
-                    readTokenMoves(transaction.chainId, t.isERC721());
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Trigger check for " + t.getFullName());
+                    //setup next check to be for this chain
+                    //find in index
+                    setNextTransferCheck(transaction.chainId, t.isNonFungible());
                 default:
                     break;
             }

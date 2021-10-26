@@ -262,6 +262,7 @@ public class TokensService
         TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), networkFilter);
         for (TokenCardMeta meta : tokenList)
         {
+            meta.lastTxUpdate = meta.lastUpdate;
             String key = databaseKey(meta.getChain(), meta.getAddress());
             if (!pendingTokenMap.containsKey(key))
             {
@@ -774,24 +775,30 @@ public class TokensService
         //this list will be in order of update.
         for (TokenCardMeta check : tokenList)
         {
-            long lastUpdateDiff = currentTime - check.lastUpdate;
+            long lastCheckDiff = currentTime - check.lastUpdate;
+            long lastUpdateDiff = check.lastTxUpdate > 0 ? currentTime - check.lastTxUpdate : 0;
             float weighting = check.calculateBalanceUpdateWeight();
 
             if (!appHasFocus && (!check.isEthereum() && !isFocusToken(check))) continue; //only check chains when wallet out of focus
 
             //simply multiply the weighting by the last diff.
-            float updateFactor = weighting * (float) lastUpdateDiff;
+            float updateFactor = weighting * (float) lastCheckDiff;
             long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS; //normal minimum update frequency for token 30 seconds
+
+            if (lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
+            {
+                cutoffCheck = 120*DateUtils.SECOND_IN_MILLIS;
+            }
 
             if (isFocusToken(check))
             {
-                updateFactor = 3.0f * (float) lastUpdateDiff;
+                updateFactor = 3.0f * (float) lastCheckDiff;
                 cutoffCheck = 15*DateUtils.SECOND_IN_MILLIS; //focus token can be checked every 15 seconds - focus token when erc20 or chain clicked on in wallet
             }
             else if (check.isEthereum() && pendingChainMap.containsKey(check.getChain())) //higher priority for checking balance of pending chain
             {
                 cutoffCheck = 15*DateUtils.SECOND_IN_MILLIS;
-                updateFactor = 4.0f * (float) lastUpdateDiff; //chain has a recent transaction
+                updateFactor = 4.0f * (float) lastCheckDiff; //chain has a recent transaction
             }
             else if (check.isEthereum())
             {
@@ -799,11 +806,11 @@ public class TokensService
             }
             else if (focusToken != null)
             {
-                updateFactor = 0.1f * (float) lastUpdateDiff;
+                updateFactor = 0.1f * (float) lastCheckDiff;
                 cutoffCheck = 60*DateUtils.SECOND_IN_MILLIS; //when looking at token in detail view (ERC20TokenDetail) update other tokens at 1 minute cycle
             }
 
-            if (updateFactor > highestWeighting && (lastUpdateDiff > (float)cutoffCheck))
+            if (updateFactor > highestWeighting && (lastCheckDiff > (float)cutoffCheck))
             {
                 highestWeighting = updateFactor;
                 highestToken = check;
@@ -886,7 +893,7 @@ public class TokensService
      * @param pendingTxChains
      * @return
      */
-    public Token getRequiresTransactionUpdate(List<Long> pendingTxChains)
+    public Token getRequiresTransactionUpdate()
     {
         //pull all tokens from this wallet out of DB
         TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), networkFilter);
@@ -901,7 +908,7 @@ public class TokensService
             Token token = getToken(check.getChain(), check.getAddress());
             if (token == null) continue;
             if (!token.needsTransactionCheck()) continue;
-            long timeIntervalCheck = getTokenTimeInterval(token, pendingTxChains);
+            long timeIntervalCheck = getTokenTimeInterval(token);
             if (timeIntervalCheck == 0) continue;
 
             if (focusToken != null && token.tokenInfo.chainId == focusToken.chainId)
@@ -974,20 +981,15 @@ public class TokensService
     /**
      * Timings for when there can be a check for new transactions
      * @param t
-     * @param pending
      * @return
      */
-    private long getTokenTimeInterval(Token t, Collection<Long> pending)
+    private long getTokenTimeInterval(Token t)
     {
         long nextTimeCheck;
 
-        if (t.isEthereum() && pending != null && pending.contains(t.tokenInfo.chainId)) //check chain every 10 seconds while transaction is pending
+        if (t.isEthereum())
         {
-            nextTimeCheck = 10*DateUtils.SECOND_IN_MILLIS;
-        }
-        else if (t.isEthereum())
-        {
-            nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds when not pending
+            nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds
         }
         else
         {

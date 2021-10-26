@@ -96,7 +96,6 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     @Override
     public void addressReady(String address, String ensName)
     {
-        watchAddress.setError(null);
         KeyboardUtils.hideKeyboard(watchAddress.getInputView());
         onSetWatchWalletListener.onWatchWallet(address);
     }

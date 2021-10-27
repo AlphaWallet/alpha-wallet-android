@@ -1,6 +1,9 @@
 package com.alphawallet.app.repository;
 
+import com.alphawallet.app.repository.entity.RealmGasSpread;
+
 import io.realm.DynamicRealm;
+import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObject;
@@ -336,6 +339,42 @@ public class AWRealmMigration implements RealmMigration
             {
                 realmData.addField("ENSAvatar", String.class);
             }
+            oldVersion++;
+        }
+
+        if (oldVersion == 34)
+        {
+            RealmObjectSchema realmData = schema.get("RealmToken");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            realmData = schema.get("RealmAuxData");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            realmData = schema.get("RealmGasSpread");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId")
+                    .addPrimaryKey("chainId");
+
+            realmData = schema.get("RealmTransaction");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            realmData = schema.get("RealmWCSession");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
             oldVersion++;
         }
     }

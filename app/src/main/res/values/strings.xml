@@ -844,4 +844,6 @@
     <string name="email_is_invalid">Please provide valid email address</string>
     <string name="github">Github (File an issue)</string>
     <string name="chains_to_scan">Chains to scan</string>
+    <string name="action_view">View</string>
+    <string name="error_chainid_already_taken">Chain Id already taken</string>
 </resources>

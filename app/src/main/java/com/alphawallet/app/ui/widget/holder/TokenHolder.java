@@ -299,13 +299,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
     }
 
-    private void emptyTicker()
-    {
-        text24Hours.setText(R.string.unknown_balance_without_symbol);
-        textAppreciation.setText(R.string.unknown_balance_without_symbol);
-        balanceCurrency.setText(R.string.unknown_balance_without_symbol);
-    }
-
     private void startTickerRealmListener()
     {
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
@@ -334,44 +327,37 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
         BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
-        String formattedPercents = "";
-        int color = Color.RED;
 
         String lbl = getString(R.string.token_balance, "", converted);
         lbl += " " + ticker.priceSymbol;
-        Spannable spannable;
         if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
         {
-            spannable = new SpannableString(lbl);
-            spannable.setSpan(new ForegroundColorSpan(color),
-                    converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            this.balanceCurrency.setText(lbl);
-            this.issuer.setVisibility(View.GONE);
+            issuer.setVisibility(View.GONE);
         }
         else
         {
-            this.balanceCurrency.setText(EMPTY_BALANCE);
+            lbl = EMPTY_BALANCE;
         }
 
+        balanceCurrency.setText(lbl);
+        balanceCurrency.setTextColor(getContext().getColor(R.color.text_dark_gray));
+
         //This sets the 24hr percentage change (rightmost value)
-        double percentage = 0;
         try {
-            percentage = Double.parseDouble(ticker.percentChange24h);
-            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
+            double percentage = Double.parseDouble(ticker.percentChange24h);
+            String formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
             text24Hours.setText(formattedPercents);
-            text24Hours.setTextColor(color);
-        } catch (Exception ex) { /* Quietly */ }
+            text24Hours.setTextColor(ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green));
+        } catch (Exception ex)
+        { /* Quietly */ }
 
         //This sets the crypto price value (middle amount)
         String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
 
         lbl = getString(R.string.token_balance, "", formattedValue);
         lbl += " " + ticker.priceSymbol;
-        spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                lbl.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.textAppreciation.setText(lbl);
+        textAppreciation.setText(lbl);
+        textAppreciation.setTextColor(getContext().getColor(R.color.text_dark_gray));
 
         tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
     }

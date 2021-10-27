@@ -737,7 +737,7 @@ public class TokenDefinition {
                         {
                             case "ethereum":
                                 String chainIdStr = tokenSpec.getAttribute("network");
-                                int chainId = Integer.parseInt(chainIdStr);
+                                long chainId = Long.parseLong(chainIdStr);
                                 ContractInfo ci = new ContractInfo(tokenSpec.getLocalName());
                                 ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
                                 contracts.put(label, ci);
@@ -1021,8 +1021,8 @@ public class TokenDefinition {
     private void handleAddress(Element addressElement, ContractInfo info)
     {
         String networkStr = addressElement.getAttribute("network");
-        int network = 1;
-        if (networkStr != null) network = Integer.parseInt(networkStr);
+        long network = 1;
+        if (networkStr != null) network = Long.parseLong(networkStr);
         String address = addressElement.getTextContent().toLowerCase();
         List<String> addresses = info.addresses.get(network);
         if (addresses == null)

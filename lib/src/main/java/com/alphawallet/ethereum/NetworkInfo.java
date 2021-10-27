@@ -10,14 +10,14 @@ public class NetworkInfo {
     public final String symbol;
     public final String rpcServerUrl;
     public final String etherscanUrl; // This is used by the Transaction Detail page for the user to visit a website with detailed transaction information
-    public final int chainId;
+    public final long chainId;
 
     public NetworkInfo(
             String name,
             String symbol,
             String rpcServerUrl,
             String etherscanUrl,
-            int chainId) {
+            long chainId) {
         this.name = name;
         this.symbol = symbol;
         this.rpcServerUrl = rpcServerUrl;

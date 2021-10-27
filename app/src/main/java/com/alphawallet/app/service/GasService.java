@@ -1,5 +1,14 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
+import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
+import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
@@ -21,26 +30,16 @@ import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.tx.gas.ContractGasProvider;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-
-import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
-import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
-import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 18/11/2020.
@@ -54,10 +53,12 @@ public class GasService implements ContractGasProvider
     private final EthereumNetworkRepositoryType networkRepository;
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
-    private int currentChainId;
+    private long currentChainId;
     private Web3j web3j;
     private BigInteger currentGasPrice;
     private final String ETHERSCAN_API_KEY;
+    private final String POLYGONSCAN_API_KEY;
+    private boolean keyFail;
 
     @Nullable
     private Disposable gasFetchDisposable;
@@ -67,6 +68,7 @@ public class GasService implements ContractGasProvider
     }
 
     public static native String getEtherscanKey();
+    public static native String getPolygonScanKey();
 
     public GasService(EthereumNetworkRepositoryType networkRepository, OkHttpClient httpClient, RealmManager realm)
     {
@@ -74,13 +76,15 @@ public class GasService implements ContractGasProvider
         this.httpClient = httpClient;
         this.realmManager = realm;
         gasFetchDisposable = null;
-        currentChainId = MAINNET_ID;
+        this.currentChainId = MAINNET_ID;
 
         web3j = null;
         ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
+        POLYGONSCAN_API_KEY = "&apikey=" + getPolygonScanKey();
+        keyFail = false;
     }
 
-    public void startGasPriceCycle(int chainId)
+    public void startGasPriceCycle(long chainId)
     {
         updateChainId(chainId);
         if (gasFetchDisposable == null || gasFetchDisposable.isDisposed())
@@ -98,7 +102,7 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    public void updateChainId(int chainId)
+    public void updateChainId(long chainId)
     {
         if (networkRepository.getNetworkByChain(chainId) == null)
         {
@@ -118,11 +122,22 @@ public class GasService implements ContractGasProvider
     private void fetchCurrentGasPrice()
     {
         updateCurrentGasPrices()
+                .flatMap(this::useNodeFallback)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(updated -> { if (BuildConfig.DEBUG) System.out.println("Updated gas prices: " + updated); },
-                        Throwable::printStackTrace)
+                .subscribe(updated -> {
+                    if (BuildConfig.DEBUG) System.out.println("Updated gas prices: " + updated);
+                    }, Throwable::printStackTrace)
                 .isDisposed();
+    }
+
+    private Single<Boolean> useNodeFallback(Boolean updated)
+    {
+        if (updated) return Single.fromCallable(() -> true);
+        else
+        {
+            return useNodeEstimate();
+        }
     }
 
     @Override
@@ -154,7 +169,8 @@ public class GasService implements ContractGasProvider
         String gasOracleAPI = EthereumNetworkRepository.getGasOracle(currentChainId);
         if (!TextUtils.isEmpty(gasOracleAPI))
         {
-            if (gasOracleAPI.contains("etherscan")) gasOracleAPI += ETHERSCAN_API_KEY;
+            if (!keyFail && gasOracleAPI.contains("etherscan")) gasOracleAPI += ETHERSCAN_API_KEY;
+            if (!keyFail && gasOracleAPI.contains("polygonscan")) gasOracleAPI += POLYGONSCAN_API_KEY;
             return updateEtherscanGasPrices(gasOracleAPI);
         }
         else
@@ -175,21 +191,21 @@ public class GasService implements ContractGasProvider
         }
         else
         {
-            final int nodeId = currentChainId;
+            final long nodeId = currentChainId;
             return Single.fromCallable(() -> web3j
                     .ethGasPrice().send())
                     .map(price -> updateGasPrice(price, nodeId));
         }
     }
 
-    private Boolean updateGasPrice(EthGasPrice ethGasPrice, int chainId)
+    private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId)
     {
         currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
         updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
         return true;
     }
 
-    private BigInteger fixGasPrice(BigInteger gasPrice, int chainId)
+    private BigInteger fixGasPrice(BigInteger gasPrice, long chainId)
     {
         if (gasPrice.compareTo(BigInteger.ZERO) > 0)
         {
@@ -198,11 +214,11 @@ public class GasService implements ContractGasProvider
         else
         {
             //gas price from node is zero
-            switch (chainId)
+            switch ((int)chainId)
             {
                 default:
                     return gasPrice;
-                case ARTIS_TAU1_ID:
+                case (int)ARTIS_TAU1_ID:
                     //this node incorrectly returns gas price zero, use 1 Gwei
                     return new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
             }
@@ -211,7 +227,7 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateEtherscanGasPrices(String gasOracleAPI)
     {
-        final int chainId = currentChainId;
+        final long chainId = currentChainId;
         return Single.fromCallable(() -> {
             boolean update = false;
             Request request = new Request.Builder()
@@ -225,9 +241,16 @@ public class GasService implements ContractGasProvider
                     String result = response.body()
                             .string();
                     GasPriceSpread gps = new GasPriceSpread(result);
-                    updateRealm(gps, chainId);
-                    update = true;
-                    currentGasPrice = gps.standard;
+                    if (gps.isResultValid())
+                    {
+                        updateRealm(gps, chainId);
+                        update = true;
+                        currentGasPrice = gps.standard;
+                    }
+                    else
+                    {
+                        keyFail = true;
+                    }
                 }
             }
             catch (Exception e)
@@ -246,9 +269,9 @@ public class GasService implements ContractGasProvider
      * @param gasPriceSpread
      * @param chainId
      */
-    private void updateRealm(final GasPriceSpread gasPriceSpread, final int chainId)
+    private void updateRealm(final GasPriceSpread gasPriceSpread, final long chainId)
     {
-        realmManager.getRealmInstance(TICKER_DB).executeTransactionAsync(r -> {
+        realmManager.getRealmInstance(TICKER_DB).executeTransaction(r -> {
             RealmGasSpread rgs = r.where(RealmGasSpread.class)
                     .equalTo("chainId", chainId)
                     .findFirst();
@@ -259,7 +282,7 @@ public class GasService implements ContractGasProvider
         });
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, int chainId, String toAddress, BigInteger amount, Wallet wallet)
+    public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)

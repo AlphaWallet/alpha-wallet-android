@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -30,7 +31,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
      */
     public boolean isEnabled = false;
 
-    public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
     {
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
         this.lastUpdate = timeStamp;
@@ -39,7 +40,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.balance = balance;
     }
 
-    public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type)
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type)
     {
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
         this.lastUpdate = timeStamp;
@@ -103,13 +104,13 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         return !balance.equals("0");
     }
 
-    public int getChain()
+    public long getChain()
     {
         int chainPos = tokenId.lastIndexOf('-') + 1;
         if (chainPos < tokenId.length())
         {
             String chainStr = tokenId.substring(chainPos);
-            return Integer.parseInt(chainStr);
+            return Long.parseLong(chainStr);
         }
         else
         {
@@ -117,7 +118,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    public static int calculateTokenNameWeight(int chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
+    public static int calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
     {
         int weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
@@ -136,7 +137,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
         else if (isEth)
         {
-            return chainId + 1;
+            return 1 + EthereumNetworkBase.getChainOrdinal(chainId);
         }
 
         if (TextUtils.isEmpty(name)) return Integer.MAX_VALUE;

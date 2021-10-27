@@ -435,7 +435,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         aDialog.show();
     }
 
-    private void setupNetwork(int chainId)
+    private void setupNetwork(long chainId)
     {
         networkInfo = viewModel.getNetworkInfo(chainId);
         if (networkInfo != null)
@@ -446,7 +446,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 setupNetwork(networkId);
             });
 

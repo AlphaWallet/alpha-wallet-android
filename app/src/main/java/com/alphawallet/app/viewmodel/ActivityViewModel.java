@@ -88,22 +88,12 @@ public class ActivityViewModel extends BaseViewModel
 
     public void fetchMoreTransactions(long startTime)
     {
-        List<Integer> currentChains = tokensService.getNetworkFilters();
+        List<Long> currentChains = tokensService.getNetworkFilters();
         disposable = Observable.fromIterable(currentChains)
                 .flatMap(chainId -> transactionsService.fetchAndStoreTransactions(chainId, startTime).toObservable())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(activityItems::postValue, this::onError);
-
-//        disposable = transactionsService.fetchAndStoreTransactions(1, startTime)
-//                          .subscribeOn(Schedulers.io())
-//                          .observeOn(AndroidSchedulers.mainThread())
-//                          .subscribe(activityItems::postValue, this::onError);
-
-//                fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .subscribe(activityItems::postValue, this::onError);
     }
 
     public void onDestroy()

@@ -26,7 +26,7 @@ public class EtherscanTransaction
     String gasUsed;
     int confirmations;
 
-    public Transaction createTransaction(String walletAddress, int chainId)
+    public Transaction createTransaction(String walletAddress, long chainId)
     {
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
                                          gasUsed, chainId, contractAddress);

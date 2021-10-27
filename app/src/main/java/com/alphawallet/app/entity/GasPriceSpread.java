@@ -75,7 +75,7 @@ public class GasPriceSpread
     public GasPriceSpread(BigInteger currentAvGasPrice, boolean hasLockedGas)
     {
         rapid = BigInteger.ZERO;
-        fast = BigInteger.ZERO;
+        fast = new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger();
         standard = currentAvGasPrice;
         slow = BigInteger.ZERO;
         baseFee = BigInteger.ZERO;
@@ -148,5 +148,11 @@ public class GasPriceSpread
     public int getCustomIndex()
     {
         return customIndex;
+    }
+
+    public boolean isResultValid()
+    {
+        return !rapid.equals(BigInteger.ZERO) || !fast.equals(BigInteger.ZERO) || !standard.equals(BigInteger.ZERO)
+                || !slow.equals(BigInteger.ZERO);
     }
 }

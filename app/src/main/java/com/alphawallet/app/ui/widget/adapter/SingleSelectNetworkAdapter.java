@@ -35,7 +35,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         }
     }
 
-    public Integer getSelectedItem()
+    public Long getSelectedItem()
     {
         for (NetworkItem data : networkList)
         {

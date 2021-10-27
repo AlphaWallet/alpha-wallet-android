@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -73,7 +74,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private final List<GasSpeed> gasSpeeds = new ArrayList<>();
     private int currentGasSpeedIndex = -1;
-    private int chainId;
+    private long chainId;
     private BigDecimal presetGasLimit;
     private BigDecimal customGasLimit;
     private BigDecimal availableBalance;
@@ -82,6 +83,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private GasWarningLayout gasWarning;
     private GasWarningLayout insufficientWarning;
     private long minGasPrice;
+    private boolean gasWarningShown;
 
     private int customIndex = -1;
 
@@ -122,7 +124,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         }
 
         currentGasSpeedIndex = getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-        chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
         presetGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT_PRESET));
         availableBalance = new BigDecimal(getIntent().getStringExtra(C.EXTRA_TOKEN_BALANCE));
@@ -140,6 +142,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         // start listening for gas price updates
         setupGasSpeeds();
         startGasListener();
+        gasWarningShown = false;
     }
 
     private RealmQuery<RealmGasSpread> getGasQuery()
@@ -312,9 +315,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 {
                     hideGasWarning();
                 }
+                notifyItemChanged(currentGasSpeedIndex);
                 currentGasSpeedIndex = position;
-                notifyDataSetChanged();
-
+                notifyItemChanged(position);
             });
 
             String speedGwei = BalanceUtils.weiToGweiBI(gs.gasPrice).toBigInteger().toString();
@@ -380,6 +383,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             }
 
             setCustomGasDetails(position);
+
+            //This collapses the view if it's not required, eg for re-send transaction
+            //This hides the views that aren't selectable due to gas too low
             if(minGasPrice > 0)
             {
                 if(!gs.isCustom && gs.gasPrice.longValue() < minGasPrice)
@@ -584,6 +590,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (gasWarning.getVisibility() != View.VISIBLE) //no need to re-apply
         {
+            gasWarningShown = true;
             gasWarning.setVisibility(View.VISIBLE);
 
             EditText gas_price_entry = findViewById(R.id.gas_price_entry);
@@ -594,12 +601,20 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private void hideGasWarning()
     {
-        gasWarning.setVisibility(View.GONE);
+        if (gasWarningShown) //leave gas warning space, so we don't do a jump-scroll while user operates slider if warning is visible
+        {
+            gasWarning.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            gasWarning.setVisibility(View.GONE);
+        }
+
         warningType = Warning.OFF;
 
         EditText gas_price_entry = findViewById(R.id.gas_price_entry);
         gas_price_entry.setTextColor(getColor(R.color.dove));
-        gas_price_entry.setBackground(getDrawable(R.drawable.background_password_entry));
+        gas_price_entry.setBackground(AppCompatResources.getDrawable(this, R.drawable.background_password_entry));
     }
 
     private void checkInsufficientGas(BigDecimal txCost)

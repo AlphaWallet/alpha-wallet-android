@@ -68,7 +68,7 @@ public class QRScanner extends BaseActivity
     private BeepManager beepManager;
     private String lastText;
     private Disposable disposable;
-    private int chainIdOverride;
+    private long chainIdOverride;
     private TextView flashButton;
     private TextView myAddressButton;
     private TextView browseButton;

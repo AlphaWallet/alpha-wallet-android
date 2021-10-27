@@ -22,14 +22,6 @@ public class RealmTokenTicker extends RealmObject {
         this.id = id;
     }
 
-    public String getContract() {
-        return contract;
-    }
-
-    public void setContract(String contract) {
-        this.contract = contract;
-    }
-
     public String getPrice() {
         return price;
     }

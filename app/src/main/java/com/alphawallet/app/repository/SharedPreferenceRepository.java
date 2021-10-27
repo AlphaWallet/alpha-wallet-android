@@ -53,30 +53,39 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getString(CURRENT_ACCOUNT_ADDRESS_KEY, null);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setCurrentWalletAddress(String address) {
-        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).apply();
+        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).commit(); //use commit as the value may be used immediately
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
-    public int getActiveBrowserNetwork() {
-        int selectedNetwork;
+    public long getActiveBrowserNetwork() {
+        long selectedNetwork;
         try
         {
-            selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            selectedNetwork = pref.getLong(DEFAULT_NETWORK_NAME_KEY, 0);
         }
-        catch (ClassCastException e) //previously we used string
+        catch (ClassCastException e) //previously we used Integer or String
         {
-            selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
-            setActiveBrowserNetwork(selectedNetwork);
+            try
+            {
+                selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            }
+            catch (ClassCastException string)
+            {
+                selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
+            }
+            pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, selectedNetwork).commit(); //commit as we need to update this immediately
         }
 
         return selectedNetwork;
     }
 
     @Override
-    public void setActiveBrowserNetwork(int networkId) {
-        pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
+    public void setActiveBrowserNetwork(long networkId) {
+        pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
     }
 
     @Override

@@ -25,8 +25,14 @@
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
 
         <item name="android:windowBackground">@drawable/splash_background</item>
-
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="actionMenuTextColor">@color/semi_dark_grey</item>
+        <item name="android:textColor">@color/text_dark_gray</item>
+        <item name="android:textColorHint">@color/text_dark_gray</item>
+        <item name="android:autoCompleteTextViewStyle">@style/Widget.AppCompat.Light.AutoCompleteTextView</item>
     </style>
+
 
     <style name="AppTheme.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="colorControlNormal">@color/black</item>

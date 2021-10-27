@@ -17,7 +17,7 @@ public class RealmTransaction extends RealmObject {
     private String gasUsed;
     private String input;
     private String error;
-    private int chainId;
+    private long chainId;
     private long expectedCompletion;
     private String contractAddress; // this is so we can efficiently lookup transactions relating to contracts,
                                     // if we discovered them using the Etherscan 'Transfers' API.
@@ -27,10 +27,6 @@ public class RealmTransaction extends RealmObject {
 
     public String getHash() {
         return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
     }
 
     public String getBlockNumber() {
@@ -121,12 +117,12 @@ public class RealmTransaction extends RealmObject {
         this.error = error;
     }
 
-    public int getChainId()
+    public long getChainId()
     {
         return chainId;
     }
 
-    public void setChainId(int chainId)
+    public void setChainId(long chainId)
     {
         this.chainId = chainId;
     }

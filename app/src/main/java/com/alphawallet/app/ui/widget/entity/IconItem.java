@@ -9,11 +9,11 @@ public class IconItem {
     private final String url;
     private final UseIcon useText;
     private final String correctedAddress;
-    private final int chainId;
+    private final long chainId;
 
     private final static Map<String, Boolean> iconLoadType = new ConcurrentHashMap<>();
 
-    public IconItem(String url, String correctedAddress, int chainId) {
+    public IconItem(String url, String correctedAddress, long chainId) {
         this.url = url;
         this.useText = getLoadType(correctedAddress);
         this.correctedAddress = correctedAddress;

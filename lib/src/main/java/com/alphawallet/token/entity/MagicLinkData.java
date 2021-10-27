@@ -22,7 +22,7 @@ public class MagicLinkData
     public String ownerAddress;
     public String contractName;
     public byte contractType;
-    public int chainId;
+    public long chainId;
 
     public List<BigInteger> balanceInfo = null;
 

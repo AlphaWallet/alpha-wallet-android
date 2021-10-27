@@ -65,7 +65,7 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(Erc1155AssetsViewModel.class);
 
-            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
             wallet = getArguments().getParcelable(C.Key.WALLET);
 

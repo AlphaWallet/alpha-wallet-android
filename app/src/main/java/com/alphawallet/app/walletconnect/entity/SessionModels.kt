@@ -8,7 +8,7 @@ data class WCSessionRequest(
 
 data class WCApproveSessionResponse(
         val approved: Boolean = true,
-        val chainId: Int,
+        val chainId: Long,
         val accounts: List<String>,
         val peerId: String?,
         val peerMeta: WCPeerMeta?
@@ -16,7 +16,7 @@ data class WCApproveSessionResponse(
 
 data class WCSessionUpdate(
         val approved: Boolean,
-        val chainId: Int?,
+        val chainId: Long?,
         val accounts: List<String>?
 )
 

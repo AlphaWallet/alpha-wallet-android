@@ -213,11 +213,11 @@ public class Web3TokenView extends WebView
         );
     }
 
-    public void setChainId(int chainId) {
+    public void setChainId(long chainId) {
         jsInjectorClient.setChainId(chainId);
     }
 
-    public void setRpcUrl(@NonNull int chainId) {
+    public void setRpcUrl(@NonNull long chainId) {
         jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
     }
 

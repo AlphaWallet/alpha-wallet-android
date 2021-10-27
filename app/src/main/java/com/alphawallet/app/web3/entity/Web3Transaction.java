@@ -178,7 +178,7 @@ public class Web3Transaction implements Parcelable {
      * @param chainId
      * @return
      */
-    public CharSequence getFormattedTransaction(Context ctx, int chainId, String symbol)
+    public CharSequence getFormattedTransaction(Context ctx, long chainId, String symbol)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
         sb.startStyleGroup().append(ctx.getString(R.string.to)).append(":\n ");

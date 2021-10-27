@@ -23,14 +23,14 @@
     <!-- Splash Screen theme. -->
 
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
-
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="actionMenuTextColor">@color/semi_dark_grey</item>
-        <item name="android:textColor">@color/text_dark_gray</item>
-        <item name="android:textColorHint">@color/text_dark_gray</item>
+
         <item name="android:autoCompleteTextViewStyle">@style/Widget.AppCompat.Light.AutoCompleteTextView</item>
+        <item name="android:dialogTheme">@style/MyDialogTheme</item>
+        <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
     </style>
 
 
@@ -71,6 +71,13 @@
         <item name="tabPaddingStart">@dimen/dp23</item>
         <item name="tabPaddingEnd">@dimen/dp23</item>
         <item name="tabTextAppearance">@style/ChartTabTextAppearance</item>
+    </style>
+
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
     <style name="ChartTabTextAppearance" parent="TextAppearance.Design.Tab">

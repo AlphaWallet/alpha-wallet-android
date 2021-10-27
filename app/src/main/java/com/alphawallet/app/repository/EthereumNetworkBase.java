@@ -4,6 +4,7 @@ package com.alphawallet.app.repository;
  * between projects including non-Android projects */
 
 import android.text.TextUtils;
+import android.util.LongSparseArray;
 import android.view.View;
 
 import com.alphawallet.app.C;
@@ -484,9 +485,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            //Add in case no order was specified
-            for (NetworkInfo info : networkMap.values())
+            LongSparseArray<NetworkInfo> spc = new LongSparseArray<>(networkMap.size());
+            for (long chainId : networkMap.keySet()) { spc.put(chainId, networkMap.get(chainId)); }
+            //sorted array
+            for (int i = 0; i < spc.size(); i++)
             {
+                NetworkInfo info = spc.valueAt(i);
                 if (!hasValue.contains(info.chainId) && !result.contains(info))
                 {
                     result.add(info);

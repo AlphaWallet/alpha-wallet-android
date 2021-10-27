@@ -132,6 +132,7 @@
                             android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
+                            android:textColor="@color/text_dark_gray"
                             tools:text="$108.73"
                             android:textSize="12sp"
                             android:visibility="visible"/>
@@ -187,6 +188,7 @@
                             android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
                             android:text="@string/unknown_balance_without_symbol"
+                            android:textColor="@color/text_dark_gray"
                             android:textSize="12sp" />
 
                         <TextView

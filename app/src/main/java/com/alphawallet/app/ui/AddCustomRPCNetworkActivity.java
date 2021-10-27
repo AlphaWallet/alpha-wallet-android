@@ -152,8 +152,8 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             }
         }
 
-        int newChainId = Integer.parseInt(chainIdInputView.getText().toString());
-        int chainId = getIntent().getIntExtra(CHAIN_ID, -1);
+        long newChainId = Long.parseLong(chainIdInputView.getText().toString());
+        long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
         if (newChainId != chainId) {
             EthereumNetworkRepositoryType.NetworkInfoExt networkInfo = viewModel.getNetworkInfo(newChainId);
             if (networkInfo.info != null) {

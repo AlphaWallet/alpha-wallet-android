@@ -131,6 +131,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     private void localError(Throwable throwable)
     {
         System.out.println("IMPORT ERROR: Store HD Wallet: " + throwable.getMessage());
+        error.postValue(new ErrorEnvelope(throwable.getMessage()));
     }
 
 

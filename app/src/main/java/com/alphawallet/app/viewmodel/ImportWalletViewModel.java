@@ -113,19 +113,26 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         if (walletAddress == null)
         {
             progress.postValue(false);
-            System.out.println("ERROR");
+            System.out.println("IMPORT ERROR: No address");
             badSeed.postValue(true);
         }
         else
         {
             progress.postValue(true);
             //begin key storage process
+            System.out.println("IMPORT ERROR: Store HD Wallet: " + walletAddress);
             disposable = importWalletInteract.storeHDWallet(walletAddress, level, ensResolver)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onWallet, this::onError); //signal to UI wallet import complete
+                    .subscribe(this::onWallet, this::localError); //signal to UI wallet import complete
         }
     }
+
+    private void localError(Throwable throwable)
+    {
+        System.out.println("IMPORT ERROR: Store HD Wallet: " + throwable.getMessage());
+    }
+
 
 //    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
 //    {

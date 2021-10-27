@@ -215,6 +215,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
     private void onError(ErrorEnvelope errorEnvelope) {
         hideDialog();
+        System.out.println("ERROR HERE");
         String message = TextUtils.isEmpty(errorEnvelope.message)
                 ? getString(R.string.error_import)
                 : errorEnvelope.message;
@@ -356,6 +357,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     {
         if (data == null)
         {
+            System.out.println("IMPORT ERROR: No address");
             onProgress(false);
             keyImportError(getString(R.string.import_error));
         }

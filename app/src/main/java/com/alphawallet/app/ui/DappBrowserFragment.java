@@ -1468,12 +1468,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             {
                 loadUrl(loadUrlAfterReload);
                 loadUrlAfterReload = null;
-                if (forceChainChange != 0)
-                {
-                    handler.postDelayed(() -> forceChainChange = 0, 5000);
-                }
             }
         }); //execute on UI thread
+
+        if (forceChainChange != 0)
+        {
+            handler.postDelayed(() -> forceChainChange = 0, 5000);
+        }
     }
 
     private void setBackForwardButtons()

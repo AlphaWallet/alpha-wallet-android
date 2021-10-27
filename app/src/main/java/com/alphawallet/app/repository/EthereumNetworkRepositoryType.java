@@ -66,9 +66,9 @@ public interface EthereumNetworkRepositoryType {
     boolean hasSetNetworkFilters();
     boolean isMainNetSelected();
 
-
     void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId);
     NetworkInfoExt getNetworkInfoExt(long chainId);
+    void removeCustomRPCNetwork(long chainId);
 
     boolean isChainContract(long chainId, String address);
     boolean hasLockedGas(long chainId);

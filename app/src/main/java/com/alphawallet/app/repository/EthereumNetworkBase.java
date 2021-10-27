@@ -434,7 +434,23 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             String networks = new Gson().toJson(this);
             preferences.setCustomRPCNetworks(networks);
         }
+
+        public void remove(long chainId) {
+            for (NetworkInfo in : list) {
+                if (in.chainId == chainId) {
+                    list.remove(in);
+                    break;
+                }
+            }
+            mapToTestNet.remove(chainId);
+            map.remove(chainId);
+
+            String networks = new Gson().toJson(this);
+            preferences.setCustomRPCNetworks(networks);
+        }
     }
+
+
 
     private static CustomNetworks customNetworks;
 
@@ -870,6 +886,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : !hasRealValue(chainId);
 
         return new NetworkInfoExt(info, isTestNetwork, isCustom);
+    }
+
+
+    public void removeCustomRPCNetwork(long chainId) {
+        customNetworks.remove(chainId);
     }
 
     public static NetworkInfo getNetworkInfo(long chainId) {

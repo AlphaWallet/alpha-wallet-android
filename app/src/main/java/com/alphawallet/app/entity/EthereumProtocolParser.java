@@ -89,7 +89,7 @@ public class EthereumProtocolParser
                                 readState = ParseState.READ_DIRECTIVE;
                                 break;
                             case CHAIN_ID:
-                                result.chainId = item.getValueBI().intValue();
+                                result.chainId = item.getValueBI().longValue();
                                 readState = ParseState.READ_DIRECTIVE;
                                 break;
                             case READ_TYPE:

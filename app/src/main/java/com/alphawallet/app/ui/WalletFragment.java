@@ -470,11 +470,8 @@ public class WalletFragment extends BaseFragment implements
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.try_again: {
-                viewModel.prepare();
-            }
-            break;
+        if (view.getId() == R.id.try_again) {
+            viewModel.prepare();
         }
     }
 

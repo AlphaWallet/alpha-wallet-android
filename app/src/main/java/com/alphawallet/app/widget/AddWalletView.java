@@ -35,26 +35,32 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+
+        final int close_action = R.id.close_action;
+        final int new_account_action = R.id.new_account_action;
+        final int import_account_action = R.id.import_account_action;
+        final int watch_account_action = R.id.watch_account_action;
+
         switch (view.getId()) {
-            case R.id.close_action: {
+            case close_action: {
                 if (onCloseActionListener != null) {
                     onCloseActionListener.onClose(view);
                 }
                 break;
             }
-            case R.id.new_account_action: {
+            case new_account_action: {
                 if (onNewWalletClickListener != null) {
                     onNewWalletClickListener.onNewWallet(view);
                 }
                 break;
             }
-            case R.id.import_account_action: {
+            case import_account_action: {
                 if (onImportWalletClickListener != null) {
                     onImportWalletClickListener.onImportWallet(view);
                 }
                 break;
             }
-            case R.id.watch_account_action: {
+            case watch_account_action: {
                 if (onWatchWalletClickListener != null) {
                     onWatchWalletClickListener.onWatchWallet(view);
                 }

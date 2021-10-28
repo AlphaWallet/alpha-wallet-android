@@ -39,33 +39,40 @@ public class QRCodeActionsView extends FrameLayout implements View.OnClickListen
     //TODO: Refactor with if/else
     @Override
     public void onClick(View view) {
+
+        final int send_to_this_address_action = R.id.send_to_this_address_action;
+        final int add_custom_token_action = R.id.add_custom_token_action;
+        final int watch_account_action = R.id.watch_account_action;
+        final int open_in_etherscan_action = R.id.open_in_etherscan_action;
+        final int close_action = R.id.close_action;
+
         switch (view.getId()) {
-            case R.id.send_to_this_address_action: {
+            case send_to_this_address_action: {
                 if (onSendToAddressClickListener != null) {
                     onSendToAddressClickListener.onClick(view);
                 }
                 break;
             }
-            case R.id.add_custom_token_action: {
+            case add_custom_token_action: {
                 if (onAddCustonTokenClickListener != null) {
                     onAddCustonTokenClickListener.onClick(view);
                 }
                 break;
             }
-            case R.id.watch_account_action: {
+            case watch_account_action: {
                 if (onWatchWalletClickListener != null) {
                     onWatchWalletClickListener.onClick(view);
                 }
                 break;
 
             }
-            case R.id.open_in_etherscan_action: {
+            case open_in_etherscan_action: {
                 if (onOpenInEtherscanClickListener != null) {
                     onOpenInEtherscanClickListener.onClick(view);
                 }
                 break;
             }
-            case R.id.close_action: {
+            case close_action: {
                 if (onCloseActionListener != null) {
                     onCloseActionListener.onClick(view);
                 }

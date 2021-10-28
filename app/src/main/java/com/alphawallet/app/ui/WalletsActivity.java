@@ -190,8 +190,9 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final int action_add = R.id.action_add;
         switch (item.getItemId()) {
-            case R.id.action_add: {
+            case action_add: {
                 onAddWallet();
             }
             break;
@@ -238,11 +239,8 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.try_again: {
-                viewModel.fetchWallets();
-            }
-            break;
+        if (view.getId() == R.id.try_again) {
+            viewModel.fetchWallets();
         }
     }
 

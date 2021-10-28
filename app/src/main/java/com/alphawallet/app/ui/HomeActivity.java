@@ -289,7 +289,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         //TODO: Move all fragment comms to this model - see all instances of ((HomeActivity)getActivity()).
         getSupportFragmentManager()
-                .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> viewModel.restartTokensService());
+                .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> {
+                    viewModel.restartTokensService();
+                    //trigger wallet adapter reset
+                    resetTokens();
+                });
 
         getSupportFragmentManager()
                 .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> showAndRefreshWallet());

@@ -359,4 +359,26 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
         return "";
     }
+
+    public boolean isMainNetsSelected()
+    {
+        return ethereumNetworkRepository.isMainNetSelected();
+    }
+
+    public void addNetworkToFilters(NetworkInfo info)
+    {
+        List<Long> filters = ethereumNetworkRepository.getFilterNetworkList();
+        if (!filters.contains(info.chainId))
+        {
+            filters.add(info.chainId);
+            ethereumNetworkRepository.setFilterNetworkList(filters.toArray(new Long[0]));
+        }
+
+        tokensService.setupFilter();
+    }
+
+    public void setMainNetsSelected(boolean isMainNet)
+    {
+        ethereumNetworkRepository.setActiveMainnet(isMainNet);
+    }
 }

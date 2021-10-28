@@ -65,6 +65,7 @@ public interface EthereumNetworkRepositoryType {
     String getCurrentWalletAddress();
     boolean hasSetNetworkFilters();
     boolean isMainNetSelected();
+    void setActiveMainnet(boolean isMainNet);
 
     void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId);
     NetworkInfoExt getNetworkInfoExt(long chainId);

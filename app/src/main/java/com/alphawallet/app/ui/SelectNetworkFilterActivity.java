@@ -174,13 +174,12 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     public void onTestNetDialogClosed()
     {
         testnetSwitch.setChecked(false);
-        testnetDialog.dismiss();
     }
 
     @Override
-    public void onTestNetDialogConfirmed()
+    public void onTestNetDialogConfirmed(long newChainId)
     {
-        testnetDialog.dismiss();
+        //Shouldn't we change to testnet here?
     }
 
     @Override

@@ -67,7 +67,7 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity {
 
     protected void initTestNetDialog(TestNetDialog.TestNetDialogCallback callback)
     {
-        testnetDialog = new TestNetDialog(this, callback);
+        testnetDialog = new TestNetDialog(this, 0, callback);
     }
 
     private void initViews()

@@ -38,7 +38,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -58,7 +57,6 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -84,7 +82,6 @@ public class HomeViewModel extends BaseViewModel {
 
     private final PreferenceRepositoryType preferenceRepository;
     private final ImportTokenRouter importTokenRouter;
-    private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
@@ -110,7 +107,6 @@ public class HomeViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
@@ -123,7 +119,6 @@ public class HomeViewModel extends BaseViewModel {
             ExternalBrowserRouter externalBrowserRouter ) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
-        this.addTokenRouter = addTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
@@ -210,10 +205,6 @@ public class HomeViewModel extends BaseViewModel {
 
     private void importLink(Wallet wallet, Activity activity, String importData) {
         importTokenRouter.open(activity, importData);
-    }
-
-    public void showAddToken(Context context, String address) {
-        addTokenRouter.open(context, address);
     }
 
     public void updateLocale(String newLocale, Context context)
@@ -407,7 +398,7 @@ public class HomeViewModel extends BaseViewModel {
             {
                 Intent intent = new Intent(activity, AddTokenActivity.class);
                 intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
-                activity.startActivity(intent);
+                activity.startActivityForResult(intent, C.ADDED_TOKEN_RETURN);
             }
             else if (v.getId() == R.id.watch_account_action)
             {

@@ -290,9 +290,9 @@ public class Web3View extends WebView {
     private final OnWalletAddEthereumChainObjectListener innerAddChainListener = new OnWalletAddEthereumChainObjectListener()
     {
         @Override
-        public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
+        public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
         {
-            onWalletAddEthereumChainObjectListener.OnWalletAddEthereumChainObject(chainObject);
+            onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObject);
         }
     };
 

@@ -1,9 +1,5 @@
 package com.alphawallet.app.di;
 
-import android.content.Context;
-
-import dagger.Module;
-import dagger.Provides;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepository;
@@ -13,7 +9,6 @@ import com.alphawallet.app.repository.LocaleRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -23,6 +18,9 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 
+import dagger.Module;
+import dagger.Provides;
+
 @Module
 class HomeModule {
     @Provides
@@ -30,7 +28,6 @@ class HomeModule {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
@@ -45,7 +42,6 @@ class HomeModule {
                 preferenceRepository,
                 localeRepository,
                 importTokenRouter,
-                addTokenRouter,
                 assetDefinitionService,
                 genericWalletInteract,
                 fetchWalletsInteract,
@@ -61,11 +57,6 @@ class HomeModule {
     @Provides
     LocaleRepositoryType provideLocaleRepository(PreferenceRepositoryType preferenceRepository) {
         return new LocaleRepository(preferenceRepository);
-    }
-
-    @Provides
-    AddTokenRouter provideAddTokenRouter() {
-        return new AddTokenRouter();
     }
 
     @Provides

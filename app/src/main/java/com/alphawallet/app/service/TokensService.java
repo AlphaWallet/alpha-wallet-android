@@ -112,7 +112,7 @@ public class TokensService
         this.openseaService = openseaService;
         this.analyticsService = analyticsService;
         networkFilter = new ArrayList<>();
-        setupFilter();
+        setupFilter(ethereumNetworkRepository.hasSetNetworkFilters());
         focusToken = null;
         this.unknownTokens = new ConcurrentLinkedDeque<>();
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
@@ -343,7 +343,7 @@ public class TokensService
 
     public static void setWalletStartup() { walletStartup = true; }
 
-    public void setupFilter()
+    public void setupFilter(boolean userUpdated)
     {
         networkFilter.clear();
         if (CustomViewSettings.getLockedChains().size() > 0)
@@ -354,6 +354,8 @@ public class TokensService
         {
             networkFilter.addAll(ethereumNetworkRepository.getFilterNetworkList());
         }
+
+        if (userUpdated) ethereumNetworkRepository.setHasSetNetworkFilters();
     }
 
     public void setFocusToken(@NotNull Token token)
@@ -872,12 +874,15 @@ public class TokensService
         networkFilter.clear();
         NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
 
-        for (NetworkInfo network : networks)
+        if (!ethereumNetworkRepository.hasSetNetworkFilters())
         {
-            Token t = getToken(network.chainId, currentAddress);
-            if (t != null && t.balance.compareTo(BigDecimal.ZERO) > 0)
+            for (NetworkInfo network : networks)
             {
-                networkFilter.add(network.chainId);
+                Token t = getToken(network.chainId, currentAddress);
+                if (t != null && t.balance.compareTo(BigDecimal.ZERO) > 0)
+                {
+                    networkFilter.add(network.chainId);
+                }
             }
         }
 

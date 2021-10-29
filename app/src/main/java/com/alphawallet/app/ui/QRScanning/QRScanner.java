@@ -103,7 +103,7 @@ public class QRScanner extends BaseActivity
         toolbar();
         setTitle(getString(R.string.qr_scanner));
 
-        chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
+        chainIdOverride = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, 0);
         barcodeView = findViewById(R.id.scanner_view);
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.AZTEC);
         barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));

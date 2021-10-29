@@ -293,9 +293,9 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if (result != null)
         {
             ContractLocator cr = new ContractLocator(result.getAddress(), result.tokenInfo.chainId);
-            Intent intent = new Intent(ADDED_TOKEN);
-            intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, new ArrayList<>(Collections.singletonList(cr)));
-            sendBroadcast(intent);
+            Intent iResult = new Intent();
+            iResult.putParcelableArrayListExtra(ADDED_TOKEN, new ArrayList<>(Collections.singletonList(cr)));
+            setResult(RESULT_OK, iResult);
             finish();
         }
     }
@@ -451,7 +451,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             });
 
     private void selectNetwork() {
-        Intent intent = new Intent(AddTokenActivity.this, SelectNetworkActivity.class);
+        Intent intent = new Intent(this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         getNetwork.launch(intent);

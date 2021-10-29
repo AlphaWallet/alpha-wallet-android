@@ -106,6 +106,7 @@ import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.TestNetDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -152,6 +153,7 @@ import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -161,7 +163,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
-        ActionSheetCallback
+        ActionSheetCallback, TestNetDialog.TestNetDialogCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -801,6 +803,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         forceChainChange = chainId; //avoid prompt to change chain for 1inch
         loadUrlAfterReload = url;   //after reload with new chain inject, page is clean to load the correct site
 
+        if (viewModel == null)
+        {
+            initViewModel();
+            return;
+        }
+
         activeNetwork = viewModel.getNetworkInfo(chainId);
         updateNetworkMenuItem();
         viewModel.setNetwork(chainId);
@@ -823,6 +831,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
             if (networkChanged && isOnHomePage())
                 resetDappBrowser(); //trigger a reset if on homepage
+
+            updateFilters(networkInfo);
         }
         else
         {
@@ -831,8 +841,21 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
+    private void updateFilters(NetworkInfo networkInfo)
+    {
+        if (networkInfo.hasRealValue() && !viewModel.isMainNetsSelected())
+        {
+            //switch to main net, no need to ask user
+            viewModel.setMainNetsSelected(true);
+        }
+
+        viewModel.addNetworkToFilters(networkInfo);
+        getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle()); //reset tokens service and wallet page with updated filters
+    }
+
     ActivityResultLauncher<Intent> getNewNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                if (result.getData() == null) return;
                 long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 loadNewNetwork(networkId);
             });
@@ -1026,9 +1049,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                if (result.getData() == null) return;
                 long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 forceChainChange = networkId;
                 loadNewNetwork(networkId);
+                //might have adjusted the filters
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
             });
 
     private void loadNewNetwork(long newNetworkId)
@@ -1110,13 +1136,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     @Override
-    public void OnWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
+    public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
     {
         // read chain value
         long chainId = chainObj.getChainId();
         final NetworkInfo info = viewModel.getNetworkInfo(chainId);
 
-        if (forceChainChange != 0)
+        if (forceChainChange != 0 || getContext() == null)
         {
             return; //No action if chain change is forced
         }
@@ -1136,23 +1162,35 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //Don't show dialog if network doesn't need to be changed or if already showing
         if (activeNetwork.chainId == chainId || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
 
+        //if we're switching between mainnet and testnet we need to pop open the 'switch to testnet' dialog (class TestNetDialog)
+        // - after the user switches to testnet, go straight to switching the network (loadNewNetwork)
+        // - if user is switching form testnet to mainnet, simply add the title below
+
+        // at this stage, we know if it's testnet or not
+        if (!info.hasRealValue() && activeNetwork.hasRealValue())
+        {
+            TestNetDialog testnetDialog = new TestNetDialog(getContext(), info.chainId, this);
+            testnetDialog.show();
+        }
+        else
+        {
+            //go straight to chain change dialog
+            showChainChangeDialog(info);
+        }
+    }
+
+    private void showChainChangeDialog(NetworkInfo newNetwork)
+    {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setMessage(getString(R.string.request_change_chain, info.name, String.valueOf(info.chainId)))
-                .setPositiveButton(R.string.dialog_ok, (d, w) -> loadNewNetwork(info.chainId))
+                .setMessage(getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId)))
+                .setPositiveButton(R.string.dialog_ok, (d, w) -> loadNewNetwork(newNetwork.chainId))
                 .setNegativeButton(R.string.action_cancel, (d, w) -> chainSwapDialog.dismiss())
                 .setCancelable(true);
 
         //Warn if we're switching between network types
-        if (EthereumNetworkRepository.hasRealValue(activeNetwork.chainId) != EthereumNetworkRepository.hasRealValue(info.chainId))
+        if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
         {
-            if (EthereumNetworkRepository.hasRealValue(info.chainId))
-            {
-                builder.setTitle(R.string.warning_switch_to_main);
-            }
-            else
-            {
-                builder.setTitle(R.string.warning_switching_to_test);
-            }
+            builder.setTitle(R.string.warning_switch_to_main);
         }
 
         chainSwapDialog = builder.create();
@@ -1542,11 +1580,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.loadUrl(Utils.formatUrl(urlText));
         setUrlText(Utils.formatUrl(urlText));
         web3.requestFocus();
-        Activity current = getActivity();
-        if (current != null)
-        {
-            current.sendBroadcast(new Intent(RESET_TOOLBAR));
-        }
+        getParentFragmentManager().setFragmentResult(RESET_TOOLBAR, new Bundle());
         return true;
     }
 
@@ -2162,5 +2196,24 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         String customHome = viewModel.getHomePage(getContext());
         return customHome != null ? customHome : EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
+    }
+
+    @Override
+    public void onTestNetDialogClosed()
+    {
+        //don't change to the new network
+
+    }
+
+    @Override
+    public void onTestNetDialogConfirmed(long newChainId)
+    {
+        viewModel.setMainNetsSelected(false);
+        //proceed with new network change, no need to pop a second dialog, we are swapping from a main net to a testnet
+        NetworkInfo newNetwork = viewModel.getNetworkInfo(newChainId);
+        if (newNetwork != null)
+        {
+            loadNewNetwork(newChainId);
+        }
     }
 }

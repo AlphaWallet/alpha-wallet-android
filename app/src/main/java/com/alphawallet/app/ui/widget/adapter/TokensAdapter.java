@@ -1,7 +1,9 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.content.Intent;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
@@ -41,12 +43,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
     public static final int FILTER_COLLECTIBLES = 3;
-    private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(99999999999L);
     private final Realm realm;
 
     private int filterType;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
     private String walletAddress;
@@ -94,11 +96,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
+    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService,
+                         ActivityResultLauncher<Intent> launcher) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = tService;
         this.realm = tokensService.getTickerRealmInstance();
+        this.managementLauncher = launcher;
     }
 
     protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
@@ -106,6 +110,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.assetService = aService;
         this.tokensService = null;
         this.realm = null;
+        this.managementLauncher = null;
     }
 
     @Override
@@ -197,7 +202,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addManageTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress), 0));
+            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher), 0));
         }
     }
 

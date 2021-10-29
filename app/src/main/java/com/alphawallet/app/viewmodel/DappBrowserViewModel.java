@@ -374,7 +374,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             ethereumNetworkRepository.setFilterNetworkList(filters.toArray(new Long[0]));
         }
 
-        tokensService.setupFilter();
+        tokensService.setupFilter(true);
     }
 
     public void setMainNetsSelected(boolean isMainNet)

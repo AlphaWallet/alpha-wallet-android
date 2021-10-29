@@ -803,6 +803,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         forceChainChange = chainId; //avoid prompt to change chain for 1inch
         loadUrlAfterReload = url;   //after reload with new chain inject, page is clean to load the correct site
 
+        if (viewModel == null)
+        {
+            initViewModel();
+            return;
+        }
+
         activeNetwork = viewModel.getNetworkInfo(chainId);
         updateNetworkMenuItem();
         viewModel.setNetwork(chainId);
@@ -1047,6 +1053,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 forceChainChange = networkId;
                 loadNewNetwork(networkId);
+                //might have adjusted the filters
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
             });
 
     private void loadNewNetwork(long newNetworkId)
@@ -1572,11 +1580,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.loadUrl(Utils.formatUrl(urlText));
         setUrlText(Utils.formatUrl(urlText));
         web3.requestFocus();
-        Activity current = getActivity();
-        if (current != null)
-        {
-            current.sendBroadcast(new Intent(RESET_TOOLBAR));
-        }
+        getParentFragmentManager().setFragmentResult(RESET_TOOLBAR, new Bundle());
         return true;
     }
 

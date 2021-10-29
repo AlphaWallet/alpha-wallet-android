@@ -64,6 +64,7 @@ public interface EthereumNetworkRepositoryType {
 
     String getCurrentWalletAddress();
     boolean hasSetNetworkFilters();
+    void setHasSetNetworkFilters();
     boolean isMainNetSelected();
     void setActiveMainnet(boolean isMainNet);
 

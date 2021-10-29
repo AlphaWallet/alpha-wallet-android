@@ -275,14 +275,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final LongSparseArray<Integer> chainLogos = new LongSparseArray<Integer>() {
         {
             put(MAINNET_ID, R.drawable.ic_token_eth);
-            put(KOVAN_ID, R.drawable.kovan_logo);
-            put(ROPSTEN_ID, R.drawable.ropsten_logo);
-            put(RINKEBY_ID, R.drawable.rinkeby_logo);
+            put(KOVAN_ID, R.drawable.ic_kovan);
+            put(ROPSTEN_ID, R.drawable.ic_ropsten);
+            put(RINKEBY_ID, R.drawable.ic_rinkeby);
             put(CLASSIC_ID, R.drawable.classic_logo);
             put(POA_ID, R.drawable.ic_poa_logo);
             put(SOKOL_ID, R.drawable.ic_poa_sokol);
             put(XDAI_ID, R.drawable.xdai_logo);
-            put(GOERLI_ID, R.drawable.goerli_logo);
+            put(GOERLI_ID, R.drawable.ic_goerli);
             put(ARTIS_SIGMA1_ID, R.drawable.ic_artis_sigma_logo);
             put(ARTIS_TAU1_ID, R.drawable.ic_artis_tau_logo);
             put(BINANCE_MAIN_ID, R.drawable.ic_binance_logo);
@@ -475,7 +475,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         for (NetworkInfo network : networks)
         {
-            if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue) result.add(network);
+            if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue
+                    && !result.contains(network)) result.add(network);
         }
     }
 
@@ -581,8 +582,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         if (selectedIds.size() == 0)
         {
             selectedIds.add(getDefaultNetwork(isMainNet));
-            preferences.blankHasSetNetworkFilters();
-            preferences.commit();
         }
 
         return selectedIds;
@@ -616,6 +615,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             preferences.setActiveBrowserNetwork(0);
         }
+
+
     }
 
     @Override
@@ -641,8 +642,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public NetworkInfo[] getAllActiveNetworks()
     {
+        NetworkInfo[] allNetworks = getAvailableNetworkList();
         List<NetworkInfo> networks = new ArrayList<>();
-        addNetworks(networks, preferences.isActiveMainnet());
+        addNetworks(allNetworks, networks, preferences.isActiveMainnet());
         return networks.toArray(new NetworkInfo[0]);
     }
 
@@ -874,6 +876,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public boolean hasSetNetworkFilters()
     {
         return preferences.hasSetNetworkFilters();
+    }
+
+    public void setHasSetNetworkFilters()
+    {
+        preferences.setHasSetNetworkFilters();
     }
 
     public boolean isMainNetSelected()

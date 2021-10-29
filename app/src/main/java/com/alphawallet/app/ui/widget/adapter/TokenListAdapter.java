@@ -52,7 +52,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     private final Context context;
     private final List<UnknownToken> unknownTokenList;
-    private ItemClickListener listener;
+    private final ItemClickListener listener;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
     private Disposable disposable;

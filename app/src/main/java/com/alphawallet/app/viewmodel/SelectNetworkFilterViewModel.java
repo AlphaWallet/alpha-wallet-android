@@ -27,9 +27,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public void setFilterNetworks(List<Long> selectedItems, boolean mainnetActive, boolean hasSelected) {
+    public void setFilterNetworks(List<Long> selectedItems, boolean mainnetActive, boolean hasSelected, boolean shouldBlankUserSelection)
+    {
         preferenceRepository.setActiveMainnet(mainnetActive);
-        if (hasSelected) preferenceRepository.setHasSetNetworkFilters();
 
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         long activeNetworkId = -99;
@@ -50,7 +50,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter();
+        tokensService.setupFilter(hasSelected && !shouldBlankUserSelection);
+
+        if (shouldBlankUserSelection) preferenceRepository.blankHasSetNetworkFilters();
 
         preferenceRepository.commit();
     }

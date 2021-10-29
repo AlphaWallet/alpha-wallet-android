@@ -1,18 +1,15 @@
 package com.alphawallet.app.viewmodel;
 
-import android.content.Context;
-
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.annotation.NonNull;
 
+import com.alphawallet.app.interact.FetchWalletsInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.interact.FetchWalletsInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -24,7 +21,6 @@ import com.alphawallet.app.service.TransactionsService;
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final PreferenceRepositoryType preferenceRepository;
     private final ImportTokenRouter importTokenRouter;
-    private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
@@ -41,7 +37,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
@@ -55,7 +50,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
-        this.addTokenRouter = addTokenRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -75,7 +69,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 preferenceRepository,
                 localeRepository,
                 importTokenRouter,
-                addTokenRouter,
                 assetDefinitionService,
                 genericWalletInteract,
                 fetchWalletsInteract,

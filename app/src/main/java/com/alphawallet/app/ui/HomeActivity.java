@@ -1,8 +1,10 @@
 package com.alphawallet.app.ui;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
@@ -302,6 +304,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
                     viewModel.updateTickers();
                     showAndRefreshWallet();
+                });
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(RESET_TOOLBAR, this, (requestKey, b) -> invalidateOptionsMenu());
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(ADDED_TOKEN, this, (requestKey, b) -> {
+                    List<ContractLocator> contractList = b.getParcelableArrayList(ADDED_TOKEN);
+                    if (contractList != null)
+                    {
+                        ((ActivityFragment) activityFragment).addedToken(contractList);
+                    }
                 });
     }
 
@@ -681,18 +695,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void TokensReady()
-    {
-        ((ActivityFragment) activityFragment).resetTokens();
-    }
-
-    @Override
-    public void AddToken(String address)
-    {
-        viewModel.showAddToken(this, address);
-    }
-
-    @Override
     public void updateReady(int updateVersion)
     {
         //signal to WalletFragment an update is ready
@@ -869,12 +871,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void resetToolbar()
-    {
-        invalidateOptionsMenu();
-    }
-
-    @Override
     public void requestNotificationPermission()
     {
         checkNotificationPermission(RC_ASSET_NOTIFICATION_PERM);
@@ -901,12 +897,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void addedToken(List<ContractLocator> tokenContracts)
-    {
-        ((ActivityFragment) activityFragment).addedToken(tokenContracts);
-    }
-
-    @Override
     public void changedLocale()
     {
         ((WalletFragment) walletFragment).changedLocale();
@@ -916,12 +906,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void resetTransactions()
     {
         ((ActivityFragment) activityFragment).resetTransactions();
-    }
-
-    @Override
-    public void refreshTokens()
-    {
-        ((WalletFragment) walletFragment).refreshTokens();
     }
 
     @Override
@@ -1153,6 +1137,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     ((ActivityFragment)activityFragment).scrollToTop();
                     showPage(ACTIVITY);
                 }
+                break;
+            case C.ADDED_TOKEN_RETURN:
+                List<ContractLocator> tokenData = data.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST);
+                ((ActivityFragment) activityFragment).addedToken(tokenData);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

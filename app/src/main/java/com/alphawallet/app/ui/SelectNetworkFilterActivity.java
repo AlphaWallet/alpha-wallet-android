@@ -163,9 +163,10 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
+        boolean shouldBlankUserSelection = (mainnetSwitch.isChecked() && mainNetAdapter.getSelectedItems().length == 0)
+                || (testnetSwitch.isChecked() && testNetAdapter.getSelectedItems().length == 0);
 
-        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked(), hasClicked);
-        sendBroadcast(new Intent(C.RESET_WALLET));
+        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked(), hasClicked, shouldBlankUserSelection);
         setResult(RESULT_OK, new Intent());
         finish();
     }

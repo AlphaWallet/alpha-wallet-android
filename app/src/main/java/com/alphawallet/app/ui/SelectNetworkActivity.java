@@ -60,10 +60,12 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
 
             // Previous active network was deselected, get the first item in filtered networks
-            if (selectedChainId == -1)
+            if (selectedChainId == -1) { selectedChainId = viewModel.getSelectedNetwork(); } //try network from settings
+            if (selectedChainId == -1
+                || !viewModel.getFilterNetworkList().contains(selectedChainId))
             {
                 selectedChainId = viewModel.getFilterNetworkList().get(0);
-            }
+            } //use first network known on list if there's still any kind of issue
 
             if (localSelectionMode)
             {

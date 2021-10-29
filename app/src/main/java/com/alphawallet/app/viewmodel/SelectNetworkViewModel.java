@@ -66,4 +66,11 @@ public class SelectNetworkViewModel extends BaseViewModel {
     {
         return EthereumNetworkBase.hasRealValue(networkId);
     }
+
+    public long getSelectedNetwork()
+    {
+        NetworkInfo browserNetwork = networkRepository.getActiveBrowserNetwork();
+        if (browserNetwork != null) { return browserNetwork.chainId; }
+        else return -1;
+    }
 }

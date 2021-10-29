@@ -81,6 +81,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     public static native String getEtherscanKey();
     public static native String getBSCExplorerKey();
+    public static native String getCovalentKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -676,7 +677,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanTransaction[] readCovalentTransactions(String walletAddress, String accountAddress, NetworkInfo networkInfo, boolean ascending, int page, int pageSize) throws JSONException
     {
         String covalent = "" + networkInfo.chainId + "/address/" + accountAddress.toLowerCase() + "/transactions_v2/?";
-        String args = "block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize;
+        String args = "no-logs=true&block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize + "&key=" + getCovalentKey();
         String fullUrl = networkInfo.etherscanAPI.replace(COVALENT, covalent);
         String result = null;
 

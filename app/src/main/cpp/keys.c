@@ -158,3 +158,14 @@ Java_com_alphawallet_app_service_GasService_getPolygonScanKey(JNIEnv *env, jobje
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getCovalentKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedCKey(env, 4, '_', covalentKey);
+#else
+    const jstring key = "ckey_9bfb5c8fe0f04c7491231e60ee8"; // <-- Add your covalent key here. This public one could be rate limited
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

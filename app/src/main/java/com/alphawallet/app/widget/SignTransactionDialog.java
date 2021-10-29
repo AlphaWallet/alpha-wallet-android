@@ -17,6 +17,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.WalletType;
 
 import java.security.ProviderException;
 import java.util.concurrent.Executor;
@@ -122,19 +123,21 @@ public class SignTransactionDialog
         final BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle(activity.getString(R.string.unlock_private_key));
 
-        if (!hasDeviceCredential && !hasStrongBiometric)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
         {
-            //device is completely unlocked ... go direct to callback
-            authCallback.authenticatePass(callbackId);
-            return;
-        }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
-        {
-            promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
-
-            if (!hasDeviceCredential)
+            if (!hasStrongBiometric && !hasDeviceCredential)
             {
-                promptBuilder.setNegativeButtonText(activity.getString(R.string.action_cancel));
+                //device should be unlocked, drop through
+                authCallback.authenticatePass(callbackId);
+            }
+            else
+            {
+                promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
+
+                if (!hasDeviceCredential)
+                {
+                    promptBuilder.setNegativeButtonText(activity.getString(R.string.action_cancel));
+                }
             }
         }
         else

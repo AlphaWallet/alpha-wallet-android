@@ -240,7 +240,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             String qrCode = data.getString("qrCode");
             String sessionId = data.getString("session");
-            chainIdOverride = data.getInt(C.EXTRA_CHAIN_ID, 0);
+            chainIdOverride = data.getLong(C.EXTRA_CHAIN_ID, 0);
             if (sessionId != null) fromSessionActivity = true;
             if (!TextUtils.isEmpty(qrCode))
             {
@@ -629,6 +629,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
                 Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
                 onSessionRequest(0L, remotePeerMeta, chainIdOverride);

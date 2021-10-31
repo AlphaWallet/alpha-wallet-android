@@ -1,6 +1,5 @@
 package com.alphawallet.app.viewmodel;
 
-import android.content.Context;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -9,7 +8,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
@@ -21,7 +19,6 @@ import io.realm.Realm;
 public class TokenManagementViewModel extends BaseViewModel {
     private final TokenRepositoryType tokenRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
-    private final AddTokenRouter addTokenRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
@@ -31,12 +28,10 @@ public class TokenManagementViewModel extends BaseViewModel {
 
     public TokenManagementViewModel(TokenRepositoryType tokenRepository,
                                     ChangeTokenEnableInteract changeTokenEnableInteract,
-                                    AddTokenRouter addTokenRouter,
                                     AssetDefinitionService assetDefinitionService,
                                     TokensService tokensService) {
         this.tokenRepository = tokenRepository;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
-        this.addTokenRouter = addTokenRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
     }
@@ -60,10 +55,6 @@ public class TokenManagementViewModel extends BaseViewModel {
 
     public void setTokenEnabled(Wallet wallet, Token token, boolean enabled) {
         changeTokenEnableInteract.setEnable(wallet, token, enabled);
-    }
-
-    public void showAddToken(Context context) {
-        addTokenRouter.open(context, null);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

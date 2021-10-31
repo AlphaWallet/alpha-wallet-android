@@ -57,13 +57,15 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         if (intent != null)
         {
             localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
-            long selectedChainId = intent.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+            long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
 
             // Previous active network was deselected, get the first item in filtered networks
-            if (selectedChainId == -1)
+            if (selectedChainId == -1) { selectedChainId = viewModel.getSelectedNetwork(); } //try network from settings
+            if (selectedChainId == -1
+                || !viewModel.getFilterNetworkList().contains(selectedChainId))
             {
                 selectedChainId = viewModel.getFilterNetworkList().get(0);
-            }
+            } //use first network known on list if there's still any kind of issue
 
             if (localSelectionMode)
             {
@@ -212,13 +214,11 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     public void onTestNetDialogClosed()
     {
         testnetSwitch.setChecked(false);
-        testnetDialog.dismiss();
     }
 
     @Override
-    public void onTestNetDialogConfirmed()
+    public void onTestNetDialogConfirmed(long newChainId)
     {
-        testnetDialog.dismiss();
         testNetAdapter.selectDefault();
     }
 

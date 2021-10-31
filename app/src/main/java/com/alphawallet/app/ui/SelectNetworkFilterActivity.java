@@ -163,9 +163,10 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
+        boolean shouldBlankUserSelection = (mainnetSwitch.isChecked() && mainNetAdapter.getSelectedItems().length == 0)
+                || (testnetSwitch.isChecked() && testNetAdapter.getSelectedItems().length == 0);
 
-        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked(), hasClicked);
-        sendBroadcast(new Intent(C.RESET_WALLET));
+        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked(), hasClicked, shouldBlankUserSelection);
         setResult(RESULT_OK, new Intent());
         finish();
     }
@@ -174,13 +175,12 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     public void onTestNetDialogClosed()
     {
         testnetSwitch.setChecked(false);
-        testnetDialog.dismiss();
     }
 
     @Override
-    public void onTestNetDialogConfirmed()
+    public void onTestNetDialogConfirmed(long newChainId)
     {
-        testnetDialog.dismiss();
+        //Shouldn't we change to testnet here?
     }
 
     @Override

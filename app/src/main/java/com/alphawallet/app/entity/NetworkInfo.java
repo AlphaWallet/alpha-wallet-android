@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.Utils;
 
 public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
@@ -82,5 +83,10 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
         {
             return Uri.EMPTY;
         }
+    }
+
+    public boolean hasRealValue()
+    {
+        return EthereumNetworkRepository.hasRealValue(this.chainId);
     }
 }

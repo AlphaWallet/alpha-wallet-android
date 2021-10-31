@@ -175,9 +175,10 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getBoolean(FULL_SCREEN_STATE, false);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setActiveMainnet(boolean state) {
-        pref.edit().putBoolean(ACTIVE_MAINNET, state).apply();
+        pref.edit().putBoolean(ACTIVE_MAINNET, state).commit(); //use commit
     }
 
     @Override

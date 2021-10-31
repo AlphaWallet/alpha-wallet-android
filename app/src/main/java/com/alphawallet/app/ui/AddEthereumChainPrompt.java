@@ -27,11 +27,9 @@ public class AddEthereumChainPrompt extends BottomSheetDialog implements Standar
         void onAdd(WalletAddEthereumChainObject chainObject);
     }
 
-    private TextView message;
-    private FunctionButtonBar functionBar;
-    private WalletAddEthereumChainObject chainObject;
+    private final WalletAddEthereumChainObject chainObject;
 
-    private AddChainListener listener;
+    private final AddChainListener listener;
 
     public AddEthereumChainPrompt(@NonNull @NotNull Context context, WalletAddEthereumChainObject chainObject, AddChainListener listener) {
         super(context);
@@ -39,12 +37,12 @@ public class AddEthereumChainPrompt extends BottomSheetDialog implements Standar
         this.chainObject = chainObject;
         this.listener = listener;
 
-        message = findViewById(R.id.message);
+        TextView message = findViewById(R.id.message);
         message.setText(context.getString(R.string.add_chain_dialog_message, chainObject.chainName, String.valueOf(chainObject.getChainId())));
 
         findViewById(R.id.close_action).setOnClickListener(v -> dismiss());
 
-        functionBar = findViewById(R.id.layoutButtons);
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_enable_switch_reload)));
         functionBar.revealButtons();
     }

@@ -170,10 +170,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void populateTicker()
     {
+        if (token.getFullName().contains("Pirl"))
+        {
+            System.out.println("YOLESS");
+        }
         TokenTicker ticker = tokensService.getTokenTicker(token);
         if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
-            handleTicker();
+            handleTicker(ticker);
         }
         else
         {
@@ -192,13 +196,25 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
     }
 
-    private void handleTicker()
+    private void handleTicker(TokenTicker ticker)
     {
-        primaryElement = true;
-        hideIssuerViews();
-        layoutAppreciation.setVisibility(View.VISIBLE);
-        balanceCurrency.setVisibility(View.VISIBLE);
-        startTickerRealmListener();
+        if (ticker != null)
+        {
+            primaryElement = true;
+            hideIssuerViews();
+            layoutAppreciation.setVisibility(View.VISIBLE);
+            balanceCurrency.setVisibility(View.VISIBLE);
+            startTickerRealmListener();
+        }
+        else
+        {
+            //Ethereum token without a ticker
+            issuer.setVisibility(View.GONE);
+            issuerPlaceholder.setVisibility(View.GONE);
+            balanceCurrency.setVisibility(View.GONE);
+            layoutAppreciation.setVisibility(View.GONE);
+            primaryElement = true;
+        }
     }
 
     private void showNetworkLabel() {

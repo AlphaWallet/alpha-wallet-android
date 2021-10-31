@@ -1,5 +1,11 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.C.WALLET_CONNECT_CLIENT_TERMINATE;
+import static com.alphawallet.app.C.WALLET_CONNECT_COUNT_CHANGE;
+import static com.alphawallet.app.C.WALLET_CONNECT_FAIL;
+import static com.alphawallet.app.C.WALLET_CONNECT_NEW_SESSION;
+import static com.alphawallet.app.C.WALLET_CONNECT_REQUEST;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -25,13 +31,6 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
-
-import static com.alphawallet.app.C.PAGE_LOADED;
-import static com.alphawallet.app.C.WALLET_CONNECT_CLIENT_TERMINATE;
-import static com.alphawallet.app.C.WALLET_CONNECT_COUNT_CHANGE;
-import static com.alphawallet.app.C.WALLET_CONNECT_FAIL;
-import static com.alphawallet.app.C.WALLET_CONNECT_NEW_SESSION;
-import static com.alphawallet.app.C.WALLET_CONNECT_REQUEST;
 
 /**
  * The purpose of this service is to manage the currently active WalletConnect sessions. Keep the connections alive and terminate where required.
@@ -233,6 +232,7 @@ public class WalletConnectService extends Service
         client.setOnDisconnect((code, reason) -> {
             Log.d(TAG, "Terminate session?");
             terminateClient(client.sessionId());
+            client.resetState();
             return Unit.INSTANCE;
         });
 
@@ -344,9 +344,9 @@ public class WalletConnectService extends Service
 
     private void terminateClient(String sessionKey)
     {
+        broadcastSessionEvent(WALLET_CONNECT_CLIENT_TERMINATE, sessionKey);
         clientMap.remove(sessionKey);
         broadcastConnectionCount(clientMap.size());
-        broadcastSessionEvent(WALLET_CONNECT_CLIENT_TERMINATE, sessionKey);
         if (clientMap.size() == 0 && pingTimer != null && !pingTimer.isDisposed())
         {
             Log.d(TAG, "Stop timer & service");

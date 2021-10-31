@@ -837,4 +837,8 @@
     <string name="chains_to_scan">Chains to scan</string>
     <string name="action_view">View</string>
     <string name="error_chainid_already_taken">Chain Id already taken</string>
+    <string name="status">Tình trạng</string>
+    <string name="connected_to">được kết nối với</string>
+    <string name="not_connected">Không được kết nối</string>
+    <string name="online">Trực tuyến</string>
 </resources>

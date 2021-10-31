@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
+import static com.alphawallet.app.util.Utils.isValidUrl;
 
 import androidx.preference.PreferenceManager;
 
@@ -39,9 +41,14 @@ public class DappBrowserUtils {
             List<DApp> primaryDapps = getPrimarySites(context);
             Map<String, DApp> dappMap = new HashMap<>();
             for (DApp d : myDapps)
-                dappMap.put(d.getUrl(), d);
+            {
+                if (isValidUrl(d.getUrl()))
+                    dappMap.put(d.getUrl(), d);
+            }
             for (DApp d : primaryDapps)
+            {
                 dappMap.remove(d.getUrl());
+            }
 
             String myDappsJson = new Gson().toJson(dappMap.values());
             storeJsonData(MY_DAPPS_FILE, myDappsJson, context);
@@ -83,7 +90,45 @@ public class DappBrowserUtils {
             history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<DApp>>() {
             }.getType());
         }
+
+        int historyLen = history.size();
+
+        history = parseDappHistory(history);
+
+        if (historyLen != history.size())
+        {
+            String dappHistory = new Gson().toJson(history);
+            storeJsonData(DAPPS_HISTORY_FILE, dappHistory, context);
+        }
+
         return history;
+    }
+
+    private static List<DApp> parseDappHistory(List<DApp> history)
+    {
+        boolean requireRefresh = false;
+        List<DApp> recodeHistory = new ArrayList<>();
+        for (DApp dapp : history)
+        {
+            if (TextUtils.isEmpty(dapp.getUrl())) { continue; }
+            if (isValidUrl(dapp.getUrl()))
+            {
+                recodeHistory.add(dapp);
+            }
+            else
+            {
+                requireRefresh = true;
+            }
+        }
+
+        if (requireRefresh)
+        {
+            return recodeHistory;
+        }
+        else
+        {
+            return history;
+        }
     }
 
     private static void storeJsonData(String fName, String json, Context context)

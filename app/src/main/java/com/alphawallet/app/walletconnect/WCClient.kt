@@ -106,7 +106,7 @@ open class WCClient(
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         Log.d(TAG,"<< websocket closed >>")
-        resetState()
+        //resetState()
         onFailure(t)
 
         listeners.forEach { it.onFailure(webSocket, t, response) }
@@ -126,7 +126,7 @@ open class WCClient(
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         Log.d(TAG,"<< closing socket >>")
 
-        resetState()
+        //resetState()
         onDisconnect(code, reason)
 
         listeners.forEach { it.onClosing(webSocket, code, reason) }
@@ -349,7 +349,7 @@ open class WCClient(
         listeners.remove(listener)
     }
 
-    private fun resetState() {
+    fun resetState() {
         handshakeId = -1
         isConnected = false
         session = null

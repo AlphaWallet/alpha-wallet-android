@@ -338,11 +338,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     };
 
-    public static void setChainColour(View view, long chainId)
-    {
-        view.getBackground().setTint(ContextCompat.getColor(view.getContext(), getChainColour(chainId)));
-    }
-
     //Does the chain have a gas oracle?
     //Add it to this list here if so. Note that so far, all gas oracles follow the same format:
     //  <etherscanAPI from the above list> + GAS_API

@@ -1,8 +1,13 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
+import static com.alphawallet.app.util.Utils.isValidUrl;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.DApp;
@@ -16,18 +21,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
-import static com.alphawallet.app.util.Utils.isValidUrl;
-
-import androidx.preference.PreferenceManager;
 
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";

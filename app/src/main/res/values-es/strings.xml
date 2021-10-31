@@ -809,4 +809,8 @@
     <string name="chains_to_scan">Chains to scan</string>
     <string name="action_view">View</string>
     <string name="error_chainid_already_taken">Chain Id already taken</string>
+    <string name="status">Estado</string>
+    <string name="connected_to">Conectado a</string>
+    <string name="not_connected">No conectado</string>
+    <string name="online">Conectado</string>
 </resources>

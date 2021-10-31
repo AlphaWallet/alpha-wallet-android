@@ -809,4 +809,8 @@
     <string name="chains_to_scan">Chains to scan</string>
     <string name="action_view">View</string>
     <string name="error_chainid_already_taken">Chain Id already taken</string>
+    <string name="status">地位</string>
+    <string name="connected_to">连接到</string>
+    <string name="not_connected">未连接</string>
+    <string name="online">在线</string>
 </resources>

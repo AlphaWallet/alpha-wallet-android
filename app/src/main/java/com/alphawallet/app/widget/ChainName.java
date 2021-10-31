@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -18,6 +19,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 public class ChainName extends LinearLayout
 {
     private final TextView chainName;
+    private boolean invertNameColour;
 
     public ChainName(Context context, @Nullable AttributeSet attrs)
     {
@@ -29,8 +31,16 @@ public class ChainName extends LinearLayout
 
     public void setChainID(long chainId)
     {
-        EthereumNetworkBase.setChainColour(chainName, chainId);
         chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
+        if (invertNameColour)
+        {
+            invertChainID(chainId);
+        }
+        else
+        {
+            chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
+                    EthereumNetworkBase.getChainColour(chainId)));
+        }
     }
 
     public void invertChainID(long chainId)
@@ -51,6 +61,7 @@ public class ChainName extends LinearLayout
         {
             int fontSize = a.getInteger(R.styleable.InputView_font_size, 12);
             chainName.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+            invertNameColour = a.getBoolean(R.styleable.InputView_invert, false);
         }
         finally
         {

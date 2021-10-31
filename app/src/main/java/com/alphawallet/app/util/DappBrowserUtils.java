@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -208,7 +209,7 @@ public class DappBrowserUtils {
     }
 
     public static String getIconUrl(String url) {
-        return "https://api.faviconkit.com/" + url + "/144";
+        return "https://www.google.com/s2/favicons?sz=128&domain=" + url;
     }
 
     public static List<DApp> getDappsList(Context context) {

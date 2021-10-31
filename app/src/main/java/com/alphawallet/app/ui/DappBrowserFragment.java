@@ -156,6 +156,7 @@ import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
+import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -1489,9 +1490,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 web3.clearHistory();
             }
         }
-        DApp dapp = new DApp(title, url);
-        DappBrowserUtils.addToHistory(getContext(), dapp);
-        adapter.addSuggestion(dapp);
+
+        if (isValidUrl(url))
+        {
+            DApp dapp = new DApp(title, url);
+            DappBrowserUtils.addToHistory(getContext(), dapp);
+            adapter.addSuggestion(dapp);
+        }
+
         onWebpageLoadComplete();
 
         if (urlTv != null) urlTv.setText(url);

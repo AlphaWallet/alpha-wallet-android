@@ -34,9 +34,9 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
     private final OnHistoryItemRemovedListener onHistoryItemRemovedListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView icon;
-        TextView name, url, remove;
-        View urlHolder;
+        final ImageView icon;
+        final TextView name, url, remove;
+        final View urlHolder;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -75,6 +75,7 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
         DApp dApp = data.get(i);
         String visibleUrl = Utils.getDomainName(dApp.getUrl());
         viewHolder.name.setText(dApp.getName());
+        viewHolder.name.setVisibility(View.VISIBLE);
         viewHolder.url.setText(dApp.getUrl());
 
         String favicon;

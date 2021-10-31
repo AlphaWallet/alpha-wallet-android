@@ -148,8 +148,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         retrieveQrCode();
         viewModel.prepare();
-
-        startMessageCheck();
     }
 
     @Override
@@ -580,6 +578,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         super.onResume();
         //see if the session is active
         setupClient(getSessionId());
+        startMessageCheck();
     }
 
     private void setupClient(final String sessionId)
@@ -901,6 +900,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void onPause()
     {
         super.onPause();
+        unregisterReceiver(walletConnectActionReceiver);
     }
 
     @Override
@@ -908,7 +908,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onDestroy();
         if (viewModel != null) viewModel.onDestroy();
-        unregisterReceiver(walletConnectActionReceiver);
     }
 
     private void showErrorDialog(String message)

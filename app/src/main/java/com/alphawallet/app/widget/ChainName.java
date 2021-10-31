@@ -31,6 +31,7 @@ public class ChainName extends LinearLayout
 
     public void setChainID(long chainId)
     {
+        chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
         if (invertNameColour)
         {
             invertChainID(chainId);
@@ -39,7 +40,6 @@ public class ChainName extends LinearLayout
         {
             chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
                     EthereumNetworkBase.getChainColour(chainId)));
-            chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
         }
     }
 

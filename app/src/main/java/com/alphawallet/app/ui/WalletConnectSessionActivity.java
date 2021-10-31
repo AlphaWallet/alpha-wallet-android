@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.WALLET;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,7 +10,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,21 +33,14 @@ import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
-import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.widget.ChainName;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-
-import static com.alphawallet.app.C.Key.WALLET;
 
 /**
  * Created by JB on 9/09/2020.
@@ -196,6 +190,7 @@ public class WalletConnectSessionActivity extends BaseActivity
 
             Glide.with(getApplication())
                     .load(session.icon)
+                    .circleCrop()
                     .into(holder.icon);
             holder.peerName.setText(session.name);
             holder.peerUrl.setText(session.url);

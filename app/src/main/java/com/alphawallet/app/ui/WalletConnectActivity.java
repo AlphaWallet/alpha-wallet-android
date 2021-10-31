@@ -331,7 +331,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 viewModel.getClient(this, sessionId, client -> {
                     Log.d(TAG, "Resume Session: " + getSessionId());
 
-                    if (client == null || !client.isConnected())
+                    if (client == null && fromSessionActivity)
+                    {
+                        functionBar.setVisibility(View.GONE);
+                        return;
+                    }
+                    else if (client == null || !client.isConnected())
                     {
                         if (client == null || (!fromSessionActivity && session == null))
                         {
@@ -588,10 +593,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             if (client == null || !client.isConnected())
             {
                 statusText.setText(R.string.not_connected);
+                statusText.setTextColor(getColor(R.color.cancel_red));
             }
             else
             {
                 statusText.setText(R.string.online);
+                statusText.setTextColor(getColor(R.color.nasty_green));
             }
         }));
     }
@@ -613,6 +620,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 Glide.with(this)
                         .load(remotePeerData.getIcons().get(0))
+                        .circleCrop()
                         .into(icon);
             }
             peerName.setText(remotePeerData.getName());

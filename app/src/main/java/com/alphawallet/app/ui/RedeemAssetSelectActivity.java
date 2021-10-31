@@ -135,12 +135,14 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final int action_next = R.id.action_next;
+        final int action_redeem = R.id.action_redeem;
         switch (item.getItemId()) {
-            case R.id.action_next: {
+            case action_next: {
                 onNext();
             }
             break;
-            case R.id.action_redeem: {
+            case action_redeem: {
                 onRedeem();
             }
             break;

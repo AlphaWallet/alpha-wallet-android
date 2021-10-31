@@ -53,15 +53,20 @@ public class DepositView extends FrameLayout implements View.OnClickListener {
         String url;
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         String userCurrency = pref.getString("currency_locale", "USD");
+
+        final int action_localeth = R.id.action_localeth;
+        final int action_changelly = R.id.action_changelly;
+        final int action_coinbase = R.id.action_coinbase;
+
         switch (v.getId()) {
-            case R.id.action_localeth: {
+            case action_localeth: {
                 url = localethereum;
             } break;
-            case R.id.action_changelly: {
+            case action_changelly: {
                 url = changelly + "&fiat=" + userCurrency;
             } break;
             default:
-            case R.id.action_coinbase: {
+            case action_coinbase: {
                 url = coinbaseUrl;
             } break;
         }

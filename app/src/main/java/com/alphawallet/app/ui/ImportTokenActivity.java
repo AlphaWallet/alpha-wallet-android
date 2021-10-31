@@ -534,8 +534,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
+        final int import_ticket = R.id.import_ticket;
+        final int cancel_button = R.id.cancel_button;
         switch (v.getId()) {
-            case R.id.import_ticket:
+            case import_ticket:
                 if (ticketRange != null) {
                     if (viewModel.getSalesOrder().price > 0.0)
                     {
@@ -553,7 +555,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     completeCurrencyImport();
                 }
                 break;
-            case R.id.cancel_button:
+            case cancel_button:
                 //go to main screen
                 new HomeRouter().open(this, true);
                 finish();

@@ -379,6 +379,18 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
 
+        if (oldVersion == 35)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAToken");
+            if (realmData == null)
+            {
+                schema.create("RealmAToken")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
+            }
+
+            oldVersion++;
+        }
+
     }
 
     @Override

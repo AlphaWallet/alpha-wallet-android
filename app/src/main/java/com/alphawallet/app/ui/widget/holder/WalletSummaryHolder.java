@@ -19,6 +19,7 @@ import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.UserAvatar;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -31,7 +32,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
 	private final LinearLayout manageWalletLayout;
 	private final ImageView manageWalletBtn;
-	private final ImageView walletIcon;
+	private final UserAvatar walletIcon;
 	private final LinearLayout walletClickLayout;
 	private final TextView walletBalanceText;
 	private final TextView walletBalanceCurrency;
@@ -90,7 +91,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 				walletNameText.setVisibility(View.GONE);
 			}
 
-			walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
+			walletIcon.bind(wallet);
 
 			String walletBalance = wallet.balance;
 			if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
@@ -149,6 +150,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			w.balance = realmWallet.getBalance();
 			w.ENSname = realmWallet.getENSName();
 			w.name = realmWallet.getName();
+			w.ENSAvatar = realmWallet.getENSAvatar();
 		}
 
 		return w;

@@ -125,9 +125,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void checkBalance(final Wallet wallet)
     {
-        if (activeNetwork.getValue() != null && wallet != null)
+        final NetworkInfo info = getActiveNetwork();
+        if (info != null && wallet != null)
         {
-            disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), activeNetwork.getValue().chainId)
+            disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), info.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .subscribe(w -> { }, e -> { });
@@ -136,7 +137,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
-                activeNetwork.getValue().chainId)
+                getActiveNetwork().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
@@ -196,8 +197,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             ethereumNetworkRepository.setActiveBrowserNetwork(info);
             gasService.startGasPriceCycle(chainId);
-            activeNetwork.setValue(info);
-            //activeNetwork.postValue(info);
         }
     }
 

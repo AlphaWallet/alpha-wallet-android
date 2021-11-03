@@ -19,12 +19,10 @@ public interface EthereumNetworkRepositoryType {
     class NetworkInfoExt {
         public final NetworkInfo info;
         public final boolean isTestNetwork;
-        public final boolean isCustomNetwork;
 
-        public NetworkInfoExt(NetworkInfo info, boolean isTestNetwork, boolean isCustomNetwork) {
+        public NetworkInfoExt(NetworkInfo info, boolean isTestNetwork) {
             this.info = info;
             this.isTestNetwork = isTestNetwork;
-            this.isCustomNetwork = isCustomNetwork;
         }
     }
 

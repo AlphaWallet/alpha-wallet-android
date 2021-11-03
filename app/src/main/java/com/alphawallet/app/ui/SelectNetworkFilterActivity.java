@@ -124,7 +124,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
                 });
 
                 EthereumNetworkRepositoryType.NetworkInfoExt ext = viewModel.getNetworkInfoExt(chainId);
-                if (ext.isCustomNetwork) {
+                if (ext.info.isCustom) {
                     popupView.findViewById(R.id.popup_delete).setOnClickListener(v -> {
                         // delete network
                         viewModel.removeCustomNetwork(chainId);

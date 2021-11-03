@@ -98,7 +98,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             blockExplorerApiUrl.setText(ext.info.etherscanAPI);
             testNetSwitch.setChecked(ext.isTestNetwork);
             // disable editing for hardcoded networks
-            if (!ext.isCustomNetwork) {
+            if (!ext.info.isCustom) {
                 nameInputView.getEditText().setEnabled(false);
                 rpcUrlInputView.getEditText().setEnabled(false);
                 chainIdInputView.getEditText().setEnabled(false);

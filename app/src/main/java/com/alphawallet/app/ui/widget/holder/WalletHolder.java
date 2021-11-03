@@ -152,6 +152,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			w.balance = realmWallet.getBalance();
 			w.ENSname = realmWallet.getENSName();
 			w.name = realmWallet.getName();
+			w.ENSAvatar = realmWallet.getENSAvatar();
 		}
 
 		return w;

@@ -184,7 +184,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         TokenTicker ticker = tokensService.getTokenTicker(token);
         if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
-            handleTicker();
+            handleTicker(ticker);
         }
         else
         {
@@ -202,13 +202,23 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
     }
 
-    private void handleTicker()
+    private void handleTicker(TokenTicker ticker)
     {
-        primaryElement = true;
-        hideIssuerViews();
-        layoutAppreciation.setVisibility(View.VISIBLE);
-        balanceCurrency.setVisibility(View.VISIBLE);
-        startTickerRealmListener();
+        if (ticker != null)
+        {
+            primaryElement = true;
+            hideIssuerViews();
+            layoutAppreciation.setVisibility(View.VISIBLE);
+            balanceCurrency.setVisibility(View.VISIBLE);
+            startTickerRealmListener();
+        }
+        else
+        {
+            //Ethereum token without a ticker
+            balanceCurrency.setVisibility(View.GONE);
+            layoutAppreciation.setVisibility(View.GONE);
+            primaryElement = true;
+        }
     }
 
     private void showNetworkLabel() {
@@ -266,6 +276,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void startTickerRealmListener()
     {
+        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
         realmUpdate = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
                 .findAllAsync();

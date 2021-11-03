@@ -582,7 +582,7 @@ public abstract class TokenscriptFunction
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return transResult;
@@ -698,7 +698,7 @@ public abstract class TokenscriptFunction
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
             return null;
         }
     }

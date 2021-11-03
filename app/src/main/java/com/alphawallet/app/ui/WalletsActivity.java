@@ -68,7 +68,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private boolean requiresHomeRefresh;
     private String dialogError;
-    private final int balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
+    private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -191,8 +191,9 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final int action_add = R.id.action_add;
         switch (item.getItemId()) {
-            case R.id.action_add: {
+            case action_add: {
                 onAddWallet();
             }
             break;
@@ -239,11 +240,8 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.try_again: {
-                viewModel.fetchWallets();
-            }
-            break;
+        if (view.getId() == R.id.try_again) {
+            viewModel.fetchWallets();
         }
     }
 

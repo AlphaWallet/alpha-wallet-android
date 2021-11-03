@@ -65,7 +65,7 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(TokenAlertsViewModel.class);
 
-            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             Token token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -84,20 +85,6 @@ public class WalletActionsViewModel extends BaseViewModel {
         deleted.postValue(true);
     }
 
-    public void storeWallet(Wallet wallet) {
-        isTaskRunning.postValue(true);
-        disposable = fetchWalletsInteract.storeWallet(wallet)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onStored, this::onError);
-    }
-
-    private void onStored(Wallet wallet) {
-        isTaskRunning.postValue(false);
-        Log.d(TAG, "Stored " + wallet.address);
-        saved.postValue(1);
-    }
-
     @Override
     protected void onError(Throwable throwable) {
         isTaskRunning.postValue(false);
@@ -106,5 +93,13 @@ public class WalletActionsViewModel extends BaseViewModel {
 
     public void showHome(Context context) {
         homeRouter.open(context, true);
+    }
+
+    public void updateWallet(Wallet wallet)
+    {
+        fetchWalletsInteract.updateWalletData(wallet, () -> {
+            if (BuildConfig.DEBUG) Log.d(TAG, "Stored " + wallet.address);
+            saved.postValue(1);
+        });
     }
 }

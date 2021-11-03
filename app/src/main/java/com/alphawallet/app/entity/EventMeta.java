@@ -7,16 +7,16 @@ import java.util.UUID;
  */
 public class EventMeta extends ActivityMeta
 {
-    public final int chainId;
+    public final long chainId;
     public final String eventName;
     public final String activityCardName;
 
-    public EventMeta(String txHash, String eName, String cardName, long timeStamp, int chain)
+    public EventMeta(String txHash, String eName, String cardName, long timeStamp, long chainId)
     {
         super(timeStamp, txHash);
-        chainId = chain;
-        eventName = eName;
-        activityCardName = cardName;
+        this.chainId = chainId;
+        this.eventName = eName;
+        this.activityCardName = cardName;
     }
 
     public long getUID()

@@ -2,6 +2,8 @@ package com.alphawallet.app.entity;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -87,7 +89,7 @@ public class EthereumProtocolParser
                                 readState = ParseState.READ_DIRECTIVE;
                                 break;
                             case CHAIN_ID:
-                                result.chainId = item.getValueBI().intValue();
+                                result.chainId = item.getValueBI().longValue();
                                 readState = ParseState.READ_DIRECTIVE;
                                 break;
                             case READ_TYPE:
@@ -110,7 +112,7 @@ public class EthereumProtocolParser
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
             return null;
         }
 

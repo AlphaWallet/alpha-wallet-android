@@ -1,10 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
+import android.content.Context;
+import android.content.Intent;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.content.Context;
-import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
@@ -29,8 +30,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -39,11 +38,12 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
-    private final MutableLiveData<Integer> switchNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Long> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
     private final MutableLiveData<Token> tokentype = new MutableLiveData<>();
     private final MutableLiveData<Token> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
+    private final MutableLiveData<Integer> scanCount = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GenericWalletInteract genericWalletInteract;
@@ -55,8 +55,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private boolean foundNetwork;
     private int networkCount;
-    private int primaryChainId = 1;
-    private String testAddress;
+    private long primaryChainId = 1;
 
     public MutableLiveData<Wallet> wallet() {
         return wallet;
@@ -65,10 +64,11 @@ public class AddTokenViewModel extends BaseViewModel {
     public MutableLiveData<Token> tokenType() { return tokentype; }
     public MutableLiveData<Boolean> noContract() { return noContract; }
     public LiveData<Token> result() { return result; }
-    public LiveData<Integer> switchNetwork() { return switchNetwork; }
+    public LiveData<Long> switchNetwork() { return switchNetwork; }
     public LiveData<TokenInfo> tokenInfo() {
         return tokenInfo;
     }
+    public LiveData<Integer> chainScanCount() { return scanCount; }
 
     @Nullable
     Disposable scanNetworksDisposable;
@@ -92,7 +92,7 @@ public class AddTokenViewModel extends BaseViewModel {
         this.sharedPreference = sharedPreference;
     }
 
-    public void save(int chainId, String address, String name, String symbol, int decimals, ContractType contractType)
+    public void save(long chainId, String address, String name, String symbol, int decimals, ContractType contractType)
     {
         //update token details as entered
         TokenInfo info = new TokenInfo(address, name, symbol, decimals, true, chainId);
@@ -118,23 +118,23 @@ public class AddTokenViewModel extends BaseViewModel {
         if (scanNetworksDisposable != null && !scanNetworksDisposable.isDisposed()) scanNetworksDisposable.dispose();
     }
 
-    public void setPrimaryChain(int chainId)
+    public void setPrimaryChain(long chainId)
     {
         primaryChainId = chainId;
     }
 
-    public int getSelectedChain()
+    public long getSelectedChain()
     {
         return primaryChainId;
     }
 
-    private void setupToken(int chainId, String addr, ContractType type) {
+    private void setupToken(long chainId, String addr, ContractType type) {
         disposable = tokensService
                 .update(addr, chainId)
                 .subscribe(info -> onTokensSetup(info, type), error -> checkType(error, chainId, addr, type));
     }
 
-    private void checkType(Throwable throwable, int chainId, String address, ContractType type)
+    private void checkType(Throwable throwable, long chainId, String address, ContractType type)
     {
         if (type == ContractType.ERC1155)
         {
@@ -146,7 +146,7 @@ public class AddTokenViewModel extends BaseViewModel {
         }
     }
 
-    public void fetchToken(int chainId, String addr)
+    public void fetchToken(long chainId, String addr)
     {
         tokensService.update(addr, chainId)
                 .subscribeOn(Schedulers.io())
@@ -167,7 +167,7 @@ public class AddTokenViewModel extends BaseViewModel {
         finalisedToken.postValue(token);
     }
 
-    public NetworkInfo getNetworkInfo(int chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
+    public NetworkInfo getNetworkInfo(long chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
 
     private void findWallet()
     {
@@ -192,7 +192,6 @@ public class AddTokenViewModel extends BaseViewModel {
     public void prepare()
     {
         findWallet();
-        testAddress = null;
     }
 
     public void showSend(Context ctx, QRResult result, Token token)
@@ -219,11 +218,11 @@ public class AddTokenViewModel extends BaseViewModel {
         ctx.startActivity(intent);
     }
 
-    private List<Integer> getNetworkIds()
+    private List<Long> getNetworkIds()
     {
-        List<Integer> networkIds = new ArrayList<>();
+        List<Long> networkIds = new ArrayList<>();
         networkIds.add(primaryChainId); //test selected chain first
-        for (int chainId : tokensService.getNetworkFilters())
+        for (long chainId : tokensService.getNetworkFilters())
         {
             if (!networkIds.contains(chainId)) networkIds.add(chainId);
         }
@@ -238,10 +237,10 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public void testNetworks(String address, NetworkInfo networkInfo)
     {
-        testAddress = address;
         foundNetwork = false;
         networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
-        //String address, String name, String symbol, int decimals, boolean isEnabled, int chainId
+        scanCount.postValue(networkCount);
+        //String address, String name, String symbol, int decimals, boolean isEnabled, long chainId
         TokenInfo tokenInfo = new TokenInfo(address, "", "", 0, true, networkInfo.chainId);
         //first test the network selected, then do all the
         //try to determine what kind of contract this is. Note if we get invalid response there's no contract there
@@ -266,8 +265,9 @@ public class AddTokenViewModel extends BaseViewModel {
             //try the other networks
             ethereumNetworkRepository.getAllActiveNetworks();
             networkCount--;
+            scanCount.postValue(networkCount);
 
-            for (int networkId : getNetworkIds())
+            for (long networkId : getNetworkIds())
             {
                 if (foundNetwork) break;
                 if (networkId == info.chainId) continue;
@@ -315,9 +315,9 @@ public class AddTokenViewModel extends BaseViewModel {
     private void checkNetworkCount()
     {
         networkCount--;
+        scanCount.postValue(networkCount);
         if (networkCount == 0 && !foundNetwork)
         {
-            testAddress = null;
             noContract.postValue(true);
         }
     }
@@ -330,9 +330,14 @@ public class AddTokenViewModel extends BaseViewModel {
         context.startActivity(intent);
     }
 
-    public Token getToken(int chainId, String address)
+    public Token getToken(long chainId, String address)
     {
         return tokensService.getToken(chainId, address);
+    }
+
+    public Token getChainToken(long chainId)
+    {
+        return tokensService.getServiceToken(chainId);
     }
 
     public boolean shouldHideZeroBalanceTokens()

@@ -130,7 +130,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(() -> onDefaultWallet(wallet), this::onError);
     }
 
-    public void onPrepare(int chainId)
+    public void onPrepare(long chainId)
     {
         walletBalances.clear();
         progress.postValue(true);
@@ -184,10 +184,9 @@ public class WalletsViewModel extends BaseViewModel
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
                         .map(ensName -> { wallet.ENSname = ensName; return wallet;})
-                        .flatMap(fetchWalletsInteract::updateWalletData)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(w -> { }, this::onError));
+                        .subscribe(w -> fetchWalletsInteract.updateWalletData(w, () -> { }), this::onError));
 
         updateWallets();
     }
@@ -225,10 +224,9 @@ public class WalletsViewModel extends BaseViewModel
         //loop through wallets and update balance
         disposable = Observable.fromArray(wallets)
                 .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
-                        .flatMap(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance))
                         .subscribeOn(Schedulers.io())
-                        .observeOn(Schedulers.io())
-                        .subscribe(w -> { }, e -> { }));
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance), e -> { }));
 
         progress.postValue(false);
     }

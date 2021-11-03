@@ -27,6 +27,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.widget.entity.NumericInput;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -202,15 +203,22 @@ public class InputAmount extends LinearLayout
      */
     private void bindDataSource()
     {
+        if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
+
         realmTokenUpdate = realm.where(RealmToken.class)
                 .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), Case.INSENSITIVE)
                 .findFirstAsync();
 
+        //if the token doesn't exist yet, first ask the TokensService to pick it up
+        tokensService.storeToken(token);
+
         realmTokenUpdate.addChangeListener(realmToken -> {
-            //load token & update balance
             RealmToken rt = (RealmToken)realmToken;
-            token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
-            updateAvailableBalance();
+            if (rt.isValid())
+            {
+                token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
+                updateAvailableBalance();
+            }
         });
     }
 
@@ -289,6 +297,7 @@ public class InputAmount extends LinearLayout
     private void startTickerListener()
     {
         if (getTickerQuery() == null) return;
+        if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
         realmTickerUpdate = getTickerQuery().findFirstAsync();
         realmTickerUpdate.addChangeListener(realmTicker -> {
             updateAvailableBalance();

@@ -51,7 +51,6 @@ public class SendViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
-    private final PreferenceRepositoryType preferenceRepository;
 
     public SendViewModel(MyAddressRouter myAddressRouter,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -61,8 +60,7 @@ public class SendViewModel extends BaseViewModel {
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
                          KeyService keyService,
-                         AnalyticsServiceType analyticsService,
-                         PreferenceRepositoryType preferenceRepository)
+                         AnalyticsServiceType analyticsService)
     {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = ethereumNetworkRepositoryType;
@@ -73,7 +71,6 @@ public class SendViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.analyticsService = analyticsService;
-        this.preferenceRepository = preferenceRepository;
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -87,12 +84,12 @@ public class SendViewModel extends BaseViewModel {
         myAddressRouter.open(ctx, wallet, token);
     }
 
-    public NetworkInfo getNetworkInfo(int chainId)
+    public NetworkInfo getNetworkInfo(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
+    public Token getToken(long chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
 
     public void showImportLink(Context context, String importTxt)
     {
@@ -102,7 +99,7 @@ public class SendViewModel extends BaseViewModel {
         context.startActivity(intent);
     }
 
-    public void fetchToken(int chainId, String address, String walletAddress)
+    public void fetchToken(long chainId, String address, String walletAddress)
     {
         tokensService.update(address, chainId)
                 .subscribeOn(Schedulers.io())
@@ -128,7 +125,7 @@ public class SendViewModel extends BaseViewModel {
         return tokensService;
     }
 
-    public void startGasCycle(int chainId)
+    public void startGasCycle(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
     }
@@ -153,7 +150,7 @@ public class SendViewModel extends BaseViewModel {
         return txBytes;
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
@@ -163,7 +160,7 @@ public class SendViewModel extends BaseViewModel {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, int chainId)
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)
@@ -177,9 +174,5 @@ public class SendViewModel extends BaseViewModel {
         analyticsProperties.setData(mode);
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
-    }
-
-    public void tryToShowRateAppDialog(Activity context) {
-        RateApp.showRateTheApp(context, preferenceRepository, true);
     }
 }

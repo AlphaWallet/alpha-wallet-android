@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 170
-        versionName "3.40.1"
+        versionCode 174
+        versionName "3.40.5"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -46,7 +46,7 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
-        buildConfigField 'int', 'DB_VERSION', '33'
+        buildConfigField 'int', 'DB_VERSION', '35'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -55,6 +55,12 @@ android {
         packagingOptions {
             jniLibs {
                 useLegacyPackaging true
+            }
+        }
+
+        externalNativeBuild {
+            cmake {
+                cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\"";
             }
         }
     }
@@ -113,7 +119,7 @@ android {
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
                 implementation 'com.google.android.play:core:1.10.2'
-                implementation 'com.google.firebase:firebase-analytics:19.0.1'
+                implementation 'com.google.firebase:firebase-analytics:19.0.2'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
         }
@@ -202,7 +208,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.1'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.4'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 
@@ -216,6 +222,7 @@ dependencies {
 
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
+    implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
 }
 

@@ -97,7 +97,7 @@ public class TokenRepository implements TokenRepositoryType {
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
 
-    private final Map<Integer, Web3j> web3jNodeServers;
+    private final Map<Long, Web3j> web3jNodeServers;
     private AWEnsResolver ensResolver;
 
     public TokenRepository(
@@ -123,7 +123,7 @@ public class TokenRepository implements TokenRepositoryType {
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
-    private Web3j getService(int chainId)
+    private Web3j getService(long chainId)
     {
         if (!web3jNodeServers.containsKey(chainId))
         {
@@ -193,20 +193,19 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters)
+    public TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Long> networkFilters)
     {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource.fetchTokenMetasForUpdate(wallet, networkFilters);
     }
 
     @Override
-    public Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Integer> networkFilters)
+    public Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters)
     {
         return localSource.getTotalValue(currentAddress, networkFilters);
     }
 
-    @Override
-    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
+    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters,
                                                    AssetDefinitionService svs)
     {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
@@ -215,21 +214,21 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, String searchTerm) {
+    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Long> networkFilters, String searchTerm) {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
                 .fetchAllTokenMetas(wallet, networkFilters, searchTerm);
     }
 
     @Override
-    public Single<Token[]> fetchTokensThatMayNeedUpdating(String walletAddress, List<Integer> networkFilters) {
+    public Single<Token[]> fetchTokensThatMayNeedUpdating(String walletAddress, List<Long> networkFilters) {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
                 .fetchAllTokensWithNameIssue(walletAddress, networkFilters);
     }
 
     @Override
-    public Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Integer> networkFilters) {
+    public Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Long> networkFilters) {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
                 .fetchAllTokensWithBlankName(walletAddress, networkFilters);
@@ -248,7 +247,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<BigInteger> fetchLatestBlockNumber(int chainId)
+    public Single<BigInteger> fetchLatestBlockNumber(long chainId)
     {
         return Single.fromCallable(() -> {
             try
@@ -265,7 +264,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Token fetchToken(int chainId, String walletAddress, String address)
+    public Token fetchToken(long chainId, String walletAddress, String address)
     {
         Wallet wallet = new Wallet(walletAddress);
         return localSource.fetchToken(chainId, wallet, address);
@@ -293,17 +292,19 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
         Wallet wallet = new Wallet(walletAddress);
-        return updateBalance(network, wallet, token)
+        return updateBalance(wallet, token)
+                .map(bal -> token)
+                .flatMap(tok -> localSource.saveToken(wallet, tok))
                 .observeOn(Schedulers.newThread())
                 .toObservable();
     }
 
     @Override
-    public Single<BigDecimal> fetchChainBalance(String walletAddress, int chainId)
+    public Single<BigDecimal> fetchChainBalance(String walletAddress, long chainId)
     {
-        return Single.fromCallable(() -> updateNativeToken(new Wallet(walletAddress), chainId));
+        Token baseToken = fetchToken(chainId, walletAddress, walletAddress);
+        return updateTokenBalance(walletAddress, baseToken);
     }
 
     @Override
@@ -326,9 +327,10 @@ public class TokenRepository implements TokenRepositoryType {
         TokenFactory tf = new TokenFactory();
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
         Token newToken = tf.createToken(tokenInfo, contractType, network.getShortName());
-
-        return localSource.saveToken(wallet, newToken)
-                .flatMap(t-> updateBalance(network, wallet, t).map(bal -> newToken));
+        return updateBalance(wallet, newToken)
+                .map(bal -> newToken)
+                .flatMap(tok -> localSource.saveToken(wallet, tok))
+                .observeOn(Schedulers.newThread());
     }
 
     @Override
@@ -367,7 +369,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<String> resolveENS(int chainId, String ensName)
+    public Single<String> resolveENS(long chainId, String ensName)
     {
         if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         return ensResolver.resolveENSAddress(ensName);
@@ -386,13 +388,13 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenInfo> update(String contractAddr, int chainId)
+    public Single<TokenInfo> update(String contractAddr, long chainId)
     {
         return setupTokensFromLocal(contractAddr, chainId);
     }
 
     @Override
-    public String getTokenImageUrl(int networkId, String address)
+    public String getTokenImageUrl(long networkId, String address)
     {
         return localSource.getTokenImageUrl(networkId, address);
     }
@@ -448,11 +450,6 @@ public class TokenRepository implements TokenRepositoryType {
                     {
                         balance = token.balance;
                     }
-
-                    if (token.isEthereum() && wallet.address.equalsIgnoreCase(token.getWallet()))
-                    {
-                        updateNativeToken(wallet, token.tokenInfo.chainId);
-                    }
                 }
                 catch (Exception e)
                 {
@@ -475,46 +472,7 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    /**
-     * Used for an edge condition where you are looking at an account that's also contract
-     *
-     * @param wallet
-     * @param chainId
-     */
-    private BigDecimal updateNativeToken(Wallet wallet, int chainId)
-    {
-        TokenFactory tFactory = new TokenFactory();
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-        TokenInfo tInfo = new TokenInfo("eth", network.name, network.symbol, 18, true, network.chainId);
-        BigDecimal balance = getEthBalance(wallet, chainId);
-        //get current balance
-        Token dbToken = fetchToken(chainId, wallet.address, "eth");
-        if (!balance.equals(BigDecimal.valueOf(-1)) && (dbToken == null || !dbToken.balance.equals(balance)))
-        {
-            if (dbToken == null) dbToken = tFactory.createToken(tInfo, balance, null, System.currentTimeMillis(), ContractType.ETHEREUM, network.getShortName(), System.currentTimeMillis());
-            else dbToken.balance = balance;
-            localSource.updateTokenBalance(network, wallet, dbToken);
-        }
-
-        return balance;
-    }
-
-    /**
-     * Obtain live balance of token from Ethereum blockchain and cache into Realm
-     *
-     * @param network
-     * @param wallet
-     * @param token
-     * @return
-     */
-    private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token)
-    {
-        if (token == null) return Single.fromCallable(() -> null);
-        else return localSource.saveToken(wallet, token)
-            .flatMap(t -> updateBalance(network, wallet, t).map(bal -> token));
-    }
-
-    private BigDecimal checkUint256Balance(@NonNull Wallet wallet, int chainId, String tokenAddress)
+    private BigDecimal checkUint256Balance(@NonNull Wallet wallet, long chainId, String tokenAddress)
     {
         BigDecimal balance = BigDecimal.valueOf(-1);
 
@@ -603,12 +561,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenTicker> getEthTicker(int chainId)
+    public Single<TokenTicker> getEthTicker(long chainId)
     {
         return Single.fromCallable(() -> tickerService.getEthTicker(chainId));
     }
 
-    private BigDecimal getEthBalance(Wallet wallet, int chainId)
+    private BigDecimal getEthBalance(Wallet wallet, long chainId)
     {
         //in case chain has an override
         if (EthereumNetworkRepository.getChainOverrideAddress(chainId).length() > 0)
@@ -632,7 +590,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private List<BigInteger> getBalanceArray875(Wallet wallet, int chainId, String tokenAddress) {
+    private List<BigInteger> getBalanceArray875(Wallet wallet, long chainId, String tokenAddress) {
         List<BigInteger> result = new ArrayList<>();
         result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         try
@@ -684,7 +642,7 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, int chainId, String tokenAddress) {
+    private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, long chainId, String tokenAddress) {
         List<BigInteger> result = new ArrayList<>();
         result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         try
@@ -1037,7 +995,7 @@ public class TokenRepository implements TokenRepositoryType {
      * @return
      */
     private String callCustomNetSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet, int chainId)  {
+            Function function, String contractAddress, Wallet wallet, long chainId)  {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
@@ -1119,7 +1077,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<ContractLocator> getTokenResponse(String address, int chainId, String method)
+    public Single<ContractLocator> getTokenResponse(String address, long chainId, String method)
     {
         return Single.fromCallable(() -> {
             ContractLocator contractLocator = new ContractLocator(INVALID_CONTRACT, chainId);
@@ -1144,7 +1102,7 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address, int chainId) //pass exception up the chain
+    private Single<TokenInfo> setupTokensFromLocal(String address, long chainId) //pass exception up the chain
     {
         return Single.fromCallable(() -> {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
@@ -1314,12 +1272,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void addImageUrl(int networkId, String address, String imageUrl)
+    public void addImageUrl(long networkId, String address, String imageUrl)
     {
         localSource.storeTokenUrl(networkId, address, imageUrl);
     }
 
-    public static Web3j getWeb3jService(int chainId)
+    public static Web3j getWeb3jService(long chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -1332,7 +1290,7 @@ public class TokenRepository implements TokenRepositoryType {
         return Web3j.build(publicNodeService);
     }
 
-    public static String callSmartContractFunction(int chainId,
+    public static String callSmartContractFunction(long chainId,
                                   Function function, String contractAddress, String walletAddr)
     {
         String encodedFunction = FunctionEncoder.encode(function);
@@ -1358,7 +1316,7 @@ public class TokenRepository implements TokenRepositoryType {
         return null;
     }
 
-    public static List callSmartContractFunctionArray(int chainId,
+    public static List callSmartContractFunctionArray(long chainId,
                                 Function function, String contractAddress, String walletAddr)
     {
         try

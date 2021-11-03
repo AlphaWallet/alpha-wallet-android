@@ -26,7 +26,7 @@ public class FetchTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<ContractLocator> getContractResponse(String address, int chainId, String method)
+    public Observable<ContractLocator> getContractResponse(String address, long chainId, String method)
     {
         return tokenRepository.getTokenResponse(address, chainId, method).toObservable();
     }
@@ -46,7 +46,7 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<TokenTicker> getEthereumTicker(int chainId)
+    public Single<TokenTicker> getEthereumTicker(long chainId)
     {
         return tokenRepository.getEthTicker(chainId);
     }
@@ -58,7 +58,7 @@ public class FetchTokensInteract {
         return tokenRepository.fetchIsRedeemed(token, tokenId);
     }
 
-    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs)
+    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters, AssetDefinitionService svs)
     {
         return tokenRepository.fetchTokenMetas(wallet, networkFilters, svs);
     }

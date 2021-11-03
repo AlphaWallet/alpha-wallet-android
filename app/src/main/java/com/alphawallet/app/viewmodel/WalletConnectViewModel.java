@@ -169,7 +169,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         });
     }
 
-    public void startGasCycle(int chainId)
+    public void startGasCycle(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
     }
@@ -215,7 +215,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, int chainId)
+    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId)
     {
         resetSignDialog();
         EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
@@ -227,7 +227,7 @@ public class WalletConnectViewModel extends BaseViewModel {
                         error -> dAppFunction.DAppError(error, etm));
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, int chainId, SendTransactionInterface callback)
+    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
     {
         if (finalTx.isConstructor())
         {
@@ -245,7 +245,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         }
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
@@ -315,9 +315,9 @@ public class WalletConnectViewModel extends BaseViewModel {
         return peerId;
     }
 
-    public int getChainId(String sessionId)
+    public long getChainId(String sessionId)
     {
-        int chainId = MAINNET_ID;
+        long chainId = MAINNET_ID;
         RealmWCSession sessionData = realmManager.getRealmInstance(WC_SESSION_DB).where(RealmWCSession.class)
                 .equalTo("sessionId", sessionId)
                 .findFirst();
@@ -331,7 +331,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     }
 
     public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData,
-                                 String remotePeerData, int sessionChainId)
+                                 String remotePeerData, long sessionChainId)
     {
         realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
             RealmWCSession sessionAux = r.where(RealmWCSession.class)
@@ -386,7 +386,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     public void recordSignTransaction(Context ctx, Web3Transaction tx, String chainIdStr, String sessionId)
     {
         realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
-                int chainId = chainIdStr != null ? Integer.parseInt(chainIdStr) : MAINNET_ID;
+                long chainId = chainIdStr != null ? Long.parseLong(chainIdStr) : MAINNET_ID;
                 RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
                 String signType = "Transaction";
                 signMessage.setSessionId(sessionId);
@@ -524,7 +524,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         ctx.startService(bIntent);
     }
 
-    public String getNetworkSymbol(int chainId)
+    public String getNetworkSymbol(long chainId)
     {
         NetworkInfo info = findDefaultNetworkInteract.getNetworkInfo(chainId);
         if (info == null) { info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID); }

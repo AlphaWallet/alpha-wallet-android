@@ -77,7 +77,7 @@ public class TokenScriptFile extends File
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return null;

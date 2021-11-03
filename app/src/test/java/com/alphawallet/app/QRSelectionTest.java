@@ -1,5 +1,8 @@
 package com.alphawallet.app;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.MessagePair;
@@ -35,9 +38,6 @@ import javax.inject.Inject;
 import io.reactivex.Single;
 import io.realm.Realm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class QRSelectionTest
 {
     @Inject
@@ -69,37 +69,37 @@ public class QRSelectionTest
         transactionRepository = new TransactionRepositoryType()
         {
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, int chainId)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, long chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, int chainId)
+            public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, long chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable sign, int chainId)
+            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable sign, long chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, String pass, byte[] message, int chainId)
+            public Single<byte[]> getSignatureFast(Wallet wallet, String pass, byte[] message, long chainId)
             {
                 return Single.fromCallable(() -> {
                     //sign using the local key
@@ -135,7 +135,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+            public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
             {
                 return Single.fromCallable(() -> { return ""; });
             }
@@ -148,13 +148,13 @@ public class QRSelectionTest
 
             @Override
             public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet,
-                                                                      List<Integer> networkFilters, long fetchTime, int fetchLimit)
+                                                                      List<Long> networkFilters, long fetchTime, int fetchLimit)
             {
                 return null;
             }
 
             @Override
-            public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId,
+            public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, long chainId,
                                                                       String tokenAddress,
                                                                       int historyCount)
             {
@@ -163,7 +163,7 @@ public class QRSelectionTest
 
             @Override
             public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet,
-                                                          List<Integer> networkFilters)
+                                                          List<Long> networkFilters)
             {
                 return null;
             }

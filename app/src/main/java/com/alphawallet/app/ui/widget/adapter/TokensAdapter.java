@@ -1,20 +1,19 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.interact.ATokensRepository;
@@ -55,13 +54,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
     public static final int FILTER_COLLECTIBLES = 3;
-    private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(99999999999L);
     private final Realm realm;
 
     private int filterType;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
     private final ATokensRepository aTokensRepository;
+    private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
     private String walletAddress;
@@ -112,11 +111,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService) {
+
+    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService,
+                         ActivityResultLauncher<Intent> launcher)
+    {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
         this.realm = tokensService.getTickerRealmInstance();
+        this.managementLauncher = launcher;
         this.aTokensRepository = new ATokensRepository(aService.getTokenLocalSource());
         aTokensRepository.getTokensList()
                 .subscribeOn(Schedulers.io())
@@ -134,6 +137,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::notifyDataSetChanged).isDisposed();
+        this.managementLauncher = null;
     }
 
     @Override
@@ -249,7 +253,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addSearchTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress), 0));
+            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), 0));
         }
     }
 
@@ -273,7 +277,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addManageTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress), Integer.MAX_VALUE));
+            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher), 0));
         }
     }
 
@@ -367,7 +371,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void removeToken(int chainId, String tokenAddress) {
+    public void removeToken(long chainId, String tokenAddress) {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
         for (int i = 0; i < items.size(); i++) {
             Object si = items.get(i);

@@ -1,5 +1,9 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +14,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -27,13 +34,13 @@ import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
 import com.alphawallet.app.viewmodel.TokenManagementViewModelFactory;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
-
-import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.ItemClickListener {
     @Inject
@@ -50,6 +57,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
+    private ArrayList<ContractLocator> tokenUpdates;
 
     private boolean isDataChanged;
 
@@ -63,6 +71,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         toolbar();
         setTitle(getString(R.string.add_hide_tokens));
         initViews();
+        tokenUpdates = null;
     }
 
     private void initViews() {
@@ -120,12 +129,23 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         return super.onCreateOptionsMenu(menu);
     }
 
+    final ActivityResultLauncher<Intent> addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                tokenUpdates = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
+            });
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if (item.getItemId() == R.id.action_add)
         {
-            viewModel.showAddToken(this);
+            addTokenLauncher.launch(new Intent(this, AddTokenActivity.class));
+        }
+        else if (item.getItemId() == android.R.id.home)
+        {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -154,16 +174,17 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         if (search.getText().length() > 0)
         {
             search.setText("");
             return;
         }
-        if (isDataChanged)
-        {
-            new HomeRouter().open(this, true);
-        }
-        super.onBackPressed();
+        //setup init
+        Intent iResult = new Intent();
+        iResult.putParcelableArrayListExtra(ADDED_TOKEN, tokenUpdates);
+        setResult(RESULT_OK, iResult);
+        finish();
     }
 
     private void startRealmListener(Wallet wallet)
@@ -178,6 +199,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     private void setRealmListener()
     {
+        if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         realmUpdates = realm.where(RealmToken.class)
                 .like("address", ADDRESS_FORMAT)
                 .findAllAsync();

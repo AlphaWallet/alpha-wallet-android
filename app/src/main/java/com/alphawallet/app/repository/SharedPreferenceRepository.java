@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.WalletPage;
 
 import java.util.Locale;
 
@@ -37,6 +38,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String DEVICE_LOCALE = "device_locale";
     public static final String DEVICE_COUNTRY = "device_country";
     public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
+    private static final String LAST_FRAGMENT_ID = "lastfrag_id";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -52,30 +54,39 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getString(CURRENT_ACCOUNT_ADDRESS_KEY, null);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setCurrentWalletAddress(String address) {
-        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).apply();
+        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).commit(); //use commit as the value may be used immediately
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
-    public int getActiveBrowserNetwork() {
-        int selectedNetwork;
+    public long getActiveBrowserNetwork() {
+        long selectedNetwork;
         try
         {
-            selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            selectedNetwork = pref.getLong(DEFAULT_NETWORK_NAME_KEY, 0);
         }
-        catch (ClassCastException e) //previously we used string
+        catch (ClassCastException e) //previously we used Integer or String
         {
-            selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
-            setActiveBrowserNetwork(selectedNetwork);
+            try
+            {
+                selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            }
+            catch (ClassCastException string)
+            {
+                selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
+            }
+            pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, selectedNetwork).commit(); //commit as we need to update this immediately
         }
 
         return selectedNetwork;
     }
 
     @Override
-    public void setActiveBrowserNetwork(int networkId) {
-        pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
+    public void setActiveBrowserNetwork(long networkId) {
+        pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
     }
 
     @Override
@@ -165,9 +176,10 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getBoolean(FULL_SCREEN_STATE, false);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setActiveMainnet(boolean state) {
-        pref.edit().putBoolean(ACTIVE_MAINNET, state).apply();
+        pref.edit().putBoolean(ACTIVE_MAINNET, state).commit(); //use commit
     }
 
     @Override
@@ -316,5 +328,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setMarshMallowWarning(boolean shown) {
         pref.edit().putBoolean(MARSHMALLOW_SUPPORT_WARNING, true).apply();
+    }
+
+    @Override
+    public void storeLastFragmentPage(int ordinal)
+    {
+        pref.edit().putInt(LAST_FRAGMENT_ID, ordinal).apply();
+    }
+
+    @Override
+    public int getLastFragmentPage()
+    {
+        return pref.getInt(LAST_FRAGMENT_ID, -1);
     }
 }

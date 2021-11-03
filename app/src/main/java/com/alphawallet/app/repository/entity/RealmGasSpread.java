@@ -2,8 +2,6 @@ package com.alphawallet.app.repository.entity;
 
 import com.alphawallet.app.entity.GasPriceSpread;
 
-import java.math.BigInteger;
-
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -13,7 +11,7 @@ import io.realm.annotations.PrimaryKey;
 public class RealmGasSpread extends RealmObject
 {
     @PrimaryKey
-    private int chainId;
+    private long chainId;
 
     private String rapid;
     private String fast;
@@ -22,7 +20,7 @@ public class RealmGasSpread extends RealmObject
     private String baseFee;
     private long timeStamp;
 
-    public int getChainId()
+    public long getChainId()
     {
         return chainId;
     }
@@ -32,24 +30,21 @@ public class RealmGasSpread extends RealmObject
         rapid = spread.rapid.toString();
         fast = spread.fast.toString();
         standard = spread.standard.toString();
-        slow = spread.slow.toString();
+        slow = spread.slow.toString() + "," + (spread.lockedGas ? "0" : "1");
         baseFee = spread.baseFee.toString();
         timeStamp = time;
     }
 
-    // All chains except main net - gas price isn't important
-    public void setGasPrice(BigInteger gasPrice, int chain)
-    {
-        rapid = "0";
-        fast = "0";
-        standard = gasPrice.toString();
-        slow = "0";
-        baseFee = "0";
-        chainId = chain;
-    }
-
     public GasPriceSpread getGasPrice()
     {
-        return new GasPriceSpread(rapid, fast, standard, slow, baseFee, timeStamp);
+        boolean gasLocked = false;
+        String slowGas = slow;
+        if (slow.contains(","))
+        {
+            String[] gasBreakdown = slow.split(",");
+            slowGas = gasBreakdown[0];
+            gasLocked = gasBreakdown[1].charAt(0) == '0';
+        }
+        return new GasPriceSpread(rapid, fast, standard, slowGas, baseFee, timeStamp, gasLocked);
     }
 }

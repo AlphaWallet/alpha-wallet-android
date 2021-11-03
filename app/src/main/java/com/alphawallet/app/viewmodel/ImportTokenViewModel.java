@@ -195,7 +195,7 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    public void switchNetwork(int newNetwork)
+    public void switchNetwork(long newNetwork)
     {
         if (network.getValue() == null || network.getValue().chainId != newNetwork)
         {
@@ -525,7 +525,7 @@ public class ImportTokenViewModel extends BaseViewModel
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }
 
-    private void getEthereumTicker(int chainId)
+    private void getEthereumTicker(long chainId)
     {
         disposable = fetchTokensInteract.getEthereumTicker(chainId)
                 .subscribeOn(Schedulers.io())
@@ -610,9 +610,9 @@ public class ImportTokenViewModel extends BaseViewModel
         onError(throwable);
     }
 
-    private List<Integer> getNetworkIds()
+    private List<Long> getNetworkIds()
     {
-        List<Integer> networkIds = new ArrayList<>();
+        List<Long> networkIds = new ArrayList<>();
         for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
         {
             networkIds.add(networkInfo.chainId);
@@ -673,7 +673,7 @@ public class ImportTokenViewModel extends BaseViewModel
         keyService.resetSigningDialog();
     }
 
-    public void checkTokenScriptSignature(final int chainId, final String address)
+    public void checkTokenScriptSignature(final long chainId, final String address)
     {
         disposable = assetDefinitionService.getAssetDefinitionASync(chainId, address)
                 .flatMap(def -> assetDefinitionService.getSignatureData(chainId, address))

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.TextUtils;
@@ -76,7 +77,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private Button primaryButton;
     private Button secondaryButton;
     private ImageButton moreButton;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private AssetDefinitionService assetService;
     private WalletType walletType = WalletType.NOT_DEFINED;
 
@@ -215,6 +216,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         else if (action.buttonId == R.string.action_buy_crypto)
         {
             buyFunctionInterface.handleBuyFunction(token);
+        }
+        else if (action.buttonId == R.string.generate_payment_request) {
+            buyFunctionInterface.handleGeneratePaymentRequest(token);
         }
         else
         {
@@ -374,7 +378,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 functionMapComplete.release();
             }
             callStandardFunctions.showWaitSpinner(false);
@@ -553,7 +557,10 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
 
-        //TODO: Update Token name with result from selection
+        if (!token.isNonFungible())
+        {
+            addFunction(new ItemClick(context.getString(R.string.generate_payment_request), R.string.generate_payment_request));
+        }
     }
 
     private void addTokenScriptFunctions(Map<String, TSAction> availableFunctions, Token token, BigInteger tokenId)
@@ -596,36 +603,36 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             return false;
         }
 
-        switch (token.tokenInfo.chainId)
+        if (token.tokenInfo.chainId == MAINNET_ID)
         {
-            case MAINNET_ID:
-                switch (token.getAddress().toLowerCase())
-                {
-                    case C.DAI_TOKEN:
-                    case C.SAI_TOKEN:
-                        addFunction(R.string.convert_to_xdai);
-                        return true;
-                    default:
-                        if (token.isERC20())
-                        {
-                            addFunction(R.string.exchange_with_oneinch);
-                        }
-                        return true;
-                }
-            case BINANCE_MAIN_ID:
-            case OPTIMISTIC_MAIN_ID:
-            case ARBITRUM_MAIN_ID:
-                if (token.isERC20())
-                {
-                    addFunction(R.string.exchange_with_oneinch);
+            switch (token.getAddress().toLowerCase())
+            {
+                case C.DAI_TOKEN:
+                case C.SAI_TOKEN:
+                    addFunction(R.string.convert_to_xdai);
                     return true;
-                }
-                break;
-            case MATIC_ID:
-                {
-                    addFunction(R.string.swap_with_quickswap);
+                default:
+                    if (token.isERC20() || token.isEthereum())
+                    {
+                        addFunction(R.string.exchange_with_oneinch);
+                    }
                     return true;
-                }
+            }
+        }
+        else if (token.tokenInfo.chainId == BINANCE_MAIN_ID
+                || token.tokenInfo.chainId == OPTIMISTIC_MAIN_ID
+                || token.tokenInfo.chainId == ARBITRUM_MAIN_ID)
+        {
+            if (token.isERC20() || token.isEthereum())
+            {
+                addFunction(R.string.exchange_with_oneinch);
+                return true;
+            }
+        }
+        else if (token.tokenInfo.chainId == MATIC_ID)
+        {
+            addFunction(R.string.swap_with_quickswap);
+            return true;
         }
         return false;
     }
@@ -638,7 +645,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         //get the available map for this collection
@@ -698,11 +705,10 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void addBuyFunction()
     {
-        switch (token.tokenInfo.chainId)
+        if (token.tokenInfo.chainId == MAINNET_ID
+                || token.tokenInfo.chainId == XDAI_ID)
         {
-            case MAINNET_ID:
-            case XDAI_ID:
-                addPurchaseVerb(token, onRampRepository);
+            addPurchaseVerb(token, onRampRepository);
         }
     }
 

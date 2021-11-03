@@ -33,7 +33,7 @@ public class ParseMagicLink
     private static final String CURRENCY_LINK_PREFIX = "XDAIDROP";
     private CryptoFunctionsInterface cryptoInterface;
 
-    private Map<Integer, ChainSpec> extraChains;
+    private Map<Long, ChainSpec> extraChains;
 
     public ParseMagicLink(CryptoFunctionsInterface cryptInf, List<ChainSpec> chains)
     {
@@ -93,7 +93,7 @@ public class ParseMagicLink
 
     public MagicLinkData parseUniversalLink(String link) throws SalesOrderMalformed
     {
-        int chainId = MagicLinkInfo.identifyChainId(link);
+        long chainId = MagicLinkInfo.identifyChainId(link);
         String magicLinkUrlPrefix = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
         if (chainId == 0 && extraChains != null)
         {
@@ -119,10 +119,10 @@ public class ParseMagicLink
         }
     }
 
-    private int identifyChain(String link)
+    private long identifyChain(String link)
     {
         int dSlash = link.indexOf("://");
-        int chainId = 0;
+        long chainId = 0;
         //split out the chainId from the magiclink
         int index = link.indexOf(mainnetMagicLinkDomain);
 
@@ -188,7 +188,7 @@ public class ParseMagicLink
         return data;
     }
 
-    private MagicLinkData getMagicLinkDataFromURL(String linkData, int chainId) throws SalesOrderMalformed
+    private MagicLinkData getMagicLinkDataFromURL(String linkData, long chainId) throws SalesOrderMalformed
     {
         MagicLinkData data = new MagicLinkData();
         data.chainId = chainId;
@@ -429,13 +429,13 @@ public class ParseMagicLink
         return generateLeadingLinkBytes(spawnable, null, tokenIds, contractAddress, priceWei, expiry);
     }
 
-    public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature, int chainId) throws SalesOrderMalformed
+    public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature, long chainId) throws SalesOrderMalformed
     {
         byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
         return completeUniversalLink(chainId, leading, signature);
     }
 
-    public String completeUniversalLink(int chainId, byte[] message, byte[] signature)
+    public String completeUniversalLink(long chainId, byte[] message, byte[] signature)
     {
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);

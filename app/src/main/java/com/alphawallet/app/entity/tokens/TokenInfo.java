@@ -11,10 +11,10 @@ public class TokenInfo implements Parcelable {
     public final String name;
     public final String symbol;
     public final int decimals;
-    public final int chainId;
+    public final long chainId;
     public boolean isEnabled;
 
-    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, int chainId) {
+    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, long chainId) {
         if (address.contains("-"))
         {
             address = address.split("-")[0];
@@ -40,7 +40,7 @@ public class TokenInfo implements Parcelable {
         symbol = in.readString();
         decimals = in.readInt();
         isEnabled = in.readInt() == 1;
-        chainId = in.readInt();
+        chainId = in.readLong();
     }
 
     public static final Creator<TokenInfo> CREATOR = new Creator<TokenInfo>() {
@@ -67,6 +67,6 @@ public class TokenInfo implements Parcelable {
         dest.writeString(symbol);
         dest.writeInt(decimals);
         dest.writeInt(isEnabled ? 1 : 0);
-        dest.writeInt(chainId);
+        dest.writeLong(chainId);
     }
 }

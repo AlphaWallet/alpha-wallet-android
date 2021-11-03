@@ -28,8 +28,7 @@
         android:theme="@style/AppTheme.NoActionBar"
         >
         <activity
-            android:name="com.alphawallet.app.ui.SplashActivity"
-            android:theme="@style/SplashTheme">
+            android:name="com.alphawallet.app.ui.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

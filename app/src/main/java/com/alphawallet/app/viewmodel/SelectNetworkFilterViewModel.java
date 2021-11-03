@@ -27,21 +27,21 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public void setFilterNetworks(List<Integer> selectedItems, boolean mainnetActive, boolean hasSelected) {
+    public void setFilterNetworks(List<Long> selectedItems, boolean mainnetActive, boolean hasSelected, boolean shouldBlankUserSelection)
+    {
         preferenceRepository.setActiveMainnet(mainnetActive);
-        if (hasSelected) preferenceRepository.setHasSetNetworkFilters();
 
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
-        int activeNetworkId = -99;
+        long activeNetworkId = -99;
         if (activeNetwork != null) {
             activeNetworkId = networkRepository.getActiveBrowserNetwork().chainId;
         }
 
         //Mark dappbrowser network as deselected if appropriate
         boolean deselected = true;
-        Integer[] selectedIds = new Integer[selectedItems.size()];
+        Long[] selectedIds = new Long[selectedItems.size()];
         int index = 0;
-        for (Integer selectedId : selectedItems) {
+        for (Long selectedId : selectedItems) {
             if (EthereumNetworkRepository.hasRealValue(selectedId) == mainnetActive && activeNetworkId == selectedId) {
                 deselected = false;
             }
@@ -50,7 +50,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter();
+        tokensService.setupFilter(hasSelected && !shouldBlankUserSelection);
+
+        if (shouldBlankUserSelection) preferenceRepository.blankHasSetNetworkFilters();
 
         preferenceRepository.commit();
     }
@@ -65,9 +67,13 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         preferenceRepository.setShownTestNetWarning();
     }
 
-    public NetworkInfo getNetworkByChain(int chainId)
+    public NetworkInfo getNetworkByChain(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
+    }
+
+    public EthereumNetworkRepositoryType.NetworkInfoExt getNetworkInfoExt(long chainId) {
+        return this.networkRepository.getNetworkInfoExt(chainId);
     }
 
     public boolean mainNetActive()
@@ -78,7 +84,7 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
     public List<NetworkItem> getNetworkList(boolean isMainNet)
     {
         List<NetworkItem> networkList = new ArrayList<>();
-        List<Integer> filterIds = networkRepository.getSelectedFilters(isMainNet);
+        List<Long> filterIds = networkRepository.getSelectedFilters(isMainNet);
 
         for (NetworkInfo info : getNetworkList())
         {
@@ -89,5 +95,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         }
 
         return networkList;
+    }
+
+    public void removeCustomNetwork(long chainId) {
+        networkRepository.removeCustomRPCNetwork(chainId);
     }
 }

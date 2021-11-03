@@ -10,7 +10,6 @@ import android.webkit.URLUtil;
 
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -85,7 +84,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
         initViewModel();
 
-        int chainId = getIntent().getIntExtra(CHAIN_ID, -1);
+        long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
 
         if (chainId >= 0) {
             // get network info and fill ui
@@ -96,7 +95,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             chainIdInputView.setText(String.valueOf(ext.info.chainId));
             symbolInputView.setText(ext.info.symbol);
             blockExplorerUrlInputView.setText(ext.info.etherscanUrl);
-            blockExplorerApiUrl.setText(ext.info.etherscanTxUrl);
+            blockExplorerApiUrl.setText(ext.info.etherscanAPI);
             testNetSwitch.setChecked(ext.isTestNetwork);
             // disable editing for hardcoded networks
             if (!ext.isCustomNetwork) {
@@ -146,9 +145,19 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             return false;
         } else {
             try {
-                Integer.parseInt(chainIdInputView.getText().toString());
+                Long.parseLong(chainIdInputView.getText().toString());
             } catch (NumberFormatException ex) {
                 chainIdInputView.setError(getString(R.string.error_must_numeric));
+                return false;
+            }
+        }
+
+        long newChainId = Long.parseLong(chainIdInputView.getText().toString());
+        long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
+        if (newChainId != chainId) {
+            EthereumNetworkRepositoryType.NetworkInfoExt networkInfo = viewModel.getNetworkInfo(newChainId);
+            if (networkInfo.info != null) {
+                chainIdInputView.setError(getString(R.string.error_chainid_already_taken));
                 return false;
             }
         }
@@ -192,15 +201,15 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     public void handleClick(String action, int actionId)
     {
         if (validateInputs()) {
-            int oldChainId = getIntent().getIntExtra(CHAIN_ID, -1);
+            long oldChainId = getIntent().getLongExtra(CHAIN_ID, -1);
 
             // add network
             viewModel.addNetwork(nameInputView.getText().toString(),
                     rpcUrlInputView.getText().toString(),
-                    Integer.parseInt(chainIdInputView.getText().toString()),
+                    Long.parseLong(chainIdInputView.getText().toString()),
                     symbolInputView.getText().toString(),
                     blockExplorerUrlInputView.getText().toString(),
-                    blockExplorerApiUrl.getText().toString(), testNetSwitch.isChecked(), oldChainId != -1 ? oldChainId : null);
+                    blockExplorerApiUrl.getText().toString(), testNetSwitch.isChecked(), oldChainId != -1L ? oldChainId : null);
             finish();
         } else {
             handler.postDelayed(this::resetValidateErrors, 2000);

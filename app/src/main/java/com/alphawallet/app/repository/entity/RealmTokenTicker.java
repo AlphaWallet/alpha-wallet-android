@@ -27,9 +27,9 @@ public class RealmTokenTicker extends RealmObject {
         return contract.split("-")[0];
     }
 
-    public int getChain()
+    public long getChain()
     {
-        return Integer.parseInt(contract.split("-")[1]);
+        return Long.parseLong(contract.split("-")[1]);
     }
 
     public String getPrice() {

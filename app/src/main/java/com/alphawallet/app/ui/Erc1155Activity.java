@@ -83,7 +83,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
     private void getIntentData()
     {
         wallet = getIntent().getParcelableExtra(WALLET);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
     }
 
@@ -94,7 +94,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         TokenActivityFragment tokenActivityFragment = new TokenActivityFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putInt(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        bundle.putLong(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
         bundle.putParcelable(WALLET, wallet);
         infoFragment.setArguments(bundle);

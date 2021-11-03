@@ -114,6 +114,7 @@
                         android:id="@+id/pending_time"
                         style="@style/TransactionDetailsStyle"
                         android:layout_width="wrap_content"
+                        android:textColor="@color/text_dark_gray"
                         android:layout_height="wrap_content"
                         tools:text="@string/transaction_pending_for" />
 

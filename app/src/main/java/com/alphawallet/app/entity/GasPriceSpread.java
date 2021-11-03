@@ -29,6 +29,7 @@ public class GasPriceSpread
     public final BigInteger standard;
     public final BigInteger slow;
     public final BigInteger baseFee;
+    public final boolean lockedGas;
 
     public final long timeStamp;
 
@@ -67,20 +68,22 @@ public class GasPriceSpread
         standard = gweiToWei(rStandard);
         slow = gweiToWei(rSlow);
         baseFee = gweiToWei(rBaseFee);
+        lockedGas = false;
         timeStamp = System.currentTimeMillis();
     }
 
-    public GasPriceSpread(BigInteger currentAvGasPrice)
+    public GasPriceSpread(BigInteger currentAvGasPrice, boolean hasLockedGas)
     {
         rapid = BigInteger.ZERO;
-        fast = BigInteger.ZERO;
+        fast = new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger();
         standard = currentAvGasPrice;
         slow = BigInteger.ZERO;
         baseFee = BigInteger.ZERO;
         timeStamp = System.currentTimeMillis();
+        lockedGas = hasLockedGas;
     }
 
-    public GasPriceSpread(String r, String f, String st, String sl, String bf, long timeSt)
+    public GasPriceSpread(String r, String f, String st, String sl, String bf, long timeSt, boolean locked)
     {
         rapid = new BigInteger(r);
         fast = new BigInteger(f);
@@ -88,6 +91,7 @@ public class GasPriceSpread
         slow = new BigInteger(sl);
         baseFee = new BigInteger(bf);
         timeStamp = timeSt;
+        lockedGas = locked;
     }
 
     public int setupGasSpeeds(Context ctx, List<GasSpeed> gasSpeeds, int currentGasSpeedIndex)
@@ -144,5 +148,11 @@ public class GasPriceSpread
     public int getCustomIndex()
     {
         return customIndex;
+    }
+
+    public boolean isResultValid()
+    {
+        return !rapid.equals(BigInteger.ZERO) || !fast.equals(BigInteger.ZERO) || !standard.equals(BigInteger.ZERO)
+                || !slow.equals(BigInteger.ZERO);
     }
 }

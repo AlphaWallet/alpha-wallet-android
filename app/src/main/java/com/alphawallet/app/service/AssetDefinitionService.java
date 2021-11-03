@@ -199,7 +199,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         List<String> handledHashes = checkRealmScriptsForChanges();
@@ -260,7 +260,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return handledHashes;
@@ -337,7 +337,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -366,7 +366,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -413,13 +413,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return td;
     }
 
-    private String getTSDataKey(int chainId, String address)
+    private String getTSDataKey(long chainId, String address)
     {
         return address + "-" + chainId;
     }
@@ -491,7 +491,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         if (fileList.size() == 0) finishLoading();
@@ -559,7 +559,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     @Override
-    public long getLastTokenUpdate(int chainId, String address)
+    public long getLastTokenUpdate(long chainId, String address)
     {
         long txUpdateTime = 0;
         Token token = tokensService.getToken(chainId, address);
@@ -576,7 +576,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         String addr = null;
         TokenDefinition td = null;
-        int chainId = origin.addresses.keySet().iterator().next();
+        long chainId = origin.addresses.keySet().iterator().next();
         if (origin.addresses.get(chainId).size() > 0) addr = origin.addresses.get(chainId).get(0);
         if (addr != null) td = getAssetDefinition(chainId, addr);
         if (td != null)
@@ -690,7 +690,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private TokenDefinition getDefinition(int chainId, String address)
+    private TokenDefinition getDefinition(long chainId, String address)
     {
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
         TokenDefinition result = null;
@@ -730,13 +730,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return result;
     }
 
-    public TokenScriptFile getTokenScriptFile(int chainId, String address)
+    public TokenScriptFile getTokenScriptFile(long chainId, String address)
     {
         //pull from database
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
@@ -761,7 +761,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * @param address
      * @return
      */
-    public TokenDefinition getAssetDefinition(int chainId, String address)
+    public TokenDefinition getAssetDefinition(long chainId, String address)
     {
         TokenDefinition assetDef = null;
         if (address == null) return null;
@@ -781,7 +781,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return assetDef; // if nothing found use default
     }
 
-    public Single<TokenDefinition> getAssetDefinitionASync(int chainId, final String address)
+    public Single<TokenDefinition> getAssetDefinitionASync(long chainId, final String address)
     {
         if (address == null) return Single.fromCallable(TokenDefinition::new);
         String contractName = address;
@@ -809,7 +809,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         finally
         {
@@ -817,7 +817,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public String getTokenName(int chainId, String address, int count)
+    public String getTokenName(long chainId, String address, int count)
     {
         String tokenName = null;
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
@@ -836,7 +836,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tokenName;
     }
 
-    public Token getTokenFromService(int chainId, String address)
+    public Token getTokenFromService(long chainId, String address)
     {
         return tokensService.getToken(chainId, address);
     }
@@ -850,7 +850,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public String getIssuerName(Token token)
     {
-        int chainId = token.tokenInfo.chainId;
+        long chainId = token.tokenInfo.chainId;
         String address = token.tokenInfo.address;
 
         String issuer = token.getNetworkName();
@@ -896,7 +896,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void onError(Throwable throwable)
     {
-        throwable.printStackTrace();
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
     private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
@@ -1043,7 +1043,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             finally
             {
@@ -1095,7 +1095,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (holdingContracts != null)
             {
                 //some Android versions don't have stream()
-                for (int network : holdingContracts.addresses.keySet())
+                for (long network : holdingContracts.addresses.keySet())
                 {
                     for (String address : holdingContracts.addresses.get(network))
                     {
@@ -1113,7 +1113,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return false;
     }
@@ -1127,13 +1127,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return td;
     }
 
-    private void updateRealmForBundledScript(int chainId, String address, String asset, TokenDefinition td)
+    private void updateRealmForBundledScript(long chainId, String address, String asset, TokenDefinition td)
     {
         realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransactionAsync(r -> {
             String entryKey = getTSDataKey(chainId, address);
@@ -1158,7 +1158,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return null;
@@ -1288,7 +1288,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private EthFilter getEventFilter(EventDefinition ev) throws Exception
     {
-        int chainId = ev.getEventChainId();
+        long chainId = ev.getEventChainId();
         String address = ev.getEventContractAddress();
 
         Token originToken = tokensService.getToken(chainId, address);
@@ -1301,7 +1301,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private String processLogs(EventDefinition ev, List<EthLog.LogResult> logs, String walletAddress)
     {
         if (logs.size() == 0) return ""; //early return
-        int chainId = ev.contract.addresses.keySet().iterator().next();
+        long chainId = ev.contract.addresses.keySet().iterator().next();
         Web3j web3j = getWeb3jService(chainId);
 
         String firstTxHash = "";
@@ -1356,7 +1356,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ev.readBlock = readBlock.add(BigInteger.ONE);
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
-            int chainId = ev.getEventChainId();
+            long chainId = ev.getEventChainId();
             String eventAddress = ev.getEventContractAddress();
             String eventName = ev.activityName != null ? ev.activityName : ev.attributeName;
             String databaseKey = TokensRealmSource.eventBlockKey(chainId, eventAddress, ev.type.name, ev.filter);
@@ -1621,7 +1621,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return file;
     }
 
-    public boolean hasDefinition(int chainId, String address)
+    public boolean hasDefinition(long chainId, String address)
     {
         boolean hasDefinition = false;
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
@@ -1643,7 +1643,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetChecked.clear();
     }
 
-    public boolean hasTokenView(int chainId, String address, String type)
+    public boolean hasTokenView(long chainId, String address, String type)
     {
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
@@ -1656,7 +1656,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public String getTokenView(int chainId, String contractAddr, String type)
+    public String getTokenView(long chainId, String contractAddr, String type)
     {
         String viewHTML = "";
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
@@ -1668,7 +1668,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return viewHTML;
     }
 
-    public String getTokenViewStyle(int chainId, String contractAddr, String type)
+    public String getTokenViewStyle(long chainId, String contractAddr, String type)
     {
         String styleData = "";
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
@@ -1680,7 +1680,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return styleData;
     }
 
-    public List<Attribute> getTokenViewLocalAttributes(int chainId, String contractAddr)
+    public List<Attribute> getTokenViewLocalAttributes(long chainId, String contractAddr)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         List<Attribute> results = new ArrayList<>();
@@ -1693,7 +1693,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return results;
     }
 
-    public Map<String, TSAction> getTokenFunctionMap(int chainId, String contractAddr)
+    public Map<String, TSAction> getTokenFunctionMap(long chainId, String contractAddr)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         if (td != null)
@@ -1946,7 +1946,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return observer;
     }
 
-    public Single<XMLDsigDescriptor> getSignatureData(int chainId, String contractAddress)
+    public Single<XMLDsigDescriptor> getSignatureData(long chainId, String contractAddress)
     {
         return Single.fromCallable(() -> {
             XMLDsigDescriptor sigDescriptor = new XMLDsigDescriptor();
@@ -2156,7 +2156,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String[] contractDetails = eventData.getInstanceKey().split("-");
         if (contractDetails.length != 5) return;
         String eventAddress = contractDetails[0];
-        int chainId = Integer.parseInt(contractDetails[1]);
+        long chainId = Long.parseLong(contractDetails[1]);
         String eventId = eventData.getFunctionId();
 
         String eventKey = EventDefinition.getEventKey(chainId, eventAddress, eventId, null);
@@ -2246,7 +2246,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * Get all the magic values - eg native crypto balances for all chains
      * @return
      */
-    public String getMagicValuesForInjection(int chainId) throws Exception
+    public String getMagicValuesForInjection(long chainId) throws Exception
     {
         String walletBalance = "walletBalance";
         String prefix = "web3.eth";
@@ -2451,7 +2451,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    public Single<TokenDefinition> checkServerForScript(int chainId, String address)
+    public Single<TokenDefinition> checkServerForScript(long chainId, String address)
     {
         TokenScriptFile tf = getTokenScriptFile(chainId, address);
         if (tf != null && !isInSecureZone(tf)) return Single.fromCallable(TokenDefinition::new); //early return for debug script check
@@ -2464,7 +2464,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void storeTokenViewHeight(int chainId, String address, int listViewHeight)
+    public void storeTokenViewHeight(long chainId, String address, int listViewHeight)
     {
         try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
         {
@@ -2490,7 +2490,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public String getTokenImageUrl(int networkId, String address)
+    public String getTokenImageUrl(long networkId, String address)
     {
         String url = "";
         String instanceKey = address.toLowerCase() + "-" + networkId;
@@ -2526,7 +2526,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tURL;
     }
 
-    public void storeImageUrl(int chainId, String imageUrl)
+    public void storeImageUrl(long chainId, String imageUrl)
     {
         String tokenAddress = Utils.getTokenAddrFromAWUrl(imageUrl);
         if (!TextUtils.isEmpty(tokenAddress))
@@ -2535,7 +2535,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public Single<Integer> fetchViewHeight(int chainId, String address)
+    public Single<Integer> fetchViewHeight(long chainId, String address)
     {
         return Single.fromCallable(() -> {
             try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
@@ -2571,7 +2571,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private String tokenSizeDBKey(int chainId, String address)
+    private String tokenSizeDBKey(long chainId, String address)
     {
         return "szkey-" + chainId + "-" + address.toLowerCase();
     }

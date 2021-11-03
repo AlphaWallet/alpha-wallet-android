@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.GasPriceSpread;
@@ -57,7 +59,7 @@ public class GasWidget extends LinearLayout implements Runnable
     private Activity baseActivity;
     private StandardFunctionInterface functionInterface;
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final TextView speedText;
     private final TextView timeEstimate;
@@ -308,6 +310,7 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private void startGasListener()
     {
+        if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery().findFirstAsync();
         realmGasSpread.addChangeListener(realmToken -> {
             if (realmGasSpread.isValid())
@@ -328,12 +331,20 @@ public class GasWidget extends LinearLayout implements Runnable
                 currentGasSpeedIndex = customGasSpeedIndex;
                 forceCustomGas = false;
             }
+
+            TextView editTxt = findViewById(R.id.edit_text);
+
+            if (gs.lockedGas && editTxt.getVisibility() == View.VISIBLE)
+            {
+                findViewById(R.id.edit_text).setVisibility(View.GONE);
+                setOnClickListener(null);
+            }
             //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
             handler.post(this);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -393,6 +404,10 @@ public class GasWidget extends LinearLayout implements Runnable
         {
             checkCustomGasPrice(gasSpeeds.get(customGasSpeedIndex).gasPrice);
         }
+        else
+        {
+            speedWarning.setVisibility(View.GONE);
+        }
         checkSufficientGas();
         manageWarnings();
     }
@@ -441,11 +456,22 @@ public class GasWidget extends LinearLayout implements Runnable
         double lowerBound = lg.gasPrice.doubleValue();
         double upperBound = ug.gasPrice.doubleValue();
 
-        if (dGasPrice < lowerBound)
+        if (resendGasPrice.compareTo(BigInteger.ZERO) > 0)
+        {
+            if (dGasPrice > (3.0 * resendGasPrice.doubleValue()))
+            {
+                showCustomSpeedWarning(true);
+            }
+            else
+            {
+                speedWarning.setVisibility(View.GONE);
+            }
+        }
+        else if (dGasPrice < lowerBound)
         {
             showCustomSpeedWarning(false);
         }
-        else if (dGasPrice > 1.5 * upperBound)
+        else if (dGasPrice > 2.0 * upperBound)
         {
             showCustomSpeedWarning(true);
         }

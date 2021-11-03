@@ -95,7 +95,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         if (getIntent() != null && getIntent().getExtras() != null) {
             asset = getIntent().getExtras().getParcelable(C.EXTRA_NFTASSET);
             String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-            int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             token = viewModel.getToken(chainId, address);
             tokenId = new BigInteger(getIntent().getExtras().getString(C.EXTRA_TOKEN_ID));
             initViews();

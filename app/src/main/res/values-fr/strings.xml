@@ -74,7 +74,7 @@
     <string name="action_more_details">Plus de détails</string>
     <string name="action_add_wallet">Ajouter portefeuille</string>
     <string name="action_add_token">Ajouter Token</string>
-    <string name="action_open_etherscan">Voir sur Etherscan</string>
+    <string name="action_open_etherscan">Voir sur Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly (Acheter avec une carte de crédit)</string>
@@ -605,6 +605,7 @@
     <string name="tokenscript_file_error">TokenScript fichier erreur</string>
     <string name="toast_browser_cache_cleared">Cache Navigateur nettoyé</string>
     <string name="toast_token_data_cleared">Données de Token effacées</string>
+    <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
     <string name="your_wallets">Vos Portefeuilles</string>
     <string name="action_copy">Copier</string>
     <string name="title_version_support_warning">Mise à jour importante</string>
@@ -725,7 +726,7 @@
     <string name="new_balance">(Nouveau: %1$s %2$s)</string>
     <string name="set_speed_title">Régler la vitesse Speed</string>
     <string name="gas_price_widget">Prix du Gas: %1$s</string>
-    <string name="gas_message">Les frais sont basés sur la charge actuelle du réseau de la blockchain Ethereum. Ils ne dépendent pas d\'AlphaWallet. AlphaWallet utilise l\'oracle en direct de gasnow.org et met à jour les prix du gas toutes les 15 secondes.</string>
+    <string name="gas_message">Les frais sont basés sur la charge actuelle du réseau de la blockchain Ethereum. Ils ne dépendent pas d\'AlphaWallet. AlphaWallet utilise l\'oracle en direct de %1$s et met à jour les prix du gas toutes les 15 secondes.</string>
     <string name="set_your_speed">Définir Le Votre</string>
     <string name="nonce_optional">Nonce (optionnel)</string>
     <string name="calc_gas_limit">Calcul de la Limite de Gas</string>
@@ -833,4 +834,18 @@
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">Réseaux</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="action_send_to_this_address">Send to this Address</string>
+    <string name="stay_updated">Stay Updated</string>
+    <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
+    <string name="hint_email_address">Email Address</string>
+    <string name="action_want_to_receive_email">I want to receive such emails</string>
+    <string name="email_is_invalid">Please provide valid email address</string>
+    <string name="github">Github (signaler un problème)</string>
+    <string name="chains_to_scan">Chains to scan</string>
+    <string name="action_view">View</string>
+    <string name="error_chainid_already_taken">Chain Id already taken</string>
+    <string name="status">Statut</string>
+    <string name="connected_to">Connecté à</string>
+    <string name="not_connected">Non connecté</string>
+    <string name="online">Connecté</string>
 </resources>

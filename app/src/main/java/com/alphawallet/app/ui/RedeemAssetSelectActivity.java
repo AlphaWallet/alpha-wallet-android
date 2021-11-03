@@ -71,7 +71,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(RedeemAssetSelectViewModel.class);
 
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         setContentView(R.layout.activity_redeem_asset);
@@ -135,12 +135,14 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final int action_next = R.id.action_next;
+        final int action_redeem = R.id.action_redeem;
         switch (item.getItemId()) {
-            case R.id.action_next: {
+            case action_next: {
                 onNext();
             }
             break;
-            case R.id.action_redeem: {
+            case action_redeem: {
                 onRedeem();
             }
             break;

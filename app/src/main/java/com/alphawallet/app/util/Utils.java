@@ -1,5 +1,14 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
 import android.content.Context;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
@@ -12,12 +21,11 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
-import android.view.View;
 import android.webkit.URLUtil;
 
 import androidx.annotation.RawRes;
-import androidx.core.content.ContextCompat;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -49,33 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class Utils {
 
@@ -194,72 +175,6 @@ public class Utils {
         {
             return "";
         }
-    }
-
-    public static int getChainColour(int chainId)
-    {
-        switch (chainId)
-        {
-            case MAINNET_ID:
-                return R.color.mainnet;
-            case CLASSIC_ID:
-                return R.color.classic;
-            case POA_ID:
-                return R.color.poa;
-            case KOVAN_ID:
-                return R.color.kovan;
-            case ROPSTEN_ID:
-                return R.color.ropsten;
-            case SOKOL_ID:
-                return R.color.sokol;
-            case RINKEBY_ID:
-                return R.color.rinkeby;
-            case GOERLI_ID:
-                return R.color.goerli;
-            case XDAI_ID:
-                return R.color.xdai;
-            case ARTIS_SIGMA1_ID:
-                return R.color.artis_sigma1;
-            case ARTIS_TAU1_ID:
-                return R.color.artis_tau1;
-            case BINANCE_MAIN_ID:
-                return R.color.binance_main;
-            case BINANCE_TEST_ID:
-                return R.color.binance_test;
-            case HECO_ID:
-                return R.color.heco_main;
-            case HECO_TEST_ID:
-                return R.color.heco_test;
-            case FANTOM_ID:
-                return R.color.fantom_main;
-            case FANTOM_TEST_ID:
-                return R.color.fantom_test;
-            case AVALANCHE_ID:
-                return R.color.avalanche_main;
-            case FUJI_TEST_ID:
-                return R.color.avalanche_test;
-            case MATIC_ID:
-                return R.color.polygon_main;
-            case MATIC_TEST_ID:
-                return R.color.polygon_test;
-            case OPTIMISTIC_MAIN_ID:
-                return R.color.optimistic_main;
-            case OPTIMISTIC_TEST_ID:
-                return R.color.optimistic_test;
-            case CRONOS_TEST_ID:
-                return R.color.cronos_test;
-            case ARBITRUM_MAIN_ID:
-                return R.color.arbitrum_main;
-            case ARBITRUM_TEST_ID:
-                return R.color.arbitrum_test;
-            default:
-                return R.color.mine;
-        }
-    }
-
-    public static void setChainColour(View view, int chainId)
-    {
-        view.getBackground().setTint(ContextCompat.getColor(view.getContext(), getChainColour(chainId)));
     }
 
     /**
@@ -400,7 +315,7 @@ public class Utils {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return false;
     }
@@ -410,11 +325,11 @@ public class Utils {
         return address != null && address.length() > 0 && WalletUtils.isValidAddress(address);
     }
 
-    public static String intArrayToString(Integer[] values)
+    public static String longArrayToString(Long[] values)
     {
         StringBuilder store = new StringBuilder();
         boolean firstValue = true;
-        for (int network : values)
+        for (long network : values)
         {
             if (!firstValue) store.append(",");
             store.append(network);
@@ -424,17 +339,17 @@ public class Utils {
         return store.toString();
     }
 
-    public static List<Integer> intListToArray(String list)
+    public static List<Long> longListToArray(String list)
     {
-        List<Integer> idList = new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
         //convert to array
         String[] split = list.split(",");
         for (String s : split)
         {
-            Integer value;
+            Long value;
             try
             {
-                value = Integer.valueOf(s);
+                value = Long.valueOf(s);
                 idList.add(value);
             }
             catch (NumberFormatException e)
@@ -846,37 +761,26 @@ public class Utils {
         return "";
     }
 
+    private static final Map<Long, String> twChainNames = new HashMap<Long, String>() {
+        {
+            put(CLASSIC_ID, "classic");
+            put(XDAI_ID, "xdai");
+            put(POA_ID, "poa");
+            put(BINANCE_MAIN_ID, "smartchain");
+            put(AVALANCHE_ID, "avalanche");
+            put(OPTIMISTIC_MAIN_ID, "optimism");
+            put(MATIC_ID, "polygon");
+            put(MAINNET_ID, "ethereum");
+        }
+    };
+
     @NotNull
-    public static String getTWTokenImageUrl(int chainId, String address)
+    public static String getTWTokenImageUrl(long chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;
-        String repoChain;
-        switch (chainId)
-        {
-            case CLASSIC_ID:
-                repoChain = "classic";
-                break;
-            case XDAI_ID:
-                repoChain = "xdai";
-                break;
-            case POA_ID:
-                repoChain = "poa";
-                break;
-            case BINANCE_MAIN_ID:
-                repoChain = "binance";
-                break;
-            case AVALANCHE_ID:
-                repoChain = "avalanche";
-                break;
-            case MATIC_ID:
-                repoChain = "polygon";
-                break;
-            default:
-                repoChain = "ethereum";
-                break;
-        }
+        String repoChain = twChainNames.get(chainId);
+        if (repoChain == null) repoChain = "ethereum";
         tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
-
         return tURL;
     }
 
@@ -959,5 +863,19 @@ public class Utils {
         {
             return false;
         }
+    }
+
+    public static boolean isTransactionHash(String input)
+    {
+        if (input == null || (input.length() != 66 && input.length() != 64)) return false;
+        String cleanInput = Numeric.cleanHexPrefix(input);
+
+        try {
+            Numeric.toBigIntNoPrefix(cleanInput);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return cleanInput.length() == 64;
     }
 }

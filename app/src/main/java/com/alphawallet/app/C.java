@@ -18,6 +18,7 @@ public abstract class C {
     public static final int COMPLETED_TRANSACTION = 3;
     public static final int SEND_INTENT_REQUEST_CODE = 4;
     public static final int TERMINATE_ACTIVITY = 5;
+    public static final int ADDED_TOKEN_RETURN = 9;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -45,6 +46,8 @@ public abstract class C {
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
     public static final String ARBITRUM_TEST_NETWORK = "Arbitrum (Test)";
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
+    public static final String PALM_NAME = "PALM";
+    public static final String PALM_TEST_NAME = "PALM (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -63,7 +66,7 @@ public abstract class C {
     public static final String GOERLI_SYMBOL = "GÖETH";
     public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
-    public static final String BINANCE_SYMBOL = "BNB";
+    public static final String BINANCE_SYMBOL = "BSC";
     public static final String HECO_SYMBOL = "HT";
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
@@ -71,6 +74,7 @@ public abstract class C {
     public static final String CRONOS_SYMBOL = "tCRO";
     public static final String ARBITRUM_SYMBOL = "AETH";
     public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
+    public static final String PALM_SYMBOL = "PALM";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

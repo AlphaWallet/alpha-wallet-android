@@ -3,7 +3,6 @@ package com.alphawallet.app.repository;
 import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
@@ -23,35 +22,34 @@ import io.realm.Realm;
 public interface TokenLocalSource {
     Single<Token> saveToken(Wallet wallet, Token token);
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
-    void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
     boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray);
-    Token fetchToken(int chainId, Wallet wallet, String address);
+    Token fetchToken(long chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
     void createBaseNetworkTokens(String walletAddress);
-    String getTokenImageUrl(int networkId, String address);
+    String getTokenImageUrl(long chainId, String address);
 
     Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
-    void deleteRealmToken(int chainId, Wallet wallet, String address);
+    void deleteRealmToken(long chainId, Wallet wallet, String address);
 
     Token updateTokenType(Token token, Wallet wallet, ContractType type);
-    void storeTokenUrl(int networkId, String address, String imageUrl);
+    void storeTokenUrl(long chainId, String address, String imageUrl);
     Token[] initNFTAssets(Wallet wallet, Token[] tokens);
 
-    Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
+    Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters,
                                             AssetDefinitionService svs);
 
-    Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
+    Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Long> networkFilters,
                                              String seachTerm);
 
-    TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Integer> networkFilters);
+    TokenCardMeta[] fetchTokenMetasForUpdate(Wallet wallet, List<Long> networkFilters);
 
-    Single<Token[]> fetchAllTokensWithNameIssue(String walletAddress, List<Integer> networkFilters);
-    Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Integer> networkFilters);
+    Single<Token[]> fetchAllTokensWithNameIssue(String walletAddress, List<Long> networkFilters);
+    Single<ContractAddress[]> fetchAllTokensWithBlankName(String walletAddress, List<Long> networkFilters);
 
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 
-    void updateEthTickers(Map<Integer, TokenTicker> ethTickers);
-    void updateERC20Tickers(int chainId, Map<String, TokenTicker> erc20Tickers);
+    void updateEthTickers(Map<Long, TokenTicker> ethTickers);
+    void updateERC20Tickers(long chainId, Map<String, TokenTicker> erc20Tickers);
     void removeOutdatedTickers();
 
     Realm getRealmInstance(Wallet wallet);
@@ -71,5 +69,5 @@ public interface TokenLocalSource {
     void storeATokenAddresses(List<String> addresses);
     Single<List<String>> getATokenAddresses();
 
-    Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Integer> networkFilters);
+    Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 }

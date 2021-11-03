@@ -1,6 +1,9 @@
 package com.alphawallet.app.repository;
 
+import com.alphawallet.app.repository.entity.RealmGasSpread;
+
 import io.realm.DynamicRealm;
+import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
@@ -308,16 +311,11 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
 
-        if (oldVersion == 29)
+        if (oldVersion == 29 || oldVersion == 30)
         {
             RealmObjectSchema realmData = schema.get("RealmTransaction");
             if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
             oldVersion = 31;
-        }
-
-        if (oldVersion == 30)
-        {
-            oldVersion++;
         }
 
         if (oldVersion == 31)
@@ -331,28 +329,54 @@ public class AWRealmMigration implements RealmMigration
                     .addField("standard", String.class)
                     .addField("slow", String.class)
                     .addField("baseFee", String.class);
-
             oldVersion++;
         }
 
-        if (oldVersion == 32)
+        if (oldVersion == 32 || oldVersion == 33)
         {
-            RealmObjectSchema realmData = schema.get("RealmAToken");
-            if (realmData == null)
+            RealmObjectSchema realmData = schema.get("RealmWalletData");
+            if (realmData != null && !realmData.hasField("ENSAvatar"))
             {
-                schema.create("RealmAToken")
-                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
+                realmData.addField("ENSAvatar", String.class);
             }
+            oldVersion++;
+        }
 
-            schema.remove("RealmGasSpread");
-            schema.create("RealmGasSpread")
-                    .addField("chainId", int.class, FieldAttribute.PRIMARY_KEY)
-                    .addField("timeStamp", long.class)
-                    .addField("rapid", String.class)
-                    .addField("fast", String.class)
-                    .addField("standard", String.class)
-                    .addField("slow", String.class)
-                    .addField("baseFee", String.class);
+        //Migrate from int to long
+        if (oldVersion == 34)
+        {
+            RealmObjectSchema realmData = schema.get("RealmToken");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            realmData = schema.get("RealmAuxData");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            realmData = schema.get("RealmGasSpread");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId")
+                    .addPrimaryKey("chainId");
+
+            realmData = schema.get("RealmTransaction");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            realmData = schema.get("RealmWCSession");
+            realmData.addField("temp_chainId", long.class)
+                    .transform(obj -> obj.setLong("temp_chainId", (long)obj.getInt("chainId")))
+                    .removeField("chainId")
+                    .renameField("temp_chainId", "chainId");
+
+            oldVersion++;
         }
 
     }

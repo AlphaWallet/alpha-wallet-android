@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +21,7 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -26,6 +29,7 @@ import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.util.AWEnsResolver;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -276,7 +280,7 @@ public class WalletViewModel extends BaseViewModel
         tokensService.onWalletRefreshSwipe();
     }
 
-    public boolean isChainToken(int chainId, String tokenAddress)
+    public boolean isChainToken(long chainId, String tokenAddress)
     {
         return tokensService.isChainToken(chainId, tokenAddress);
     }
@@ -300,5 +304,10 @@ public class WalletViewModel extends BaseViewModel
 
     public void setMarshMallowWarning(boolean shown) {
         preferenceRepository.setMarshMallowWarning(shown);
+    }
+
+    public void saveAvatar(Wallet wallet)
+    {
+        genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
     }
 }

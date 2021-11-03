@@ -101,15 +101,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private void setAssetSelection(Token token, List<Pair<BigInteger, NFTAsset>> selection)
     {
         setAssetRange(token, selection);
-
-//        if (selection.size() == 1 && selection.get(0).second.getSelectedBalance().compareTo(BigDecimal.ONE) <= 0)
-//        {
-//            setTokenRange(token, Collections.singletonList(selection.get(0).first)); //setup a normal single token transfer
-//        }
-//        else
-//        {
-//
-//        }
     }
 
     @NotNull

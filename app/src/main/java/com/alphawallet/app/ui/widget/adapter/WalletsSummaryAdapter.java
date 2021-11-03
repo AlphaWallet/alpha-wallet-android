@@ -190,6 +190,13 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         onSetWalletDefaultListener.onSetDefault(wallet);
     }
 
+    @Override
+    public void ensAvatar(Wallet wallet)
+    {
+        // we received a wallet avatar URL (wallet.ENSAvatar)
+        //TODO: Michael - does the view need to be updated?
+    }
+
     public void onDestroy()
     {
         realm.close();

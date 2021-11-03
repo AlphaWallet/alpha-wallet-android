@@ -113,7 +113,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         SystemView systemView = findViewById(R.id.system_view);
         systemView.hide();
         functionBar = findViewById(R.id.layoutButtons);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         initViews(viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS)));
         toolbar();
         setTitle(getString(R.string.token_function));
@@ -149,6 +149,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
     private void setTokenListener()
     {
+        if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {

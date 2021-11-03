@@ -14,17 +14,17 @@ public class EIP681Request
     private final String PROTOCOL = "ethereum:";
     private String address;
     private BigDecimal weiAmount;
-    private int chainId;
+    private long chainId;
     private String contractAddress;
 
-    public EIP681Request(String displayAddress, int chainId, BigDecimal weiAmount)
+    public EIP681Request(String displayAddress, long chainId, BigDecimal weiAmount)
     {
         this.address = displayAddress;
         this.chainId = chainId;
         this.weiAmount = weiAmount;
     }
 
-    public EIP681Request(String userAddress, String contractAddress, int chainId, BigDecimal weiAmount)
+    public EIP681Request(String userAddress, String contractAddress, long chainId, BigDecimal weiAmount)
     {
         this.address = userAddress;
         this.chainId = chainId;

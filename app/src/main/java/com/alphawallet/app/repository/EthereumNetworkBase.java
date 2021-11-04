@@ -853,13 +853,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         customNetworks.addCustomNetwork(info, isTestnet, oldChainId);
     }
 
-    public NetworkInfoExt getNetworkInfoExt(long chainId) {
-        NetworkInfo info = getNetworkByChain(chainId);
-        boolean isTestNetwork = !hasRealValue(chainId);
-        return new NetworkInfoExt(info, isTestNetwork);
-    }
-
-
     public void removeCustomRPCNetwork(long chainId) {
         customNetworks.remove(chainId);
     }

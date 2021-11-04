@@ -1,12 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
-
-
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.ethereum.NetworkInfo;
+import com.alphawallet.app.entity.NetworkInfo;
 
 public class CustomNetworkViewModel extends BaseViewModel
 {
@@ -22,7 +18,11 @@ public class CustomNetworkViewModel extends BaseViewModel
         this.ethereumNetworkRepository.addCustomRPCNetwork(name, rpcUrl, chainId, symbol, blockExplorerUrl, explorerApiUrl, isTestnet, oldChainId);
     }
 
-    public EthereumNetworkRepositoryType.NetworkInfoExt getNetworkInfo(long chainId) {
-        return this.ethereumNetworkRepository.getNetworkInfoExt(chainId);
+    public NetworkInfo getNetworkInfo(long chainId) {
+        return this.ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
+
+    public boolean isTestNetwork(NetworkInfo network) {
+        return !EthereumNetworkRepository.hasRealValue(network.chainId);
     }
 }

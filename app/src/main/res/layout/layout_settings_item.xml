@@ -18,7 +18,7 @@
 
     <LinearLayout
         android:id="@+id/layout_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="16dp"
@@ -37,12 +37,13 @@
 
         <TextView
             android:id="@+id/setting_subtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
+            android:ellipsize="middle"
             android:fontFamily="@font/font_light"
             android:lines="1"
             android:maxLines="1"
+
             android:text="Setting Subtitle"
             android:textColor="@color/dove"
             android:textSize="12sp"

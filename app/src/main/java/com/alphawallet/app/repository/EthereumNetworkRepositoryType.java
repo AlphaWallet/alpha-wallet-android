@@ -16,19 +16,6 @@ import io.reactivex.Single;
 
 public interface EthereumNetworkRepositoryType {
 
-    class NetworkInfoExt {
-        public final NetworkInfo info;
-        public final boolean isTestNetwork;
-        public final boolean isCustomNetwork;
-
-        public NetworkInfoExt(NetworkInfo info, boolean isTestNetwork, boolean isCustomNetwork) {
-            this.info = info;
-            this.isTestNetwork = isTestNetwork;
-            this.isCustomNetwork = isCustomNetwork;
-        }
-    }
-
-
     NetworkInfo getActiveBrowserNetwork();
 
     void setActiveBrowserNetwork(NetworkInfo networkInfo);
@@ -69,7 +56,6 @@ public interface EthereumNetworkRepositoryType {
     void setActiveMainnet(boolean isMainNet);
 
     void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId);
-    NetworkInfoExt getNetworkInfoExt(long chainId);
     void removeCustomRPCNetwork(long chainId);
 
     boolean isChainContract(long chainId, String address);

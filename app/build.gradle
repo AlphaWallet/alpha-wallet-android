@@ -42,6 +42,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
@@ -128,6 +129,17 @@ android {
 
 }
 
+task disableAnimations(type: Exec) {
+    def adb = "$System.env.ANDROID_HOME/platform-tools/adb"
+    commandLine "$adb", 'shell', 'settings', 'put', 'global', 'window_animation_scale', '0'
+    commandLine "$adb", 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '0'
+    commandLine "$adb", 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0'
+}
+
+project.gradle.taskGraph.whenReady {
+    connectedAndroidTest.dependsOn disableAnimations
+}
+
 dependencies {
     implementation project(":lib")
 
@@ -209,6 +221,10 @@ dependencies {
     androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 

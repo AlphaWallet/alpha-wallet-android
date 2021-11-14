@@ -302,8 +302,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         getSupportFragmentManager()
                 .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
-                    viewModel.updateTickers();
-                    showAndRefreshWallet();
+                    resetTokens();
+                    showPage(WALLET);
                 });
 
         getSupportFragmentManager()
@@ -882,13 +882,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (Utils.isAddressValid(keyAddress)) backupWalletSuccess(keyAddress);
     }
 
-    //Deprecated
-    @Override
-    public void changeCurrency()
-    {
-
-    }
-
     @Override
     public void resetTokens()
     {
@@ -1213,7 +1206,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void showAndRefreshWallet()
     {
         showPage(WALLET);
-        resetTokens();
+        //resetTokens();
     }
 
     public void useActionSheet(String mode)

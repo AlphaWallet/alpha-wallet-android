@@ -31,6 +31,8 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +45,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
     public static final int FILTER_COLLECTIBLES = 3;
-    private final Realm realm;
 
     private int filterType;
     protected final AssetDefinitionService assetService;
@@ -101,7 +102,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = tService;
-        this.realm = tokensService.getTickerRealmInstance();
         this.managementLauncher = launcher;
     }
 
@@ -109,7 +109,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = null;
-        this.realm = null;
         this.managementLauncher = null;
     }
 
@@ -128,12 +127,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
+    @NonNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         BinderViewHolder<?> holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, realm);
+                TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
                 break;
@@ -451,16 +451,16 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void onDestroy(RecyclerView recyclerView)
     {
-        //ensure all holders have their realm listeners cleaned up
-        if (recyclerView != null)
-        {
-            for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
-            {
-                ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
-            }
-        }
-
-        if (realm != null) realm.close();
+//        //ensure all holders have their realm listeners cleaned up
+//        if (recyclerView != null)
+//        {
+//            for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
+//            {
+//                ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
+//            }
+//        }
+//
+//        if (realm != null) realm.close();
     }
 
     public void setDebug()

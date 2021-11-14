@@ -353,7 +353,7 @@ public class WalletDataRealmSource {
 
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                instance.executeTransaction(r -> instance.deleteAll());
+                instance.executeTransaction(r -> r.deleteAll());
                 instance.refresh();
             }
             catch (Exception e)

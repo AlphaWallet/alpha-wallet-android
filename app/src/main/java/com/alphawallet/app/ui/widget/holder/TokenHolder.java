@@ -62,16 +62,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final ChainName testnet;
-    private RealmResults<RealmTokenTicker> realmUpdate = null;
     private boolean primaryElement;
-    private final Realm realm;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
+    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
     {
         super(R.layout.item_token, parent);
 
@@ -92,7 +90,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
-        realm = r;
     }
 
     @Override
@@ -111,12 +108,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 //edge condition - looking at a contract as an account
                 Token backupChain = tokensService.getToken(data.getChain(), "eth");
                 if (backupChain != null) token = backupChain;
-            }
-
-            if (realmUpdate != null)
-            {
-                realmUpdate.removeAllChangeListeners();
-                realmUpdate = null;
             }
 
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
@@ -147,11 +138,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public void onDestroyView()
     {
-        if (realmUpdate != null)
-        {
-            realmUpdate.removeAllChangeListeners();
-            realmUpdate = null;
-        }
+
     }
 
     private void setPendingAmount()
@@ -170,10 +157,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void populateTicker()
     {
-        if (token.getFullName().contains("Pirl"))
-        {
-            System.out.println("YOLESS");
-        }
         TokenTicker ticker = tokensService.getTokenTicker(token);
         if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
@@ -204,7 +187,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
-            startTickerRealmListener();
+            setTickerInfo(ticker);
         }
         else
         {
@@ -315,30 +298,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
     }
 
-    private void startTickerRealmListener()
-    {
-        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
-        realmUpdate = realm.where(RealmTokenTicker.class)
-                .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
-                .findAllAsync();
-        realmUpdate.addChangeListener(realmTicker -> {
-            //update balance
-            if (realmTicker.size() == 0) return;
-            RealmTokenTicker rawTicker = realmTicker.first();
-            if (rawTicker == null) return;
-            //update ticker info
-            final TokenTicker tt = new TokenTicker(rawTicker.getPrice(), rawTicker.getPercentChange24h(), rawTicker.getCurrencySymbol(),
-                    rawTicker.getImage(), rawTicker.getUpdatedTime());
-            handler.post(() -> {
-                setTickerInfo(tt);
-            });
-        });
-    }
-
     private void setTickerInfo(TokenTicker ticker)
     {
-        if (((Activity)getContext()).isFinishing() || ((Activity) getContext()).isDestroyed()) { return; }
-
         //Set the fiat equivalent (leftmost value)
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
         BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
@@ -368,10 +329,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         { /* Quietly */ }
 
         //This sets the crypto price value (middle amount)
-        String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
+        String formattedValue = TickerService.getCurrencyString(new BigDecimal(ticker.price).doubleValue());
+        //TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
 
         lbl = getString(R.string.token_balance, "", formattedValue);
-        lbl += " " + ticker.priceSymbol;
+        //lbl += " " + ticker.priceSymbol;
         textAppreciation.setText(lbl);
         textAppreciation.setTextColor(getContext().getColor(R.color.text_dark_gray));
 

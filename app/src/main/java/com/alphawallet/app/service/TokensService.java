@@ -670,7 +670,7 @@ public class TokensService
         List<TokenCardMeta> allERC20 = new ArrayList<>();
         for (TokenCardMeta tcm : tokenList)
         {
-            if (tcm.type == ContractType.ERC20)
+            if (tcm.type == ContractType.ERC20 && tcm.isEnabled) //filter out enabled, visible tokens
             {
                 allERC20.add(tcm);
             }

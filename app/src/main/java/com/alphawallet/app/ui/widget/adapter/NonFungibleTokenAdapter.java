@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Pair;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.SortedList;
 
@@ -105,7 +106,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     @NotNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         BinderViewHolder<?> holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove

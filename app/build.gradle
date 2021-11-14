@@ -46,7 +46,7 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
-        buildConfigField 'int', 'DB_VERSION', '35'
+        buildConfigField 'int', 'DB_VERSION', '36'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -119,7 +119,7 @@ android {
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
                 implementation 'com.google.android.play:core:1.10.2'
-                implementation 'com.google.firebase:firebase-analytics:19.0.2'
+                implementation 'com.google.firebase:firebase-analytics:20.0.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
             }
         }
@@ -142,9 +142,10 @@ dependencies {
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.google.code.gson:gson:2.8.8"
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation "com.squareup.picasso:picasso:2.71828"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    //noinspection GradleDependency
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1' //This cannot be updated until minSdkVersion is 31.
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //noinspection GradleCompatible
     implementation 'androidx.appcompat:appcompat:1.3.1'
@@ -155,8 +156,8 @@ dependencies {
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
     // Bar code scanning
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    implementation 'com.google.zxing:core:3.4.0'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.4.1'
 
     // Sugar
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
@@ -166,11 +167,11 @@ dependencies {
     //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
 
     // ReactiveX
-    implementation "io.reactivex.rxjava2:rxjava:2.2.10"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
     implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
 
     // Keyboard visibility
-    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC2'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
 
     // Dagger 2
 
@@ -204,11 +205,11 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"
     })
-    androidTestImplementation('tools.fastlane:screengrab:1.1.0', {
+    androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.3'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.4'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 

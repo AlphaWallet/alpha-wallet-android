@@ -9,8 +9,6 @@ import android.os.Bundle;
 
 import com.alphawallet.app.C;
 
-import static com.alphawallet.app.C.ADDED_TOKEN;
-
 public class HomeReceiver extends BroadcastReceiver
 {
     private final HomeCommsInterface homeCommsInterface;
@@ -19,7 +17,6 @@ public class HomeReceiver extends BroadcastReceiver
         ctx.registerReceiver(this, new IntentFilter(C.DOWNLOAD_READY));
         ctx.registerReceiver(this, new IntentFilter(C.REQUEST_NOTIFICATION_ACCESS));
         ctx.registerReceiver(this, new IntentFilter(C.BACKUP_WALLET_SUCCESS));
-        ctx.registerReceiver(this, new IntentFilter(C.CHANGE_CURRENCY));
         ctx.registerReceiver(this, new IntentFilter(C.CHANGED_LOCALE));
         ctx.registerReceiver(this, new IntentFilter(C.WALLET_CONNECT_REQUEST));
         this.homeCommsInterface = homeCommsInterface;
@@ -41,9 +38,6 @@ public class HomeReceiver extends BroadcastReceiver
             case C.BACKUP_WALLET_SUCCESS:
                 String keyAddress = bundle.getString("Key");
                 homeCommsInterface.backupSuccess(keyAddress);
-                break;
-            case C.CHANGE_CURRENCY:
-                homeCommsInterface.changeCurrency();
                 break;
             case C.CHANGED_LOCALE:
                 homeCommsInterface.changedLocale();

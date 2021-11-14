@@ -332,7 +332,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Single.fromCallable(() -> {
             try (Realm instance = realmManager.getRealmInstance(TICKER_DB))
             {
-                instance.executeTransaction(r -> instance.deleteAll());
+                instance.executeTransaction(r -> r.deleteAll());
                 instance.refresh();
             }
             catch (Exception e)
@@ -351,7 +351,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //delete all token and AUX data for this wallet
             try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
             {
-                instance.executeTransaction(r -> instance.deleteAll());
+                instance.executeTransaction(r -> r.deleteAll());
                 instance.refresh();
             }
             catch (Exception e)

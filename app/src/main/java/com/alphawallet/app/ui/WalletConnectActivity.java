@@ -25,6 +25,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
@@ -990,16 +991,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialogTerminate(String message)
     {
-        runOnUiThread(() -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
-            AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
-                    .setMessage(message)
-                    .setPositiveButton(R.string.dialog_ok, (d, w) -> {
-                        finish();
-                    })
-                    .create();
-            dialog.show();
-        });
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
+                AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                            finish();
+                        })
+                        .create();
+                dialog.show();
+            });
+        }
     }
 
     @Override

@@ -1161,14 +1161,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
 
         //Don't show dialog if network doesn't need to be changed or if already showing
-        if (activeNetwork.chainId == chainId || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
+        if ((activeNetwork != null && activeNetwork.chainId == chainId) || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
 
         //if we're switching between mainnet and testnet we need to pop open the 'switch to testnet' dialog (class TestNetDialog)
         // - after the user switches to testnet, go straight to switching the network (loadNewNetwork)
         // - if user is switching form testnet to mainnet, simply add the title below
 
         // at this stage, we know if it's testnet or not
-        if (!info.hasRealValue() && activeNetwork.hasRealValue())
+        if (!info.hasRealValue() && (activeNetwork != null && activeNetwork.hasRealValue()))
         {
             TestNetDialog testnetDialog = new TestNetDialog(getContext(), info.chainId, this);
             testnetDialog.show();

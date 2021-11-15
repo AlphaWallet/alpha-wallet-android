@@ -1020,6 +1020,12 @@ public class TokensService
             token = getToken(chainId, currentAddress); // use base currency
         }
 
+        if (token == null)
+        {
+            //create base token if required
+            token = ethereumNetworkRepository.getBlankOverrideToken(ethereumNetworkRepository.getNetworkByChain(chainId));
+        }
+
         return token;
     }
 

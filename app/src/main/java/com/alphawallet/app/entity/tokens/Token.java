@@ -601,7 +601,7 @@ public class Token
     public boolean hasGroupedTransfer() { return false; } //Can the NFT token's transfer function handle multiple tokens?
     public boolean checkSelectionValidity(List<BigInteger> selection) //check a selection of ID's for Transfer/Redeem/Sell
     {
-        return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
+        return selection != null && selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
     }
 
     public String getShortName() {

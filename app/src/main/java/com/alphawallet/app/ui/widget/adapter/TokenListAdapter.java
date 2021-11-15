@@ -429,6 +429,8 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     public void addToken(TokenCardMeta tokenCardMeta)
     {
         Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
+        if (token == null) return;
+
         tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
         TokenSortedItem sortedItem = null;
 

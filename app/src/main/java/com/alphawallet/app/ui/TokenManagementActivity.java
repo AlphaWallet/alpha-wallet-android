@@ -59,8 +59,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private String realmId;
     private ArrayList<ContractLocator> tokenUpdates;
 
-    private boolean isDataChanged;
-
     private final Handler delayHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -87,7 +85,9 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         tokenList.setLayoutManager(new LinearLayoutManager(this));
 
         saveButton.setOnClickListener(v -> {
-            new HomeRouter().open(this, true);
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            finish();
         });
 
         tokenList.requestFocus();
@@ -120,7 +120,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     @Override
     public void onItemClick(Token token, boolean enabled) {
         viewModel.setTokenEnabled(wallet, token, enabled);
-        isDataChanged = true;
     }
 
     @Override

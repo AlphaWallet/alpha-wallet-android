@@ -219,7 +219,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             {
                 items.removeItemAt(i);
                 notifyItemRemoved(i);
-                notifyDataSetChanged();
                 break;
             }
         }
@@ -353,7 +352,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (clear) {
             items.clear();
         }
-        addManageTokensLayout();
+        if (managementLauncher != null) addManageTokensLayout();
         for (TokenCardMeta token : tokens)
         {
             updateToken(token, false);

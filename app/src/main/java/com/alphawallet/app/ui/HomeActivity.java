@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -317,6 +318,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ((ActivityFragment) activityFragment).addedToken(contractList);
                     }
                 });
+
+        // Get the intent that started this activity
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+
+        if (data != null)
+        {
+            String importData = data.toString();
+            String importPath = null;
+            if (importData.startsWith("content://"))
+            {
+                importPath = data.getPath();
+            }
+
+            checkIntents(importData, importPath, intent);
+        }
     }
 
     @Override
@@ -335,47 +352,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 importPath = data.getPath();
             }
 
-            String flags = data.toString();
-            if (flags.startsWith(NotificationService.AWSTARTUP))
-            {
-                flags = flags.substring(NotificationService.AWSTARTUP.length());
-                //move window to token if found
-                ((WalletFragment) walletFragment).setImportFilename(flags);
-            }
-        }
-
-        if (startIntent.getStringExtra("url") != null)
-        {
-            String url = startIntent.getStringExtra("url");
-            showPage(DAPP_BROWSER);
-            ((DappBrowserFragment)dappBrowserFragment).loadDirect(url);
-        }
-        else if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
-        {
-            try
-            {
-                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                if (parser.parseUniversalLink(importData).chainId > 0)
-                {
-                    new ImportTokenRouter().open(this, importData);
-                    finish();
-                }
-            }
-            catch (SalesOrderMalformed ignored) { }
-        }
-        else if (importData != null && importData.startsWith("wc:"))
-        {
-            WCSession session = WCSession.Companion.from(importData);
-            String importPassData = WalletConnectActivity.WC_INTENT + importData;
-            Intent intent = new Intent(this, WalletConnectActivity.class);
-            intent.putExtra("qrCode", importPassData);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-        }
-        else if (importPath != null)
-        {
-            boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
-            viewModel.importScriptFile(this, importData, useAppExternalDir);
+            checkIntents(importData, importPath, startIntent);
         }
     }
 
@@ -491,7 +468,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
@@ -802,6 +779,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             super(fm);
         }
 
+        @NonNull
         @Override
         public Fragment getItem(int position)
         {
@@ -1116,7 +1094,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     String url = data.getStringExtra(C.DAPP_URL_LOAD);
                     long chainId = data.getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-                    ((DappBrowserFragment)dappBrowserFragment).switchNetworkAndLoadUrl(chainId, url);
+                    DappBrowserFragment dappFrag = (DappBrowserFragment)getFragment(DAPP_BROWSER.ordinal());
+                    if (!dappFrag.isDetached())
+                    {
+                        ((DappBrowserFragment) dappBrowserFragment).switchNetworkAndLoadUrl(chainId, url);
+                    }
                     showPage(DAPP_BROWSER);
                 }
                 else if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.EXTRA_TXHASH))
@@ -1132,8 +1114,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 break;
             case C.ADDED_TOKEN_RETURN:
-                List<ContractLocator> tokenData = data.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST);
-                ((ActivityFragment) activityFragment).addedToken(tokenData);
+                if (data.hasExtra(C.EXTRA_TOKENID_LIST))
+                {
+                    List<ContractLocator> tokenData = data.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST);
+                    ((ActivityFragment) activityFragment).addedToken(tokenData);
+                }
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -1225,5 +1210,49 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         WindowInsetsControllerCompat inset = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
         inset.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
+    }
+
+    private void checkIntents(String importData, String importPath, Intent startIntent)
+    {
+        if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
+        {
+            importData = importData.substring(NotificationService.AWSTARTUP.length());
+            //move window to token if found
+            ((WalletFragment) walletFragment).setImportFilename(importData);
+        }
+        else if (startIntent.getStringExtra("url") != null)
+        {
+            String url = startIntent.getStringExtra("url");
+            showPage(DAPP_BROWSER);
+            DappBrowserFragment dappFrag = (DappBrowserFragment)dappBrowserFragment;
+            if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
+        }
+        else if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
+        {
+            try
+            {
+                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                if (parser.parseUniversalLink(importData).chainId > 0)
+                {
+                    new ImportTokenRouter().open(this, importData);
+                    finish();
+                }
+            }
+            catch (SalesOrderMalformed ignored) { }
+        }
+        else if (importData != null && importData.startsWith("wc:"))
+        {
+            WCSession session = WCSession.Companion.from(importData);
+            String importPassData = WalletConnectActivity.WC_INTENT + importData;
+            Intent intent = new Intent(this, WalletConnectActivity.class);
+            intent.putExtra("qrCode", importPassData);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+        }
+        else if (importPath != null)
+        {
+            boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
+            viewModel.importScriptFile(this, importData, useAppExternalDir);
+        }
     }
 }

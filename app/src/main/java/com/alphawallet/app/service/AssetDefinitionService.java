@@ -1,5 +1,10 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -27,7 +32,6 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionRepositoryType;
@@ -35,7 +39,6 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.repository.entity.RealmTokenScriptData;
 import com.alphawallet.app.ui.HomeActivity;
-import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.token.entity.Attribute;
@@ -109,11 +112,6 @@ import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
 
 /**

@@ -17,27 +17,41 @@ public class DisplayUtils
         Point screenResolution = new Point();
         WindowManager windowManager = activity.getWindowManager();
 
-        try
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
         {
-            Method m = windowManager.getClass().getDeclaredMethod(
-                    "getCurrentWindowMetrics"); //Use reflection to see if method is available
+            try
+            {
+                Method m = windowManager.getClass().getDeclaredMethod(
+                        "getCurrentWindowMetrics"); //Use reflection to see if method is available
 
-            WindowMetrics windowMetrics = (WindowMetrics) m.invoke(windowManager);
-            Insets insets = windowMetrics.getWindowInsets()
-                    .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+                WindowMetrics windowMetrics = (WindowMetrics) m.invoke(windowManager);
+                Insets insets = windowMetrics.getWindowInsets()
+                        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
 
-            screenResolution.set(windowMetrics.getBounds().width() - insets.left - insets.right,
-                    windowMetrics.getBounds().height() - insets.top - insets.bottom);
+                screenResolution.set(windowMetrics.getBounds().width() - insets.left - insets.right,
+                        windowMetrics.getBounds().height() - insets.top - insets.bottom);
+            }
+            catch (Exception e)
+            {
+                screenResolution = useLegacyMethod(activity);
+            }
         }
-        catch (Exception e)
+        else
         {
-            //Use legacy method
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            screenResolution.x = displayMetrics.widthPixels;
-            screenResolution.y = displayMetrics.heightPixels;
+            screenResolution = useLegacyMethod(activity);
         }
 
+        return screenResolution;
+    }
+
+    private static Point useLegacyMethod(Activity activity)
+    {
+        Point screenResolution = new Point();
+        //Use legacy method
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        screenResolution.x = displayMetrics.widthPixels;
+        screenResolution.y = displayMetrics.heightPixels;
         return screenResolution;
     }
 }

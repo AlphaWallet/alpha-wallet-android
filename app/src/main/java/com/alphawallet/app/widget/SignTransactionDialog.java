@@ -138,6 +138,10 @@ public class SignTransactionDialog
                 {
                     promptBuilder.setNegativeButtonText(activity.getString(R.string.action_cancel));
                 }
+                else
+                {
+                    promptBuilder.setNegativeButtonText(activity.getString(R.string.use_pin));
+                }
             }
         }
         else

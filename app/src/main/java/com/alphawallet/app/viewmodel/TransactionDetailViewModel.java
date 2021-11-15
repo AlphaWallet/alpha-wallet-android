@@ -32,6 +32,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import org.web3j.protocol.Web3j;
@@ -124,7 +125,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     public void showMoreDetails(Context context, Transaction transaction) {
         Uri uri = buildEtherscanUri(transaction);
-        if (uri != null) {
+        if (uri != null && Utils.isValidUrl(uri.toString())) {
             externalBrowserRouter.open(context, uri);
         }
     }

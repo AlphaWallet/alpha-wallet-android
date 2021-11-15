@@ -242,7 +242,7 @@ public class GasWidget extends LinearLayout implements Runnable
         boolean sufficientGas = true;
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
         BigDecimal networkFee = new BigDecimal(gs.gasPrice.multiply(useGasLimit));
-        Token base = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
+        Token base = tokensService.getTokenOrBase(token.tokenInfo.chainId, token.getWallet());
 
         if (isSendingAll)
         {
@@ -358,7 +358,7 @@ public class GasWidget extends LinearLayout implements Runnable
         if (currentGasSpeedIndex == -1) currentGasSpeedIndex = 0;
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
 
-        Token baseCurrency = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
+        Token baseCurrency = tokensService.getTokenOrBase(token.tokenInfo.chainId, token.getWallet());
         BigInteger networkFee = gs.gasPrice.multiply(getUseGasLimit());
         String gasAmountInBase = BalanceUtils.getScaledValueScientific(new BigDecimal(networkFee), baseCurrency.tokenInfo.decimals);
         if (gasAmountInBase.equals("0")) gasAmountInBase = "0.0001";

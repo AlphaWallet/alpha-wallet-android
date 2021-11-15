@@ -218,6 +218,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.resetSignDialog();
     }
 
+    //TODO: Use Activity Launcher model (eg see tokenManagementLauncher in WalletFragment)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

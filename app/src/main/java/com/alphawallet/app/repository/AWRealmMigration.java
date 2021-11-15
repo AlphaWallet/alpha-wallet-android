@@ -377,6 +377,11 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion++;
         }
+
+        if (oldVersion == 35)
+        {
+            oldVersion++;
+        }
     }
 
     @Override

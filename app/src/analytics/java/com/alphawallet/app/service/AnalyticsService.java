@@ -7,7 +7,9 @@ import android.text.TextUtils;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.ServiceErrorException;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
@@ -112,5 +114,11 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     {
         //Nothing like flush in firebase
         mixpanelAPI.flush();
+    }
+
+    @Override
+    public void recordException(ServiceErrorException e)
+    {
+        FirebaseCrashlytics.getInstance().recordException(e);
     }
 }

@@ -2,6 +2,8 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 
+import com.alphawallet.app.entity.ServiceErrorException;
+
 public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
     public AnalyticsService(Context context)
@@ -29,6 +31,12 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
     @Override
     public void flush()
+    {
+        //No code
+    }
+
+    @Override
+    public void recordException(ServiceErrorException e)
     {
         //No code
     }

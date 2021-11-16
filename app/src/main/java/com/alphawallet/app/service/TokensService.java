@@ -742,13 +742,13 @@ public class TokensService
 
     public void walletHidden()
     {
-        //stop updates (note that for notifications we'll use a background service)
-        stopUpdateCycle();
+        appHasFocus = false;
     }
 
     public void walletShowing()
     {
-        //restart the event cycle
+        appHasFocus = true;
+        //restart the event cycle if required
         startUpdateCycle();
     }
 
@@ -989,12 +989,12 @@ public class TokensService
         }
     }
 
-    public void appInFocus()
+    public void walletInFocus()
     {
         appHasFocus = true;
     }
 
-    public void appOutOfFocus()
+    public void walletOutOfFocus()
     {
         appHasFocus = false;
     }

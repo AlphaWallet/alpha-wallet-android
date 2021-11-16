@@ -240,6 +240,10 @@ public class GasWidget extends LinearLayout implements Runnable
     {
         BigInteger useGasLimit = getUseGasLimit();
         boolean sufficientGas = true;
+        if (currentGasSpeedIndex < 0)
+        {
+            currentGasSpeedIndex = setAverageGas();
+        }
         GasSpeed gs = gasSpeeds.get(currentGasSpeedIndex);
         BigDecimal networkFee = new BigDecimal(gs.gasPrice.multiply(useGasLimit));
         Token base = tokensService.getTokenOrBase(token.tokenInfo.chainId, token.getWallet());
@@ -267,6 +271,22 @@ public class GasWidget extends LinearLayout implements Runnable
         }
 
         return sufficientGas;
+    }
+
+    private int setAverageGas()
+    {
+        int index = 0;
+        for (int i = 0; i < gasSpeeds.size(); i++)
+        {
+            GasSpeed gs = gasSpeeds.get(i);
+            if (gs.speed.equals(context.getString(R.string.speed_average)))
+            {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
     }
 
     private BigInteger getUseGasLimit()
@@ -344,6 +364,7 @@ public class GasWidget extends LinearLayout implements Runnable
         }
         catch (Exception e)
         {
+            currentGasSpeedIndex = 0;
             if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }

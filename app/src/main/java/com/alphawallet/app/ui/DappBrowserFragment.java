@@ -1,5 +1,19 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
+import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
+import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
+import static com.alphawallet.app.util.Utils.isValidUrl;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
@@ -39,7 +53,6 @@ import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -133,8 +146,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -146,20 +157,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.RealmResults;
-
-import static com.alphawallet.app.C.ETHER_DECIMALS;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
-import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
-import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
-import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
-import static com.alphawallet.app.util.Utils.isValidUrl;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
@@ -606,6 +603,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             {
                 viewModel.checkForNetworkChanges();
             }
+            else
+            {
+                viewModel.startBalanceUpdate();
+                startBalanceListener();
+            }
         }
         if (urlTv != null)
         {
@@ -621,6 +623,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         focusFlag = false;
         if (web3 != null) web3.requestFocus();
         if (urlTv != null) urlTv.clearFocus();
+        if (viewModel != null) viewModel.stopBalanceUpdate();
+        stopBalanceListener();
     }
 
     // TODO: Move all nav stuff to widget
@@ -788,13 +792,22 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         });
     }
 
+    private void stopBalanceListener()
+    {
+        if (realmUpdate != null)
+        {
+            realmUpdate.removeAllChangeListeners();
+            realmUpdate.getRealm().close();
+            realmUpdate = null;
+        }
+    }
+
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
         if (activeNetwork != null)
         {
             boolean needsReload = loadOnInit == null;
             setupWeb3();
-            startBalanceListener();
             if (needsReload) reloadPage();
         }
     }
@@ -1066,6 +1079,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             symbol.setVisibility(View.GONE);
             viewModel.setNetwork(newNetworkId);
             onNetworkChanged(viewModel.getNetworkInfo(newNetworkId));
+            startBalanceListener();
         }
         //refresh URL page
         reloadPage();

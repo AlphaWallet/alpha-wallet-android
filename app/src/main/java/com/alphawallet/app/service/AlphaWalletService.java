@@ -46,7 +46,7 @@ public class AlphaWalletService
     private static final String API = "api/";
     private static final String XML_VERIFIER_ENDPOINT = "https://aw.app/api/v1/verifyXMLDSig";
     private static final String XML_VERIFIER_PASS = "pass";
-    private static MediaType MEDIA_TYPE_TOKENSCRIPT
+    private static final MediaType MEDIA_TYPE_TOKENSCRIPT
             = MediaType.parse("text/xml; charset=UTF-8");
 
     public AlphaWalletService(OkHttpClient httpClient,

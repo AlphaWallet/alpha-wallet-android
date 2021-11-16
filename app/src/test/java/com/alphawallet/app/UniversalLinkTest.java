@@ -34,7 +34,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 public class UniversalLinkTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), null);
+    private static final ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), null);
 
     final String[] links = { "https://aw.app/AAAAAFroO8yg2x-t8XoYKvHWEk8mRcRZuarNIgwNDg9OYA205_-QZURILYlNp6astOo-RkQMSSefIzMWHKdjcGsc3kAaHfHYi7rrLTgmUfAMaQjFB_u8G0EbB8HewJwDAA==",
             "https://aw.app/AB6EgFroX2xm8IymiSAXpF2m-3kqjpRvy-PYZRQVFhcYAlMtOEau6TvoUT-lN5HoxjxlErC2T0LJ-1u4DmORCdoVs-UNTIL33W_OJ6jGJy2ocqEyWBmV-RiYPIzQlHq0mwE=",

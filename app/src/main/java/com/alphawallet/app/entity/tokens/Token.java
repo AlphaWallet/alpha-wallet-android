@@ -911,14 +911,14 @@ public class Token
     {
         return new Function("tokenURI",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private Function getTokenURI2(BigInteger tokenId)
     {
         return new Function("uri",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private String loadMetaData(String tokenURI)

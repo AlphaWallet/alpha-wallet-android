@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -224,7 +225,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             is.read(buffer);
             is.close();
 
-            jsonString = new String(buffer, "UTF-8");
+            jsonString = new String(buffer, StandardCharsets.UTF_8);
         }
         catch (IOException e) {
             return null;
@@ -294,7 +295,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
         TokenSortedItem updateItem = new TokenSortedItem(
                 DISPLAY_TOKEN, tcm, tcm.nameWeight
-        );;
+        );
 
         items.beginBatchedUpdates();
         if (items.get(position).viewType == DISPLAY_TOKEN)

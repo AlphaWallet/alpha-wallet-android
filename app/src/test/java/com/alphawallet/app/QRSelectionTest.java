@@ -204,7 +204,7 @@ public class QRSelectionTest
                     long currentTime = System.currentTimeMillis();
                     long minsT = currentTime / (30 * 1000);
                     int minsTime = (int) minsT;
-                    String plainMessage = selectionStr + "," + String.valueOf(minsTime) + "," + contract.toLowerCase();  //This is the plain text message that gets signed
+                    String plainMessage = selectionStr + "," + minsTime + "," + contract.toLowerCase();  //This is the plain text message that gets signed
                     return new MessagePair(selectionStr, plainMessage);
                 });
             }

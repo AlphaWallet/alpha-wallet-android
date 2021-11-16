@@ -393,7 +393,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     static class CustomNetworks {
         private ArrayList<NetworkInfo> list = new ArrayList<>();
         private Map<Long, Boolean> mapToTestNet = new HashMap<>();
-        transient private PreferenceRepositoryType preferences;
+        final transient private PreferenceRepositoryType preferences;
 
         public CustomNetworks(PreferenceRepositoryType preferences) {
             this.preferences = preferences;
@@ -579,7 +579,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public void setFilterNetworkList(Long[] networkList)
     {
         String store = Utils.longArrayToString(networkList);
-        preferences.setNetworkFilterList(store.toString());
+        preferences.setNetworkFilterList(store);
     }
 
     @Override

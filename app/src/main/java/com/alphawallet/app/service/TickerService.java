@@ -511,14 +511,14 @@ public class TickerService
     private static Function read() {
         return new Function(
                 "read",
-                Arrays.<Type>asList(),
+                Arrays.asList(),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 
     private static Function getTickers() {
         return new Function(
                 "getTickers",
-                Arrays.<Type>asList(),
+                Arrays.asList(),
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 

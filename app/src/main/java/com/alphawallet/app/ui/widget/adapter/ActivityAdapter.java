@@ -346,7 +346,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         }
     }
 
-    private Runnable resetAdapter = () -> {
+    private final Runnable resetAdapter = () -> {
         pendingReset = false;
         notifyDataSetChanged();
     };

@@ -64,7 +64,7 @@ public class GasWidget extends LinearLayout implements Runnable
     private final TextView speedText;
     private final TextView timeEstimate;
     private final LinearLayout gasWarning;
-    private LinearLayout speedWarning;
+    private final LinearLayout speedWarning;
     private final Context context;
 
     private final List<GasSpeed> gasSpeeds;

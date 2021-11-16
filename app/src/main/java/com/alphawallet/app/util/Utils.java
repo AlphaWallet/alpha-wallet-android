@@ -47,6 +47,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -296,7 +297,7 @@ public class Utils {
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
-            json = new String(buffer, "UTF-8");
+            json = new String(buffer, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -444,7 +445,7 @@ public class Utils {
         {
             if (!keepZeros && id == 0) continue;
             if (!first)sb.append(",");
-            sb.append(String.valueOf(id));
+            sb.append(id);
             first = false;
         }
 

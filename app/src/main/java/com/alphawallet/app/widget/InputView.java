@@ -27,7 +27,7 @@ import com.alphawallet.app.R;
 import static android.content.Context.CLIPBOARD_SERVICE;
 
 public class InputView extends LinearLayout {
-    private Context context;
+    private final Context context;
 
     private final TextView labelText;
     private final TextView errorText;

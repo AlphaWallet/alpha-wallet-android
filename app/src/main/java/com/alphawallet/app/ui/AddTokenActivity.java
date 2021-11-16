@@ -521,7 +521,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
+                                                "Code: " + resultCode
                     ));
                     break;
             }

@@ -636,7 +636,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             quantity = selection.size();
         }
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
-        String qty = String.valueOf(quantity) + " " +
+        String qty = quantity + " " +
                 getResources().getString(ticketName) + "\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
@@ -660,7 +660,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         String toAddress = (ensName == null) ? to : ensName;
 
-        String qty = String.valueOf(quantity) + " " +
+        String qty = quantity + " " +
                 getResources().getString(ticketName) + "\n" +
                 getResources().getString(R.string.to) + " " +
                 toAddress;

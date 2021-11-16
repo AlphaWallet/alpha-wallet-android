@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 public interface AmountReadyCallback
 {
     void amountReady(BigDecimal value, BigDecimal gasFee);
-    default void updateCryptoAmount(BigDecimal value) { };
+    default void updateCryptoAmount(BigDecimal value) { }
 }

@@ -69,7 +69,6 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
-import org.xml.sax.SAXException;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -139,7 +138,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final TokensService tokensService;
     private final TokenLocalSource tokenLocalSource;
     private final AlphaWalletService alphaWalletService;
-    private final TransactionRepositoryType transactionRespository;
+    private final TransactionRepositoryType transactionRepository;
     private TokenDefinition cachedDefinition = null;
     private final ConcurrentHashMap<String, EventDefinition> eventList = new ConcurrentHashMap<>(); //List of events built during file load
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
@@ -170,7 +169,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions
         tokenLocalSource = trs;
-        transactionRespository = trt;
+        transactionRepository = trt;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
         //deleteAllEventData();
@@ -563,7 +562,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return txUpdateTime;
-    };
+    }
 
     @Override
     public Attribute fetchAttribute(ContractInfo origin, String attributeName)
@@ -893,7 +892,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
-    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
+    private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
     {
         Locale locale;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -1328,12 +1327,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 storeActivityValue(walletAddress, ev, ethLog, blockTime, ev.activityName);
 
                 //do we need to fetch transaction from chain or do we have it already?
-                com.alphawallet.app.entity.Transaction tx = transactionRespository.fetchCachedTransaction(walletAddress, txHash);
+                com.alphawallet.app.entity.Transaction tx = transactionRepository.fetchCachedTransaction(walletAddress, txHash);
 
                 if (tx == null)
                 {
                     EventUtils.getTransactionDetails(txHash, web3j)
-                            .flatMap(ethTx -> transactionRespository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
+                            .flatMap(ethTx -> transactionRepository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(System.out::println, this::onError)

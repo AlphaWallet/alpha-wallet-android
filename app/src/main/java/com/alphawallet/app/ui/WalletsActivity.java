@@ -141,7 +141,7 @@ public class WalletsActivity extends BaseActivity implements
         if (handler != null) handler.post(displayWalletError);
     }
 
-    private Runnable displayWalletError = new Runnable()
+    private final Runnable displayWalletError = new Runnable()
     {
         @Override
         public void run()

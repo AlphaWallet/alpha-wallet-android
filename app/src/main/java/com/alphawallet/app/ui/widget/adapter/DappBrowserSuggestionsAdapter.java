@@ -148,7 +148,7 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             return false;

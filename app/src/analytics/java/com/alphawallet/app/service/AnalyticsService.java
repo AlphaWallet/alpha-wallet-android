@@ -20,8 +20,8 @@ import java.util.Objects;
 
 public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
-    private MixpanelAPI mixpanelAPI;
-    private FirebaseAnalytics firebaseAnalytics;
+    private final MixpanelAPI mixpanelAPI;
+    private final FirebaseAnalytics firebaseAnalytics;
 
     public static native String getAnalyticsKey();
 

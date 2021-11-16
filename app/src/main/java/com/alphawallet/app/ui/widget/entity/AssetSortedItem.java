@@ -47,10 +47,10 @@ public class AssetSortedItem extends SortedItem<TicketRange>
     }
 
     @Override
-    public void setIsChecked(boolean b) { value.isChecked = b; };
+    public void setIsChecked(boolean b) { value.isChecked = b; }
 
     @Override
-    public void setExposeRadio(boolean expose) { value.exposeRadio = expose; };
+    public void setExposeRadio(boolean expose) { value.exposeRadio = expose; }
 
     @Override
     public List<BigInteger> getTokenIds()

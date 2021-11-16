@@ -26,7 +26,7 @@ public abstract class Contract
     public boolean balanceIsLive = false;
     private String tokenWallet;
     private short tokenNetwork;
-    private boolean requiresAuxRefresh = true;
+    private final boolean requiresAuxRefresh = true;
     protected ContractType contractType;
     public long lastBlockCheck = 0;
 }

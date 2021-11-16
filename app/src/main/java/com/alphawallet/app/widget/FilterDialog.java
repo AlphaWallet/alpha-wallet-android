@@ -13,11 +13,11 @@ import android.widget.Spinner;
 import com.alphawallet.app.R;
 
 public class FilterDialog extends Dialog {
-    private Spinner spinnerDate;
-    private Spinner spinnerPrice;
-    private Spinner spinnerTimeframe;
-    private Spinner spinnerDistance;
-    private Button btnApply;
+    private final Spinner spinnerDate;
+    private final Spinner spinnerPrice;
+    private final Spinner spinnerTimeframe;
+    private final Spinner spinnerDistance;
+    private final Button btnApply;
 
     public FilterDialog(Activity activity) {
         super(activity);

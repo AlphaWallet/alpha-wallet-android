@@ -33,7 +33,7 @@ public abstract class TokenManageType {
     @ManageType
     public int getTokenManageType(){
         return mType;
-    };
+    }
 
     public void setTokenManageType(@ManageType int type){
         mType = type;

@@ -68,7 +68,7 @@ public class SelectCurrencyActivity extends BaseActivity {
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
-        private ArrayList<CurrencyItem> dataSet;
+        private final ArrayList<CurrencyItem> dataSet;
         private String selectedItemId;
 
         private void setSelectedItemId(String selectedItemId) {

@@ -3,8 +3,7 @@ package com.alphawallet.app.ui.widget.holder;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 
@@ -26,6 +26,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
+import com.alphawallet.token.tools.Convert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,6 +35,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
+    private static final long TICKER_PERIOD_VALIDITY = 20 * DateUtils.MINUTE_IN_MILLIS; //Tickers invalid after 20 minutes
 
     private final TokenIcon tokenIcon;
     private final TextView balanceEth;
@@ -52,8 +54,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final RelativeLayout tokenLayout;
     private final ChainName testnet;
     private boolean primaryElement;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -84,6 +84,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
     {
+        if (data == null) { fillEmpty(); return; }
         try
         {
             token = tokensService.getToken(data.getChain(), data.getAddress());
@@ -147,6 +148,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void populateTicker()
     {
+        findViewById(R.id.ticker_update).setVisibility(View.GONE);
         TokenTicker ticker = tokensService.getTokenTicker(token);
         if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
@@ -204,21 +206,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceCurrency.setText(EMPTY_BALANCE);
     }
 
-    private final Runnable clearElevation = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            tokenLayout.setElevation(0.0f);
-        }
-    };
-
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            tokenLayout.setElevation(-10.0f);
             onTokenClickListener.onTokenClick(v, token, null, true);
-            handler.postDelayed(clearElevation, 800);
         }
     }
 
@@ -236,10 +227,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         this.onTokenClickListener = onTokenClickListener;
     }
 
-    public void setOnLongClickListener(OnTokenClickListener onTokenClickListener) {
-        this.onTokenClickListener = onTokenClickListener;
-    }
-
     private void setIssuerDetails()
     {
         if (token.isEthereum())     // If token is eth and we get here, it's a testnet chain, show testnet
@@ -252,7 +239,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         else
         {
             String issuerName = assetDefinition.getIssuerName(token);
-            if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
+            if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's AlphaWallet
             {
                 issuer.setVisibility(View.VISIBLE);
                 issuerPlaceholder.setVisibility(View.VISIBLE);
@@ -291,8 +278,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private void setTickerInfo(TokenTicker ticker)
     {
         //Set the fiat equivalent (leftmost value)
-        BigDecimal correctedBalance = token.getCorrectedBalance(18);
-        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
+        BigDecimal correctedBalance = token.getCorrectedBalance(Convert.Unit.ETHER.getFactor());
+        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(Convert.Unit.ETHER.getFactor(), RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
 
         String lbl = getString(R.string.token_balance, "", converted);
@@ -318,9 +305,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         } catch (Exception ex)
         { /* Quietly */ }
 
+        if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
+        {
+            extendedInfo.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhite));
+            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhite));
+            findViewById(R.id.ticker_update).setVisibility(View.VISIBLE);
+        }
+
         //This sets the crypto price value (middle amount)
         String formattedValue = TickerService.getCurrencyString(new BigDecimal(ticker.price).doubleValue());
-        //TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
 
         lbl = getString(R.string.token_balance, "", formattedValue);
         //lbl += " " + ticker.priceSymbol;

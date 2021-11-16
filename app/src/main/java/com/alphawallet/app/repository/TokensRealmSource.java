@@ -1237,7 +1237,8 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmItem.getCurrencySymbol().equals(ticker.priceSymbol) && realmItem.getPrice().equals(ticker.price)
                 && realmItem.getPercentChange24h().equals(ticker.percentChange24h))
             {
-                //no update
+                //no update, but update the received time
+                realmItem.setUpdatedTime(ticker.updateTime);
                 return false;
             }
         }

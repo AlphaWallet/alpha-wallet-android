@@ -6,6 +6,7 @@ import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.C.SHOW_BACKUP;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.WalletPage.SETTINGS;
@@ -142,7 +143,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void onMoveToForeground()
     {
         Log.d("LIFE", "AlphaWallet into foreground");
-        ((WalletFragment) walletFragment).walletInFocus();
         if (viewModel != null) viewModel.startTransactionUpdate();
         isForeground = true;
     }
@@ -299,7 +299,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> showAndRefreshWallet());
+                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> {
+                    viewModel.restartTokensService();
+                    resetTokens();
+                    showPage(WALLET);
+                });
 
         getSupportFragmentManager()
                 .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
@@ -318,6 +322,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ((ActivityFragment) activityFragment).addedToken(contractList);
                     }
                 });
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(SHOW_BACKUP, this, (requestKey, b) -> showBackupWalletDialog(b.getBoolean(SHOW_BACKUP, false)));
 
         // Get the intent that started this activity
         Intent intent = getIntent();
@@ -383,7 +390,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         });
     }
 
-    public void showBackupWalletDialog(boolean walletImported)
+    private void showBackupWalletDialog(boolean walletImported)
     {
         if (!viewModel.isFindWalletAddressDialogShown())
         {
@@ -1186,12 +1193,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             super.onBackPressed();
         }
-    }
-
-    public void showAndRefreshWallet()
-    {
-        showPage(WALLET);
-        //resetTokens();
     }
 
     public void useActionSheet(String mode)

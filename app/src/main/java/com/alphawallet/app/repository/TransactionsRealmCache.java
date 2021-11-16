@@ -3,6 +3,8 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
+import static java.lang.Thread.sleep;
+
 import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
@@ -12,7 +14,10 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmNFTAsset;
+import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.RealmManager;
 
@@ -21,6 +26,7 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Phaser;
 
 import io.reactivex.Single;
 import io.realm.Case;
@@ -351,12 +357,18 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //delete all token and AUX data for this wallet
             try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
             {
-                instance.executeTransaction(r -> r.deleteAll());
-                instance.refresh();
+                instance.executeTransaction(r -> {
+                    //delete all the data
+                    r.where(RealmToken.class).findAll().deleteAllFromRealm();
+                    r.where(RealmTransaction.class).findAll().deleteAllFromRealm();
+                    r.where(RealmAuxData.class).findAll().deleteAllFromRealm();
+                    r.where(RealmNFTAsset.class).findAll().deleteAllFromRealm();
+                    r.where(RealmTransfer.class).findAll().deleteAllFromRealm();
+                });
             }
             catch (Exception e)
             {
-                return false;
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             try (Realm walletRealm = realmManager.getWalletDataRealmInstance())
@@ -374,6 +386,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                         walletData.setENSAvatar("");
                     }
                 });
+
+                walletRealm.refresh();
             }
 
             return true;

@@ -119,8 +119,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultWallet(final Wallet wallet) {
         defaultWallet.setValue(wallet);
-        //get the chain balance
-        startBalanceUpdate();
     }
 
     private void checkBalance(final Wallet wallet)

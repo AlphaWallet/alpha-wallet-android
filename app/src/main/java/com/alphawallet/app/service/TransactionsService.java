@@ -119,12 +119,12 @@ public class TransactionsService
     {
         chainTransferCheckTimes.clear();
         chainTransactionCheckTimes.clear();
+        tokensService.startUpdateCycle();
 
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
             fetchTransactions();
         }
-        tokensService.appInFocus();
     }
 
     /**
@@ -348,7 +348,7 @@ public class TransactionsService
 
     public void lostFocus()
     {
-        tokensService.appOutOfFocus();
+        tokensService.stopUpdateCycle();
         stopAllChainUpdate();
     }
 

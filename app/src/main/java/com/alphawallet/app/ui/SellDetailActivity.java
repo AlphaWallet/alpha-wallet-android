@@ -482,8 +482,8 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
 
-        String qty = String.valueOf(quantity) + " " + unit + "\n" +
-                String.valueOf(getEthString(sellPriceValue)) + " " + getString(R.string.eth_per_ticket, currencySymbol) + "\n" +
+        String qty = quantity + " " + unit + "\n" +
+                getEthString(sellPriceValue) + " " + getString(R.string.eth_per_ticket, currencySymbol) + "\n" +
                 getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 

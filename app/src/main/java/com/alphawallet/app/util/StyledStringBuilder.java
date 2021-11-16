@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class StyledStringBuilder extends SpannableStringBuilder
 {
-    private List<SpanType> spanners = new ArrayList<>();
+    private final List<SpanType> spanners = new ArrayList<>();
     private int startIndex;
     private int startGroup = -1;
 

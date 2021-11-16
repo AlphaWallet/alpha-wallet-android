@@ -26,8 +26,8 @@ public class QuantitySelectorHolder extends BinderViewHolder<Token> {
     private final TextView quantity;
     private final TextView title;
     private int currentQuantity;
-    private int quantityLimit;
-    private AssetDefinitionService assetService;
+    private final int quantityLimit;
+    private final AssetDefinitionService assetService;
 
     public int getCurrentQuantity()
     {

@@ -7,7 +7,7 @@ public class TokenLocator extends ContractInfo
 {
     private final TokenScriptFile tokenScriptFile;
     private final String name;
-    private boolean error;
+    private final boolean error;
     private final String errorMessage;
 
     public TokenLocator(String name, ContractInfo origins, TokenScriptFile file) {

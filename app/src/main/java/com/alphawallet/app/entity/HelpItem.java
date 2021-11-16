@@ -4,9 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class HelpItem implements Parcelable {
-    private String question;
-    private String answer;
-    private int resource;
+    private final String question;
+    private final String answer;
+    private final int resource;
 
     private String eventName;
 

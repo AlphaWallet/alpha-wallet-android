@@ -22,7 +22,7 @@ public class NotificationView extends LinearLayout {
     private int textColorRes;
 
     public static class Builder {
-        private Context context;
+        private final Context context;
         private int backgroundColorRes = -1;
         private int textColorRes = -1;
         private int titleRes = -1;

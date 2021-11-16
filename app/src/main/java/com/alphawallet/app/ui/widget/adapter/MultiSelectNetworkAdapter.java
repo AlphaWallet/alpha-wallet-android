@@ -25,7 +25,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         void onEditNetwork(long chainId, View parent);
     }
 
-    private EditNetworkListener editListener;
+    private final EditNetworkListener editListener;
 
 
     public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener)

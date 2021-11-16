@@ -10,9 +10,9 @@ import java.util.List;
 import com.alphawallet.app.entity.DApp;
 
 public class SuggestionsFilter extends Filter {
-    private DappBrowserSuggestionsAdapter adapter;
-    private List<DApp> originalList;
-    private List<DApp> filteredList;
+    private final DappBrowserSuggestionsAdapter adapter;
+    private final List<DApp> originalList;
+    private final List<DApp> filteredList;
 
     public SuggestionsFilter(DappBrowserSuggestionsAdapter adapter, List<DApp> originalList) {
         super();

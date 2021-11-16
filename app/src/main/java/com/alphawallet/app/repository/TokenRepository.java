@@ -55,6 +55,7 @@ import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -782,7 +783,7 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     data = Arrays.copyOfRange(data, 0, index + 1);
                 }
-                name = new String(data, "UTF-8");
+                name = new String(data, StandardCharsets.UTF_8);
                 //now filter out any 'bad' chars
                 name = filterAscii(name);
             }
@@ -847,63 +848,63 @@ public class TokenRepository implements TokenRepositoryType {
 
     private static Function nameOf() {
         return new Function("name",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static Function supportsInterface(BigInteger value) {
         return new Function(
                 "supportsInterface",
-                Arrays.<Type>asList(new Bytes4(Numeric.toBytesPadded(value, 4))),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+                Arrays.asList(new Bytes4(Numeric.toBytesPadded(value, 4))),
+                Arrays.asList(new TypeReference<Bool>() {}));
     }
 
     private static Function stringParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static Function boolParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Bool>() {}));
     }
 
     private static Function stringParam(String param, BigInteger value) {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                            Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static Function intParam(String param, BigInteger value) {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+                            Arrays.asList(new TypeReference<Uint256>() {}));
     }
 
     private static Function intParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Uint>() {}));
     }
 
     private static Function symbolOf() {
         return new Function("symbol",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static Function decimalsOf() {
         return new Function("decimals",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Uint8>() {}));
     }
 
     private static Function addrParam(String param) {
         return new Function(param,
-                            Arrays.<Type>asList(),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+                            Arrays.asList(),
+                            Arrays.asList(new TypeReference<Address>() {}));
     }
 
     private Function addressFunction(String method, byte[] resultHash)
@@ -1078,8 +1079,8 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             ContractLocator contractLocator = new ContractLocator(INVALID_CONTRACT, chainId);
             Function function = new Function(method,
-                                                                     Arrays.<Type>asList(),
-                                                                     Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                                                                     Arrays.asList(),
+                                                                     Arrays.asList(new TypeReference<Utf8String>() {}));
 
             Wallet temp = new Wallet(null);
             String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);

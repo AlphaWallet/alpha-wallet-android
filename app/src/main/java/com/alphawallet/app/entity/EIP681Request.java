@@ -12,9 +12,9 @@ import java.text.NumberFormat;
 public class EIP681Request
 {
     private final String PROTOCOL = "ethereum:";
-    private String address;
-    private BigDecimal weiAmount;
-    private long chainId;
+    private final String address;
+    private final BigDecimal weiAmount;
+    private final long chainId;
     private String contractAddress;
 
     public EIP681Request(String displayAddress, long chainId, BigDecimal weiAmount)

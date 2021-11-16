@@ -19,19 +19,19 @@ import com.alphawallet.token.entity.Signable;
 
 public class SignMessageDialog extends Dialog {
     //    private LinearLayout container;
-    private TextView message;
-    private TextView requester;
-    private TextView address;
-    private TextView value;
-    private TextView valueLabel;
-    private TextView messageLabel;
-    private TextView title;
-    private LinearLayout valueLayout;
-    private TextView valueUSD;
-    private TextView usdLabel;
-    private Button btnReject;
-    private LinearLayout layoutBtnApprove;
-    private Context context;
+    private final TextView message;
+    private final TextView requester;
+    private final TextView address;
+    private final TextView value;
+    private final TextView valueLabel;
+    private final TextView messageLabel;
+    private final TextView title;
+    private final LinearLayout valueLayout;
+    private final TextView valueUSD;
+    private final TextView usdLabel;
+    private final Button btnReject;
+    private final LinearLayout layoutBtnApprove;
+    private final Context context;
 
     public SignMessageDialog(@NonNull Context activity) {
         super(activity);

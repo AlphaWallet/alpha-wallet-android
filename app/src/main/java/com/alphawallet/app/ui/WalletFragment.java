@@ -640,7 +640,7 @@ public class WalletFragment extends BaseFragment implements
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
-        private TokensAdapter mAdapter;
+        private final TokensAdapter mAdapter;
         private Drawable icon;
         private ColorDrawable background;
 

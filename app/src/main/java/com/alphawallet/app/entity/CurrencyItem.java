@@ -7,7 +7,7 @@ public class CurrencyItem implements Parcelable
 {
     private String code;
     private String name;
-    private String symbol;
+    private final String symbol;
     private int flag = -1;
     public boolean isSelected;
 

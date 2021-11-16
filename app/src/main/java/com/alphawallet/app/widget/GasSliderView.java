@@ -40,7 +40,7 @@ public class GasSliderView extends RelativeLayout
     private float gasLimitScaleFactor;
     private boolean limitInit = false;
     private final Handler handler = new Handler();
-    private FrameLayout note;
+    private final FrameLayout note;
 
     private GasSettingsCallback gasCallback;
 

@@ -229,8 +229,8 @@ public class EnsResolver {
     private Function getResolver(byte[] nameHash)
     {
         return new Function("resolver",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -238,9 +238,9 @@ public class EnsResolver {
     private Function getAvatar(byte[] nameHash)
     {
         return new Function("text",
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
                                     new org.web3j.abi.datatypes.Utf8String("avatar")),
-                Arrays.<TypeReference<?>>asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
+                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
                 {
                 }));
     }
@@ -248,8 +248,8 @@ public class EnsResolver {
     private Function getResolverOf(BigInteger nameId)
     {
         return new Function("resolverOf",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Uint(nameId)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -257,8 +257,8 @@ public class EnsResolver {
     private Function get(BigInteger nameId)
     {
         return new Function("get",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
+                            Arrays.asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                            Arrays.asList(new TypeReference<Utf8String>()
                             {
                             }));
     }
@@ -266,8 +266,8 @@ public class EnsResolver {
     private Function getAddr(byte[] nameHash)
     {
         return new Function("addr",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -275,8 +275,8 @@ public class EnsResolver {
     private Function getName(byte[] nameHash)
     {
         return new Function("name",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Utf8String>()
                             {
                             }));
     }

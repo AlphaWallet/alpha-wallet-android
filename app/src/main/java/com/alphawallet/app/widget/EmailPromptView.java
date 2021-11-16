@@ -44,9 +44,9 @@ public class EmailPromptView extends LinearLayout implements StandardFunctionInt
     public static native String getMailchimpKey();
 
     private InputView emailInput;
-    private View successOverlay;
-    private Handler handler;
-    private Runnable onSuccessRunnable;
+    private final View successOverlay;
+    private final Handler handler;
+    private final Runnable onSuccessRunnable;
 
     public EmailPromptView(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
         super(context);

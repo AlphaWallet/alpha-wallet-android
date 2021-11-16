@@ -18,12 +18,12 @@ import com.alphawallet.app.service.TokensService;
 
 public class SellDetailModelFactory implements ViewModelProvider.Factory {
 
-    private FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private TokensService tokensService;
-    private CreateTransactionInteract createTransactionInteract;
-    private SellDetailRouter sellDetailRouter;
-    private KeyService keyService;
-    private AssetDefinitionService assetDefinitionService;
+    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
+    private final TokensService tokensService;
+    private final CreateTransactionInteract createTransactionInteract;
+    private final SellDetailRouter sellDetailRouter;
+    private final KeyService keyService;
+    private final AssetDefinitionService assetDefinitionService;
 
     public SellDetailModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   TokensService tokensService,

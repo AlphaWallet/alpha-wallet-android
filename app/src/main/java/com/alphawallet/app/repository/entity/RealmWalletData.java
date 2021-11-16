@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
  */
 public class RealmWalletData extends RealmObject
 {
-    private static int DISMISS_WARNING_IN_SETTINGS_MASK = 0xFFFFFFFE;
+    private static final int DISMISS_WARNING_IN_SETTINGS_MASK = 0xFFFFFFFE;
 
     @PrimaryKey
     private String address;

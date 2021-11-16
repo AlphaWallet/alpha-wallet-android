@@ -148,7 +148,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void populateTicker()
     {
-        findViewById(R.id.ticker_update).setVisibility(View.GONE);
+        resetTickerViews();
         TokenTicker ticker = tokensService.getTokenTicker(token);
         if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
@@ -321,5 +321,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         textAppreciation.setTextColor(getContext().getColor(R.color.text_dark_gray));
 
         tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
+    }
+
+    private void resetTickerViews()
+    {
+        extendedInfo.setForeground(null);
+        layoutAppreciation.setForeground(null);
+        findViewById(R.id.ticker_update).setVisibility(View.GONE);
     }
 }

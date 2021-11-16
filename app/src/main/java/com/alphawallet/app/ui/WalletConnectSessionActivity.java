@@ -29,6 +29,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
@@ -169,7 +170,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             final TextView peerName;
             final TextView peerUrl;
             final LinearLayout clickLayer;
-            final ChainName chainName;
+            final ImageView chainIcon;
 
             CustomViewHolder(View view)
             {
@@ -179,7 +180,9 @@ public class WalletConnectSessionActivity extends BaseActivity
                 peerName = view.findViewById(R.id.session_name);
                 peerUrl = view.findViewById(R.id.session_url);
                 clickLayer = view.findViewById(R.id.item_layout);
-                chainName = view.findViewById(R.id.chain_name);
+                chainIcon = view.findViewById(R.id.chain_icon);
+                chainIcon.setVisibility(View.VISIBLE);
+                view.findViewById(R.id.chain_icon_background).setVisibility(View.VISIBLE);
             }
         }
 
@@ -194,7 +197,7 @@ public class WalletConnectSessionActivity extends BaseActivity
                     .into(holder.icon);
             holder.peerName.setText(session.name);
             holder.peerUrl.setText(session.url);
-            holder.chainName.setChainID(session.chainId);
+            holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {
                 //go to wallet connect session page
                 Intent intent = new Intent(getApplication(), WalletConnectActivity.class);

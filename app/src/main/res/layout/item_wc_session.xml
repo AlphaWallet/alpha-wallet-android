@@ -50,13 +50,4 @@
 
     </LinearLayout>
 
-
-    <com.alphawallet.app.widget.ChainName
-        android:id="@+id/chain_name"
-        android:layout_gravity="center_vertical|end"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        custom:font_size="12" />
-
 </LinearLayout>

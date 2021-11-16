@@ -49,6 +49,8 @@ public class TokenIcon extends ConstraintLayout
     private final ImageView statusIcon;
     private final ProgressBar pendingProgress;
     private final ImageView statusBackground;
+    private final ImageView chainIcon;
+    private final ImageView chainIconBackground;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -72,6 +74,8 @@ public class TokenIcon extends ConstraintLayout
         statusBackground = findViewById(R.id.status_icon_background);
         statusIcon.setVisibility(isInEditMode() ? View.VISIBLE : View.GONE);
         currentStatus = StatusType.NONE;
+        chainIcon = findViewById(R.id.chain_icon);
+        chainIconBackground = findViewById(R.id.chain_icon_background);
 
         bindViews();
 
@@ -136,8 +140,17 @@ public class TokenIcon extends ConstraintLayout
         this.token = token;
 
         statusBackground.setVisibility(View.GONE);
+        chainIconBackground.setVisibility(View.GONE);
+        chainIcon.setVisibility(View.GONE);
 
         displayTokenIcon(iconItem);
+    }
+
+    public void setChainIcon(long chainId)
+    {
+        chainIconBackground.setVisibility(View.VISIBLE);
+        chainIcon.setVisibility(View.VISIBLE);
+        chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
     }
 
     private void setupDefaultIcon(boolean loadFailed)

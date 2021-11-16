@@ -1,16 +1,12 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.app.Activity;
-import android.graphics.Color;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -24,8 +20,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -35,11 +29,6 @@ import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
-import io.realm.Realm;
-import io.realm.RealmResults;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -121,6 +110,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             primaryElement = false;
 
             tokenIcon.bindData(token, assetDefinition);
+            //if (!token.isEthereum()) tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
             tokenIcon.setOnTokenClickListener(onTokenClickListener);
 
 

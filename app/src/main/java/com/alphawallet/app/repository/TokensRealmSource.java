@@ -496,6 +496,16 @@ public class TokensRealmSource implements TokenLocalSource {
                 final String currentBalance = realmToken.getBalance();
                 final String newBalance = (balanceArray == null) ? balance.toString() : Utils.bigIntListToString(balanceArray, true);
 
+                //does the token need updating?
+                if (token.checkInfoRequiresUpdate(realmToken))
+                {
+                    realm.executeTransaction(r -> {
+                        realmToken.setName(token.tokenInfo.name);
+                        realmToken.setSymbol(token.tokenInfo.symbol);
+                        realmToken.setDecimals(token.tokenInfo.decimals);
+                    });
+                }
+
                 if ((token.isERC721()) && balance.equals(BigDecimal.ZERO) && !currentBalance.equals("0"))
                 {
                     //only used for determining if balance is now zero
@@ -1237,7 +1247,8 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmItem.getCurrencySymbol().equals(ticker.priceSymbol) && realmItem.getPrice().equals(ticker.price)
                 && realmItem.getPercentChange24h().equals(ticker.percentChange24h))
             {
-                //no update
+                //no update, but update the received time
+                realmItem.setUpdatedTime(ticker.updateTime);
                 return false;
             }
         }

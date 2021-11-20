@@ -30,6 +30,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
 
+import org.bson.json.JsonParseException;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -682,56 +683,71 @@ public class TokenRepository implements TokenRepositoryType {
 
     private <T> T getContractData(NetworkInfo network, String address, Function function, T type) throws Exception
     {
-        Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, network, temp);
-
-        if (TextUtils.isEmpty(responseValue))
+        String responseValue;
+        try
         {
-            throw new Exception("Bad contract value");
-        }
-        else if (responseValue.equals("0x"))
-        {
-            if (type instanceof Boolean)
+            Wallet temp = new Wallet(null);
+            if (function.getName().equalsIgnoreCase("symbol") && address.equalsIgnoreCase("0x60cd862c9c687a9de49aecdc3a99b74a4fc54ab6"))
             {
-                return (T)Boolean.FALSE;
+                System.out.println("YOLESS");
             }
-            else
+            responseValue = callSmartContractFunction(function, address, network, temp);
+
+            if (TextUtils.isEmpty(responseValue))
             {
-                return null;
+                throw new Exception("Bad contract value");
             }
-        }
-
-        //Check for raw bytes return value; need to do this before we try to parse the function return
-        //as raw bytes returns now cause a throw from the encoder
-        String rawBytesValue = checkRawBytesValue(responseValue, type);
-        if (rawBytesValue != null) return (T)rawBytesValue;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1)
-        {
-            if (type instanceof String)
+            else if (responseValue.equals("0x"))
             {
-                String value = (String)response.get(0).getValue();
-                if (value.length() == 0 && responseValue.length() > 2)
+                if (type instanceof Boolean)
                 {
-                    value = checkBytesString(responseValue);
-                    if (!Utils.isAlNum(value)) value = "";
-                    return (T)value;
+                    return (T) Boolean.FALSE;
+                }
+                else
+                {
+                    return null;
                 }
             }
-            return (T) response.get(0).getValue();
-        }
-        else
-        {
-            if (type instanceof Boolean)
+
+
+            //Check for raw bytes return value; need to do this before we try to parse the function return
+            //as raw bytes returns now cause a throw from the encoder
+            String rawBytesValue = checkRawBytesValue(responseValue, type);
+            if (rawBytesValue != null) return (T) rawBytesValue;
+
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1)
             {
-                return (T)Boolean.FALSE;
+                if (type instanceof String)
+                {
+                    String value = (String) response.get(0).getValue();
+                    if (value.length() == 0 && responseValue.length() > 2)
+                    {
+                        value = checkBytesString(responseValue);
+                        if (!Utils.isAlNum(value)) value = "";
+                        return (T) value;
+                    }
+                }
+                return (T) response.get(0).getValue();
             }
             else
             {
-                return null;
+                if (type instanceof Boolean)
+                {
+                    return (T) Boolean.FALSE;
+                }
+                else
+                {
+                    return null;
+                }
             }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            responseValue = "0x";
+            return null;
         }
     }
 
@@ -813,14 +829,26 @@ public class TokenRepository implements TokenRepositoryType {
         if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
         Function function = decimalsOf();
         Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, network, temp);
-        if (TextUtils.isEmpty(responseValue)) return 18;
+        String responseValue;
+        try
+        {
+            responseValue = callSmartContractFunction(function, address, network, temp);
+            if (TextUtils.isEmpty(responseValue)) return 18;
 
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return ((Uint8) response.get(0)).getValue().intValue();
-        } else {
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1)
+            {
+                return ((Uint8) response.get(0)).getValue().intValue();
+            }
+            else
+            {
+                return 18;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
             return 18;
         }
     }
@@ -973,7 +1001,7 @@ public class TokenRepository implements TokenRepositoryType {
 
             return response.getValue();
         }
-        catch (InterruptedIOException|UnknownHostException e)
+        catch (InterruptedIOException|UnknownHostException|JsonParseException e)
         {
             //expected to happen when user switches wallets
             return "0x";

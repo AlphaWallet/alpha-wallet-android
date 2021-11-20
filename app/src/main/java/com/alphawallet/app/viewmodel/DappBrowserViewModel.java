@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Pair;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -62,7 +61,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private final MutableLiveData<NetworkInfo> activeNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<Pair<Long, String>> switchNetworkAndLoadUrl = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -101,10 +99,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
-    }
-
-    public LiveData<Pair<Long, String>> switchNetworkAndLoadUrl() {
-        return switchNetworkAndLoadUrl;
     }
 
     public void findWallet() {

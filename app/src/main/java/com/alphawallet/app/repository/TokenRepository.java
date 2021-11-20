@@ -146,7 +146,8 @@ public class TokenRepository implements TokenRepositoryType {
                 Token t = tokens[i];
                 if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20 || !t.checkBalanceType()) //balance type appears to be wrong
                 {
-                    ContractType type = determineCommonType(t.tokenInfo).blockingGet();
+                    ContractType type = determineCommonType(t.tokenInfo)
+                            .onErrorReturnItem(t.getInterfaceSpec()).blockingGet();
                     TokenInfo tInfo = t.tokenInfo;
                     //upgrade type:
                     switch (type)
@@ -614,32 +615,6 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    private List<BigInteger> getBalanceArray875(Wallet wallet, TokenInfo tokenInfo) {
-        List<BigInteger> result = new ArrayList<>();
-        result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
-        try
-        {
-            Function function = balanceOfArray(wallet.address);
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-            List<Type> indices = callSmartContractFunctionArray(function, tokenInfo.address, network, wallet);
-            if (indices != null)
-            {
-                result.clear();
-                for (Type val : indices)
-                {
-                    result.add((BigInteger)val.getValue());
-                }
-            }
-        }
-        catch (StringIndexOutOfBoundsException e)
-        {
-            //contract call error
-            result.clear();
-            result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
-        }
-        return result;
-    }
-
     private List<BigInteger> getBalanceArray721Ticket(Wallet wallet, long chainId, String tokenAddress) {
         List<BigInteger> result = new ArrayList<>();
         result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
@@ -683,71 +658,55 @@ public class TokenRepository implements TokenRepositoryType {
 
     private <T> T getContractData(NetworkInfo network, String address, Function function, T type) throws Exception
     {
-        String responseValue;
-        try
+        String responseValue = callSmartContractFunction(function, address, network, new Wallet(ZERO_ADDRESS));
+
+        if (TextUtils.isEmpty(responseValue))
         {
-            Wallet temp = new Wallet(null);
-            if (function.getName().equalsIgnoreCase("symbol") && address.equalsIgnoreCase("0x60cd862c9c687a9de49aecdc3a99b74a4fc54ab6"))
+            throw new Exception("Bad contract value");
+        }
+        else if (responseValue.equals("0x"))
+        {
+            if (type instanceof Boolean)
             {
-                System.out.println("YOLESS");
-            }
-            responseValue = callSmartContractFunction(function, address, network, temp);
-
-            if (TextUtils.isEmpty(responseValue))
-            {
-                throw new Exception("Bad contract value");
-            }
-            else if (responseValue.equals("0x"))
-            {
-                if (type instanceof Boolean)
-                {
-                    return (T) Boolean.FALSE;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-
-            //Check for raw bytes return value; need to do this before we try to parse the function return
-            //as raw bytes returns now cause a throw from the encoder
-            String rawBytesValue = checkRawBytesValue(responseValue, type);
-            if (rawBytesValue != null) return (T) rawBytesValue;
-
-            List<Type> response = FunctionReturnDecoder.decode(
-                    responseValue, function.getOutputParameters());
-            if (response.size() == 1)
-            {
-                if (type instanceof String)
-                {
-                    String value = (String) response.get(0).getValue();
-                    if (value.length() == 0 && responseValue.length() > 2)
-                    {
-                        value = checkBytesString(responseValue);
-                        if (!Utils.isAlNum(value)) value = "";
-                        return (T) value;
-                    }
-                }
-                return (T) response.get(0).getValue();
+                return (T) Boolean.FALSE;
             }
             else
             {
-                if (type instanceof Boolean)
-                {
-                    return (T) Boolean.FALSE;
-                }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
         }
-        catch (Exception e)
+
+        //Check for raw bytes return value; need to do this before we try to parse the function return
+        //as raw bytes returns now cause a throw from the encoder
+        String rawBytesValue = checkRawBytesValue(responseValue, type);
+        if (rawBytesValue != null) return (T) rawBytesValue;
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1)
         {
-            e.printStackTrace();
-            responseValue = "0x";
-            return null;
+            if (type instanceof String)
+            {
+                String value = (String) response.get(0).getValue();
+                if (value.length() == 0 && responseValue.length() > 2)
+                {
+                    value = checkBytesString(responseValue);
+                    if (!Utils.isAlNum(value)) value = "";
+                    return (T) value;
+                }
+            }
+            return (T) response.get(0).getValue();
+        }
+        else
+        {
+            if (type instanceof Boolean)
+            {
+                return (T) Boolean.FALSE;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -1127,7 +1086,7 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address, long chainId) //pass exception up the chain
+    private Single<TokenInfo> setupTokensFromLocal(String address, long chainId)
     {
         return Single.fromCallable(() -> {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
@@ -1137,7 +1096,7 @@ public class TokenRepository implements TokenRepositoryType {
                     getContractData(network, address, symbolOf(), ""),
                     getDecimals(address, network),
                     false, chainId);
-        });
+        }).onErrorReturnItem(new TokenInfo());
     }
 
     private Single<Token[]> checkTokenData(Token[] tokens)
@@ -1145,7 +1104,8 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             for (int i = 0; i < tokens.length; i++)
             {
-                tokens[i] = updateTokenNameIfRequired(tokens[i]).blockingGet();
+                tokens[i] = updateTokenNameIfRequired(tokens[i])
+                        .onErrorReturnItem(tokens[i]).blockingGet();
             }
 
             return tokens;
@@ -1157,9 +1117,12 @@ public class TokenRepository implements TokenRepositoryType {
         if (t.mayRequireRefresh())
         {
             return setupTokensFromLocal(t.getAddress(), t.tokenInfo.chainId)
-                    .map(updatedInfo -> new Token(updatedInfo, BigDecimal.ZERO, 0,
-                            ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId).getShortName(),
-                            t.getInterfaceSpec()));
+                    .map(updatedInfo -> {
+                        if (updatedInfo.chainId == 0) { return t; }
+                        else return new Token(updatedInfo, BigDecimal.ZERO, 0,
+                                ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId).getShortName(),
+                                t.getInterfaceSpec());
+                    });
         }
         else
         {

@@ -956,4 +956,11 @@ public class Token
                     .build();
         }
     }
+
+    public boolean checkInfoRequiresUpdate(RealmToken realmToken)
+    {
+        if (TextUtils.isEmpty(realmToken.getName()) || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(realmToken.getName()))) { return true; }
+        if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
+        return realmToken.getDecimals() != tokenInfo.decimals;
+    }
 }

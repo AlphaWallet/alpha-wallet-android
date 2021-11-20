@@ -787,27 +787,14 @@ public class TokenRepository implements TokenRepositoryType {
     private int getDecimals(String address, NetworkInfo network) throws Exception {
         if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
         Function function = decimalsOf();
-        Wallet temp = new Wallet(null);
-        String responseValue;
-        try
-        {
-            responseValue = callSmartContractFunction(function, address, network, temp);
-            if (TextUtils.isEmpty(responseValue)) return 18;
+        String responseValue = callSmartContractFunction(function, address, network, new Wallet(ZERO_ADDRESS));
+        if (TextUtils.isEmpty(responseValue)) return 18;
 
-            List<Type> response = FunctionReturnDecoder.decode(
-                    responseValue, function.getOutputParameters());
-            if (response.size() == 1)
-            {
-                return ((Uint8) response.get(0)).getValue().intValue();
-            }
-            else
-            {
-                return 18;
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return ((Uint8) response.get(0)).getValue().intValue();
+        } else {
             return 18;
         }
     }

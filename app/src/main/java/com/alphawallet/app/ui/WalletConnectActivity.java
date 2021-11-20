@@ -512,9 +512,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         client.setOnFailure(throwable -> {
             Log.d(TAG, "On Fail: " + throwable.getMessage());
-            runOnUiThread(() -> {
-                showErrorDialog("Error: " + throwable.getMessage());
-            });
+            showErrorDialog("Error: " + throwable.getMessage());
             return Unit.INSTANCE;
         });
     }
@@ -921,35 +919,45 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialog(String message)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
-        AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
-                .setMessage(message)
-                .setPositiveButton(R.string.try_again, (d, w) -> {
-                    onDefaultWallet(viewModel.getWallet());
-                })
-                .setNeutralButton(R.string.action_cancel, (d, w) -> {
-                    d.dismiss();
-                })
-                .setNegativeButton(R.string.action_close, (d, w) -> {
-                    d.dismiss();
-                    killSession();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
+                AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.try_again, (d, w) -> {
+                            onDefaultWallet(viewModel.getWallet());
+                        })
+                        .setNeutralButton(R.string.action_cancel, (d, w) -> {
+                            d.dismiss();
+                        })
+                        .setNegativeButton(R.string.action_close, (d, w) -> {
+                            d.dismiss();
+                            killSession();
+                        })
+                        .setCancelable(false)
+                        .create();
+                dialog.show();
+            });
+        }
     }
 
     private void showErrorDialogCancel(String title, String message)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
-        AlertDialog dialog = builder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(R.string.action_cancel, (d, w) -> {
-                    d.dismiss();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
+                AlertDialog dialog = builder.setTitle(title)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.action_cancel, (d, w) -> {
+                            d.dismiss();
+                        })
+                        .setCancelable(false)
+                        .create();
+                dialog.show();
+            });
+        }
     }
 
     @Override

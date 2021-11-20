@@ -74,7 +74,6 @@ import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
-import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.walletconnect.WCSession;
@@ -83,7 +82,6 @@ import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
-import com.bumptech.glide.Glide;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
@@ -248,7 +246,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         int lastId = viewModel.getLastFragmentId();
 
-        if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
+        /*if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
         {
             showPage(SETTINGS);
         }
@@ -256,7 +254,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             showPage(WalletPage.values()[lastId]);
             viewModel.storeCurrentFragmentId(-1);
-        }
+        }*/
 
         if (CustomViewSettings.hideDappBrowser())
         {
@@ -787,25 +785,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         @Override
         public Fragment getItem(int position)
         {
-            return getFragment(WalletPage.values()[position]);
-        }
-
-        @Override
-        public int getCount()
-        {
-            return WalletPage.values().length;
-        }
-    }
-
-    private Fragment getFragment(WalletPage page)
-    {
-        if (page.ordinal() < getSupportFragmentManager().getFragments().size())
-        {
-            return getSupportFragmentManager().getFragments().get(page.ordinal());
-        }
-        else
-        {
-            switch (page)
+            switch (WalletPage.values()[position])
             {
                 case WALLET:
                     return walletFragment;
@@ -815,10 +795,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     return dappBrowserFragment;
                 case SETTINGS:
                     return settingsFragment;
+                default:
+                    return walletFragment;
             }
         }
 
-        return walletFragment;
+        @Override
+        public int getCount()
+        {
+            return WalletPage.values().length;
+        }
+    }
+
+    private BaseFragment getFragment(WalletPage page)
+    {
+        //build map, return correct fragment.
+        return (BaseFragment) getSupportFragmentManager().getFragments().get(page.ordinal());
     }
 
     @Override

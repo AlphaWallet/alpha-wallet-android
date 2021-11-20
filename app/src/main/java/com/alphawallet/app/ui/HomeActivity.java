@@ -74,6 +74,7 @@ import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
+import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.walletconnect.WCSession;
@@ -309,6 +310,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
                     resetTokens();
                     showPage(WALLET);
+
+                    List<Fragment> frags = getSupportFragmentManager().getFragments();
+                    for (Fragment frag : frags)
+                    {
+                        String tag = frag.getTag();
+                        System.out.println("YOLESS: " + tag);
+                    }
                 });
 
         getSupportFragmentManager()
@@ -1101,11 +1109,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     String url = data.getStringExtra(C.DAPP_URL_LOAD);
                     long chainId = data.getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.view_pager + ":" + DAPP_BROWSER.ordinal());
+                    if (fragment instanceof DappBrowserFragment)
+                    {
+                        DappBrowserFragment frag = (DappBrowserFragment) fragment;
+
+                    }
+
+                    /*DappBrowserFragment f = (DappBrowserFragment) getSupportFragmentManager().findFragmentByTag(DAPP_BROWSER);
+
                     DappBrowserFragment dappFrag = (DappBrowserFragment)getFragment(DAPP_BROWSER.ordinal());
+                    DappBrowserViewModel dvm = new ViewModelProvider(this).get(DappBrowserViewModel.class);
+                    dvm.
                     if (!dappFrag.isDetached())
                     {
                         ((DappBrowserFragment) dappBrowserFragment).switchNetworkAndLoadUrl(chainId, url);
-                    }
+                    }*/
                     showPage(DAPP_BROWSER);
                 }
                 else if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.EXTRA_TXHASH))

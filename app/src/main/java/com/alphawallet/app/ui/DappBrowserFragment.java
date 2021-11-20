@@ -35,6 +35,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -252,6 +253,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                     addToBackStack(DAPP_BROWSER);
                     if (dapp != null) { loadUrl(dapp.getUrl()); }
                     else if (removedDapp != null) { adapter.removeSuggestion(removedDapp); }
+                });
+
+        getChildFragmentManager()
+                .setFragmentResultListener(C.DAPP_URL_LOAD, this, (requestKey, bundle) -> {
+                    System.out.println("YOLESS");
                 });
     }
 
@@ -750,6 +756,17 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
+    /*private void registerListener()
+    {
+        .setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+        @Override
+        public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+            String result = bundle.getString("bundleKey");
+            // Do something with the result
+        }
+    });
+    }*/
+
     private void detachFragment(String tag) {
         if (!isAdded()) return; //the dappBrowserFragment itself may not yet be attached.
         Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
@@ -769,8 +786,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        viewModel.switchNetworkAndLoadUrl().observe(getViewLifecycleOwner(), this::receivedUrlRequest);
         activeNetwork = viewModel.getActiveNetwork();
         viewModel.findWallet();
+    }
+
+    private void receivedUrlRequest(@NonNull Pair<Long, String> urlRequest)
+    {
+        System.out.println("YOLESS: " + urlRequest.second);
     }
 
     private void startBalanceListener()

@@ -379,7 +379,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 functionMapComplete.release();
             }
             callStandardFunctions.showWaitSpinner(false);
@@ -604,36 +604,36 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             return false;
         }
 
-        switch (token.tokenInfo.chainId)
+        if (token.tokenInfo.chainId == MAINNET_ID)
         {
-            case MAINNET_ID:
-                switch (token.getAddress().toLowerCase())
-                {
-                    case C.DAI_TOKEN:
-                    case C.SAI_TOKEN:
-                        addFunction(R.string.convert_to_xdai);
-                        return true;
-                    default:
-                        if (token.isERC20())
-                        {
-                            addFunction(R.string.exchange_with_oneinch);
-                        }
-                        return true;
-                }
-            case BINANCE_MAIN_ID:
-            case OPTIMISTIC_MAIN_ID:
-            case ARBITRUM_MAIN_ID:
-                if (token.isERC20())
-                {
-                    addFunction(R.string.exchange_with_oneinch);
+            switch (token.getAddress().toLowerCase())
+            {
+                case C.DAI_TOKEN:
+                case C.SAI_TOKEN:
+                    addFunction(R.string.convert_to_xdai);
                     return true;
-                }
-                break;
-            case MATIC_ID:
-                {
-                    addFunction(R.string.swap_with_quickswap);
+                default:
+                    if (token.isERC20() || token.isEthereum())
+                    {
+                        addFunction(R.string.exchange_with_oneinch);
+                    }
                     return true;
-                }
+            }
+        }
+        else if (token.tokenInfo.chainId == BINANCE_MAIN_ID
+                || token.tokenInfo.chainId == OPTIMISTIC_MAIN_ID
+                || token.tokenInfo.chainId == ARBITRUM_MAIN_ID)
+        {
+            if (token.isERC20() || token.isEthereum())
+            {
+                addFunction(R.string.exchange_with_oneinch);
+                return true;
+            }
+        }
+        else if (token.tokenInfo.chainId == MATIC_ID)
+        {
+            addFunction(R.string.swap_with_quickswap);
+            return true;
         }
         return false;
     }
@@ -646,7 +646,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         //get the available map for this collection
@@ -706,11 +706,10 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void addBuyFunction()
     {
-        switch (token.tokenInfo.chainId)
+        if (token.tokenInfo.chainId == MAINNET_ID
+                || token.tokenInfo.chainId == XDAI_ID)
         {
-            case MAINNET_ID:
-            case XDAI_ID:
-                addPurchaseVerb(token, onRampRepository);
+            addPurchaseVerb(token, onRampRepository);
         }
     }
 

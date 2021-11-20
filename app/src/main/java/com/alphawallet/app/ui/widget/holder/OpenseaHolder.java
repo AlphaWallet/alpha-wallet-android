@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -56,7 +58,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private final NFTImageView tokenImageView;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean activeClick;
     private final Activity activity;
     private final boolean clickThrough;
@@ -116,7 +118,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
 
     private void handleError(Throwable e, BigInteger tokenId)
     {
-        e.printStackTrace();
+        if (BuildConfig.DEBUG) e.printStackTrace();
         NFTAsset asset = token.getAssetForToken(tokenId.toString());
         loadingSpinner.setVisibility(View.GONE);
         String assetName;

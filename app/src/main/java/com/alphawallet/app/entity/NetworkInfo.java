@@ -6,9 +6,13 @@ import androidx.annotation.Nullable;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.util.Utils;
+
 public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
     private final String BLOCKSCOUT_API = "blockscout";
-    private final String MATIC_API = "maticvigil.com/api/v2/transactions";
+    private final String MATIC_API = "polygonscan";
+    private final String PALM_API = "explorer.palm";
 
     public  String backupNodeUrl = null;
     public  String etherscanAPI = null; //This is used by the API call to fetch transactions
@@ -18,10 +22,24 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
             String symbol,
             String rpcServerUrl,
             String etherscanUrl,
-            int chainId,
+            long chainId,
+            String backupNodeUrl,
+            String etherscanAPI,
+            boolean isCustom) {
+        super(name, symbol, rpcServerUrl, etherscanUrl, chainId, isCustom);
+        this.backupNodeUrl = backupNodeUrl;
+        this.etherscanAPI = etherscanAPI;
+    }
+
+    public NetworkInfo(
+            String name,
+            String symbol,
+            String rpcServerUrl,
+            String etherscanUrl,
+            long chainId,
             String backupNodeUrl,
             String etherscanAPI) {
-        super(name, symbol, rpcServerUrl, etherscanUrl, chainId);
+        super(name, symbol, rpcServerUrl, etherscanUrl, chainId, false);
         this.backupNodeUrl = backupNodeUrl;
         this.etherscanAPI = etherscanAPI;
     }
@@ -36,7 +54,8 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
 
     public boolean usesSeparateNFTTransferQuery()
     {
-        return (etherscanAPI != null && !etherscanAPI.contains(BLOCKSCOUT_API) && !etherscanAPI.contains(MATIC_API) && !etherscanAPI.contains(COVALENT));
+        return (etherscanAPI != null && !etherscanAPI.contains(BLOCKSCOUT_API) && !etherscanAPI.contains(MATIC_API)
+                && !etherscanAPI.contains(COVALENT) && !etherscanAPI.contains(PALM_API));
     }
 
     @Nullable
@@ -54,19 +73,34 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
         }
     }
 
-    public Uri getEtherscanAddressUri(String toAddress)
+    public Uri getEtherscanAddressUri(String value)
     {
         if (etherscanUrl != null)
         {
-            return Uri.parse(etherscanUrl)
+            String explorer = etherscanUrl;
+            if (Utils.isAddressValid(value))
+            {
+                explorer = explorer.substring(0, explorer.lastIndexOf("tx/"));
+                explorer += "address/";
+            }
+            else if (!Utils.isTransactionHash(value))
+            {
+                return Uri.EMPTY;
+            }
+
+            return Uri.parse(explorer)
                     .buildUpon()
-                    .appendEncodedPath("address")
-                    .appendEncodedPath(toAddress)
+                    .appendEncodedPath(value)
                     .build();
         }
         else
         {
             return Uri.EMPTY;
         }
+    }
+
+    public boolean hasRealValue()
+    {
+        return EthereumNetworkRepository.hasRealValue(this.chainId);
     }
 }

@@ -1,19 +1,18 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
-import android.os.IBinder;
+import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -30,7 +29,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -40,15 +38,14 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
@@ -57,24 +54,22 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.widget.AddWalletView;
+import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.ParseMagicLink;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.Locale;
 import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import jnr.ffi.annotations.In;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
@@ -87,7 +82,6 @@ public class HomeViewModel extends BaseViewModel {
 
     private final PreferenceRepositoryType preferenceRepository;
     private final ImportTokenRouter importTokenRouter;
-    private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
@@ -106,13 +100,13 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
     private BottomSheetDialog dialog;
 
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
@@ -125,7 +119,6 @@ public class HomeViewModel extends BaseViewModel {
             ExternalBrowserRouter externalBrowserRouter ) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
-        this.addTokenRouter = addTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
@@ -154,6 +147,10 @@ public class HomeViewModel extends BaseViewModel {
 
     public LiveData<String> backUpMessage() {
         return backUpMessage;
+    }
+
+    public LiveData<Boolean> splashReset() {
+        return splashActivity;
     }
 
     public void prepare() {
@@ -200,7 +197,7 @@ public class HomeViewModel extends BaseViewModel {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return filterPass;
@@ -208,10 +205,6 @@ public class HomeViewModel extends BaseViewModel {
 
     private void importLink(Wallet wallet, Activity activity, String importData) {
         importTokenRouter.open(activity, importData);
-    }
-
-    public void showAddToken(Context context, String address) {
-        addTokenRouter.open(context, address);
     }
 
     public void updateLocale(String newLocale, Context context)
@@ -272,24 +265,36 @@ public class HomeViewModel extends BaseViewModel {
                 .getWallet(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> onWallet(context, wallet), this::onError);
+                .subscribe(wallet -> onWallet(context, wallet), this::walletError);
     }
 
-    private void onWallet(Context context, Wallet wallet) {
+    private void walletError(Throwable throwable)
+    {
+        //no wallets
+        splashActivity.postValue(true);
+    }
+
+    private void onWallet(Context context, Wallet wallet)
+    {
         transactionsService.changeWallet(wallet);
         if (!TextUtils.isEmpty(wallet.name))
         {
             walletName.postValue(wallet.name);
-        } else if (!TextUtils.isEmpty(wallet.ENSname))
+        }
+        else if (!TextUtils.isEmpty(wallet.ENSname))
         {
             walletName.postValue(wallet.ENSname);
-        } else
+        }
+        else
         {
             walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
                     .reverseResolveEns(wallet.address)
-                    .map(ensName -> { wallet.ENSname = ensName; return wallet; })
+                    .map(ensName -> {
+                        wallet.ENSname = ensName;
+                        return wallet;
+                    })
                     .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
@@ -385,32 +390,37 @@ public class HomeViewModel extends BaseViewModel {
     private void showActionSheet(Activity activity, QRResult qrResult) {
 
         View.OnClickListener listener = v -> {
-            switch (v.getId()) {
-                case R.id.send_to_this_address_action:
-                    showSend(activity, qrResult);
-                    break;
-                case R.id.add_custom_token_action: {
-                    Intent intent = new Intent(activity, AddTokenActivity.class);
-                    intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
-                    activity.startActivity(intent);
+            if (v.getId() == R.id.send_to_this_address_action)
+            {
+                showSend(activity, qrResult);
+            }
+            else if (v.getId() == R.id.add_custom_token_action)
+            {
+                Intent intent = new Intent(activity, AddTokenActivity.class);
+                intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
+                activity.startActivityForResult(intent, C.ADDED_TOKEN_RETURN);
+            }
+            else if (v.getId() == R.id.watch_account_action)
+            {
+                Intent intent = new Intent(activity, ImportWalletActivity.class);
+                intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
+                intent.putExtra(C.EXTRA_STATE, "watch");
+                activity.startActivity(intent);
+            }
+            else if (v.getId() == R.id.open_in_etherscan_action)
+            {
+                NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(qrResult.chainId);
+                if (info == null) return;
+
+                Uri blockChainInfoUrl = info.getEtherscanAddressUri(qrResult.getAddress());
+
+                if (blockChainInfoUrl != Uri.EMPTY) {
+                    externalBrowserRouter.open(activity, blockChainInfoUrl);
                 }
-                    break;
-                case R.id.watch_account_action: {
-                    Intent intent = new Intent(activity, ImportWalletActivity.class);
-                    intent.putExtra(C.EXTRA_QR_CODE, qrResult.getAddress());
-                    intent.putExtra(C.EXTRA_STATE, "watch");
-                    activity.startActivity(intent);
-                }
-                    break;
-                case R.id.open_in_etherscan_action:
-                    String etherScanUrl = MagicLinkInfo.getEtherscanURLbyNetwork(qrResult.chainId);
-                    if (etherScanUrl != null) {
-                        String url = etherScanUrl + "token/" + qrResult.getAddress();
-                        externalBrowserRouter.open(activity, Uri.parse(url));
-                    }
-                    break;
-                case R.id.close_action:
-                    break;
+            }
+            else if (v.getId() == R.id.close_action)
+            {
+                //NOP
             }
 
             dialog.dismiss();
@@ -539,5 +549,106 @@ public class HomeViewModel extends BaseViewModel {
     public void restartTokensService()
     {
         transactionsService.restartService();
+    }
+
+    public void storeCurrentFragmentId(int ordinal)
+    {
+        preferenceRepository.storeLastFragmentPage(ordinal);
+    }
+
+    public int getLastFragmentId()
+    {
+        return preferenceRepository.getLastFragmentPage();
+    }
+
+    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
+        if (preferenceRepository.getLaunchCount() == 4) {
+            EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
+            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+            emailPromptDialog.setContentView(emailPromptView);
+            emailPromptDialog.setCancelable(true);
+            emailPromptDialog.setCanceledOnTouchOutside(true);
+            emailPromptView.setParentDialog(emailPromptDialog);
+            BottomSheetBehavior behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
+            emailPromptDialog.setOnShowListener(dialog -> behavior.setPeekHeight(emailPromptView.getHeight()));
+            emailPromptDialog.show();
+        }
+    }
+
+    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
+    {
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = ctx.getResources().getConfiguration().getLocales().get(0);
+        }
+        else
+        {
+            locale = ctx.getResources().getConfiguration().locale;
+        }
+
+        return new TokenDefinition(
+                xmlInputStream, locale, null);
+    }
+
+    public void importScriptFile(Context ctx, String importData, boolean appExternal)
+    {
+        try
+        {
+            InputStream iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            TokenDefinition td = parseFile(ctx, iStream);
+            if (td.holdingToken == null || td.holdingToken.length() == 0) return; //tokenscript with no holding token is currently meaningless. Is this always the case?
+
+            byte[] writeBuffer = new byte[32768];
+            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+            newFileName = newFileName + ".tsml";
+
+            if (appExternal)
+            {
+                newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
+            }
+            else
+            {
+                newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+            }
+
+            //Store
+            iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            FileOutputStream fos = new FileOutputStream(newFileName);
+
+            while (iStream.available() > 0)
+            {
+                fos.write(writeBuffer, 0, iStream.read(writeBuffer));
+            }
+
+            iStream.close();
+            fos.flush();
+            fos.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean checkDebugDirectory()
+    {
+        File directory = new File(Environment.getExternalStorageDirectory()
+                + File.separator + ALPHAWALLET_DIR);
+
+        return directory.exists();
+    }
+
+    public void setWalletStartup()
+    {
+        TokensService.setWalletStartup();
+    }
+
+    public void setCurrencyAndLocale(Context context)
+    {
+        if (TextUtils.isEmpty(localeRepository.getUserPreferenceLocale()))
+        {
+            localeRepository.setLocale(context, localeRepository.getActiveLocale());
+        }
+        currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
     }
 }

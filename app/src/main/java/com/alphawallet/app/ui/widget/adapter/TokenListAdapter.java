@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +53,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     private final Context context;
     private final List<UnknownToken> unknownTokenList;
-    private ItemClickListener listener;
+    private final ItemClickListener listener;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
     private Disposable disposable;
@@ -224,7 +225,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             is.read(buffer);
             is.close();
 
-            jsonString = new String(buffer, "UTF-8");
+            jsonString = new String(buffer, StandardCharsets.UTF_8);
         }
         catch (IOException e) {
             return null;
@@ -294,7 +295,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
         TokenSortedItem updateItem = new TokenSortedItem(
                 DISPLAY_TOKEN, tcm, tcm.nameWeight
-        );;
+        );
 
         items.beginBatchedUpdates();
         if (items.get(position).viewType == DISPLAY_TOKEN)
@@ -429,6 +430,8 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     public void addToken(TokenCardMeta tokenCardMeta)
     {
         Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
+        if (token == null) return;
+
         tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
         TokenSortedItem sortedItem = null;
 

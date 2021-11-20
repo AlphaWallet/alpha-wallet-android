@@ -17,12 +17,12 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 
 public class AWalletConfirmationDialog extends Dialog {
-    private LinearLayout container;
-    private TextView title;
-    private TextView smallText;
-    private TextView mediumText;
-    private TextView bigText;
-    private TextView extraText;
+    private final LinearLayout container;
+    private final TextView title;
+    private final TextView smallText;
+    private final TextView mediumText;
+    private final TextView bigText;
+    private final TextView extraText;
     protected Button btnPrimary;
     protected Button btnSecondary;
     protected Context context;

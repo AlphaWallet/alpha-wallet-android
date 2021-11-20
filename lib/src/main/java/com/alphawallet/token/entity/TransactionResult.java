@@ -11,12 +11,12 @@ public class TransactionResult
     public final BigInteger tokenId;
     public final String method;
     public final String contractAddress;
-    public final int contractChainId;
+    public final long contractChainId;
     public String result;
     public long resultTime;
     public final String attrId;
 
-    public TransactionResult(int chainId, String address, BigInteger tokenId, Attribute attr)
+    public TransactionResult(long chainId, String address, BigInteger tokenId, Attribute attr)
     {
         this.contractAddress = address;
         this.contractChainId = chainId;

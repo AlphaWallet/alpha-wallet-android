@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Pair;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.SortedList;
 
@@ -101,20 +102,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private void setAssetSelection(Token token, List<Pair<BigInteger, NFTAsset>> selection)
     {
         setAssetRange(token, selection);
-
-//        if (selection.size() == 1 && selection.get(0).second.getSelectedBalance().compareTo(BigDecimal.ONE) <= 0)
-//        {
-//            setTokenRange(token, Collections.singletonList(selection.get(0).first)); //setup a normal single token transfer
-//        }
-//        else
-//        {
-//
-//        }
     }
 
     @NotNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         BinderViewHolder<?> holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove

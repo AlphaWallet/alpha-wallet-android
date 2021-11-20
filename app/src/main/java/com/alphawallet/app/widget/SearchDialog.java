@@ -17,13 +17,13 @@ import com.alphawallet.app.R;
 import java.util.Locale;
 
 public class SearchDialog extends Dialog {
-    private Spinner spinnerMatch;
-    private Spinner spinnerClass;
-    private Spinner spinnerSeats;
-    private Spinner spinnerDate;
-    private SeekBar priceSeekBar;
-    private Button btnApply;
-    private TextView seekBarValue;
+    private final Spinner spinnerMatch;
+    private final Spinner spinnerClass;
+    private final Spinner spinnerSeats;
+    private final Spinner spinnerDate;
+    private final SeekBar priceSeekBar;
+    private final Button btnApply;
+    private final TextView seekBarValue;
 
     public SearchDialog(Activity activity) {
         super(activity);

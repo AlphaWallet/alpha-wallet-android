@@ -80,9 +80,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView importTxt;
 
     private LinearLayout costLayout;
-    private int chainId = 0;
+    private long chainId = 0;
     private boolean usingFeeMaster = false;
-    private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api/";
+    private final String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api/";
     private final String TAG = "ITA";
 
     @Override
@@ -218,6 +218,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.resetSignDialog();
     }
 
+    //TODO: Use Activity Launcher model (eg see tokenManagementLauncher in WalletFragment)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -420,7 +421,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         setTicket(false, false, true);
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
-        String importText = String.valueOf(order.ticketCount) + "x ";
+        String importText = order.ticketCount + "x ";
         importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
 
         tv.setText(importText);
@@ -441,7 +442,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         setTicket(false, false, true);
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
-        String importText = String.valueOf(order.ticketCount) + "x ";
+        String importText = order.ticketCount + "x ";
         importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
         tv.setText(importText);
         //Note: it's actually not possible to pull the event or anything like that since we can't get the tokenID if it's been imported.
@@ -534,8 +535,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
+        final int import_ticket = R.id.import_ticket;
+        final int cancel_button = R.id.cancel_button;
         switch (v.getId()) {
-            case R.id.import_ticket:
+            case import_ticket:
                 if (ticketRange != null) {
                     if (viewModel.getSalesOrder().price > 0.0)
                     {
@@ -553,7 +556,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     completeCurrencyImport();
                 }
                 break;
-            case R.id.cancel_button:
+            case cancel_button:
                 //go to main screen
                 new HomeRouter().open(this, true);
                 finish();

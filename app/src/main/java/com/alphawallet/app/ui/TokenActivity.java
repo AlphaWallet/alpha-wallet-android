@@ -24,6 +24,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
@@ -54,6 +55,7 @@ import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.TSActivityView;
@@ -582,7 +584,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singletonList(tokenId)), null)
@@ -594,7 +596,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void onError(Throwable throwable)
     {
-        throwable.printStackTrace();
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
         displayFunction(attrs.toString());
     }
 
@@ -729,12 +731,14 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     {
         if (actionId == R.string.speedup_transaction)
         {
+            viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
             checkConfirm(ActionSheetMode.SPEEDUP_TRANSACTION);
             //resend the transaction to speedup
             //viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.RESEND);
         }
         else if (actionId == R.string.cancel_transaction)
         {
+            viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
             checkConfirm(ActionSheetMode.CANCEL_TRANSACTION);
             //cancel the transaction
             //viewModel.reSendTransaction(transactionHash, this, token, ConfirmationType.CANCEL_TX);
@@ -785,8 +789,8 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
         //ActionSheet was dismissed
-        //refresh page with new tx
-        transactionHash = txHash;
+        //refresh page with new txf
+        if (txHash != null) transactionHash = txHash;
         viewModel.getCurrentWallet();
     }
 
@@ -794,5 +798,27 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     public void notifyConfirm(String mode)
     {
         viewModel.actionSheetConfirm(mode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        switch (requestCode)
+        {
+            case C.SET_GAS_SETTINGS:
+                if (data != null && confirmationDialog != null)
+                {
+                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+                    BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
+                            new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
+                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+                    confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

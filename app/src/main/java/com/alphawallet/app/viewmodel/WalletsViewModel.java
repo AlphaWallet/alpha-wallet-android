@@ -130,7 +130,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(() -> onDefaultWallet(wallet), this::onError);
     }
 
-    public void onPrepare(int chainId)
+    public void onPrepare(long chainId)
     {
         walletBalances.clear();
         progress.postValue(true);
@@ -225,7 +225,7 @@ public class WalletsViewModel extends BaseViewModel
         disposable = Observable.fromArray(wallets)
                 .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
                         .subscribeOn(Schedulers.io())
-                        .observeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance), e -> { }));
 
         progress.postValue(false);

@@ -1,6 +1,15 @@
 package com.alphawallet.app.ui;
 
 
+import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
+import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
+
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,14 +49,6 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-
-import static android.app.Activity.RESULT_OK;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
-import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
-import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
-import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 public class NewSettingsFragment extends BaseFragment {
     @Inject
@@ -498,8 +499,7 @@ public class NewSettingsFragment extends BaseFragment {
     ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 //send instruction to restart tokenService
-                Bundle r = new Bundle();
-                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, r);
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
             });
 
     private void onSelectNetworksSettingClicked() {
@@ -511,9 +511,14 @@ public class NewSettingsFragment extends BaseFragment {
     ActivityResultLauncher<Intent> advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 Intent data = result.getData();
-                if (data != null && data.getBooleanExtra("close", false))
+                if (data == null) return;
+                if (data.getBooleanExtra(RESET_WALLET, false))
                 {
-                    ((HomeActivity)getActivity()).showAndRefreshWallet();
+                    getParentFragmentManager().setFragmentResult(RESET_WALLET, new Bundle());
+                }
+                else if (data.getBooleanExtra(CHANGE_CURRENCY, false))
+                {
+                    getParentFragmentManager().setFragmentResult(CHANGE_CURRENCY, new Bundle());
                 }
             });
 
@@ -539,7 +544,6 @@ public class NewSettingsFragment extends BaseFragment {
 
         if (pendingUpdate > 0)
         {
-            final int thisPendingUpdate = pendingUpdate; //avoid OS reclaiming the value
             updateLayout.setVisibility(View.VISIBLE);
             TextView current = view.findViewById(R.id.text_detail_current);
             TextView available = view.findViewById(R.id.text_detail_available);

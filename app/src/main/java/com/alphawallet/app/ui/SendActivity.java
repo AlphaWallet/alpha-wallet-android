@@ -110,7 +110,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 .get(SendViewModel.class);
 
         String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        int currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
+        long currentChain = getIntent().getLongExtra(C.EXTRA_NETWORKID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = viewModel.getToken(currentChain, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
@@ -147,7 +147,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private boolean checkTokenValidity(int currentChain, String contractAddress)
+    private boolean checkTokenValidity(long currentChain, String contractAddress)
     {
         if (token == null || token.tokenInfo == null)
         {
@@ -290,7 +290,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
+                                                "Code: " + resultCode
                     ));
                     break;
             }
@@ -424,7 +424,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private void showChainChangeDialog(int chainId)
+    private void showChainChangeDialog(long chainId)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
@@ -655,9 +655,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
-
-            // successful transaction - try to show rate the app
-            viewModel.tryToShowRateAppDialog(this);
 
             finish();
         }

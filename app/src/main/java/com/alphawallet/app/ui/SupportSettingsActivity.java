@@ -4,17 +4,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-
-import android.provider.MediaStore;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
+
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.MediaLinks;
-import com.alphawallet.app.router.HelpRouter;
 import com.alphawallet.app.widget.SettingsItemView;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 public class SupportSettingsActivity extends BaseActivity {
 
@@ -28,6 +26,7 @@ public class SupportSettingsActivity extends BaseActivity {
     private SettingsItemView facebook;
     private SettingsItemView blog;
     private SettingsItemView faq;
+    private SettingsItemView github;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +84,12 @@ public class SupportSettingsActivity extends BaseActivity {
                 .withListener(this::onBlogClicked)
                 .build();*/
 
+        github = new SettingsItemView.Builder(this)
+                .withIcon(R.drawable.ic_logo_github)
+                .withTitle(R.string.github)
+                .withListener(this::onGitHubClicked)
+                .build();
+
         faq = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_settings_faq)
                 .withTitle(R.string.title_faq)
@@ -110,6 +115,10 @@ public class SupportSettingsActivity extends BaseActivity {
             supportSettingsLayout.addView(twitter);
         }
 
+        if (MediaLinks.AWALLET_GITHUB != null) {
+            supportSettingsLayout.addView(github);
+        }
+
         /*if (MediaLinks.AWALLET_REDDIT_URL != null) {
             supportSettingsLayout.addView(reddit);
         }
@@ -133,8 +142,19 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+    }
+
+    private void onGitHubClicked() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
+
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -149,8 +169,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -166,8 +185,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -180,8 +198,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -197,8 +214,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -213,8 +229,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -230,8 +245,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -246,8 +260,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

@@ -26,7 +26,7 @@ public class CoinGeckoTicker
         this.usdPrice = usdPrice;
     }
 
-    public static List<CoinGeckoTicker> buildTickerList(String jsonData) throws JSONException
+    public static List<CoinGeckoTicker> buildTickerList(String jsonData, String currencyIsoSymbol) throws JSONException
     {
         List<CoinGeckoTicker> res = new ArrayList<>();
         JSONObject data = new JSONObject(jsonData);
@@ -36,12 +36,12 @@ public class CoinGeckoTicker
         {
             String address = data.names().get(i).toString();
             JSONObject obj = data.getJSONObject(address);
-            if (obj.has("usd"))
+            if (obj.has(currencyIsoSymbol.toLowerCase()))
             {
-                String usdChangeStr = obj.getString("usd_24h_change");
+                String usdChangeStr = obj.getString(currencyIsoSymbol.toLowerCase() + "_24h_change");
                 double usdChange = 0.0;
-                if (!TextUtils.isEmpty(usdChangeStr) && Character.isDigit(usdChangeStr.charAt(0))) usdChange = obj.getDouble("usd_24h_change");
-                CoinGeckoTicker ticker = new CoinGeckoTicker(address, obj.getDouble("usd"), usdChange);
+                if (!TextUtils.isEmpty(usdChangeStr) && Character.isDigit(usdChangeStr.charAt(0))) usdChange = obj.getDouble(currencyIsoSymbol.toLowerCase() + "_24h_change");
+                CoinGeckoTicker ticker = new CoinGeckoTicker(address, obj.getDouble(currencyIsoSymbol.toLowerCase()), usdChange);
                 res.add(ticker);
             }
         }

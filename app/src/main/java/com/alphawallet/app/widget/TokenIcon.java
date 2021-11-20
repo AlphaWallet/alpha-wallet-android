@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.CurrencyRepository;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
@@ -46,6 +48,9 @@ public class TokenIcon extends ConstraintLayout
     private final TextView textIcon;
     private final ImageView statusIcon;
     private final ProgressBar pendingProgress;
+    private final ImageView statusBackground;
+    private final ImageView chainIcon;
+    private final ImageView chainIconBackground;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -66,8 +71,11 @@ public class TokenIcon extends ConstraintLayout
         textIcon = findViewById(R.id.text_icon);
         statusIcon = findViewById(R.id.status_icon);
         pendingProgress = findViewById(R.id.pending_progress);
+        statusBackground = findViewById(R.id.status_icon_background);
         statusIcon.setVisibility(isInEditMode() ? View.VISIBLE : View.GONE);
         currentStatus = StatusType.NONE;
+        chainIcon = findViewById(R.id.chain_icon);
+        chainIconBackground = findViewById(R.id.chain_icon_background);
 
         bindViews();
 
@@ -131,7 +139,18 @@ public class TokenIcon extends ConstraintLayout
         this.handler.removeCallbacks(null);
         this.token = token;
 
+        statusBackground.setVisibility(View.GONE);
+        chainIconBackground.setVisibility(View.GONE);
+        chainIcon.setVisibility(View.GONE);
+
         displayTokenIcon(iconItem);
+    }
+
+    public void setChainIcon(long chainId)
+    {
+        chainIconBackground.setVisibility(View.VISIBLE);
+        chainIcon.setVisibility(View.VISIBLE);
+        chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
     }
 
     private void setupDefaultIcon(boolean loadFailed)
@@ -204,7 +223,8 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(R.drawable.ic_transaction_rejected);
                 break;
             case CONSTRUCTOR:
-                statusIcon.setImageResource(R.drawable.ic_ethereum_logo);
+                statusIcon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
+                statusBackground.setVisibility(View.VISIBLE);
                 break;
             case SELF:
                 statusIcon.setImageResource(R.drawable.ic_send_self_small);
@@ -228,6 +248,15 @@ public class TokenIcon extends ConstraintLayout
      */
     private void loadFromAltRepo()
     {
+        if (getContext() instanceof Activity)
+        {
+            Activity myAct = (Activity) getContext();
+            if (myAct.isFinishing() || myAct.isDestroyed())
+            {
+                return;
+            }
+        }
+
         handler.post(() ->
                 currentRq = Glide.with(getContext())
                 .load(this.fallbackIconUrl)
@@ -245,7 +274,7 @@ public class TokenIcon extends ConstraintLayout
     {
         if (loadFailed) icon.setVisibility(View.GONE);
         textIcon.setVisibility(View.VISIBLE);
-        textIcon.setBackgroundTintList(getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
+        textIcon.setBackgroundTintList(getColorStateList(getContext(), EthereumNetworkBase.getChainColour(token.tokenInfo.chainId)));
         //try symbol first
         if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.length() > 1)
         {

@@ -14,8 +14,8 @@ import io.realm.Realm;
 public class GasSettingsViewModel extends BaseViewModel {
     private final TokensService tokensService;
 
-    private MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
-    private MutableLiveData<BigInteger> gasLimit = new MutableLiveData<>();
+    private final MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
+    private final MutableLiveData<BigInteger> gasLimit = new MutableLiveData<>();
 
     public GasSettingsViewModel(TokensService svs) {
         this.tokensService = svs;
@@ -40,7 +40,7 @@ public class GasSettingsViewModel extends BaseViewModel {
         return new BigDecimal(gasPrice.getValue().multiply(gasLimit.getValue()));
     }
 
-    public Token getBaseCurrencyToken(int chainId)
+    public Token getBaseCurrencyToken(long chainId)
     {
         return tokensService.getToken(chainId, tokensService.getCurrentAddress());
     }

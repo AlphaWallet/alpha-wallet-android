@@ -19,7 +19,8 @@ AlphaWallet and TokenScript have been used by tokenisation projects like FIFA an
 
 ## About AlphaWallet - Features
 
-Easy to use and secure open source Ethereum wallet for Android and iOS, with native ERC20, ERC721 and ERC875 support. AlphaWallet supports all Ethereum based networks: Ethereum, xDai, Ethereum Classic, Artis, POA, Ropsten, Goerli, Kovan, Rinkeby and Sokol.
+Easy to use and secure open source Ethereum wallet for Android and iOS, with native ERC20, ERC721, ERC1155 and ERC875 support. AlphaWallet supports all Ethereum based networks: Ethereum, xDai, Ethereum Classic, Artis, POA, Binance Smart Chain, Heco, Polygon, Avalanche, Fantom, L2 chains Optimistic and Arbitrum, and Palm.
+TestChains: Ropsten, Goerli, Kovan, Rinkeby, Sokol, Binance Test, Heco Test, Fuji (Avalanche test), Fantom Test, Polygon Test, Optimistic and Arbitrum Test, Cronos Test and Palm test.
 
 - Beginner Friendly
 - Secure Enclave Security
@@ -91,7 +92,7 @@ class CustomViewSettings
 ...
 ```
     private static final List<TokenInfo> lockedTokens = Arrays.asList(
-            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, int ChainId)
+            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, long ChainId)
             new TokenInfo("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "USD Coin", "USDC", 6, true, EthereumNetworkBase.MAINNET_ID)
     );
     

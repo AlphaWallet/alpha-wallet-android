@@ -1,16 +1,12 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.app.Activity;
-import android.graphics.Color;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -24,8 +20,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -35,11 +29,6 @@ import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
-import io.realm.Realm;
-import io.realm.RealmResults;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -62,16 +51,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final ChainName testnet;
-    private RealmResults<RealmTokenTicker> realmUpdate = null;
     private boolean primaryElement;
-    private final Realm realm;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, Realm r)
+    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
     {
         super(R.layout.item_token, parent);
 
@@ -92,7 +79,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
-        realm = r;
     }
 
     @Override
@@ -113,12 +99,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 if (backupChain != null) token = backupChain;
             }
 
-            if (realmUpdate != null)
-            {
-                realmUpdate.removeAllChangeListeners();
-                realmUpdate = null;
-            }
-
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
@@ -130,6 +110,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             primaryElement = false;
 
             tokenIcon.bindData(token, assetDefinition);
+            //if (!token.isEthereum()) tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
             tokenIcon.setOnTokenClickListener(onTokenClickListener);
 
 
@@ -147,11 +128,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public void onDestroyView()
     {
-        if (realmUpdate != null)
-        {
-            realmUpdate.removeAllChangeListeners();
-            realmUpdate = null;
-        }
+
     }
 
     private void setPendingAmount()
@@ -173,7 +150,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         TokenTicker ticker = tokensService.getTokenTicker(token);
         if (ticker != null || (token.isEthereum() && EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId)))
         {
-            handleTicker();
+            handleTicker(ticker);
         }
         else
         {
@@ -192,13 +169,25 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
     }
 
-    private void handleTicker()
+    private void handleTicker(TokenTicker ticker)
     {
-        primaryElement = true;
-        hideIssuerViews();
-        layoutAppreciation.setVisibility(View.VISIBLE);
-        balanceCurrency.setVisibility(View.VISIBLE);
-        startTickerRealmListener();
+        if (ticker != null)
+        {
+            primaryElement = true;
+            hideIssuerViews();
+            layoutAppreciation.setVisibility(View.VISIBLE);
+            balanceCurrency.setVisibility(View.VISIBLE);
+            setTickerInfo(ticker);
+        }
+        else
+        {
+            //Ethereum token without a ticker
+            issuer.setVisibility(View.GONE);
+            issuerPlaceholder.setVisibility(View.GONE);
+            balanceCurrency.setVisibility(View.GONE);
+            layoutAppreciation.setVisibility(View.GONE);
+            primaryElement = true;
+        }
     }
 
     private void showNetworkLabel() {
@@ -299,78 +288,44 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
     }
 
-    private void emptyTicker()
-    {
-        text24Hours.setText(R.string.unknown_balance_without_symbol);
-        textAppreciation.setText(R.string.unknown_balance_without_symbol);
-        balanceCurrency.setText(R.string.unknown_balance_without_symbol);
-    }
-
-    private void startTickerRealmListener()
-    {
-        realmUpdate = realm.where(RealmTokenTicker.class)
-                .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
-                .findAllAsync();
-        realmUpdate.addChangeListener(realmTicker -> {
-            //update balance
-            if (realmTicker.size() == 0) return;
-            RealmTokenTicker rawTicker = realmTicker.first();
-            if (rawTicker == null) return;
-            //update ticker info
-            final TokenTicker tt = new TokenTicker(rawTicker.getPrice(), rawTicker.getPercentChange24h(), rawTicker.getCurrencySymbol(),
-                    rawTicker.getImage(), rawTicker.getUpdatedTime());
-            handler.post(() -> {
-                setTickerInfo(tt);
-            });
-        });
-    }
-
     private void setTickerInfo(TokenTicker ticker)
     {
-        if (((Activity)getContext()).isFinishing() || ((Activity) getContext()).isDestroyed()) { return; }
-
         //Set the fiat equivalent (leftmost value)
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
         BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
-        String formattedPercents = "";
-        int color = Color.RED;
 
         String lbl = getString(R.string.token_balance, "", converted);
         lbl += " " + ticker.priceSymbol;
-        Spannable spannable;
         if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
         {
-            spannable = new SpannableString(lbl);
-            spannable.setSpan(new ForegroundColorSpan(color),
-                    converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            this.balanceCurrency.setText(lbl);
-            this.issuer.setVisibility(View.GONE);
+            issuer.setVisibility(View.GONE);
         }
         else
         {
-            this.balanceCurrency.setText(EMPTY_BALANCE);
+            lbl = EMPTY_BALANCE;
         }
 
+        balanceCurrency.setText(lbl);
+        balanceCurrency.setTextColor(getContext().getColor(R.color.text_dark_gray));
+
         //This sets the 24hr percentage change (rightmost value)
-        double percentage = 0;
         try {
-            percentage = Double.parseDouble(ticker.percentChange24h);
-            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
+            double percentage = Double.parseDouble(ticker.percentChange24h);
+            String formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
             text24Hours.setText(formattedPercents);
-            text24Hours.setTextColor(color);
-        } catch (Exception ex) { /* Quietly */ }
+            text24Hours.setTextColor(ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green));
+        } catch (Exception ex)
+        { /* Quietly */ }
 
         //This sets the crypto price value (middle amount)
-        String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
+        String formattedValue = TickerService.getCurrencyString(new BigDecimal(ticker.price).doubleValue());
+        //TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
 
         lbl = getString(R.string.token_balance, "", formattedValue);
-        lbl += " " + ticker.priceSymbol;
-        spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                lbl.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.textAppreciation.setText(lbl);
+        //lbl += " " + ticker.priceSymbol;
+        textAppreciation.setText(lbl);
+        textAppreciation.setTextColor(getContext().getColor(R.color.text_dark_gray));
 
         tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
     }

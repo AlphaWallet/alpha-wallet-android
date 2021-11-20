@@ -55,8 +55,8 @@ public class NFTSortedItem extends SortedItem<Pair<BigInteger, NFTAsset>>
     }
 
     @Override
-    public void setIsChecked(boolean b) { value.second.isChecked = b; };
+    public void setIsChecked(boolean b) { value.second.isChecked = b; }
 
     @Override
-    public void setExposeRadio(boolean expose) { value.second.exposeRadio = expose; };
+    public void setExposeRadio(boolean expose) { value.second.exposeRadio = expose; }
 }

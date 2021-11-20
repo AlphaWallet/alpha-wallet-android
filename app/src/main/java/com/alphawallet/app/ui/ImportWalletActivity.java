@@ -429,7 +429,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                 break;
             default:
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                            "Code: " + String.valueOf(resultCode)
+                                            "Code: " + resultCode
                 ));
                 break;
         }

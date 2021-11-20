@@ -81,6 +81,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     public static native String getEtherscanKey();
     public static native String getBSCExplorerKey();
+    public static native String getCovalentKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -178,7 +179,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             finally
             {
@@ -269,7 +270,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, int chainId)
+    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, long chainId)
     {
         txList.clear();
         for (EtherscanTransaction etx : myTxs)
@@ -348,7 +349,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         if (networkInfo == null) return new EtherscanTransaction[0];
         if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransactions(walletAddress, tokenAddress, networkInfo, ascending, page, pageSize); }
-        okhttp3.Response response;
+
         String result = null;
         String fullUrl;
 
@@ -395,15 +396,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             fullUrl = sb.toString();
 
-            try
+            Request request = new Request.Builder()
+                    .url(fullUrl)
+                    .get()
+                    .build();
+
+            try (okhttp3.Response response = httpClient.newCall(request).execute())
             {
-                Request request = new Request.Builder()
-                        .url(fullUrl)
-                        .get()
-                        .build();
-
-                response = httpClient.newCall(request).execute();
-
                 if (response.body() == null) return new EtherscanTransaction[0];
 
                 result = response.body().string();
@@ -563,9 +562,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
             }
-            else //not NFT
+            else if (newToken) // new Fungible token
             {
-                if (newToken) svs.storeToken(token);
+                svs.storeToken(token);
+            }
+            else
+            {
+                //instruct tokensService to update balance
+                svs.addBalanceCheck(token);
             }
 
             //Send to storage as soon as each token is done
@@ -624,7 +628,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         if (TextUtils.isEmpty(networkInfo.etherscanAPI)) return "";
         if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
-        okhttp3.Response response;
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
@@ -635,17 +638,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
                 "&sort=asc" + APIKEY_TOKEN;
 
-        try
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .header("User-Agent", "Chrome/74.0.3729.169")
+                .method("GET", null)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        try (okhttp3.Response response = httpClient.newCall(request).execute())
         {
-            Request request = new Request.Builder()
-                    .url(fullUrl)
-                    .header("User-Agent", "Chrome/74.0.3729.169")
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
-            response = httpClient.newCall(request).execute();
-
             result = response.body().string();
             if (result.length() < 80 && result.contains("No transactions found"))
             {
@@ -676,21 +677,18 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanTransaction[] readCovalentTransactions(String walletAddress, String accountAddress, NetworkInfo networkInfo, boolean ascending, int page, int pageSize) throws JSONException
     {
         String covalent = "" + networkInfo.chainId + "/address/" + accountAddress.toLowerCase() + "/transactions_v2/?";
-        String args = "block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize;
+        String args = "no-logs=true&block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize + "&key=" + getCovalentKey();
         String fullUrl = networkInfo.etherscanAPI.replace(COVALENT, covalent);
-        okhttp3.Response response;
         String result = null;
 
-        try
+        Request request = new Request.Builder()
+                .url(fullUrl + args)
+                .get()
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        try (okhttp3.Response response = httpClient.newCall(request).execute())
         {
-            Request request = new Request.Builder()
-                    .url(fullUrl + args)
-                    .get()
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
-            response = httpClient.newCall(request).execute();
-
             if (response.body() == null) return new EtherscanTransaction[0];
 
             result = response.body().string();
@@ -714,7 +712,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return getEtherscanTransactionsFromCovalent(result, walletAddress, networkInfo);
     }
 
-    private long getTokenBlockRead(Realm instance, int chainId, boolean isNFT)
+    private long getTokenBlockRead(Realm instance, long chainId, boolean isNFT)
     {
         RealmAuxData rd = instance.where(RealmAuxData.class)
                 .equalTo("instanceKey", BLOCK_ENTRY + chainId)
@@ -730,7 +728,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeTokenBlockRead(Realm instance, int chainId, long lastBlockChecked, boolean isNFT)
+    private void writeTokenBlockRead(Realm instance, long chainId, long lastBlockChecked, boolean isNFT)
     {
         instance.executeTransaction(r -> {
             RealmAuxData rd = r.where(RealmAuxData.class)
@@ -753,7 +751,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         });
     }
 
-    private long getOldestBlockRead(Realm instance, int chainId, long lastTxTime)
+    private long getOldestBlockRead(Realm instance, long chainId, long lastTxTime)
     {
         long txBlockRead = 0;
         try
@@ -778,14 +776,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return txBlockRead;
     }
 
-    private long getFirstTransactionBlock(Realm instance, int chainId, String walletAddress)
+    private long getFirstTransactionBlock(Realm instance, long chainId, String walletAddress)
     {
         long txBlockRead = 0;
         try
         {
             RealmToken realmToken = instance.where(RealmToken.class)
                     .equalTo("address", databaseKey(chainId, walletAddress))
-                    .equalTo("chainId", chainId)
                     .findFirst();
 
             if (realmToken != null)
@@ -801,7 +798,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return txBlockRead;
     }
 
-    private List<TransactionMeta> fetchOlderThan(String walletAddress, long fetchTime, int chainId)
+    private List<TransactionMeta> fetchOlderThan(String walletAddress, long fetchTime, long chainId)
     {
         List<TransactionMeta> metas = new ArrayList<>();
         try (Realm instance = realmManager.getRealmInstance(walletAddress.toLowerCase()))
@@ -827,14 +824,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return metas;
     }
 
-    private void storeLatestBlockRead(String walletAddress, int chainId, String tokenAddress, String lastBlockRead)
+    private void storeLatestBlockRead(String walletAddress, long chainId, String tokenAddress, String lastBlockRead)
     {
         try (Realm instance = realmManager.getRealmInstance(walletAddress))
         {
             instance.executeTransactionAsync(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", databaseKey(chainId, tokenAddress))
-                        .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (realmToken != null)
@@ -850,14 +846,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void storeEarliestBlockRead(Realm instance, int chainId, String walletAddress, long earliestBlock)
+    private void storeEarliestBlockRead(Realm instance, long chainId, String walletAddress, long earliestBlock)
     {
         try
         {
             instance.executeTransactionAsync(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", databaseKey(chainId, walletAddress))
-                        .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (realmToken != null)
@@ -872,7 +867,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    public void deleteAllChainTransactions(Realm instance, int chainId, String walletAddress)
+    public void deleteAllChainTransactions(Realm instance, long chainId, String walletAddress)
     {
         try
         {
@@ -895,11 +890,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void resetBlockRead(Realm r, int chainId, String walletAddress)
+    private void resetBlockRead(Realm r, long chainId, String walletAddress)
     {
         RealmToken realmToken = r.where(RealmToken.class)
                 .equalTo("address", databaseKey(chainId, walletAddress))
-                .equalTo("chainId", chainId)
                 .findFirst();
 
         if (realmToken != null)
@@ -924,7 +918,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //write event list
             for (EtherscanEvent ev : events)
             {
-                boolean scanAsNFT = isNFT || (ev.tokenDecimal.length() == 0 && ev.tokenID.length() > 0);
+                boolean scanAsNFT = isNFT || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0) && (ev.tokenID != null && ev.tokenID.length() > 0));
                 Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
 
                 //find tx name
@@ -1001,7 +995,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @param chainId networkId
      * @param txFetches map of transactions that need writing. Note we use a map to de-duplicate
      */
-    private void fetchRequiredTransactions(Realm instance, int chainId, Map<String, Transaction> txFetches)
+    private void fetchRequiredTransactions(Realm instance, long chainId, Map<String, Transaction> txFetches)
     {
         //TODO: this should go into the TX service, or be loaded at view time.
         instance.executeTransactionAsync(r -> {

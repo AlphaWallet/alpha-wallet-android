@@ -504,7 +504,7 @@ public class TokenscriptFunctionTest implements ParseResult {
             "      </ts:origins>\n" +
             "    </ts:attribute>\n" +
             "</ts:token>\n";
-    private TokenDefinition entryToken;
+    private final TokenDefinition entryToken;
 
     public TokenscriptFunctionTest() throws IOException, SAXException {
         InputStream fileStream = new ByteArrayInputStream(entryTokenTestFile.getBytes(StandardCharsets.UTF_8));

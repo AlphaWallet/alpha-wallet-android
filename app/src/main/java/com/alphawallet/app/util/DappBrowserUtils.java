@@ -1,8 +1,13 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
+import static com.alphawallet.app.util.Utils.isValidUrl;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.DApp;
@@ -22,10 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
-
-import androidx.preference.PreferenceManager;
-
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
@@ -39,9 +40,14 @@ public class DappBrowserUtils {
             List<DApp> primaryDapps = getPrimarySites(context);
             Map<String, DApp> dappMap = new HashMap<>();
             for (DApp d : myDapps)
-                dappMap.put(d.getUrl(), d);
+            {
+                if (isValidUrl(d.getUrl()))
+                    dappMap.put(d.getUrl(), d);
+            }
             for (DApp d : primaryDapps)
+            {
                 dappMap.remove(d.getUrl());
+            }
 
             String myDappsJson = new Gson().toJson(dappMap.values());
             storeJsonData(MY_DAPPS_FILE, myDappsJson, context);
@@ -83,7 +89,45 @@ public class DappBrowserUtils {
             history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<DApp>>() {
             }.getType());
         }
+
+        int historyLen = history.size();
+
+        history = parseDappHistory(history);
+
+        if (historyLen != history.size())
+        {
+            String dappHistory = new Gson().toJson(history);
+            storeJsonData(DAPPS_HISTORY_FILE, dappHistory, context);
+        }
+
         return history;
+    }
+
+    private static List<DApp> parseDappHistory(List<DApp> history)
+    {
+        boolean requireRefresh = false;
+        List<DApp> recodeHistory = new ArrayList<>();
+        for (DApp dapp : history)
+        {
+            if (TextUtils.isEmpty(dapp.getUrl())) { continue; }
+            if (isValidUrl(dapp.getUrl()))
+            {
+                recodeHistory.add(dapp);
+            }
+            else
+            {
+                requireRefresh = true;
+            }
+        }
+
+        if (requireRefresh)
+        {
+            return recodeHistory;
+        }
+        else
+        {
+            return history;
+        }
     }
 
     private static void storeJsonData(String fName, String json, Context context)
@@ -163,7 +207,7 @@ public class DappBrowserUtils {
     }
 
     public static String getIconUrl(String url) {
-        return "https://api.faviconkit.com/" + url + "/144";
+        return "https://www.google.com/s2/favicons?sz=128&domain=" + url;
     }
 
     public static List<DApp> getDappsList(Context context) {

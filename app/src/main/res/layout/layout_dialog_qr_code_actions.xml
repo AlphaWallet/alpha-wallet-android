@@ -67,7 +67,7 @@
         android:gravity="center_vertical"
         android:paddingStart="20dp"
         android:paddingEnd="15dp"
-        android:text="@string/action_open_in_etherscan"
+        android:text="@string/action_open_etherscan"
         android:textColor="@color/black"
         android:textSize="17sp" />
 

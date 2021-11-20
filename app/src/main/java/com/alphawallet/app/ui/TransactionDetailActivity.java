@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -80,7 +81,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         viewModel.transactionError().observe(this, this::txError);
 
         String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
         viewModel.fetchTransaction(wallet, txHash, chainId);
     }
@@ -102,19 +103,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         {
             //how long has this TX been pending
             findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
-            List<Integer> functionList = new ArrayList<>(Collections.singletonList(R.string.speedup_transaction));
-            functionList.add(R.string.action_open_etherscan);
-            functionList.add(R.string.cancel_transaction);
             blockNumber = "";
 
-            functionBar.setupFunctions(this, functionList);
             viewModel.startPendingTimeDisplay(transaction.hash);
             viewModel.latestTx().observe(this, this::onTxUpdated);
         }
-        else
-        {
-            functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
-        }
+        List<Integer> functionList = new ArrayList<>(Collections.singletonList(R.string.action_open_etherscan));
+        functionBar.setupFunctions(this, functionList);
 
         setupVisibilities();
 
@@ -186,7 +181,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

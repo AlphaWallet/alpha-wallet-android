@@ -50,6 +50,7 @@
         <attr name="show_allFunds" format="boolean" />
         <attr name="show_paste" format="boolean" />
         <attr name="font_size" format="integer" />
+        <attr name="invert" format="boolean" />
     </declare-styleable>
     <declare-styleable name="CopyTextView">
         <attr name="text" format="string" />

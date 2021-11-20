@@ -20,6 +20,7 @@
             custom:hint="@string/input_address"
             custom:label="@string/input_address"
             custom:show_header="false"
+            custom:nocam="true"
             custom:imeOptions="actionDone"
             android:layout_marginBottom="5dp"
             android:layout_marginTop="20dp"
@@ -39,7 +40,7 @@
         android:layout_marginStart="16dp"
         android:background="@color/nasty_green"
         android:fontFamily="@font/font_semibold"
-        android:text="@string/watch_wallet"
+        android:text="@string/action_watch_account"
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="18sp" />

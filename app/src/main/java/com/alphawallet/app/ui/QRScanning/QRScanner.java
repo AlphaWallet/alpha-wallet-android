@@ -8,7 +8,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.TextView;
@@ -41,6 +44,7 @@ import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +68,7 @@ public class QRScanner extends BaseActivity
     private BeepManager beepManager;
     private String lastText;
     private Disposable disposable;
-    private int chainIdOverride;
+    private long chainIdOverride;
     private TextView flashButton;
     private TextView myAddressButton;
     private TextView browseButton;
@@ -99,7 +103,7 @@ public class QRScanner extends BaseActivity
         toolbar();
         setTitle(getString(R.string.qr_scanner));
 
-        chainIdOverride = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, 0);
+        chainIdOverride = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, 0);
         barcodeView = findViewById(R.id.scanner_view);
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.AZTEC);
         barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
@@ -200,7 +204,7 @@ public class QRScanner extends BaseActivity
     ActivityResultLauncher<String> getQRImage = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
                 disposable = concertAndHandle(uri)
-                        .observeOn(Schedulers.io())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onSuccess, this::onError);
             });
@@ -216,7 +220,7 @@ public class QRScanner extends BaseActivity
         {
             displayErrorDialog(getString(R.string.title_dialog_error), getString(R.string.error_browse_selection));
         }
-        else
+        else if (!TextUtils.isEmpty(result.getText()))
         {
             handleQRCode(result.getText());
         }
@@ -233,6 +237,8 @@ public class QRScanner extends BaseActivity
     private Single<Result> concertAndHandle(Uri selectedImage)
     {
         return Single.fromCallable(() -> {
+
+            if (selectedImage == null) return new Result("", null, null, BarcodeFormat.QR_CODE);
 
             Bitmap bitmap = getMutableCapturedImage(selectedImage);
 
@@ -257,8 +263,16 @@ public class QRScanner extends BaseActivity
     {
         try
         {
-            ImageDecoder.Source bitMapSrc = ImageDecoder.createSource(getContentResolver(), selectedPhotoUri);
-            return ImageDecoder.decodeBitmap(bitMapSrc).copy(Bitmap.Config.ARGB_8888, true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            {
+                ImageDecoder.Source bitMapSrc = ImageDecoder.createSource(getContentResolver(), selectedPhotoUri);
+                return ImageDecoder.decodeBitmap(bitMapSrc).copy(Bitmap.Config.ARGB_8888, true);
+            }
+            else
+            {
+                //noinspection deprecation
+                return MediaStore.Images.Media.getBitmap(getContentResolver(), selectedPhotoUri);
+            }
         }
         catch (IOException e)
         {

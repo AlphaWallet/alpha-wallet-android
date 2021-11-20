@@ -601,7 +601,7 @@ public class Token
     public boolean hasGroupedTransfer() { return false; } //Can the NFT token's transfer function handle multiple tokens?
     public boolean checkSelectionValidity(List<BigInteger> selection) //check a selection of ID's for Transfer/Redeem/Sell
     {
-        return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
+        return selection != null && selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
     }
 
     public String getShortName() {
@@ -911,28 +911,29 @@ public class Token
     {
         return new Function("tokenURI",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private Function getTokenURI2(BigInteger tokenId)
     {
         return new Function("uri",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private String loadMetaData(String tokenURI)
     {
+        if (TextUtils.isEmpty(tokenURI)) return "";
+
         setupClient();
 
-        try
-        {
-            Request request = new Request.Builder()
+        Request request = new Request.Builder()
                     .url(Utils.parseIPFS(tokenURI))
                     .get()
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             return response.body().string();
         }
         catch (Exception e)

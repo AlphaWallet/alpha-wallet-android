@@ -166,7 +166,7 @@ public abstract class EventUtils
 
     public static EthFilter generateLogFilter(EventDefinition ev, Token originToken, List<BigInteger> tokenIds, AttributeInterface attrIf) throws Exception
     {
-        int chainId = ev.contract.addresses.keySet().iterator().next();
+        long chainId = ev.contract.addresses.keySet().iterator().next();
         String eventContractAddr = ev.contract.addresses.get(chainId).get(0);
 
         final Event resolverEvent = generateEventFunction(ev);
@@ -290,7 +290,7 @@ public abstract class EventUtils
         String typeName = t.getTypeAsString();
         //strip numbers
         int i = typeName.length() - 1;
-        while (Character.isDigit(typeName.charAt(i))) { i--; }; //strip
+        while (Character.isDigit(typeName.charAt(i))) { i--; }//strip
         typeName = typeName.substring(0, i+1);
         byte[] val;
 

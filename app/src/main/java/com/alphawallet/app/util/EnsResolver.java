@@ -2,6 +2,7 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenRepository;
@@ -110,7 +111,8 @@ public class EnsResolver {
             }
             catch (Exception e)
             {
-                throw new RuntimeException("Unable to execute Ethereum request", e);
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
+                return "";
             }
 
             if (!Utils.isAddressValid(contractAddress))
@@ -186,7 +188,29 @@ public class EnsResolver {
             catch (Exception e)
             {
                 //
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+        }
+
+        return "";
+    }
+
+    public String resolveAvatarFromAddress(String address)
+    {
+        if (Utils.isAddressValid(address))
+        {
+            String reverseName = Numeric.cleanHexPrefix(address.toLowerCase()) + REVERSE_NAME_SUFFIX;
+            try
+            {
+                String resolverAddress = lookupResolver(reverseName);
+                byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
+                String avatar = getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash));
+                return avatar;
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
             }
         }
 
@@ -205,8 +229,8 @@ public class EnsResolver {
     private Function getResolver(byte[] nameHash)
     {
         return new Function("resolver",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -214,9 +238,9 @@ public class EnsResolver {
     private Function getAvatar(byte[] nameHash)
     {
         return new Function("text",
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
                                     new org.web3j.abi.datatypes.Utf8String("avatar")),
-                Arrays.<TypeReference<?>>asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
+                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
                 {
                 }));
     }
@@ -224,8 +248,8 @@ public class EnsResolver {
     private Function getResolverOf(BigInteger nameId)
     {
         return new Function("resolverOf",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Uint(nameId)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -233,8 +257,8 @@ public class EnsResolver {
     private Function get(BigInteger nameId)
     {
         return new Function("get",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
+                            Arrays.asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                            Arrays.asList(new TypeReference<Utf8String>()
                             {
                             }));
     }
@@ -242,8 +266,8 @@ public class EnsResolver {
     private Function getAddr(byte[] nameHash)
     {
         return new Function("addr",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -251,8 +275,8 @@ public class EnsResolver {
     private Function getName(byte[] nameHash)
     {
         return new Function("name",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Utf8String>()
                             {
                             }));
     }
@@ -271,7 +295,7 @@ public class EnsResolver {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, int chainId) throws Exception
+            Function function, String contractAddress, long chainId) throws Exception
     {
         try
         {
@@ -290,7 +314,7 @@ public class EnsResolver {
         }
     }
 
-    private <T> T getContractData(int chainId, String address, Function function) throws Exception
+    private <T> T getContractData(long chainId, String address, Function function) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address, chainId);
 

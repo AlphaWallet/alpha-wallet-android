@@ -7,9 +7,9 @@ public interface PreferenceRepositoryType {
 
     void setCurrentWalletAddress(String address);
 
-    int getActiveBrowserNetwork();
+    long getActiveBrowserNetwork();
 
-    void setActiveBrowserNetwork(int networkId);
+    void setActiveBrowserNetwork(long networkId);
 
     String getNetworkFilterList();
 
@@ -84,4 +84,7 @@ public interface PreferenceRepositoryType {
 
     boolean isMarshMallowWarningShown();
     void setMarshMallowWarning(boolean shown);
+
+    void storeLastFragmentPage(int ordinal);
+    int getLastFragmentPage();
 }

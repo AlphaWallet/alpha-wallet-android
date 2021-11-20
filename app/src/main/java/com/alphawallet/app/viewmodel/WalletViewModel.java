@@ -273,7 +273,7 @@ public class WalletViewModel extends BaseViewModel
         tokensService.onWalletRefreshSwipe();
     }
 
-    public boolean isChainToken(int chainId, String tokenAddress)
+    public boolean isChainToken(long chainId, String tokenAddress)
     {
         return tokensService.isChainToken(chainId, tokenAddress);
     }

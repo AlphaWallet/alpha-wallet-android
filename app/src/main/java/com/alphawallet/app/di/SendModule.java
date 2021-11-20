@@ -29,8 +29,7 @@ class SendModule {
                                                      GasService gasService,
                                                      AssetDefinitionService assetDefinitionService,
                                                      KeyService keyService,
-                                                     AnalyticsServiceType analyticsService,
-                                                     PreferenceRepositoryType preferenceRepository) {
+                                                     AnalyticsServiceType analyticsService) {
         return new SendViewModelFactory(myAddressRouter,
                 networkRepositoryType,
                 tokensService,
@@ -39,8 +38,7 @@ class SendModule {
                 gasService,
                 assetDefinitionService,
                 keyService,
-                analyticsService,
-                preferenceRepository);
+                analyticsService);
     }
 
     @Provides

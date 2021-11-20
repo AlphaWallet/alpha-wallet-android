@@ -60,7 +60,7 @@ public class EventDefinition
         return found ? index : -1;
     }
 
-    public int getEventChainId()
+    public long getEventChainId()
     {
         if (parentAttribute != null)
         {
@@ -74,7 +74,7 @@ public class EventDefinition
 
     public String getEventContractAddress()
     {
-        int chainId = getEventChainId();
+        long chainId = getEventChainId();
         String contractAddress;
         if (parentAttribute != null)
         {
@@ -114,13 +114,13 @@ public class EventDefinition
         return getEventKey(contract.getfirstChainId(), contract.getFirstAddress(), activityName, attributeName);
     }
 
-    public static String getEventKey(int chainId, String eventAddress, String activityName, String attributeName)
+    public static String getEventKey(long chainId, String eventAddress, String activityName, String attributeName)
     {
         StringBuilder sb = new StringBuilder();
         try
         {
             MessageDigest digest = MessageDigest.getInstance("MD5");
-            digest.update(intToByteArray(chainId));
+            digest.update(longToByteArray(chainId));
             digest.update(eventAddress.getBytes());
             if (activityName != null) digest.update(activityName.getBytes());
             if (attributeName != null) digest.update(attributeName.getBytes());
@@ -146,6 +146,20 @@ public class EventDefinition
         ret[2] = (byte) ((a >> 8) & 0xFF);
         ret[1] = (byte) ((a >> 16) & 0xFF);
         ret[0] = (byte) ((a >> 24) & 0xFF);
+        return ret;
+    }
+
+    private static byte[] longToByteArray(long a)
+    {
+        byte[] ret = new byte[8];
+        ret[7] = (byte) (a & 0xFF);
+        ret[6] = (byte) ((a >> 8) & 0xFF);
+        ret[5] = (byte) ((a >> 16) & 0xFF);
+        ret[4] = (byte) ((a >> 24) & 0xFF);
+        ret[3] = (byte) ((a >> 32) & 0xFF);
+        ret[2] = (byte) ((a >> 40) & 0xFF);
+        ret[1] = (byte) ((a >> 48) & 0xFF);
+        ret[0] = (byte) ((a >> 56) & 0xFF);
         return ret;
     }
 }

@@ -53,7 +53,7 @@ public class WalletRepository implements WalletRepositoryType
 	{
 		return fetchWallets()
 				.flatMap(wallets -> {
-					if (wallets.length == 0) return Single.error(new Exception("No wallets"));
+					if (wallets.length == 0) return Single.error(new NoWallets("No wallets"));
 					Wallet firstWallet = null;
 					for (Wallet wallet : wallets)
 					{

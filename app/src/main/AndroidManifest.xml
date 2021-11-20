@@ -36,8 +36,12 @@
         tools:replace="android:name, android:theme, android:allowBackup">
         <activity
             android:launchMode="singleTask"
-            android:name=".ui.SplashActivity"
-            android:theme="@style/SplashTheme">
+            android:name=".ui.HomeActivity"
+            android:theme="@style/SplashTheme"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -139,6 +143,9 @@
             android:name=".ui.WalletsActivity"
             android:label="@string/title_account_list" />
 
+        <activity android:name=".ui.SplashActivity"
+            android:theme="@style/SplashTheme" />
+
         <service
             android:name=".service.WalletConnectService"
             android:enabled="true">
@@ -190,10 +197,10 @@
             android:name=".ui.RedeemAssetSelectActivity"
             android:label="@string/title_redeem" />
 
-        <activity
+        <!--<activity
             android:name=".ui.HomeActivity"
             android:label="@string/toolbar_header_wallet"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan" />-->
 
         <activity
             android:name=".ui.ImportTokenActivity"

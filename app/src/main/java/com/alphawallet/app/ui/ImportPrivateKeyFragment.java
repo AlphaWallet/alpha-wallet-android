@@ -148,14 +148,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
         }
 
         final Matcher privateKeyMatch = findKey.matcher(value);
-        if (privateKeyMatch.find())
-        {
-            updateButtonState(true);
-        }
-        else
-        {
-            updateButtonState(false);
-        }
+        updateButtonState(privateKeyMatch.find());
     }
 
     public String getPrivateKey()

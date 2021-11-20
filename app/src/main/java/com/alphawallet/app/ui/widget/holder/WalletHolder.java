@@ -118,6 +118,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 	private void startRealmListener()
 	{
+		if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
 		realmUpdate = realm.where(RealmWalletData.class)
 				.equalTo("address", wallet.address).findAllAsync();
 		realmUpdate.addChangeListener(realmWallets -> {
@@ -188,12 +189,14 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	@Override
 	public void onClick(View view) {
 		//if (wallet == null) { return; } //protect against click between constructor and bind
+		final int wallet_click_layer = R.id.wallet_click_layer;
+		final int layout_manage_wallet = R.id.layout_manage_wallet;
 		switch (view.getId()) {
-			case R.id.wallet_click_layer:
+			case wallet_click_layer:
 				clickCallback.onWalletClicked(wallet);
 				break;
 
-			case R.id.layout_manage_wallet:
+			case layout_manage_wallet:
 				Intent intent = new Intent(getContext(), WalletActionsActivity.class);
 				intent.putExtra("wallet", wallet);
 				intent.putExtra("currency", wallet.balanceSymbol);

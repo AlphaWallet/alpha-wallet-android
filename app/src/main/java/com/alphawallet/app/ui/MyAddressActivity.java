@@ -71,7 +71,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private LinearLayout selectAddress;
     private NetworkInfo networkInfo;
     private AddressMode currentMode = AddressMode.MODE_ADDRESS;
-    private int overrideNetwork;
+    private long overrideNetwork;
     private int screenWidth;
     private CopyTextView copyAddress;
     private CopyTextView copyWalletName;
@@ -321,7 +321,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             result -> {
                 if (result.getResultCode() == RESULT_OK)
                 {
-                    int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, -1);
+                    long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, -1);
                     NetworkInfo info = viewModel.getNetworkByChain(networkId);
                     if (info != null)
                     {
@@ -364,10 +364,10 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         if (viewModel == null) initViewModel();
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        int fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
-        overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
+        long fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
+        overrideNetwork = getIntent().getLongExtra(OVERRIDE_DEFAULT, fallBackChainId);
 
         if (wallet == null)
         {

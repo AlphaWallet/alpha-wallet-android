@@ -20,7 +20,7 @@ public class RecycleViewDivider extends RecyclerView.ItemDecoration {
     private final int[] ATTRS = new int[]{android.R.attr.listDivider};
     private Drawable mDivider;
     private final Rect mBounds = new Rect();
-    private int marginPx = 2;
+    private final int marginPx = 2;
     private int childTxMargin = marginPx;
 
     public RecycleViewDivider(Context context)
@@ -93,14 +93,7 @@ public class RecycleViewDivider extends RecyclerView.ItemDecoration {
 
     private boolean isChildView(View child)
     {
-        if (child.getLabelFor() == TransferHolder.VIEW_TYPE)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return child.getLabelFor() == TransferHolder.VIEW_TYPE;
     }
 
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)

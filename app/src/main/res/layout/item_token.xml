@@ -132,6 +132,7 @@
                             android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
+                            android:textColor="@color/text_dark_gray"
                             tools:text="$108.73"
                             android:textSize="12sp"
                             android:visibility="visible"/>
@@ -174,9 +175,8 @@
                         android:layout_weight="1"
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
-                        android:gravity="bottom|end"
-                        android:paddingEnd="@dimen/dp12"
-                        android:visibility="gone">
+                        android:gravity="bottom|center_horizontal"
+                        android:visibility="visible">
 
                         <TextView
                             android:id="@+id/text_appreciation"
@@ -186,7 +186,9 @@
                             android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
+                            tools:text="801,205 INR"
                             android:text="@string/unknown_balance_without_symbol"
+                            android:textColor="@color/text_dark_gray"
                             android:textSize="12sp" />
 
                         <TextView
@@ -196,6 +198,8 @@
                             android:layout_gravity="center_horizontal"
                             android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
+                            tools:text="(+0.503%)"
+                            tools:textColor="@color/nasty_green"
                             android:text="@string/unknown_balance_without_symbol"
                             android:textSize="12sp" />
 

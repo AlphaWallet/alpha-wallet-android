@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -40,7 +41,7 @@ public class OpenSeaService
     private static OkHttpClient httpClient;
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
-    private final List<Integer> storedImagesForChain = new ArrayList<>();
+    private final List<Long> storedImagesForChain = new ArrayList<>();
     private static final TokenFactory tf = new TokenFactory();
     private int pageOffset;
 
@@ -59,7 +60,7 @@ public class OpenSeaService
         return pageOffset;
     }
 
-    public Single<Token[]> getTokens(String address, int networkId, String networkName, TokensService tokensService)
+    public Single<Token[]> getTokens(String address, long networkId, String networkName, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
             int receivedTokens;
@@ -104,7 +105,7 @@ public class OpenSeaService
     }
 
     private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address,
-                                      int networkId, String networkName, TokensService tokensService) throws Exception
+                                      long networkId, String networkName, TokensService tokensService) throws Exception
     {
         final Map<String, Map<BigInteger, NFTAsset>> assetList = new HashMap<>();
 
@@ -132,7 +133,7 @@ public class OpenSeaService
         }
     }
 
-    private void handleERC721(Map<String, Map<BigInteger, NFTAsset>> assetList, JSONObject assetJSON, int networkId,
+    private void handleERC721(Map<String, Map<BigInteger, NFTAsset>> assetList, JSONObject assetJSON, long networkId,
                               Map<String, Token> foundTokens, TokensService svs, String networkName, String address) throws Exception
     {
         NFTAsset asset = new NFTAsset(assetJSON.toString());
@@ -171,7 +172,7 @@ public class OpenSeaService
         token.addAssetToTokenBalanceAssets(tokenId, asset);
     }
 
-    private void handleERC1155(Map<String, Map<BigInteger, NFTAsset>> assetList, JSONObject assetJSON, int networkId,
+    private void handleERC1155(Map<String, Map<BigInteger, NFTAsset>> assetList, JSONObject assetJSON, long networkId,
                               Map<String, Token> foundTokens, TokensService svs, String networkName, String address) throws Exception
     {
         NFTAsset asset = new NFTAsset(assetJSON.toString());
@@ -211,7 +212,7 @@ public class OpenSeaService
         token.addAssetToTokenBalanceAssets(tokenId, asset);
     }
 
-    private void addAssetImageToHashMap(Map<String, String> imageUrls, AssetContract assetContract, int networkId)
+    private void addAssetImageToHashMap(Map<String, String> imageUrls, AssetContract assetContract, long networkId)
     {
         if (storedImagesForChain.contains(networkId)) return; //already recorded the image
 
@@ -227,21 +228,18 @@ public class OpenSeaService
         return jsonData != null && jsonData.length() >= 10 && jsonData.contains("assets"); //validate return from API
     }
 
-    private String fetchTokensFromOpensea(String address, int networkId, int offset)
+    public static final Map<Long, String> apiMap = new HashMap<Long, String>(){
+        {
+            put(EthereumNetworkBase.MAINNET_ID, "https://api.opensea.io");
+            put(EthereumNetworkBase.RINKEBY_ID, "https://rinkeby-api.opensea.io");
+        }
+    };
+
+    private String fetchTokensFromOpensea(String address, long networkId, int offset)
     {
         String jsonResult = "{\"noresult\":[]}";
-        String apiBase;
-        switch (networkId)
-        {
-            case 1:
-                apiBase = "https://api.opensea.io";
-                break;
-            case 4:
-                apiBase = "https://rinkeby-api.opensea.io";
-                break;
-            default:
-                return jsonResult;
-        }
+        String apiBase = apiMap.get(networkId);
+        if (apiBase == null) return jsonResult;
 
         StringBuilder sb = new StringBuilder();
         sb.append(apiBase);
@@ -251,14 +249,13 @@ public class OpenSeaService
         sb.append("&offset=");
         sb.append(offset);
 
-        try
-        {
-            Request request = new Request.Builder()
-                    .url(sb.toString())
-                    .get()
-                    .build();
+        Request request = new Request.Builder()
+                .url(sb.toString())
+                .get()
+                .build();
 
-            okhttp3.Response response = httpClient.newCall(request).execute();
+        try (okhttp3.Response response = httpClient.newCall(request).execute())
+        {
             jsonResult = response.body().string();
         }
         catch (InterruptedIOException e)

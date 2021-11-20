@@ -75,7 +75,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
     private void getIntentData()
     {
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET_LIST);

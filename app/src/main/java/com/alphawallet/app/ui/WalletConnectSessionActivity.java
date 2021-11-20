@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.WALLET;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,7 +10,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,25 +29,19 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
-import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.widget.ChainName;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-
-import static com.alphawallet.app.C.Key.WALLET;
 
 /**
  * Created by JB on 9/09/2020.
@@ -159,7 +155,7 @@ public class WalletConnectSessionActivity extends BaseActivity
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
     {
         @Override
-        public CustomAdapter.CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+        public CustomAdapter.CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_wc_session, parent, false);
@@ -174,7 +170,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             final TextView peerName;
             final TextView peerUrl;
             final LinearLayout clickLayer;
-            final ChainName chainName;
+            final ImageView chainIcon;
 
             CustomViewHolder(View view)
             {
@@ -184,7 +180,9 @@ public class WalletConnectSessionActivity extends BaseActivity
                 peerName = view.findViewById(R.id.session_name);
                 peerUrl = view.findViewById(R.id.session_url);
                 clickLayer = view.findViewById(R.id.item_layout);
-                chainName = view.findViewById(R.id.chain_name);
+                chainIcon = view.findViewById(R.id.chain_icon);
+                chainIcon.setVisibility(View.VISIBLE);
+                view.findViewById(R.id.chain_icon_background).setVisibility(View.VISIBLE);
             }
         }
 
@@ -195,10 +193,11 @@ public class WalletConnectSessionActivity extends BaseActivity
 
             Glide.with(getApplication())
                     .load(session.icon)
+                    .circleCrop()
                     .into(holder.icon);
             holder.peerName.setText(session.name);
             holder.peerUrl.setText(session.url);
-            holder.chainName.setChainID(session.chainId);
+            holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {
                 //go to wallet connect session page
                 Intent intent = new Intent(getApplication(), WalletConnectActivity.class);

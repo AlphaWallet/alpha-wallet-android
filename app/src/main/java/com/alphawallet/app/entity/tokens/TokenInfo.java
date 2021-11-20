@@ -34,6 +34,16 @@ public class TokenInfo implements Parcelable {
         this.chainId = chainId;
     }
 
+    public TokenInfo()
+    {
+        address = "";
+        name = "";
+        symbol = "";
+        decimals = 0;
+        chainId = 0;
+        isEnabled = false;
+    }
+
     public TokenInfo(Parcel in) {
         address = in.readString();
         name = in.readString();

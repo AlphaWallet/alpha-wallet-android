@@ -91,6 +91,15 @@
                     android:layout_marginBottom="8dp"
                     android:orientation="horizontal">
 
+                    <ProgressBar
+                        android:id="@+id/ticker_update"
+                        android:layout_width="16dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_height="match_parent"
+                        android:indeterminateTint="@color/azure"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/layout_extended_info"
                         android:layout_width="0dp"
@@ -121,7 +130,7 @@
                             android:layout_marginEnd="2dp"
                             android:fontFamily="@font/font_semibold"
                             android:textColor="@color/colorPrimaryDark"
-                            tools:text="Ethereumg"
+                            tools:text="Ethereum"
                             android:textSize="12sp" />
 
                         <TextView

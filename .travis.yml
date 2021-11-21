@@ -37,7 +37,9 @@ script:
 - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
-- ./gradlew build
+- ./gradlew test
+- ./gradlew connectedAndroidTest
+- ./gradlew build -x test
 
 after_success:
  - bash <(curl -s https://codecov.io/bash)

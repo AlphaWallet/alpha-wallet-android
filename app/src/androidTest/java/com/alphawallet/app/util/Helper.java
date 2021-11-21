@@ -1,7 +1,6 @@
 package com.alphawallet.app.util;
 
 import android.view.View;
-import android.widget.TextView;
 
 import org.hamcrest.Matcher;
 
@@ -13,7 +12,6 @@ import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
-import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.core.AllOf.allOf;
@@ -60,32 +58,6 @@ public class Helper {
                         .withViewDescription(HumanReadables.describe(view))
                         .withCause(new TimeoutException())
                         .build();
-            }
-        };
-    }
-
-    public static ViewAction getText(final int id) {
-        return new ViewAction() {
-            private CharSequence text;
-
-            @Override
-            public Matcher<View> getConstraints() {
-                return isAssignableFrom(TextView.class);
-            }
-
-            @Override
-            public String getDescription() {
-                return "get text";
-            }
-
-            @Override
-            public void perform(UiController uiController, View view) {
-                TextView textView = (TextView) view;
-                text = textView.getText();
-            }
-
-            public CharSequence getText() {
-                return text;
             }
         };
     }

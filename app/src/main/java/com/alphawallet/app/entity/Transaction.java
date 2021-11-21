@@ -611,7 +611,7 @@ public class Transaction implements Parcelable
 	}
 
 	private String calculateContractAddress(String account, long nonce){
-		byte[] addressAsBytes = org.web3j.utils.Numeric.hexStringToByteArray(account);
+		byte[] addressAsBytes = Numeric.hexStringToByteArray(account);
 		byte[] calculatedAddressAsBytes =
 				Hash.sha3(RlpEncoder.encode(
 						new RlpList(
@@ -620,6 +620,6 @@ public class Transaction implements Parcelable
 
 		calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
 				12, calculatedAddressAsBytes.length);
-		return org.web3j.utils.Numeric.toHexString(calculatedAddressAsBytes);
+		return Numeric.toHexString(calculatedAddressAsBytes);
 	}
 }

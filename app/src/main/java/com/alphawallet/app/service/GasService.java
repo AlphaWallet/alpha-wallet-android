@@ -11,6 +11,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GasPriceSpread;
@@ -34,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -49,6 +50,7 @@ import okhttp3.Request;
 public class GasService implements ContractGasProvider
 {
     public final static long FETCH_GAS_PRICE_INTERVAL_SECONDS = 15;
+    private final String WHALE_ACCOUNT = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"; //used for calculating gas estimate where a tx would exceed the limits with default gas settings
 
     private final EthereumNetworkRepositoryType networkRepository;
     private final OkHttpClient httpClient;
@@ -56,6 +58,7 @@ public class GasService implements ContractGasProvider
     private long currentChainId;
     private Web3j web3j;
     private BigInteger currentGasPrice;
+    private BigInteger currentLowGasPrice = BigInteger.ZERO;
     private final String ETHERSCAN_API_KEY;
     private final String POLYGONSCAN_API_KEY;
     private boolean keyFail;
@@ -121,6 +124,8 @@ public class GasService implements ContractGasProvider
 
     private void fetchCurrentGasPrice()
     {
+        currentLowGasPrice = BigInteger.ZERO;
+        currentGasPrice = BigInteger.ZERO;
         updateCurrentGasPrices()
                 .flatMap(this::useNodeFallback)
                 .subscribeOn(Schedulers.io())
@@ -161,7 +166,7 @@ public class GasService implements ContractGasProvider
     @Override
     public BigInteger getGasLimit()
     {
-        return new BigInteger(C.DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT);
+        return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
     }
 
     private Single<Boolean> updateCurrentGasPrices()
@@ -246,6 +251,7 @@ public class GasService implements ContractGasProvider
                         updateRealm(gps, chainId);
                         update = true;
                         currentGasPrice = gps.standard;
+                        currentLowGasPrice = gps.baseFee;
                     }
                     else
                     {
@@ -294,7 +300,28 @@ public class GasService implements ContractGasProvider
         String finalTxData = txData;
 
         return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), getGasLimit(), toAddress, amount, finalTxData));
+                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), getGasLimit(), toAddress, amount, finalTxData))
+                .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData));
+    }
+
+    // If gas estimate failed due to insufficient gas, use whale account to estimate; we just want the tx estimate.
+    private Single<EthEstimateGas> handleOutOfGasError(@NonNull EthEstimateGas estimate, long chainId, String toAddress, BigInteger amount, String finalTxData)
+    {
+        if (!estimate.hasError() || chainId != 1) return Single.fromCallable(() -> estimate);
+        else return networkRepository.getLastTransactionNonce(web3j, WHALE_ACCOUNT)
+            .flatMap(nonce -> ethEstimateGas(WHALE_ACCOUNT, nonce, getLowGasPrice(), getGasLimit(), toAddress, amount, finalTxData));
+    }
+
+    private BigInteger getLowGasPrice()
+    {
+        if (currentLowGasPrice.compareTo(BigInteger.ZERO) > 0)
+        {
+            return currentLowGasPrice;
+        }
+        else
+        {
+            return currentGasPrice;
+        }
     }
 
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,

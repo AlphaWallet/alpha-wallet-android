@@ -180,7 +180,7 @@ public class WalletConnectSessionActivity extends BaseActivity
                 peerName = view.findViewById(R.id.session_name);
                 peerUrl = view.findViewById(R.id.session_url);
                 clickLayer = view.findViewById(R.id.item_layout);
-                chainIcon = view.findViewById(R.id.chain_icon);
+                chainIcon = view.findViewById(R.id.status_chain_icon);
                 chainIcon.setVisibility(View.VISIBLE);
                 view.findViewById(R.id.chain_icon_background).setVisibility(View.VISIBLE);
             }

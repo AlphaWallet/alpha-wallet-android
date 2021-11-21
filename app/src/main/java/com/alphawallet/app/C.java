@@ -174,6 +174,8 @@ public abstract class C {
     public static final String WALLET_CONNECT_CLIENT_TERMINATE =
             "com.stormbird.wallet.WC_CLIENT_TERMINATE";
     public static final String SHOW_BACKUP = "com.stormbird.wallet.CHECK_BACKUP";
+    public static final String HANDLE_BACKUP = "com.stormbird.wallet.HANDLE_BACKUP";
+    public static final String FROM_HOME_ROUTER = "HomeRouter";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";

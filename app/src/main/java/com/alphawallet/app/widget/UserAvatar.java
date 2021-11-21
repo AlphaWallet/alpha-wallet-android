@@ -155,7 +155,7 @@ public class UserAvatar extends LinearLayout
     private void setBlockie(String address)
     {
         state = BindingState.BLOCKIE;
-        if (address.equalsIgnoreCase(ZERO_ADDRESS)) return;
+        if (TextUtils.isEmpty(address) || address.equalsIgnoreCase(ZERO_ADDRESS)) return;
         image.setVisibility(View.VISIBLE);
         webLayout.setVisibility(View.GONE);
         image.setImageBitmap(Blockies.createIcon(address.toLowerCase()));

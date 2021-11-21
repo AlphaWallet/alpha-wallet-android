@@ -136,6 +136,7 @@ public class TransactionsService
         if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
                 (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
 
+        if (currentChainIndex >= filters.size()) currentChainIndex = 0;
         readTokenMoves(filters.get(currentChainIndex), nftCheck); //check NFTs for same chain on next iteration or advance to next chain
         Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
         currentChainIndex = pendingChainData.first;

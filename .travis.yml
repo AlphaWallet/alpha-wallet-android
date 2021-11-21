@@ -38,7 +38,7 @@ script:
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
 - ./gradlew test
-- ./gradlew connectedAndroidTest
+- ./gradlew uninstallAll connectedAndroidTest
 - ./gradlew build -x test
 
 after_success:

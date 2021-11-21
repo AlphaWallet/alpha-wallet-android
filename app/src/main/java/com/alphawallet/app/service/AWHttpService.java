@@ -9,18 +9,21 @@ package com.alphawallet.app.service;
  *
  */
 
+import static okhttp3.ConnectionSpec.CLEARTEXT;
+
 import com.google.gson.JsonParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.protocol.exceptions.ClientConnectionException;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +39,6 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
-
-import static okhttp3.ConnectionSpec.CLEARTEXT;
 
 /** HTTP implementation of our services API. */
 public class AWHttpService extends HttpService
@@ -192,6 +193,7 @@ public class AWHttpService extends HttpService
             }
             else
             {
+                //build fake response 0x
                 return buildNullInputStream();
             }
         }
@@ -213,16 +215,9 @@ public class AWHttpService extends HttpService
         // Default implementation is empty
     }
 
-    private InputStream buildNullInputStream()
-    {
-        return new InputStream()
-        {
-            @Override
-            public int read()
-            {
-                return 0;
-            }
-        };
+    private InputStream buildNullInputStream() {
+        String jsonData = "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x\"}";
+        return new ByteArrayInputStream(jsonData.getBytes(StandardCharsets.UTF_8));
     }
 
     private InputStream buildInputStream(Response response) throws IOException {

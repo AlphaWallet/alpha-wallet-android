@@ -68,6 +68,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
+import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.RootUtil;
@@ -96,7 +97,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver
+        FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -214,6 +215,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewPager.lockPages(true);
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(WalletPage.values().length);
+        viewPager.setCompletionCallback(this);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
             @Override
@@ -243,18 +245,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
         viewModel.splashReset().observe(this, this::onRequireInit);
-
-        int lastId = viewModel.getLastFragmentId();
-
-        /*if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
-        {
-            showPage(SETTINGS);
-        }
-        else if (lastId >= 0 && lastId < WalletPage.values().length)
-        {
-            showPage(WalletPage.values()[lastId]);
-            viewModel.storeCurrentFragmentId(-1);
-        }*/
 
         if (CustomViewSettings.hideDappBrowser())
         {
@@ -289,6 +279,31 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             //First check that this the package name is "io.stormbird.wallet" - it could be a fork
         }
 
+        setupFragmentListeners();
+
+        // Get the intent that started this activity
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (intent.hasExtra(C.FROM_HOME_ROUTER) && intent.getStringExtra(C.FROM_HOME_ROUTER).equals(C.FROM_HOME_ROUTER))
+        {
+            viewModel.storeCurrentFragmentId(-1);
+        }
+
+        if (data != null)
+        {
+            String importData = data.toString();
+            String importPath = null;
+            if (importData.startsWith("content://"))
+            {
+                importPath = data.getPath();
+            }
+
+            checkIntents(importData, importPath, intent);
+        }
+    }
+
+    private void setupFragmentListeners()
+    {
         //TODO: Move all fragment comms to this model - see all instances of ((HomeActivity)getActivity()).
         getSupportFragmentManager()
                 .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> {
@@ -325,21 +340,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         getSupportFragmentManager()
                 .setFragmentResultListener(SHOW_BACKUP, this, (requestKey, b) -> showBackupWalletDialog(b.getBoolean(SHOW_BACKUP, false)));
 
-        // Get the intent that started this activity
-        Intent intent = getIntent();
-        Uri data = intent.getData();
-
-        if (data != null)
-        {
-            String importData = data.toString();
-            String importPath = null;
-            if (importData.startsWith("content://"))
-            {
-                importPath = data.getPath();
-            }
-
-            checkIntents(importData, importPath, intent);
-        }
+        getSupportFragmentManager()
+                .setFragmentResultListener(C.HANDLE_BACKUP, this, (requestKey, b) -> {
+                    if (b.getBoolean(C.HANDLE_BACKUP))
+                    {
+                        backupWalletSuccess(b.getString("Key"));
+                    }
+                    else
+                    {
+                        backupWalletFail(b.getString("Key"), b.getBoolean("nolock"));
+                    }
+                });
     }
 
     @Override
@@ -774,6 +785,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .commitAllowingStateLoss();
     }
 
+    @Override
+    public void loadingComplete()
+    {
+        int lastId = viewModel.getLastFragmentId();
+
+        if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
+        {
+            showPage(SETTINGS);
+        }
+        else if (lastId >= 0 && lastId < WalletPage.values().length)
+        {
+            showPage(WalletPage.values()[lastId]);
+            viewModel.storeCurrentFragmentId(-1);
+        }
+    }
+
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter
     {
         public ScreenSlidePagerAdapter(FragmentManager fm)
@@ -788,6 +815,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             switch (WalletPage.values()[position])
             {
                 case WALLET:
+                default:
                     return walletFragment;
                 case ACTIVITY:
                     return activityFragment;
@@ -795,8 +823,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     return dappBrowserFragment;
                 case SETTINGS:
                     return settingsFragment;
-                default:
-                    return walletFragment;
             }
         }
 
@@ -1113,7 +1139,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 break;
             case C.ADDED_TOKEN_RETURN:
-                if (data.hasExtra(C.EXTRA_TOKENID_LIST))
+                if (data != null && data.hasExtra(C.EXTRA_TOKENID_LIST))
                 {
                     List<ContractLocator> tokenData = data.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST);
                     ((ActivityFragment) getFragment(ACTIVITY)).addedToken(tokenData);

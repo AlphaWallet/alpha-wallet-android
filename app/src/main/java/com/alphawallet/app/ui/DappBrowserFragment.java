@@ -2083,15 +2083,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
     }
 
-    public void selected()
-    {
-        //start gas update cycle when user selects Dapp browser
-        if (viewModel != null && activeNetwork != null)
-        {
-            viewModel.updateGasPrice(activeNetwork.chainId);
-        }
-    }
-
     // Handle resizing the browser view when the soft keyboard pops up and goes.
     // The issue this fixes is where you need to enter data at the bottom of the webpage,
     // and the keyboard hides the input field

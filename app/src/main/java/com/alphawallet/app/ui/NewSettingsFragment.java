@@ -4,6 +4,7 @@ package com.alphawallet.app.ui;
 import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
@@ -282,19 +283,17 @@ public class NewSettingsFragment extends BaseFragment {
 
     ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                String keyBackup = null;
+                String keyBackup = "";
                 boolean noLockScreen = false;
                 Intent data = result.getData();
                 if (data != null) keyBackup = data.getStringExtra("Key");
                 if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
-                if (result.getResultCode() == RESULT_OK)
-                {
-                    ((HomeActivity)getActivity()).backupWalletSuccess(keyBackup);
-                }
-                else
-                {
-                    ((HomeActivity)getActivity()).backupWalletFail(keyBackup, noLockScreen);
-                }
+
+                Bundle b = new Bundle();
+                b.putBoolean(C.HANDLE_BACKUP, result.getResultCode() == RESULT_OK);
+                b.putString("Key", keyBackup);
+                b.putBoolean("nolock", noLockScreen);
+                getParentFragmentManager().setFragmentResult(C.HANDLE_BACKUP, b);
             });
 
     private void openBackupActivity(Wallet wallet) {
@@ -540,7 +539,7 @@ public class NewSettingsFragment extends BaseFragment {
 
     private void checkPendingUpdate(View view)
     {
-        if (updateLayout == null) return;
+        if (updateLayout == null || view == null) return;
 
         if (pendingUpdate > 0)
         {

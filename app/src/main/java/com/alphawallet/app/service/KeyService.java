@@ -264,7 +264,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
         catch (UserNotAuthenticatedException e)
         {
-            checkAuthentication(FETCH_MNEMONIC);
+            callingActivity.runOnUiThread(() ->
+                    checkAuthentication(FETCH_MNEMONIC));
         }
     }
 

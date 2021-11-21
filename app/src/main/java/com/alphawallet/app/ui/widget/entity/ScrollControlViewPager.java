@@ -6,8 +6,10 @@ import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.util.Utils;
 
 /**
@@ -17,6 +19,7 @@ import com.alphawallet.app.util.Utils;
 public class ScrollControlViewPager extends ViewPager
 {
     private boolean isLocked = true; //locked by default
+    private PagerCallback pagerCallback = null;
 
     public ScrollControlViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -30,6 +33,10 @@ public class ScrollControlViewPager extends ViewPager
     public void lockPages(boolean locked)
     {
         isLocked = locked;
+    }
+    public void setCompletionCallback(PagerCallback cb)
+    {
+        pagerCallback = cb;
     }
 
     @Override
@@ -61,6 +68,16 @@ public class ScrollControlViewPager extends ViewPager
     public boolean performClick()
     {
         return super.performClick();
+    }
+
+    @Override
+    public void addView(View child, int index, ViewGroup.LayoutParams params)
+    {
+        super.addView(child, index, params);
+        if (pagerCallback != null && index == (WalletPage.values().length - 1))
+        {
+            pagerCallback.loadingComplete();
+        }
     }
 }
 

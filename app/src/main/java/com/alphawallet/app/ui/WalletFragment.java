@@ -5,8 +5,6 @@ import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
-import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
-import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 
 import android.content.Intent;
 import android.graphics.Canvas;

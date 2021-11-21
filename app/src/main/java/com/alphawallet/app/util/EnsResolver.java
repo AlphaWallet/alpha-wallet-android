@@ -6,6 +6,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenRepository;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -307,7 +308,7 @@ public class EnsResolver {
 
             return response.getValue();
         }
-        catch (InterruptedIOException | UnknownHostException e)
+        catch (InterruptedIOException | UnknownHostException | JsonParseException e)
         {
             //expected to happen when user switches wallets
             return "0x";

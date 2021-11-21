@@ -1,11 +1,13 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
@@ -139,8 +141,19 @@ public class WalletConnectViewModel extends BaseViewModel {
 
         Intent i = new Intent(context, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        context.startService(i);
-        context.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
+        startServiceLocal(i, context, connection);
+    }
+
+    private void startServiceLocal(Intent i, Context context, ServiceConnection connection)
+    {
+        ActivityManager.RunningAppProcessInfo myProcess = new ActivityManager.RunningAppProcessInfo();
+        ActivityManager.getMyMemoryState(myProcess);
+        boolean isInBackground = myProcess.importance != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+        if (!isInBackground)
+        {
+            context.startService(i);
+            context.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
+        }
     }
 
     public void prepare()
@@ -447,8 +460,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
         Intent i = new Intent(activity, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        activity.startService(i);
-        activity.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
+        startServiceLocal(i, activity, connection);
     }
 
     public void getCurrentRequest(WalletConnectActivity activity)
@@ -476,8 +488,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
         Intent i = new Intent(activity, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        activity.startService(i);
-        activity.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
+        startServiceLocal(i, activity, connection);
     }
 
     public void putClient(Activity activity, String sessionId, WCClient client)
@@ -500,8 +511,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
         Intent i = new Intent(activity, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        activity.startService(i);
-        activity.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
+        startServiceLocal(i, activity, connection);
     }
 
     public void rejectRequest(Context ctx, String sessionId, long id, String message)

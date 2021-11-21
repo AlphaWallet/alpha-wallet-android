@@ -175,7 +175,7 @@
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
 
     <ImageView
-        android:id="@+id/iv_chain_icon"
+        android:id="@+id/status_chain_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/empty"

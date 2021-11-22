@@ -27,7 +27,8 @@ licenses:
   - 'google-gdk-license-.+'
 
 before_install:
-- yes | sdkmanager "system-images;android-30;google_apis;x86"
+  - sdkmanager tools
+  - yes | sdkmanager "system-images;android-30;google_apis;x86"
 
 install:
   - true

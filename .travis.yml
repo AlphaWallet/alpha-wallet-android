@@ -28,14 +28,14 @@ licenses:
 
 before_install:
   - yes | sdkmanager tools
-  - yes | sdkmanager "system-images;android-30;google_apis;x86"
+  - yes | sdkmanager "system-images;android-30;google_apis;x86_64"
 
 install:
   - true
 
 before_script:
   - avdmanager list target
-  - echo no | avdmanager create avd --force -n test -k "system-images;android-30;google_apis;x86"
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-30;google_apis;x86_64"
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &

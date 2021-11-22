@@ -5,15 +5,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <include
+    <!--<include
         android:id="@+id/toolbar1"
-        layout="@layout/layout_app_bar" />
+        layout="@layout/layout_app_bar_transparent" />-->
 
     <com.journeyapps.barcodescanner.DecoratedBarcodeView
         android:id="@+id/scanner_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar1"/>
+        android:layout_height="match_parent"/>
 
     <TextView
         android:layout_width="wrap_content"

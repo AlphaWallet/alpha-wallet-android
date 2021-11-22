@@ -54,6 +54,7 @@ import com.alphawallet.token.tools.Numeric;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -233,11 +234,23 @@ public class WalletConnectViewModel extends BaseViewModel {
         resetSignDialog();
         EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
                 requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
-        disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                        error -> dAppFunction.DAppError(error, etm));
+
+        if (w3tx.isConstructor())
+        {
+            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
+                            error -> dAppFunction.DAppError(error, etm));
+        }
+        else
+        {
+            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
+                            error -> dAppFunction.DAppError(error, etm));
+        }
     }
 
     public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)

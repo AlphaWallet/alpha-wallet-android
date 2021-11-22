@@ -3,7 +3,9 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
 import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
+import static com.alphawallet.app.C.GAS_LIMIT_MAX;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
@@ -21,10 +23,12 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
+import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.Nullable;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
@@ -299,9 +303,17 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), getGasLimit(), toAddress, amount, finalTxData))
-                .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData));
+        if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
+        {
+            return networkRepository.getLastTransactionNonce(web3j, wallet.address)
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData));
+        }
+        else
+        {
+            return networkRepository.getLastTransactionNonce(web3j, wallet.address)
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), toAddress, amount, finalTxData))
+                    .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData));
+        }
     }
 
     // If gas estimate failed due to insufficient gas, use whale account to estimate; we just want the tx estimate.
@@ -322,6 +334,13 @@ public class GasService implements ContractGasProvider
         {
             return currentGasPrice;
         }
+    }
+
+    private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,
+                                                  BigInteger gasLimit, String txData)
+    {
+        final Transaction transaction = new Transaction(fromAddress, nonce, gasPrice, gasLimit, null, BigInteger.ZERO, txData);
+        return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
     }
 
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,

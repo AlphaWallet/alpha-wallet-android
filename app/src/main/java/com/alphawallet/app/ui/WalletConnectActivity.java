@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
@@ -741,7 +742,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void onFailure(Throwable throwable)
+    private void onFailure(@NonNull Throwable throwable)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
@@ -853,6 +854,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         w3Tx.recipient.toString(), viewModel.getTokensService(), this);
                 confDialog.setURL(remotePeerData.getUrl());
                 confDialog.setCanceledOnTouchOutside(false);
+                confDialog.waitForEstimate();
 
                 viewModel.calculateGasEstimate(viewModel.getWallet(), Numeric.hexStringToByteArray(w3Tx.payload),
                         chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value))

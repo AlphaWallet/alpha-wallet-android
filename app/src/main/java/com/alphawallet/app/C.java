@@ -179,16 +179,13 @@ public abstract class C {
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
-    public static final String DEFAULT_GAS_LIMIT = "90000";
     public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
     public static final String DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT = "1000000"; //if we don't know the specific function, we default to 1 million gas limit
     public static final String DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS = "432000"; //NFT's typically require more gas
-    public static final String DEFAULT_GAS_LIMIT_FOR_END_CONTRACT = "200000"; //TODO: determine appropriate gas limit for contract destruct
-    public static final long GAS_PER_BYTE = 310; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_DEFAULT = 90000L;
     public static final long GAS_LIMIT_CONTRACT = 1000000L;
-    public static final long GAS_LIMIT_MAX = 1300000L;
+    public static final long GAS_LIMIT_MAX = 1800000L;
     public static final long GAS_PRICE_MIN = 400000000L;
     public static final int ETHER_DECIMALS = 18;
 

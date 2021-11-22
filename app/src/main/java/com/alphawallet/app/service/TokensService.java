@@ -128,7 +128,7 @@ public class TokensService
             ContractAddress t = unknownTokens.pollFirst();
             Token cachedToken = t != null ? getToken(t.chainId, t.address) : null;
 
-            if (t != null && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
+            if (t != null && t.address.length() > 0 && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
             {
                 queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId).toObservable() //fetch tokenInfo
                         .filter(tokenInfo -> tokenInfo.name != null)
@@ -137,7 +137,7 @@ public class TokensService
                             .map(contractType -> tokenFactory.createToken(tokenInfo, contractType, ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId).getShortName())))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
-                        .subscribe(this::finishAddToken, this::onCheckError, this::finishTokenCheck);
+                        .subscribe(this::finishAddToken, err -> onCheckError(err, t), this::finishTokenCheck);
             }
             else if (t == null)
             {
@@ -148,7 +148,7 @@ public class TokensService
         }
     }
 
-    private void onCheckError(Throwable throwable)
+    private void onCheckError(Throwable throwable, ContractAddress t)
     {
         if (BuildConfig.DEBUG) throwable.printStackTrace();
     }

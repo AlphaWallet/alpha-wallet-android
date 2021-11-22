@@ -20,7 +20,6 @@ android:
     # if you need to run emulator(s) during your tests
     - sys-img-x86-android-30
     - sys-img-x86-android-26
-    - sys-img-armeabi-v7a-android-30
 
 licenses:
   - 'android-sdk-preview-license-.+'
@@ -28,13 +27,14 @@ licenses:
   - 'google-gdk-license-.+'
 
 before_install:
-- yes | sdkmanager "platforms;android-30"
+- yes | sdkmanager "system-images;android-30;google_apis;x86"
 
 install:
   - true
 
 before_script:
-  - echo no | android create avd --force -n test -t android-30 --abi armeabi-v7a
+  - avdmanager list target
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-30;google_apis;x86"
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &

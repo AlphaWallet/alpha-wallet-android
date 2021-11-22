@@ -34,8 +34,7 @@ install:
   - true
 
 before_script:
-  - avdmanager list target
-  - echo no | avdmanager create avd --force -n test -k "system-images;android-30;google_apis;x86_64"
+  - echo no | android create avd --force -n test -t android-30 --abi x86_64
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &

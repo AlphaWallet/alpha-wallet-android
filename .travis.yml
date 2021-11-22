@@ -32,6 +32,12 @@ before_install:
 install:
   - true
 
+before_script:
+  - echo no | android create avd --force -n test -t android-26 --abi armeabi-v7a
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
 - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..

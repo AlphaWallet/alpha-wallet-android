@@ -6,7 +6,6 @@ android:
     # use the latest revision of Android SDK Tools
     - tools
     - platform-tools
-    - emulator
 
     # The BuildTools version used by your project
     - build-tools-30.0.3
@@ -36,7 +35,7 @@ install:
 
 before_script:
   - echo no | android create avd --force -n test -k "system-images;android-30;google_apis;x86_64"
-  - emulator -avd test -no-skin -no-audio -no-window &
+  - cd $(dirname $(which emulator)) && ./emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
 

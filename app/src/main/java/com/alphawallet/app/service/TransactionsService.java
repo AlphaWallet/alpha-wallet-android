@@ -115,6 +115,12 @@ public class TransactionsService
         }
     }
 
+    public void resumeFocus()
+    {
+        tokensService.clearFocusToken();
+        tokensService.walletInFocus();
+    }
+
     public void startUpdateCycle()
     {
         chainTransferCheckTimes.clear();
@@ -347,10 +353,16 @@ public class TransactionsService
         fetchTransactions();
     }
 
-    public void lostFocus()
+    public void stopService()
     {
         tokensService.stopUpdateCycle();
         stopAllChainUpdate();
+        tokensService.walletOutOfFocus();
+    }
+
+    public void lostFocus()
+    {
+        tokensService.walletOutOfFocus();
     }
 
     private void stopAllChainUpdate()
@@ -359,11 +371,16 @@ public class TransactionsService
         if (transactionCheckCycle != null && !transactionCheckCycle.isDisposed()) { transactionCheckCycle.dispose(); }
         if (pendingTransactionCheckCycle != null && !pendingTransactionCheckCycle.isDisposed()) { pendingTransactionCheckCycle.dispose(); }
         if (tokenTransferCheckCycle != null && !tokenTransferCheckCycle.isDisposed()) { tokenTransferCheckCycle.dispose(); }
+        if (eventFetch != null && !eventFetch.isDisposed()) { eventFetch.dispose(); }
 
         fetchTransactionDisposable = null;
         transactionCheckCycle = null;
         pendingTransactionCheckCycle = null;
         tokenTransferCheckCycle = null;
+        eventFetch = null;
+        tokensService.checkingChain(0);
+        chainTransferCheckTimes.clear();
+        chainTransactionCheckTimes.clear();
     }
 
     public void markPending(Transaction tx)
@@ -467,6 +484,12 @@ public class TransactionsService
         {
             return new Transaction();
         }
+    }
+
+    public void stopActivity()
+    {
+        tokensService.stopUpdateCycle();
+        stopAllChainUpdate();
     }
 
     public Single<Boolean> wipeDataForWallet()

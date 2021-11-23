@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 
@@ -21,18 +22,21 @@ public class ActivityViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final TransactionsService transactionsService;
+    private final RealmManager realmManager;
 
     public ActivityViewModelFactory(
             GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            TransactionsService transactionsService) {
+            TransactionsService transactionsService,
+            RealmManager realmManager) {
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.transactionsService = transactionsService;
+        this.realmManager = realmManager;
     }
 
     @NonNull
@@ -43,7 +47,8 @@ public class ActivityViewModelFactory implements ViewModelProvider.Factory {
                 fetchTransactionsInteract,
                 assetDefinitionService,
                 tokensService,
-                transactionsService);
+                transactionsService,
+                realmManager);
     }
 }
 

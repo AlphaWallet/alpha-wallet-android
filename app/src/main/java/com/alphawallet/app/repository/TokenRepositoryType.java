@@ -34,7 +34,6 @@ public interface TokenRepositoryType {
     TokenTicker getTokenTicker(Token token);
     Single<BigInteger> fetchLatestBlockNumber(long chainId);
     Token fetchToken(long chainId, String walletAddress, String address);
-    void createBaseNetworkTokens(String walletAddress);
     String getTokenImageUrl(long chainId, String address);
 
     Single<Token[]> storeTokens(Wallet wallet, Token[] tokens);

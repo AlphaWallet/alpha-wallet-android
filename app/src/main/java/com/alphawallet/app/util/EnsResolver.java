@@ -141,7 +141,7 @@ public class EnsResolver {
      */
     public String reverseResolve(String address) throws UnableToResolveENS
     {
-        String name = null;
+        String name = "";
         if (Utils.isAddressValid(address))
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
@@ -206,7 +206,7 @@ public class EnsResolver {
                 String resolverAddress = lookupResolver(reverseName);
                 byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
                 String avatar = getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash));
-                return avatar;
+                return avatar != null ? avatar : "";
             }
             catch (Exception e)
             {
@@ -325,7 +325,7 @@ public class EnsResolver {
         }
         else if (responseValue.equals("0x"))
         {
-            return null;
+            return (T)"";
         }
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -336,7 +336,7 @@ public class EnsResolver {
         }
         else
         {
-            return null;
+            return (T)"";
         }
     }
 

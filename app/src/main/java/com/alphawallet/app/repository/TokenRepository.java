@@ -165,6 +165,10 @@ public class TokenRepository implements TokenRepositoryType {
                             {
                                 type = ContractType.ERC721;
                             }
+                            else
+                            {
+                                t.balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address); //get balance for wallet from contract
+                            }
                             break;
                         case ERC1155:
                             break;
@@ -267,12 +271,6 @@ public class TokenRepository implements TokenRepositoryType {
     {
         Wallet wallet = new Wallet(walletAddress);
         return localSource.fetchToken(chainId, wallet, address);
-    }
-
-    @Override
-    public void createBaseNetworkTokens(String walletAddress)
-    {
-        localSource.createBaseNetworkTokens(walletAddress);
     }
 
     @Override
@@ -427,7 +425,7 @@ public class TokenRepository implements TokenRepositoryType {
                             balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
                             break;
                         case ERC1155:
-                            balance = token.updateBalance(getRealmInstance(wallet));
+                            balance = updateERC1155Balance(token, wallet);
                             break;
                         case ERC721_TICKET:
                             balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());
@@ -457,6 +455,17 @@ public class TokenRepository implements TokenRepositoryType {
 
                 return balance;
             });
+    }
+
+    private BigDecimal updateERC1155Balance(Token token, Wallet wallet)
+    {
+        BigDecimal newBalance;
+        try (Realm realm = getRealmInstance(wallet))
+        {
+            newBalance = token.updateBalance(realm);
+        }
+
+        return newBalance;
     }
 
     private Single<Token[]> updateBalances(Wallet wallet, Token[] tokens)

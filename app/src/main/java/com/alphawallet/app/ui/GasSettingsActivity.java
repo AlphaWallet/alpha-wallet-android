@@ -235,7 +235,11 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     public void onDestroy()
     {
         super.onDestroy();
-        if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
+        if (realmGasSpread != null)
+        {
+            realmGasSpread.removeAllChangeListeners();
+            if (!realmGasSpread.getRealm().isClosed()) realmGasSpread.getRealm().close();
+        }
     }
 
     @Override

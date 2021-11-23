@@ -89,27 +89,6 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens)
-    {
-        return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                realm.executeTransactionAsync(r -> {
-                    for (Token token : tokens)
-                    {
-                        saveToken(r, token);
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-            return tokens;
-        });
-    }
-
-    @Override
     public void deleteRealmToken(long chainId, Wallet wallet, String address)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
@@ -135,7 +114,7 @@ public class TokensRealmSource implements TokenLocalSource {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", dbKey, Case.INSENSITIVE)
                         .findFirst();
@@ -250,28 +229,6 @@ public class TokensRealmSource implements TokenLocalSource {
             }
 
             return t;
-        }
-    }
-
-    @Override
-    public void createBaseNetworkTokens(String walletAddress)
-    {
-        try (Realm realm = realmManager.getRealmInstance(walletAddress))
-        {
-            realm.executeTransaction(r -> {
-                NetworkInfo[] allMainNetworks = ethereumNetworkRepository.getAllActiveNetworks();
-                for (NetworkInfo info : allMainNetworks)
-                {
-                    RealmToken realmItem = r.where(RealmToken.class)
-                            .equalTo("address", databaseKey(info.chainId, walletAddress))
-                            .findFirst();
-
-                    if (realmItem == null)
-                    {
-                        saveToken(r, createCurrencyToken(info, new Wallet(walletAddress)));
-                    }
-                }
-            });
         }
     }
 
@@ -552,7 +509,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception e)
         {
-            //
+            if (BuildConfig.DEBUG) System.out.println("He's Did: " + e.getMessage());
         }
 
         return balanceChanged;
@@ -929,8 +886,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
-            return tokenMetas;
-        }).flatMap(loadedMetas -> populateBaseCards(wallet, rootChainTokenCards, loadedMetas));
+            return tokenMetas.toArray(new TokenCardMeta[0]); //tokenMetas;
+        });//.flatMap(loadedMetas -> populateBaseCards(wallet, rootChainTokenCards, loadedMetas));
     }
 
     private Single<TokenCardMeta[]> populateBaseCards(Wallet wallet, List<Long> rootChainTokenCards, List<TokenCardMeta> loadedMetas)

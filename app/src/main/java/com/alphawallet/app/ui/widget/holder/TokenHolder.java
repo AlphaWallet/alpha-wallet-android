@@ -90,6 +90,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             token = tokensService.getToken(data.getChain(), data.getAddress());
             if (token == null)
             {
+                tokenLayout.setVisibility(View.GONE);
                 fillEmpty();
                 return;
             }
@@ -100,6 +101,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 if (backupChain != null) token = backupChain;
             }
 
+            tokenLayout.setVisibility(View.VISIBLE);
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);

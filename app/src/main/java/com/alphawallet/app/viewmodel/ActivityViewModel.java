@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 
@@ -36,6 +37,7 @@ public class ActivityViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final TransactionsService transactionsService;
+    private final RealmManager realmManager;
 
     @Nullable
     private Disposable queryUnknownTokensDisposable;
@@ -50,12 +52,14 @@ public class ActivityViewModel extends BaseViewModel
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            TransactionsService transactionsService) {
+            TransactionsService transactionsService,
+            RealmManager realmManager) {
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.transactionsService = transactionsService;
+        this.realmManager = realmManager;
     }
 
     public void prepare()
@@ -116,7 +120,7 @@ public class ActivityViewModel extends BaseViewModel
 
     public Realm getRealmInstance()
     {
-        return fetchTransactionsInteract.getRealmInstance(wallet.getValue());
+        return realmManager.getRealmInstance(wallet.getValue());
     }
 
     public Transaction getTransaction(String hash)

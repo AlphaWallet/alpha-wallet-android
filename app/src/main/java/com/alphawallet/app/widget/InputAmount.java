@@ -148,8 +148,17 @@ public class InputAmount extends LinearLayout
     {
         if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
         if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
-        if (realm != null) realm.removeAllChangeListeners();
-        if (tickerRealm != null) tickerRealm.removeAllChangeListeners();
+        if (realm != null)
+        {
+            realm.removeAllChangeListeners();
+            if (!realm.isClosed()) realm.close();
+        }
+        if (tickerRealm != null)
+        {
+            tickerRealm.removeAllChangeListeners();
+            if (!tickerRealm.isClosed()) tickerRealm.close();
+        }
+
         realmTickerUpdate = null;
         realmTokenUpdate = null;
     }

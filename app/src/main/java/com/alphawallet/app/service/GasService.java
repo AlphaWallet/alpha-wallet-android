@@ -23,12 +23,10 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
-import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.Nullable;
-import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
@@ -43,6 +41,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -281,15 +280,18 @@ public class GasService implements ContractGasProvider
      */
     private void updateRealm(final GasPriceSpread gasPriceSpread, final long chainId)
     {
-        realmManager.getRealmInstance(TICKER_DB).executeTransaction(r -> {
-            RealmGasSpread rgs = r.where(RealmGasSpread.class)
-                    .equalTo("chainId", chainId)
-                    .findFirst();
-            if (rgs == null)
-                rgs = r.createObject(RealmGasSpread.class, chainId);
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransaction(r -> {
+                RealmGasSpread rgs = r.where(RealmGasSpread.class)
+                        .equalTo("chainId", chainId)
+                        .findFirst();
+                if (rgs == null)
+                    rgs = r.createObject(RealmGasSpread.class, chainId);
 
-            rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
-        });
+                rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
+            });
+        }
     }
 
     public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet)

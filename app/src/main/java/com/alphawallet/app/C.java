@@ -176,6 +176,7 @@ public abstract class C {
     public static final String SHOW_BACKUP = "com.stormbird.wallet.CHECK_BACKUP";
     public static final String HANDLE_BACKUP = "com.stormbird.wallet.HANDLE_BACKUP";
     public static final String FROM_HOME_ROUTER = "HomeRouter";
+    public static final String TOKEN_CLICK = "com.stormbird.wallet.TOKEN_CLICK";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
@@ -200,7 +201,6 @@ public abstract class C {
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
-
 
     public interface ErrorCode {
         int UNKNOWN = 1;

@@ -25,6 +25,7 @@ import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -55,6 +56,7 @@ public class WalletViewModel extends BaseViewModel
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
+    private final RealmManager realmManager;
     private long lastBackupCheck = 0;
 
     WalletViewModel(
@@ -66,7 +68,8 @@ public class WalletViewModel extends BaseViewModel
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
-            PreferenceRepositoryType preferenceRepository)
+            PreferenceRepositoryType preferenceRepository,
+            RealmManager realmManager)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -77,6 +80,7 @@ public class WalletViewModel extends BaseViewModel
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
         this.preferenceRepository = preferenceRepository;
+        this.realmManager = realmManager;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -114,7 +118,6 @@ public class WalletViewModel extends BaseViewModel
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
-        tokensService.startUpdateCycle();
         fetchTokens(wallet);
     }
 
@@ -187,9 +190,9 @@ public class WalletViewModel extends BaseViewModel
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 
-    public Realm getRealmInstance(Wallet wallet)
+    public Realm getRealmInstance()
     {
-        return tokensService.getRealmInstance(wallet);
+        return realmManager.getRealmInstance(getWallet());
     }
 
     public void showTokenDetail(Activity activity, Token token)

@@ -86,23 +86,30 @@ public class AWEnsResolver extends EnsResolver
                 // no action
             }
             return ensName;
-        });
+        }).onErrorReturnItem("");
     }
 
     public Single<String> getENSUrl(String ensName)
     {
         return Single.fromCallable(() -> {
-            if (TextUtils.isEmpty(ensName))
+            try
+            {
+                if (TextUtils.isEmpty(ensName))
+                {
+                    return "";
+                }
+                else if (Utils.isAddressValid(ensName))
+                {
+                    return resolveAvatarFromAddress(ensName);
+                }
+                else
+                {
+                    return resolveAvatar(ensName);
+                }
+            }
+            catch (Exception e)
             {
                 return "";
-            }
-            else if (Utils.isAddressValid(ensName))
-            {
-                return resolveAvatarFromAddress(ensName);
-            }
-            else
-            {
-                return resolveAvatar(ensName);
             }
         }).flatMap(this::convertLocator);
     }
@@ -296,7 +303,7 @@ public class AWEnsResolver extends EnsResolver
                 // no action
             }
             return address;
-        });
+        }).onErrorReturnItem("");
     }
 
     public static boolean couldBeENS(String address)

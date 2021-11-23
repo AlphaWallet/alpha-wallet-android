@@ -117,6 +117,13 @@ public class TransactionsService
 
     public void resumeFocus()
     {
+        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed()
+            || pendingTransactionCheckCycle == null || pendingTransactionCheckCycle.isDisposed()
+            || tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())
+        {
+            startUpdateCycle();
+        }
+
         tokensService.clearFocusToken();
         tokensService.walletInFocus();
     }

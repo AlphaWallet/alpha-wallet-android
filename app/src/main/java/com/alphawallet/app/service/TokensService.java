@@ -996,6 +996,8 @@ public class TokensService
     public void walletInFocus()
     {
         appHasFocus = true;
+
+        //running or not?
     }
 
     public void walletOutOfFocus()

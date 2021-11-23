@@ -495,6 +495,11 @@ public class HomeViewModel extends BaseViewModel {
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 
+    public void checkTransactionEngine()
+    {
+        transactionsService.resumeFocus();
+    }
+
     public void stopTransactionUpdate()
     {
         transactionsService.stopService();
@@ -503,12 +508,6 @@ public class HomeViewModel extends BaseViewModel {
     public void outOfFocus()
     {
         transactionsService.lostFocus();
-    }
-
-    public void startTransactionUpdate()
-    {
-        transactionsService.startUpdateCycle();
-        transactionsService.resumeFocus();
     }
 
     public boolean fullScreenSelected()

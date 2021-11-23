@@ -500,6 +500,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             else
             {
+                balanceChanged = true;
                 //write token
                 realm.executeTransaction(r -> {
                     token.balance = balance;
@@ -509,7 +510,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) System.out.println("He's Did: " + e.getMessage());
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return balanceChanged;
@@ -605,11 +606,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 token.setRealmLastBlock(realmToken);
                 writeAssetContract(realm, token);
             }
-        }
-
-        if (wasNew && BuildConfig.DEBUG && realmToken.isEnabled())
-        {
-            Log.d(TAG, "Save New Token already enabled");
         }
 
         //Final check to see if the token should be visible

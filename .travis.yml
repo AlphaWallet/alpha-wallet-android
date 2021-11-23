@@ -34,6 +34,7 @@ install:
   - true
 
 before_script:
+  - sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
   - echo no | android create avd --force -n test -k "system-images;android-30;google_apis;x86_64"
   - cd $(dirname $(which emulator)) && ./emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator

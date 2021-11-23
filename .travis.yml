@@ -34,6 +34,7 @@ install:
   - true
 
 before_script:
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
   - sudo apt-get update
   - sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
   - echo no | android create avd --force -n test -k "system-images;android-30;google_apis;x86_64"

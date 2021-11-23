@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenPerformance;
 import com.alphawallet.app.entity.tokens.TokenPortfolio;
 import com.alphawallet.app.entity.tokens.TokenStats;
+import com.alphawallet.app.ui.widget.entity.HistoryChart;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.TokenInfoViewModel;
 import com.alphawallet.app.viewmodel.TokenInfoViewModelFactory;
@@ -44,6 +45,7 @@ public class TokenInfoFragment extends BaseFragment {
     private Token token;
     private LinearLayout tokenInfoHeaderLayout;
     private LinearLayout tokenInfoLayout;
+    private HistoryChart historyChart;
 
     private TokenInfoHeaderView tokenInfoHeaderView;
     private TokenInfoView portfolioBalance;
@@ -83,6 +85,7 @@ public class TokenInfoFragment extends BaseFragment {
             token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             initTabLayout(view);
+            historyChart = view.findViewById(R.id.history_chart);
             tokenInfoHeaderLayout = view.findViewById(R.id.layout_token_header);
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
 
@@ -134,6 +137,8 @@ public class TokenInfoFragment extends BaseFragment {
             viewModel.portfolio().observe(getViewLifecycleOwner(), this::onPortfolioUpdated);
             viewModel.performance().observe(getViewLifecycleOwner(), this::onPerformanceUpdated);
             viewModel.stats().observe(getViewLifecycleOwner(), this::onStatsUpdated);
+
+            historyChart.fetchHistory(token.tokenInfo, HistoryChart.Range.Day);
         }
     }
 
@@ -146,12 +151,12 @@ public class TokenInfoFragment extends BaseFragment {
         tabLayout.addTab(tabLayout.newTab().setText("1M"));
         tabLayout.addTab(tabLayout.newTab().setText("3M"));
         tabLayout.addTab(tabLayout.newTab().setText("1Y"));
-
+        
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab)
             {
-                viewModel.fetchChartData(tab.getPosition());
+                historyChart.fetchHistory(token.tokenInfo, HistoryChart.Range.values()[tab.getPosition()]);
             }
 
             @Override

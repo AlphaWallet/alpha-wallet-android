@@ -6,6 +6,7 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.viewmodel.ActivityViewModelFactory;
@@ -25,13 +26,15 @@ class ActivityModule
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            TransactionsService transactionsService) {
+            TransactionsService transactionsService,
+            RealmManager realmManager) {
         return new ActivityViewModelFactory(
                 genericWalletInteract,
                 fetchTransactionsInteract,
                 assetDefinitionService,
                 tokensService,
-                transactionsService);
+                transactionsService,
+                realmManager);
     }
 
     @Provides

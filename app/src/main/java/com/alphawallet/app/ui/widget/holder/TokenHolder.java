@@ -100,6 +100,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 if (backupChain != null) token = backupChain;
             }
 
+            findViewById(R.id.progress_spinner).setVisibility(View.GONE);
+            tokenLayout.setVisibility(View.VISIBLE);
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
@@ -202,13 +204,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     }
 
     private void fillEmpty() {
-        balanceEth.setText(R.string.NA);
+        findViewById(R.id.progress_spinner).setVisibility(View.VISIBLE);
+        balanceEth.setText(R.string.empty);
         balanceCurrency.setText(EMPTY_BALANCE);
     }
 
     @Override
     public void onClick(View v) {
-        if (onTokenClickListener != null) {
+        if (onTokenClickListener != null && token != null) {
             onTokenClickListener.onTokenClick(v, token, null, true);
         }
     }
@@ -216,7 +219,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public boolean onLongClick(View v)
     {
-        if (onTokenClickListener != null) {
+        if (onTokenClickListener != null && token != null) {
             onTokenClickListener.onLongTokenClick(v, token, null);
         }
 

@@ -3,7 +3,9 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
 import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
+import static com.alphawallet.app.C.GAS_LIMIT_MAX;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
@@ -39,6 +41,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -277,15 +280,18 @@ public class GasService implements ContractGasProvider
      */
     private void updateRealm(final GasPriceSpread gasPriceSpread, final long chainId)
     {
-        realmManager.getRealmInstance(TICKER_DB).executeTransaction(r -> {
-            RealmGasSpread rgs = r.where(RealmGasSpread.class)
-                    .equalTo("chainId", chainId)
-                    .findFirst();
-            if (rgs == null)
-                rgs = r.createObject(RealmGasSpread.class, chainId);
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransaction(r -> {
+                RealmGasSpread rgs = r.where(RealmGasSpread.class)
+                        .equalTo("chainId", chainId)
+                        .findFirst();
+                if (rgs == null)
+                    rgs = r.createObject(RealmGasSpread.class, chainId);
 
-            rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
-        });
+                rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
+            });
+        }
     }
 
     public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet)
@@ -299,9 +305,17 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), getGasLimit(), toAddress, amount, finalTxData))
-                .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData));
+        if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
+        {
+            return networkRepository.getLastTransactionNonce(web3j, wallet.address)
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData));
+        }
+        else
+        {
+            return networkRepository.getLastTransactionNonce(web3j, wallet.address)
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), toAddress, amount, finalTxData))
+                    .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData));
+        }
     }
 
     // If gas estimate failed due to insufficient gas, use whale account to estimate; we just want the tx estimate.
@@ -322,6 +336,13 @@ public class GasService implements ContractGasProvider
         {
             return currentGasPrice;
         }
+    }
+
+    private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,
+                                                  BigInteger gasLimit, String txData)
+    {
+        final Transaction transaction = new Transaction(fromAddress, nonce, gasPrice, gasLimit, null, BigInteger.ZERO, txData);
+        return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
     }
 
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,

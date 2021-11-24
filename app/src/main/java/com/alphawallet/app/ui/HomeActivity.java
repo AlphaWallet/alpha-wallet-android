@@ -119,6 +119,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
+    private volatile boolean tokenClicked = false;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -143,7 +144,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void onMoveToForeground()
     {
         Log.d("LIFE", "AlphaWallet into foreground");
-        if (viewModel != null) viewModel.startTransactionUpdate();
+        if (viewModel != null) viewModel.checkTransactionEngine();
         isForeground = true;
     }
 
@@ -151,7 +152,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void onMoveToBackground()
     {
         Log.d("LIFE", "AlphaWallet into background");
-        if (viewModel != null) viewModel.stopTransactionUpdate();
+        if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
+        if (viewModel != null) viewModel.outOfFocus();
         isForeground = false;
     }
 
@@ -350,6 +352,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     {
                         backupWalletFail(b.getString("Key"), b.getBoolean("nolock"));
                     }
+                });
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(C.TOKEN_CLICK, this, (requestKey, b) -> {
+                    tokenClicked = true;
+                    handler.postDelayed(() -> tokenClicked = false, 10000);
                 });
     }
 
@@ -647,12 +655,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void signalPageVisibilityChange(WalletPage oldPage, WalletPage newPage)
     {
-        if (oldPage == newPage) return;
-
-        BaseFragment leavingFocus = (BaseFragment) getFragment(oldPage);
-        BaseFragment inFocus      = (BaseFragment) getFragment(newPage);
-        leavingFocus.leaveFocus();
+        BaseFragment inFocus = (BaseFragment) getFragment(newPage);
         inFocus.comeIntoFocus();
+
+        if (oldPage != newPage)
+        {
+            BaseFragment leavingFocus = (BaseFragment) getFragment(oldPage);
+            leavingFocus.leaveFocus();
+        }
     }
 
     private void checkWarnings()
@@ -798,6 +808,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             showPage(WalletPage.values()[lastId]);
             viewModel.storeCurrentFragmentId(-1);
+        }
+        else
+        {
+            showPage(WALLET);
+            getFragment(WALLET).comeIntoFocus();
         }
     }
 
@@ -1009,7 +1024,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         boolean hasPermission = true;
         for (int i = 0; i < permissions.length; i++)
         {
-            if (grantResults[i] == -1) hasPermission = false;
+            if (grantResults[i] == -1) { hasPermission = false; break; }
         }
 
         return hasPermission;

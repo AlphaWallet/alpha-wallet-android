@@ -36,17 +36,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingBottom="10dp"
             android:paddingStart="16dp"
+            android:paddingTop="14dp"
             android:paddingEnd="2dp"
-            android:paddingTop="14dp">
+            android:paddingBottom="10dp">
 
             <com.alphawallet.app.widget.TokenIcon
                 android:id="@+id/token_icon"
                 android:layout_width="@dimen/token_icon"
                 android:layout_height="@dimen/token_icon"
-                android:layout_marginEnd="10dp"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:layout_marginEnd="10dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -62,24 +62,35 @@
                         android:id="@+id/eth_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="2dp"
                         android:layout_alignParentStart="true"
+                        android:layout_marginEnd="2dp"
                         android:layout_toStartOf="@+id/chain_name"
                         android:fontFamily="@font/font_regular"
-                        tools:text="0 Ethereum"
                         android:textColor="@color/text_black"
-                        android:textSize="20sp" />
+                        android:textSize="20sp"
+                        tools:text="0 Ethereum" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignBottom="@id/eth_data"
+                        android:indeterminateTint="@color/azure"
+                        android:layout_alignTop="@id/eth_data"
+                        android:visibility="gone"
+                        android:layout_marginEnd="2dp" />
 
                     <com.alphawallet.app.widget.ChainName
                         android:id="@+id/chain_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
                         android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="@dimen/dp5"
                         android:layout_marginTop="@dimen/dp5"
                         android:layout_marginEnd="@dimen/dp8"
-                        android:layout_marginStart="@dimen/dp5"
-                        custom:font_size="10"/>
+                        custom:font_size="10" />
 
                 </RelativeLayout>
 
@@ -94,18 +105,18 @@
                     <ProgressBar
                         android:id="@+id/ticker_update"
                         android:layout_width="16dp"
-                        android:layout_marginEnd="2dp"
                         android:layout_height="match_parent"
+                        android:layout_marginEnd="2dp"
                         android:indeterminateTint="@color/azure"
                         android:visibility="gone"
-                        tools:visibility="visible"/>
+                        tools:visibility="visible" />
 
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/layout_extended_info"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
+                        android:layout_weight="1"
                         android:gravity="bottom"
                         android:orientation="horizontal">
 
@@ -113,59 +124,59 @@
                             android:id="@+id/issuerPlaceholder"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:fontFamily="@font/font_semibold"
                             android:layout_gravity="bottom"
+                            android:fontFamily="@font/font_semibold"
                             android:gravity="bottom"
                             android:text="@string/issuer"
                             android:textColor="@color/colorPrimaryDark"
                             android:textSize="12sp"
-                            android:visibility="visible"/>
+                            android:visibility="visible" />
 
                         <TextView
                             android:id="@+id/issuer"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:gravity="bottom"
                             android:layout_gravity="bottom"
                             android:layout_marginEnd="2dp"
                             android:fontFamily="@font/font_semibold"
+                            android:gravity="bottom"
                             android:textColor="@color/colorPrimaryDark"
-                            tools:text="Ethereum"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:text="Ethereum" />
 
                         <TextView
                             android:id="@+id/balance_currency"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal|bottom"
-                            android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
+                            android:gravity="bottom"
                             android:text="@string/unknown_balance_without_symbol"
                             android:textColor="@color/text_dark_gray"
-                            tools:text="$108.73"
                             android:textSize="12sp"
-                            android:visibility="visible"/>
+                            android:visibility="visible"
+                            tools:text="$108.73" />
 
                         <View
                             android:id="@+id/contract_seperator"
                             android:layout_width="1dp"
                             android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="2dp"
                             android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
                             android:layout_marginTop="2dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="2dp"
                             android:background="@color/colorPrimaryDark"
+                            android:gravity="center_vertical"
                             android:visibility="visible" />
 
                         <TextView
                             android:id="@+id/contract_type"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:fontFamily="@font/font_regular"
-                            android:textColor="@color/colorPrimaryDark"
                             android:layout_gravity="bottom"
+                            android:fontFamily="@font/font_regular"
                             android:gravity="bottom"
+                            android:textColor="@color/colorPrimaryDark"
                             android:textSize="12sp"
                             android:visibility="visible"
                             tools:text="@string/erc20" />
@@ -174,17 +185,17 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=" "
-                            android:textSize="12sp"/>
+                            android:textSize="12sp" />
 
                     </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <LinearLayout
                         android:id="@+id/layout_appreciation"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
-                        android:orientation="horizontal"
+                        android:layout_weight="1"
                         android:gravity="bottom|center_horizontal"
+                        android:orientation="horizontal"
                         android:visibility="visible">
 
                         <TextView
@@ -192,25 +203,25 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
-                            android:gravity="bottom"
-                            android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
-                            tools:text="801,205 INR"
+                            android:fontFamily="@font/font_regular"
+                            android:gravity="bottom"
                             android:text="@string/unknown_balance_without_symbol"
                             android:textColor="@color/text_dark_gray"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:text="801,205 INR" />
 
                         <TextView
                             android:id="@+id/text_24_hrs"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
-                            android:gravity="bottom"
                             android:fontFamily="@font/font_regular"
-                            tools:text="(+0.503%)"
-                            tools:textColor="@color/nasty_green"
+                            android:gravity="bottom"
                             android:text="@string/unknown_balance_without_symbol"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:text="(+0.503%)"
+                            tools:textColor="@color/nasty_green" />
 
                     </LinearLayout>
 

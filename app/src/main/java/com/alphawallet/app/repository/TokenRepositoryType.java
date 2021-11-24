@@ -34,7 +34,6 @@ public interface TokenRepositoryType {
     TokenTicker getTokenTicker(Token token);
     Single<BigInteger> fetchLatestBlockNumber(long chainId);
     Token fetchToken(long chainId, String walletAddress, String address);
-    void createBaseNetworkTokens(String walletAddress);
     String getTokenImageUrl(long chainId, String address);
 
     Single<Token[]> storeTokens(Wallet wallet, Token[] tokens);
@@ -44,7 +43,6 @@ public interface TokenRepositoryType {
     Token[] initNFTAssets(Wallet wallet, Token[] token);
 
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
-    Token updateTokenType(Token token, Wallet wallet, ContractType type);
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
 

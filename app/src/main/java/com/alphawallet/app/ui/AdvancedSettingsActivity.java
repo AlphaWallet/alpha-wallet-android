@@ -199,6 +199,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
                 .setMessage(R.string.reload_token_data_desc)
                 .setPositiveButton(R.string.action_reload, (d, w) -> {
                     //delete all Token data for this wallet
+                    viewModel.stopChainActivity();
                     showWaitDialog();
                     clearTokenCache = viewModel.resetTokenData()
                             .subscribeOn(Schedulers.io())
@@ -217,7 +218,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
     {
         if (waitDialog != null && waitDialog.isShowing()) return;
         waitDialog = new AWalletAlertDialog(this);
-        waitDialog.setTitle(getString(R.string.title_reload_token_data));
+        waitDialog.setTitle(getString(R.string.token_data_being_cleared));
         waitDialog.setIcon(AWalletAlertDialog.NONE);
         waitDialog.setProgressMode();
         waitDialog.setCancelable(true);

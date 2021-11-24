@@ -505,7 +505,14 @@ public class Web3TokenView extends WebView
     {
         super.destroy();
         //remove listeners
-        if (realmAuxUpdates != null) realmAuxUpdates.removeAllChangeListeners();
+        if (realmAuxUpdates != null)
+        {
+            realmAuxUpdates.removeAllChangeListeners();
+            if (!realmAuxUpdates.getRealm().isClosed())
+            {
+                realmAuxUpdates.getRealm().close();
+            }
+        }
     }
 
     /**

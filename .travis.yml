@@ -23,6 +23,9 @@ android:
   - sys-img-x86-android-26
   - sys-img-armeabi-v7a-android-17
 
+  # NDK
+  - ndk;21.4.7075529
+
  licenses:
   - 'android-sdk-license-.+'
   - 'android-ndk-license-.+'

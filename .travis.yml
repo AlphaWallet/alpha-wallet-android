@@ -24,9 +24,7 @@ android:
   - sys-img-armeabi-v7a-android-17
 
  licenses:
-  - 'android-sdk-preview-license-52d11cd2'
-  - 'android-sdk-license-.+'
-  - 'google-gdk-license-.+'
+  - 'android-ndk-license-.+'
 
 # Emulator Management: Create, Start and Wait
 before_script:
@@ -38,12 +36,12 @@ before_script:
 
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
-- cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
-- cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
-- cd util && ../gradlew -i build && ../gradlew -i test && cd ..
-- ./gradlew test
-- ./gradlew uninstallAll connectedAndroidTest
-- ./gradlew build -x test
+ - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
+ - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
+ - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
+ - ./gradlew test
+ - ./gradlew uninstallAll connectedAndroidTest
+ - ./gradlew build -x test
 
 after_success:
  - bash <(curl -s https://codecov.io/bash)

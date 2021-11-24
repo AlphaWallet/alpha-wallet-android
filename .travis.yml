@@ -11,7 +11,7 @@ android:
   - build-tools-26.0.2
 
   # The SDK version used to compile your project
-  - android-26
+  - android-17
 
   # Additional components
   - extra-google-google_play_services
@@ -21,12 +21,12 @@ android:
   # Specify at least one system image,
   # if you need to run emulator(s) during your tests
   - sys-img-x86-android-26
-  - sys-img-armeabi-v7a-android-26
+  - sys-img-armeabi-v7a-android-17
 
 # Emulator Management: Create, Start and Wait
 before_script:
  - android list targets
- - echo no | android create avd --force -n test -t android-26 --abi armeabi-v7a -c 100M
+ - echo no | android create avd --force -n test -t android-17 --abi armeabi-v7a -c 100M
  - emulator -avd test -noaudio -no-window &
  - android-wait-for-emulator
  - adb shell input keyevent 82 &

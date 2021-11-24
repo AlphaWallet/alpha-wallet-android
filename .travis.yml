@@ -27,7 +27,7 @@ android:
 before_script:
  - android list targets
  - echo no | android create avd --force -n test -t android-17 --abi armeabi-v7a -c 100M
- - emulator -avd test -no-window &
+ - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
  - android-wait-for-emulator
  - adb shell input keyevent 82 &
 

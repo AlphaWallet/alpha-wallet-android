@@ -43,7 +43,6 @@ public interface TokenRepositoryType {
     Token[] initNFTAssets(Wallet wallet, Token[] token);
 
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
-    Token updateTokenType(Token token, Wallet wallet, ContractType type);
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
 

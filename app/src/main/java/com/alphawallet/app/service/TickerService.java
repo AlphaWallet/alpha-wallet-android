@@ -78,7 +78,7 @@ public class TickerService
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
     private static final String CHAIN_IDS = "[CHAIN_ID]";
     private static final String CURRENCY_TOKEN = "[CURRENCY]";
-    private static final String COINGECKO_CHAIN_CALL = "https://api.coingecko.com/api/v3/simple/price?ids=" + CHAIN_IDS + "&vs_currencies=usd&include_24hr_change=true";
+    private static final String COINGECKO_CHAIN_CALL = "https://api.coingecko.com/api/v3/simple/price?ids=" + CHAIN_IDS + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" + CONTRACT_ADDR + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
     private static final String DEXGURU_API = "https://api.dex.guru/v1/tokens/" + CONTRACT_ADDR + "-" + CHAIN_IDS;
     private static final String CURRENCY_CONV = "currency";
@@ -281,17 +281,13 @@ public class TickerService
             try (okhttp3.Response response = httpClient.newCall(request)
                     .execute())
             {
-                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt);
+                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
                 newSize = tickers.size();
 
                 for (CoinGeckoTicker t : tickers)
                 {
-                    BigDecimal changeValue = new BigDecimal(t.usdChange); //String.valueOf(t.usdPrice * currentConversionRate)
-                    TokenTicker tTicker = new TokenTicker(String.valueOf(t.usdPrice),
-                            changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
-
                     //store ticker
-                    erc20Tickers.put(t.address, tTicker);
+                    erc20Tickers.put(t.address, t.toTokenTicker(currentCurrencySymbolTxt));
                     lookupMap.remove(t.address.toLowerCase());
                 }
 
@@ -435,11 +431,21 @@ public class TickerService
         try
         {
             BigDecimal changeValue = BigDecimal.ZERO;
-            double usdPrice = eth.getDouble(currentCurrencySymbolTxt.toLowerCase());
-            String usdChangeStr = eth.getString(currentCurrencySymbolTxt.toLowerCase() + "_24h_change");
-            if (!TextUtils.isEmpty(usdChangeStr) && Character.isDigit(usdChangeStr.charAt(0))) changeValue = BigDecimal.valueOf(eth.getDouble(currentCurrencySymbolTxt.toLowerCase() + "_24h_change"));
+            double fiatPrice = 0.0;
+            String fiatChangeStr = "0.0";
+            if (eth.has(currentCurrencySymbolTxt.toLowerCase()))
+            {
+                fiatPrice = eth.getDouble(currentCurrencySymbolTxt.toLowerCase());
+                fiatChangeStr = eth.getString(currentCurrencySymbolTxt.toLowerCase() + "_24h_change");
+            }
+            else
+            {
+                fiatPrice = eth.getDouble("usd") * currentConversionRate;
+                fiatChangeStr = eth.getString("usd_24h_change");
+            }
+            if (!TextUtils.isEmpty(fiatChangeStr) && Character.isDigit(fiatChangeStr.charAt(0))) changeValue = BigDecimal.valueOf(eth.getDouble(currentCurrencySymbolTxt.toLowerCase() + "_24h_change"));
 
-            tTicker = new TokenTicker(String.valueOf(usdPrice),
+            tTicker = new TokenTicker(String.valueOf(fiatPrice),
                     changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
         }
         catch (Exception e)
@@ -508,13 +514,6 @@ public class TickerService
         }
     }
 
-    private static Function read() {
-        return new Function(
-                "read",
-                Arrays.asList(),
-                Collections.singletonList(new TypeReference<Uint256>() {}));
-    }
-
     private static Function getTickers() {
         return new Function(
                 "getTickers",
@@ -522,6 +521,12 @@ public class TickerService
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
+    /**
+     * Potentially used by forks to add a custom ticker
+     * @param chainId
+     * @param ticker
+     */
+    @SuppressWarnings("unused")
     public void addCustomTicker(long chainId, TokenTicker ticker)
     {
         if (ticker != null)
@@ -530,6 +535,13 @@ public class TickerService
         }
     }
 
+    /**
+     * Potentially used by forks
+     * @param chainId
+     * @param address
+     * @param ticker
+     */
+    @SuppressWarnings("unused")
     public void addCustomTicker(long chainId, String address, TokenTicker ticker)
     {
         if (ticker != null && address != null)
@@ -667,7 +679,7 @@ public class TickerService
             tokenList.append(cp.chainSymbol);
         }
 
-        return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString().replace(CURRENCY_TOKEN, currentCurrencySymbolTxt));
+        return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt);
     }
 
     private boolean receivedAllChainPairs()

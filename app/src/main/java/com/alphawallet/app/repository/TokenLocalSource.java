@@ -24,10 +24,7 @@ public interface TokenLocalSource {
     Token fetchToken(long chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
     String getTokenImageUrl(long chainId, String address);
-
     void deleteRealmToken(long chainId, Wallet wallet, String address);
-
-    Token updateTokenType(Token token, Wallet wallet, ContractType type);
     void storeTokenUrl(long chainId, String address, String imageUrl);
     Token[] initNFTAssets(Wallet wallet, Token[] tokens);
 

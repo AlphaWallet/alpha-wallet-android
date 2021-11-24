@@ -90,7 +90,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             token = tokensService.getToken(data.getChain(), data.getAddress());
             if (token == null)
             {
-                tokenLayout.setVisibility(View.GONE);
                 fillEmpty();
                 return;
             }

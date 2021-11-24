@@ -108,34 +108,6 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Token updateTokenType(Token token, Wallet wallet, ContractType type)
-    {
-        token.setInterfaceSpec(type);
-        try (Realm realm = realmManager.getRealmInstance(wallet))
-        {
-            String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
-            realm.executeTransaction(r -> {
-                RealmToken realmToken = r.where(RealmToken.class)
-                        .equalTo("address", dbKey, Case.INSENSITIVE)
-                        .findFirst();
-
-                if (realmToken == null)
-                {
-                    saveToken(r, token);
-                }
-                else
-                {
-                    realmToken.setInterfaceSpec(type.ordinal());
-                    realmToken.setName(token.tokenInfo.name);
-                    realmToken.setSymbol(token.tokenInfo.symbol);
-                }
-            });
-
-            return fetchToken(token.tokenInfo.chainId, wallet, token.getAddress());
-        }
-    }
-
-    @Override
     public Realm getRealmInstance(Wallet wallet)
     {
         return realmManager.getRealmInstance(wallet);
@@ -460,6 +432,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         realmToken.setName(token.tokenInfo.name);
                         realmToken.setSymbol(token.tokenInfo.symbol);
                         realmToken.setDecimals(token.tokenInfo.decimals);
+                        realmToken.setInterfaceSpec(token.getInterfaceSpec().ordinal());
                     });
                 }
 

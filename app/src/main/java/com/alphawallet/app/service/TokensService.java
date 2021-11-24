@@ -65,7 +65,6 @@ public class TokensService
 
     private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>(); //this is used to compute the USD value of the tokens on an address
     private static final Map<Long, Long> pendingChainMap = new ConcurrentHashMap<>();
-    private static final Map<String, LongSparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
     private String currentAddress = null;
@@ -175,23 +174,10 @@ public class TokensService
     public void storeToken(Token token)
     {
         if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
-        addToTokenStoreList(token);
-    }
-
-    private void addToTokenStoreList(Token token)
-    {
-        Token[] tokenArray = new Token[1];
-        tokenArray[0] = token;
-        tokenStoreDisposable = tokenRepository.checkInterface(tokenArray, new Wallet(token.getWallet()))
+        tokenStoreDisposable = tokenRepository.checkInterface(new Token[] { token }, new Wallet(token.getWallet()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::storedToken, this::onERC20Error);
-    }
-
-    private void storedToken(Token[] tokens)
-    {
-        if (BuildConfig.DEBUG) Log.d(TAG, "Stored " + tokens.length + " Tokens");
-        Collections.addAll(tokenStoreList, tokens);
+                .subscribe(tkn -> Collections.addAll(tokenStoreList, tkn), this::onERC20Error);
     }
 
     public TokenTicker getTokenTicker(Token token)
@@ -318,31 +304,6 @@ public class TokensService
     }
 
     public String getCurrentAddress() { return currentAddress; }
-
-    public static void setInterfaceSpec(long chainId, String address, ContractType functionSpec)
-    {
-        LongSparseArray<ContractType> types = interfaceSpecMap.get(address);
-        if (types == null)
-        {
-            types = new LongSparseArray<>();
-            interfaceSpecMap.put(address, types);
-        }
-        types.put(chainId, functionSpec);
-    }
-
-    public static ContractType checkInterfaceSpec(long chainId, String address)
-    {
-        LongSparseArray<ContractType> types = interfaceSpecMap.get(address);
-        ContractType type = types != null ? types.get(chainId) : null;
-        if (type != null)
-        {
-            return type;
-        }
-        else
-        {
-            return ContractType.NOT_SET;
-        }
-    }
 
     public static void setWalletStartup() { walletStartup = true; }
 
@@ -741,18 +702,6 @@ public class TokensService
         }
 
         return totalVal*tickerService.getCurrentConversionRate();
-    }
-
-    public void walletHidden()
-    {
-        appHasFocus = false;
-    }
-
-    public void walletShowing()
-    {
-        appHasFocus = true;
-        //restart the event cycle if required
-        startUpdateCycle();
     }
 
     ///////////////////////////////////////////

@@ -223,14 +223,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private void onInterfaceSpec(ContractType spec, String to, Token token, ArrayList<Pair<BigInteger, NFTAsset>> transferList)
     {
         token.setInterfaceSpec(spec);
-        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
         createTokenTransfer(to, token, transferList);
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)
     {
         token.setInterfaceSpec(spec);
-        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
         createTokenTransfer(to, token, transferList);
     }
 

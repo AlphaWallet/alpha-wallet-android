@@ -11,7 +11,7 @@ android:
     - build-tools-26.0.2
 
     # The SDK version used to compile your project
-    - android-17
+    - android-25
 
     # Additional components
     - extra-google-google_play_services
@@ -20,8 +20,8 @@ android:
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-x86-android-26
-    - sys-img-armeabi-v7a-android-17
+    - sys-img-x86-android-25
+    - sys-img-armeabi-v7a-android-25
 
   licenses:
     - 'android-sdk-license-.+'
@@ -31,19 +31,19 @@ android:
 before_script:
   - echo y | sdkmanager "ndk-bundle"
   - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-  - echo no | android create avd --force -n test -t android-17 --abi armeabi-v7a -c 100M
+  - echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a -c 100M
   - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
 
 script:
   # go and test other modules before going on to app, can only have one travis file per repo.
-  - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
-  - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
-  - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
-  - ./gradlew test
+#  - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
+#  - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
+#  - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
+#  - ./gradlew test
   - ./gradlew uninstallAll connectedAndroidTest
-  - ./gradlew build -x test
+#  - ./gradlew build -x test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

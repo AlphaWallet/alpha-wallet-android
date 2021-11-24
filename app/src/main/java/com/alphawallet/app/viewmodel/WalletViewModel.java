@@ -3,16 +3,21 @@ package com.alphawallet.app.viewmodel;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
@@ -29,7 +34,10 @@ import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.ui.TokenManagementActivity;
+import com.alphawallet.app.widget.WalletFragmentActionsView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +46,9 @@ import java.math.BigDecimal;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
+import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 public class WalletViewModel extends BaseViewModel
 {
@@ -60,6 +71,7 @@ public class WalletViewModel extends BaseViewModel
     private final MyAddressRouter myAddressRouter;
     private final ManageWalletsRouter manageWalletsRouter;
     private long lastBackupCheck = 0;
+    private BottomSheetDialog dialog;
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
@@ -185,7 +197,36 @@ public class WalletViewModel extends BaseViewModel
 
     public void showMyAddress(Context context)
     {
-        myAddressRouter.open(context, defaultWallet.getValue());
+        // show bottomsheet dialog
+        WalletFragmentActionsView actionsView = new WalletFragmentActionsView(context);
+        actionsView.setOnCopyWalletAddressClickListener(v -> {
+            dialog.dismiss();
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, getWalletAddr());
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(clip);
+            }
+
+            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+        });
+        actionsView.setOnShowMyWalletAddressClickListener(v -> {
+            dialog.dismiss();
+            myAddressRouter.open(context, defaultWallet.getValue());
+        });
+        actionsView.setOnAddHideTokensClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(context, TokenManagementActivity.class);
+            intent.putExtra(EXTRA_ADDRESS, getWalletAddr());
+            context.startActivity(intent);
+        });
+
+        dialog = new BottomSheetDialog(context);
+        dialog.setContentView(actionsView);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) actionsView.getParent());
+        dialog.setOnShowListener(dialog -> behavior.setPeekHeight(actionsView.getHeight()));
+        dialog.show();
     }
 
     public void showQRCodeScanning(Activity activity) {

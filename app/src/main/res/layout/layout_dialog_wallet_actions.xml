@@ -1,0 +1,58 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/copy_wallet_address_action"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:text="@string/copy_wallet_address"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury"/>
+
+    <TextView
+        android:id="@+id/show_my_wallet_address_action"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:text="@string/title_show_wallet_address"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury"/>
+
+    <TextView
+        android:id="@+id/add_hide_tokens_action"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:text="@string/add_hide_tokens"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
+
+</LinearLayout>
+
+

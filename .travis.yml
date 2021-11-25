@@ -44,6 +44,8 @@ script:
 #  - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 #  - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
 #  - ./gradlew test
+  - adb shell screencap -p /sdcard/screen.png
+  - adb pull /sdcard/screen.png
   - ./gradlew uninstallAll connectedAndroidTest --info
 #  - ./gradlew build -x test
 

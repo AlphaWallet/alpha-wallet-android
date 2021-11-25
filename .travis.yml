@@ -46,7 +46,7 @@ script:
 #  - ./gradlew test
   - adb shell screencap -p /sdcard/screen.png
   - adb pull /sdcard/screen.png
-  - ./gradlew uninstallAll connectedAndroidTest --info
+  - ./gradlew uninstallAll connectedAndroidTest
 #  - ./gradlew build -x test
 
 after_success:

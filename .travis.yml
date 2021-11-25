@@ -33,7 +33,7 @@ before_script:
   - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a -c 100M
   - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
   - android-wait-for-emulator
-#  - adb shell input keyevent 82 &
+  - adb shell input keyevent 82 &
   - adb shell settings put global window_animation_scale 0.0
   - adb shell settings put global transition_animation_scale 0.0
   - adb shell settings put global animator_duration_scale 0.0
@@ -44,7 +44,7 @@ script:
 #  - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 #  - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
 #  - ./gradlew test
-  - ./gradlew uninstallAll connectedAndroidTest
+  - ./gradlew uninstallAll connectedAndroidTest --info
 #  - ./gradlew build -x test
 
 after_success:

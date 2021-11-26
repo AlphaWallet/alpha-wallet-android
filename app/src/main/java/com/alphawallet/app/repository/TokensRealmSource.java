@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -456,14 +457,17 @@ public class TokensRealmSource implements TokenLocalSource {
                     balanceChanged = true;
                 }
 
-                if (!realmToken.isVisibilityChanged() && realmToken.isEnabled() && newBalance != null && newBalance.equals("0"))
+                if (!realmToken.isVisibilityChanged() && realmToken.isEnabled() && newBalance != null && newBalance.equals("0")
+                    && !(token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId)))
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setEnabled(false);
                         realmToken.setBalance("0");
                     });
                 }
-                else if (!realmToken.isVisibilityChanged() && !realmToken.isEnabled() && token.balance.compareTo(BigDecimal.ZERO) > 0)
+                else if ((!realmToken.isVisibilityChanged() && !realmToken.isEnabled()) &&
+                        (token.balance.compareTo(BigDecimal.ZERO) > 0 ||
+                                (token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId) && !realmToken.isEnabled()))) // enable if base token should be showing
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setEnabled(true);
@@ -474,6 +478,7 @@ public class TokensRealmSource implements TokenLocalSource {
             else
             {
                 balanceChanged = true;
+                if (token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId)) token.tokenInfo.isEnabled = true;
                 //write token
                 realm.executeTransaction(r -> {
                     token.balance = balance;

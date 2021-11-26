@@ -317,15 +317,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         boolean allowThroughFilter = CustomViewSettings.tokenCanBeDisplayed(token);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
-        if (tokensService != null)
-        {
-            Token checka = tokensService.getToken(token.getChain(), token.getAddress());
-            if (checka == null)
-            {
-                return false;
-            }
-        }
-
         switch (filterType)
         {
             case FILTER_ASSETS:

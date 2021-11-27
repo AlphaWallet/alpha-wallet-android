@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import io.reactivex.Single;
+import io.realm.Realm;
 
 public class AdvancedSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
@@ -114,5 +115,10 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public Single<Boolean> resetTokenData()
     {
         return transactionsService.wipeDataForWallet();
+    }
+
+    public void stopChainActivity()
+    {
+        transactionsService.stopActivity();
     }
 }

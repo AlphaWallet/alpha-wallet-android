@@ -558,6 +558,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void setGasEstimate(BigInteger estimate)
     {
         gasWidget.setGasEstimate(estimate);
+        functionBar.setPrimaryButtonEnabled(true);
     }
 
     private void showAmount(BigInteger amountVal)
@@ -589,5 +590,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             // Do nothing
         });
         dismiss();
+    }
+
+    public void waitForEstimate()
+    {
+        functionBar.setPrimaryButtonWaiting();
     }
 }

@@ -100,9 +100,6 @@ public class QRScanner extends BaseActivity
     {
         setContentView(R.layout.activity_qr_scanner);
 
-        toolbar();
-        setTitle(getString(R.string.qr_scanner));
-
         chainIdOverride = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, 0);
         barcodeView = findViewById(R.id.scanner_view);
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.AZTEC);

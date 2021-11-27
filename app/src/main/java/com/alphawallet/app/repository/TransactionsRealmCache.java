@@ -24,6 +24,7 @@ import com.alphawallet.app.service.RealmManager;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Phaser;
@@ -354,9 +355,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     public Single<Boolean> deleteAllForWallet(String currentAddress)
     {
         return Single.fromCallable(() -> {
-            //delete all token and AUX data for this wallet
+            File databaseFile = null;
             try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
             {
+                databaseFile = new File(instance.getConfiguration().getPath());
                 instance.executeTransaction(r -> {
                     //delete all the data
                     r.where(RealmToken.class).findAll().deleteAllFromRealm();
@@ -365,10 +367,23 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     r.where(RealmNFTAsset.class).findAll().deleteAllFromRealm();
                     r.where(RealmTransfer.class).findAll().deleteAllFromRealm();
                 });
+                instance.refresh();
             }
             catch (Exception e)
             {
                 if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+
+            if (databaseFile != null && databaseFile.exists())
+            {
+                try
+                {
+                    databaseFile.delete();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
 
             try (Realm walletRealm = realmManager.getWalletDataRealmInstance())

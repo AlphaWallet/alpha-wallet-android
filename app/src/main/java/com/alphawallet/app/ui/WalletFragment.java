@@ -5,8 +5,6 @@ import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
-import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
-import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -16,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -132,8 +131,6 @@ public class WalletFragment extends BaseFragment implements
 
         initViewModel();
 
-        isVisible = true;
-
         initList();
 
         initTabLayout(view);
@@ -141,6 +138,8 @@ public class WalletFragment extends BaseFragment implements
         initNotificationView(view);
 
         setImportToken();
+
+        viewModel.prepare();
 
         return view;
     }
@@ -170,7 +169,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
     }
 
-    private void initViews(View view) {
+    private void initViews(@NonNull View view) {
         refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
@@ -201,16 +200,11 @@ public class WalletFragment extends BaseFragment implements
 
     private void setRealmListener(final long updateTime)
     {
-        if (realm == null) return;
+        if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance();
         if (realmUpdates != null)
         {
             realmUpdates.removeAllChangeListeners();
             realm.removeAllChangeListeners();
-        }
-
-        if (realm.isClosed())
-        {
-            realm = viewModel.getRealmInstance(viewModel.getWallet());
         }
 
         realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
@@ -218,7 +212,6 @@ public class WalletFragment extends BaseFragment implements
                 .greaterThan("addedTime", (updateTime + 1))
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
-            if (!isVisible && realmTokens.size() == 0) return;
             long lastUpdateTime = updateTime;
             List<TokenCardMeta> metas = new ArrayList<>();
             //make list
@@ -274,8 +267,12 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void comeIntoFocus()
     {
-        setRealmListener(realmUpdateTime);
-        if (viewModel != null) viewModel.getTokensService().walletShowing();
+        isVisible = true;
+        if (viewModel.getWallet() != null && !TextUtils.isEmpty(viewModel.getWallet().address))
+        {
+            setRealmListener(realmUpdateTime);
+        }
+        //if (viewModel != null) viewModel.getTokensService().walletShowing();
     }
 
     @Override
@@ -286,8 +283,8 @@ public class WalletFragment extends BaseFragment implements
             realmUpdates.removeAllChangeListeners();
             realmUpdates = null;
         }
-        if (realm != null) realm.close();
-        if (viewModel != null) viewModel.getTokensService().walletHidden();
+        if (realm != null && !realm.isClosed()) realm.close();
+        //if (viewModel != null) viewModel.getTokensService().walletHidden();
     }
 
     @Override
@@ -384,11 +381,11 @@ public class WalletFragment extends BaseFragment implements
     public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected) {
         if (selectedToken == null)
         {
+            getParentFragmentManager().setFragmentResult(C.TOKEN_CLICK, new Bundle());
             selectedToken = view;
             Token clickOrigin = viewModel.getTokenFromService(token);
             if (clickOrigin == null) clickOrigin = token;
             viewModel.showTokenDetail(getActivity(), clickOrigin);
-            //clickOrigin.clickReact(viewModel, getActivity());
             handler.postDelayed(this, 700);
         }
     }
@@ -408,10 +405,10 @@ public class WalletFragment extends BaseFragment implements
         {
             ((HomeActivity)getActivity()).resetFragment(WalletPage.WALLET);
         }
-        else
+        /*else
         {
             viewModel.prepare();
-        }
+        }*/
     }
 
     private void onTokens(TokenCardMeta[] tokens)
@@ -429,8 +426,10 @@ public class WalletFragment extends BaseFragment implements
             if (tcm.lastUpdate > realmUpdateTime) realmUpdateTime = tcm.lastUpdate;
         }
 
-        realm = viewModel.getRealmInstance(viewModel.getWallet());
-        setRealmListener(realmUpdateTime);
+        if (isVisible)
+        {
+            setRealmListener(realmUpdateTime);
+        }
     }
 
     /**
@@ -511,7 +510,6 @@ public class WalletFragment extends BaseFragment implements
     public void onDestroy()
     {
         super.onDestroy();
-        //viewModel.clearProcess();
         handler.removeCallbacksAndMessages(null);
         if (realmUpdates != null)
         {
@@ -531,22 +529,6 @@ public class WalletFragment extends BaseFragment implements
             //reload tokens
             viewModel.reloadTokens();
         }
-    }
-
-    public void refreshTokens()
-    {
-        //only update the tokens in place if something has changed, using TokenSortedItem rules.
-        if (viewModel != null && adapter != null)
-        {
-            adapter.clear();
-            viewModel.prepare();
-            systemView.showProgress(false); //indicate update complete
-        }
-    }
-
-    public void indicateFetch()
-    {
-        systemView.showCentralSpinner();
     }
 
     public void changedLocale()
@@ -690,7 +672,7 @@ public class WalletFragment extends BaseFragment implements
             if (viewHolder.getItemViewType() == TokenHolder.VIEW_TYPE)
             {
                 Token t = ((TokenHolder)viewHolder).token;
-                if (t.isEthereum()) return 0;
+                if (t != null && t.isEthereum()) return 0;
             }
             else if (viewHolder.getItemViewType() == ManageTokensHolder.VIEW_TYPE ||
                     viewHolder.getItemViewType() == TokenGridHolder.VIEW_TYPE)

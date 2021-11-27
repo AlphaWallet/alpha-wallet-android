@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.SortedList;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;

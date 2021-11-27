@@ -608,7 +608,7 @@
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Đã xóa bộ nhớ cache của trình duyệt</string>
     <string name="toast_token_data_cleared">Token Data cleared</string>
-    <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
+    <string name="token_data_being_cleared">Dữ liệu mã thông báo đang được xóa… Vui lòng đợi</string>
     <string name="your_wallets">Ví của bạn</string>
     <string name="action_copy">Sao chép</string>
     <string name="title_version_support_warning">Important Update</string>

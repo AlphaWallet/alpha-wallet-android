@@ -2,11 +2,13 @@ package com.alphawallet.app.entity;
 
 import android.text.TextUtils;
 
-import org.bouncycastle.pqc.math.linearalgebra.CharUtils;
-import org.json.JSONArray;
+import com.alphawallet.app.entity.tokens.TokenTicker;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,17 +18,17 @@ import java.util.List;
 public class CoinGeckoTicker
 {
     public final String address;
-    public final double usdPrice;
-    public final double usdChange;
+    public final double fiatPrice;
+    public final BigDecimal fiatChange;
 
-    public CoinGeckoTicker(String address, double usdPrice, double usdChange)
+    public CoinGeckoTicker(String address, double fiatPrice, BigDecimal fiatChange)
     {
         this.address = address;
-        this.usdChange = usdChange;
-        this.usdPrice = usdPrice;
+        this.fiatChange = fiatChange;
+        this.fiatPrice = fiatPrice;
     }
 
-    public static List<CoinGeckoTicker> buildTickerList(String jsonData, String currencyIsoSymbol) throws JSONException
+    public static List<CoinGeckoTicker> buildTickerList(String jsonData, String currencyIsoSymbol, double currentConversionRate) throws JSONException
     {
         List<CoinGeckoTicker> res = new ArrayList<>();
         JSONObject data = new JSONObject(jsonData);
@@ -36,16 +38,29 @@ public class CoinGeckoTicker
         {
             String address = data.names().get(i).toString();
             JSONObject obj = data.getJSONObject(address);
+            double fiatPrice = 0.0;
+            String fiatChangeStr;
             if (obj.has(currencyIsoSymbol.toLowerCase()))
             {
-                String usdChangeStr = obj.getString(currencyIsoSymbol.toLowerCase() + "_24h_change");
-                double usdChange = 0.0;
-                if (!TextUtils.isEmpty(usdChangeStr) && Character.isDigit(usdChangeStr.charAt(0))) usdChange = obj.getDouble(currencyIsoSymbol.toLowerCase() + "_24h_change");
-                CoinGeckoTicker ticker = new CoinGeckoTicker(address, obj.getDouble(currencyIsoSymbol.toLowerCase()), usdChange);
-                res.add(ticker);
+                fiatPrice = obj.getDouble(currencyIsoSymbol.toLowerCase());
+                fiatChangeStr = obj.getString(currencyIsoSymbol.toLowerCase() + "_24h_change");
             }
+            else
+            {
+                fiatPrice = obj.getDouble("usd") * currentConversionRate;
+                fiatChangeStr = obj.getString("usd_24h_change");
+            }
+
+            res.add(new CoinGeckoTicker(address, fiatPrice,
+                    !TextUtils.isEmpty(fiatChangeStr) && Character.isDigit(fiatChangeStr.charAt(0)) ? new BigDecimal(fiatChangeStr) : BigDecimal.ZERO));
         }
 
         return res;
+    }
+
+    public TokenTicker toTokenTicker(String currentCurrencySymbolTxt)
+    {
+        return new TokenTicker(String.valueOf(fiatPrice),
+                fiatChange.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
     }
 }

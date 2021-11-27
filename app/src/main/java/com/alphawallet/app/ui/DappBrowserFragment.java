@@ -156,6 +156,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
@@ -180,6 +181,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
+    private Realm realm = null;
 
     private ActionSheetDialog confirmationDialog;
 
@@ -362,7 +364,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         super.onDestroy();
         viewModel.onDestroy();
-        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
+        stopBalanceListener();
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
@@ -776,9 +778,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void startBalanceListener()
     {
         if (wallet == null || activeNetwork == null) return;
+        if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance(wallet);
 
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
-        realmUpdate = viewModel.getRealmInstance(wallet).where(RealmToken.class)
+        realmUpdate = realm.where(RealmToken.class)
                 .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth")).findAllAsync();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance
@@ -797,9 +800,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (realmUpdate != null)
         {
             realmUpdate.removeAllChangeListeners();
-            realmUpdate.getRealm().close();
             realmUpdate = null;
         }
+
+        if (realm != null && !realm.isClosed()) realm.close();
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -2081,15 +2085,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void notifyConfirm(String mode)
     {
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
-    }
-
-    public void selected()
-    {
-        //start gas update cycle when user selects Dapp browser
-        if (viewModel != null && activeNetwork != null)
-        {
-            viewModel.updateGasPrice(activeNetwork.chainId);
-        }
     }
 
     // Handle resizing the browser view when the soft keyboard pops up and goes.

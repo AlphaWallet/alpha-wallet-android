@@ -56,11 +56,12 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private SystemView systemView;
     private ActivityAdapter adapter;
     private RecyclerView listView;
-    private Realm realm;
     private RealmResults<RealmTransaction> realmUpdates;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean checkTimer;
+    private Realm realm;
     private long lastUpdateTime = 0;
+    private boolean isVisible = false;
 
     @Nullable
     @Override
@@ -87,18 +88,24 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void onItemsLoaded(ActivityMeta[] activityItems)
     {
-        realm = viewModel.getRealmInstance();
-        adapter.updateActivityItems(buildTransactionList(activityItems).toArray(new ActivityMeta[0]));
-        showEmptyTx();
-
-        for (ActivityMeta am : activityItems)
+        try (Realm realm = viewModel.getRealmInstance())
         {
-            if (am instanceof TransactionMeta && am.getTimeStampSeconds() > lastUpdateTime) lastUpdateTime = am.getTimeStampSeconds() - 60;
+            adapter.updateActivityItems(buildTransactionList(realm, activityItems).toArray(new ActivityMeta[0]));
+            showEmptyTx();
+
+            for (ActivityMeta am : activityItems)
+            {
+                if (am instanceof TransactionMeta && am.getTimeStampSeconds() > lastUpdateTime) lastUpdateTime = am.getTimeStampSeconds() - 60;
+            }
         }
+
+        if (isVisible) startTxListener();
     }
 
     private void startTxListener()
     {
+        if (viewModel.defaultWallet().getValue() == null) return;
+        if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance();
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         if (viewModel == null || viewModel.defaultWallet().getValue() == null || TextUtils.isEmpty(viewModel.defaultWallet().getValue().address))
             return;
@@ -121,13 +128,13 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
             if (metas.size() > 0)
             {
                 TransactionMeta[] metaArray = metas.toArray(new TransactionMeta[0]);
-                adapter.updateActivityItems(buildTransactionList(metaArray).toArray(new ActivityMeta[0]));
+                adapter.updateActivityItems(buildTransactionList(realm, metaArray).toArray(new ActivityMeta[0]));
                 systemView.hide();
             }
         });
     }
 
-    private List<ActivityMeta> buildTransactionList(ActivityMeta[] activityItems)
+    private List<ActivityMeta> buildTransactionList(Realm realm, ActivityMeta[] activityItems)
     {
         //selectively filter the items with the following rules:
         // - allow through all normal transactions with no token transfer consequences
@@ -139,7 +146,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         {
             if (am instanceof TransactionMeta)
             {
-                List<TokenTransferData> tokenTransfers = getTokenTransfersForHash((TransactionMeta)am);
+                List<TokenTransferData> tokenTransfers = getTokenTransfersForHash(realm, (TransactionMeta)am);
                 if (tokenTransfers.size() != 1) { filteredList.add(am); } //only 1 token transfer ? No need to show the underlying transaction
                 filteredList.addAll(tokenTransfers);
             }
@@ -148,7 +155,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         return filteredList;
     }
 
-    private List<TokenTransferData> getTokenTransfersForHash(TransactionMeta tm)
+    private List<TokenTransferData> getTokenTransfersForHash(Realm realm, TransactionMeta tm)
     {
         List<TokenTransferData> transferData = new ArrayList<>();
         //summon realm items
@@ -280,6 +287,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Override
     public void comeIntoFocus()
     {
+        isVisible = true;
         //start listener
         startTxListener(); //adjust for timestamp delay
     }
@@ -287,8 +295,10 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Override
     public void leaveFocus()
     {
+        isVisible = false;
         //stop listener
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
+        if (realm != null && !realm.isClosed()) realm.close();
     }
 
     public void resetTransactions()

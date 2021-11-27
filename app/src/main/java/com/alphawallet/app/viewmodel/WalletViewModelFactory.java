@@ -13,6 +13,7 @@ import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
@@ -25,6 +26,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final MyAddressRouter myAddressRouter;
     private final PreferenceRepositoryType preferenceRepository;
+    private final RealmManager realmManager;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   TokenDetailRouter tokenDetailRouter,
@@ -34,7 +36,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   TokensService tokensService,
                                   ChangeTokenEnableInteract changeTokenEnableInteract,
                                   MyAddressRouter myAddressRouter,
-                                  PreferenceRepositoryType preferenceRepository) {
+                                  PreferenceRepositoryType preferenceRepository,
+                                  RealmManager realmManager) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
@@ -44,6 +47,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
         this.preferenceRepository = preferenceRepository;
+        this.realmManager = realmManager;
     }
 
     @NonNull
@@ -58,6 +62,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 tokensService,
                 changeTokenEnableInteract,
                 myAddressRouter,
-                preferenceRepository);
+                preferenceRepository,
+                realmManager);
     }
 }

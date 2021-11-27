@@ -132,11 +132,6 @@ public class SignTransactionDialog
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
         {
             promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
-
-            if (!hasDeviceCredential)
-            {
-                promptBuilder.setNegativeButtonText(activity.getString(R.string.action_cancel));
-            }
         }
         else
         {

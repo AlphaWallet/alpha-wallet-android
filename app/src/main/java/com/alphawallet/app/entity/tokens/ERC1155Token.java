@@ -622,10 +622,6 @@ public class ERC1155Token extends Token
         {
             if (BuildConfig.DEBUG) e.printStackTrace();
         }
-        finally
-        {
-            realm.close();
-        }
 
         return new BigDecimal(assets.keySet().size());
     }

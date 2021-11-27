@@ -135,7 +135,6 @@ public class TokenRepository implements TokenRepositoryType {
         return web3jNodeServers.get(chainId);
     }
 
-    // Only for sensing ERC721 Ticket
     @Override
     public Single<Token[]> checkInterface(Token[] tokens, Wallet wallet)
     {
@@ -186,9 +185,7 @@ public class TokenRepository implements TokenRepositoryType {
                             type = ContractType.ERC721;
                     }
 
-                    //update in database
-                    updateTokenType(t, wallet, type);
-                    TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.tokenInfo.address, type);
+                    t.setInterfaceSpec(type);
                 }
             }
 
@@ -270,12 +267,6 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void createBaseNetworkTokens(String walletAddress)
-    {
-        localSource.createBaseNetworkTokens(walletAddress);
-    }
-
-    @Override
     public TokenTicker getTokenTicker(Token token)
     {
         return localSource.getCurrentTicker(token);
@@ -321,17 +312,6 @@ public class TokenRepository implements TokenRepositoryType {
                 .observeOn(Schedulers.io());
     }
 
-    private Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType contractType)
-    {
-        TokenFactory tf = new TokenFactory();
-        NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-        Token newToken = tf.createToken(tokenInfo, contractType, network.getShortName());
-        return updateBalance(wallet, newToken)
-                .map(bal -> newToken)
-                .flatMap(tok -> localSource.saveToken(wallet, tok))
-                .observeOn(Schedulers.newThread());
-    }
-
     @Override
     public Single<Token[]> storeTokens(Wallet wallet, Token[] tokens)
     {
@@ -359,12 +339,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Token[] initNFTAssets(Wallet wallet, Token[] token)
     {
         return localSource.initNFTAssets(wallet, token);
-    }
-
-    @Override
-    public Token updateTokenType(Token token, Wallet wallet, ContractType type)
-    {
-        return localSource.updateTokenType(token, wallet, type);
     }
 
     @Override
@@ -405,6 +379,7 @@ public class TokenRepository implements TokenRepositoryType {
                 try
                 {
                     List<BigInteger> balanceArray = null;
+                    Token thisToken = token;
 
                     switch (token.getInterfaceSpec())
                     {
@@ -424,10 +399,12 @@ public class TokenRepository implements TokenRepositoryType {
                             balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
                             break;
                         case MAYBE_ERC20:
-                            balance = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
+                            thisToken = wrappedCheckUint256Balance(wallet, token.tokenInfo, token);
+                            balance = thisToken.balance;
+                            balanceArray = thisToken.getArrayBalance();
                             break;
                         case ERC1155:
-                            balance = token.updateBalance(getRealmInstance(wallet));
+                            balance = updateERC1155Balance(token, wallet);
                             break;
                         case ERC721_TICKET:
                             balanceArray = getBalanceArray721Ticket(wallet, token.tokenInfo.chainId, token.getAddress());
@@ -443,7 +420,7 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
-                        localSource.updateTokenBalance(wallet, token, balance, balanceArray);
+                        localSource.updateTokenBalance(wallet, thisToken, balance, balanceArray);
                     }
                     else
                     {
@@ -457,6 +434,17 @@ public class TokenRepository implements TokenRepositoryType {
 
                 return balance;
             });
+    }
+
+    private BigDecimal updateERC1155Balance(Token token, Wallet wallet)
+    {
+        BigDecimal newBalance;
+        try (Realm realm = getRealmInstance(wallet))
+        {
+            newBalance = token.updateBalance(realm);
+        }
+
+        return newBalance;
     }
 
     private Single<Token[]> updateBalances(Wallet wallet, Token[] tokens)
@@ -503,60 +491,50 @@ public class TokenRepository implements TokenRepositoryType {
      * @param token
      * @return
      */
-    private BigDecimal wrappedCheckUint256Balance(@NonNull Wallet wallet, @NonNull TokenInfo tokenInfo, @Nullable Token token)
+    private Token wrappedCheckUint256Balance(@NonNull Wallet wallet, @NonNull TokenInfo tokenInfo, @Nullable Token token)
     {
         BigDecimal balance = BigDecimal.ZERO;
+        if (token == null) return null;
         try
         {
             Function function = balanceOf(wallet.address);
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
 
-            if (token != null && TextUtils.isEmpty(responseValue))
-            {
-                balance = token.balance;
-            }
-            else
+            if (!TextUtils.isEmpty(responseValue))
             {
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
                 if (response.size() > 0) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
 
                 //only perform checking if token is non-null
-                if (token != null && tokenInfo.decimals == 18 && balance.compareTo(BigDecimal.ZERO) > 0 && balance.compareTo(BigDecimal.valueOf(10)) < 0)
+                if (tokenInfo.decimals == 18 && balance.compareTo(BigDecimal.ZERO) > 0 && balance.compareTo(BigDecimal.valueOf(10)) < 0)
                 {
                     //suspicious balance - check for ERC721 ticket
                     List<BigInteger> testBalance = getBalanceArray721Ticket(wallet, tokenInfo);
-                    if (testBalance != null && testBalance.size() > 0)
+                    if (testBalance.size() > 0)
                     {
-                        //change interface
-                        addToken(wallet, tokenInfo, ContractType.ERC721_TICKET)
-                                .subscribe(this::updateInService).isDisposed();
-                        balance = token.balance;
+                        Token[] tkr = checkInterface(new Token[]{token}, wallet).onErrorReturnItem(new Token[]{token}).blockingGet();
+                        token = tkr.length == 1 ? tkr[0] : token;
+                        if (token.getInterfaceSpec() == ContractType.ERC721_TICKET)
+                        {
+                            for (BigInteger tokenId : testBalance) { token.addAssetToTokenBalanceAssets(tokenId, null); }
+                        }
                     }
                 }
-                else if (token != null && balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
+                else if (balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
                 {
                     //this is a token returning an array balance. Test the interface and update
-                    determineCommonType(tokenInfo)
-                            .flatMap(tType -> addToken(wallet, tokenInfo, tType)) //changes token type
-                            .subscribe(this::updateInService).isDisposed();
-                    balance = token.balance;
+                    Token[] tkr = checkInterface(new Token[]{token}, wallet).onErrorReturnItem(new Token[]{token}).blockingGet();
+                    token = tkr.length == 1 ? tkr[0] : token;
                 }
             }
         }
         catch (Exception e)
         {
-            //use previous balance if appropriate
-            if (token != null) balance = token.balance;
+            //use previous balance
         }
 
-        return balance;
-    }
-
-    private void updateInService(Token t)
-    {
-        t.walletUIUpdateRequired = true;
-        TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec());
+        return token;
     }
 
     @Override
@@ -1179,41 +1157,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
 
             return returnType;
-        }).flatMap(type -> additionalHandling(type, tokenInfo));
-    }
-
-    private Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
-    {
-        ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.chainId, tokenInfo.address);
-        if (tokenInfo.name == null && tokenInfo.symbol == null)
-        {
-            return Single.fromCallable(() -> ContractType.NOT_SET);
-        }
-        else if (checked != null && checked != ContractType.NOT_SET && checked != ContractType.OTHER)
-        {
-            return Single.fromCallable(() -> checked);
-        }
-        else return Single.fromCallable(() -> ContractType.OTHER);
-    }
-
-    public Single<ContractType> additionalHandling(ContractType type, TokenInfo tokenInfo)
-    {
-        switch (type)
-        {
-            case ERC20:
-            case ERC721:
-            case ERC721_LEGACY:
-            case ERC721_TICKET:
-                return Single.fromCallable(() -> type);
-            case ERC875:
-                //requires additional handling to determine if it's Legacy type, but safe to return ERC875 for now:
-                queryInterfaceSpec(tokenInfo)
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(actualType -> TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, actualType)).isDisposed();
-                return Single.fromCallable(() -> type);
-            default:
-                return Single.fromCallable(() -> type); //take no further action: possible that this is not a valid token
-        }
+        });
     }
 
     private ContractType findContractTypeFromResponse(String balanceResponse, Boolean isERC875) throws Exception

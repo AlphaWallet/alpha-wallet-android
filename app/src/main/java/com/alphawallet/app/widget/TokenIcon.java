@@ -74,7 +74,7 @@ public class TokenIcon extends ConstraintLayout
         statusBackground = findViewById(R.id.status_icon_background);
         statusIcon.setVisibility(isInEditMode() ? View.VISIBLE : View.GONE);
         currentStatus = StatusType.NONE;
-        chainIcon = findViewById(R.id.chain_icon);
+        chainIcon = findViewById(R.id.status_chain_icon);
         chainIconBackground = findViewById(R.id.chain_icon_background);
 
         bindViews();
@@ -248,6 +248,7 @@ public class TokenIcon extends ConstraintLayout
      */
     private void loadFromAltRepo()
     {
+        if (getContext() == null) return;
         if (getContext() instanceof Activity)
         {
             Activity myAct = (Activity) getContext();

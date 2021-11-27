@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
@@ -40,7 +41,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
@@ -512,9 +512,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         client.setOnFailure(throwable -> {
             Log.d(TAG, "On Fail: " + throwable.getMessage());
-            runOnUiThread(() -> {
-                showErrorDialog("Error: " + throwable.getMessage());
-            });
+            showErrorDialog("Error: " + throwable.getMessage());
             return Unit.INSTANCE;
         });
     }
@@ -744,7 +742,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void onFailure(Throwable throwable)
+    private void onFailure(@NonNull Throwable throwable)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
         AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
@@ -856,8 +854,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         w3Tx.recipient.toString(), viewModel.getTokensService(), this);
                 confDialog.setURL(remotePeerData.getUrl());
                 confDialog.setCanceledOnTouchOutside(false);
+                confDialog.waitForEstimate();
 
-                viewModel.calculateGasEstimate(viewModel.getWallet(), com.alphawallet.token.tools.Numeric.hexStringToByteArray(w3Tx.payload),
+                viewModel.calculateGasEstimate(viewModel.getWallet(), Numeric.hexStringToByteArray(w3Tx.payload),
                         chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value))
                         .map(limit -> convertToGasLimit(limit, w3Tx))
                         .subscribeOn(Schedulers.io())
@@ -921,35 +920,45 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void showErrorDialog(String message)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
-        AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
-                .setMessage(message)
-                .setPositiveButton(R.string.try_again, (d, w) -> {
-                    onDefaultWallet(viewModel.getWallet());
-                })
-                .setNeutralButton(R.string.action_cancel, (d, w) -> {
-                    d.dismiss();
-                })
-                .setNegativeButton(R.string.action_close, (d, w) -> {
-                    d.dismiss();
-                    killSession();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
+                AlertDialog dialog = builder.setTitle(R.string.title_dialog_error)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.try_again, (d, w) -> {
+                            onDefaultWallet(viewModel.getWallet());
+                        })
+                        .setNeutralButton(R.string.action_cancel, (d, w) -> {
+                            d.dismiss();
+                        })
+                        .setNegativeButton(R.string.action_close, (d, w) -> {
+                            d.dismiss();
+                            killSession();
+                        })
+                        .setCancelable(false)
+                        .create();
+                dialog.show();
+            });
+        }
     }
 
     private void showErrorDialogCancel(String title, String message)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
-        AlertDialog dialog = builder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(R.string.action_cancel, (d, w) -> {
-                    d.dismiss();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectActivity.this);
+                AlertDialog dialog = builder.setTitle(title)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.action_cancel, (d, w) -> {
+                            d.dismiss();
+                        })
+                        .setCancelable(false)
+                        .create();
+                dialog.show();
+            });
+        }
     }
 
     @Override

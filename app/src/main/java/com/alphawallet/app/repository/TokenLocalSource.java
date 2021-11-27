@@ -23,13 +23,8 @@ public interface TokenLocalSource {
     boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray);
     Token fetchToken(long chainId, Wallet wallet, String address);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
-    void createBaseNetworkTokens(String walletAddress);
     String getTokenImageUrl(long chainId, String address);
-
-    Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
     void deleteRealmToken(long chainId, Wallet wallet, String address);
-
-    Token updateTokenType(Token token, Wallet wallet, ContractType type);
     void storeTokenUrl(long chainId, String address, String imageUrl);
     Token[] initNFTAssets(Wallet wallet, Token[] tokens);
 

@@ -37,6 +37,7 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
 
+import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
@@ -581,6 +582,11 @@ public class GasWidget extends LinearLayout implements Runnable
      */
     public void setGasEstimate(BigInteger estimate)
     {
+        //Override custom gas limit
+        if (customGasLimit.equals(baseLineGasLimit))
+        {
+            customGasLimit = estimate;
+        }
         if (initialTxGasLimit.equals(BigInteger.ZERO))
         {
             baseLineGasLimit = estimate;

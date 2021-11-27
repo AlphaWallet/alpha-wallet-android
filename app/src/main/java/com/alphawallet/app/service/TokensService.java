@@ -79,11 +79,13 @@ public class TokensService
     private final ConcurrentLinkedQueue<Long> baseTokenCheck;
     private static long openSeaCheck;
     private long openSeaCheckId;
-    private boolean appHasFocus = true;
+    private boolean appHasFocus;
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
     private long transferCheckChain;
     private final TokenFactory tokenFactory = new TokenFactory();
+    private long syncTimer;
+    private long syncStart;
 
     @Nullable
     private Disposable eventTimer;
@@ -208,6 +210,8 @@ public class TokensService
         {
             currentAddress = newWalletAddr.toLowerCase();
             stopUpdateCycle();
+            syncStart = System.currentTimeMillis();
+            syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
             addLockedTokens();
             openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
             openseaService.resetOffsetRead();
@@ -242,6 +246,7 @@ public class TokensService
     // Constructs a map of tokens requiring update
     private TokenCardMeta[] buildUpdateMap()
     {
+        int unSynced = 0;
         TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), networkFilter);
         for (TokenCardMeta meta : tokenList)
         {
@@ -249,11 +254,29 @@ public class TokensService
             String key = databaseKey(meta.getChain(), meta.getAddress());
             if (!pendingTokenMap.containsKey(key))
             {
+                if (meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM) unSynced++;
                 pendingTokenMap.put(key, meta.lastUpdate);
+            }
+            else if (meta.lastUpdate <= pendingTokenMap.get(key))
+            {
+                meta.lastUpdate = pendingTokenMap.get(key);
+                if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
+                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
+                {
+                    unSynced++;
+                }
+            }
+        }
+
+        if (syncTimer > 0 && System.currentTimeMillis() > syncTimer)
+        {
+            if (unSynced > 0)
+            {
+                syncTimer = System.currentTimeMillis() + 5*DateUtils.SECOND_IN_MILLIS;
             }
             else
             {
-                meta.lastUpdate = pendingTokenMap.get(key);
+                syncTimer = 0;
             }
         }
 
@@ -713,6 +736,7 @@ public class TokensService
      * @return Token that needs updating
      */
 
+    private String lastUpdateKey = null;
     //TODO: Integrate the transfer check update time into the priority calculation
     //TODO: If we have done a transfer check recently then we don't need to check balance here
     public Token getNextInBalanceUpdateQueue()
@@ -734,13 +758,21 @@ public class TokensService
         {
             long lastCheckDiff = currentTime - check.lastUpdate;
             long lastUpdateDiff = check.lastTxUpdate > 0 ? currentTime - check.lastTxUpdate : 0;
+
             float weighting = check.calculateBalanceUpdateWeight();
 
+            if ((!check.isEnabled || check.isNFT()) && !isSynced()) continue; //don't start looking at NFT balances until we sync the chain/ERC20 tokens
+            if (!isSynced() && check.lastUpdate > syncStart) continue; //don't start updating already updated tokens until all ERC20 are checked
             if (!appHasFocus && (!check.isEthereum() && !isFocusToken(check))) continue; //only check chains when wallet out of focus
 
+            if (!isSynced() && !check.isEnabled)
+            {
+                System.out.println("ERROR!");
+            }
+
             //simply multiply the weighting by the last diff.
-            float updateFactor = weighting * (float) lastCheckDiff;
-            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS; //normal minimum update frequency for token 30 seconds
+            float updateFactor = weighting * (float) lastCheckDiff * (check.isEnabled ? 1 : 0.25f);
+            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS / (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
 
             if (!check.isEthereum() && lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
             {
@@ -777,6 +809,7 @@ public class TokensService
 
         if (highestToken != null)
         {
+            lastUpdateKey = databaseKey(highestToken.getChain(), highestToken.getAddress());
             pendingTokenMap.put(databaseKey(highestToken.getChain(), highestToken.getAddress()), System.currentTimeMillis());
             return getToken(highestToken.getChain(), highestToken.getAddress());
         }
@@ -1053,5 +1086,10 @@ public class TokensService
         eth.setIsEthereum();
         eth.pendingBalance = balance;
         return eth;
+    }
+
+    public boolean isSynced()
+    {
+        return (syncTimer == 0);
     }
 }

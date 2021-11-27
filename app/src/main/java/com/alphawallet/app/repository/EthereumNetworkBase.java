@@ -10,6 +10,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -572,7 +573,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Long getDefaultNetwork(boolean isMainNet)
     {
-        return isMainNet ? MAINNET_ID : RINKEBY_ID;
+        return isMainNet ? CustomViewSettings.primaryChain : RINKEBY_ID;
     }
 
     @Override
@@ -689,19 +690,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         else return "";
     }
 
-    public static String getEtherscanURLbyNetworkAndHash(long networkId, String txHash)
-    {
-        NetworkInfo info = networkMap.get(networkId);
-        if (info != null)
-        {
-            return info.getEtherscanUri(txHash).toString();
-        }
-        else
-        {
-            return networkMap.get(MAINNET_ID).getEtherscanUri(txHash).toString();
-        }
-    }
-
     public static long getNetworkIdFromName(String name)
     {
         if (!TextUtils.isEmpty(name)) {
@@ -736,12 +724,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Long> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(MAINNET_ID));
+        return CustomViewSettings.alwaysVisibleChains;
     }
 
     public static ContractLocator getOverrideToken()
     {
-        return new ContractLocator("", MAINNET_ID, ContractType.ETHEREUM);
+        return new ContractLocator("", CustomViewSettings.primaryChain, ContractType.ETHEREUM);
     }
 
     @Override

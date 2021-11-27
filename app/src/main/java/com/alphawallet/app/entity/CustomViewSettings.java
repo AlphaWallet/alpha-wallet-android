@@ -19,10 +19,14 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class CustomViewSettings
 {
-    private static final long primaryChain = MAINNET_ID;
+    public static final long primaryChain = MAINNET_ID;
     private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
     //You can use the settings in this file to customise the wallet appearance
+
+    //IF you want to re-order the the way chains appear in the wallet, see this line in EthereumNetworkBase:
+    //private static final List<Long> hasValue = new ArrayList<>(Arrays.asList( ...
+    //... and read the comment above it
 
     //Ensures certain tokens are always visible, even if zero balance (see also 'showZeroBalance()' below).
     //See also lockedChains. You can also lock the chains that are displayed on.
@@ -42,6 +46,15 @@ public class CustomViewSettings
             //EthereumNetworkBase.RINKEBY_ID, //You can mix testnets and mainnets, but probably shouldn't as it may result in people getting scammed
             //EthereumNetworkBase.GOERLI_ID
     );
+
+    public static final List<Long> alwaysVisibleChains = Arrays.asList(
+            EthereumNetworkBase.MAINNET_ID
+    );
+
+    public static boolean alwaysShow(long chainId)
+    {
+        return alwaysVisibleChains.contains(chainId);
+    }
 
     //TODO: Wallet can only show the above tokens
     private static final boolean onlyShowTheseTokens = true;

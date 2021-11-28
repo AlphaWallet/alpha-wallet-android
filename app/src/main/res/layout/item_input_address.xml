@@ -130,16 +130,4 @@
         android:visibility="gone"
         tools:text="That address already exists" />
 
-    <ProgressBar
-        android:id="@+id/ens_fetch_progress"
-        android:layout_width="@dimen/dp12"
-        android:layout_height="@dimen/dp12"
-        android:layout_below="@id/box_layout"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/dp10"
-        android:layout_marginTop="2dp"
-        android:visibility="gone"
-        android:indeterminateTint="@color/green"
-        android:indeterminate="true"/>
-
 </RelativeLayout>

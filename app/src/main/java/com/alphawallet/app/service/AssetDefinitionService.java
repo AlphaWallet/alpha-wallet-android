@@ -1060,8 +1060,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void finishLoading()
     {
         assetLoadingLock.release();
-        updateEventBlockTimes();
-        startEventListener();
+        if (Utils.isAddressValid(tokensService.getCurrentAddress()))
+        {
+            updateEventBlockTimes();
+            startEventListener();
+        }
     }
 
     private void removeFile(String filename)

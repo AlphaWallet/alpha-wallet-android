@@ -70,10 +70,14 @@ import com.google.android.material.tabs.TabLayout;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.internal.operators.observable.ObservableElementAtSingle;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -114,6 +118,9 @@ public class WalletFragment extends BaseFragment implements
     private long realmUpdateTime;
 
     @Nullable
+    private Disposable checkSync;
+
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
@@ -140,6 +147,8 @@ public class WalletFragment extends BaseFragment implements
         setImportToken();
 
         viewModel.prepare();
+
+        //addressAvatar.setWaiting();
 
         return view;
     }
@@ -196,6 +205,8 @@ public class WalletFragment extends BaseFragment implements
         Bundle result = new Bundle();
         result.putBoolean(C.SHOW_BACKUP, wallet.lastBackupTime > 0);
         getParentFragmentManager().setFragmentResult(C.SHOW_BACKUP, result); //reset tokens service and wallet page with updated filters
+
+        startCheckSync();
     }
 
     private void setRealmListener(final long updateTime)
@@ -272,7 +283,7 @@ public class WalletFragment extends BaseFragment implements
         {
             setRealmListener(realmUpdateTime);
         }
-        //if (viewModel != null) viewModel.getTokensService().walletShowing();
+        startCheckSync();
     }
 
     @Override
@@ -284,7 +295,7 @@ public class WalletFragment extends BaseFragment implements
             realmUpdates = null;
         }
         if (realm != null && !realm.isClosed()) realm.close();
-        //if (viewModel != null) viewModel.getTokensService().walletHidden();
+        if (checkSync != null && !checkSync.isDisposed()) checkSync.dispose();
     }
 
     @Override
@@ -405,10 +416,6 @@ public class WalletFragment extends BaseFragment implements
         {
             ((HomeActivity)getActivity()).resetFragment(WalletPage.WALLET);
         }
-        /*else
-        {
-            viewModel.prepare();
-        }*/
     }
 
     private void onTokens(TokenCardMeta[] tokens)
@@ -510,6 +517,7 @@ public class WalletFragment extends BaseFragment implements
     public void onDestroy()
     {
         super.onDestroy();
+        if (checkSync != null && !checkSync.isDisposed()) checkSync.dispose();
         handler.removeCallbacksAndMessages(null);
         if (realmUpdates != null)
         {
@@ -718,6 +726,44 @@ public class WalletFragment extends BaseFragment implements
     public Wallet getCurrentWallet()
     {
         return viewModel.getWallet();
+    }
+
+    //Don't show sync for the release yet
+    private void startCheckSync()
+    {
+        /*if (viewModel != null && getActivity() != null && !getActivity().isDestroyed())
+        {
+            if (viewModel.getTokensService().isSynced())
+            {
+                getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
+            }
+            if (checkSync == null || checkSync.isDisposed())
+            {
+                checkSync = Observable.interval(1, 4, TimeUnit.SECONDS)
+                        .doOnNext(l -> checkWalletSync()).subscribe();
+            }
+        }*/
+    }
+
+    private void checkWalletSync()
+    {
+        if (viewModel.getTokensService().isSynced())
+        {
+            if (checkSync != null && !checkSync.isDisposed()) { checkSync.dispose(); }
+            checkSync = null;
+
+            if (getActivity() != null && !getActivity().isDestroyed())
+            {
+                getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
+            }
+        }
+        else
+        {
+            if (getActivity() != null && !getActivity().isDestroyed())
+            {
+                getActivity().runOnUiThread(() -> addressAvatar.setWaiting());
+            }
+        }
     }
 
     @Override

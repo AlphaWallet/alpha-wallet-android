@@ -1,6 +1,5 @@
 language: android
 dist: trusty
-sudo: required
 android:
   components:
     # Uncomment the lines below if you want to

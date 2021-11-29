@@ -1,5 +1,6 @@
 language: android
 dist: trusty
+sudo: required
 android:
   components:
     # Uncomment the lines below if you want to
@@ -44,7 +45,7 @@ script:
 #  - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 #  - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
 #  - ./gradlew test
-  - adb shell screencap -p /sdcard/screen.png
+  - sudo adb shell screencap -p /sdcard/screen.png
   - adb pull /sdcard/screen.png
   - ./gradlew uninstallAll connectedAndroidTest
 #  - ./gradlew build -x test

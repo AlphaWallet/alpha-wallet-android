@@ -229,6 +229,8 @@ public class TokensService
     {
         stopUpdateCycle();
 
+        if (!Utils.isAddressValid(currentAddress)) return;
+
         setupFilters();
         openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
 

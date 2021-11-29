@@ -148,6 +148,8 @@ public class WalletFragment extends BaseFragment implements
 
         viewModel.prepare();
 
+        //addressAvatar.setWaiting();
+
         return view;
     }
 
@@ -204,22 +206,7 @@ public class WalletFragment extends BaseFragment implements
         result.putBoolean(C.SHOW_BACKUP, wallet.lastBackupTime > 0);
         getParentFragmentManager().setFragmentResult(C.SHOW_BACKUP, result); //reset tokens service and wallet page with updated filters
 
-        addressAvatar.setWaiting();
-        if (checkSync == null || checkSync.isDisposed())
-        {
-            checkSync = Observable.interval(5, 4, TimeUnit.SECONDS)
-                    .doOnNext(l -> checkWalletSync()).subscribe();
-        }
-    }
-
-    private void checkWalletSync()
-    {
-        if (viewModel.getTokensService().isSynced())
-        {
-            checkSync.dispose();
-            checkSync = null;
-            getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
-        }
+        startCheckSync();
     }
 
     private void setRealmListener(final long updateTime)
@@ -296,6 +283,7 @@ public class WalletFragment extends BaseFragment implements
         {
             setRealmListener(realmUpdateTime);
         }
+        startCheckSync();
     }
 
     @Override
@@ -307,6 +295,7 @@ public class WalletFragment extends BaseFragment implements
             realmUpdates = null;
         }
         if (realm != null && !realm.isClosed()) realm.close();
+        if (checkSync != null && !checkSync.isDisposed()) checkSync.dispose();
     }
 
     @Override
@@ -737,6 +726,44 @@ public class WalletFragment extends BaseFragment implements
     public Wallet getCurrentWallet()
     {
         return viewModel.getWallet();
+    }
+
+    //Don't show sync for the release yet
+    private void startCheckSync()
+    {
+        /*if (viewModel != null && getActivity() != null && !getActivity().isDestroyed())
+        {
+            if (viewModel.getTokensService().isSynced())
+            {
+                getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
+            }
+            if (checkSync == null || checkSync.isDisposed())
+            {
+                checkSync = Observable.interval(1, 4, TimeUnit.SECONDS)
+                        .doOnNext(l -> checkWalletSync()).subscribe();
+            }
+        }*/
+    }
+
+    private void checkWalletSync()
+    {
+        if (viewModel.getTokensService().isSynced())
+        {
+            if (checkSync != null && !checkSync.isDisposed()) { checkSync.dispose(); }
+            checkSync = null;
+
+            if (getActivity() != null && !getActivity().isDestroyed())
+            {
+                getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
+            }
+        }
+        else
+        {
+            if (getActivity() != null && !getActivity().isDestroyed())
+            {
+                getActivity().runOnUiThread(() -> addressAvatar.setWaiting());
+            }
+        }
     }
 
     @Override

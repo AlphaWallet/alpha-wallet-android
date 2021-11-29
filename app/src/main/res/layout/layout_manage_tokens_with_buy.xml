@@ -14,6 +14,8 @@
         android:layout_marginTop="@dimen/dp24"
         android:layout_marginStart="@dimen/dp16"
         android:layout_marginEnd="@dimen/dp16"
+        android:layout_marginBottom="@dimen/dp22"
+
         android:background="@drawable/selector_round_button"
         android:ellipsize="end"
         android:fontFamily="@font/font_semibold"
@@ -25,17 +27,6 @@
         android:textColor="@color/white"
         android:textSize="20sp"
         />
-
-    <TextView
-        android:layout_margin="21dp"
-        android:id="@+id/text_add_hide_tokens"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="@font/font_semibold"
-        android:text="@string/add_hide_tokens"
-        android:textColor="@color/azure"
-        android:textSize="20sp" />
 
     <ImageView
         android:id="@+id/img_add_token"

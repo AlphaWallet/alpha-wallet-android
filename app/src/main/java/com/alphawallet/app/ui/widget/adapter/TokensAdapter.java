@@ -272,12 +272,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         {
             items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
         }
-//>>>>>>> 7dc72738ffdcf2af5e558b77a16c3e8ff621079e
     }
 
     private void addManageTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher), 0));
+            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher), Integer.MAX_VALUE));
         }
     }
 

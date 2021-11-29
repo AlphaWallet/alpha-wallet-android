@@ -206,8 +206,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	KeyService provideKeyService(Context ctx) {
-		return new KeyService(ctx);
+	KeyService provideKeyService(Context ctx, AnalyticsServiceType analyticsService) {
+		return new KeyService(ctx, analyticsService);
 	}
 
 	@Singleton

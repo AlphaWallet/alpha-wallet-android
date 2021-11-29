@@ -5,12 +5,12 @@ package com.alphawallet.app.repository;
 
 import android.text.TextUtils;
 import android.util.LongSparseArray;
-import android.view.View;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -40,7 +40,6 @@ import io.reactivex.Single;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
@@ -71,8 +70,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
-
-import androidx.core.content.ContextCompat;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
@@ -150,9 +147,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Note: This list also determines the order of display for main net chains in the wallet.
     //If your wallet prioritises xDai for example, you may want to move the XDAI_ID to the front of this list,
     //Then xDai would appear as the first token at the top of the wallet
-    private static final List<Long> hasValue = Arrays.asList(
+    private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID);
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID));
 
     //List of network details. Note, the advantage of using LongSparseArray is efficiency and also
     //the entries are automatically sorted into numerical order
@@ -396,9 +393,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     static class CustomNetworks {
         private ArrayList<NetworkInfo> list = new ArrayList<>();
-        transient private Map<Long, NetworkInfo> map = new HashMap<>();
         private Map<Long, Boolean> mapToTestNet = new HashMap<>();
-        transient private PreferenceRepositoryType preferences;
+        final transient private PreferenceRepositoryType preferences;
 
         public CustomNetworks(PreferenceRepositoryType preferences) {
             this.preferences = preferences;
@@ -413,7 +409,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 this.mapToTestNet = cn.mapToTestNet;
 
                 for (NetworkInfo info : list) {
-                    map.put(info.chainId, info);
+                    networkMap.put(info.chainId, info);
+                    if (mapToTestNet.containsKey(info.chainId) && !mapToTestNet.get(info.chainId)) {
+                       hasValue.add(info.chainId);
+                    }
                 }
             }
         }
@@ -427,13 +426,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                         break;
                     }
                 }
+                hasValue.remove(oldChainId);
                 mapToTestNet.remove(oldChainId);
-                map.remove(oldChainId);
+                networkMap.remove(oldChainId);
             }
 
             list.add(info);
+            if (!isTestnet) {
+                hasValue.add(info.chainId);
+            }
             mapToTestNet.put(info.chainId, isTestnet);
-            map.put(info.chainId, info);
+            networkMap.put(info.chainId, info);
             String networks = new Gson().toJson(this);
             preferences.setCustomRPCNetworks(networks);
         }
@@ -445,15 +448,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     break;
                 }
             }
+            hasValue.remove(chainId);
             mapToTestNet.remove(chainId);
-            map.remove(chainId);
+            networkMap.remove(chainId);
 
             String networks = new Gson().toJson(this);
             preferences.setCustomRPCNetworks(networks);
         }
     }
-
-
 
     private static CustomNetworks customNetworks;
 
@@ -463,7 +465,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         this.additionalNetworks = additionalNetworks;
         this.useTestNets = useTestNets;
 
-        this.customNetworks = new CustomNetworks(this.preferences);
+        customNetworks = new CustomNetworks(this.preferences);
     }
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
@@ -505,11 +507,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public String getNameById(long chainId)
     {
-        NetworkInfo info = customNetworks.map.get(chainId);
-        if (info != null) {
-            return info.name;
-        }
-
         if (networkMap.indexOfKey(chainId) >= 0) return networkMap.get(chainId).name;
         else return "Unknown: " + chainId;
     }
@@ -518,21 +515,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public NetworkInfo getActiveBrowserNetwork()
     {
         long activeNetwork = preferences.getActiveBrowserNetwork();
-        NetworkInfo info = customNetworks.map.get(activeNetwork);
-        if (info != null) {
-            return info;
-        }
-
         return networkMap.get(activeNetwork);
     }
 
     @Override
     public NetworkInfo getNetworkByChain(long chainId)
     {
-        NetworkInfo info = customNetworks.map.get(chainId);
-        if (info != null) {
-            return info;
-        }
         return networkMap.get(chainId);
     }
 
@@ -585,14 +573,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Long getDefaultNetwork(boolean isMainNet)
     {
-        return isMainNet ? MAINNET_ID : RINKEBY_ID;
+        return isMainNet ? CustomViewSettings.primaryChain : RINKEBY_ID;
     }
 
     @Override
     public void setFilterNetworkList(Long[] networkList)
     {
         String store = Utils.longArrayToString(networkList);
-        preferences.setNetworkFilterList(store.toString());
+        preferences.setNetworkFilterList(store);
     }
 
     @Override
@@ -627,10 +615,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
          * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
          * test nets, they are displayed by that order.
          */
-        addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, true);
         addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(networks, false);
-        addNetworks(customNetworks.list.toArray(new NetworkInfo[0]), networks, false);
         return networks.toArray(new NetworkInfo[0]);
     }
 
@@ -650,23 +636,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static boolean hasRealValue(long chainId)
     {
-        if (customNetworks.mapToTestNet.containsKey(chainId))
-        {
-            return !customNetworks.mapToTestNet.get(chainId);
-        }
-        else
-        {
-            return hasValue.contains(chainId);
-        }
+        return hasValue.contains(chainId);
     }
 
     public static String getSecondaryNodeURL(long networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
-        if (info == null) {
-            info = customNetworks.map.get(networkId);
-        }
-
         if (info != null) { return info.backupNodeUrl; }
         else {
             return "";
@@ -700,9 +675,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getNodeURLByNetworkId(long networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
-        if (info == null) {
-            info = customNetworks.map.get(networkId);
-        }
         if (info != null) { return info.rpcServerUrl; }
         else { return MAINNET_RPC_URL; }
     }
@@ -714,38 +686,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
     public static String getDefaultNodeURL(long networkId) {
         NetworkInfo info = networkMap.get(networkId);
-        if (info == null) {
-            info = customNetworks.map.get(networkId);
-        }
         if (info != null) return info.rpcServerUrl;
         else return "";
-    }
-
-    public static String getEtherscanURLbyNetworkAndHash(long networkId, String txHash)
-    {
-        NetworkInfo info = networkMap.get(networkId);
-        if (info == null) {
-            info = customNetworks.map.get(networkId);
-        }
-
-        if (info != null)
-        {
-            return info.getEtherscanUri(txHash).toString();
-        }
-        else
-        {
-            return networkMap.get(MAINNET_ID).getEtherscanUri(txHash).toString();
-        }
     }
 
     public static long getNetworkIdFromName(String name)
     {
         if (!TextUtils.isEmpty(name)) {
-            for (NetworkInfo NETWORK : customNetworks.map.values()) {
-                if (name.equals(NETWORK.name)) {
-                    return NETWORK.chainId;
-                }
-            }
             for (int i = 0; i < networkMap.size(); i++) {
                 if (name.equals(networkMap.valueAt(i).name)) {
                     return networkMap.valueAt(i).chainId;
@@ -777,12 +724,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Long> addDefaultNetworks()
     {
-        return new ArrayList<>(Collections.singletonList(MAINNET_ID));
+        return CustomViewSettings.alwaysVisibleChains;
     }
 
     public static ContractLocator getOverrideToken()
     {
-        return new ContractLocator("", MAINNET_ID, ContractType.ETHEREUM);
+        return new ContractLocator("", CustomViewSettings.primaryChain, ContractType.ETHEREUM);
     }
 
     @Override
@@ -890,34 +837,21 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     public void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
-        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, explorerApiUrl);
+        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, explorerApiUrl, true);
         customNetworks.addCustomNetwork(info, isTestnet, oldChainId);
     }
-
-    public NetworkInfoExt getNetworkInfoExt(long chainId) {
-
-        boolean isCustom = customNetworks.map.containsKey(chainId);
-        NetworkInfo info = getNetworkByChain(chainId);
-        boolean isTestNetwork = isCustom ? customNetworks.mapToTestNet.get(chainId) : !hasRealValue(chainId);
-
-        return new NetworkInfoExt(info, isTestNetwork, isCustom);
-    }
-
 
     public void removeCustomRPCNetwork(long chainId) {
         customNetworks.remove(chainId);
     }
 
     public static NetworkInfo getNetworkInfo(long chainId) {
-        NetworkInfo info = networkMap.get(chainId);
-        if (info == null) info = customNetworks.map.get(chainId);
-        return info;
+        return networkMap.get(chainId);
     }
 
     public static String getShortChainName(long chainId)
     {
         NetworkInfo info = networkMap.get(chainId);
-        if (info == null) info = customNetworks.map.get(chainId);
         if (info != null)
         {
             String shortName = info.name;
@@ -938,7 +872,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getChainSymbol(long chainId)
     {
         NetworkInfo info = networkMap.get(chainId);
-        if (info == null) info = customNetworks.map.get(chainId);
         if (info != null)
         {
             return info.symbol;

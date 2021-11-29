@@ -72,10 +72,6 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public EthereumNetworkRepositoryType.NetworkInfoExt getNetworkInfoExt(long chainId) {
-        return this.networkRepository.getNetworkInfoExt(chainId);
-    }
-
     public boolean mainNetActive()
     {
         return preferenceRepository.isActiveMainnet();

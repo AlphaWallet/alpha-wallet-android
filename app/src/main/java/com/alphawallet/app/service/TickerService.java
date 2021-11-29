@@ -16,6 +16,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import androidx.annotation.Nullable;
@@ -76,8 +77,9 @@ public class TickerService
     private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
     private static final String CHAIN_IDS = "[CHAIN_ID]";
-    private static final String COINGECKO_CHAIN_CALL = "https://api.coingecko.com/api/v3/simple/price?ids=" + CHAIN_IDS + "&vs_currencies=usd&include_24hr_change=true";
-    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" +CONTRACT_ADDR + "&vs_currencies=USD&include_24hr_change=true";
+    private static final String CURRENCY_TOKEN = "[CURRENCY]";
+    private static final String COINGECKO_CHAIN_CALL = "https://api.coingecko.com/api/v3/simple/price?ids=" + CHAIN_IDS + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
+    private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" + CONTRACT_ADDR + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
     private static final String DEXGURU_API = "https://api.dex.guru/v1/tokens/" + CONTRACT_ADDR + "-" + CHAIN_IDS;
     private static final String CURRENCY_CONV = "currency";
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
@@ -88,7 +90,6 @@ public class TickerService
     private final PreferenceRepositoryType sharedPrefs;
     private final TokenLocalSource localSource;
     private final Map<Long, TokenTicker> ethTickers = new ConcurrentHashMap<>();
-    private Disposable tickerUpdateTimer;
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
@@ -96,7 +97,13 @@ public class TickerService
     private static final ConcurrentLinkedQueue<TokenCardMeta> dexGuruQuery = new ConcurrentLinkedQueue<>();
 
     @Nullable
+    private Disposable tickerUpdateTimer;
+
+    @Nullable
     private Disposable dexGuruLookup;
+
+    @Nullable
+    private Disposable mainTickerUpdate;
 
     public TickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource)
     {
@@ -110,7 +117,12 @@ public class TickerService
 
     public void updateTickers()
     {
+        if (mainTickerUpdate != null && !mainTickerUpdate.isDisposed())
+        {
+            return; //do not update if update is currently in progress
+        }
         if (tickerUpdateTimer != null && !tickerUpdateTimer.isDisposed()) tickerUpdateTimer.dispose();
+        sharedPrefs.commit();
 
         tickerUpdateTimer = Observable.interval(0, UPDATE_TICKER_CYCLE, TimeUnit.MINUTES)
                     .doOnNext(l -> tickerUpdate())
@@ -119,13 +131,20 @@ public class TickerService
 
     private void tickerUpdate()
     {
-        updateCurrencyConversion()
+        mainTickerUpdate = updateCurrencyConversion()
                 .flatMap(this::updateTickersFromOracle)
                 .flatMap(this::fetchTickersSeparatelyIfRequired)
                 .flatMap(this::addArtisTicker)
+                .map(this::checkTickers)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::checkTickers, this::onTickersError).isDisposed();
+                .subscribe(this::tickersUpdated, this::onTickersError);
+    }
+
+    private void tickersUpdated(int tickerCount)
+    {
+        if (BuildConfig.DEBUG) System.out.println("Tickers Updated: " + tickerCount);
+        mainTickerUpdate = null;
     }
 
     public Single<Double> updateCurrencyConversion()
@@ -255,24 +274,20 @@ public class TickerService
             }
 
             Request request = new Request.Builder()
-                    .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()))
+                    .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt))
                     .get()
                     .build();
 
             try (okhttp3.Response response = httpClient.newCall(request)
                     .execute())
             {
-                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string());
+                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
                 newSize = tickers.size();
 
                 for (CoinGeckoTicker t : tickers)
                 {
-                    BigDecimal changeValue = new BigDecimal(t.usdChange);
-                    TokenTicker tTicker = new TokenTicker(String.valueOf(t.usdPrice * currentConversionRate),
-                            changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
-
                     //store ticker
-                    erc20Tickers.put(t.address, tTicker);
+                    erc20Tickers.put(t.address, t.toTokenTicker(currentCurrencySymbolTxt));
                     lookupMap.remove(t.address.toLowerCase());
                 }
 
@@ -382,12 +397,13 @@ public class TickerService
         }
     }
 
-    private void checkTickers(int tickerSize)
+    private int checkTickers(int tickerSize)
     {
         if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
         localSource.updateEthTickers(ethTickers);
         localSource.removeOutdatedTickers();
+        return tickerSize;
     }
 
     public TokenTicker getEthTicker(long chainId)
@@ -414,10 +430,22 @@ public class TickerService
         TokenTicker tTicker;
         try
         {
-            double usdPrice = eth.getDouble("usd");
-            BigDecimal changeValue = BigDecimal.valueOf(eth.getDouble("usd_24h_change"));
+            BigDecimal changeValue = BigDecimal.ZERO;
+            double fiatPrice = 0.0;
+            String fiatChangeStr = "0.0";
+            if (eth.has(currentCurrencySymbolTxt.toLowerCase()))
+            {
+                fiatPrice = eth.getDouble(currentCurrencySymbolTxt.toLowerCase());
+                fiatChangeStr = eth.getString(currentCurrencySymbolTxt.toLowerCase() + "_24h_change");
+            }
+            else
+            {
+                fiatPrice = eth.getDouble("usd") * currentConversionRate;
+                fiatChangeStr = eth.getString("usd_24h_change");
+            }
+            if (!TextUtils.isEmpty(fiatChangeStr) && Character.isDigit(fiatChangeStr.charAt(0))) changeValue = BigDecimal.valueOf(eth.getDouble(currentCurrencySymbolTxt.toLowerCase() + "_24h_change"));
 
-            tTicker = new TokenTicker(String.valueOf(usdPrice * currentConversionRate),
+            tTicker = new TokenTicker(String.valueOf(fiatPrice),
                     changeValue.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
         }
         catch (Exception e)
@@ -486,41 +514,19 @@ public class TickerService
         }
     }
 
-    private double getUSDPrice() throws Exception {
-        Web3j web3j = TokenRepository.getWeb3jService(MAINNET_ID);
-        Function function = read();
-        String responseValue = callSmartContractFunction(web3j, function, MEDIANIZER);
-
-        BigDecimal usdRaw = BigDecimal.ZERO;
-
-        if (responseValue == null) return usdRaw.doubleValue();
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-
-        if (response.size() > 0)
-        {
-            usdRaw = new BigDecimal(((Uint256) response.get(0)).getValue());
-            usdRaw = usdRaw.divide(new BigDecimal(Math.pow(10, 18)));
-        }
-
-        return usdRaw.doubleValue();
-    }
-
-    private static Function read() {
-        return new Function(
-                "read",
-                Arrays.<Type>asList(),
-                Collections.singletonList(new TypeReference<Uint256>() {}));
-    }
-
     private static Function getTickers() {
         return new Function(
                 "getTickers",
-                Arrays.<Type>asList(),
+                Arrays.asList(),
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
+    /**
+     * Potentially used by forks to add a custom ticker
+     * @param chainId
+     * @param ticker
+     */
+    @SuppressWarnings("unused")
     public void addCustomTicker(long chainId, TokenTicker ticker)
     {
         if (ticker != null)
@@ -529,6 +535,13 @@ public class TickerService
         }
     }
 
+    /**
+     * Potentially used by forks
+     * @param chainId
+     * @param address
+     * @param ticker
+     */
+    @SuppressWarnings("unused")
     public void addCustomTicker(long chainId, String address, TokenTicker ticker)
     {
         if (ticker != null && address != null)
@@ -556,6 +569,7 @@ public class TickerService
 
     private void onTickersError(Throwable throwable)
     {
+        mainTickerUpdate = null;
         throwable.printStackTrace();
     }
 
@@ -607,6 +621,7 @@ public class TickerService
     {
         canUpdate.clear();
         dexGuruQuery.clear();
+        ethTickers.clear();
     }
 
     private static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>(){{
@@ -668,7 +683,7 @@ public class TickerService
             tokenList.append(cp.chainSymbol);
         }
 
-        return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString());
+        return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt);
     }
 
     private boolean receivedAllChainPairs()

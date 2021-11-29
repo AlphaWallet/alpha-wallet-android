@@ -290,7 +290,7 @@ public abstract class EventUtils
         String typeName = t.getTypeAsString();
         //strip numbers
         int i = typeName.length() - 1;
-        while (Character.isDigit(typeName.charAt(i))) { i--; }; //strip
+        while (Character.isDigit(typeName.charAt(i))) { i--; }//strip
         typeName = typeName.substring(0, i+1);
         byte[] val;
 

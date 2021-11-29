@@ -44,24 +44,42 @@
         android:orientation="horizontal"
         android:visibility="visible">
 
-        <Button
-            android:id="@+id/primary_button"
+        <RelativeLayout
+            android:id="@+id/primary_button_wrapper"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:layout_weight="0.5"
-            android:background="@drawable/selector_round_button"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_semibold"
-            android:lines="1"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            tools:text="Primary"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="17sp"
-            android:visibility="gone" />
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/primary_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_round_button"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_semibold"
+                android:lines="1"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                android:visibility="visible"
+                tools:text="Primary" />
+
+            <ProgressBar
+                android:id="@+id/primary_spinner"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_centerVertical="true"
+                android:indeterminateTint="@color/white"
+                android:translationZ="20dp"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
 
         <Button
             android:id="@+id/secondary_button"

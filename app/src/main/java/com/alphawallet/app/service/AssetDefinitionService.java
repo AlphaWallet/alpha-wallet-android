@@ -1,5 +1,10 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -27,7 +32,6 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionRepositoryType;
@@ -35,7 +39,6 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.repository.entity.RealmTokenScriptData;
 import com.alphawallet.app.ui.HomeActivity;
-import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.token.entity.Attribute;
@@ -66,7 +69,6 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
-import org.xml.sax.SAXException;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -110,11 +112,6 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
-
 
 /**
  * AssetDefinitionService is the only place where we interface with XML files.
@@ -141,7 +138,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final TokensService tokensService;
     private final TokenLocalSource tokenLocalSource;
     private final AlphaWalletService alphaWalletService;
-    private final TransactionRepositoryType transactionRespository;
+    private final TransactionRepositoryType transactionRepository;
     private TokenDefinition cachedDefinition = null;
     private final ConcurrentHashMap<String, EventDefinition> eventList = new ConcurrentHashMap<>(); //List of events built during file load
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
@@ -172,7 +169,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions
         tokenLocalSource = trs;
-        transactionRespository = trt;
+        transactionRepository = trt;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
         //deleteAllEventData();
@@ -354,9 +351,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void deleteAllInternalScriptFromRealm()
     {
-        try
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
-            realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransactionAsync(r -> {
+            realm.executeTransactionAsync(r -> {
                 //have to remove all instances of this hash
                 RealmResults<RealmTokenScriptData> hashInstances = r.where(RealmTokenScriptData.class)
                         .equalTo("fileHash", BUNDLED_SCRIPT)
@@ -569,7 +566,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return txUpdateTime;
-    };
+    }
 
     @Override
     public Attribute fetchAttribute(ContractInfo origin, String attributeName)
@@ -899,7 +896,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
-    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
+    private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
     {
         Locale locale;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -942,25 +939,28 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void deleteScriptEntriesFromRealm(List<ContractLocator> origins, boolean isDebug)
     {
-        realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransactionAsync(r -> {
-            for (ContractLocator cl : origins)
-            {
-                String entryKey = getTSDataKey(cl.chainId, cl.address);
-                RealmTokenScriptData realmData = r.where(RealmTokenScriptData.class)
-                        .equalTo("instanceKey", entryKey)
-                        .findFirst();
-
-                if (realmData != null && (isDebug || isInSecureZone(realmData.getFilePath()))) //delete the existing entry if this script is debug, or if the old script is in the server area
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                for (ContractLocator cl : origins)
                 {
-                    RealmCertificateData realmCert = r.where(RealmCertificateData.class)
-                            .equalTo("instanceKey", realmData.getFileHash())
+                    String entryKey = getTSDataKey(cl.chainId, cl.address);
+                    RealmTokenScriptData realmData = r.where(RealmTokenScriptData.class)
+                            .equalTo("instanceKey", entryKey)
                             .findFirst();
-                    if (realmCert != null) realmCert.deleteFromRealm();
-                    deleteEventDataForScript(realmData);
-                    realmData.deleteFromRealm();
+
+                    if (realmData != null && (isDebug || isInSecureZone(realmData.getFilePath()))) //delete the existing entry if this script is debug, or if the old script is in the server area
+                    {
+                        RealmCertificateData realmCert = r.where(RealmCertificateData.class)
+                                .equalTo("instanceKey", realmData.getFileHash())
+                                .findFirst();
+                        if (realmCert != null) realmCert.deleteFromRealm();
+                        deleteEventDataForScript(realmData);
+                        realmData.deleteFromRealm();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private Single<File> fetchXMLFromServer(String address)
@@ -1064,8 +1064,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void finishLoading()
     {
         assetLoadingLock.release();
-        updateEventBlockTimes();
-        startEventListener();
+        if (Utils.isAddressValid(tokensService.getCurrentAddress()))
+        {
+            updateEventBlockTimes();
+            startEventListener();
+        }
     }
 
     private void removeFile(String filename)
@@ -1135,20 +1138,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void updateRealmForBundledScript(long chainId, String address, String asset, TokenDefinition td)
     {
-        realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransactionAsync(r -> {
-            String entryKey = getTSDataKey(chainId, address);
-            RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", entryKey)
-                    .findFirst();
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                String entryKey = getTSDataKey(chainId, address);
+                RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                        .equalTo("instanceKey", entryKey)
+                        .findFirst();
 
-            if (entry == null) entry = r.createObject(RealmTokenScriptData.class, entryKey);
-            entry.setFilePath(asset);
-            entry.setViewList(td.getViews());
-            entry.setNames(td.getTokenNameList());
-            entry.setHasEvents(td.hasEvents());
-            entry.setViewList(td.getViews());
-            entry.setFileHash(BUNDLED_SCRIPT);
-        });
+                if (entry == null) entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                entry.setFilePath(asset);
+                entry.setViewList(td.getViews());
+                entry.setNames(td.getTokenNameList());
+                entry.setHasEvents(td.hasEvents());
+                entry.setViewList(td.getViews());
+                entry.setFileHash(BUNDLED_SCRIPT);
+            });
+        }
     }
 
     public TokenDefinition getTokenDefinition(File file)
@@ -1334,12 +1340,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 storeActivityValue(walletAddress, ev, ethLog, blockTime, ev.activityName);
 
                 //do we need to fetch transaction from chain or do we have it already?
-                com.alphawallet.app.entity.Transaction tx = transactionRespository.fetchCachedTransaction(walletAddress, txHash);
+                com.alphawallet.app.entity.Transaction tx = transactionRepository.fetchCachedTransaction(walletAddress, txHash);
 
                 if (tx == null)
                 {
                     EventUtils.getTransactionDetails(txHash, web3j)
-                            .flatMap(ethTx -> transactionRespository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
+                            .flatMap(ethTx -> transactionRepository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(System.out::println, this::onError)
@@ -1555,16 +1561,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void storeCertificateData(String hash, XMLDsigDescriptor sig) throws RealmException
     {
-        realmManager.getRealmInstance(ASSET_DEFINITION_DB).executeTransactionAsync(r -> {
-            //if signature present, then just update
-            RealmCertificateData realmData = r.where(RealmCertificateData.class)
-                    .equalTo("instanceKey", hash)
-                    .findFirst();
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                //if signature present, then just update
+                RealmCertificateData realmData = r.where(RealmCertificateData.class)
+                        .equalTo("instanceKey", hash)
+                        .findFirst();
 
-            if (realmData == null)
-                realmData = r.createObject(RealmCertificateData.class, hash);
-            realmData.setFromSig(sig);
-        });
+                if (realmData == null)
+                    realmData = r.createObject(RealmCertificateData.class, hash);
+                realmData.setFromSig(sig);
+            });
+        }
     }
 
     private XMLDsigDescriptor getCertificateFromRealm(String hash)

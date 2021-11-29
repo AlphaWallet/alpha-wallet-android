@@ -22,7 +22,7 @@ import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, View.OnLongClickListener, PageReadyCallback
 {
     private TicketRange thisData;
-    private Token token;
+    private final Token token;
     private final Web3TokenView tokenView;
     private final LinearLayout webWrapper;
     private TokensAdapterCallback tokensAdapterCallback;

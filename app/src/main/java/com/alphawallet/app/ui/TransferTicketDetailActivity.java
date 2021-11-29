@@ -182,7 +182,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
-        viewModel.userTransaction().observe(this, this::onUserTransaction);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
         //we should import a token and a list of chosen ids
@@ -456,30 +455,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.show();
     }
 
-    private void onUserTransaction(String hash)
-    {
-        hideDialog();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.transaction_succeeded);
-        dialog.setMessage(hash);
-        dialog.setButtonText(R.string.copy);
-        dialog.setButtonListener(v -> {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("transaction hash",
-                    EthereumNetworkBase.getEtherscanURLbyNetworkAndHash(token.tokenInfo.chainId, hash));
-            clipboard.setPrimaryClip(clip);
-            dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-        });
-        dialog.setOnDismissListener(v -> {
-            dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-            new HomeRouter().open(this, true);
-            finish();
-        });
-        dialog.show();
-    }
-
     private void hideDialog()
     {
         if (dialog != null && dialog.isShowing())
@@ -661,7 +636,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             quantity = selection.size();
         }
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
-        String qty = String.valueOf(quantity) + " " +
+        String qty = quantity + " " +
                 getResources().getString(ticketName) + "\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
@@ -685,7 +660,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         String toAddress = (ensName == null) ? to : ensName;
 
-        String qty = String.valueOf(quantity) + " " +
+        String qty = quantity + " " +
                 getResources().getString(ticketName) + "\n" +
                 getResources().getString(R.string.to) + " " +
                 toAddress;

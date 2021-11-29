@@ -47,5 +47,5 @@ public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 
 	public void setFromTokenView() { }
 
-	public void onDestroyView() { };
+	public void onDestroyView() { }
 }

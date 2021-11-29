@@ -29,7 +29,7 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
     private final TokensService tokensService;
     private final GenericWalletInteract walletInteract;
 
-    private MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
+    private final MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
 
     public Erc1155AssetDetailViewModel(
             AssetDefinitionService assetDefinitionService,

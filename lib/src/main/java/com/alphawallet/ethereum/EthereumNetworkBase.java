@@ -70,65 +70,65 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
-                    MAINNET_ID));
+                    MAINNET_ID, false));
             put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
-                    CLASSIC_ID));
+                    CLASSIC_ID, false));
             put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
-                    XDAI_ID));
+                    XDAI_ID, false));
             put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
-                    POA_ID));
+                    POA_ID, false));
             put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
-                    ARTIS_SIGMA1_ID));
+                    ARTIS_SIGMA1_ID, false));
             put(KOVAN_ID, new NetworkInfo("Kovan (Test)", "ETH", KOVAN_RPC_URL, "https://kovan.etherscan.io/tx/",
-                    KOVAN_ID));
+                    KOVAN_ID, false));
             put(ROPSTEN_ID, new NetworkInfo("Ropsten (Test)", "ETH", ROPSTEN_RPC_URL, "https://ropsten.etherscan.io/tx/",
-                    ROPSTEN_ID));
+                    ROPSTEN_ID, false));
             put(SOKOL_ID, new NetworkInfo("Sokol (Test)", "POA", SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/tx/",
-                    SOKOL_ID));
+                    SOKOL_ID, false));
             put(RINKEBY_ID, new NetworkInfo("Rinkeby (Test)", "ETH", RINKEBY_RPC_URL, "https://rinkeby.etherscan.io/tx/",
-                    RINKEBY_ID));
+                    RINKEBY_ID, false));
             put(GOERLI_ID, new NetworkInfo("Görli (Test)", "GÖETH", GOERLI_RPC_URL, "https://goerli.etherscan.io/tx/",
-                    GOERLI_ID));
+                    GOERLI_ID, false));
             put(ARTIS_TAU1_ID, new NetworkInfo("ARTIS tau1 (Test)", "ATS", ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/tx/",
-                    ARTIS_TAU1_ID));
+                    ARTIS_TAU1_ID, false));
             put(BINANCE_TEST_ID, new NetworkInfo("BSC TestNet (Test)", "T-BSC", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
-                    BINANCE_MAIN_ID));
+                    BINANCE_MAIN_ID, false));
             put(BINANCE_MAIN_ID, new NetworkInfo("Binance (BSC)", "BSC", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",
-                    BINANCE_TEST_ID));
+                    BINANCE_TEST_ID, false));
             put(HECO_ID, new NetworkInfo("Heco", "HT", HECO_RPC_URL, "https://hecoinfo.com/tx/",
-                    HECO_ID));
+                    HECO_ID, false));
             put(HECO_TEST_ID, new NetworkInfo("Heco (Test)", "HT", HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/tx/",
-                    HECO_TEST_ID));
+                    HECO_TEST_ID, false));
 
             put(AVALANCHE_ID, new NetworkInfo("Avalanche Mainnet C-Chain", "AVAX", AVALANCHE_RPC_URL, "https://cchain.explorer.avax.network/tx/",
-                    AVALANCHE_ID));
+                    AVALANCHE_ID, false));
             put(FUJI_TEST_ID, new NetworkInfo("Avalanche FUJI C-Chain (Test)", "AVAX", FUJI_TEST_RPC_URL, "https://cchain.explorer.avax-test.network/tx/",
-                    FUJI_TEST_ID));
+                    FUJI_TEST_ID, false));
 
             put(FANTOM_ID, new NetworkInfo("Fantom Opera", "FTM", FANTOM_RPC_URL, "https://ftmscan.com/tx/",
-                    FANTOM_ID));
+                    FANTOM_ID, false));
             put(FANTOM_TEST_ID, new NetworkInfo("Fantom (Test)", "FTM", FANTOM_TEST_RPC_URL, "https://explorer.testnet.fantom.network/tx/",
-                    FANTOM_TEST_ID));
+                    FANTOM_TEST_ID, false));
 
             put(MATIC_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://polygonscan.com/tx/",
-                    MATIC_ID));
+                    MATIC_ID, false));
             put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
-                    MATIC_TEST_ID));
+                    MATIC_TEST_ID, false));
 
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_URL, "https://optimistic.etherscan.io/tx/",
-                    OPTIMISTIC_MAIN_ID));
+                    OPTIMISTIC_MAIN_ID, false));
             put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
-                    OPTIMISTIC_TEST_ID));
-            put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://cronos-explorer.crypto.org/tx/",CRONOS_TEST_ID));
+                    OPTIMISTIC_TEST_ID, false));
+            put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://cronos-explorer.crypto.org/tx/",CRONOS_TEST_ID, false));
             put(ARBITRUM_MAIN_ID, new NetworkInfo("Arbitrum One","AETH", ARBITRUM_RPC_URL, "https://arbiscan.io/tx/",
-                    ARBITRUM_MAIN_ID));
+                    ARBITRUM_MAIN_ID, false));
             put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Test", "ARETH", ARBITRUM_TEST_RPC_URL, "https://rinkeby-explorer.arbitrum.io/tx/",
-                    ARBITRUM_TEST_ID));
+                    ARBITRUM_TEST_ID, false));
 
             put(PALM_ID, new NetworkInfo("PALM","PALM", PALM_RPC_URL, "https://explorer.palm.io/tx/",
-                    PALM_ID));
+                    PALM_ID, false));
             put(PALM_TEST_ID, new NetworkInfo("PALM (Test)", "PALM", PALM_TEST_RPC_URL, "https://explorer.palm-uat.xyz/tx/",
-                    PALM_TEST_ID));
+                    PALM_TEST_ID, false));
         }
     };
 

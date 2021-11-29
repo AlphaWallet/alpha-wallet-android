@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.web3j.exceptions.MessageDecodingException;
@@ -115,16 +116,31 @@ public class TransactionsService
         }
     }
 
+    public void resumeFocus()
+    {
+        if (!Utils.isAddressValid(tokensService.getCurrentAddress())) return;
+
+        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed()
+            || pendingTransactionCheckCycle == null || pendingTransactionCheckCycle.isDisposed()
+            || tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())
+        {
+            startUpdateCycle();
+        }
+
+        tokensService.clearFocusToken();
+        tokensService.walletInFocus();
+    }
+
     public void startUpdateCycle()
     {
         chainTransferCheckTimes.clear();
         chainTransactionCheckTimes.clear();
+        tokensService.startUpdateCycle();
 
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
             fetchTransactions();
         }
-        tokensService.appInFocus();
     }
 
     /**
@@ -136,6 +152,7 @@ public class TransactionsService
         if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
                 (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
 
+        if (currentChainIndex >= filters.size()) currentChainIndex = 0;
         readTokenMoves(filters.get(currentChainIndex), nftCheck); //check NFTs for same chain on next iteration or advance to next chain
         Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
         currentChainIndex = pendingChainData.first;
@@ -346,10 +363,16 @@ public class TransactionsService
         fetchTransactions();
     }
 
+    public void stopService()
+    {
+        tokensService.stopUpdateCycle();
+        stopAllChainUpdate();
+        tokensService.walletOutOfFocus();
+    }
+
     public void lostFocus()
     {
-        tokensService.appOutOfFocus();
-        stopAllChainUpdate();
+        tokensService.walletOutOfFocus();
     }
 
     private void stopAllChainUpdate()
@@ -358,11 +381,16 @@ public class TransactionsService
         if (transactionCheckCycle != null && !transactionCheckCycle.isDisposed()) { transactionCheckCycle.dispose(); }
         if (pendingTransactionCheckCycle != null && !pendingTransactionCheckCycle.isDisposed()) { pendingTransactionCheckCycle.dispose(); }
         if (tokenTransferCheckCycle != null && !tokenTransferCheckCycle.isDisposed()) { tokenTransferCheckCycle.dispose(); }
+        if (eventFetch != null && !eventFetch.isDisposed()) { eventFetch.dispose(); }
 
         fetchTransactionDisposable = null;
         transactionCheckCycle = null;
         pendingTransactionCheckCycle = null;
         tokenTransferCheckCycle = null;
+        eventFetch = null;
+        tokensService.checkingChain(0);
+        chainTransferCheckTimes.clear();
+        chainTransactionCheckTimes.clear();
     }
 
     public void markPending(Transaction tx)
@@ -466,6 +494,12 @@ public class TransactionsService
         {
             return new Transaction();
         }
+    }
+
+    public void stopActivity()
+    {
+        tokensService.stopUpdateCycle();
+        stopAllChainUpdate();
     }
 
     public Single<Boolean> wipeDataForWallet()

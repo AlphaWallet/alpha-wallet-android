@@ -14,8 +14,8 @@ import io.realm.Realm;
 public class GasSettingsViewModel extends BaseViewModel {
     private final TokensService tokensService;
 
-    private MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
-    private MutableLiveData<BigInteger> gasLimit = new MutableLiveData<>();
+    private final MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
+    private final MutableLiveData<BigInteger> gasLimit = new MutableLiveData<>();
 
     public GasSettingsViewModel(TokensService svs) {
         this.tokensService = svs;

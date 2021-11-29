@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,6 +78,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private Button primaryButton;
     private Button secondaryButton;
+    private RelativeLayout primaryButtonWrapper;
+    private ProgressBar primaryButtonSpinner;
     private ImageButton moreButton;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private AssetDefinitionService assetService;
@@ -101,6 +105,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private void initializeViews()
     {
         primaryButton = findViewById(R.id.primary_button);
+        primaryButtonWrapper = findViewById(R.id.primary_button_wrapper);
+        primaryButtonSpinner = findViewById(R.id.primary_spinner);
         secondaryButton = findViewById(R.id.secondary_button);
         moreButton = findViewById(R.id.more_button);
 
@@ -120,7 +126,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void resetButtonCount() {
         buttonCount = 0;
-        primaryButton.setVisibility(View.GONE);
+        primaryButtonWrapper.setVisibility(View.GONE);
         secondaryButton.setVisibility(View.GONE);
         moreButton.setVisibility(View.GONE);
         moreActionsList.clear();
@@ -398,10 +404,10 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     public void setPrimaryButtonText(Integer resource) {
         if (resource != null) {
-            primaryButton.setVisibility(View.VISIBLE);
+            primaryButtonWrapper.setVisibility(View.VISIBLE);
             primaryButton.setText(resource);
         } else {
-            primaryButton.setVisibility(View.GONE);
+            primaryButtonWrapper.setVisibility(View.GONE);
         }
     }
 
@@ -416,6 +422,12 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     public void setPrimaryButtonEnabled(boolean enabled) {
         primaryButton.setEnabled(enabled);
+        if (enabled) primaryButtonSpinner.setVisibility(View.GONE);
+    }
+
+    public void setPrimaryButtonWaiting() {
+        primaryButton.setEnabled(false);
+        primaryButtonSpinner.setVisibility(View.VISIBLE);
     }
 
     public void setSecondaryButtonEnabled(boolean enabled) {
@@ -424,10 +436,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     public void setPrimaryButtonClickListener(OnClickListener listener) {
         primaryButton.setOnClickListener(listener);
-    }
-
-    public void setSecondaryButtonClickListener(OnClickListener listener) {
-        secondaryButton.setOnClickListener(listener);
     }
 
     private void debounceButton(final View v)
@@ -466,7 +474,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             case 0: {
                 primaryButton.setText(function.buttonText);
                 primaryButton.setId(function.buttonId);
-                primaryButton.setVisibility(View.VISIBLE);
+                primaryButtonWrapper.setVisibility(View.VISIBLE);
                 primaryButton.setOnClickListener(this);
                 break;
             }

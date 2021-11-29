@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_holder"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -11,12 +12,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
+        tools:visibility="visible"
         tools:src="@drawable/ic_token_eth"/>
+
+    <ProgressBar
+        android:id="@+id/progress_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminateDrawable="@drawable/progress_bar_spinner"
+        tools:visibility="visible"
+        android:visibility="gone"/>
 
     <RelativeLayout
         android:id="@+id/web_view_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:visibility="gone"
         android:visibility="visible">
 
         <WebView
@@ -36,4 +47,4 @@
             android:visibility="gone"/>
 
     </RelativeLayout>
-</LinearLayout>
+</RelativeLayout>

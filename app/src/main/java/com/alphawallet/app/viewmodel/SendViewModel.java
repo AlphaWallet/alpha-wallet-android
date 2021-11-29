@@ -89,7 +89,7 @@ public class SendViewModel extends BaseViewModel {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public Token getToken(long chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
+    public Token getToken(long chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); }
 
     public void showImportLink(Context context, String importTxt)
     {

@@ -633,7 +633,7 @@ public class Token
     public boolean hasGroupedTransfer() { return false; } //Can the NFT token's transfer function handle multiple tokens?
     public boolean checkSelectionValidity(List<BigInteger> selection) //check a selection of ID's for Transfer/Redeem/Sell
     {
-        return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
+        return selection != null && selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
     }
 
     public String getShortName() {
@@ -943,14 +943,14 @@ public class Token
     {
         return new Function("tokenURI",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private Function getTokenURI2(BigInteger tokenId)
     {
         return new Function("uri",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private String loadMetaData(String tokenURI)
@@ -987,5 +987,13 @@ public class Token
                     .retryOnConnectionFailure(true)
                     .build();
         }
+    }
+
+    public boolean checkInfoRequiresUpdate(RealmToken realmToken)
+    {
+        if (TextUtils.isEmpty(realmToken.getName()) || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(realmToken.getName()))) { return true; }
+        if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
+        if (realmToken.getContractType() != contractType) { return true; }
+        return realmToken.getDecimals() != tokenInfo.decimals;
     }
 }

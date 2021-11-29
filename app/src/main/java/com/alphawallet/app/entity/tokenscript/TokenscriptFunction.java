@@ -42,6 +42,7 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -606,7 +607,7 @@ public abstract class TokenscriptFunction
                 {
                     data = Arrays.copyOfRange(data, 0, index + 1);
                 }
-                name = new String(data, "UTF-8");
+                name = new String(data, StandardCharsets.UTF_8);
             }
         }
 

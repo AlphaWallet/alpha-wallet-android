@@ -8,7 +8,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class SetDefaultWalletInteract {
 
-	private WalletRepositoryType accountRepository;
+	private final WalletRepositoryType accountRepository;
 
 	public SetDefaultWalletInteract(WalletRepositoryType walletRepositoryType) {
 		this.accountRepository = walletRepositoryType;

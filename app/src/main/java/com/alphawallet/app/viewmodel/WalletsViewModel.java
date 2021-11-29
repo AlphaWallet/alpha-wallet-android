@@ -183,6 +183,7 @@ public class WalletsViewModel extends BaseViewModel
         ensWrappingCheck = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
+                                                    .onErrorReturnItem(wallet.ENSname != null ? wallet.ENSname : "")
                         .map(ensName -> { wallet.ENSname = ensName; return wallet;})
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())

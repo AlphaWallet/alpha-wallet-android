@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class Blockies {
     private static final int size = 8;
-    private static long[] randSeed = new long[4];
+    private static final long[] randSeed = new long[4];
 
     public static Bitmap createIcon(String address) {
         return createIcon(address, 16);

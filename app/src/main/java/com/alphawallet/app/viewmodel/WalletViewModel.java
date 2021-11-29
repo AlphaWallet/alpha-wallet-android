@@ -32,6 +32,7 @@ import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.TokenManagementActivity;
@@ -70,6 +71,7 @@ public class WalletViewModel extends BaseViewModel
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
     private final ManageWalletsRouter manageWalletsRouter;
+    private final RealmManager realmManager;
     private long lastBackupCheck = 0;
     private BottomSheetDialog dialog;
 
@@ -83,7 +85,8 @@ public class WalletViewModel extends BaseViewModel
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
             ManageWalletsRouter manageWalletsRouter,
-            PreferenceRepositoryType preferenceRepository)
+            PreferenceRepositoryType preferenceRepository,
+            RealmManager realmManager)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -95,6 +98,7 @@ public class WalletViewModel extends BaseViewModel
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
+        this.realmManager = realmManager;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -235,9 +239,9 @@ public class WalletViewModel extends BaseViewModel
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 
-    public Realm getRealmInstance(Wallet wallet)
+    public Realm getRealmInstance()
     {
-        return tokensService.getRealmInstance(wallet);
+        return realmManager.getRealmInstance(getWallet());
     }
 
     public void showTokenDetail(Activity activity, Token token)

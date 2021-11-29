@@ -605,7 +605,7 @@
     <string name="tokenscript_file_error">TokenScript fichier erreur</string>
     <string name="toast_browser_cache_cleared">Cache Navigateur nettoyé</string>
     <string name="toast_token_data_cleared">Données de Token effacées</string>
-    <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
+    <string name="token_data_being_cleared">Données du Token en cours d\'effacement … Veuillez patienter</string>
     <string name="your_wallets">Vos Portefeuilles</string>
     <string name="action_copy">Copier</string>
     <string name="title_version_support_warning">Mise à jour importante</string>

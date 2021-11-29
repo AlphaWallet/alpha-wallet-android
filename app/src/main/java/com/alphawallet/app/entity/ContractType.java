@@ -26,5 +26,4 @@ public enum ContractType
     MAYBE_ERC20,
     ERC1155,
     CREATION //Placeholder for generic, should be at end of list
-    ;
 }

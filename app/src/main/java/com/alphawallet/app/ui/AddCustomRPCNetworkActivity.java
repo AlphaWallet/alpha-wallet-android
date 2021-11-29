@@ -88,17 +88,17 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
         if (chainId >= 0) {
             // get network info and fill ui
-            EthereumNetworkRepositoryType.NetworkInfoExt ext = viewModel.getNetworkInfo(chainId);
+            NetworkInfo network = viewModel.getNetworkInfo(chainId);
 
-            nameInputView.setText(ext.info.name);
-            rpcUrlInputView.setText(ext.info.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})","/********************************"));
-            chainIdInputView.setText(String.valueOf(ext.info.chainId));
-            symbolInputView.setText(ext.info.symbol);
-            blockExplorerUrlInputView.setText(ext.info.etherscanUrl);
-            blockExplorerApiUrl.setText(ext.info.etherscanAPI);
-            testNetSwitch.setChecked(ext.isTestNetwork);
+            nameInputView.setText(network.name);
+            rpcUrlInputView.setText(network.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})","/********************************"));
+            chainIdInputView.setText(String.valueOf(network.chainId));
+            symbolInputView.setText(network.symbol);
+            blockExplorerUrlInputView.setText(network.etherscanUrl);
+            blockExplorerApiUrl.setText(network.etherscanAPI);
+            testNetSwitch.setChecked(viewModel.isTestNetwork(network));
             // disable editing for hardcoded networks
-            if (!ext.isCustomNetwork) {
+            if (!network.isCustom) {
                 nameInputView.getEditText().setEnabled(false);
                 rpcUrlInputView.getEditText().setEnabled(false);
                 chainIdInputView.getEditText().setEnabled(false);
@@ -155,8 +155,8 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         long newChainId = Long.parseLong(chainIdInputView.getText().toString());
         long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
         if (newChainId != chainId) {
-            EthereumNetworkRepositoryType.NetworkInfoExt networkInfo = viewModel.getNetworkInfo(newChainId);
-            if (networkInfo.info != null) {
+            NetworkInfo network = viewModel.getNetworkInfo(newChainId);
+            if (network != null) {
                 chainIdInputView.setError(getString(R.string.error_chainid_already_taken));
                 return false;
             }

@@ -12,6 +12,7 @@ import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 
@@ -31,7 +32,8 @@ public class WalletModule {
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
             ManageWalletsRouter manageWalletsRouter,
-            PreferenceRepositoryType preferenceRepository) {
+            PreferenceRepositoryType preferenceRepository,
+            RealmManager realmManager) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 tokenDetailRouter,
@@ -42,7 +44,8 @@ public class WalletModule {
                 changeTokenEnableInteract,
                 myAddressRouter,
                 manageWalletsRouter,
-                preferenceRepository);
+                preferenceRepository,
+                realmManager);
     }
 
     @Provides

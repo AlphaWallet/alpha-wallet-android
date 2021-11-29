@@ -16,6 +16,13 @@
         app:layout_constraintGuide_percent="0.98" />
 
     <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.00" />
+
+    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,14 +62,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.65" />
+        app:layout_constraintGuide_percent="0.59" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineRightMid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.65" />
+        app:layout_constraintGuide_percent="0.55" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineLeftMid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.45" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBottom2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.965" />
 
     <ImageView
         android:id="@+id/circle"
@@ -71,6 +92,7 @@
         android:contentDescription="@string/empty"
         android:src="@drawable/grey_circle"
         android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
         app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
@@ -125,7 +147,7 @@
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
         app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
         app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
-        app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
 
     <ImageView
         android:id="@+id/status_icon"
@@ -137,7 +159,33 @@
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
         app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
         app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
-        app:layout_constraintBottom_toTopOf="@id/guidelineBottom" />
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
+
+    <ImageView
+        android:id="@+id/chain_icon_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/grey_circle"
+        app:layout_constraintEnd_toStartOf="@id/guidelineLeftMid"
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
+        app:layout_constraintStart_toEndOf="@id/guidelineLeft"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
+
+    <ImageView
+        android:id="@+id/status_chain_icon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/empty"
+        android:src="@drawable/ic_kovan"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2"
+        app:layout_constraintEnd_toStartOf="@id/guidelineLeftMid"
+        app:layout_constraintStart_toEndOf="@id/guidelineLeft"
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
+        tools:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/pending_progress"

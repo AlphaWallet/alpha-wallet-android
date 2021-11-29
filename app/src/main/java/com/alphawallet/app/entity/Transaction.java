@@ -568,8 +568,7 @@ public class Transaction implements Parcelable
 		if ((transactionInput != null && transactionInput.functionData != null) && transactionInput.containsAddress(walletAddr)) return true;
 		else if (from.equalsIgnoreCase(walletAddr)) return true;
 		else if (to.equalsIgnoreCase(walletAddr)) return true;
-		else if (input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr.toLowerCase()))) return true;
-		else return false;
+		else return input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr.toLowerCase()));
 	}
 
 	public boolean isNFTSent(String walletAddress)
@@ -612,7 +611,7 @@ public class Transaction implements Parcelable
 	}
 
 	private String calculateContractAddress(String account, long nonce){
-		byte[] addressAsBytes = org.web3j.utils.Numeric.hexStringToByteArray(account);
+		byte[] addressAsBytes = Numeric.hexStringToByteArray(account);
 		byte[] calculatedAddressAsBytes =
 				Hash.sha3(RlpEncoder.encode(
 						new RlpList(
@@ -621,6 +620,6 @@ public class Transaction implements Parcelable
 
 		calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
 				12, calculatedAddressAsBytes.length);
-		return org.web3j.utils.Numeric.toHexString(calculatedAddressAsBytes);
+		return Numeric.toHexString(calculatedAddressAsBytes);
 	}
 }

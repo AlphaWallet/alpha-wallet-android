@@ -591,7 +591,7 @@
     <string name="tokenscript_file_error">TokenScript 文件错误</string>
     <string name="toast_browser_cache_cleared">浏览器缓存已清除</string>
     <string name="toast_token_data_cleared">通证数据已清除</string>
-    <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
+    <string name="token_data_being_cleared">正在清除通证数据……请稍候</string>
     <string name="your_wallets">您的钱包</string>
     <string name="action_copy">复制</string>
     <string name="title_version_support_warning">重要更新</string>

@@ -56,7 +56,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
-    private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
 
@@ -104,7 +103,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     }
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
-    public LiveData<String> userTransaction() { return userTransaction; }
     private void initParser()
     {
         if (parser == null)
@@ -225,14 +223,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private void onInterfaceSpec(ContractType spec, String to, Token token, ArrayList<Pair<BigInteger, NFTAsset>> transferList)
     {
         token.setInterfaceSpec(spec);
-        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
         createTokenTransfer(to, token, transferList);
     }
 
     private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)
     {
         token.setInterfaceSpec(spec);
-        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
         createTokenTransfer(to, token, transferList);
     }
 

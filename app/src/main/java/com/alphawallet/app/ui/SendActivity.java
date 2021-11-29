@@ -290,7 +290,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
+                                                "Code: " + resultCode
                     ));
                     break;
             }

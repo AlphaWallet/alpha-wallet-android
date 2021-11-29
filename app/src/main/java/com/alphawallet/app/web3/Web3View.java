@@ -412,14 +412,8 @@ public class Web3View extends WebView {
     // Grim hack for dapps that still use local storage
     private void checkDOMUsage(@NotNull String url)
     {
-        if (url.equals("https://wallet.matic.network/bridge/")) // may need other sites added
-        {
-            getSettings().setDomStorageEnabled(false);
-        }
-        else
-        {
-            getSettings().setDomStorageEnabled(true);
-        }
+        // may need other sites added
+        getSettings().setDomStorageEnabled(!url.equals("https://wallet.matic.network/bridge/"));
     }
 
     private static boolean isJson(String value) {

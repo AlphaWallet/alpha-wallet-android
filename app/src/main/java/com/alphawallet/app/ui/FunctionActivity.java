@@ -543,7 +543,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         handler.postDelayed(closer, 1000);
     }
 
-    private Runnable closer = new Runnable()
+    private final Runnable closer = new Runnable()
     {
         @Override
         public void run()
@@ -552,7 +552,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     };
 
-    private Runnable progress = new Runnable()
+    private final Runnable progress = new Runnable()
     {
         @Override
         public void run()
@@ -561,7 +561,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     };
 
-    private Runnable progressOff = new Runnable()
+    private final Runnable progressOff = new Runnable()
     {
         @Override
         public void run()

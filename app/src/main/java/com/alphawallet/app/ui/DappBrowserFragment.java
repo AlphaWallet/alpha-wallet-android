@@ -1,5 +1,19 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
+import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
+import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
+import static com.alphawallet.app.util.Utils.isValidUrl;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
@@ -39,7 +53,6 @@ import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -133,8 +146,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -145,21 +156,8 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import io.realm.RealmResults;
-
-import static com.alphawallet.app.C.ETHER_DECIMALS;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
-import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
-import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
-import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
-import static com.alphawallet.app.util.Utils.isValidUrl;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
@@ -183,6 +181,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
+    private Realm realm = null;
 
     private ActionSheetDialog confirmationDialog;
 
@@ -365,7 +364,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         super.onDestroy();
         viewModel.onDestroy();
-        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
+        stopBalanceListener();
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
@@ -606,6 +605,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             {
                 viewModel.checkForNetworkChanges();
             }
+            else
+            {
+                viewModel.startBalanceUpdate();
+                startBalanceListener();
+            }
         }
         if (urlTv != null)
         {
@@ -621,6 +625,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         focusFlag = false;
         if (web3 != null) web3.requestFocus();
         if (urlTv != null) urlTv.clearFocus();
+        if (viewModel != null) viewModel.stopBalanceUpdate();
+        stopBalanceListener();
     }
 
     // TODO: Move all nav stuff to widget
@@ -772,9 +778,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void startBalanceListener()
     {
         if (wallet == null || activeNetwork == null) return;
+        if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance(wallet);
 
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
-        realmUpdate = viewModel.getRealmInstance(wallet).where(RealmToken.class)
+        realmUpdate = realm.where(RealmToken.class)
                 .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth")).findAllAsync();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance
@@ -788,13 +795,23 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         });
     }
 
+    private void stopBalanceListener()
+    {
+        if (realmUpdate != null)
+        {
+            realmUpdate.removeAllChangeListeners();
+            realmUpdate = null;
+        }
+
+        if (realm != null && !realm.isClosed()) realm.close();
+    }
+
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
         if (activeNetwork != null)
         {
             boolean needsReload = loadOnInit == null;
             setupWeb3();
-            startBalanceListener();
             if (needsReload) reloadPage();
         }
     }
@@ -1066,6 +1083,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             symbol.setVisibility(View.GONE);
             viewModel.setNetwork(newNetworkId);
             onNetworkChanged(viewModel.getNetworkInfo(newNetworkId));
+            startBalanceListener();
         }
         //refresh URL page
         reloadPage();
@@ -1161,14 +1179,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
 
         //Don't show dialog if network doesn't need to be changed or if already showing
-        if (activeNetwork.chainId == chainId || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
+        if ((activeNetwork != null && activeNetwork.chainId == chainId) || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
 
         //if we're switching between mainnet and testnet we need to pop open the 'switch to testnet' dialog (class TestNetDialog)
         // - after the user switches to testnet, go straight to switching the network (loadNewNetwork)
         // - if user is switching form testnet to mainnet, simply add the title below
 
         // at this stage, we know if it's testnet or not
-        if (!info.hasRealValue() && activeNetwork.hasRealValue())
+        if (!info.hasRealValue() && (activeNetwork != null && activeNetwork.hasRealValue()))
         {
             TestNetDialog testnetDialog = new TestNetDialog(getContext(), info.chainId, this);
             testnetDialog.show();
@@ -2067,15 +2085,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void notifyConfirm(String mode)
     {
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
-    }
-
-    public void selected()
-    {
-        //start gas update cycle when user selects Dapp browser
-        if (viewModel != null && activeNetwork != null)
-        {
-            viewModel.updateGasPrice(activeNetwork.chainId);
-        }
     }
 
     // Handle resizing the browser view when the soft keyboard pops up and goes.

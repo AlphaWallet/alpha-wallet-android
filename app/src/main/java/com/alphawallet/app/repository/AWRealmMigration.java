@@ -379,7 +379,7 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
 
-        if (oldVersion == 35)
+        if (oldVersion == 35 || oldVersion == 36)
         {
             RealmObjectSchema realmData = schema.get("RealmAToken");
             if (realmData == null)
@@ -390,7 +390,6 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion++;
         }
-
     }
 
     @Override

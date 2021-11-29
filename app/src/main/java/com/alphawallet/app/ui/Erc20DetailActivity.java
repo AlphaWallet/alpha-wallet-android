@@ -205,6 +205,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
         adapter.setDefaultWallet(wallet);
 
+        //TODO: Fix Realm leak
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
                 token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
@@ -343,13 +344,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
         else
         {
-            if (activityHistoryList != null)
-            {
-                //reset the transaction history
-                activityHistoryList.resetAdapter();
-                activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                        token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
-            }
+            activityHistoryList.resetAdapter();
+            activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
+                    token, viewModel.getTokensService(), BigInteger.ZERO, HISTORY_LENGTH);
             viewModel.getTokensService().setFocusToken(token);
             viewModel.restartServices();
         }

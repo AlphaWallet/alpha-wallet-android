@@ -1,5 +1,17 @@
 package com.alphawallet.app.service;
 
+import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
+import static com.alphawallet.app.entity.Operation.CREATE_KEYSTORE_KEY;
+import static com.alphawallet.app.entity.Operation.CREATE_PRIVATE_KEY;
+import static com.alphawallet.app.entity.Operation.FETCH_MNEMONIC;
+import static com.alphawallet.app.entity.Operation.IMPORT_HD_KEY;
+import static com.alphawallet.app.entity.Operation.UPGRADE_HD_KEY;
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
+import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
+import static com.alphawallet.app.service.LegacyKeystore.getLegacyPassword;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
@@ -8,7 +20,6 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
@@ -19,6 +30,7 @@ import androidx.annotation.RequiresApi;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -35,7 +47,6 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
@@ -74,18 +85,6 @@ import wallet.core.jni.Curve;
 import wallet.core.jni.HDWallet;
 import wallet.core.jni.Hash;
 import wallet.core.jni.PrivateKey;
-
-import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
-import static com.alphawallet.app.entity.Operation.CREATE_KEYSTORE_KEY;
-import static com.alphawallet.app.entity.Operation.CREATE_PRIVATE_KEY;
-import static com.alphawallet.app.entity.Operation.FETCH_MNEMONIC;
-import static com.alphawallet.app.entity.Operation.IMPORT_HD_KEY;
-import static com.alphawallet.app.entity.Operation.UPGRADE_HD_KEY;
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
-import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
-import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
-import static com.alphawallet.app.service.LegacyKeystore.getLegacyPassword;
 
 @TargetApi(23)
 public class KeyService implements AuthenticationCallback, PinAuthenticationCallbackInterface
@@ -131,6 +130,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private CreateWalletCallbackInterface callbackInterface;
     private ImportWalletCallback importCallback;
     private SignAuthenticationCallback signCallback;
+    private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
     private boolean requireAuthentication = false;
 
     private static SecurityStatus securityStatus = SecurityStatus.NOT_CHECKED;
@@ -140,10 +140,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return context;
     }
 
-    public KeyService(Context ctx)
+    public KeyService(Context ctx, AnalyticsServiceType<AnalyticsProperties> analyticsService)
     {
         System.loadLibrary("TrustWalletCore");
-        context = ctx;
+        this.context = ctx;
+        this.analyticsService = analyticsService;
         checkSecurity();
         signDialog = new SignTransactionDialog(context);
     }
@@ -263,7 +264,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
         catch (UserNotAuthenticatedException e)
         {
-            checkAuthentication(FETCH_MNEMONIC);
+            callingActivity.runOnUiThread(() ->
+                    checkAuthentication(FETCH_MNEMONIC));
         }
     }
 
@@ -422,7 +424,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
+            if (!BuildConfig.DEBUG) analyticsService.recordException(e);
             e.printStackTrace();
         }
         catch (KeyServiceException e)
@@ -564,7 +566,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
+            if (!BuildConfig.DEBUG) analyticsService.recordException(e);
             e.printStackTrace();
             return UpgradeKeyResult.ERROR;
         }
@@ -1064,7 +1066,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
-            if (!BuildConfig.DEBUG) FirebaseCrashlytics.getInstance().recordException(e);
+            if (!BuildConfig.DEBUG) analyticsService.recordException(e);
             returnSig.failMessage = e.getMessage();
             e.printStackTrace();
         }

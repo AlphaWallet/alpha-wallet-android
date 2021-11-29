@@ -8,7 +8,6 @@
     android:animateLayoutChanges="true"
     android:background="@drawable/background_round_nofill_8dp"
     android:clickable="true"
-    android:elevation="2dp"
     android:focusable="true"
     android:orientation="vertical"
     android:paddingStart="@dimen/dp16"

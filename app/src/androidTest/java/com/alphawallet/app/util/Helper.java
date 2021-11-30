@@ -17,7 +17,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.core.AllOf.allOf;
 
 public class Helper {
-    private static final int DEFAULT_TIMEOUT_IN_MILLIS = 60000;
+    private static final int DEFAULT_TIMEOUT_IN_MILLIS = 120000;
 
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher) {
         return waitUntil(allOf(withId(viewId), matcher));

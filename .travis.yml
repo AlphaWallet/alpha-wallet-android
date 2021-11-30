@@ -31,6 +31,7 @@ android:
 before_script:
   - echo y | sdkmanager "ndk-bundle"
   - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+  - android list targets
   - echo no | android create avd --force -n test -t android-31 --abi armeabi-v8a  -c 100M
   - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
   - android-wait-for-emulator

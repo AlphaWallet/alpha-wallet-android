@@ -35,12 +35,12 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by JB on 30/05/2021.
  */
-public class NFTImageView extends LinearLayout
+public class NFTImageView extends RelativeLayout
 {
     private final ImageView image;
     private final RelativeLayout webLayout;
     private final WebView webView;
-    private final LinearLayout holdingView;
+    private final RelativeLayout holdingView;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)

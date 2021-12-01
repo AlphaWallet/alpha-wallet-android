@@ -215,7 +215,7 @@ public class TokensService
             syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
             addLockedTokens();
             openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
-            openseaService.resetOffsetRead();
+            if (openseaService != null) openseaService.resetOffsetRead();
         }
     }
 
@@ -319,6 +319,7 @@ public class TokensService
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
 
         IconItem.resetCheck();
+        tokenValueMap.clear();
         pendingChainMap.clear();
         tokenStoreList.clear();
         baseTokenCheck.clear();
@@ -581,7 +582,8 @@ public class TokensService
 
     private void checkOpenSea()
     {
-        if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) return;
+        if ((openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed())
+            || openseaService == null) return;
         NetworkInfo info;
         if (networkFilter.contains(MAINNET_ID))
             info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
@@ -982,10 +984,13 @@ public class TokensService
      */
     public void track(String gasSpeed)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(gasSpeed);
+        if (analyticsService != null)
+        {
+            AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+            analyticsProperties.setData(gasSpeed);
 
-        analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+            analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+        }
     }
 
     public Token getTokenOrBase(long chainId, String address)

@@ -1,5 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.content.Context;
 
@@ -18,11 +21,14 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 
@@ -35,9 +41,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class WalletsViewModel extends BaseViewModel
 {
@@ -55,6 +58,10 @@ public class WalletsViewModel extends BaseViewModel
     private final TokensService tokensService;
     private final AWEnsResolver ensResolver;
     private final AssetDefinitionService assetService;
+
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final TokenRepositoryType tokenRepository;
+    private final TickerService tickerService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -85,7 +92,9 @@ public class WalletsViewModel extends BaseViewModel
             HomeRouter homeRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
-            TokensService tokensService,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            TokenRepositoryType tokenRepository,
+            TickerService tickerService,
             AssetDefinitionService assetService,
             Context context)
     {
@@ -96,8 +105,12 @@ public class WalletsViewModel extends BaseViewModel
         this.homeRouter = homeRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
-        this.tokensService = tokensService;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.tokenRepository = tokenRepository;
+        this.tickerService = tickerService;
         this.assetService = assetService;
+
+        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
     }

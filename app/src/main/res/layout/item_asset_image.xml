@@ -16,7 +16,7 @@
         tools:src="@drawable/ic_token_eth"/>
 
     <ProgressBar
-        android:id="@+id/progress_spinner"
+        android:id="@+id/avatar_progress_spinner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:indeterminateDrawable="@drawable/progress_bar_spinner"

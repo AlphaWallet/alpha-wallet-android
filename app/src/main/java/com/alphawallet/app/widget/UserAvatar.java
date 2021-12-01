@@ -82,12 +82,12 @@ public class UserAvatar extends LinearLayout
 
     public void setWaiting()
     {
-        findViewById(R.id.progress_spinner).setVisibility(View.VISIBLE);
+        findViewById(R.id.avatar_progress_spinner).setVisibility(View.VISIBLE);
     }
 
     public void finishWaiting()
     {
-        findViewById(R.id.progress_spinner).setVisibility(View.GONE);
+        findViewById(R.id.avatar_progress_spinner).setVisibility(View.GONE);
     }
 
     public void bindAndFind(@NonNull Wallet wallet)

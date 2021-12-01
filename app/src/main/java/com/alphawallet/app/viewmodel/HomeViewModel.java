@@ -516,11 +516,8 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void tryToShowRateAppDialog(Activity context) {
-        //only if installed from PlayStore
-        if (Utils.verifyInstallerId(context))
-        {
-            RateApp.showRateTheApp(context, preferenceRepository, false);
-        }
+        //only if installed from PlayStore (checked within the showRateTheApp method)
+        RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 
     public boolean shouldShowRootWarning() {

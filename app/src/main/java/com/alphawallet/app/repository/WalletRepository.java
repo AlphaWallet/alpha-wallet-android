@@ -53,7 +53,7 @@ public class WalletRepository implements WalletRepositoryType
 	{
 		return fetchWallets()
 				.flatMap(wallets -> {
-					if (wallets.length == 0) return Single.error(new Exception("No wallets"));
+					if (wallets.length == 0) return Single.error(new NoWallets("No wallets"));
 					Wallet firstWallet = null;
 					for (Wallet wallet : wallets)
 					{
@@ -160,9 +160,9 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Wallet> updateWalletData(Wallet wallet)
+	public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
 	{
-		return walletDataRealmSource.updateWalletData(wallet);
+		walletDataRealmSource.updateWalletData(wallet, onSuccess);
 	}
 
 	@Override

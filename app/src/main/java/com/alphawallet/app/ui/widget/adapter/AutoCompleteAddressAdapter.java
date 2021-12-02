@@ -1,8 +1,9 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +27,9 @@ public class AutoCompleteAddressAdapter extends ArrayAdapter<String>
 {
     private final List<String> history;
     public List<String> filteredUrls = new ArrayList<>();
-    private Context context;
+    private final Context context;
     private ItemClickListener listener;
-    private String preferenceTag;
+    private final String preferenceTag;
 
     public AutoCompleteAddressAdapter(Context context, String tag) {
         super(context, 0);

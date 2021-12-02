@@ -2,16 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_networks"
+        android:icon="@drawable/ic_network_2"
+        android:orderInCategory="1"
+        android:title="@string/action_networks"
+        app:showAsAction="always"
+        />
+    <item
         android:id="@+id/action_show_contract"
         android:icon="@drawable/ic_ethereum"
         android:orderInCategory="1"
         android:title="@string/show_token_contract"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_receive_payment"
-        android:icon="@drawable/ic_action_generate_request"
-        android:orderInCategory="20"
-        android:title="@string/receive_payment"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_my_address"

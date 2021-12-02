@@ -19,16 +19,20 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class CustomViewSettings
 {
-    private static final int primaryChain = MAINNET_ID;
+    public static final long primaryChain = MAINNET_ID;
     private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
     //You can use the settings in this file to customise the wallet appearance
+
+    //IF you want to re-order the the way chains appear in the wallet, see this line in EthereumNetworkBase:
+    //private static final List<Long> hasValue = new ArrayList<>(Arrays.asList( ...
+    //... and read the comment above it
 
     //Ensures certain tokens are always visible, even if zero balance (see also 'showZeroBalance()' below).
     //See also lockedChains. You can also lock the chains that are displayed on.
     //If you leave the locked chains empty, the token will appear if the chain is selected
     private static final List<TokenInfo> lockedTokens = Arrays.asList(
-            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, int ChainId)
+            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, long ChainId)
             //new TokenInfo("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "USD Coin", "USDC", 6, true, EthereumNetworkBase.MAINNET_ID),
             //new TokenInfo("0x6C8c6b02E7b2BE14d4fA6022Dfd6d75921D90E4E", "Compound BAT", "CBAT", 8, true, EthereumNetworkBase.MAINNET_ID)
     );
@@ -36,12 +40,21 @@ public class CustomViewSettings
     //List of chains that wallet can show
     //If blank, enable the user filter select dialog, if there are any entries here, the select network dialog is disabled
     //Note: you should always enable the chainId corresponding to the chainIDs in the lockedTokens.
-    private static final List<Integer> lockedChains = Arrays.asList(
+    private static final List<Long> lockedChains = Arrays.asList(
             //EthereumNetworkBase.MAINNET_ID //EG only show Main, xdai, classic and two testnets. Don't allow user to select any others
             //EthereumNetworkBase.XDAI_ID,
             //EthereumNetworkBase.RINKEBY_ID, //You can mix testnets and mainnets, but probably shouldn't as it may result in people getting scammed
             //EthereumNetworkBase.GOERLI_ID
     );
+
+    public static final List<Long> alwaysVisibleChains = Arrays.asList(
+            EthereumNetworkBase.MAINNET_ID
+    );
+
+    public static boolean alwaysShow(long chainId)
+    {
+        return alwaysVisibleChains.contains(chainId);
+    }
 
     //TODO: Wallet can only show the above tokens
     private static final boolean onlyShowTheseTokens = true;
@@ -51,7 +64,7 @@ public class CustomViewSettings
         return lockedTokens;
     }
 
-    public static List<Integer> getLockedChains()
+    public static List<Long> getLockedChains()
     {
         return lockedChains;
     }
@@ -65,12 +78,12 @@ public class CustomViewSettings
     //Does main wallet page show tokens with zero balance? NB: any 'Locked' tokens above will always be shown
     public static boolean showZeroBalance() { return false; }
 
-    public static boolean tokenCanBeDisplayed(ContractType type, String balance, int chainId, String contractAddress)
+    public static boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
-        return showZeroBalance() || type == ContractType.ETHEREUM || !balance.equals("0") || isLockedToken(chainId, contractAddress);
+        return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
     }
 
-    private static boolean isLockedToken(int chainId, String contractAddress)
+    private static boolean isLockedToken(long chainId, String contractAddress)
     {
         for (TokenInfo tInfo : lockedTokens)
         {

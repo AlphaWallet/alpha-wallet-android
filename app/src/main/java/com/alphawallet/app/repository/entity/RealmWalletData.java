@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
  */
 public class RealmWalletData extends RealmObject
 {
-    private static int DISMISS_WARNING_IN_SETTINGS_MASK = 0xFFFFFFFE;
+    private static final int DISMISS_WARNING_IN_SETTINGS_MASK = 0xFFFFFFFE;
 
     @PrimaryKey
     private String address;
@@ -17,6 +17,7 @@ public class RealmWalletData extends RealmObject
     private String balance;
     private String name;
     private long lastWarning;
+    private String ENSAvatar;
 
     public String getAddress()
     {
@@ -66,4 +67,14 @@ public class RealmWalletData extends RealmObject
     }
     public boolean getIsDismissedInSettings() { return (lastWarning & 0x1) == 1; }
     public void setIsDismissedInSettings(boolean isDismissed) { lastWarning = (lastWarning&DISMISS_WARNING_IN_SETTINGS_MASK) + (isDismissed ? 0x1 : 0x0); }
+
+    public String getENSAvatar()
+    {
+        return ENSAvatar;
+    }
+
+    public void setENSAvatar(String ENSAvatar)
+    {
+        this.ENSAvatar = ENSAvatar;
+    }
 }

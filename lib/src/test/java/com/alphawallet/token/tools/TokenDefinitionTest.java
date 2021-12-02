@@ -36,7 +36,7 @@ public class TokenDefinitionTest implements ParseResult
 
         assertTrue(entryToken.contracts.size() > 0); //we have at least one address
 
-        for (int networkId : ci.addresses.keySet())
+        for (long networkId : ci.addresses.keySet())
         {
             for (String address : ci.addresses.get(networkId))
             {

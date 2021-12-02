@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class MarketplaceEvent implements Parcelable {
-    private String eventName;
+    private final String eventName;
 
     public MarketplaceEvent(String eventName) {
         this.eventName = eventName;

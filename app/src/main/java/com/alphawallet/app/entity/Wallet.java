@@ -3,9 +3,12 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
+
+import org.web3j.ens.contracts.generated.ENS;
 
 import java.math.BigDecimal;
 
@@ -19,6 +22,8 @@ public class Wallet implements Parcelable {
     public KeyService.AuthenticationLevel authLevel;
     public long walletCreationTime;
     public String balanceSymbol;
+    public String ENSAvatar;
+    public boolean isSynced;
 
 	public Wallet(String address) {
 		this.address = address;
@@ -30,6 +35,7 @@ public class Wallet implements Parcelable {
 		this.authLevel = KeyService.AuthenticationLevel.NOT_SET;
 		this.walletCreationTime = 0;
 		this.balanceSymbol = "";
+		this.ENSAvatar = "";
 	}
 
 	private Wallet(Parcel in)
@@ -45,6 +51,7 @@ public class Wallet implements Parcelable {
 		authLevel = KeyService.AuthenticationLevel.values()[t];
 		walletCreationTime = in.readLong();
 		balanceSymbol = in.readString();
+		ENSAvatar = in.readString();
 	}
 
 	public void setWalletType(WalletType wType)
@@ -85,6 +92,7 @@ public class Wallet implements Parcelable {
 		parcel.writeInt(authLevel.ordinal());
 		parcel.writeLong(walletCreationTime);
 		parcel.writeString(balanceSymbol);
+		parcel.writeString(ENSAvatar);
 	}
 
 	public boolean setWalletBalance(Token token)
@@ -110,4 +118,9 @@ public class Wallet implements Parcelable {
 			balance = BalanceUtils.getScaledValueFixed(BigDecimal.ZERO, 0, Token.TOKEN_BALANCE_PRECISION);
 		}
 	}
+
+    public boolean canSign()
+    {
+		return BuildConfig.DEBUG || type != WalletType.WATCH;
+    }
 }

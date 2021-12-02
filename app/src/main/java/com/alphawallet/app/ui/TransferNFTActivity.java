@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -29,12 +30,11 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
@@ -73,9 +73,9 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
- * Created by JB on 11/08/2021.cla
+ * Created by JB on 11/08/2021
  */
-public class TransferNFTActivity extends BaseActivity implements OnTokenClickListener, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
+public class TransferNFTActivity extends BaseActivity implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
@@ -104,7 +104,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
 
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
@@ -129,7 +129,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
-        viewModel.userTransaction().observe(this, this::onUserTransaction);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
         //we should import a token and a list of chosen ids
@@ -164,30 +163,6 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> finish());
 
-        dialog.show();
-    }
-
-    private void onUserTransaction(String hash)
-    {
-        hideDialog();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.transaction_succeeded);
-        dialog.setMessage(hash);
-        dialog.setButtonText(R.string.copy);
-        dialog.setButtonListener(v -> {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("transaction hash",
-                    EthereumNetworkBase.getEtherscanURLbyNetworkAndHash(token.tokenInfo.chainId, hash));
-            clipboard.setPrimaryClip(clip);
-            dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-        });
-        dialog.setOnDismissListener(v -> {
-            dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-            new HomeRouter().open(this, true);
-            finish();
-        });
         dialog.show();
     }
 
@@ -264,10 +239,10 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
             case C.BARCODE_READER_REQUEST_CODE:
                 switch (resultCode)
                 {
-                    case FullScannerFragment.SUCCESS:
+                    case Activity.RESULT_OK:
                         if (data != null)
                         {
-                            String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                            String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                             //if barcode is still null, ensure we don't GPF
                             if (barcode == null)
@@ -286,7 +261,7 @@ public class TransferNFTActivity extends BaseActivity implements OnTokenClickLis
                             addressInput.setAddress(extracted_address);
                         }
                         break;
-                    case QRScanningActivity.DENY_PERMISSION:
+                    case QRScanner.DENY_PERMISSION:
                         showCameraDenied();
                         break;
                     default:

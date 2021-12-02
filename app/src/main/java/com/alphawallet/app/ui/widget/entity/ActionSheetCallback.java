@@ -14,5 +14,5 @@ public interface ActionSheetCallback
     void sendTransaction(Web3Transaction tx);
     void dismissed(String txHash, long callbackId, boolean actionCompleted);
     void notifyConfirm(String mode);
-    default void signTransaction(Web3Transaction tx) { }; // only WalletConnect uses this so far
+    default void signTransaction(Web3Transaction tx) { } // only WalletConnect uses this so far
 }

@@ -64,8 +64,8 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-	TickerService provideTickerService(OkHttpClient httpClient, Gson gson, Context context, TokenLocalSource localSource) {
-		return new TickerService(httpClient, gson, context, localSource);
+	TickerService provideTickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource) {
+		return new TickerService(httpClient, sharedPrefs, localSource);
     }
 
 	@Singleton
@@ -155,11 +155,10 @@ public class RepositoriesModule {
 	@Provides
 	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
 									   TokenRepositoryType tokenRepository,
-									   Context context,
 									   TickerService tickerService,
 									   OpenSeaService openseaService,
 									   AnalyticsServiceType analyticsService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, context, tickerService, openseaService, analyticsService);
+		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
 	}
 
 	@Singleton
@@ -200,15 +199,15 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
     AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager,
-														 EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService,
-														 TokenLocalSource tls, TransactionRepositoryType trt, AlphaWalletService alphaService) {
-		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, trt, alphaService);
+														 TokensService tokensService, TokenLocalSource tls, TransactionRepositoryType trt,
+														 AlphaWalletService alphaService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, tokensService, tls, trt, alphaService);
 	}
 
 	@Singleton
 	@Provides
-	KeyService provideKeyService(Context ctx) {
-		return new KeyService(ctx);
+	KeyService provideKeyService(Context ctx, AnalyticsServiceType analyticsService) {
+		return new KeyService(ctx, analyticsService);
 	}
 
 	@Singleton

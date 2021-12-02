@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelectNetworkAdapter.ViewHolder> {
-    private ArrayList<NetworkItem> networkList;
+    private final ArrayList<NetworkItem> networkList;
     private boolean hasSelection;
 
     public SingleSelectNetworkAdapter(ArrayList<NetworkItem> data)
@@ -35,7 +35,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         }
     }
 
-    public Integer getSelectedItem()
+    public Long getSelectedItem()
     {
         for (NetworkItem data : networkList)
         {

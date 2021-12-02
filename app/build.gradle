@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 169
-        versionName "3.4"
+        versionCode 177
+        versionName "3.40.7"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -44,9 +44,9 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
-        def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
+        def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
 
-        buildConfigField 'int', 'DB_VERSION', '28'
+        buildConfigField 'int', 'DB_VERSION', '37'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -55,6 +55,12 @@ android {
         packagingOptions {
             jniLibs {
                 useLegacyPackaging true
+            }
+        }
+
+        externalNativeBuild {
+            cmake {
+                cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\""
             }
         }
     }
@@ -112,9 +118,10 @@ android {
             apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
             dependencies {
-                implementation 'com.google.android.play:core:1.10.0'
-                implementation 'com.google.firebase:firebase-analytics:19.0.0'
+                implementation 'com.google.android.play:core:1.10.2'
+                implementation 'com.google.firebase:firebase-analytics:20.0.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
+                implementation 'com.google.firebase:firebase-crashlytics:18.2.4'
             }
         }
     }
@@ -135,13 +142,11 @@ dependencies {
     implementation "org.web3j:core:4.6.0-android"
 
     // Http client
-    implementation "com.squareup.retrofit2:retrofit:2.5.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.5.0"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.google.code.gson:gson:2.8.6"
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation "com.squareup.picasso:picasso:2.71828"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    //noinspection GradleDependency
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1' //This cannot be updated until minSdkVersion is 31.
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //noinspection GradleCompatible
     implementation 'androidx.appcompat:appcompat:1.3.1'
@@ -152,22 +157,22 @@ dependencies {
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
     // Bar code scanning
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    implementation 'com.google.zxing:core:3.3.3'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.4.1'
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
 
     //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
 
     // ReactiveX
-    implementation "io.reactivex.rxjava2:rxjava:2.2.10"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
     implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
 
     // Keyboard visibility
-    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC2'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
 
     // Dagger 2
 
@@ -181,6 +186,9 @@ dependencies {
 
     // if you are not using support library, include this instead
     implementation "com.google.dagger:dagger-android:2.22"
+
+    //Use Leak Canary for debug builds only
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     // Image Loader
     implementation 'com.github.bumptech.glide:glide:4.12.0'
@@ -198,11 +206,9 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"
     })
-    androidTestImplementation('tools.fastlane:screengrab:1.1.0', {
+    androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.0'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 
@@ -215,6 +221,9 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
+
+    implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
+    implementation 'androidx.preference:preference-ktx:1.1.1'
 }
 
 // WARNING WARNING WARNING

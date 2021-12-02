@@ -2,37 +2,35 @@ package com.alphawallet.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.adapter.MyDappsListAdapter;
 import com.alphawallet.app.util.DappBrowserUtils;
-
-import java.util.List;
-
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
+import java.util.List;
 
-public class MyDappsFragment extends Fragment {
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
+
+
+public class MyDappsFragment extends Fragment implements OnDappClickListener {
     private MyDappsListAdapter adapter;
-    private OnDappClickListener onDappClickListener;
     private AWalletAlertDialog dialog;
     private TextView noDapps;
-
-    void setCallbacks(OnDappClickListener listener) {
-        onDappClickListener = listener;
-    }
 
     @Nullable
     @Override
@@ -41,7 +39,7 @@ public class MyDappsFragment extends Fragment {
         View view = inflater.inflate(R.layout.layout_my_dapps, container, false);
         adapter = new MyDappsListAdapter(
                 getData(),
-                onDappClickListener,
+                this,
                 this::onDappRemoved,
                 this::onDappEdited);
         RecyclerView list = view.findViewById(R.id.my_dapps_list);
@@ -96,7 +94,7 @@ public class MyDappsFragment extends Fragment {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         finally
         {
@@ -121,5 +119,13 @@ public class MyDappsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateData();
+    }
+
+    @Override
+    public void onDappClick(DApp dapp)
+    {
+        Bundle result = new Bundle();
+        result.putParcelable(DAPP_CLICK, dapp);
+        getParentFragmentManager().setFragmentResult(DAPP_CLICK, result);
     }
 }

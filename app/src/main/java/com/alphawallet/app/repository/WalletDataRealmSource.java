@@ -5,17 +5,11 @@ import android.util.Log;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmKeyType;
-import com.alphawallet.app.repository.entity.RealmNFTAsset;
-import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,6 +169,7 @@ public class WalletDataRealmSource {
             wallet.ENSname = d.getENSName();
             wallet.balance = balance(d);
             wallet.name = d.getName();
+            wallet.ENSAvatar = d.getENSAvatar();
         }
     }
 
@@ -232,16 +227,31 @@ public class WalletDataRealmSource {
         .flatMap(deletedWallet -> Single.fromCallable(() -> {
             storeKeyData(wallet);
             storeWalletData(wallet);
-            if (BuildConfig.DEBUG) Log.d("RealmDebug", "stored " + wallet.address);
             return wallet;
         }));
     }
 
-    public Single<Wallet> updateWalletData(Wallet wallet) {
-        return Single.fromCallable(() -> {
-            storeWalletData(wallet);
-            return wallet;
-        });
+    public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
+    {
+        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmWalletData item = r.where(RealmWalletData.class)
+                        .equalTo("address", wallet.address, Case.INSENSITIVE)
+                        .findFirst();
+                if (item == null) item = r.createObject(RealmWalletData.class, wallet.address);
+                item.setName(wallet.name);
+                item.setENSName(wallet.ENSname);
+                item.setBalance(wallet.balance);
+                item.setENSAvatar(wallet.ENSAvatar);
+                if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedwalletdata " + wallet.address);
+            }, onSuccess);
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+            onSuccess.onSuccess();
+        }
     }
 
     public Single<String> getName(String address) {
@@ -327,7 +337,7 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
             try (Realm realm = realmManager.getWalletTypeRealmInstance())
             {
@@ -338,15 +348,17 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
-            //now delete the token data
-            Realm realm = realmManager.getRealmInstance(wallet);
 
-            File databaseFile = new File(realm.getConfiguration().getPath());
-            if (databaseFile.exists())
+            try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                databaseFile.delete();
+                instance.executeTransaction(r -> r.deleteAll());
+                instance.refresh();
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return wallet;
@@ -398,7 +410,7 @@ public class WalletDataRealmSource {
     {
         try (Realm realm = realmManager.getWalletDataRealmInstance())
         {
-            realm.executeTransaction(r -> {
+            realm.executeTransactionAsync(r -> {
                 RealmWalletData item = r.where(RealmWalletData.class)
                         .equalTo("address", wallet.address, Case.INSENSITIVE)
                         .findFirst();
@@ -406,12 +418,13 @@ public class WalletDataRealmSource {
                 item.setName(wallet.name);
                 item.setENSName(wallet.ENSname);
                 item.setBalance(wallet.balance);
+                item.setENSAvatar(wallet.ENSAvatar);
                 if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedwalletdata " + wallet.address);
             });
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 

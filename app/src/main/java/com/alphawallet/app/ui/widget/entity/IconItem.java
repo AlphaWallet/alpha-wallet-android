@@ -7,17 +7,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IconItem {
     private final String url;
-    private final boolean useText;
+    private final UseIcon useText;
     private final String correctedAddress;
-    private final int chainId;
+    private final long chainId;
 
-    private final static Map<String, Boolean> iconLoadFails = new ConcurrentHashMap<>();
+    private final static Map<String, Boolean> iconLoadType = new ConcurrentHashMap<>();
 
-    public IconItem(String url, String correctedAddress, int chainId) {
+    public IconItem(String url, String correctedAddress, long chainId) {
         this.url = url;
-        this.useText = iconLoadFails.containsKey(correctedAddress.toLowerCase());
+        this.useText = getLoadType(correctedAddress);
         this.correctedAddress = correctedAddress;
         this.chainId = chainId;
+    }
+
+    private UseIcon getLoadType(String correctedAddress)
+    {
+        return iconLoadType.containsKey(correctedAddress.toLowerCase())
+                ? (iconLoadType.get(correctedAddress.toLowerCase()) ? UseIcon.SECONDARY : UseIcon.NO_ICON)
+                : UseIcon.PRIMARY;
     }
 
     public String getUrl() {
@@ -25,21 +32,27 @@ public class IconItem {
     }
 
     public boolean useTextSymbol() {
-        return useText;
+        return useText == UseIcon.NO_ICON;
+    }
+
+    public boolean usePrimary() {
+        return useText == UseIcon.PRIMARY;
     }
 
     public ObjectKey getSignature() {
         return new ObjectKey(correctedAddress + "-" + chainId);
     }
 
-    public static void iconLoadFail(String address)
+    //Use Secondary icon
+    public static void secondaryFound(String address)
     {
-        iconLoadFails.put(address.toLowerCase(), true);
+        iconLoadType.put(address.toLowerCase(), true);
     }
 
-    public static void iconLoadClear(String address)
+    //Use TextIcon
+    public static void noIconFound(String address)
     {
-        iconLoadFails.remove(address.toLowerCase());
+        iconLoadType.put(address.toLowerCase(), false);
     }
 
     /**
@@ -47,6 +60,6 @@ public class IconItem {
      */
     public static void resetCheck()
     {
-        iconLoadFails.clear();
+        iconLoadType.clear();
     }
 }

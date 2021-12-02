@@ -41,7 +41,7 @@ public class TransactionDetailWidget extends LinearLayout
         layoutSummary = findViewById(R.id.layout_summary);
     }
 
-    public void setupTransaction(Web3Transaction w3tx, int chainId, String walletAddress, String symbol,
+    public void setupTransaction(Web3Transaction w3tx, long chainId, String walletAddress, String symbol,
                                  @NotNull ActionSheetInterface asIf)
     {
         layoutHolder.setVisibility(View.VISIBLE);

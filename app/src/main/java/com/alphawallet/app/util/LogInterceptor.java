@@ -4,10 +4,13 @@ import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Headers;
@@ -23,7 +26,7 @@ import okio.BufferedSource;
 
 public class LogInterceptor implements Interceptor {
 	private static final String TAG = "HTTP_TRACE";
-	private static final Charset UTF8 = Charset.forName("UTF-8");
+	private static final Charset UTF8 = StandardCharsets.UTF_8;
 
 	@Override
 	public Response intercept(@NonNull Chain chain) throws IOException
@@ -73,7 +76,7 @@ public class LogInterceptor implements Interceptor {
 		}
 		catch (InterruptedIOException e)
 		{
-			e.printStackTrace();
+			if (BuildConfig.DEBUG) e.printStackTrace();
 		}
 
 		try

@@ -13,18 +13,20 @@ import java.text.NumberFormat;
 
 public class BalanceUtils
 {
-    private static String weiInEth  = "1000000000000000000";
-    private static int showDecimalPlaces = 5;
+    private static final String weiInEth  = "1000000000000000000";
+    private static final int showDecimalPlaces = 5;
+    private static final String MACRO_PATTERN = "###,###,###,###,##0";
 
     private static String getDigitalPattern(int precision)
     {
         return getDigitalPattern(precision, 0);
     }
 
+    // TODO: Do locale formatting here
     private static String getDigitalPattern(int precision, int fixed)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("###,###,###,###,##0");
+        sb.append(MACRO_PATTERN);
         if (precision > 0)
         {
             sb.append(".");
@@ -85,7 +87,7 @@ public class BalanceUtils
 
     public static String weiToGwei(BigDecimal wei, int precision) {
         BigDecimal value = Convert.fromWei(wei, Convert.Unit.GWEI);
-        return scaledValue(value, getDigitalPattern(precision), 0);
+        return scaledValue(value, getDigitalPattern(precision), 0, 0);
         //return getScaledValue(wei, Convert.Unit.GWEI.getWeiFactor().intValue(), precision);
         //return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).setScale(decimals, RoundingMode.HALF_DOWN).toString(); //to 2 dp
     }
@@ -134,24 +136,23 @@ public class BalanceUtils
     public static String getScaledValueWithLimit(BigDecimal value, long decimals)
     {
         String pattern = getDigitalPattern(9, 2);
-        return scaledValue(value, pattern, decimals);
+        return scaledValue(value, pattern, decimals, 0);
     }
 
     public static String getScaledValueFixed(BigDecimal value, long decimals, int precision)
     {
-        //form precision
         String pattern = getDigitalPattern(precision, precision);
-        return scaledValue(value, pattern, decimals);
+        return scaledValue(value, pattern, decimals, precision);
     }
 
     public static String getScaledValueMinimal(BigInteger value, long decimals)
     {
-        return scaledValue(new BigDecimal(value), getDigitalPattern(Token.TOKEN_BALANCE_FOCUS_PRECISION, 0), decimals);
+        return getScaledValueMinimal(new BigDecimal(value), decimals, Token.TOKEN_BALANCE_FOCUS_PRECISION); //scaledValue(new BigDecimal(value), getDigitalPattern(Token.TOKEN_BALANCE_FOCUS_PRECISION, 0), decimals);
     }
 
     public static String getScaledValueMinimal(BigDecimal value, long decimals, int max_precision)
     {
-        return scaledValue(value, getDigitalPattern(max_precision, 0), decimals);
+        return scaledValue(value, getDigitalPattern(max_precision, 0), decimals, 0);
     }
 
     public static String getScaledValueScientific(final BigDecimal value, long decimals)
@@ -159,25 +160,26 @@ public class BalanceUtils
         return getScaledValueScientific(value, decimals, showDecimalPlaces);
     }
 
+    //TODO: write 'suffix' generator: https://www.nist.gov/pml/weights-and-measures/metric-si-prefixes
+    // Tera to pico (T to p) Anything below p show as 0.000
     public static String getScaledValueScientific(final BigDecimal value, long decimals, int dPlaces)
     {
         String returnValue;
         BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
         final NumberFormat formatter = new DecimalFormat(CustomViewSettings.getDecimalFormat());
+        final BigDecimal displayThreshold = BigDecimal.ONE.divide(BigDecimal.valueOf(Math.pow(10, dPlaces)), 18, RoundingMode.DOWN);
         formatter.setRoundingMode(RoundingMode.DOWN);
         if (value.equals(BigDecimal.ZERO)) //zero balance
         {
             returnValue = "0";
         }
-        else if (correctedValue.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
+        else if (correctedValue.compareTo(displayThreshold) < 0) //very low balance //TODO: Fold into getSuffixedValue below
         {
-            returnValue = formatter.format(correctedValue);
-            returnValue = returnValue.replace("E", "e");
+            returnValue = "0.000~";
         }
-        else if (correctedValue.compareTo(BigDecimal.valueOf(Math.pow(10, 14))) > 0) //too big
+        else if (requiresSuffix(correctedValue, dPlaces))
         {
-            returnValue = formatter.format(correctedValue);
-            returnValue = returnValue.replace("E", "e+");
+            returnValue = getSuffixedValue(correctedValue, dPlaces);
         }
         else //otherwise display in standard pattern to dPlaces dp
         {
@@ -189,11 +191,45 @@ public class BalanceUtils
         return returnValue;
     }
 
+    private static boolean requiresSuffix(BigDecimal correctedValue, int dPlaces)
+    {
+        final BigDecimal displayThreshold = BigDecimal.ONE.divide(BigDecimal.valueOf(Math.pow(10, dPlaces)), 18, RoundingMode.DOWN);
+        return correctedValue.compareTo(displayThreshold) < 0
+                || correctedValue.compareTo(BigDecimal.valueOf(Math.pow(10, 6 + dPlaces))) > 0;
+    }
+
+    private static String getSuffixedValue(BigDecimal correctedValue, int dPlaces)
+    {
+        DecimalFormat df = new DecimalFormat(MACRO_PATTERN);
+        df.setRoundingMode(RoundingMode.DOWN);
+        int reductionValue = 0;
+        String suffix = "";
+
+        if (correctedValue.compareTo(BigDecimal.valueOf(Math.pow(10, 12 + dPlaces))) > 0) //T
+        {
+            reductionValue = 12;
+            suffix = "T";
+        }
+        else if (correctedValue.compareTo(BigDecimal.valueOf(Math.pow(10, 9 + dPlaces))) > 0) //G
+        {
+            reductionValue = 9;
+            suffix = "G";
+        }
+        else if (correctedValue.compareTo(BigDecimal.valueOf(Math.pow(10, 6 + dPlaces))) > 0) //M
+        {
+            reductionValue = 6;
+            suffix = "M";
+        }
+
+        correctedValue = correctedValue.divideToIntegralValue(BigDecimal.valueOf(Math.pow(10, reductionValue)));
+        return convertToLocale(df.format(correctedValue)) + suffix;
+    }
+
     public static String getScaledValue(BigDecimal value, long decimals, int precision)
     {
         try
         {
-            return scaledValue(value, getDigitalPattern(precision), decimals);
+            return scaledValue(value, getDigitalPattern(precision), decimals, precision);
         }
         catch (NumberFormatException e)
         {
@@ -201,12 +237,21 @@ public class BalanceUtils
         }
     }
 
-    private static String scaledValue(BigDecimal value, String pattern, long decimals)
+    private static String scaledValue(BigDecimal value, String pattern, long decimals, int macroPrecision)
     {
         DecimalFormat df = new DecimalFormat(pattern);
         value = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
+        if (macroPrecision > 0)
+        {
+            final BigDecimal displayThreshold = BigDecimal.ONE.multiply(BigDecimal.valueOf(Math.pow(10, macroPrecision)));
+            if (value.compareTo(displayThreshold) > 0)
+            {
+                //strip decimals
+                df = new DecimalFormat(MACRO_PATTERN);
+            }
+        }
         df.setRoundingMode(RoundingMode.DOWN);
-        return df.format(value);
+        return convertToLocale(df.format(value));
     }
 
     /**

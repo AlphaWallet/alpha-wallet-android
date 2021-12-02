@@ -1,16 +1,23 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Pair;
+import android.view.View;
+import android.widget.Toast;
 
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
@@ -18,12 +25,20 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.TokenDetailRouter;
+import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.TokenManagementActivity;
+import com.alphawallet.app.widget.WalletFragmentActionsView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +48,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
+import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
+
 public class WalletViewModel extends BaseViewModel
 {
     public static long BALANCE_BACKUP_CHECK_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
@@ -41,6 +59,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
+    private final MutableLiveData<Pair<Double, Double>> fiatValues = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final TokenDetailRouter tokenDetailRouter;
@@ -49,8 +68,12 @@ public class WalletViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
+    private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
+    private final ManageWalletsRouter manageWalletsRouter;
+    private final RealmManager realmManager;
     private long lastBackupCheck = 0;
+    private BottomSheetDialog dialog;
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
@@ -60,7 +83,10 @@ public class WalletViewModel extends BaseViewModel
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
-            MyAddressRouter myAddressRouter)
+            MyAddressRouter myAddressRouter,
+            ManageWalletsRouter manageWalletsRouter,
+            PreferenceRepositoryType preferenceRepository,
+            RealmManager realmManager)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -70,6 +96,9 @@ public class WalletViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
+        this.manageWalletsRouter = manageWalletsRouter;
+        this.preferenceRepository = preferenceRepository;
+        this.realmManager = realmManager;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -77,6 +106,7 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Wallet> defaultWallet() { return defaultWallet; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
+    public LiveData<Pair<Double, Double>> onFiatValues() { return fiatValues; }
 
     public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : ""; }
     public WalletType getWalletType() { return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE; }
@@ -171,18 +201,47 @@ public class WalletViewModel extends BaseViewModel
 
     public void showMyAddress(Context context)
     {
-        myAddressRouter.open(context, defaultWallet.getValue());
+        // show bottomsheet dialog
+        WalletFragmentActionsView actionsView = new WalletFragmentActionsView(context);
+        actionsView.setOnCopyWalletAddressClickListener(v -> {
+            dialog.dismiss();
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, getWalletAddr());
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(clip);
+            }
+
+            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+        });
+        actionsView.setOnShowMyWalletAddressClickListener(v -> {
+            dialog.dismiss();
+            myAddressRouter.open(context, defaultWallet.getValue());
+        });
+        actionsView.setOnAddHideTokensClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(context, TokenManagementActivity.class);
+            intent.putExtra(EXTRA_ADDRESS, getWalletAddr());
+            context.startActivity(intent);
+        });
+
+        dialog = new BottomSheetDialog(context);
+        dialog.setContentView(actionsView);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) actionsView.getParent());
+        dialog.setOnShowListener(dialog -> behavior.setPeekHeight(actionsView.getHeight()));
+        dialog.show();
     }
 
     public void showQRCodeScanning(Activity activity) {
-        Intent intent = new Intent(activity, QRScanningActivity.class);
+        Intent intent = new Intent(activity, QRScanner.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 
-    public Realm getRealmInstance(Wallet wallet)
+    public Realm getRealmInstance()
     {
-        return tokensService.getRealmInstance(wallet);
+        return realmManager.getRealmInstance(getWallet());
     }
 
     public void showTokenDetail(Activity activity, Token token)
@@ -222,33 +281,11 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    /*@Override
-    public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
-        boolean isToken = !token.isEthereum();
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
-        tokenDetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
-    }
-
-    @Override
-    public void showTokenList(Activity activity, Token token)
-    {
-        switch (token.getInterfaceSpec())
-        {
-            case ERC1155:
-                boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
-                tokenDetailRouter.openERC1155(activity, token, defaultWallet.getValue(), hasDefinition);
-                break;
-            default:
-                assetDisplayRouter.open(activity, token, defaultWallet.getValue());
-                break;
-        }
-    }*/
-
-    public void checkBackup()
+    public void checkBackup(double fiatValue)
     {
         if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
         lastBackupCheck = System.currentTimeMillis();
-        double walletUSDValue = tokensService.getUSDValue();
+        double walletUSDValue = tokensService.convertToUSD(fiatValue);
 
         if (walletUSDValue > 0.0)
         {
@@ -288,8 +325,34 @@ public class WalletViewModel extends BaseViewModel
         tokensService.onWalletRefreshSwipe();
     }
 
-    public boolean isChainToken(int chainId, String tokenAddress)
+    public boolean isChainToken(long chainId, String tokenAddress)
     {
         return tokensService.isChainToken(chainId, tokenAddress);
+    }
+
+    public void calculateFiatValues()
+    {
+        disposable = tokensService.getFiatValuePair()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(fiatValues::postValue);
+    }
+
+    public void showManageWallets(Context context, boolean clearStack)
+    {
+        manageWalletsRouter.open(context, clearStack);
+    }
+
+    public boolean isMarshMallowWarningShown() {
+        return preferenceRepository.isMarshMallowWarningShown();
+    }
+
+    public void setMarshMallowWarning(boolean shown) {
+        preferenceRepository.setMarshMallowWarning(shown);
+    }
+
+    public void saveAvatar(Wallet wallet)
+    {
+        genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
     }
 }

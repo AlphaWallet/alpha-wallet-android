@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Ticket;
@@ -45,7 +46,7 @@ public class AlphaWalletService
     private static final String API = "api/";
     private static final String XML_VERIFIER_ENDPOINT = "https://aw.app/api/v1/verifyXMLDSig";
     private static final String XML_VERIFIER_PASS = "pass";
-    private static MediaType MEDIA_TYPE_TOKENSCRIPT
+    private static final MediaType MEDIA_TYPE_TOKENSCRIPT
             = MediaType.parse("text/xml; charset=UTF-8");
 
     public AlphaWalletService(OkHttpClient httpClient,
@@ -64,7 +65,7 @@ public class AlphaWalletService
         }
     }
 
-    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, int chainId, MagicLinkData order)
+    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, long chainId, MagicLinkData order)
     {
         switch (order.contractType)
         {
@@ -125,13 +126,13 @@ public class AlphaWalletService
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return dsigDescriptor;
     }
 
-    private Observable<Integer> sendFeemasterCurrencyTransaction(String url, int networkId, String address, MagicLinkData order)
+    private Observable<Integer> sendFeemasterCurrencyTransaction(String url, long networkId, String address, MagicLinkData order)
     {
         return Observable.fromCallable(() -> {
             Integer result = 500; //fail by default
@@ -153,7 +154,7 @@ public class AlphaWalletService
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
             return result;
@@ -198,7 +199,7 @@ public class AlphaWalletService
 
     private Single<Integer> sendFeemasterTransaction(
             String url,
-            int networkId,
+            long networkId,
             String toAddress,
             long expiry,
             String indices,
@@ -292,7 +293,7 @@ public class AlphaWalletService
         return sb.toString();
     }
 
-    public Single<Boolean> checkFeemasterService(String url, int chainId, String address)
+    public Single<Boolean> checkFeemasterService(String url, long chainId, String address)
     {
         return Single.fromCallable(() -> {
             Boolean result = false;

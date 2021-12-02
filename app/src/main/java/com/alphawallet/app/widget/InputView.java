@@ -6,14 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.text.TextUtils;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -21,8 +18,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.entity.BoxStatus;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
@@ -30,7 +27,7 @@ import com.alphawallet.app.R;
 import static android.content.Context.CLIPBOARD_SERVICE;
 
 public class InputView extends LinearLayout {
-    private Context context;
+    private final Context context;
 
     private final TextView labelText;
     private final TextView errorText;
@@ -113,7 +110,7 @@ public class InputView extends LinearLayout {
             if (!noCam)
             {
                 scanQrIcon.setOnClickListener(v -> {
-                    Intent intent = new Intent(context, QRScanningActivity.class);
+                    Intent intent = new Intent(context, QRScanner.class);
                     ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
                 });
             }

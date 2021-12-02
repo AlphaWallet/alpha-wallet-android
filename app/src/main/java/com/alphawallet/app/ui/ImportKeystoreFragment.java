@@ -180,14 +180,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         else
         {
             String txt = password.getText().toString();
-            if (txt.length() >= 1)
-            {
-                updateButtonState(true);
-            }
-            else
-            {
-                updateButtonState(false);
-            }
+            updateButtonState(txt.length() >= 1);
         }
     }
 

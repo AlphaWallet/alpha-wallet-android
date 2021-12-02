@@ -68,14 +68,7 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
         {
             return true;
         }
-        else if (other.viewType == TransferHolder.VIEW_TYPE)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        else return other.viewType == TransferHolder.VIEW_TYPE;
     }
 
     @Override
@@ -92,14 +85,7 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
         {
             return true;
         }
-        else if (other.viewType == TransferHolder.VIEW_TYPE)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        else return other.viewType == TransferHolder.VIEW_TYPE;
     }
 
     @Override

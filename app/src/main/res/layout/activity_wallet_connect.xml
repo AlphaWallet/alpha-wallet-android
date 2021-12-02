@@ -15,14 +15,15 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/dp16"
+            android:layout_marginTop="@dimen/dp30"
+            android:layout_marginBottom="@dimen/dp30"
             android:src="@mipmap/ic_alpha" />
 
         <TextView
@@ -30,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/dp16"
+            android:layout_marginBottom="42dp"
             android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
             android:paddingStart="@dimen/dp16"
@@ -45,86 +46,7 @@
             android:background="@color/mercury" />
 
         <LinearLayout
-            android:id="@+id/layout_peer_url"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/background_bottom_border"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/dp16"
-            android:paddingEnd="@dimen/dp16">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/requester_url"
-                android:textColor="@color/black"
-                android:textSize="17sp" />
-
-            <TextView
-                android:id="@+id/peer_url"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:fontFamily="@font/font_light"
-                android:lines="1"
-                android:maxLines="1"
-                tools:text="https://samplepeer.com"
-                android:textColor="@color/dove"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/background_bottom_border"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:id="@+id/layout_address"
-                android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:paddingStart="@dimen/dp16"
-                android:paddingEnd="@dimen/dp16">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/signer_address"
-                    android:textColor="@color/black"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/address"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:fontFamily="@font/font_light"
-                    android:lines="1"
-                    android:maxLines="1"
-                    tools:text="0xabcd1234"
-                    android:textColor="@color/dove"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <com.alphawallet.app.widget.ChainName
-                android:id="@+id/chain_name"
-                android:layout_gravity="center_vertical|end"
-                android:layout_marginEnd="6dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="visible"
-                custom:font_size="12" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_sign"
+            android:id="@+id/layout_status"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="@drawable/background_bottom_border"
@@ -134,26 +56,137 @@
             android:paddingEnd="@dimen/dp16">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="95dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                android:text="@string/signed_transactions"
-                android:textColor="@color/black"
-                android:textSize="17sp" />
+                android:text="@string/status"
+                android:textColor="@color/dove"
+                android:textSize="16sp" />
 
             <TextView
-                android:id="@+id/tx_count"
-                android:layout_width="match_parent"
+                android:id="@+id/connection_status"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="end"
                 android:ellipsize="end"
                 android:fontFamily="@font/font_semibold"
                 android:lines="1"
                 android:maxLines="1"
-                tools:text="1"
+                tools:text="Online"
+                android:textColor="@color/nasty_green"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/background_bottom_border"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/dp16"
+            android:paddingEnd="@dimen/dp16">
+
+            <TextView
+                android:layout_width="95dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/hint_contract_name"
                 android:textColor="@color/dove"
-                android:textSize="17sp" />
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_semibold"
+                android:lines="1"
+                android:maxLines="1"
+                tools:text="Aave - Open Source Liquidity"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/layout_peer_url"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/background_bottom_border"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/dp16"
+            android:paddingEnd="@dimen/dp16">
+
+            <TextView
+                android:layout_width="95dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/connected_to"
+                android:textColor="@color/dove"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/peer_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_semibold"
+                android:lines="1"
+                android:maxLines="1"
+                tools:text="https://samplepeer.com"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_network"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/background_bottom_border"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/dp16"
+            android:paddingEnd="@dimen/dp16">
+
+            <TextView
+                android:layout_width="95dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/subtitle_network"
+                android:textColor="@color/dove"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical">
+
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/chain_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/dp16"
+                    custom:font_size="16"
+                    custom:invert="true"
+                    custom:layout_constraintBottom_toBottomOf="parent"
+                    custom:layout_constraintEnd_toEndOf="parent" />
+
+                <com.alphawallet.app.widget.TokenIcon
+                    android:id="@+id/chain_icon"
+                    android:layout_width="@dimen/token_icon"
+                    android:layout_height="@dimen/token_icon"
+                    android:visibility="gone"
+                    custom:layout_constrainedHeight="true"
+                    custom:layout_constrainedWidth="true"
+                    custom:layout_constraintBottom_toTopOf="@+id/chain_name"
+                    custom:layout_constraintDimensionRatio="W,1:1"
+                    custom:layout_constraintEnd_toEndOf="@+id/chain_name"
+                    custom:layout_constraintStart_toStartOf="@+id/chain_name"
+                    custom:layout_constraintTop_toTopOf="parent" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -164,6 +197,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:visibility="gone"
         android:indeterminateTint="@color/azure" />
 
     <com.alphawallet.app.widget.FunctionButtonBar

@@ -1,22 +1,14 @@
 package com.alphawallet.app.ui;
 
 import android.annotation.SuppressLint;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -26,6 +18,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
@@ -37,6 +35,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.viewmodel.BackupKeyViewModelFactory;
@@ -57,7 +56,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
 public class BackupKeyActivity extends BaseActivity implements
         View.OnClickListener,
@@ -102,8 +100,8 @@ public class BackupKeyActivity extends BaseActivity implements
 
         toolbar();
         initViewModel();
-        determineScreenWidth();
 
+        screenWidth = DisplayUtils.getScreenResolution(this).x;
         wallet = getIntent().getParcelableExtra(WALLET);
 
         if (Objects.requireNonNull(getIntent().getExtras()).containsKey("STATE"))
@@ -181,12 +179,6 @@ public class BackupKeyActivity extends BaseActivity implements
                 setupUpgradeKey(false);
                 break;
         }
-    }
-
-    private void determineScreenWidth() {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        screenWidth = displayMetrics.widthPixels;
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -871,12 +863,8 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
             case SET_JSON_PASSWORD:
                 String txt = inputView.getText().toString();
-                if (txt.length() >= 6) //password length minimum 6
-                {
-                    functionButtonBar.setPrimaryButtonEnabled(true);
-                } else {
-                    functionButtonBar.setPrimaryButtonEnabled(false);
-                }
+                //password length minimum 6
+                functionButtonBar.setPrimaryButtonEnabled(txt.length() >= 6);
                 break;
             case SHOW_SEED_PHRASE:
             case SHOW_SEED_PHRASE_SETTINGS:

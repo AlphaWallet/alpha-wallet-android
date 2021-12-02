@@ -315,10 +315,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         for (Uint16 indexVal : burnList)
         {
             Integer index = indexVal.getValue().intValue();
-            if (tickets.contains(index))
-            {
-                tickets.remove(index);
-            }
+            tickets.remove(index);
         }
     }
 

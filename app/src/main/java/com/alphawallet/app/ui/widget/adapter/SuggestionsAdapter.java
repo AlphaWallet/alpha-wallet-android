@@ -15,7 +15,7 @@ import java.util.List;
 public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsAdapter.ViewHolder> {
     private List<String> suggestionList;
     private String suggestion = "";
-    private OnSuggestionClickListener onSuggestionClickListener;
+    private final OnSuggestionClickListener onSuggestionClickListener;
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;

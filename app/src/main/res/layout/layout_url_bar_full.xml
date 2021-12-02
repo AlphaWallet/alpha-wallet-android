@@ -13,13 +13,17 @@
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
+
+
         <RelativeLayout
             android:id="@+id/address_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
             android:orientation="horizontal"
-            android:paddingStart="5dp">
+            android:paddingStart="5dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <LinearLayout
                 android:id="@+id/layout_navigator"
@@ -55,21 +59,23 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="4dp"
-                android:layout_toEndOf="@id/layout_navigator"
                 android:layout_toStartOf="@id/network_holder"
+                android:layout_toEndOf="@id/layout_navigator"
                 android:animateLayoutChanges="true"
                 android:background="@drawable/background_address_bar"
+                android:clickable="true"
                 android:completionThreshold="1"
                 android:dropDownAnchor="@id/anchor"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:fontFamily="@font/font_regular"
                 android:hint="@string/search_or_type_web_address"
                 android:imeOptions="actionGo"
+                android:textColor="@color/black"
+                android:textColorHint="@color/dove"
                 android:inputType="textUri"
                 android:padding="5dp"
                 android:paddingRight="35dp"
-                android:focusable="true"
-                android:clickable="true"
-                android:focusableInTouchMode="true"
                 android:textSize="18sp" />
 
             <ImageView
@@ -81,18 +87,25 @@
                 android:layout_marginRight="3dp"
                 android:padding="3dp"
                 android:src="@drawable/ic_clear"
-                android:tint="@color/light_gray"
+                app:tint="@color/light_gray"
                 android:visibility="gone" />
 
+
             <LinearLayout
+                android:layout_marginStart="@dimen/dp12"
+                android:layout_marginEnd="@dimen/dp12"
                 android:id="@+id/network_holder"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
-                android:ellipsize="end">
-
-                <include layout="@layout/item_network_select"/>
-
+                android:orientation="horizontal"
+                android:ellipsize="end"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_home"/>
             </LinearLayout>
 
         </RelativeLayout>

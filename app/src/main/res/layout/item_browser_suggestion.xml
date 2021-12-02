@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -21,11 +22,11 @@
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/icon"
+        android:layout_toEndOf="@id/icon"
         android:ellipsize="end"
         android:fontFamily="@font/font_regular"
         android:lines="1"
-        android:text="State of the DApps"
+        tools:text="State of the DApps"
         android:textColor="@color/black"
         android:textSize="16sp" />
 
@@ -34,24 +35,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/name"
-        android:layout_toRightOf="@id/icon"
+        android:layout_toEndOf="@id/icon"
         android:ellipsize="end"
         android:fontFamily="@font/font_light"
         android:lines="1"
-        android:text="List of 2676 DApps"
+        tools:text="List of 2676 DApps"
         android:textColor="@color/text_dark_gray"
         android:textSize="12sp" />
 
-    <TextView
-        android:id="@+id/url"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/description"
-        android:ellipsize="end"
-        android:fontFamily="@font/font_light"
-        android:lines="1"
-        android:text="https://stateofthedapps.com"
-        android:textColor="@color/text_dark_gray"
-        android:textSize="12sp"
-        android:visibility="gone" />
 </RelativeLayout>

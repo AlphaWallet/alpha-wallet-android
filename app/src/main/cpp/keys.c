@@ -9,6 +9,12 @@
 #   define HAS_KEYS 0
 #endif
 
+#ifdef IFKEY
+#   define HAS_INFURA 1
+#else
+#   define HAS_INFURA 0
+#endif
+
 JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_EthereumNetworkBase_getAmberDataKey( JNIEnv* env, jobject thiz )
 {
@@ -25,6 +31,8 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getInfuraKey( JNIEnv* en
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, infuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, IFKEY);
 #else
     const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);
@@ -91,6 +99,8 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, secondaryInfuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, IFKEY);
 #else
     const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);
@@ -98,11 +108,64 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_EthereumNetworkBase_getBSCExplorerKey( JNIEnv* env, jobject thiz )
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getBSCExplorerKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getBSCExplorerKey(env);
 #else
     return (*env)->NewStringUTF(env, "");
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getEtherscanKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, etherscanKey);
+#else
+    const jstring key = "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_GasService_getEtherscanKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, etherscanKey);
+#else
+    const jstring key = "6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_widget_EmailPromptView_getMailchimpKey(JNIEnv *env, jclass clazz) {
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, mailchimpKey);
+#else
+    const jstring key = "--";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_GasService_getPolygonScanKey(JNIEnv *env, jobject thiz) {
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, polygonScanKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getCovalentKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedCKey(env, 4, '_', covalentKey);
+#else
+    const jstring key = "ckey_9bfb5c8fe0f04c7491231e60ee8"; // <-- Add your covalent key here. This public one could be rate limited
+    return (*env)->NewStringUTF(env, key);
 #endif
 }

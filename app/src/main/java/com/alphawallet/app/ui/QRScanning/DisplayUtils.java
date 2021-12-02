@@ -1,42 +1,57 @@
 package com.alphawallet.app.ui.QRScanning;
 
-import android.content.Context;
-import android.content.res.Configuration;
+import android.app.Activity;
+import android.graphics.Insets;
 import android.graphics.Point;
-import android.view.Display;
+import android.util.DisplayMetrics;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
+
+import java.lang.reflect.Method;
 
 public class DisplayUtils
 {
-    public static Point getScreenResolution(Context context) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
+    @SuppressWarnings("deprecation")
+    public static Point getScreenResolution(Activity activity) {
         Point screenResolution = new Point();
-        if (android.os.Build.VERSION.SDK_INT >= 13) {
-            display.getSize(screenResolution);
-        } else {
-            screenResolution.set(display.getWidth(), display.getHeight());
+        WindowManager windowManager = activity.getWindowManager();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+        {
+            try
+            {
+                Method m = windowManager.getClass().getDeclaredMethod(
+                        "getCurrentWindowMetrics"); //Use reflection to see if method is available
+
+                WindowMetrics windowMetrics = (WindowMetrics) m.invoke(windowManager);
+                Insets insets = windowMetrics.getWindowInsets()
+                        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+
+                screenResolution.set(windowMetrics.getBounds().width() - insets.left - insets.right,
+                        windowMetrics.getBounds().height() - insets.top - insets.bottom);
+            }
+            catch (Exception e)
+            {
+                screenResolution = useLegacyMethod(activity);
+            }
+        }
+        else
+        {
+            screenResolution = useLegacyMethod(activity);
         }
 
         return screenResolution;
     }
 
-    public static int getScreenOrientation(Context context)
+    private static Point useLegacyMethod(Activity activity)
     {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-
-        int orientation = Configuration.ORIENTATION_UNDEFINED;
-        if(display.getWidth()==display.getHeight()){
-            orientation = Configuration.ORIENTATION_SQUARE;
-        } else{
-            if(display.getWidth() < display.getHeight()){
-                orientation = Configuration.ORIENTATION_PORTRAIT;
-            }else {
-                orientation = Configuration.ORIENTATION_LANDSCAPE;
-            }
-        }
-        return orientation;
+        Point screenResolution = new Point();
+        //Use legacy method
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        screenResolution.x = displayMetrics.widthPixels;
+        screenResolution.y = displayMetrics.heightPixels;
+        return screenResolution;
     }
-
 }

@@ -13,25 +13,18 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
-        <com.alphawallet.app.widget.PasswordInputView
+        <com.alphawallet.app.widget.InputAddress
             android:id="@+id/input_watch_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            custom:hint="@string/input_address"
+            custom:label="@string/input_address"
+            custom:show_header="false"
+            custom:nocam="true"
+            custom:imeOptions="actionDone"
             android:layout_marginBottom="5dp"
             android:layout_marginTop="20dp"
-            android:textSize="18sp"
-            custom:minHeightValue="90"
-            custom:lines="2"
-            custom:imeOptions="actionDone"
-            custom:label="@string/watch_wallet" />
-
-        <TextView
-            android:id="@+id/text_watch_wallet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_light"
-            android:gravity="center"
-            android:text="@string/suggestion_address" />
+            custom:ens="true"/>
 
     </LinearLayout>
 
@@ -47,7 +40,7 @@
         android:layout_marginStart="16dp"
         android:background="@color/nasty_green"
         android:fontFamily="@font/font_semibold"
-        android:text="@string/watch_wallet"
+        android:text="@string/action_watch_account"
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="18sp" />

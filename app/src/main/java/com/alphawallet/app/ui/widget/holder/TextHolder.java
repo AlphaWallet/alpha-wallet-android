@@ -15,7 +15,7 @@ public class TextHolder extends BinderViewHolder<String>
 {
     public static final int VIEW_TYPE = 1041;
 
-    private TextView text;
+    private final TextView text;
 
     public TextHolder(int resId, ViewGroup parent)
     {

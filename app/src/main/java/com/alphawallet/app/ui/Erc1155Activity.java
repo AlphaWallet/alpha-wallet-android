@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.WALLET;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -7,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -19,14 +20,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
-import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc1155ViewModel;
@@ -42,8 +41,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-
-import static com.alphawallet.app.C.Key.WALLET;
 
 public class Erc1155Activity extends BaseActivity implements StandardFunctionInterface {
     @Inject
@@ -83,7 +80,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
     private void getIntentData()
     {
         wallet = getIntent().getParcelableExtra(WALLET);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
     }
 
@@ -94,7 +91,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         TokenActivityFragment tokenActivityFragment = new TokenActivityFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putInt(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        bundle.putLong(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
         bundle.putParcelable(WALLET, wallet);
         infoFragment.setArguments(bundle);

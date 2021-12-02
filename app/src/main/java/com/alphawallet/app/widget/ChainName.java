@@ -8,10 +8,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 
 /**
  * Created by JB on 3/12/2020.
@@ -19,6 +19,7 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 public class ChainName extends LinearLayout
 {
     private final TextView chainName;
+    private boolean invertNameColour;
 
     public ChainName(Context context, @Nullable AttributeSet attrs)
     {
@@ -28,15 +29,23 @@ public class ChainName extends LinearLayout
         getAttrs(context, attrs);
     }
 
-    public void setChainID(int chainId)
+    public void setChainID(long chainId)
     {
-        Utils.setChainColour(chainName, chainId);
         chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
+        if (invertNameColour)
+        {
+            invertChainID(chainId);
+        }
+        else
+        {
+            chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
+                    EthereumNetworkBase.getChainColour(chainId)));
+        }
     }
 
-    public void invertChainID(int chainId)
+    public void invertChainID(long chainId)
     {
-        chainName.setTextColor(getContext().getColor(Utils.getChainColour(chainId)));
+        chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
         chainName.setBackgroundResource(0);
     }
 
@@ -52,6 +61,7 @@ public class ChainName extends LinearLayout
         {
             int fontSize = a.getInteger(R.styleable.InputView_font_size, 12);
             chainName.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+            invertNameColour = a.getBoolean(R.styleable.InputView_invert, false);
         }
         finally
         {

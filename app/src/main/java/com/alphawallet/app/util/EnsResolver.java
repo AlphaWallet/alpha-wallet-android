@@ -2,10 +2,11 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokenRepository;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -74,13 +75,13 @@ public class EnsResolver {
     /**
      * This function takes ensName (eg 'scotty.eth') and returns the matching Ethereum Address.
      * NOTE: It is highly important to check the node is synced before resolving, as this could be an attack
-     * @param contractId
+     * @param ensName
      * @return
      */
-    public String resolve(String contractId)
+    public String resolve(String ensName)
     {
-        String contractAddress = contractId;
-        if (isValidEnsName(contractId, addressLength))
+        String contractAddress = ensName;
+        if (isValidEnsName(ensName, addressLength))
         {
             try
             {
@@ -88,9 +89,9 @@ public class EnsResolver {
                 {
                     throw new EnsResolutionException("Node is not currently synced");
                 }
-                else if (contractId.endsWith(".crypto")) //check crypto namespace
+                else if (ensName.endsWith(".crypto")) //check crypto namespace
                 {
-                    byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
                     BigInteger nameId = new BigInteger(nameHash);
                     String resolverAddress = getContractData(MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId));
                     if (!TextUtils.isEmpty(resolverAddress))
@@ -100,10 +101,10 @@ public class EnsResolver {
                 }
                 else
                 {
-                    String resolverAddress = lookupResolver(contractId);
+                    String resolverAddress = lookupResolver(ensName);
                     if (!TextUtils.isEmpty(resolverAddress))
                     {
-                        byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+                        byte[] nameHash = NameHash.nameHashAsBytes(ensName);
                         //now attempt to get the address of this ENS
                         contractAddress = getContractData(MAINNET_ID, resolverAddress, getAddr(nameHash));
                     }
@@ -111,12 +112,14 @@ public class EnsResolver {
             }
             catch (Exception e)
             {
-                throw new RuntimeException("Unable to execute Ethereum request", e);
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
+                return "";
             }
 
             if (!Utils.isAddressValid(contractAddress))
             {
-                throw new RuntimeException("Unable to resolve address for name: " + contractId);
+                //throw new RuntimeException("Unable to resolve address for name: " + ensName);
+                return "";
             }
             else
             {
@@ -125,7 +128,7 @@ public class EnsResolver {
         }
         else
         {
-            return contractId;
+            return ensName;
         }
     }
 
@@ -138,7 +141,7 @@ public class EnsResolver {
      */
     public String reverseResolve(String address) throws UnableToResolveENS
     {
-        String name = null;
+        String name = "";
         if (Utils.isAddressValid(address))
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
@@ -150,7 +153,8 @@ public class EnsResolver {
             }
             catch (Exception e)
             {
-                throw new RuntimeException("Unable to execute Ethereum request", e);
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
+                return "";
             }
 
             if (!isValidEnsName(name, addressLength))
@@ -168,6 +172,52 @@ public class EnsResolver {
         }
     }
 
+    public String resolveAvatar(String ensName)
+    {
+        if (isValidEnsName(ensName, addressLength))
+        {
+            try
+            {
+                String resolverAddress = lookupResolver(ensName);
+                if (!TextUtils.isEmpty(resolverAddress))
+                {
+                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
+                    //now attempt to get the address of this ENS
+                    return getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash));
+                }
+            }
+            catch (Exception e)
+            {
+                //
+                if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+        }
+
+        return "";
+    }
+
+    public String resolveAvatarFromAddress(String address)
+    {
+        if (Utils.isAddressValid(address))
+        {
+            String reverseName = Numeric.cleanHexPrefix(address.toLowerCase()) + REVERSE_NAME_SUFFIX;
+            try
+            {
+                String resolverAddress = lookupResolver(reverseName);
+                byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
+                String avatar = getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash));
+                return avatar != null ? avatar : "";
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
+                //throw new RuntimeException("Unable to execute Ethereum request", e);
+            }
+        }
+
+        return "";
+    }
+
     private String lookupResolver(String ensName) throws Exception
     {
         NetVersion netVersion = web3j.netVersion().send();
@@ -180,17 +230,27 @@ public class EnsResolver {
     private Function getResolver(byte[] nameHash)
     {
         return new Function("resolver",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
+    }
+
+    private Function getAvatar(byte[] nameHash)
+    {
+        return new Function("text",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
+                                    new org.web3j.abi.datatypes.Utf8String("avatar")),
+                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
+                {
+                }));
     }
 
     private Function getResolverOf(BigInteger nameId)
     {
         return new Function("resolverOf",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Uint(nameId)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -198,8 +258,8 @@ public class EnsResolver {
     private Function get(BigInteger nameId)
     {
         return new Function("get",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
+                            Arrays.asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                            Arrays.asList(new TypeReference<Utf8String>()
                             {
                             }));
     }
@@ -207,8 +267,8 @@ public class EnsResolver {
     private Function getAddr(byte[] nameHash)
     {
         return new Function("addr",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Address>()
                             {
                             }));
     }
@@ -216,8 +276,8 @@ public class EnsResolver {
     private Function getName(byte[] nameHash)
     {
         return new Function("name",
-                            Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
+                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                            Arrays.asList(new TypeReference<Utf8String>()
                             {
                             }));
     }
@@ -236,7 +296,7 @@ public class EnsResolver {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, int chainId) throws Exception
+            Function function, String contractAddress, long chainId) throws Exception
     {
         try
         {
@@ -248,14 +308,14 @@ public class EnsResolver {
 
             return response.getValue();
         }
-        catch (InterruptedIOException | UnknownHostException e)
+        catch (InterruptedIOException | UnknownHostException | JsonParseException e)
         {
             //expected to happen when user switches wallets
             return "0x";
         }
     }
 
-    private <T> T getContractData(int chainId, String address, Function function) throws Exception
+    private <T> T getContractData(long chainId, String address, Function function) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address, chainId);
 
@@ -265,7 +325,7 @@ public class EnsResolver {
         }
         else if (responseValue.equals("0x"))
         {
-            return null;
+            return (T)"";
         }
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -276,7 +336,7 @@ public class EnsResolver {
         }
         else
         {
-            return null;
+            return (T)"";
         }
     }
 
@@ -285,7 +345,6 @@ public class EnsResolver {
     }
 
     public static boolean isValidEnsName(String input, int addressLength) {
-        return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !Utils.isAddressValid(input));
+        return input != null && input.contains(".") && input.length() > 4;
     }
 }

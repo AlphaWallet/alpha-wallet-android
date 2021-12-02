@@ -8,10 +8,13 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
+import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
@@ -23,6 +26,9 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final MyAddressRouter myAddressRouter;
+    private final ManageWalletsRouter manageWalletsRouter;
+    private final PreferenceRepositoryType preferenceRepository;
+    private final RealmManager realmManager;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   TokenDetailRouter tokenDetailRouter,
@@ -31,7 +37,10 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   AssetDefinitionService assetDefinitionService,
                                   TokensService tokensService,
                                   ChangeTokenEnableInteract changeTokenEnableInteract,
-                                  MyAddressRouter myAddressRouter) {
+                                  MyAddressRouter myAddressRouter,
+                                  ManageWalletsRouter manageWalletsRouter,
+                                  PreferenceRepositoryType preferenceRepository,
+                                  RealmManager realmManager) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
@@ -40,6 +49,9 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.tokensService = tokensService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
+        this.manageWalletsRouter = manageWalletsRouter;
+        this.preferenceRepository = preferenceRepository;
+        this.realmManager = realmManager;
     }
 
     @NonNull
@@ -53,6 +65,9 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 assetDefinitionService,
                 tokensService,
                 changeTokenEnableInteract,
-                myAddressRouter);
+                myAddressRouter,
+                manageWalletsRouter,
+                preferenceRepository,
+                realmManager);
     }
 }

@@ -1,13 +1,14 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -19,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -32,17 +34,18 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.viewmodel.AddTokenViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputView;
+import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.util.ArrayList;
@@ -66,26 +69,21 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
 
-    public LinearLayout ticketLayout;
-
-    //Ticket Info
-    public TextView venue;
-    public TextView date;
-    public TextView price;
-
     private String lastCheck;
 
     LinearLayout progressLayout;
+    private LinearLayout counterLayout;
+    private TextView counterText;
+    private LinearLayout chainLayout;
+    private TokenIcon chainIcon;
+    private ChainName chainName;
 
     public InputAddress inputAddressView;
     public InputView symbolInputView;
     public InputView decimalsInputView;
     public InputView nameInputView;
     private String contractAddress;
-    private View networkIcon;
     private NetworkInfo networkInfo;
-    private TextView currentNetwork;
-    private RelativeLayout selectNetworkLayout;
     private QRResult currentResult;
     private InputView tokenType;
     private ContractType contractType;
@@ -101,19 +99,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         setContentView(R.layout.activity_add_token);
 
+        setTitle(getString(R.string.title_add_token));
+
         toolbar();
 
         symbolInputView = findViewById(R.id.input_symbol);
         decimalsInputView = findViewById(R.id.input_decimal);
         nameInputView = findViewById(R.id.input_name);
+        counterLayout = findViewById(R.id.layout_progress_counter);
+        counterText = findViewById(R.id.text_check_counter);
+
+        chainLayout = findViewById(R.id.layout_chain);
+        chainIcon = findViewById(R.id.token_icon);
+        chainName = findViewById(R.id.chain_name);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        currentNetwork = findViewById(R.id.current_network);
-        networkIcon = findViewById(R.id.network_icon);
         tokenType = findViewById(R.id.input_token_type);
-        selectNetworkLayout = findViewById(R.id.select_network_layout);
-        selectNetworkLayout.setOnClickListener(v -> selectNetwork());
-        selectNetworkLayout.setVisibility(View.VISIBLE);
         tokenType.setVisibility(View.GONE);
 
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
@@ -122,12 +123,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         progressLayout = findViewById(R.id.layout_progress);
 
-        venue = findViewById(R.id.textViewVenue);
-        date = findViewById(R.id.textViewDate);
-        price = findViewById(R.id.textViewPrice);
         contractType = null;
-
-        ticketLayout = findViewById(R.id.layoutTicket);
 
         viewModel = new ViewModelProvider(this, addTokenViewModelFactory)
                 .get(AddTokenViewModel.class);
@@ -138,6 +134,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         viewModel.switchNetwork().observe(this, this::setupNetwork);
         viewModel.tokenType().observe(this, this::onTokenType);
         viewModel.tokenInfo().observe(this, this::onTokenInfo);
+        viewModel.chainScanCount().observe(this, this::onChainScanned);
         lastCheck = "";
 
         inputAddressView = findViewById(R.id.input_address_view);
@@ -169,6 +166,15 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         setupNetwork(EthereumNetworkRepository.getOverrideToken().chainId);
         viewModel.prepare();
+
+        if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
+            runOnUiThread(() -> onActivityResult(C.BARCODE_READER_REQUEST_CODE, Activity.RESULT_OK, getIntent()));
+        }
+    }
+
+    private void onChainScanned(Integer count)
+    {
+        counterText.setText(String.valueOf(count));
     }
 
     private void onTokenType(Token contractTypeToken)
@@ -182,6 +188,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             String showBalance = contractTypeToken.getStringBalance() + " " + contractTypeToken.getInterfaceSpec().toString();
             tokenType.setText(showBalance);
             contractType = contractTypeToken.getInterfaceSpec();
+
+            Token chainToken = viewModel.getChainToken(contractTypeToken.tokenInfo.chainId);
+
+            chainLayout.setVisibility(View.VISIBLE);
+            chainIcon.bindData(chainToken);
+            chainName.setChainID(contractTypeToken.tokenInfo.chainId);
         }
     }
 
@@ -201,6 +213,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_network, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_networks)
+        {
+            selectNetwork();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onResume()
     {
         super.onResume();
@@ -214,8 +242,10 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     private void showProgress(Boolean shouldShowProgress) {
         if (shouldShowProgress) {
             progressLayout.setVisibility(View.VISIBLE);
+            counterLayout.setVisibility(View.VISIBLE);
         } else {
             progressLayout.setVisibility(View.GONE);
+            counterLayout.setVisibility(View.GONE);
         }
     }
 
@@ -263,16 +293,19 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if (result != null)
         {
             ContractLocator cr = new ContractLocator(result.getAddress(), result.tokenInfo.chainId);
-            Intent intent = new Intent(ADDED_TOKEN);
-            intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, new ArrayList<>(Collections.singletonList(cr)));
-            sendBroadcast(intent);
+            Intent iResult = new Intent();
+            iResult.putParcelableArrayListExtra(ADDED_TOKEN, new ArrayList<>(Collections.singletonList(cr)));
+            setResult(RESULT_OK, iResult);
             finish();
         }
     }
 
     private void onTokenInfo(TokenInfo tokenInfo)
     {
-        tokenInfo.addTokenSetupPage(this);
+        inputAddressView.setAddress(tokenInfo.address);
+        symbolInputView.setText(tokenInfo.symbol);
+        decimalsInputView.setText(String.valueOf(tokenInfo.decimals));
+        nameInputView.setText(tokenInfo.name);
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -357,8 +390,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     private void onSave() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (zeroBalanceToken && pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false))
+        if (zeroBalanceToken && viewModel.shouldHideZeroBalanceTokens())
         {
             userAddingZeroBalanceToken();
         }
@@ -378,8 +410,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         aDialog.setButtonText(R.string.dialog_switch_zero_balance_tokens_on);
         aDialog.setButtonListener(v -> {
             aDialog.dismiss();
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, false).apply();
+            viewModel.hideZeroBalanceTokens();
             inputAddressView.getAddress();
         });
         aDialog.setSecondaryButtonText(R.string.action_cancel);
@@ -393,6 +424,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onNoContractFound(Boolean noContract)
     {
+        showProgress(false);
+
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.no_token_found_title);
         aDialog.setIcon(AWalletAlertDialog.NONE);
@@ -402,25 +435,23 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         aDialog.show();
     }
 
-    private void setupNetwork(int chainId)
+    private void setupNetwork(long chainId)
     {
         networkInfo = viewModel.getNetworkInfo(chainId);
         if (networkInfo != null)
         {
-            currentNetwork.setText(networkInfo.name);
-            Utils.setChainColour(networkIcon, networkInfo.chainId);
             viewModel.setPrimaryChain(chainId);
         }
     }
 
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, 1);
+                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
                 setupNetwork(networkId);
             });
 
     private void selectNetwork() {
-        Intent intent = new Intent(AddTokenActivity.this, SelectNetworkActivity.class);
+        Intent intent = new Intent(this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         getNetwork.launch(intent);
@@ -431,9 +462,9 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
-                case FullScannerFragment.SUCCESS:
+                case Activity.RESULT_OK:
                     if (data != null) {
-                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                         QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         currentResult = parser.parse(barcode);
@@ -474,7 +505,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                             }
                             catch (Exception e)
                             {
-                                e.printStackTrace();
+                                if (BuildConfig.DEBUG) e.printStackTrace();
                             }
                         }
 
@@ -485,12 +516,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                         inputAddressView.setAddress(extracted_address);
                     }
                     break;
-                case QRScanningActivity.DENY_PERMISSION:
+                case QRScanner.DENY_PERMISSION:
                     showCameraDenied();
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
+                                                "Code: " + resultCode
                     ));
                     break;
             }
@@ -503,5 +534,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     public void addressReady(String address, String ensName)
     {
         saveFinal(address);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (viewModel != null) viewModel.stopScan();
     }
 }

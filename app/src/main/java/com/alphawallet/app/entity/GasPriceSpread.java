@@ -8,8 +8,11 @@ import com.alphawallet.app.ui.widget.entity.GasSpeed;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+
+import static com.alphawallet.app.util.BalanceUtils.gweiToWei;
 
 /**
  * Created by JB on 18/11/2020.
@@ -25,6 +28,8 @@ public class GasPriceSpread
     public final BigInteger fast;
     public final BigInteger standard;
     public final BigInteger slow;
+    public final BigInteger baseFee;
+    public final boolean lockedGas;
 
     public final long timeStamp;
 
@@ -32,50 +37,61 @@ public class GasPriceSpread
 
     public GasPriceSpread(String apiReturn)
     {
-        BigInteger rRapid = BigInteger.ZERO;
-        BigInteger rFast = BigInteger.ZERO;
-        BigInteger rStandard = BigInteger.ZERO;
-        BigInteger rSlow = BigInteger.ZERO;
-        long rTimeStamp = 0;
+        BigDecimal rRapid = BigDecimal.ZERO;
+        BigDecimal rFast = BigDecimal.ZERO;
+        BigDecimal rStandard = BigDecimal.ZERO;
+        BigDecimal rSlow = BigDecimal.ZERO;
+        BigDecimal rBaseFee = BigDecimal.ZERO;
 
         try
         {
             JSONObject result = new JSONObject(apiReturn);
-            JSONObject data = result.getJSONObject("data");
-            rRapid = new BigInteger(data.getString("rapid"));
-            rFast = new BigInteger(data.getString("fast"));
-            rStandard = new BigInteger(data.getString("standard"));
-            rSlow = new BigInteger(data.getString("slow"));
-            rTimeStamp = data.getLong("timeStamp");
+            if (result.has("result"))
+            {
+                JSONObject data = result.getJSONObject("result");
+
+                rFast = new BigDecimal(data.getString("FastGasPrice"));
+                rRapid = rFast.multiply(BigDecimal.valueOf(1.2));
+                rStandard = new BigDecimal(data.getString("ProposeGasPrice"));
+                rSlow = new BigDecimal(data.getString("SafeGasPrice"));
+                rBaseFee = new BigDecimal(data.getString("suggestBaseFee"));
+            }
         }
         catch (JSONException e)
         {
             //
         }
 
-        rapid = rRapid;
-        fast = rFast;
-        standard = rStandard;
-        slow = rSlow;
-        timeStamp = rTimeStamp;
-    }
-
-    public GasPriceSpread(BigInteger currentAvGasPrice)
-    {
-        rapid = BigInteger.ZERO;
-        fast = BigInteger.ZERO;
-        standard = currentAvGasPrice;
-        slow = BigInteger.ZERO;
+        //convert to wei
+        rapid = gweiToWei(rRapid);
+        fast = gweiToWei(rFast);
+        standard = gweiToWei(rStandard);
+        slow = gweiToWei(rSlow);
+        baseFee = gweiToWei(rBaseFee);
+        lockedGas = false;
         timeStamp = System.currentTimeMillis();
     }
 
-    public GasPriceSpread(String r, String f, String st, String sl, long timeSt)
+    public GasPriceSpread(BigInteger currentAvGasPrice, boolean hasLockedGas)
+    {
+        rapid = BigInteger.ZERO;
+        fast = new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger();
+        standard = currentAvGasPrice;
+        slow = BigInteger.ZERO;
+        baseFee = BigInteger.ZERO;
+        timeStamp = System.currentTimeMillis();
+        lockedGas = hasLockedGas;
+    }
+
+    public GasPriceSpread(String r, String f, String st, String sl, String bf, long timeSt, boolean locked)
     {
         rapid = new BigInteger(r);
         fast = new BigInteger(f);
         standard = new BigInteger(st);
         slow = new BigInteger(sl);
+        baseFee = new BigInteger(bf);
         timeStamp = timeSt;
+        lockedGas = locked;
     }
 
     public int setupGasSpeeds(Context ctx, List<GasSpeed> gasSpeeds, int currentGasSpeedIndex)
@@ -132,5 +148,11 @@ public class GasPriceSpread
     public int getCustomIndex()
     {
         return customIndex;
+    }
+
+    public boolean isResultValid()
+    {
+        return !rapid.equals(BigInteger.ZERO) || !fast.equals(BigInteger.ZERO) || !standard.equals(BigInteger.ZERO)
+                || !slow.equals(BigInteger.ZERO);
     }
 }

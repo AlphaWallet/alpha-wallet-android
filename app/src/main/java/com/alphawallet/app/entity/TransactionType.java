@@ -34,5 +34,5 @@ public enum TransactionType
     COMMIT_NFT,
     SAFE_TRANSFER,
     SAFE_BATCH_TRANSFER,
-    ILLEGAL_VALUE;
+    ILLEGAL_VALUE
 }

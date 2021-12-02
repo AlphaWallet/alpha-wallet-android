@@ -36,9 +36,9 @@ public abstract class SortedItem<T> {
         return false;
     }
 
-    public void setIsChecked(boolean b) { };
+    public void setIsChecked(boolean b) { }
 
-    public void setExposeRadio(boolean expose) { };
+    public void setExposeRadio(boolean expose) { }
 
     public List<BigInteger> getTokenIds()
     {

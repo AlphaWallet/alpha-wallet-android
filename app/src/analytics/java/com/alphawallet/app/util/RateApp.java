@@ -22,7 +22,7 @@ public class RateApp {
             View contentView = LayoutInflater.from(context).inflate(R.layout.layout_rate_dialog, null, false);
             final RatingBar ratingBar = contentView.findViewById(R.id.rating_bar);
 
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context, R.style.AWLightAlertDialog)
                     .setTitle(context.getString(R.string.rate_title, context.getString(R.string.app_name)))
                     .setView(contentView)
                     .setMessage(context.getString(R.string.rate_prompt, context.getString(R.string.app_name)))

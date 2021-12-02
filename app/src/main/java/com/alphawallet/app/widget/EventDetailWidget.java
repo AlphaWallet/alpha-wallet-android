@@ -93,7 +93,7 @@ public class EventDetailWidget extends LinearLayout
     {
         holdingView.setVisibility(View.VISIBLE);
         icon.setVisibility(View.GONE);
-        symbol.setText(token.getSymbolOrShortName());
+        symbol.setText(token.getShortSymbol());
 
         title.setVisibility(View.GONE);
 

@@ -10,10 +10,11 @@ import com.alphawallet.app.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class TestNetDialog extends BottomSheetDialog {
-    private ImageView closeButton;
-    private Button confirmButton;
+    private final ImageView closeButton;
+    private final Button confirmButton;
+    private final long newChainId;
 
-    public TestNetDialog(@NonNull Context context, TestNetDialogCallback callback)
+    public TestNetDialog(@NonNull Context context, long chainId, TestNetDialogCallback callback)
     {
         super(context);
         setCancelable(true);
@@ -21,20 +22,27 @@ public class TestNetDialog extends BottomSheetDialog {
         setContentView(R.layout.layout_dialog_testnet_confirmation);
         closeButton = findViewById(R.id.close_action);
         confirmButton = findViewById(R.id.enable_testnet_action);
+        newChainId = chainId;
         setCallback(callback);
     }
 
     private void setCallback(TestNetDialogCallback listener)
     {
-        closeButton.setOnClickListener(v -> listener.onTestNetDialogClosed());
-        confirmButton.setOnClickListener(v -> listener.onTestNetDialogConfirmed());
+        closeButton.setOnClickListener(v -> {
+            listener.onTestNetDialogClosed();
+            dismiss();
+        });
+        confirmButton.setOnClickListener(v -> {
+            listener.onTestNetDialogConfirmed(newChainId);
+            dismiss();
+        });
         setOnCancelListener(v -> listener.onTestNetDialogCancelled());
     }
 
     public interface TestNetDialogCallback {
         void onTestNetDialogClosed();
 
-        void onTestNetDialogConfirmed();
+        void onTestNetDialogConfirmed(long chainId);
 
         default void onTestNetDialogCancelled() {}
     }

@@ -41,9 +41,9 @@ import com.bumptech.glide.request.target.Target;
 public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements Filterable {
     private final List<DApp> suggestions;
     public List<DApp> filteredSuggestions;
-    private ItemClickListener listener;
-    private String text;
-    private TextView name;
+    private final ItemClickListener listener;
+//    private String text;
+//    private TextView name;
 
     public DappBrowserSuggestionsAdapter(@NonNull Context context,
                                          List<DApp> suggestions,
@@ -52,7 +52,7 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         this.suggestions = suggestions;
         this.listener = listener;
         this.filteredSuggestions = new ArrayList<>();
-        this.text = "";
+        //this.text = "";
 
         // Append browser history to known DApps list during initialisation
         addSuggestions(DappBrowserUtils.getBrowserHistory(context));
@@ -120,26 +120,27 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         if (!TextUtils.isEmpty(visibleUrl)) {
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(icon.getContext())
-                    .load(favicon)
+                    .load(favicon)//.load(favicon)
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .listener(requestListener)
                     .into(icon);
         }
 
-        name = convertView.findViewById(R.id.name);
+        TextView name = convertView.findViewById(R.id.name);
         TextView description = convertView.findViewById(R.id.description);
-        TextView url = convertView.findViewById(R.id.url);
 
         name.setText(dapp.getName());
-        if (dapp.getDescription() != null && !dapp.getDescription().isEmpty()) {
+        if (!TextUtils.isEmpty(dapp.getDescription()))
+        {
             description.setText(dapp.getDescription());
-        } else {
+        }
+        else
+        {
             description.setText(dapp.getUrl());
         }
-        url.setText(dapp.getUrl());
 
-        highlightSearch(text, dapp.getName());
+        //highlightSearch(text, dapp.getName());
 
         return convertView;
     }
@@ -147,7 +148,7 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             return false;
@@ -172,14 +173,14 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
                 int highlightColor = ContextCompat.getColor(getContext(), R.color.colorPrimaryDark);
                 builder.setSpan(new ForegroundColorSpan(highlightColor), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            this.name.setText(builder);
+            //this.name.setText(builder);
         } else {
-            this.name.setText(name);
+            //this.name.setText(name);
         }
     }
 
     public void setHighlighted(String text) {
-        this.text = text;
+        //this.text = text;
         notifyDataSetChanged();
     }
 }

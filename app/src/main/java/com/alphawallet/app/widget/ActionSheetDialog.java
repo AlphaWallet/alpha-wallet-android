@@ -17,19 +17,14 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
@@ -563,6 +558,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void setGasEstimate(BigInteger estimate)
     {
         gasWidget.setGasEstimate(estimate);
+        functionBar.setPrimaryButtonEnabled(true);
     }
 
     private void showAmount(BigInteger amountVal)
@@ -594,5 +590,10 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             // Do nothing
         });
         dismiss();
+    }
+
+    public void waitForEstimate()
+    {
+        functionBar.setPrimaryButtonWaiting();
     }
 }

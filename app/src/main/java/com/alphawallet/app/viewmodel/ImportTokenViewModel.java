@@ -20,7 +20,6 @@ import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -73,7 +72,6 @@ public class ImportTokenViewModel extends BaseViewModel
     private final FetchTokensInteract fetchTokensInteract;
     private final TokensService tokensService;
     private final AlphaWalletService alphaWalletService;
-    private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
@@ -112,7 +110,6 @@ public class ImportTokenViewModel extends BaseViewModel
                          FetchTokensInteract fetchTokensInteract,
                          TokensService tokensService,
                          AlphaWalletService alphaWalletService,
-                         AddTokenInteract addTokenInteract,
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
                          FetchTransactionsInteract fetchTransactionsInteract,
@@ -123,7 +120,6 @@ public class ImportTokenViewModel extends BaseViewModel
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokensService = tokensService;
         this.alphaWalletService = alphaWalletService;
-        this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -199,7 +195,7 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    public void switchNetwork(int newNetwork)
+    public void switchNetwork(long newNetwork)
     {
         if (network.getValue() == null || network.getValue().chainId != newNetwork)
         {
@@ -529,7 +525,7 @@ public class ImportTokenViewModel extends BaseViewModel
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }
 
-    private void getEthereumTicker(int chainId)
+    private void getEthereumTicker(long chainId)
     {
         disposable = fetchTokensInteract.getEthereumTicker(chainId)
                 .subscribeOn(Schedulers.io())
@@ -548,15 +544,8 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (importToken != null)
         {
-            disposable = addTokenInteract.add(importToken.tokenInfo, importToken.getInterfaceSpec(), wallet.getValue())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(this::finishedImport, this::onError);
+            tokensService.storeToken(importToken);
         }
-    }
-
-    private void finishedImport(Token token)
-    {
-        Log.d(TAG, "Added to Watch list: " + token.getFullName());
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -621,9 +610,9 @@ public class ImportTokenViewModel extends BaseViewModel
         onError(throwable);
     }
 
-    private List<Integer> getNetworkIds()
+    private List<Long> getNetworkIds()
     {
-        List<Integer> networkIds = new ArrayList<>();
+        List<Long> networkIds = new ArrayList<>();
         for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
         {
             networkIds.add(networkInfo.chainId);
@@ -684,7 +673,7 @@ public class ImportTokenViewModel extends BaseViewModel
         keyService.resetSigningDialog();
     }
 
-    public void checkTokenScriptSignature(final int chainId, final String address)
+    public void checkTokenScriptSignature(final long chainId, final String address)
     {
         disposable = assetDefinitionService.getAssetDefinitionASync(chainId, address)
                 .flatMap(def -> assetDefinitionService.getSignatureData(chainId, address))

@@ -19,29 +19,29 @@ public class EthRPCNodes
     private static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 
 
-    public static String getNodeURLByNetworkId(int networkId) {
-        switch (networkId) {
-            case EthereumNetworkBase.MAINNET_ID:
+    public static String getNodeURLByNetworkId(long networkId) {
+        switch ((int)networkId) {
+            case (int)EthereumNetworkBase.MAINNET_ID:
                 return MAINNET_RPC_URL;
-            case EthereumNetworkBase.KOVAN_ID:
+            case (int)EthereumNetworkBase.KOVAN_ID:
                 return KOVAN_RPC_URL;
-            case EthereumNetworkBase.ROPSTEN_ID:
+            case (int)EthereumNetworkBase.ROPSTEN_ID:
                 return ROPSTEN_RPC_URL;
-            case EthereumNetworkBase.RINKEBY_ID:
+            case (int)EthereumNetworkBase.RINKEBY_ID:
                 return RINKEBY_RPC_URL;
-            case EthereumNetworkBase.POA_ID:
+            case (int)EthereumNetworkBase.POA_ID:
                 return POA_RPC_URL;
-            case EthereumNetworkBase.SOKOL_ID:
+            case (int)EthereumNetworkBase.SOKOL_ID:
                 return SOKOL_RPC_URL;
-            case EthereumNetworkBase.CLASSIC_ID:
+            case (int)EthereumNetworkBase.CLASSIC_ID:
                 return CLASSIC_RPC_URL;
-            case EthereumNetworkBase.XDAI_ID:
+            case (int)EthereumNetworkBase.XDAI_ID:
                 return XDAI_RPC_URL;
-            case EthereumNetworkBase.GOERLI_ID:
+            case (int)EthereumNetworkBase.GOERLI_ID:
                 return GOERLI_RPC_URL;
-            case EthereumNetworkBase.ARTIS_SIGMA1_ID:
+            case (int)EthereumNetworkBase.ARTIS_SIGMA1_ID:
                 return ARTIS_SIGMA1_RPC_URL;
-            case EthereumNetworkBase.ARTIS_TAU1_ID:
+            case (int)EthereumNetworkBase.ARTIS_TAU1_ID:
                 return ARTIS_TAU1_RPC_URL;
             default:
                 return MAINNET_RPC_URL;

@@ -20,18 +20,20 @@ public interface TransactionLocalSource {
 
 	Realm getRealmInstance(Wallet wallet);
 
-	Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit);
-	Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount);
-	Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters);
+	Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, List<Long> networkFilters, long fetchTime, int fetchLimit);
+	Single<ActivityMeta[]> fetchActivityMetas(Wallet wallet, long chainId, String tokenAddress, int historyCount);
+	Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Long> networkFilters);
 
 	void markTransactionBlock(String walletAddress, String hash, long blockValue);
 	Transaction[] fetchPendingTransactions(String currentAddress);
 
 	RealmAuxData fetchEvent(String walletAddress, String eventKey);
 
-	Transaction storeRawTx(Wallet wallet, int chainId, EthTransaction object, long timeStamp, boolean isSuccessful);
+	Transaction storeRawTx(Wallet wallet, long chainId, EthTransaction object, long timeStamp, boolean isSuccessful);
 
     long fetchTxCompletionTime(Wallet wallet, String hash);
 
     Single<Boolean> deleteAllForWallet(String currentAddress);
+
+    Single<Boolean> deleteAllTickers();
 }

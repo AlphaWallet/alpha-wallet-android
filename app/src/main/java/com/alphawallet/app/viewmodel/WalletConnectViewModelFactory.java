@@ -1,7 +1,5 @@
 package com.alphawallet.app.viewmodel;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,7 +22,6 @@ public class WalletConnectViewModelFactory implements ViewModelProvider.Factory 
     private final GenericWalletInteract genericWalletInteract;
     private final RealmManager realmManager;
     private final GasService gasService;
-    private final Context context;
     private final TokensService tokensService;
     private final AnalyticsServiceType analyticsService;
 
@@ -37,8 +34,7 @@ public class WalletConnectViewModelFactory implements ViewModelProvider.Factory 
             RealmManager realmManager,
             GasService gasService,
             TokensService tokensService,
-            AnalyticsServiceType analyticsService,
-            Context context) {
+            AnalyticsServiceType analyticsService) {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -47,7 +43,6 @@ public class WalletConnectViewModelFactory implements ViewModelProvider.Factory 
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
-        this.context = context;
     }
 
     @NonNull
@@ -61,7 +56,6 @@ public class WalletConnectViewModelFactory implements ViewModelProvider.Factory 
                 realmManager,
                 gasService,
                 tokensService,
-                analyticsService,
-                context);
+                analyticsService);
     }
 }

@@ -1,8 +1,5 @@
 package com.alphawallet.app.di;
 
-import android.content.Context;
-
-import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -28,35 +25,25 @@ class SendModule {
                                                      EthereumNetworkRepositoryType networkRepositoryType,
                                                      TokensService tokensService,
                                                      FetchTransactionsInteract fetchTransactionsInteract,
-                                                     AddTokenInteract addTokenInteract,
                                                      CreateTransactionInteract createTransactionInteract,
                                                      GasService gasService,
                                                      AssetDefinitionService assetDefinitionService,
                                                      KeyService keyService,
-                                                     AnalyticsServiceType analyticsService,
-                                                     PreferenceRepositoryType preferenceRepository) {
+                                                     AnalyticsServiceType analyticsService) {
         return new SendViewModelFactory(myAddressRouter,
                 networkRepositoryType,
                 tokensService,
                 fetchTransactionsInteract,
-                addTokenInteract,
                 createTransactionInteract,
                 gasService,
                 assetDefinitionService,
                 keyService,
-                analyticsService,
-                preferenceRepository);
+                analyticsService);
     }
 
     @Provides
     MyAddressRouter provideMyAddressRouter() {
         return new MyAddressRouter();
-    }
-
-    @Provides
-    AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository) {
-        return new AddTokenInteract(tokenRepository);
     }
 
     @Provides

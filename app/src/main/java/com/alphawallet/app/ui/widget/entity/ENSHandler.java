@@ -6,13 +6,14 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.os.Handler;
-import android.preference.PreferenceManager;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -45,11 +46,9 @@ public class ENSHandler implements Runnable
     public  static final int ENS_RESOLVE_DELAY = 750; //In milliseconds
     public  static final int ENS_TIMEOUT_DELAY = 8000;
     private final InputAddress host;
-    private TextWatcher ensTextWatcher;
     private final Handler handler;
     private final AutoCompleteAddressAdapter adapterUrl;
-    private AWEnsResolver ensResolver;
-    private final float standardTextSize;
+    private final AWEnsResolver ensResolver;
 
     @Nullable
     private Disposable disposable;
@@ -58,12 +57,10 @@ public class ENSHandler implements Runnable
 
     public ENSHandler(InputAddress host, AutoCompleteAddressAdapter adapter)
     {
-        this.handler = new Handler();
+        this.handler = new Handler(Looper.getMainLooper());
         this.adapterUrl = adapter;
         this.host = host;
-        this.ensResolver = null;
-
-        standardTextSize = host.getTextSize();
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext());
 
         createWatcher();
         getENSHistoryFromPrefs(host.getContext());
@@ -73,48 +70,10 @@ public class ENSHandler implements Runnable
     {
         host.getInputView().setAdapter(adapterUrl);
         host.getInputView().setOnClickListener(v -> host.getInputView().showDropDown());
-
         waitingForENS = false;
-
-        ensTextWatcher = new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-                host.setStatus(null);
-                float ts = host.getTextSize();
-                int amount = host.getInputLength();
-                if (amount > 30 && ts == standardTextSize)
-                {
-                    host.getInputView().setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
-                }
-                else if (amount <= 30 && ts < standardTextSize)
-                {
-                    host.getInputView().setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                host.setStatus(null);
-                if (!TextUtils.isEmpty(host.getInputText()))
-                {
-                    checkAddress();
-                }
-            }
-        };
-
-        host.getInputView().addTextChangedListener(ensTextWatcher);
     }
 
-    private void checkAddress()
+    public void checkAddress()
     {
         handler.removeCallbacks(this);
         if (couldBeENS(host.getInputText()))
@@ -162,9 +121,9 @@ public class ENSHandler implements Runnable
     public void handleHistoryItemClick(String ensName)
     {
         host.hideKeyboard();
-        host.getInputView().removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
+        host.getInputView().removeTextChangedListener(host); //temporarily remove the watcher because we're handling the text change here
         host.getInputView().setText(ensName);
-        host.getInputView().addTextChangedListener(ensTextWatcher);
+        host.getInputView().addTextChangedListener(host);
         host.getInputView().dismissDropDown();
         handler.removeCallbacksAndMessages(this);
         waitingForENS = true;
@@ -191,7 +150,7 @@ public class ENSHandler implements Runnable
             if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);
-            host.ENSResolved(resolvedAddress, ensDomain);
+            host.ENSResolved(ensDomain, resolvedAddress);
         }
         else
         {
@@ -236,18 +195,17 @@ public class ENSHandler implements Runnable
         //is this an address? If so, attempt reverse lookup or resolve from known ENS addresses
         if (Utils.isAddressValid(to))
         {
-            initENSHandler();
             host.setWaitingSpinner(true);
 
-            disposable = ensResolver.resolveEnsName(to)
+            disposable = ensResolver.reverseResolveEns(to)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
         }
         else if (canBeENSName(to))
         {
-            initENSHandler();
             host.setWaitingSpinner(true);
+            host.ENSName(to);
 
             disposable = ensResolver.resolveENSAddress(to)
                     .subscribeOn(Schedulers.io())
@@ -263,7 +221,7 @@ public class ENSHandler implements Runnable
     //Given an Ethereum address, check if we can find a matching ENS name
     public Single<String> resolveENSNameFromAddress(String address)
     {
-        return ensResolver.resolveEnsName(address);
+        return ensResolver.reverseResolveEns(address);
     }
 
     /**
@@ -347,13 +305,5 @@ public class ENSHandler implements Runnable
     {
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(host.getContext()).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
-    }
-
-    private void initENSHandler()
-    {
-        if (ensResolver == null)
-        {
-            this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext());
-        }
     }
 }

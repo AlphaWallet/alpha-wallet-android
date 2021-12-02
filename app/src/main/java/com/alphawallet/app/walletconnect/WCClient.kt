@@ -47,8 +47,8 @@ open class WCClient(
 
     fun sessionId(): String?
     {
-        if (session != null) return session!!.topic;
-        else return null;
+        if (session != null) return session!!.topic
+        else return null
     }
 
     private var handshakeId: Long = -1
@@ -56,12 +56,11 @@ open class WCClient(
     var accounts: List<String>? = null
         private set
 
-    var chainId: String? = null
-        private set
+    private var chainId: String? = null
 
     fun chainIdVal(): Int
     {
-        return chainId?.toInt() ?: EthereumNetworkBase.MAINNET_ID
+        return chainId?.toInt() ?: 0
     }
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
@@ -88,7 +87,7 @@ open class WCClient(
         // The peerId channel is used to listen to all messages sent to this httpClient.
         subscribe(peerId)
 
-        onWCOpen(peerId);
+        onWCOpen(peerId)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -107,7 +106,7 @@ open class WCClient(
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         Log.d(TAG,"<< websocket closed >>")
-        resetState()
+        //resetState()
         onFailure(t)
 
         listeners.forEach { it.onFailure(webSocket, t, response) }
@@ -127,7 +126,7 @@ open class WCClient(
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         Log.d(TAG,"<< closing socket >>")
 
-        resetState()
+        //resetState()
         onDisconnect(code, reason)
 
         listeners.forEach { it.onClosing(webSocket, code, reason) }
@@ -150,28 +149,14 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun connect4(session: WCSession, peerMeta: WCPeerMeta, peerId: String = UUID.randomUUID().toString(), remotePeerId: String? = null) {
-        if (this.session != null && this.session?.topic != session.topic) {
-            killSession()
-        }
-
-        this.session = session
-        this.peerMeta = peerMeta
-        this.peerId = peerId
-        this.remotePeerId = remotePeerId
-
-        val request = Request.Builder()
-            .url(session.bridge)
-            .build()
-
-        socket = httpClient.newWebSocket(request, this)
-    }
-
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+    fun approveSession(accounts: List<String>, _chainId: Long): Boolean {
         if (handshakeId <= 0) { onFailure(Throwable("handshakeId must be greater than 0 on session approve")) }
+        var useChainId: Long = _chainId
+        if (this.chainId?.toIntOrNull() != 1) useChainId = _chainId
+        chainId = useChainId.toString()
 
         val result = WCApproveSessionResponse(
-                chainId = this.chainId?.toIntOrNull() ?: chainId,
+                chainId = useChainId,
                 accounts = accounts,
                 peerId = peerId,
                 peerMeta = peerMeta
@@ -189,14 +174,14 @@ open class WCClient(
         return socket?.send("ping") ?: false
     }
 
-    fun updateSession(accounts: List<String>? = null, chainId: Int? = null, approved: Boolean = true): Boolean {
+    fun updateSession(accounts: List<String>? = null, chainId: Long? = null, approved: Boolean = true): Boolean {
         val request = JsonRpcRequest(
                 id = Date().time,
                 method = WCMethod.SESSION_UPDATE,
                 params = listOf(
                         WCSessionUpdate(
                                 approved = approved,
-                                chainId = this.chainId?.toIntOrNull() ?: chainId,
+                                chainId = this.chainId?.toLongOrNull() ?: chainId,
                                 accounts = accounts
                         )
                 )
@@ -364,7 +349,7 @@ open class WCClient(
         listeners.remove(listener)
     }
 
-    private fun resetState() {
+    fun resetState() {
         handshakeId = -1
         isConnected = false
         session = null

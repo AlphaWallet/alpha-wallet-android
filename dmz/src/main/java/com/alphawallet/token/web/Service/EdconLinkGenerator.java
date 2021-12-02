@@ -16,7 +16,7 @@ public class EdconLinkGenerator {
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = new BigInteger("0", 16);
-    private static final int chainId = 100;
+    private static final long chainId = 100;
 
     // Time todo put in right format & set each time
     private static final String date = "20200403090000+0300";

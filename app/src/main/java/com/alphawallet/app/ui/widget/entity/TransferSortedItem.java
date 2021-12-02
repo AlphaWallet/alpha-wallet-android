@@ -59,37 +59,25 @@ public class TransferSortedItem extends TimestampSortedItem<TokenTransferData> {
     @Override
     public boolean areContentsTheSame(SortedItem other)
     {
+        //allow event type to overwrite, messaging the adapter
         if (viewType == other.viewType)
         {
             return true; //don't overwrite
         }
-        else if (other.viewType == EventHolder.VIEW_TYPE) //allow event type to overwrite, messaging the adapter
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        else return other.viewType != EventHolder.VIEW_TYPE;
     }
 
     //Checks if the type is the same, if same type then overwrite is possible
     @Override
     public boolean areItemsTheSame(SortedItem other)
     {
+        //allow Event type to overwrite
         if (viewType == other.viewType)
         {
             TokenTransferData newTx = (TokenTransferData) other.value;
             return value.hash.equals(newTx.hash); //if same type, only overwrite if hash is same
         }
-        else if (other.viewType == EventHolder.VIEW_TYPE) //allow Event type to overwrite
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        else return other.viewType == EventHolder.VIEW_TYPE;
     }
 
     @Override

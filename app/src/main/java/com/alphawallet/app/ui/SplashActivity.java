@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -84,6 +85,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         //2. repeat after step 1 is complete. Are we importing a ticket?
         //      - yes - proceed with import
         //      - no - proceed to home activity
+
+        Log.d("seaborn", "" + wallets.length);
         if (wallets.length == 0)
         {
             splashViewModel.setDefaultBrowser();
@@ -100,6 +103,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
+            Log.d("seaborn", "" + wallets[0].address);
             handler.postDelayed(this, CustomViewSettings.startupDelay());
         }
     }

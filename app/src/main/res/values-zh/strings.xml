@@ -801,6 +801,7 @@
     <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
+    <string name="no_chart_data_available">No chart data available</string>
     <string name="wallet_total_change">%1$s (%2$.2f%%) 今天</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>

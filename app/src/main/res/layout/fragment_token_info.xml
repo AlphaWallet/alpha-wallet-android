@@ -17,11 +17,22 @@
             android:layout_height="match_parent"
             android:orientation="vertical" />
 
-        <ImageView
-            android:id="@+id/placeholder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_components_charts_graph_stable" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_components_charts_graph_stable" />
+
+            <com.alphawallet.app.ui.widget.entity.HistoryChart
+                android:id="@+id/history_chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
@@ -42,8 +53,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="@dimen/dp24"
             android:layout_marginStart="@dimen/dp8"
+            android:layout_marginTop="@dimen/dp24"
             android:layout_marginEnd="@dimen/dp8"
             android:background="@color/mercury" />
 

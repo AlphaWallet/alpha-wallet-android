@@ -624,7 +624,7 @@ public class TickerService
         ethTickers.clear();
     }
 
-    private static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>(){{
+    public static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>(){{
         put(MAINNET_ID, "ethereum");
         put(XDAI_ID, "xdai");
         put(BINANCE_MAIN_ID, "binance-smart-chain");

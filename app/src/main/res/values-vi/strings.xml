@@ -74,7 +74,7 @@
     <string name="action_more_details">Chi tiết</string>
     <string name="action_add_wallet">Thêm ví</string>
     <string name="action_add_token">Thêm loại tiền</string>
-    <string name="action_open_etherscan">Xem trên Etherscan</string>
+    <string name="action_open_etherscan">Xem trên Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly (Mua với thẻ tín dụng)</string>
@@ -608,6 +608,7 @@
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Đã xóa bộ nhớ cache của trình duyệt</string>
     <string name="toast_token_data_cleared">Token Data cleared</string>
+    <string name="token_data_being_cleared">Dữ liệu mã thông báo đang được xóa… Vui lòng đợi</string>
     <string name="your_wallets">Ví của bạn</string>
     <string name="action_copy">Sao chép</string>
     <string name="title_version_support_warning">Important Update</string>
@@ -728,7 +729,7 @@
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">Set Speed</string>
     <string name="gas_price_widget">Gas Price: %1$s</string>
-    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the gasnow.org live oracle and updates the gas prices every 15 seconds.</string>
+    <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the %1$s live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">Set Your Own</string>
     <string name="nonce_optional">Nonce (optional)</string>
     <string name="calc_gas_limit">Calculating Gas Limit</string>
@@ -777,7 +778,13 @@
     <string name="select_dappbrowser_network">Kết nối tới mạng</string>
     <string name="choose_network_preference">Tùy chọn mạng</string>
     <string name="please_select_at_least_one_network">Vui lòng chọn ít nhất một mạng.</string>
+    <string name="token_info_portfolio">Portfolio</string>
+    <string name="enter_target_price">Enter Target Price</string>
+    <string name="title_set_new_alert">Set New Alert</string>
+    <string name="action_save_alert">Save Alert</string>
+    <string name="alerts_will_appear_here">Alerts will appear here</string>
     <string name="token_text">Token</string>
+    <string name="buy_eth">Buy ETH</string>
     <string name="reload_token_data_desc">Reset all cached token data (eg recorded balance etc). AlphaWallet will re-load the current status of your wallet. Doesn\'t affect the keys or assets.</string>
     <string name="title_activity_add_custom_rpcnetwork">Add Custom RPC Network</string>
     <string name="hint_network_name">Tên mạng</string>
@@ -823,4 +830,26 @@
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Yêu cầu chuỗi chuyển đổi</string>
     <string name="no_chart_data_available">No chart data available</string>
+    <string name="wallet_total_change">%1$s (%2$.2f%%) Hôm nay</string>
+    <string name="title_wallets_summary">Wallets</string>
+    <string name="summary">Summary</string>
+    <string name="network_menu_item">Network: %1$s</string>
+    <string name="action_set_as_homepage">Set as Home Page</string>
+    <string name="action_networks">Mạng lưới</string>
+    <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="action_send_to_this_address">Send to this Address</string>
+    <string name="stay_updated">Stay Updated</string>
+    <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
+    <string name="hint_email_address">Email Address</string>
+    <string name="action_want_to_receive_email">I want to receive such emails</string>
+    <string name="email_is_invalid">Please provide valid email address</string>
+    <string name="github">Github (vấn đề báo cáo)</string>
+    <string name="chains_to_scan">Chains to scan</string>
+    <string name="action_view">View</string>
+    <string name="error_chainid_already_taken">Chain Id already taken</string>
+    <string name="status">Tình trạng</string>
+    <string name="connected_to">được kết nối với</string>
+    <string name="not_connected">Không được kết nối</string>
+    <string name="online">Trực tuyến</string>
+    <string name="summary_change_24h">%1$s (%2$s) Hôm nay</string>
 </resources>

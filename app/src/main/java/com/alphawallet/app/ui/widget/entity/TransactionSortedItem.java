@@ -82,19 +82,13 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     {
         try
         {
+            //allow both Event and Transfer to override
             if (viewType == other.viewType)
             {
                 TransactionMeta oldTx = (TransactionMeta) other.value;
                 return value.hash.equals(oldTx.hash);
             }
-            else if (other.viewType == EventHolder.VIEW_TYPE || other.viewType == TransferHolder.VIEW_TYPE) //allow both Event and Transfer to override
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            else return other.viewType == EventHolder.VIEW_TYPE || other.viewType == TransferHolder.VIEW_TYPE;
         }
         catch (Exception e)
         {

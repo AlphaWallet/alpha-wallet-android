@@ -58,7 +58,7 @@ public class Transaction implements Parcelable
     public final String gasUsed;
     public final String input;
     public final String error;
-    public final int chainId;
+    public final long chainId;
 
     public boolean isConstructor = false;
     public TransactionInput transactionInput = null;
@@ -114,7 +114,7 @@ public class Transaction implements Parcelable
 			String gasPrice,
 			String input,
 			String gasUsed,
-            int chainId,
+            long chainId,
             boolean isConstructor) {
         this.hash = hash;
         this.error = error;
@@ -132,7 +132,7 @@ public class Transaction implements Parcelable
 		this.isConstructor = isConstructor;
 	}
 
-	public Transaction(Web3Transaction tx, int chainId, String wallet)
+	public Transaction(Web3Transaction tx, long chainId, String wallet)
 	{
 		this.hash = null;
 		this.error = null;
@@ -150,7 +150,7 @@ public class Transaction implements Parcelable
 		this.isConstructor = tx.isConstructor();
 	}
 
-	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, int chainId, boolean isSuccess, long timeStamp)
+	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, long chainId, boolean isSuccess, long timeStamp)
 	{
 		// Get contract address if constructor
 		String contractAddress = ethTx.getCreates() != null ? ethTx.getCreates() : "";
@@ -189,7 +189,7 @@ public class Transaction implements Parcelable
 	}
 
 	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
-					   String value, String gas, String gasPrice, String input, String gasUsed, int chainId, String contractAddress)
+					   String value, String gas, String gasPrice, String input, String gasUsed, long chainId, String contractAddress)
 	{
 		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
 		{
@@ -227,7 +227,7 @@ public class Transaction implements Parcelable
 		gasPrice = in.readString();
 		input = in.readString();
 		gasUsed = in.readString();
-		chainId = in.readInt();
+		chainId = in.readLong();
 	}
 
 	public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
@@ -261,7 +261,7 @@ public class Transaction implements Parcelable
 		dest.writeString(gasPrice);
 		dest.writeString(input);
 		dest.writeString(gasUsed);
-		dest.writeInt(chainId);
+		dest.writeLong(chainId);
 	}
 
 	public boolean isRelated(String contractAddress, String walletAddress)
@@ -568,8 +568,7 @@ public class Transaction implements Parcelable
 		if ((transactionInput != null && transactionInput.functionData != null) && transactionInput.containsAddress(walletAddr)) return true;
 		else if (from.equalsIgnoreCase(walletAddr)) return true;
 		else if (to.equalsIgnoreCase(walletAddr)) return true;
-		else if (input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr.toLowerCase()))) return true;
-		else return false;
+		else return input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr.toLowerCase()));
 	}
 
 	public boolean isNFTSent(String walletAddress)
@@ -612,7 +611,7 @@ public class Transaction implements Parcelable
 	}
 
 	private String calculateContractAddress(String account, long nonce){
-		byte[] addressAsBytes = org.web3j.utils.Numeric.hexStringToByteArray(account);
+		byte[] addressAsBytes = Numeric.hexStringToByteArray(account);
 		byte[] calculatedAddressAsBytes =
 				Hash.sha3(RlpEncoder.encode(
 						new RlpList(
@@ -621,6 +620,6 @@ public class Transaction implements Parcelable
 
 		calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
 				12, calculatedAddressAsBytes.length);
-		return org.web3j.utils.Numeric.toHexString(calculatedAddressAsBytes);
+		return Numeric.toHexString(calculatedAddressAsBytes);
 	}
 }

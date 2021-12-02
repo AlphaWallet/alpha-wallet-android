@@ -1,41 +1,38 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.adapter.DiscoverDappsListAdapter;
 import com.alphawallet.app.util.DappBrowserUtils;
 
 import java.util.List;
 
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.DApp;
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
 
 
-public class DiscoverDappsFragment extends Fragment {
-    private DiscoverDappsListAdapter adapter;
-    private OnDappClickListener onDappClickListener;
-
-    void setCallbacks(OnDappClickListener listener) {
-        onDappClickListener = listener;
-    }
+public class DiscoverDappsFragment extends Fragment implements OnDappClickListener {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_discover_dapps, container, false);
-        adapter = new DiscoverDappsListAdapter(
+        DiscoverDappsListAdapter adapter = new DiscoverDappsListAdapter(
                 getData(),
-                onDappClickListener,
+                this,
                 this::onDappAdded,
                 this::onDappRemoved);
         RecyclerView list = view.findViewById(R.id.discover_dapps_list);
@@ -43,6 +40,14 @@ public class DiscoverDappsFragment extends Fragment {
         list.setLayoutManager(new LinearLayoutManager(getActivity()));
         list.setAdapter(adapter);
         return view;
+    }
+
+    @Override
+    public void onDappClick(DApp dapp)
+    {
+        Bundle result = new Bundle();
+        result.putParcelable(DAPP_CLICK, dapp);
+        getParentFragmentManager().setFragmentResult(DAPP_CLICK, result);
     }
 
     private void onDappAdded(DApp dapp) {
@@ -77,7 +82,7 @@ public class DiscoverDappsFragment extends Fragment {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
 
@@ -100,7 +105,7 @@ public class DiscoverDappsFragment extends Fragment {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         return dapps;

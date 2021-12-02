@@ -3,10 +3,12 @@ package com.alphawallet.app.repository;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.WalletPage;
 
 import java.util.Locale;
 
@@ -20,8 +22,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String LOCALE_KEY = "locale";
     private static final String BACKUP_WALLET_SHOWN = "backup_wallet_shown";
     private static final String FIND_WALLET_ADDRESS_SHOWN = "find_wallet_address_shown";
-    private static final String CURRENCY_CODE_KEY = "currency_locale";
-    private static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
+    public static final String CURRENCY_CODE_KEY = "currency_locale";
+    public static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
     public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
@@ -29,6 +31,14 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String SHOWN_WARNING = "shown_warning";
     public static final String PRICE_ALERTS = "price_alerts";
     private static final String SET_NETWORK_FILTERS = "set_filters";
+    private static final String SHOULD_SHOW_ROOT_WARNING = "should_show_root_warning";
+    private static final String UPDATE_WARNINGS = "update_warns";
+    private static final String UPDATE_ASKS = "update_asks";
+    private static final String INSTALL_TIME = "install_time";
+    public static final String DEVICE_LOCALE = "device_locale";
+    public static final String DEVICE_COUNTRY = "device_country";
+    public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
+    private static final String LAST_FRAGMENT_ID = "lastfrag_id";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -44,30 +54,39 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getString(CURRENT_ACCOUNT_ADDRESS_KEY, null);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setCurrentWalletAddress(String address) {
-        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).apply();
+        pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).commit(); //use commit as the value may be used immediately
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
-    public int getActiveBrowserNetwork() {
-        int selectedNetwork;
+    public long getActiveBrowserNetwork() {
+        long selectedNetwork;
         try
         {
-            selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            selectedNetwork = pref.getLong(DEFAULT_NETWORK_NAME_KEY, 0);
         }
-        catch (ClassCastException e) //previously we used string
+        catch (ClassCastException e) //previously we used Integer or String
         {
-            selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
-            setActiveBrowserNetwork(selectedNetwork);
+            try
+            {
+                selectedNetwork = pref.getInt(DEFAULT_NETWORK_NAME_KEY, 0);
+            }
+            catch (ClassCastException string)
+            {
+                selectedNetwork = EthereumNetworkRepository.getNetworkIdFromName(pref.getString(DEFAULT_NETWORK_NAME_KEY, ""));
+            }
+            pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, selectedNetwork).commit(); //commit as we need to update this immediately
         }
 
         return selectedNetwork;
     }
 
     @Override
-    public void setActiveBrowserNetwork(int networkId) {
-        pref.edit().putInt(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
+    public void setActiveBrowserNetwork(long networkId) {
+        pref.edit().putLong(DEFAULT_NETWORK_NAME_KEY, networkId).apply();
     }
 
     @Override
@@ -129,6 +148,11 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
+    public String getDefaultCurrencySymbol() {
+        return pref.getString(CURRENCY_SYMBOL_KEY, C.DEFAULT_CURRENCY_CODE);
+    }
+
+    @Override
     public String getUserPreferenceLocale()
     {
         return pref.getString(USER_LOCALE_PREF, "");
@@ -152,9 +176,10 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         return pref.getBoolean(FULL_SCREEN_STATE, false);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void setActiveMainnet(boolean state) {
-        pref.edit().putBoolean(ACTIVE_MAINNET, state).apply();
+        pref.edit().putBoolean(ACTIVE_MAINNET, state).commit(); //use commit
     }
 
     @Override
@@ -233,5 +258,87 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean getRateAppShown() {
         return pref.getBoolean(RATE_APP_SHOWN, false);
+    }
+
+    @Override
+    public boolean shouldShowZeroBalanceTokens() {
+        return pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false);
+    }
+
+    @Override
+    public void setShowZeroBalanceTokens(boolean shouldShow) {
+        pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, shouldShow).apply();
+    }
+
+    @Override
+    public boolean showShowRootWarning() {
+        return pref.getBoolean(SHOULD_SHOW_ROOT_WARNING, true);
+    }
+
+    @Override
+    public void setShowRootWarning(boolean shouldShow) {
+        pref.edit().putBoolean(SHOULD_SHOW_ROOT_WARNING, shouldShow).apply();
+    }
+
+    @Override
+    public int getUpdateWarningCount() {
+        return pref.getInt(UPDATE_WARNINGS, 0);
+    }
+
+    @Override
+    public void setUpdateWarningCount(int count) {
+        pref.edit().putInt(UPDATE_WARNINGS, count).apply();
+    }
+
+    @Override
+    public int getUpdateAsksCount() {
+        return pref.getInt(UPDATE_ASKS, 0);
+    }
+
+    @Override
+    public void setUpdateAsksCount(int count) {
+        pref.edit().putInt(UPDATE_ASKS, count).apply();
+    }
+
+    @Override
+    public void setInstallTime(long time) {
+        pref.edit().putLong(INSTALL_TIME, time).apply();
+    }
+
+    @Override
+    public long getInstallTime() {
+        return pref.getLong(INSTALL_TIME, 0);
+    }
+
+    @Override
+    public String getUniqueId() {
+        return pref.getString(C.PREF_UNIQUE_ID, "");
+    }
+
+    @Override
+    public void setUniqueId(String uuid) {
+        pref.edit().putString(C.PREF_UNIQUE_ID, uuid).apply();
+    }
+
+    @Override
+    public boolean isMarshMallowWarningShown() {
+        return pref.getBoolean(MARSHMALLOW_SUPPORT_WARNING, false);
+    }
+
+    @Override
+    public void setMarshMallowWarning(boolean shown) {
+        pref.edit().putBoolean(MARSHMALLOW_SUPPORT_WARNING, true).apply();
+    }
+
+    @Override
+    public void storeLastFragmentPage(int ordinal)
+    {
+        pref.edit().putInt(LAST_FRAGMENT_ID, ordinal).apply();
+    }
+
+    @Override
+    public int getLastFragmentPage()
+    {
+        return pref.getInt(LAST_FRAGMENT_ID, -1);
     }
 }

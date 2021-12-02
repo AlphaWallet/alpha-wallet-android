@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class TransactionLookup
 {
-    private static Map<TransactionType, Integer> typeMapping = new HashMap<>();
+    private static final Map<TransactionType, Integer> typeMapping = new HashMap<>();
 
     public static int typeToName(TransactionType type)
     {

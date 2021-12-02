@@ -2,10 +2,10 @@ package com.alphawallet.app.ui.widget.entity;
 
 public class NetworkItem {
     private String name;
-    private int chainId;
+    private long chainId;
     private boolean isSelected;
 
-    public NetworkItem(String name, int chainId, boolean isSelected) {
+    public NetworkItem(String name, long chainId, boolean isSelected) {
         this.name = name;
         this.chainId = chainId;
         this.isSelected = isSelected;
@@ -15,9 +15,9 @@ public class NetworkItem {
         return name;
     }
 
-    public int getChainId() { return chainId; }
+    public long getChainId() { return chainId; }
 
-    public void setName(String name, int chainId) {
+    public void setName(String name, long chainId) {
         this.name = name;
         this.chainId = chainId;
     }

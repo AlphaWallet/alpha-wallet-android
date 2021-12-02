@@ -70,7 +70,7 @@ public class SelectLocaleActivity extends BaseActivity {
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
-        private ArrayList<LocaleItem> dataSet;
+        private final ArrayList<LocaleItem> dataSet;
         private String selectedItemId;
 
         private void setSelectedItemId(String selectedItemId) {

@@ -166,7 +166,7 @@ public abstract class EventUtils
 
     public static EthFilter generateLogFilter(EventDefinition ev, Token originToken, List<BigInteger> tokenIds, AttributeInterface attrIf) throws Exception
     {
-        int chainId = ev.contract.addresses.keySet().iterator().next();
+        long chainId = ev.contract.addresses.keySet().iterator().next();
         String eventContractAddr = ev.contract.addresses.get(chainId).get(0);
 
         final Event resolverEvent = generateEventFunction(ev);
@@ -253,7 +253,7 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetBlockByHash(blockHash.trim(), false).send();
-                if (BuildConfig.DEBUG) System.out.println(txResult.getResult());
+                //if (BuildConfig.DEBUG) System.out.println("TS EVENT: " + txResult.getResult().getHash());
             }
             catch (IOException | NullPointerException e)
             {
@@ -272,7 +272,7 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetTransactionByHash(blockHash.trim()).send();
-                if (BuildConfig.DEBUG) System.out.println(txResult.getResult());
+                //if (BuildConfig.DEBUG) System.out.println("TS EVENT: " + txResult.getResult().getHash());
             }
             catch (IOException | NullPointerException e)
             {
@@ -290,7 +290,7 @@ public abstract class EventUtils
         String typeName = t.getTypeAsString();
         //strip numbers
         int i = typeName.length() - 1;
-        while (Character.isDigit(typeName.charAt(i))) { i--; }; //strip
+        while (Character.isDigit(typeName.charAt(i))) { i--; }//strip
         typeName = typeName.substring(0, i+1);
         byte[] val;
 

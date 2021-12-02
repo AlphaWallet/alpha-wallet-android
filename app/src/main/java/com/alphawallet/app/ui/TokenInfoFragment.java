@@ -81,7 +81,7 @@ public class TokenInfoFragment extends BaseFragment {
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(TokenInfoViewModel.class);
 
-            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             initTabLayout(view);

@@ -72,8 +72,8 @@ import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRES
 public class AppSiteController implements AttributeInterface
 {
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
-    private static Map<Integer, Map<String, File>> addresses;
-    private static Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
+    private static Map<Long, Map<String, File>> addresses;
+    private static Map<Long, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
     private static final String appleAssociationConfig = "{\n" +
             "  \"applinks\": {\n" +
             "    \"apps\": [],\n" +
@@ -278,7 +278,7 @@ public class AppSiteController implements AttributeInterface
         );
     }
 
-    private TokenDefinition getTokenDefinition(int chainId, String contractAddress) throws IOException, SAXException, NoHandlerFoundException
+    private TokenDefinition getTokenDefinition(long chainId, String contractAddress) throws IOException, SAXException, NoHandlerFoundException
     {
         File xml = null;
         TokenDefinition definition = null;
@@ -373,7 +373,7 @@ public class AppSiteController implements AttributeInterface
     }
 
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
-        addresses = new HashMap<Integer, Map<String, File>>();
+        addresses = new HashMap<Long, Map<String, File>>();
         SpringApplication.run(AppSiteController.class, args);
         try (Stream<Path> dirStream = Files.walk(repoDir)) {
             dirStream.filter(path -> path.toString().toLowerCase().endsWith(".tsml"))
@@ -422,7 +422,7 @@ public class AppSiteController implements AttributeInterface
         }
     }
 
-    private static void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
+    private static void addContractsToNetwork(Long network, Map<String, File> newTokenDescriptionAddresses)
     {
         Map<String, File> existingDefinitions = addresses.get(network);
         if (existingDefinitions == null) existingDefinitions = new HashMap<>();

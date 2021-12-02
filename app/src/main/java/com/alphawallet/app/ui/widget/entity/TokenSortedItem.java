@@ -18,6 +18,23 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
     @Override
     public int compare(SortedItem other) {
         if (debugging) System.out.println("DEBUG: Compare: " + weight + " " + other.weight);
+
+
+        if (other.value instanceof TokenCardMeta) {
+            // if tokens has different group - sort by group
+            if (value.group != ((TokenCardMeta)other.value).group) {
+                return value.group.compareTo(((TokenCardMeta)other.value).group);
+            }
+        } else if (other instanceof HeaderItem) {
+            // if header is from the other group - sort by group
+            if (value.group != ((HeaderItem)other).group) {
+                return value.group.compareTo(((HeaderItem)other).group);
+            } else {
+                // header is from the same group - should be the very first item
+                return 1;
+            }
+        }
+
         return weight - other.weight;
     }
 
@@ -29,7 +46,8 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
             //if (!oldToken.tokenId.equalsIgnoreCase(newToken.tokenId)) return false;
             if (debugging) System.out.println("DEBUG: Contents: " + weight + " " + newItem.weight + " Balance: " + value.balance + " " + newToken.balance);
             if (weight != newItem.weight) return false;
-            else return value.balance.equals(newToken.balance) && value.type.ordinal() == newToken.type.ordinal();
+            else return value.balance.equals(newToken.balance) && value.type.ordinal() == newToken.type.ordinal()
+                    && value.lastUpdate == newToken.lastUpdate;
         }
         else
         {

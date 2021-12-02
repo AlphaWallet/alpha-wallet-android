@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import io.reactivex.Single;
+import io.realm.Realm;
 
 public class AdvancedSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
@@ -65,8 +66,10 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
         return currencyRepository.getCurrencyList();
     }
 
-    public void updateCurrency(String currencyCode){
+    public Single<Boolean> updateCurrency(String currencyCode){
         currencyRepository.setDefaultCurrency(currencyCode);
+        //delete tickers from realm
+        return transactionsService.wipeTickerData();
     }
 
     public boolean createDirectory() {
@@ -112,5 +115,10 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public Single<Boolean> resetTokenData()
     {
         return transactionsService.wipeDataForWallet();
+    }
+
+    public void stopChainActivity()
+    {
+        transactionsService.stopActivity();
     }
 }

@@ -55,7 +55,7 @@ public class Erc1155InfoFragment extends BaseFragment {
             viewModel = new ViewModelProvider(this, viewModelFactory)
                     .get(Erc1155InfoViewModel.class);
 
-            int chainId = getArguments().getInt(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);

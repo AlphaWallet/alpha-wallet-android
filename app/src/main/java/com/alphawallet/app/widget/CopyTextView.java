@@ -20,7 +20,7 @@ public class CopyTextView extends LinearLayout {
 
     public static final String KEY_ADDRESS = "key_address";
 
-    private Context context;
+    private final Context context;
     private ImageView copy;
     private TextView text;
     private LinearLayout layout;

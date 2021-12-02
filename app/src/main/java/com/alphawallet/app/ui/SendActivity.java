@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,11 +29,10 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
-import com.alphawallet.app.ui.zxing.FullScannerFragment;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
@@ -110,7 +110,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 .get(SendViewModel.class);
 
         String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        int currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
+        long currentChain = getIntent().getLongExtra(C.EXTRA_NETWORKID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = viewModel.getToken(currentChain, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
@@ -134,7 +134,20 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private boolean checkTokenValidity(int currentChain, String contractAddress)
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
+
+        if (result != null && (result.type == EIP681Type.PAYMENT || result.type == EIP681Type.TRANSFER))
+        {
+            handleClick("", R.string.action_next);
+        }
+    }
+
+    private boolean checkTokenValidity(long currentChain, String contractAddress)
     {
         if (token == null || token.tokenInfo == null)
         {
@@ -209,9 +222,9 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         else if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
-                case FullScannerFragment.SUCCESS:
+                case Activity.RESULT_OK:
                     if (data != null) {
-                        String qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                         //if barcode is still null, ensure we don't GPF
                         if (qrCode == null)
@@ -272,12 +285,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                         }
                     }
                     break;
-                case QRScanningActivity.DENY_PERMISSION:
+                case QRScanner.DENY_PERMISSION:
                     showCameraDenied();
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
+                                                "Code: " + resultCode
                     ));
                     break;
             }
@@ -411,7 +424,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private void showChainChangeDialog(int chainId)
+    private void showChainChangeDialog(long chainId)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
@@ -642,9 +655,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
-
-            // successful transaction - try to show rate the app
-            viewModel.tryToShowRateAppDialog(this);
 
             finish();
         }

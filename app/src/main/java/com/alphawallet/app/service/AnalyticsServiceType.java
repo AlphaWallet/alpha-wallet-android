@@ -1,5 +1,7 @@
 package com.alphawallet.app.service;
 
+import com.alphawallet.app.entity.ServiceErrorException;
+
 public interface AnalyticsServiceType<T> {
 
     void track(String eventName);
@@ -9,4 +11,6 @@ public interface AnalyticsServiceType<T> {
     void flush();
 
     void identify(String uuid);
+
+    void recordException(ServiceErrorException e);
 }

@@ -18,11 +18,12 @@ import com.google.android.play.core.tasks.Task;
 public class RateApp {
     // should be shown on 5th run or after the first transaction (afterTransaction == true)
     static public void showRateTheApp(Activity context, PreferenceRepositoryType preferenceRepository, boolean afterTransaction) {
+        if (!Utils.verifyInstallerId(context)) return;
         if ((preferenceRepository.getLaunchCount() == 6 || afterTransaction) && !preferenceRepository.getRateAppShown()) {
             View contentView = LayoutInflater.from(context).inflate(R.layout.layout_rate_dialog, null, false);
             final RatingBar ratingBar = contentView.findViewById(R.id.rating_bar);
 
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context, R.style.AWLightAlertDialog)
                     .setTitle(context.getString(R.string.rate_title, context.getString(R.string.app_name)))
                     .setView(contentView)
                     .setMessage(context.getString(R.string.rate_prompt, context.getString(R.string.app_name)))

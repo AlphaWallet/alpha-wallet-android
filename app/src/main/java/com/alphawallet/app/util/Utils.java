@@ -1,20 +1,31 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
 import android.content.Context;
+import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
-import android.view.View;
 import android.webkit.URLUtil;
 
 import androidx.annotation.RawRes;
-import androidx.core.content.ContextCompat;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -36,8 +47,10 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,31 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class Utils {
 
@@ -190,68 +178,6 @@ public class Utils {
         }
     }
 
-    public static int getChainColour(int chainId)
-    {
-        switch (chainId)
-        {
-            case MAINNET_ID:
-                return R.color.mainnet;
-            case CLASSIC_ID:
-                return R.color.classic;
-            case POA_ID:
-                return R.color.poa;
-            case KOVAN_ID:
-                return R.color.kovan;
-            case ROPSTEN_ID:
-                return R.color.ropsten;
-            case SOKOL_ID:
-                return R.color.sokol;
-            case RINKEBY_ID:
-                return R.color.rinkeby;
-            case GOERLI_ID:
-                return R.color.goerli;
-            case XDAI_ID:
-                return R.color.xdai;
-            case ARTIS_SIGMA1_ID:
-                return R.color.artis_sigma1;
-            case ARTIS_TAU1_ID:
-                return R.color.artis_tau1;
-            case BINANCE_MAIN_ID:
-                return R.color.binance_main;
-            case BINANCE_TEST_ID:
-                return R.color.binance_test;
-            case HECO_ID:
-                return R.color.heco_main;
-            case HECO_TEST_ID:
-                return R.color.heco_test;
-            case FANTOM_ID:
-                return R.color.fantom_main;
-            case FANTOM_TEST_ID:
-                return R.color.fantom_test;
-            case AVALANCHE_ID:
-                return R.color.avalanche_main;
-            case FUJI_TEST_ID:
-                return R.color.avalanche_test;
-            case MATIC_ID:
-                return R.color.polygon_main;
-            case MATIC_TEST_ID:
-                return R.color.polygon_test;
-            case OPTIMISTIC_MAIN_ID:
-                return R.color.optimistic_main;
-            case OPTIMISTIC_TEST_ID:
-                return R.color.optimistic_test;
-            case CRONOS_TEST_ID:
-                return R.color.cronos_test;
-            default:
-                return R.color.mine;
-        }
-    }
-
-    public static void setChainColour(View view, int chainId)
-    {
-        view.getBackground().setTint(ContextCompat.getColor(view.getContext(), getChainColour(chainId)));
-    }
-
     /**
      * This is here rather than in the Signable class because Signable is cross platform not Android specific
      *
@@ -326,7 +252,7 @@ public class Utils {
 
     public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
     {
-        String symbol = token != null ? token.getSymbolOrShortName() : "";
+        String symbol = token != null ? token.getShortSymbol() : "";
         boolean needsBreak = false;
 
         if ((symbol.length() + operationName.length()) > 16 && symbol.length() > 0)
@@ -371,7 +297,7 @@ public class Utils {
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
-            json = new String(buffer, "UTF-8");
+            json = new String(buffer, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
@@ -390,7 +316,7 @@ public class Utils {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
         return false;
     }
@@ -400,11 +326,11 @@ public class Utils {
         return address != null && address.length() > 0 && WalletUtils.isValidAddress(address);
     }
 
-    public static String intArrayToString(Integer[] values)
+    public static String longArrayToString(Long[] values)
     {
         StringBuilder store = new StringBuilder();
         boolean firstValue = true;
-        for (int network : values)
+        for (long network : values)
         {
             if (!firstValue) store.append(",");
             store.append(network);
@@ -414,17 +340,17 @@ public class Utils {
         return store.toString();
     }
 
-    public static List<Integer> intListToArray(String list)
+    public static List<Long> longListToArray(String list)
     {
-        List<Integer> idList = new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
         //convert to array
         String[] split = list.split(",");
         for (String s : split)
         {
-            Integer value;
+            Long value;
             try
             {
-                value = Integer.valueOf(s);
+                value = Long.valueOf(s);
                 idList.add(value);
             }
             catch (NumberFormatException e)
@@ -519,7 +445,7 @@ public class Utils {
         {
             if (!keepZeros && id == 0) continue;
             if (!first)sb.append(",");
-            sb.append(String.valueOf(id));
+            sb.append(id);
             first = false;
         }
 
@@ -590,8 +516,7 @@ public class Utils {
             String result = "";
             String firstSix = address.substring(0, 6);
             String lastSix = address.substring(address.length() - 4);
-            StringBuilder formatted = new StringBuilder(result);
-            return formatted.append(firstSix).append("...").append(lastSix).toString().toLowerCase();
+            return result + firstSix + "..." + lastSix;
         }
         else
         {
@@ -836,47 +761,33 @@ public class Utils {
         return "";
     }
 
+    private static final Map<Long, String> twChainNames = new HashMap<Long, String>() {
+        {
+            put(CLASSIC_ID, "classic");
+            put(XDAI_ID, "xdai");
+            put(POA_ID, "poa");
+            put(BINANCE_MAIN_ID, "smartchain");
+            put(AVALANCHE_ID, "avalanche");
+            put(OPTIMISTIC_MAIN_ID, "optimism");
+            put(MATIC_ID, "polygon");
+            put(MAINNET_ID, "ethereum");
+        }
+    };
+
     @NotNull
-    public static String getTokenImageUrl(int chainId, String address)
+    public static String getTWTokenImageUrl(long chainId, String address)
     {
         String tURL = TRUST_ICON_REPO;
-        String repoChain;
-        switch (chainId)
-        {
-            case CLASSIC_ID:
-                repoChain = "classic";
-                break;
-            case XDAI_ID:
-                repoChain = "xdai";
-                break;
-            case POA_ID:
-                repoChain = "poa";
-                break;
-            case BINANCE_MAIN_ID:
-                repoChain = "binance";
-                break;
-            case AVALANCHE_ID:
-                repoChain = "avalanche";
-                break;
-            case MATIC_ID:
-                repoChain = "polygon";
-                break;
-            case KOVAN_ID:
-            case RINKEBY_ID:
-            case SOKOL_ID:
-            case ROPSTEN_ID:
-            case ARTIS_SIGMA1_ID:
-            case ARTIS_TAU1_ID:
-                tURL = ALPHAWALLET_ICON_REPO;
-                repoChain = "";
-                break;
-            default:
-                repoChain = "ethereum";
-                break;
-        }
+        String repoChain = twChainNames.get(chainId);
+        if (repoChain == null) repoChain = "ethereum";
         tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
-
         return tURL;
+    }
+
+    @NotNull
+    public static String getTokenImageUrl(String address)
+    {
+        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
     }
 
     public static String getAWIconRepo(String address)
@@ -926,5 +837,45 @@ public class Utils {
     public static long timeUntil(long eventInMillis)
     {
         return eventInMillis - System.currentTimeMillis();
+    }
+
+    //TODO: detect various App Library installs and re-direct appropriately
+    public static boolean verifyInstallerId(Context context) {
+        try
+        {
+            PackageManager packageManager = context.getPackageManager();
+            String installingPackageName;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                final InstallSourceInfo installer = packageManager.getInstallSourceInfo(context.getPackageName());
+                installingPackageName = installer.getInstallingPackageName();
+            }
+            else
+            {
+                installingPackageName = packageManager.getInstallerPackageName(context.getPackageName());
+            }
+            // A list with valid installers package name
+            List<String> validInstallers = new ArrayList<>(Arrays.asList("com.android.vending", "com.google.android.feedback"));
+
+            // true if your app has been downloaded from Play Store
+            return installingPackageName != null && validInstallers.contains(installingPackageName);
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            return false;
+        }
+    }
+
+    public static boolean isTransactionHash(String input)
+    {
+        if (input == null || (input.length() != 66 && input.length() != 64)) return false;
+        String cleanInput = Numeric.cleanHexPrefix(input);
+
+        try {
+            Numeric.toBigIntNoPrefix(cleanInput);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return cleanInput.length() == 64;
     }
 }

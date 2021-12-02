@@ -24,17 +24,17 @@ public class WalletAddEthereumChainObject
     public String chainId; //this is a hex number with "0x" prefix. If it is without "0x", process it as dec
     public String[] rpcUrls;
 
-    public int getChainId()
+    public long getChainId()
     {
         try
         {
             if (Numeric.containsHexPrefix(chainId))
             {
-                return Numeric.toBigInt(chainId).intValue();
+                return Numeric.toBigInt(chainId).longValue();
             }
             else
             {
-                return new BigInteger(chainId).intValue();
+                return new BigInteger(chainId).longValue();
             }
         }
         catch (NumberFormatException e)

@@ -32,7 +32,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.SellDetailModelFactory;
@@ -69,7 +69,7 @@ import static com.alphawallet.token.tools.Convert.getEthString;
  * Created by James on 21/02/2018.
  */
 
-public class SellDetailActivity extends BaseActivity implements OnTokenClickListener, Runnable, SignAuthenticationCallback
+public class SellDetailActivity extends BaseActivity implements TokensAdapterCallback, Runnable, SignAuthenticationCallback
 {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
     public static final int SET_A_PRICE = 1;
@@ -126,7 +126,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         toolbar();
         setTitle(getString(R.string.empty));
 
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
@@ -482,8 +482,8 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
 
-        String qty = String.valueOf(quantity) + " " + unit + "\n" +
-                String.valueOf(getEthString(sellPriceValue)) + " " + getString(R.string.eth_per_ticket, currencySymbol) + "\n" +
+        String qty = quantity + " " + unit + "\n" +
+                getEthString(sellPriceValue) + " " + getString(R.string.eth_per_ticket, currencySymbol) + "\n" +
                 getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 

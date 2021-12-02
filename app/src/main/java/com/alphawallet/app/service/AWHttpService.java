@@ -9,18 +9,21 @@ package com.alphawallet.app.service;
  *
  */
 
+import static okhttp3.ConnectionSpec.CLEARTEXT;
+
 import com.google.gson.JsonParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.protocol.exceptions.ClientConnectionException;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +39,6 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
-
-import static okhttp3.ConnectionSpec.CLEARTEXT;
 
 /** HTTP implementation of our services API. */
 public class AWHttpService extends HttpService
@@ -94,14 +95,14 @@ public class AWHttpService extends HttpService
 
     private static final Logger log = LoggerFactory.getLogger(org.web3j.protocol.http.HttpService.class);
 
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
 
     private final String url;
     private final String secondaryUrl;
 
     private final boolean includeRawResponse;
 
-    private HashMap<String, String> headers = new HashMap<>();
+    private final HashMap<String, String> headers = new HashMap<>();
 
     public AWHttpService(String url, String secondaryUrl, OkHttpClient httpClient, boolean includeRawResponses) {
         super(includeRawResponses);
@@ -184,15 +185,15 @@ public class AWHttpService extends HttpService
     private InputStream processNodeResponse(Response response, String request, boolean useSecondaryNode) throws IOException
     {
         processHeaders(response.headers());
-        ResponseBody responseBody = response.body();
         if (response.isSuccessful())
         {
-            if (responseBody != null)
+            if (response.body() != null)
             {
-                return buildInputStream(responseBody);
+                return buildInputStream(response);
             }
             else
             {
+                //build fake response 0x
                 return buildNullInputStream();
             }
         }
@@ -203,7 +204,8 @@ public class AWHttpService extends HttpService
         else
         {
             int code = response.code();
-            String text = responseBody == null ? "N/A" : responseBody.string();
+            String text = response.body() == null ? "N/A" : response.body().string();
+            response.close();
 
             throw new SocketTimeoutException("Invalid response received: " + code + "; " + text);
         }
@@ -213,19 +215,13 @@ public class AWHttpService extends HttpService
         // Default implementation is empty
     }
 
-    private InputStream buildNullInputStream()
-    {
-        return new InputStream()
-        {
-            @Override
-            public int read()
-            {
-                return 0;
-            }
-        };
+    private InputStream buildNullInputStream() {
+        String jsonData = "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x\"}";
+        return new ByteArrayInputStream(jsonData.getBytes(StandardCharsets.UTF_8));
     }
 
-    private InputStream buildInputStream(ResponseBody responseBody) throws IOException {
+    private InputStream buildInputStream(Response response) throws IOException {
+        ResponseBody responseBody = response.body();
         InputStream inputStream = responseBody.byteStream();
 
         if (includeRawResponse) {

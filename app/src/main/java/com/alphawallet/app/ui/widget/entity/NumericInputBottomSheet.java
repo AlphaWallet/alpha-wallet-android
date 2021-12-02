@@ -26,7 +26,7 @@ public class NumericInputBottomSheet extends ConstraintLayout
     private final Button buttonDown;
     private final ImageView cancel;
     private AmountReadyCallback amountReady;
-    private boolean gotFocus;
+    private final boolean gotFocus;
     private int activePosition = -1;
 
     public NumericInputBottomSheet(Context context, @Nullable AttributeSet attrs)

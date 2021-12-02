@@ -3,6 +3,6 @@ package com.alphawallet.token.entity;
 public class ChainSpec
 {
     public String name;
-    public int chainId;
+    public long chainId;
     public String urlPrefix;
 }

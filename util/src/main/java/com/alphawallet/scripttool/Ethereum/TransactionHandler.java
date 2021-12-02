@@ -32,7 +32,7 @@ public class TransactionHandler
 {
     private static Web3j mWeb3;
 
-    public TransactionHandler(int networkId)
+    public TransactionHandler(long networkId)
     {
         String nodeURL = EthereumNetworkBase.getNetworkByChain(networkId).rpcServerUrl;
         OkHttpClient.Builder builder = new OkHttpClient.Builder();

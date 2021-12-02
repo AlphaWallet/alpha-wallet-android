@@ -66,6 +66,9 @@ public class AWalletBottomNavigationView extends LinearLayout {
         walletLabel.setOnClickListener(v -> selectItem(WALLET));
         settingsLabel.setOnClickListener(v -> selectItem(SETTINGS));
         activityLabel.setOnClickListener(v -> selectItem(ACTIVITY));
+
+        // set wallet fragment selected on start
+        setSelectedItem(WALLET);
     }
 
     public void setListener(OnBottomNavigationItemSelectedListener listener) {

@@ -99,6 +99,10 @@
 	<color name="optimistic_main">#FF0420</color>
 	<color name="optimistic_test">#B2C6D8</color>
 	<color name="cronos_test">#002D74</color>
+	<color name="arbitrum_main">#28A0F0</color>
+	<color name="arbitrum_test">#40678c</color>
+	<color name="palm_main">#83488c</color>
+	<color name="palm_test">#93589c</color>
 
 	<!-- Fiji Colour Palette -->
 	<color name="black">#000000</color>
@@ -163,4 +167,6 @@
 	<color name="grey_8d">#8d8d8d</color>
     <color name="greyf3">#f3f4f5</color>
 	<color name="logo_grey">#F2F4F7</color>
+	<color name="danger_10_percent">#19ff3b30</color>
+	<color name="green_10_percent">#1975b943</color>
 </resources>

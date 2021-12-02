@@ -111,7 +111,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
 
         String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getToken(chainId, address);
 
         if (token == null)
@@ -168,7 +168,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
         // Fetch attributes local to this action and add them to the injected token properties
@@ -220,7 +220,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void onError(Throwable throwable)
     {
-        throwable.printStackTrace();
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
         displayFunction(attrs.toString());
     }
 
@@ -543,7 +543,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         handler.postDelayed(closer, 1000);
     }
 
-    private Runnable closer = new Runnable()
+    private final Runnable closer = new Runnable()
     {
         @Override
         public void run()
@@ -552,7 +552,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     };
 
-    private Runnable progress = new Runnable()
+    private final Runnable progress = new Runnable()
     {
         @Override
         public void run()
@@ -561,7 +561,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     };
 
-    private Runnable progressOff = new Runnable()
+    private final Runnable progressOff = new Runnable()
     {
         @Override
         public void run()

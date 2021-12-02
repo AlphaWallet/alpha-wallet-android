@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/layout_search_tokens"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dp8"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginBottom="@dimen/dp8"
+        android:gravity="center_vertical"
+        android:background="@drawable/background_round_search"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="@dimen/dp24"
+            android:layout_height="@dimen/dp24"
+            android:layout_marginStart="@dimen/dp12"
+            android:src="@drawable/ic_search_small"/>
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dp8"
+            android:inputType="textFilter"
+            android:hint="@string/search_for_tokens"
+            android:background="@null"
+            android:layout_marginEnd="@dimen/dp16"
+            android:maxLines="1"
+            android:maxLength="20"
+            android:imeOptions="actionSearch"
+            android:textColor="@color/dove"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17"/>
+
+    </LinearLayout>
+</FrameLayout>

@@ -20,7 +20,7 @@ public class ENSInteract
         this.tokenRepository = tokenRepository;
     }
 
-    public Single<String> checkENSAddress(int chainId, String name)
+    public Single<String> checkENSAddress(long chainId, String name)
     {
         if (!ENSHandler.canBeENSName(name)) return Single.fromCallable(() -> "0");
         return tokenRepository.resolveENS(chainId, name)

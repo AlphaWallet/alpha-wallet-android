@@ -2,6 +2,8 @@ package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -46,6 +48,7 @@ import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+import static android.text.Html.FROM_HTML_MODE_COMPACT;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
 public class Token
@@ -169,7 +172,7 @@ public class Token
         if (isBad()) return TokensService.UNKNOWN_CONTRACT;
         String name = tokenInfo.name == null ? "" : tokenInfo.name;
         String symbol = (tokenInfo.symbol == null || tokenInfo.symbol.length() == 0) ? "" : " (" + tokenInfo.symbol.toUpperCase() + ")";
-        return name + symbol;
+        return sanitiseString(name + symbol);
     }
 
     public String getFullName(AssetDefinitionService assetDefinition, int count)
@@ -181,6 +184,34 @@ public class Token
             return sanitiseString(name + symbol);
         } else {
             return sanitiseString(getFullName());
+        }
+    }
+
+    public String getTSName(AssetDefinitionService assetDefinition, int count) {
+        String name = assetDefinition != null ? assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count) : null;
+        if (name != null) {
+            return sanitiseString(name);
+        }
+        return null;
+    }
+
+    public String getName(AssetDefinitionService assetDefinition, int count)
+    {
+        //override contract name with TS defined name
+        String name = assetDefinition != null ? assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count) : null;
+        if (name != null) {
+            return sanitiseString(name);
+        } else {
+            return getName();
+        }
+    }
+
+    public String getName()
+    {
+        if (TextUtils.isEmpty(tokenInfo.name) || tokenInfo.name.length() < tokenInfo.symbol.length()) {
+            return sanitiseString(!TextUtils.isEmpty(tokenInfo.symbol) ? tokenInfo.symbol : "");
+        } else {
+            return sanitiseString(!TextUtils.isEmpty(tokenInfo.name) ? tokenInfo.name : "");
         }
     }
 
@@ -199,31 +230,53 @@ public class Token
             }
         }
 
-        return sb.toString();
+        str = sb.toString();
+
+        //Don't convert to Html if name contains any kind of link; protect user from potential link spam
+        if (str.toLowerCase().contains("<a href="))
+        {
+            return str;
+        }
+        else
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
+            }
+            else
+            {
+                //noinspection deprecation
+                return Html.fromHtml(str).toString();
+            }
+        }
     }
 
-    public String getShortSymbol()
+    private String getShortestNameOrSymbol()
     {
-        return Utils.getShortSymbol(getSymbol());
+        int symbolLength = !TextUtils.isEmpty(tokenInfo.symbol) ? tokenInfo.symbol.length() : 0;
+        int nameLength = !TextUtils.isEmpty(tokenInfo.name) ? tokenInfo.name.length() : 0;
+        if (symbolLength == 0 && nameLength == 0)
+        {
+            return "";
+        }
+        else if (nameLength > 0 && (symbolLength > nameLength || symbolLength == 0))
+        {
+            return tokenInfo.name;
+        }
+        else
+        {
+            return tokenInfo.symbol;
+        }
     }
 
     public String getSymbol()
     {
-        if (tokenInfo.symbol == null) return "";
-        else return tokenInfo.symbol.toUpperCase();
+        return getShortestNameOrSymbol();
     }
 
-    public String getSymbolOrShortName()
+    public String getShortSymbol()
     {
-        String shortSymbol = getShortSymbol();
-        if (TextUtils.isEmpty(shortSymbol))
-        {
-            return Utils.getShortSymbol(tokenInfo.name);
-        }
-        else
-        {
-            return shortSymbol;
-        }
+        return Utils.getShortSymbol(getShortestNameOrSymbol());
     }
 
     public void clickReact(BaseViewModel viewModel, Activity context)
@@ -257,9 +310,7 @@ public class Token
     public Map<BigInteger, NFTAsset> getTokenAssets() {
         return null;
     }
-    public Map<BigInteger, NFTAsset> getTokenAssetMap(BigInteger tokenId) {
-        return null;
-    }
+
     public Map<BigInteger, NFTAsset> getCollectionMap() { return null; }
 
     public List<BigInteger> ticketIdStringToIndexList(String userList)
@@ -290,6 +341,11 @@ public class Token
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
+    }
+
+    public boolean checkBalanceChange(Token oldToken)
+    {
+        return !getFullBalance().equals(oldToken.getFullBalance()) || !getFullName().equals(oldToken.getFullName());
     }
 
     public void setIsEthereum()
@@ -577,7 +633,7 @@ public class Token
     public boolean hasGroupedTransfer() { return false; } //Can the NFT token's transfer function handle multiple tokens?
     public boolean checkSelectionValidity(List<BigInteger> selection) //check a selection of ID's for Transfer/Redeem/Sell
     {
-        return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
+        return selection != null && selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
     }
 
     public String getShortName() {
@@ -887,28 +943,29 @@ public class Token
     {
         return new Function("tokenURI",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private Function getTokenURI2(BigInteger tokenId)
     {
         return new Function("uri",
                 Arrays.asList(new Uint256(tokenId)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private String loadMetaData(String tokenURI)
     {
+        if (TextUtils.isEmpty(tokenURI)) return "";
+
         setupClient();
 
-        try
-        {
-            Request request = new Request.Builder()
+        Request request = new Request.Builder()
                     .url(Utils.parseIPFS(tokenURI))
                     .get()
                     .build();
 
-            okhttp3.Response response = client.newCall(request).execute();
+        try (okhttp3.Response response = client.newCall(request).execute())
+        {
             return response.body().string();
         }
         catch (Exception e)
@@ -930,5 +987,13 @@ public class Token
                     .retryOnConnectionFailure(true)
                     .build();
         }
+    }
+
+    public boolean checkInfoRequiresUpdate(RealmToken realmToken)
+    {
+        if (TextUtils.isEmpty(realmToken.getName()) || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(realmToken.getName()))) { return true; }
+        if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
+        if (realmToken.getContractType() != contractType) { return true; }
+        return realmToken.getDecimals() != tokenInfo.decimals;
     }
 }

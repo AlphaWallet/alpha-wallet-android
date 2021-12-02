@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,11 +31,11 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         context = ctx;
     }
 
-    public static String getNodeURLByNetworkId(int networkId) {
+    public static String getNodeURLByNetworkId(long networkId) {
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
     }
 
-    public boolean getIsPopularToken(int chain, String address)
+    public boolean getIsPopularToken(long chainId, String address)
     {
         return popularTokens.containsKey(address.toLowerCase());
     }
@@ -44,7 +45,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
      * ContractResult import android (therefore preventing their use
      * in non-Android projects) or introducing a new trivial
      * interface/class */
-    public List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters)
+    public List<ContractLocator> getAllKnownContracts(List<Long> networkFilters)
     {
         if (popularTokens.size() == 0)
         {
@@ -55,7 +56,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     }
 
     //Note: There is an issue with this method - if a contract is the same address on XDAI and MAINNET_ID it needs to be refactored
-    private void buildPopularTokenMap(List<Integer> networkFilters)
+    private void buildPopularTokenMap(List<Long> networkFilters)
     {
         KnownContract knownContract = readContracts();
         if (knownContract == null) return;
@@ -89,7 +90,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
             is.read(buffer);
             is.close();
 
-            jsonString = new String(buffer, "UTF-8");
+            jsonString = new String(buffer, StandardCharsets.UTF_8);
         }
         catch (IOException e) {
             return null;

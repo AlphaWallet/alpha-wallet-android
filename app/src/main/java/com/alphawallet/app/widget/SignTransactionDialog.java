@@ -1,5 +1,10 @@
 package com.alphawallet.app.widget;
 
+import static android.content.Context.KEYGUARD_SERVICE;
+import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG;
+import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK;
+import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -20,11 +25,6 @@ import com.alphawallet.app.entity.Operation;
 
 import java.security.ProviderException;
 import java.util.concurrent.Executor;
-
-import static android.content.Context.KEYGUARD_SERVICE;
-import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG;
-import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK;
-import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
 /**
  * Created by James on 7/06/2019.
@@ -122,14 +122,16 @@ public class SignTransactionDialog
         final BiometricPrompt.PromptInfo.Builder promptBuilder = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle(activity.getString(R.string.unlock_private_key));
 
+        if (!hasStrongBiometric && !hasDeviceCredential)
+        {
+            //device should be unlocked, drop through
+            showAuthenticationScreen(activity, authCallback, callbackId);
+            return;
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // 30+
         {
             promptBuilder.setAllowedAuthenticators((hasStrongBiometric ? BIOMETRIC_STRONG : 0) | (hasDeviceCredential ? DEVICE_CREDENTIAL : 0));
-
-            if (!hasDeviceCredential)
-            {
-                promptBuilder.setNegativeButtonText(activity.getString(R.string.action_cancel));
-            }
         }
         else
         {
@@ -143,6 +145,11 @@ public class SignTransactionDialog
                 promptBuilder.setAllowedAuthenticators(BIOMETRIC_STRONG)
                         .setNegativeButtonText(activity.getString(R.string.use_pin));
             }
+        }
+
+        if (!hasDeviceCredential)
+        {
+            promptBuilder.setNegativeButtonText(activity.getString(R.string.action_cancel));
         }
 
         try

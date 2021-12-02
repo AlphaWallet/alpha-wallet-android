@@ -9,11 +9,11 @@ public class KnownContract {
 
     @SerializedName("MainNet")
     @Expose
-    private List<UnknownToken> mainNet = null;
+    private final List<UnknownToken> mainNet = null;
 
     @SerializedName("xDAI")
     @Expose
-    private List<UnknownToken> xDAI = null;
+    private final List<UnknownToken> xDAI = null;
 
     public List<UnknownToken> getMainNet() {
         return mainNet;

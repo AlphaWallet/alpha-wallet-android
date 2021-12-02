@@ -3,6 +3,7 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -26,6 +27,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.widget.entity.NumericInput;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +67,7 @@ public class InputAmount extends LinearLayout
     private AssetDefinitionService assetService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private AmountReadyCallback amountReadyCallback;
     private boolean amountReady;
 
@@ -146,8 +148,17 @@ public class InputAmount extends LinearLayout
     {
         if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
         if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
-        if (realm != null) realm.removeAllChangeListeners();
-        if (tickerRealm != null) tickerRealm.removeAllChangeListeners();
+        if (realm != null)
+        {
+            realm.removeAllChangeListeners();
+            if (!realm.isClosed()) realm.close();
+        }
+        if (tickerRealm != null)
+        {
+            tickerRealm.removeAllChangeListeners();
+            if (!tickerRealm.isClosed()) tickerRealm.close();
+        }
+
         realmTickerUpdate = null;
         realmTokenUpdate = null;
     }
@@ -156,6 +167,7 @@ public class InputAmount extends LinearLayout
     {
         exactAmount = BigDecimal.ZERO;
         editText.setText(ethAmount);
+        handler.post(setCursor);
     }
 
     public void showError(boolean showError, int customError)
@@ -167,7 +179,7 @@ public class InputAmount extends LinearLayout
         }
         else
         {
-            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getSymbolOrShortName()));
+            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getShortSymbol()));
         }
 
         if (showError)
@@ -200,15 +212,22 @@ public class InputAmount extends LinearLayout
      */
     private void bindDataSource()
     {
+        if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
+
         realmTokenUpdate = realm.where(RealmToken.class)
                 .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), Case.INSENSITIVE)
                 .findFirstAsync();
 
+        //if the token doesn't exist yet, first ask the TokensService to pick it up
+        tokensService.storeToken(token);
+
         realmTokenUpdate.addChangeListener(realmToken -> {
-            //load token & update balance
             RealmToken rt = (RealmToken)realmToken;
-            token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
-            updateAvailableBalance();
+            if (rt.isValid())
+            {
+                token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
+                updateAvailableBalance();
+            }
         });
     }
 
@@ -287,6 +306,7 @@ public class InputAmount extends LinearLayout
     private void startTickerListener()
     {
         if (getTickerQuery() == null) return;
+        if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
         realmTickerUpdate = getTickerQuery().findFirstAsync();
         realmTickerUpdate.addChangeListener(realmTicker -> {
             updateAvailableBalance();
@@ -365,7 +385,6 @@ public class InputAmount extends LinearLayout
             {
                 RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
                             .equalTo("chainId", token.tokenInfo.chainId)
-                            .sort("timeStamp", Sort.DESCENDING)
                             .findFirst();
 
                 if (gasSpread != null && gasSpread.getGasPrice().standard.compareTo(BigInteger.ZERO) > 0)
@@ -387,6 +406,7 @@ public class InputAmount extends LinearLayout
                 exactAmount = token.balance;
                 updateAllFundsAmount();
             }
+            handler.post(setCursor);
         });
     }
 
@@ -414,6 +434,15 @@ public class InputAmount extends LinearLayout
                 amountReadyCallback.amountReady(exactAmount, new BigDecimal(gasPriceEstimate));
                 amountReady = false;
             }
+        }
+    };
+
+    private final Runnable setCursor = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            editText.setSelection(editText.getText().length());
         }
     };
 

@@ -4,13 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -22,7 +22,6 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -34,9 +33,9 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -103,9 +102,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void findWallet() {
-            disposable = genericWalletInteract
-                    .find()
-                    .subscribe(this::onDefaultWallet, this::onError);
+        disposable = genericWalletInteract
+                .find()
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public NetworkInfo getActiveNetwork()
@@ -120,24 +119,23 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultWallet(final Wallet wallet) {
         defaultWallet.setValue(wallet);
-        //get the chain balance
-        startBalanceUpdate();
     }
 
     private void checkBalance(final Wallet wallet)
     {
-        if (activeNetwork.getValue() != null && wallet != null)
+        final NetworkInfo info = getActiveNetwork();
+        if (info != null && wallet != null)
         {
-            disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), activeNetwork.getValue().chainId)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(Schedulers.io())
-                            .subscribe(w -> { }, e -> { });
+            disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), info.chainId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(w -> { }, e -> { });
         }
     }
 
     public void signMessage(Signable message, DAppFunction dAppFunction) {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
-                activeNetwork.getValue().chainId)
+                getActiveNetwork().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
@@ -149,6 +147,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
                 .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
     }
 
+    public void setHomePage(Context context, String url) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putString(C.DAPP_HOMEPAGE_KEY, url).apply();
+    }
+
+    public String getHomePage(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_HOMEPAGE_KEY, null);
+    }
+
     public void addToMyDapps(Context context, String title, String url) {
         Intent intent = new Intent(context, AddEditDappActivity.class);
         DApp dapp = new DApp(title, url);
@@ -158,11 +165,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void share(Context context, String url) {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND);
-            intent.putExtra(Intent.EXTRA_TEXT, url);
-            intent.setType("text/plain");
-            context.startActivity(intent);
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, url);
+        intent.setType("text/plain");
+        context.startActivity(intent);
     }
 
     public void onClearBrowserCacheClicked(Context context) {
@@ -173,7 +180,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void startScan(Activity activity) {
-        Intent intent = new Intent(activity, QRScanningActivity.class);
+        Intent intent = new Intent(activity, QRScanner.class);
         activity.startActivityForResult(intent, HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE);
     }
 
@@ -181,14 +188,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return DappBrowserUtils.getDappsList(context);
     }
 
-    public void setNetwork(int chainId)
+    public void setNetwork(long chainId)
     {
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
         if (info != null)
         {
             ethereumNetworkRepository.setActiveBrowserNetwork(info);
             gasService.startGasPriceCycle(chainId);
-            activeNetwork.postValue(info);
         }
     }
 
@@ -238,7 +244,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         ctx.startActivity(intent);
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, int chainId, SendTransactionInterface callback)
+    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
     {
         if (finalTx.isConstructor())
         {
@@ -268,7 +274,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
     }
 
-    public void updateGasPrice(int chainId)
+    public void updateGasPrice(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
     }
@@ -308,17 +314,17 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return tokensService;
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, int chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
     }
 
-    public String getNetworkNodeRPC(int chainId)
+    public String getNetworkNodeRPC(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
     }
 
-    public NetworkInfo getNetworkInfo(int chainId)
+    public NetworkInfo getNetworkInfo(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId);
     }
@@ -331,7 +337,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void addCustomChain(WalletAddEthereumChainObject chainObject) {
         this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
-                chainObject.nativeCurrency.symbol, "", "", false, -1);
+                chainObject.nativeCurrency.symbol, "", "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())
                 .subscribeOn(Schedulers.io())
@@ -349,5 +355,27 @@ public class DappBrowserViewModel extends BaseViewModel  {
         }
 
         return "";
+    }
+
+    public boolean isMainNetsSelected()
+    {
+        return ethereumNetworkRepository.isMainNetSelected();
+    }
+
+    public void addNetworkToFilters(NetworkInfo info)
+    {
+        List<Long> filters = ethereumNetworkRepository.getFilterNetworkList();
+        if (!filters.contains(info.chainId))
+        {
+            filters.add(info.chainId);
+            ethereumNetworkRepository.setFilterNetworkList(filters.toArray(new Long[0]));
+        }
+
+        tokensService.setupFilter(true);
+    }
+
+    public void setMainNetsSelected(boolean isMainNet)
+    {
+        ethereumNetworkRepository.setActiveMainnet(isMainNet);
     }
 }

@@ -1,5 +1,8 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -8,7 +11,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
@@ -35,15 +37,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import wallet.core.jni.Hash;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 public class HistoryChart extends View {
 
@@ -97,48 +90,19 @@ public class HistoryChart extends View {
         }
 
         // Mapping created by examining CoinGecko API output empirically
-        boolean platformMatches(String platform, int chainId) {
-            switch (chainId) {
-                case MAINNET_ID:
-                    return platform.equals("ethereum");
-                case CLASSIC_ID:
-                    return platform.equals("ethereum-classic");
-                case XDAI_ID:
-                    return platform.equals("xdai");
-                case BINANCE_MAIN_ID:
-                    return platform.equals("binance-smart-chain");
-                case AVALANCHE_ID:
-                    return platform.equals("avalanche");
-                case MATIC_ID:
-                    return platform.equals("polygon-pos");
-                case FANTOM_ID:
-                    return platform.equals("fantom");
-                //TODO: case ARBITRUM_ID: return platform == "arbitrum-one"
-                default:
-                    return false;
+        boolean platformMatches(String platform, long chainId) {
+            if (coinGeckoChainIdToAPIName.containsKey(chainId))
+            {
+                return coinGeckoChainIdToAPIName.get(chainId).equals(platform);
+            }
+            else
+            {
+                return false;
             }
         }
 
-        boolean isServerSupported(int chainId) {
-            switch (chainId) {
-                case MAINNET_ID:
-                    return true;
-                case CLASSIC_ID:
-                    return true;
-                case XDAI_ID:
-                    return true;
-                case BINANCE_MAIN_ID:
-                    return true;
-                case AVALANCHE_ID:
-                    return true;
-                case MATIC_ID:
-                    return true;
-                case FANTOM_ID:
-                    return true;
-                //TODO: case ARBITRUM_ID: return true
-                default:
-                    return false;
-            }
+        boolean isServerSupported(long chainId) {
+            return coinGeckoChainIdToAPIName.containsKey(chainId);
         }
 
         static Single<List<CoinGeckoToken>> fetchList() {

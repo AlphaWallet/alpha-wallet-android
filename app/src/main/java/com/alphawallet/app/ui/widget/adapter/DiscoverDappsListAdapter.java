@@ -31,11 +31,11 @@ import com.bumptech.glide.request.target.Target;
 
 public class DiscoverDappsListAdapter extends RecyclerView.Adapter<DiscoverDappsListAdapter.ViewHolder> {
     private List<DApp> data;
-    private OnDappClickListener listener;
-    private OnDappAddedListener onDappAddedListener;
-    private OnDappRemovedListener onDappRemovedListener;
+    private final OnDappClickListener listener;
+    private final OnDappAddedListener onDappAddedListener;
+    private final OnDappRemovedListener onDappRemovedListener;
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView name, description, remove, add;
 
@@ -119,7 +119,7 @@ public class DiscoverDappsListAdapter extends RecyclerView.Adapter<DiscoverDapps
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             return false;

@@ -1,14 +1,21 @@
 package com.alphawallet.app.widget;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+
 import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
@@ -20,27 +27,29 @@ import android.widget.TextView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.BoxStatus;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
-import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
 
-import static android.content.Context.CLIPBOARD_SERVICE;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by JB on 28/10/2020.
  */
-public class InputAddress extends RelativeLayout implements ItemClickListener, ENSCallback
+public class InputAddress extends RelativeLayout implements ItemClickListener, ENSCallback, TextWatcher
 {
     private final AutoCompleteTextView editText;
     private final TextView labelText;
     private final TextView pasteItem;
     private final TextView statusText;
-    private final ProgressBar ensCheckSpinner;
+    private final UserAvatar avatar;
     private final ImageButton scanQrIcon;
     private final RelativeLayout boxLayout;
     private final TextView errorText;
@@ -53,7 +62,9 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private final ENSHandler ensHandler;
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
-    private int chainOverride;
+    private long chainOverride;
+    private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
+    private final float standardTextSize;
 
     public InputAddress(Context context, AttributeSet attrs)
     {
@@ -66,10 +77,12 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         editText = findViewById(R.id.edit_text);
         pasteItem = findViewById(R.id.text_paste);
         statusText = findViewById(R.id.status_text);
-        ensCheckSpinner = findViewById(R.id.ens_fetch_progress);
         scanQrIcon = findViewById(R.id.img_scan_qr);
         boxLayout = findViewById(R.id.box_layout);
         errorText = findViewById(R.id.error_text);
+        avatar = findViewById(R.id.avatar);
+        editText.addTextChangedListener(this);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
 
         if (handleENS)
         {
@@ -96,6 +109,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         setViews();
         setImeOptions();
         chainOverride = 0;
+        standardTextSize = editText.getTextSize();
+        avatar.resetBinding();
     }
 
     private void getAttrs(Context context, AttributeSet attrs)
@@ -158,7 +173,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             //QR Scanner
             scanQrIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(context, QRScanningActivity.class);
+                Intent intent = new Intent(context, QRScanner.class);
                 intent.putExtra(C.EXTRA_CHAIN_ID, chainOverride);
                 ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
             });
@@ -201,6 +216,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             statusText.setVisibility(View.GONE);
             statusText.setText(R.string.empty);
+            avatar.setVisibility(View.GONE);
+            avatar.resetBinding();
             if (errorText.getVisibility() == View.VISIBLE) //cancel error
             {
                 setBoxColour(BoxStatus.SELECTED);
@@ -216,6 +233,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public void setError(CharSequence errorTxt)
     {
         statusText.setVisibility(View.GONE);
+        avatar.setVisibility(View.GONE);
+        avatar.resetBinding();
         setBoxColour(BoxStatus.ERROR);
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(errorTxt);
@@ -225,11 +244,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         if (waiting)
         {
-            ensCheckSpinner.setVisibility(View.VISIBLE);
+            avatar.setWaiting();
         }
         else
         {
-            ensCheckSpinner.setVisibility(View.GONE);
+            avatar.finishWaiting();
         }
     }
 
@@ -268,10 +287,27 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         errorText.setVisibility(View.GONE);
         setWaitingSpinner(false);
+        bindAvatar(address, ens);
         if (addressReadyCallback != null)
         {
             addressReadyCallback.resolvedAddress(address, ens);
+            addressReadyCallback.addressValid(true);
         }
+    }
+
+    @Override
+    public void ENSName(String name)
+    {
+        //start searching the avatar
+        bindAvatar(ZERO_ADDRESS, name);
+    }
+
+    private void bindAvatar(String address, String ensName)
+    {
+        avatar.setVisibility(View.VISIBLE);
+        Wallet temp = new Wallet(address);
+        temp.ENSname = ensName;
+        avatar.bindAndFind(temp);
     }
 
     @Override
@@ -281,6 +317,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         if (addressReadyCallback != null)
         {
             addressReadyCallback.addressReady(getInputAddress(), getENS());
+            addressReadyCallback.addressValid(true);
         }
         else
         {
@@ -367,7 +404,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         return statusText.getText().toString();
     }
 
-    public void setChainOverrideForWalletConnect(int chainId)
+    public void setChainOverrideForWalletConnect(long chainId)
     {
         chainOverride = chainId;
     }
@@ -400,11 +437,6 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         displayCheckingDialog(false);
     }
 
-    public float getTextSize()
-    {
-        return editText.getTextSize();
-    }
-
     public AutoCompleteTextView getInputView()
     {
         return editText;
@@ -413,5 +445,42 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public int getInputLength()
     {
         return editText.getText().length();
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after)
+    {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count)
+    {
+        setStatus(null);
+        float ts = editText.getTextSize();
+        int amount = getInputLength();
+        if (amount > 30 && ts == standardTextSize && !noCam)
+        {
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
+        }
+        else if (amount <= 30 && ts < standardTextSize)
+        {
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize);
+        }
+    }
+
+    @Override
+    public void afterTextChanged(Editable s)
+    {
+        if (addressReadyCallback == null) return;
+
+        final Matcher addressMatch = findAddress.matcher(s.toString());
+        addressReadyCallback.addressValid(addressMatch.find());
+
+        setStatus(null);
+        if (ensHandler != null && !TextUtils.isEmpty(getInputText()))
+        {
+            ensHandler.checkAddress();
+        }
     }
 }

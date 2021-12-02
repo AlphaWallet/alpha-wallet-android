@@ -142,7 +142,7 @@ public class BackupKeyViewModel extends BaseViewModel {
     {
         disposable = Completable.fromAction(() ->
                 keyService.getMnemonic(wallet, activity, callback)) //computation thread to give UI a chance to complete all tasks
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe();
     }

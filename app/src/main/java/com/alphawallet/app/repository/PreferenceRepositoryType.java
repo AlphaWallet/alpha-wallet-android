@@ -7,9 +7,9 @@ public interface PreferenceRepositoryType {
 
     void setCurrentWalletAddress(String address);
 
-    int getActiveBrowserNetwork();
+    long getActiveBrowserNetwork();
 
-    void setActiveBrowserNetwork(int networkId);
+    void setActiveBrowserNetwork(long networkId);
 
     String getNetworkFilterList();
 
@@ -32,6 +32,8 @@ public interface PreferenceRepositoryType {
     String getDefaultCurrency();
 
     void setDefaultCurrency(CurrencyItem currency);
+
+    String getDefaultCurrencySymbol();
 
     String getUserPreferenceLocale();
 
@@ -64,4 +66,28 @@ public interface PreferenceRepositoryType {
 
     void setRateAppShown();
     boolean getRateAppShown();
+
+    void setShowZeroBalanceTokens(boolean shouldShow);
+    boolean shouldShowZeroBalanceTokens();
+
+    boolean showShowRootWarning();
+    void setShowRootWarning(boolean shouldShow);
+
+    int getUpdateWarningCount();
+    void setUpdateWarningCount(int count);
+
+    int getUpdateAsksCount();
+    void setUpdateAsksCount(int count);
+
+    long getInstallTime();
+    void setInstallTime(long time);
+
+    String getUniqueId();
+    void setUniqueId(String uuid);
+
+    boolean isMarshMallowWarningShown();
+    void setMarshMallowWarning(boolean shown);
+
+    void storeLastFragmentPage(int ordinal);
+    int getLastFragmentPage();
 }

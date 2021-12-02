@@ -26,10 +26,10 @@ public class RealmTokenScriptData extends RealmObject
     private String viewList; //CSV list of event views //TODO: replace with RealmMap when available
     private boolean hasEvents; //TokenScript has events
 
-    public int getChainId()
+    public long getChainId()
     {
         String chainId = instanceKey.split("-")[1];
-        if (Character.isDigit(chainId.charAt(0))) return Integer.parseInt(chainId);
+        if (Character.isDigit(chainId.charAt(0))) return Long.parseLong(chainId);
         else return MAINNET_ID;
     }
 

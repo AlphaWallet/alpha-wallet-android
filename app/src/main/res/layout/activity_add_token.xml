@@ -3,16 +3,18 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_network_switch_toolbar" />
+    <include
+        layout="@layout/layout_app_bar" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="?android:attr/actionBarSize"
         android:layout_marginTop="?android:attr/actionBarSize"
+        android:layout_marginBottom="?android:attr/actionBarSize"
         android:background="@drawable/background_card">
 
         <LinearLayout
@@ -24,34 +26,22 @@
             android:paddingLeft="15dp"
             android:paddingRight="15dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/title_add_token"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_address_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                custom:ens="false"
                 custom:hint="@string/contract_address"
                 custom:label="@string/contract_address"
-                custom:show_header="false"
-                custom:ens="false"
-                android:layout_marginBottom="15dp" />
+                custom:show_header="false" />
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_symbol"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
-                custom:label="@string/hint_contract_symbol"/>
+                custom:label="@string/hint_contract_symbol" />
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_decimal"
@@ -77,51 +67,57 @@
                 custom:label="@string/hint_contract_type" />
 
             <LinearLayout
-                android:id="@+id/layoutTicket"
-                android:layout_width="match_parent"
+                android:id="@+id/layout_progress_counter"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dp15"
+                android:visibility="gone"
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/normal_margin">
+                    android:layout_marginEnd="@dimen/dp15"
+                    android:text="@string/chains_to_scan"
+                    android:textSize="@dimen/sp16" />
 
-                    <EditText
-                        android:id="@+id/textViewVenue"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/hint_contract_venue"
-                        android:inputType="textNoSuggestions" />
-                </com.google.android.material.textfield.TextInputLayout>
+                <TextView
+                    android:id="@+id/text_check_counter"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/blue_circle"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp18"
+                    tools:text="1" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/normal_margin">
-
-                    <EditText
-                        android:id="@+id/textViewDate"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/hint_contract_date"
-                        android:inputType="textNoSuggestions" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/normal_margin">
-
-                    <EditText
-                        android:id="@+id/textViewPrice"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/hint_contract_price"
-                        android:inputType="textNoSuggestions" />
-                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_chain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dp15"
+                android:visibility="gone"
+                android:orientation="horizontal">
+
+                <com.alphawallet.app.widget.TokenIcon
+                    android:id="@+id/token_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"/>
+
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/chain_name"
+                    android:layout_marginStart="@dimen/dp8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
@@ -138,7 +134,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginTop="?android:attr/actionBarSize"
         android:background="@color/transparent"
-        android:gravity="top|right"
+        android:gravity="top|end"
         android:padding="5dp"
         android:visibility="gone">
 

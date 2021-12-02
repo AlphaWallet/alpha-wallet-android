@@ -7,11 +7,13 @@ import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
 
@@ -30,7 +32,9 @@ class AccountsManageModule {
 			HomeRouter homeRouter,
 			FindDefaultNetworkInteract findDefaultNetworkInteract,
 			KeyService keyService,
-			TokensService tokensService,
+			EthereumNetworkRepositoryType ethereumNetworkRepository,
+			TokenRepositoryType tokenRepository,
+			TickerService tickerService,
 			AssetDefinitionService assetDefinitionService,
 			Context context)
 	{
@@ -41,7 +45,9 @@ class AccountsManageModule {
 				homeRouter,
 				findDefaultNetworkInteract,
 				keyService,
-				tokensService,
+				ethereumNetworkRepository,
+				tokenRepository,
+				tickerService,
 				assetDefinitionService,
 				context);
 	}

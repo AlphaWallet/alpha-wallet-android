@@ -42,11 +42,13 @@ public class Ticket extends Token
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
+        balance = balanceArray != null ? BigDecimal.valueOf(balanceArray.size()) : BigDecimal.ZERO;
     }
 
     public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
+        balance = BigDecimal.valueOf(balanceArray.size());
     }
 
     @Override

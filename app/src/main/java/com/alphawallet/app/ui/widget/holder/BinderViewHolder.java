@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 
 public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 	public BinderViewHolder(int resId, ViewGroup parent) {
@@ -43,9 +43,9 @@ public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 		return getContext().getString(stringResId, args);
 	}
 
-	public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) { }
+	public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) { }
 
 	public void setFromTokenView() { }
 
-	public void onDestroyView() { };
+	public void onDestroyView() { }
 }

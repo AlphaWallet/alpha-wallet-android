@@ -1,8 +1,6 @@
 package com.alphawallet.app.ui;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -12,33 +10,28 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AddressMode;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
@@ -62,9 +55,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_MODE = "mode";
     public static final String OVERRIDE_DEFAULT = "override";
-    public static final int MODE_ADDRESS = 100;
-    public static final int MODE_POS = 101;
-    public static final int MODE_CONTRACT = 102;
 
     @Inject
     MyAddressViewModelFactory myAddressViewModelFactory;
@@ -79,12 +69,9 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private TextView address;
     private LinearLayout layoutInputAmount;
     private LinearLayout selectAddress;
-    private TextView currentNetwork;
-    private RelativeLayout selectNetworkLayout;
-    private View networkIcon;
     private NetworkInfo networkInfo;
-    private int currentMode = MODE_ADDRESS;
-    private int overrideNetwork;
+    private AddressMode currentMode = AddressMode.MODE_ADDRESS;
+    private long overrideNetwork;
     private int screenWidth;
     private CopyTextView copyAddress;
     private CopyTextView copyWalletName;
@@ -112,8 +99,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         }
         else if (intent != null)
         {
-            int mode = intent.getIntExtra(KEY_MODE, MODE_ADDRESS);
-            if (mode == MODE_POS)
+            AddressMode mode = AddressMode.values()[intent.getIntExtra(KEY_MODE, AddressMode.MODE_ADDRESS.ordinal())];
+            if (mode == AddressMode.MODE_POS)
             {
                 showPointOfSaleMode();
             }
@@ -127,15 +114,11 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViews() {
         toolbar();
         titleView = findViewById(R.id.title_my_address);
-        currentNetwork = findViewById(R.id.current_network);
-        selectNetworkLayout = findViewById(R.id.select_network_layout);
-        if (selectNetworkLayout != null) selectNetworkLayout.setOnClickListener(v -> selectNetwork());
         layoutInputAmount = findViewById(R.id.layout_define_request);
         selectAddress = findViewById(R.id.layout_select_address);
         address =  findViewById(R.id.address);
         qrImageView = findViewById(R.id.qr_image);
         selectAddress = findViewById(R.id.layout_select_address);
-        networkIcon = findViewById(R.id.network_icon);
         qrImageView.setBackgroundResource(R.color.white);
         ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
@@ -145,12 +128,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViewModel() {
         viewModel = new ViewModelProvider(this, myAddressViewModelFactory)
                 .get(MyAddressViewModel.class);
-    }
-
-    private void setNetworkUi(NetworkInfo networkInfo)
-    {
-        currentNetwork.setText(networkInfo.name);
-        Utils.setChainColour(networkIcon, networkInfo.chainId);
     }
 
     @Override
@@ -177,23 +154,33 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         if (CustomViewSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
-        //only pay when token null, eth or erc20
-        if (token != null && token.isNonFungible() || currentMode == MODE_POS)// || EthereumNetworkRepository.isPriorityToken(token)) //Currently only allow request for native chain currency, can get here via routes where token is not set.
+
+        switch (currentMode)
         {
-            menu.findItem(R.id.action_receive_payment)
-                    .setVisible(false);
-        }
-        //if dev mode, and token is not ethereum show contract
-        boolean devMode = (checkWritePermission() && EthereumNetworkRepository.extraChains() == null);
-        if (!devMode || token == null || token.isEthereum() || currentMode == MODE_CONTRACT)
-        {        //remove contract address
-            menu.findItem(R.id.action_show_contract)
-                    .setVisible(false);
+            case MODE_ADDRESS:
+                menu.findItem(R.id.action_my_address)
+                        .setVisible(false);
+                menu.findItem(R.id.action_networks)
+                        .setVisible(false);
+                break;
+            case MODE_POS:
+                menu.findItem(R.id.action_my_address)
+                        .setVisible(false);
+                menu.findItem(R.id.action_show_contract)
+                        .setVisible(false);
+                break;
+            case MODE_CONTRACT:
+                menu.findItem(R.id.action_show_contract)
+                        .setVisible(false);
+                menu.findItem(R.id.action_networks)
+                        .setVisible(false);
+                break;
         }
 
-        if (currentMode == MODE_ADDRESS)
+        //Only show contract if we've come from a token and the token is not base chain
+        if (token == null || token.isEthereum())
         {
-            menu.findItem(R.id.action_my_address)
+            menu.findItem(R.id.action_show_contract)
                     .setVisible(false);
         }
 
@@ -203,17 +190,16 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_receive_payment)
-        {
-            showPointOfSaleMode();
-        }
-        else if (item.getItemId() == R.id.action_show_contract)
+        if (item.getItemId() == R.id.action_show_contract)
         {
             showContract();
         }
         else if (item.getItemId() == R.id.action_my_address)
         {
             showAddress();
+        }
+        else if (item.getItemId() == R.id.action_networks) {
+            selectNetwork();
         }
 
         return super.onOptionsItemSelected(item);
@@ -223,25 +209,26 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         setContentView(R.layout.activity_eip681);
         initViews();
-        getInfo();
-        //Generate QR link for receive payment.
-        //Initially just generate simple payment.
-        //need ticker so user can see how much $USD the value is
-        //get token ticker
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
         titleView.setVisibility(View.VISIBLE);
         displayAddress = Keys.toChecksumAddress(wallet.address);
         networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
-        if (token == null) token = viewModel.getTokenService().getToken(networkInfo.chainId, wallet.address);
-        currentMode = MODE_POS;
+        currentMode = AddressMode.MODE_POS;
         address.setVisibility(View.GONE);
         selectAddress.setVisibility(View.GONE);
         layoutInputAmount.setVisibility(View.VISIBLE);
+
         amountInput = findViewById(R.id.input_amount);
-        amountInput.setupToken(token, null, viewModel.getTokenService(), this);
+        setupPOSMode(networkInfo);
+    }
+
+    private void setupPOSMode(NetworkInfo info)
+    {
+        if (token == null) token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        amountInput.setAmount("");
         updateCryptoAmount(BigDecimal.ZERO);
-        setNetworkUi(networkInfo);
     }
 
     private void showAddress()
@@ -263,7 +250,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         displayAddress = Keys.toChecksumAddress(wallet.address);
         setTitle(getString(R.string.my_wallet_address));
         copyAddress.setText(displayAddress);
-        currentMode = MODE_ADDRESS;
+        currentMode = AddressMode.MODE_ADDRESS;
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }
@@ -275,7 +262,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         if(TextUtils.isEmpty(displayName))
         {
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), getApplicationContext())
-                    .resolveEnsName(displayAddress)
+                    .reverseResolveEns(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();
@@ -305,7 +292,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         copyAddress = findViewById(R.id.copy_address);
         copyAddress.setVisibility(View.VISIBLE);
 
-        currentMode = MODE_CONTRACT;
+        currentMode = AddressMode.MODE_CONTRACT;
         displayAddress = Keys.toChecksumAddress(token.getAddress());
         setTitle(getString(R.string.contract_address));
         copyAddress.setText(displayAddress);
@@ -334,17 +321,15 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             result -> {
                 if (result.getResultCode() == RESULT_OK)
                 {
-                    int networkId = result.getData().getIntExtra(C.EXTRA_CHAIN_ID, -1);
+                    long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, -1);
                     NetworkInfo info = viewModel.getNetworkByChain(networkId);
                     if (info != null)
                     {
+                        networkInfo = info;
                         getInfo();
-                        Intent intent = getIntent();
-                        intent.putExtra(KEY_MODE, MODE_POS);
-                        intent.putExtra(C.Key.WALLET, wallet);
-                        intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
-                        finish();
-                        startActivity(intent);
+                        token = null;
+                        overrideNetwork = networkId;
+                        setupPOSMode(info);
                     }
                 }
     });
@@ -370,7 +355,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             }
             else
             {
-                amountInput.setupToken(token, null, viewModel.getTokenService(), this);
+                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
             }
         }
     }
@@ -379,21 +364,16 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         if (viewModel == null) initViewModel();
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        int fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
-        overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
+        long fallBackChainId = token != null ? token.tokenInfo.chainId : MAINNET_ID;
+        overrideNetwork = getIntent().getLongExtra(OVERRIDE_DEFAULT, fallBackChainId);
 
         if (wallet == null)
         {
             //have no address. Can only quit the activity
             finish();
         }
-    }
-
-    private boolean checkWritePermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override

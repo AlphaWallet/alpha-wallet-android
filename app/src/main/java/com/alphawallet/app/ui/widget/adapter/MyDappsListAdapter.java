@@ -25,11 +25,11 @@ import com.alphawallet.app.ui.widget.OnDappRemovedListener;
 
 public class MyDappsListAdapter extends RecyclerView.Adapter<MyDappsListAdapter.ViewHolder> {
     private List<DApp> data;
-    private OnDappClickListener listener;
-    private OnDappRemovedListener onDappRemovedListener;
-    private OnDappEditedListener onDappEditedListener;
+    private final OnDappClickListener listener;
+    private final OnDappRemovedListener onDappRemovedListener;
+    private final OnDappEditedListener onDappEditedListener;
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView name, url, remove, edit;
 

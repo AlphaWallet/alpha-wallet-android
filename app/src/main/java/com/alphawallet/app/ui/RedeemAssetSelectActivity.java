@@ -16,7 +16,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
@@ -43,7 +43,7 @@ import static com.alphawallet.app.C.Key.TICKET_RANGE;
 /**
  * This is where we select indices to redeem
  */
-public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenClickListener
+public class RedeemAssetSelectActivity extends BaseActivity implements TokensAdapterCallback
 {
     @Inject
     protected RedeemAssetSelectViewModelFactory viewModelFactory;
@@ -71,7 +71,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         viewModel = new ViewModelProvider(this, viewModelFactory)
                 .get(RedeemAssetSelectViewModel.class);
 
-        int chainId = getIntent().getIntExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         setContentView(R.layout.activity_redeem_asset);
@@ -135,12 +135,14 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final int action_next = R.id.action_next;
+        final int action_redeem = R.id.action_redeem;
         switch (item.getItemId()) {
-            case R.id.action_next: {
+            case action_next: {
                 onNext();
             }
             break;
-            case R.id.action_redeem: {
+            case action_redeem: {
                 onRedeem();
             }
             break;

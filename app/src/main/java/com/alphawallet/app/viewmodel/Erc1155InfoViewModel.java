@@ -72,11 +72,6 @@ public class Erc1155InfoViewModel extends BaseViewModel {
         }
     }
 
-    public Realm getRealmInstance(Wallet wallet)
-    {
-        return tokensService.getRealmInstance(wallet);
-    }
-
     public void checkTokenScriptValidity(Token token)
     {
         disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)

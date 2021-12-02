@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.web3j.exceptions.MessageDecodingException;
@@ -29,7 +30,6 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -117,6 +117,8 @@ public class TransactionsService
 
     public void resumeFocus()
     {
+        if (!Utils.isAddressValid(tokensService.getCurrentAddress())) return;
+
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed()
             || pendingTransactionCheckCycle == null || pendingTransactionCheckCycle.isDisposed()
             || tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())

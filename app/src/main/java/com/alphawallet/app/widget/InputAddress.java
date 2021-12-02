@@ -50,7 +50,6 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private final TextView pasteItem;
     private final TextView statusText;
     private final UserAvatar avatar;
-    private final ProgressBar ensCheckSpinner;
     private final ImageButton scanQrIcon;
     private final RelativeLayout boxLayout;
     private final TextView errorText;
@@ -78,7 +77,6 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         editText = findViewById(R.id.edit_text);
         pasteItem = findViewById(R.id.text_paste);
         statusText = findViewById(R.id.status_text);
-        ensCheckSpinner = findViewById(R.id.ens_fetch_progress);
         scanQrIcon = findViewById(R.id.img_scan_qr);
         boxLayout = findViewById(R.id.box_layout);
         errorText = findViewById(R.id.error_text);
@@ -246,11 +244,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         if (waiting)
         {
-            ensCheckSpinner.setVisibility(View.VISIBLE);
+            avatar.setWaiting();
         }
         else
         {
-            ensCheckSpinner.setVisibility(View.GONE);
+            avatar.finishWaiting();
         }
     }
 

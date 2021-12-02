@@ -80,6 +80,16 @@ public class UserAvatar extends LinearLayout
         walletAddress = null;
     }
 
+    public void setWaiting()
+    {
+        findViewById(R.id.avatar_progress_spinner).setVisibility(View.VISIBLE);
+    }
+
+    public void finishWaiting()
+    {
+        findViewById(R.id.avatar_progress_spinner).setVisibility(View.GONE);
+    }
+
     public void bindAndFind(@NonNull Wallet wallet)
     {
         walletAddress = wallet.address;
@@ -100,6 +110,7 @@ public class UserAvatar extends LinearLayout
 
     public void bind(final Wallet wallet, AvatarWriteCallback avCallback)
     {
+        finishWaiting();
         if (iconRequest != null && iconRequest.isRunning()) iconRequest.clear();
         if (loadAvatarDisposable != null && !loadAvatarDisposable.isDisposed()) loadAvatarDisposable.dispose();
 

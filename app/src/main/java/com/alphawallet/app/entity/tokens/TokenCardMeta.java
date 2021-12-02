@@ -104,6 +104,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         return !balance.equals("0");
     }
 
+    public boolean hasValidName()
+    {
+        return nameWeight < Integer.MAX_VALUE;
+    }
+
     public long getChain()
     {
         int chainPos = tokenId.lastIndexOf('-') + 1;
@@ -231,39 +236,20 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     {
         float updateWeight = 0;
         //calculate balance update time
-        if (nameWeight < Integer.MAX_VALUE)
+        if (hasValidName())
         {
-            if (type == ContractType.ERC721 || type == ContractType.ERC721_LEGACY || type == ContractType.ERC721_TICKET)
+            if (isNFT())
             {
                 //ERC721 types which usually get their balance from opensea. Still need to check the balance for stale tokens to spot a positive -> zero balance transition
-                updateWeight = 0.3f; // 100 seconds
+                updateWeight = 0.25f;
             }
-            else if (EthereumNetworkRepository.hasRealValue(getChain()))
+            else if (isEnabled)
             {
-                if (isEthereum() || hasPositiveBalance())
-                {
-                    updateWeight = 1.0f; //30 seconds
-                }
-                else
-                {
-                    updateWeight = 0.5f; //1 minute
-                }
+                updateWeight = hasPositiveBalance() ? 1.0f : 0.5f; //30 seconds
             }
             else
             {
-                //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
-                if (isEthereum())
-                {
-                    updateWeight = 0.5f; //1 minute
-                }
-                else if (hasPositiveBalance() && isEnabled)
-                {
-                    updateWeight = 0.3f; //100 seconds
-                }
-                else
-                {
-                    updateWeight = 0.1f; //5 minutes
-                }
+                updateWeight = 0.25f; //1 minute
             }
         }
         return updateWeight;

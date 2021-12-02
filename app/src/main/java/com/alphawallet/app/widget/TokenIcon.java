@@ -113,6 +113,7 @@ public class TokenIcon extends ConstraintLayout
     {
         if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
         this.tokenName = token.getName(assetDefinition, token.getTokenCount());
+        //this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
         this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
 
         bind(token, getIconUrl(token));

@@ -2,7 +2,6 @@ package com.alphawallet.app.repository;
 
 import android.util.Pair;
 
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenTicker;

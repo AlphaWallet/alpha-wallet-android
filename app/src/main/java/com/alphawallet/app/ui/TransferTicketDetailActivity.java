@@ -1,11 +1,19 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.C.PRUNE_ACTIVITY;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,10 +48,9 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
@@ -84,16 +91,6 @@ import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.C.EXTRA_STATE;
-import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 21/02/2018.

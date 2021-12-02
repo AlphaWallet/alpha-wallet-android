@@ -8,8 +8,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
 
-import org.web3j.ens.contracts.generated.ENS;
-
 import java.math.BigDecimal;
 
 public class Wallet implements Parcelable {

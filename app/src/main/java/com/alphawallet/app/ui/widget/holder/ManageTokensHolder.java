@@ -21,6 +21,13 @@ public class ManageTokensHolder extends BinderViewHolder<ManageTokensData> {
 
     @Override
     public void bind(@Nullable ManageTokensData data, @NonNull Bundle addition) {
+        layout.setOnClickListener(v -> {
+            if (data.walletAddress != null && data.launcher != null) {
+                Intent intent = new Intent(getContext(), TokenManagementActivity.class);
+                intent.putExtra(EXTRA_ADDRESS, data.walletAddress);
+                data.launcher.launch(intent);
+            }
+        });
     }
 
     public ManageTokensHolder(int res_id, ViewGroup parent) {

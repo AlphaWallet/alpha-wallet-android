@@ -1,6 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
+import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -26,7 +27,6 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -47,9 +47,6 @@ import java.math.BigDecimal;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-
-import static com.alphawallet.app.C.EXTRA_ADDRESS;
-import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 public class WalletViewModel extends BaseViewModel
 {

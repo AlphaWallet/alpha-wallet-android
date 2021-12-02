@@ -38,6 +38,7 @@ import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -729,6 +730,15 @@ public class TokensService
     public double convertToUSD(double localFiatValue)
     {
         return localFiatValue / tickerService.getCurrentConversionRate();
+    }
+
+    public Pair<Double, Double> getFiatValuePair(long chainId, String address)
+    {
+        Token token = getToken(chainId, address);
+        TokenTicker tt = token != null ? getTokenTicker(token) : null;
+        if (tt == null) return new Pair<>(0.0, 0.0);
+
+        return new Pair<>(Double.parseDouble(tt.price), Double.parseDouble(tt.percentChange24h));
     }
 
     ///////////////////////////////////////////

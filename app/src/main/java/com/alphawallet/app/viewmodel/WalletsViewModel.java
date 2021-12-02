@@ -217,7 +217,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .forEach(wallet -> startWalletSync(wallet)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(w -> sendUnsyncedValue(w), e -> { }).isDisposed());
+                        .subscribe(this::sendUnsyncedValue, e -> { }).isDisposed());
     }
 
     private void sendUnsyncedValue(Wallet wallet)

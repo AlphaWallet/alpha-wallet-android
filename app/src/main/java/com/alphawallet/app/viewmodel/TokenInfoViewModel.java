@@ -74,38 +74,4 @@ public class TokenInfoViewModel extends BaseViewModel {
 
         stats.postValue(tokenStats);
     }
-
-    public void fetchChartData(int position)
-    {
-        switch (position)
-        {
-            case TokenInfoFragment.CHART_1D:
-            {
-                // TODO
-                break;
-            }
-            case TokenInfoFragment.CHART_1W:
-            {
-                // TODO
-                break;
-            }
-            case TokenInfoFragment.CHART_1M:
-            {
-                // TODO
-                break;
-            }
-            case TokenInfoFragment.CHART_3M:
-            {
-                // TODO
-                break;
-            }
-            case TokenInfoFragment.CHART_1Y:
-            {
-                // TODO
-                break;
-            }
-            default:
-                break;
-        }
-    }
 }

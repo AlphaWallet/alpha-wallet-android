@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
@@ -28,6 +29,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
@@ -87,6 +89,7 @@ public class TokensService
     private final TokenFactory tokenFactory = new TokenFactory();
     private long syncTimer;
     private long syncStart;
+    private ServiceSyncCallback completionCallback;
 
     @Nullable
     private Disposable eventTimer;
@@ -121,6 +124,7 @@ public class TokensService
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
         transferCheckChain = 0;
+        completionCallback = null;
     }
 
     private void checkUnknownTokens()
@@ -267,6 +271,11 @@ public class TokensService
                     unSynced++;
                 }
             }
+            else if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
+                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
+            {
+                unSynced++;
+            }
         }
 
         if (syncTimer > 0 && System.currentTimeMillis() > syncTimer)
@@ -278,6 +287,7 @@ public class TokensService
             else
             {
                 syncTimer = 0;
+                if (completionCallback != null) completionCallback.syncComplete(this);
             }
         }
 
@@ -472,6 +482,7 @@ public class TokensService
 
     private void checkIssueTokens()
     {
+        if (openseaService == null) return;
         tokenRepository.fetchTokensThatMayNeedUpdating(currentAddress, networkFilter)
                 .map(tokens -> {
                     for (Token t : tokens)
@@ -488,6 +499,7 @@ public class TokensService
 
     private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
     {
+        if (openseaService == null) return; //no need for this if syncing
         if (contractCandidates != null && contractCandidates.size() > 0)
         {
             for (ContractLocator cl : contractCandidates)
@@ -731,7 +743,6 @@ public class TokensService
      * @return Token that needs updating
      */
 
-    private String lastUpdateKey = null;
     //TODO: Integrate the transfer check update time into the priority calculation
     //TODO: If we have done a transfer check recently then we don't need to check balance here
     public Token getNextInBalanceUpdateQueue()
@@ -799,7 +810,6 @@ public class TokensService
 
         if (highestToken != null)
         {
-            lastUpdateKey = databaseKey(highestToken.getChain(), highestToken.getAddress());
             pendingTokenMap.put(databaseKey(highestToken.getChain(), highestToken.getAddress()), System.currentTimeMillis());
             return getToken(highestToken.getChain(), highestToken.getAddress());
         }
@@ -1084,5 +1094,27 @@ public class TokensService
     public boolean isSynced()
     {
         return (syncTimer == 0);
+    }
+
+    public void setCompletionCallback(ServiceSyncCallback cb)
+    {
+        completionCallback = cb;
+        syncTimer = System.currentTimeMillis();
+
+        //Setup
+        baseTokenCheck.clear();
+        mainNetActive = true;
+        networkFilter.clear();
+
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+
+        for (NetworkInfo info : networks)
+        {
+            if (info.hasRealValue())
+            {
+                networkFilter.add(info.chainId);
+                baseTokenCheck.add(info.chainId);
+            }
+        }
     }
 }

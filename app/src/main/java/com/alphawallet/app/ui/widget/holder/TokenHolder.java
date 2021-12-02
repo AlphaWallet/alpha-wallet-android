@@ -241,51 +241,9 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
-    /*private void setIssuerDetails()
-    {
-        if (token.isEthereum())     // If token is eth and we get here, it's a testnet chain, show testnet
-        {
-            issuer.setVisibility(View.VISIBLE);
-            issuer.setText(R.string.testnet);
-            issuerPlaceholder.setVisibility(View.GONE);
-            primaryElement = true;
-        }
-        else
-        {
-            String issuerName = assetDefinition.getIssuerName(token);
-            if (issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's AlphaWallet
-            {
-                issuer.setVisibility(View.VISIBLE);
-                issuerPlaceholder.setVisibility(View.VISIBLE);
-                primaryElement = true;
-                issuer.setText(issuerName);
-            }
-            else
-            {
-                hideIssuerViews();
-            }
-        }
-    }*/
-
     private void hideIssuerViews() {
         contractSeparator.setVisibility(View.GONE);
     }
-
-    /*private void setContractType()
-    {
-        //Display contract type if required
-        int contractStringId = token.getContractType();
-        if (contractStringId > 0)
-        {
-            contractType.setText(contractStringId);
-            contractType.setVisibility(View.VISIBLE);
-            if (primaryElement) contractSeparator.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            contractType.setVisibility(View.GONE);
-        }
-    }*/
 
     private void setTickerInfo(TokenTicker ticker)
     {

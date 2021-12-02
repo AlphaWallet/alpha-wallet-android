@@ -1,5 +1,9 @@
 package com.alphawallet.app.ui.widget.holder;
 
+import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_CHANGE;
+import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
+import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_SYNCED;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,15 +15,19 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmWalletData;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
-import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.UserAvatar;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -40,6 +48,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 	private final TextView walletAddressSeparator;
 	private final TextView walletAddressText;
 	private final ImageView walletSelectedIcon;
+	private final TextView wallet24hChange;
 	private final int greyColor;
 	private final int blackColor;
 	private final Realm realm;
@@ -59,6 +68,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 		walletAddressText = findViewById(R.id.wallet_address);
 		walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
 		walletClickLayout = findViewById(R.id.wallet_click_layer);
+		wallet24hChange = findViewById(R.id.wallet_24h_change);
 		clickCallback = callback;
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
 		greyColor = parent.getContext().getColor(R.color.greyffive);
@@ -110,9 +120,48 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
 			walletSelectedIcon.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 
+			if (addition.getBoolean(IS_SYNCED, false))
+			{
+				walletIcon.finishWaiting();
+			}
+			else
+			{
+				walletIcon.setWaiting();
+			}
+
+			if (addition.getDouble(FIAT_VALUE, -1.00) != -1.00)
+			{
+				double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
+				double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
+
+				String balanceTxt = TickerService.getCurrencyString(fiatValue);
+
+				walletBalanceText.setText(balanceTxt);
+				setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue)/oldFiatValue)*100.0 : 0.0);
+			}
+			else
+			{
+				wallet24hChange.setVisibility(View.GONE);
+			}
+
 			checkLastBackUpTime();
 			startRealmListener();
 		}
+	}
+
+	private void setWalletChange(double percentChange24h)
+	{
+		//This sets the 24hr percentage change (rightmost value)
+		try {
+			wallet24hChange.setVisibility(View.VISIBLE);
+			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.red : R.color.green);
+			BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
+			String formattedPercents = (percentChange24h < 0 ? "" : "+") + percentChangeBI + "%";
+			//wallet24hChange.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
+			wallet24hChange.setText(formattedPercents);
+			wallet24hChange.setTextColor(color);
+			//image24h.setImageResource(percentage < 0 ? R.drawable.ic_price_down : R.drawable.ic_price_up);
+		} catch (Exception ex) { /* Quietly */ }
 	}
 
 	private void startRealmListener()
@@ -123,8 +172,8 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			//update balance
 			if (realmWallets.size() == 0) return;
 			RealmWalletData realmWallet = realmWallets.first();
-			walletBalanceText.setTextColor(blackColor);
-			walletBalanceText.setText(realmWallet.getBalance());
+			//walletBalanceText.setTextColor(blackColor);
+			//walletBalanceText.setText(realmWallet.getBalance());
 			String ensName = realmWallet.getENSName();
 			String name = realmWallet.getName();
 			if (!TextUtils.isEmpty(name)) {

@@ -862,32 +862,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
-            return tokenMetas.toArray(new TokenCardMeta[0]); //tokenMetas;
-        });//.flatMap(loadedMetas -> populateBaseCards(wallet, rootChainTokenCards, loadedMetas));
-    }
-
-    private Single<TokenCardMeta[]> populateBaseCards(Wallet wallet, List<Long> rootChainTokenCards, List<TokenCardMeta> loadedMetas)
-    {
-        return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                realm.executeTransaction(r -> {
-                    for (long requiredNetwork : rootChainTokenCards)
-                    {
-                        RealmToken realmItem = r.where(RealmToken.class)
-                                .equalTo("address", databaseKey(requiredNetwork, wallet.address))
-                                .findFirst();
-
-                        if (realmItem == null)
-                        {
-                            Token token = createCurrencyToken(ethereumNetworkRepository.getNetworkByChain(requiredNetwork), wallet);
-                            saveToken(r, token);
-                            loadedMetas.add(new TokenCardMeta(token));
-                        }
-                    }
-                });
-            }
-            return loadedMetas.toArray(new TokenCardMeta[0]);
+            return tokenMetas.toArray(new TokenCardMeta[0]);
         });
     }
 

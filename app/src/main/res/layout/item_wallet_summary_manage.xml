@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -57,11 +58,11 @@
 
             <TextView
                 android:id="@+id/wallet_balance"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
-                android:text="3.2345"
+                tools:text="3.2345"
                 android:textColor="@color/text_black"
                 android:textIsSelectable="true"
                 android:textSize="20sp" />
@@ -72,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/font_light"
-                android:text="ETH"
+                tools:text="ETH"
                 android:textColor="@color/text_black"
                 android:textIsSelectable="true"
                 android:textSize="16sp"
@@ -83,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                android:text="+2.53%"
+                tools:text="+2.53%"
                 android:layout_marginEnd="@dimen/dp9"
                 android:textColor="@color/nasty_green"
                 android:textIsSelectable="true"
@@ -108,7 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                android:text="user.eth"
+                tools:text="user.eth"
                 android:textColor="@color/dove"
                 android:textSize="15sp" />
 
@@ -130,7 +131,7 @@
                 android:ellipsize="middle"
                 android:fontFamily="@font/font_regular"
                 android:singleLine="true"
-                android:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf"
+                tools:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf"
                 android:textColor="@color/dove"
                 android:textSize="15sp" />
         </LinearLayout>

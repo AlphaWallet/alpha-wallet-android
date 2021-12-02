@@ -1,7 +1,12 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,14 +25,19 @@ import com.alphawallet.app.ui.widget.holder.WalletSummaryHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.realm.Realm;
 
-public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback
+public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback, Runnable
 {
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
     private final ArrayList<Wallet> wallets;
+    private final Map<String, Pair<Double, Double>> valueMap = new HashMap<>();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private Wallet defaultWallet = null;
+    private final Wallet summaryWallet = new Wallet(ZERO_ADDRESS);
     private final Context context;
     private final Realm realm;
 
@@ -61,14 +71,24 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
 
     @Override
     public void onBindViewHolder(@NotNull BinderViewHolder holder, int position) {
+        Bundle bundle;
         switch (getItemViewType(position)) {
             case WalletHolder.VIEW_TYPE:
                 Wallet wallet = wallets.get(position);
-                Bundle bundle = new Bundle();
+                bundle = new Bundle();
                 bundle.putBoolean(
                         WalletHolder.IS_DEFAULT_ADDITION,
                         defaultWallet != null && defaultWallet.sameAddress(wallet.address));
                 bundle.putBoolean(WalletHolder.IS_LAST_ITEM, getItemCount() == 1);
+                bundle.putBoolean(WalletHolder.IS_SYNCED, wallet.isSynced);
+
+                if (valueMap.containsKey(wallet.address.toLowerCase()))
+                {
+                    Pair<Double, Double> valuePair = valueMap.get(wallet.address.toLowerCase());
+                    bundle.putDouble(WalletHolder.FIAT_VALUE, valuePair.first);
+                    bundle.putDouble(WalletHolder.FIAT_CHANGE, valuePair.second);
+                }
+
                 holder.bind(wallet, bundle);
                 break;
             case TextHolder.VIEW_TYPE:
@@ -76,8 +96,12 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                 holder.bind(wallet.address);
                 break;
             case WalletSummaryHeaderHolder.VIEW_TYPE:
-                wallet = defaultWallet;
-                holder.bind(wallet);
+                wallet = summaryWallet;
+                bundle = new Bundle();
+                Pair<Double, Double> totalPair = getSummaryBalance();
+                bundle.putDouble(WalletHolder.FIAT_VALUE, totalPair.first);
+                bundle.putDouble(WalletHolder.FIAT_CHANGE, totalPair.second);
+                holder.bind(wallet, bundle);
                 break;
 
             default:
@@ -112,6 +136,66 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         notifyDataSetChanged();
     }
 
+    private int getWalletIndex(Wallet wallet)
+    {
+        for (int i = 0; i < wallets.size(); i++)
+        {
+            if (wallets.get(i).address.equalsIgnoreCase(wallet.address))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public void setUnsyncedWalletValue(Wallet wallet, Pair<Double, Double> value)
+    {
+        int index = getWalletIndex(wallet);
+        if (index >= 0)
+        {
+            valueMap.put(wallet.address.toLowerCase(), value);
+            notifyItemChanged(index);
+            updateWalletSummary();
+        }
+    }
+
+    private Pair<Double, Double> getSummaryBalance()
+    {
+        double totalValue = 0.0;
+        double totalOldValue = 0.0;
+        for (Pair<Double, Double> value : valueMap.values())
+        {
+            totalValue += value.first;
+            totalOldValue += value.second;
+        }
+
+        return new Pair<>(totalValue, totalOldValue);
+    }
+
+    private void updateWalletSummary()
+    {
+        handler.postDelayed(this, 1000); //updates can be bunched together
+    }
+
+    @Override
+    public void run()
+    {
+        notifyItemChanged(1);
+    }
+
+    public void setWalletSynced(Wallet wallet, Pair<Double, Double> value)
+    {
+        int index = getWalletIndex(wallet);
+        if (index >= 0)
+        {
+            wallets.get(index).isSynced = true;
+            valueMap.put(wallet.address.toLowerCase(), value);
+            notifyItemChanged(index);
+            updateWalletSummary();
+        }
+    }
+
     public void setWallets(Wallet[] wallets)
     {
         this.wallets.clear();
@@ -125,7 +209,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
 
             Wallet largeTitle = new Wallet(context.getString(R.string.summary));
             largeTitle.type = WalletType.LARGE_TITLE;
-            this.wallets.add(largeTitle);
+            this.wallets.add(largeTitle); //index 1
 
             Wallet yourWallets = new Wallet(context.getString(R.string.your_wallets));
             yourWallets.type = WalletType.TEXT_MARKER;
@@ -139,12 +223,15 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                     case KEYSTORE_LEGACY:
                     case KEYSTORE:
                         hasLegacyWallet = true;
+                        w.isSynced = false;
                         break;
                     case HDKEY:
                         this.wallets.add(w);
+                        w.isSynced = false;
                         break;
                     case WATCH:
                         hasWatchWallet = true;
+                        w.isSynced = true;
                         break;
                     default:
                         break;

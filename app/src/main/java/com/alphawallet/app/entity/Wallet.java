@@ -23,6 +23,7 @@ public class Wallet implements Parcelable {
     public long walletCreationTime;
     public String balanceSymbol;
     public String ENSAvatar;
+    public boolean isSynced;
 
 	public Wallet(String address) {
 		this.address = address;

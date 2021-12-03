@@ -721,10 +721,7 @@ public class TokensService
 
     public Single<Pair<Double, Double>> getFiatValuePair()
     {
-        return tickerService.updateCurrencyConversion() //ensure we always have currency conversion
-                .flatMap(rate -> tokenRepository.getTotalValue(currentAddress, networkFilter))
-                .map(valuePair -> new Pair<>(valuePair.first * tickerService.getCurrentConversionRate(), // convert to local currency
-                        valuePair.second * tickerService.getCurrentConversionRate()));
+        return tokenRepository.getTotalValue(currentAddress, networkFilter);
     }
 
     public double convertToUSD(double localFiatValue)

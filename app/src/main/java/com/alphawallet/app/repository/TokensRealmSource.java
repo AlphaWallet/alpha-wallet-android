@@ -1141,6 +1141,29 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Map<String, Long> getTickerTimeMap(long chainId, List<TokenCardMeta> erc20Tokens)
+    {
+        Map<String, Long> updateMap = new HashMap<>();
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            for (TokenCardMeta meta : erc20Tokens)
+            {
+                String databaseKey = databaseKey(chainId, meta.getAddress().toLowerCase());
+                RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                        .equalTo("contract", databaseKey)
+                        .findFirst();
+
+                if (realmItem != null)
+                {
+                    updateMap.put(meta.getAddress(), realmItem.getUpdatedTime());
+                }
+            }
+        }
+
+        return updateMap;
+    }
+
+    @Override
     public TokenTicker getCurrentTicker(String key)
     {
         TokenTicker tt = null;

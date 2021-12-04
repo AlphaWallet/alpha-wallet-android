@@ -1,32 +1,18 @@
 package com.alphawallet.app.interact;
 
-import android.util.Log;
-
-import com.alphawallet.app.entity.CoinGeckoTicker;
-import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.MessagePair;
-import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.repository.TokenLocalSource;
-import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.repository.entity.RealmAToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Completable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmList;
-import io.realm.RealmResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 

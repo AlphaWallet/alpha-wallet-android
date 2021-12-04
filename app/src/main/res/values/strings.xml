@@ -862,4 +862,5 @@
     <string name="not_connected">Not Connected</string>
     <string name="online">Online</string>
     <string name="summary_change_24h">%1$s (%2$s) Today</string>
+    <string name="performance">Performance</string>
 </resources>

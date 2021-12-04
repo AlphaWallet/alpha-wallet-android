@@ -852,4 +852,5 @@
     <string name="not_connected">Không được kết nối</string>
     <string name="online">Trực tuyến</string>
     <string name="summary_change_24h">%1$s (%2$s) Hôm nay</string>
+    <string name="performance">Performance</string>
 </resources>

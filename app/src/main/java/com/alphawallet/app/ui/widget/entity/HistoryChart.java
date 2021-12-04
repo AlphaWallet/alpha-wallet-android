@@ -78,7 +78,7 @@ public class HistoryChart extends View {
 
         Range range;
         TokenInfo tokenInfo = null;
-        List<CoinGeckoToken> coinGeckoTokens;
+        public static List<CoinGeckoToken> coinGeckoTokens;
 
         Map<Range, Datasource> datasourceMap = new HashMap<>();
 
@@ -308,6 +308,10 @@ public class HistoryChart extends View {
         final Address polygonMaticContract = new Address("0x0000000000000000000000000000000000001010");
 
         String coingeckoTokenId = null;
+
+        // could this be replaced with
+        // https://api.coingecko.com/api/v3/coins/ <CHAIN NAME> /contract/ <TOKEN ADDRESS> /market_chart/?vs_currency=usd&days=365
+        // ?
 
         for (Cache.CoinGeckoToken cgToken : cache.coinGeckoTokens) {
             for (Map.Entry<String, String> entry : cgToken.platforms.entrySet()) {

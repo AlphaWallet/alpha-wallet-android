@@ -275,8 +275,6 @@ public class TickerService
 
     public Single<Integer> getERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
-        //final String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
-        //final String dexGuruName = dexGuruChainIdToAPISymbol.get(chainId);
         if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
             return Single.fromCallable(() -> 0);
 
@@ -288,52 +286,6 @@ public class TickerService
             localSource.updateERC20Tickers(chainId, tickerMap);
             return tickerMap.size();
         });
-
-            /*int newSize = 0;
-            if (apiChainName == null) return 0;
-
-            final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
-
-            //build ticker header
-            StringBuilder sb = new StringBuilder();
-            boolean isFirst = true;
-            for (TokenCardMeta t : erc20Tokens)
-            {
-                if (!isFirst) sb.append(",");
-                sb.append(t.getAddress());
-                isFirst = false;
-            }
-
-            Request request = new Request.Builder()
-                    .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt))
-                    .get()
-                    .build();
-
-            try (okhttp3.Response response = httpClient.newCall(request)
-                    .execute())
-            {
-                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
-                newSize = tickers.size();
-
-                for (CoinGeckoTicker t : tickers)
-                {
-                    //store ticker
-                    erc20Tickers.put(t.address, t.toTokenTicker(currentCurrencySymbolTxt));
-                    lookupMap.remove(t.address.toLowerCase());
-                }
-
-                canUpdate.put(chainId, true);
-                localSource.updateERC20Tickers(chainId, erc20Tickers);
-
-                if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
-            }
-            catch (Exception e)
-            {
-                if (BuildConfig.DEBUG) e.printStackTrace();
-            }
-
-            return newSize;
-        });*/
     }
 
     private Map<String, TokenTicker> fetchERC20TokenTickers(long chainId, Collection<TokenCardMeta> erc20Tokens)
@@ -373,8 +325,6 @@ public class TickerService
             }
 
             canUpdate.put(chainId, true);
-            //localSource.updateERC20Tickers(chainId, erc20Tickers);
-
             if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
         }
         catch (Exception e)

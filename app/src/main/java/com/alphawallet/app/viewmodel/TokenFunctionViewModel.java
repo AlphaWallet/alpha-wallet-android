@@ -529,8 +529,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void estimateGasLimit(Web3Transaction w3tx, long chainId)
     {
-        calcGasCost = gasService.calculateGasEstimate(Numeric.hexStringToByteArray(w3tx.payload), chainId, w3tx.contract.toString(), w3tx.value, wallet)
-                .map(this::convertToGasLimit)
+        calcGasCost = gasService.calculateGasEstimate(Numeric.hexStringToByteArray(w3tx.payload), chainId, w3tx.contract.toString(), w3tx.value, wallet, BigInteger.ZERO)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(estimate -> buildNewConfirmation(estimate, w3tx),
@@ -542,19 +541,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         gasEstimateComplete.postValue(new Web3Transaction(
                 w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate, w3tx.nonce, w3tx.payload, w3tx.description));
     }
-
-    private BigInteger convertToGasLimit(EthEstimateGas estimate)
-    {
-        if (estimate.hasError())
-        {
-            return BigInteger.ZERO;
-        }
-        else
-        {
-            return estimate.getAmountUsed();
-        }
-    }
-
+    
     @Override
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {

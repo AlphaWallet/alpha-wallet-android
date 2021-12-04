@@ -136,11 +136,11 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         notifyDataSetChanged();
     }
 
-    private int getWalletIndex(Wallet wallet)
+    private int getWalletIndex(String wallet)
     {
         for (int i = 0; i < wallets.size(); i++)
         {
-            if (wallets.get(i).address.equalsIgnoreCase(wallet.address))
+            if (wallets.get(i).address.equalsIgnoreCase(wallet))
             {
                 return i;
             }
@@ -149,12 +149,12 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         return -1;
     }
 
-    public void setUnsyncedWalletValue(Wallet wallet, Pair<Double, Double> value)
+    public void setUnsyncedWalletValue(String wallet, Pair<Double, Double> value)
     {
         int index = getWalletIndex(wallet);
         if (index >= 0)
         {
-            valueMap.put(wallet.address.toLowerCase(), value);
+            valueMap.put(wallet.toLowerCase(), value);
             notifyItemChanged(index);
             updateWalletSummary();
         }
@@ -184,13 +184,22 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         notifyItemChanged(1);
     }
 
-    public void setWalletSynced(Wallet wallet, Pair<Double, Double> value)
+    public void completeWalletSync(String walletAddress, Pair<Double, Double> value)
     {
-        int index = getWalletIndex(wallet);
+        int index = getWalletIndex(walletAddress);
         if (index >= 0)
         {
             wallets.get(index).isSynced = true;
-            valueMap.put(wallet.address.toLowerCase(), value);
+            updateWalletState(walletAddress, value);
+        }
+    }
+
+    public void updateWalletState(String walletAddress, Pair<Double, Double> value)
+    {
+        int index = getWalletIndex(walletAddress);
+        if (index >= 0)
+        {
+            valueMap.put(walletAddress.toLowerCase(), value);
             notifyItemChanged(index);
             updateWalletSummary();
         }

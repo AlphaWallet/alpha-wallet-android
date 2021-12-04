@@ -145,15 +145,23 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void syncCompleted(Wallet wallet, Pair<Double, Double> value)
+    public void syncUpdate(String wallet, Pair<Double, Double> value)
     {
         runOnUiThread(() -> {
-            adapter.setWalletSynced(wallet, value);
+            adapter.updateWalletState(wallet, value);
         });
     }
 
     @Override
-    public void syncStarted(Wallet wallet, Pair<Double, Double> value)
+    public void syncCompleted(String wallet, Pair<Double, Double> value)
+    {
+        runOnUiThread(() -> {
+            adapter.completeWalletSync(wallet, value);
+        });
+    }
+
+    @Override
+    public void syncStarted(String wallet, Pair<Double, Double> value)
     {
         runOnUiThread(() -> {
             adapter.setUnsyncedWalletValue(wallet, value);

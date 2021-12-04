@@ -229,7 +229,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(value ->
-                            syncCallback.syncStarted(new Wallet(service.getCurrentAddress().toLowerCase()), value)).isDisposed();
+                            syncCallback.syncStarted(service.getCurrentAddress().toLowerCase(), value)).isDisposed();
         }
     }
 
@@ -239,17 +239,25 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
             svs.setCurrentAddress(wallet.address.toLowerCase());
             svs.startUpdateCycle();
-            svs.setCompletionCallback(this);
+            svs.setCompletionCallback(this, 2);
             walletServices.put(wallet.address.toLowerCase(), svs);
             return wallet;
         });
     }
 
     @Override
-    public void syncComplete(final TokensService service, boolean isMainnetSync)
+    public void syncComplete(final TokensService service, boolean isMainnetSync, int syncCount)
     {
-        service.stopUpdateCycle();
-        walletServices.remove(service.getCurrentAddress().toLowerCase());
+        if (syncCount == 2)
+        {
+            service.setCompletionCallback(this, 1);
+        }
+        else
+        {
+            service.stopUpdateCycle();
+            walletServices.remove(service.getCurrentAddress().toLowerCase());
+        }
+
         if (syncCallback == null) return;
 
         //get value:
@@ -257,7 +265,8 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(value -> {
-                    syncCallback.syncCompleted(new Wallet(service.getCurrentAddress().toLowerCase()), value);
+                    if (syncCount == 1) { syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value); }
+                        else { syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value); }
                 }).isDisposed();
     }
 

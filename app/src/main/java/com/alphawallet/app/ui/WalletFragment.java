@@ -184,11 +184,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
-        if (!viewModel.getTokensService().startWalletSync(this))
-        {
-            //hide price view for testnets
-            largeTitleView.setVisibility(View.GONE);
-        }
+        largeTitleView.setVisibility(viewModel.getTokensService().startWalletSync(this) ? View.VISIBLE : View.GONE ); //show or hide Fiat summary
     }
 
     private void initViews(@NonNull View view) {
@@ -283,7 +279,7 @@ public class WalletFragment extends BaseFragment implements
 
     //Refresh value of wallet once sync is complete
     @Override
-    public void syncComplete(TokensService svs, boolean isMainnetSync)
+    public void syncComplete(TokensService svs, boolean isMainnetSync, int syncCount)
     {
         handler.post(() -> addressAvatar.finishWaiting());
         svs.getFiatValuePair()

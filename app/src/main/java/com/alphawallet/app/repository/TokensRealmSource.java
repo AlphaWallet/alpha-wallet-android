@@ -870,8 +870,7 @@ public class TokensRealmSource implements TokenLocalSource {
     public Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters)
     {
         final Wallet wallet = new Wallet(currentAddress);
-        return fetchTokenMetas(wallet, networkFilters, null)
-               .flatMap(metas -> calculateWalletValue(metas, wallet));
+        return calculateWalletValue(fetchTokenMetasForUpdate(wallet, networkFilters), wallet);
     }
 
     private Single<Pair<Double, Double>> calculateWalletValue(TokenCardMeta[] metas, Wallet wallet)

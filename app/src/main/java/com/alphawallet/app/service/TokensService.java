@@ -63,7 +63,6 @@ public class TokensService
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
     public static final long PENDING_TIME_LIMIT = 3*DateUtils.MINUTE_IN_MILLIS; //cut off pending chain after 3 minutes
 
-    private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>(); //this is used to compute the USD value of the tokens on an address
     private static final Map<Long, Long> pendingChainMap = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
@@ -87,6 +86,7 @@ public class TokensService
     private long syncTimer;
     private long syncStart;
     private ServiceSyncCallback completionCallback;
+    private int syncCount = 0;
 
     @Nullable
     private Disposable eventTimer;
@@ -273,6 +273,13 @@ public class TokensService
                     && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
         }
 
+        checkSyncStatus(unSynced, tokenList);
+
+        return tokenList;
+    }
+
+    private void checkSyncStatus(int unSynced, TokenCardMeta[] tokenList)
+    {
         if (syncTimer > 0 && System.currentTimeMillis() > syncTimer)
         {
             if (unSynced > 0)
@@ -286,8 +293,6 @@ public class TokensService
                 syncChainTickers(tokenList, 0);
             }
         }
-
-        return tokenList;
     }
 
     private boolean syncERC20Tickers(final int chainIndex, final long chainId, final TokenCardMeta[] tokenList)
@@ -339,7 +344,7 @@ public class TokensService
         //complete
         if (completionCallback != null)
         {
-            completionCallback.syncComplete(this, mainNetActive);
+            completionCallback.syncComplete(this, mainNetActive, syncCount);
         }
     }
 
@@ -378,7 +383,6 @@ public class TokensService
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
 
         IconItem.resetCheck();
-        tokenValueMap.clear();
         pendingChainMap.clear();
         tokenStoreList.clear();
         baseTokenCheck.clear();
@@ -1155,7 +1159,7 @@ public class TokensService
     {
         if (ethereumNetworkRepository.isMainNetSelected())
         {
-            setCompletionCallback(cb);
+            setCompletionCallback(cb, 1);
             return true;
         }
         else
@@ -1165,8 +1169,9 @@ public class TokensService
         }
     }
 
-    public void setCompletionCallback(ServiceSyncCallback cb)
+    public void setCompletionCallback(ServiceSyncCallback cb, int sync)
     {
+        syncCount = sync;
         completionCallback = cb;
         syncTimer = System.currentTimeMillis();
 
@@ -1187,15 +1192,17 @@ public class TokensService
         }
     }
 
-    // For Debugging
-//        if (!done)
-//        {
-//            done = true;
-//            Single.fromCallable(() -> {
-//                tickerService.deleteTickers();
-//                return true;
-//            }).subscribeOn(Schedulers.io())
-//                    .observeOn(Schedulers.io()).subscribe(b -> {
-//            }).isDisposed();
-//        }
+    private void deleteTickers()
+    {
+        if (BuildConfig.DEBUG && !done) //Ensure release build never deletes all the tickers
+        {
+            done = true;
+            Single.fromCallable(() -> {
+                tickerService.deleteTickers();
+                return true;
+            }).subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io()).subscribe(b -> {
+            }).isDisposed();
+        }
+    }
 }

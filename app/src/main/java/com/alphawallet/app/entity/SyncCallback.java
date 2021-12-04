@@ -7,6 +7,7 @@ import android.util.Pair;
  */
 public interface SyncCallback
 {
-    void syncCompleted(Wallet wallet, Pair<Double, Double> value);
-    void syncStarted(Wallet wallet, Pair<Double, Double> value);
+    void syncUpdate(String wallet, Pair<Double, Double> value);
+    void syncCompleted(String wallet, Pair<Double, Double> value);
+    void syncStarted(String wallet, Pair<Double, Double> value);
 }

@@ -32,6 +32,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -150,9 +151,9 @@ public class SendViewModel extends BaseViewModel {
         return txBytes;
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
-        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet);
+        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, BigInteger.ZERO);
     }
 
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)

@@ -430,7 +430,7 @@ public class ImportTokenViewModel extends BaseViewModel
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
 
-            gasService.calculateGasEstimate(tradeData, importOrder.chainId, wallet.getValue().address, order.amount, wallet.getValue())
+            gasService.calculateGasEstimate(tradeData, importOrder.chainId, wallet.getValue().address, order.amount, wallet.getValue(), BigInteger.ZERO)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::performImportFinal).isDisposed();
@@ -442,20 +442,10 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    private void performImportFinal(EthEstimateGas gasEstimate)
+    private void performImportFinal(BigInteger gasEstimate)
     {
         try
         {
-            BigInteger gasEstimateWei;
-            if (gasEstimate.hasError())
-            {
-                gasEstimateWei = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
-            }
-            else
-            {
-                gasEstimateWei = gasEstimate.getAmountUsed();
-            }
-
             MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
@@ -463,7 +453,7 @@ public class ImportTokenViewModel extends BaseViewModel
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                            gasService.getGasPrice(), gasEstimateWei, tradeData, order.chainId)
+                            gasService.getGasPrice(), gasEstimate, tradeData, order.chainId)
                     .subscribe(this::onCreateTransaction, this::onTransactionError);
 
             addTokenWatchToWallet();

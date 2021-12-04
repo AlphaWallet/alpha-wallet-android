@@ -85,13 +85,14 @@ public class TransferTest {
     }
 
     private void ensureTransactionConfirmed() {
-        onView(withText(R.string.rate_no_thanks)).perform(click());
+//        onView(withText(R.string.rate_no_thanks)).perform(click());
         onView(withId(R.string.action_show_tx_details)).perform(click());
         onView(isRoot()).perform(waitUntil(withSubstring("Sent ETH")));
         pressBack();
     }
 
-    private void createNewWalletOnFirstStart() throws InterruptedException {
+    private void createNewWalletOnFirstStart() {
+        onView(isRoot()).perform(Helper.waitUntil(allOf(withText("CREATE A NEW WALLET"), isDisplayed())));
         onView(withText("CREATE A NEW WALLET")).perform(click());
         onView(isRoot()).perform(Helper.waitUntil(allOf(withText("CLOSE"), isDisplayed())));
         onView(withText("CLOSE")).perform(click());

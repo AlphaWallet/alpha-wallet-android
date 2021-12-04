@@ -2,7 +2,6 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -1266,8 +1265,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 confirmationDialog.fullExpand();
 
                 viewModel.calculateGasEstimate(wallet, Numeric.hexStringToByteArray(transaction.payload),
-                        activeNetwork.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value))
-                        .map(limit -> convertToGasLimit(limit, transaction.gasLimit))
+                        activeNetwork.chainId, transaction.recipient.toString(), new BigDecimal(transaction.value), transaction.gasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
@@ -1306,43 +1304,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 tx.payload,
                 tx.leafPosition
         );
-    }
-
-    private BigInteger convertToGasLimit(EthEstimateGas estimate, Web3Transaction w3Tx)
-    {
-        if (!estimate.hasError() && estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
-        {
-            return estimate.getAmountUsed();
-        }
-        else if (w3Tx.gasLimit.equals(BigInteger.ZERO))
-        {
-            return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS); //cautious gas limit
-        }
-        else
-        {
-            return w3Tx.gasLimit;
-        }
-    }
-
-    private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger txGasLimit)
-    {
-        try
-        {
-            if (!estimate.hasError() && estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
-            {
-                return estimate.getAmountUsed();
-            }
-            else
-            {
-                return txGasLimit;
-            }
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return txGasLimit;
     }
 
     //Transaction failed to be sent

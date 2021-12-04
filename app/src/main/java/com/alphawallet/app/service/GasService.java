@@ -294,7 +294,7 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet)
+    public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)
@@ -305,16 +305,42 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
+        if (transactionBytes == null || transactionBytes.length == 0)
+        {
+            return Single.fromCallable(() -> BigInteger.valueOf(GAS_LIMIT_MIN));
+        }
+        else if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData));
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData))
+                    .map(estimate -> convertToGasLimit(estimate, defaultLimit));
         }
         else
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
                     .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), toAddress, amount, finalTxData))
-                    .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData));
+                    .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData))
+                    .map(estimate -> convertToGasLimit(estimate, defaultLimit));
+        }
+    }
+
+    private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger defaultLimit)
+    {
+        if (estimate.hasError())
+        {
+            return BigInteger.ZERO;
+        }
+        else if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
+        {
+            return estimate.getAmountUsed();
+        }
+        else if (defaultLimit == null || defaultLimit.equals(BigInteger.ZERO))
+        {
+            return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS); //cautious gas limit
+        }
+        else
+        {
+            return defaultLimit;
         }
     }
 

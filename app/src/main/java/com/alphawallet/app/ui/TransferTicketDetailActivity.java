@@ -806,23 +806,10 @@ public class TransferTicketDetailActivity extends BaseActivity
             calculateEstimateDialog();
             //form payload and calculate tx cost
             calcGasCost = viewModel.calculateGasEstimate(viewModel.getWallet(), transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
-                    .map(this::convertToGasLimit)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
                             error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
-        }
-    }
-
-    private BigInteger convertToGasLimit(EthEstimateGas estimate)
-    {
-        if (estimate.hasError())
-        {
-            return BigInteger.ZERO;
-        }
-        else
-        {
-            return estimate.getAmountUsed();
         }
     }
 

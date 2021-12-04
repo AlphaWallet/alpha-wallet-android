@@ -18,16 +18,13 @@ android:
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-x86-android-30
-    - sys-img-x86-android-26
-
-    # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v8a-android-30
+    - sys-img-armeabi-v7a-android-24
 
 licenses:
   - 'android-sdk-preview-license-.+'
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
+  - 'android-ndk-license-.+'
 
 before_install:
 - yes | sdkmanager "platforms;android-30"
@@ -38,7 +35,7 @@ install:
 before_script:
   - echo y | sdkmanager "ndk-bundle"
   - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-  - echo no | android create avd --force -n test -t android-30 --abi armeabi-v8a -c 100M
+  - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a -c 100M
   - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82

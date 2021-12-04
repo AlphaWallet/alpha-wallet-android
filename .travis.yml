@@ -21,6 +21,9 @@ android:
     - sys-img-x86-android-30
     - sys-img-x86-android-26
 
+    # if you need to run emulator(s) during your tests
+    - sys-img-armeabi-v8a-android-30
+
 licenses:
   - 'android-sdk-preview-license-.+'
   - 'android-sdk-license-.+'
@@ -33,10 +36,13 @@ install:
   - true
 
 before_script:
-  - echo no | android create avd --force -n test -t android-26 --abi armeabi-v7a
-  - emulator -avd test -no-skin -no-audio -no-window &
+  - echo y | sdkmanager "ndk-bundle"
+  - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+  - echo no | android create avd --force -n test -t android-30 --abi armeabi-v8a -c 100M
+  - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
   - android-wait-for-emulator
-  - adb shell input keyevent 82 &
+  - adb shell input keyevent 82
+  - adb shell input keyevent 84
 
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
@@ -44,7 +50,7 @@ script:
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
 - ./gradlew test
-- ./gradlew uninstallAll connectedAndroidTest
+- sh ./e2e.sh
 - ./gradlew build -x test
 
 after_success:

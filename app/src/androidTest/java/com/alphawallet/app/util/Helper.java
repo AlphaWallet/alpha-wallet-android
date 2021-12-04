@@ -3,17 +3,23 @@ package com.alphawallet.app.util;
 import android.view.View;
 
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 
 import java.util.concurrent.TimeoutException;
 
 import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.core.AllOf.allOf;
 
 public class Helper {
@@ -60,5 +66,10 @@ public class Helper {
                         .build();
             }
         };
+    }
+
+    public static void click(Matcher<View> matcher) {
+        onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed())));
+        onView(matcher).perform(ViewActions.click()); // Can not combine with above line
     }
 }

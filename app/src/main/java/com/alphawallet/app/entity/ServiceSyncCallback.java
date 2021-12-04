@@ -7,5 +7,5 @@ import com.alphawallet.app.service.TokensService;
  */
 public interface ServiceSyncCallback
 {
-    void syncComplete(TokensService svs);
+    void syncComplete(TokensService svs, boolean isMainnet);
 }

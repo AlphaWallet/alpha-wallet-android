@@ -184,7 +184,11 @@ public class WalletFragment extends BaseFragment implements
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
-        viewModel.getTokensService().setCompletionCallback(this);
+        if (!viewModel.getTokensService().startWalletSync(this))
+        {
+            //hide price view for testnets
+            largeTitleView.setVisibility(View.GONE);
+        }
     }
 
     private void initViews(@NonNull View view) {
@@ -222,7 +226,7 @@ public class WalletFragment extends BaseFragment implements
         result.putBoolean(C.SHOW_BACKUP, wallet.lastBackupTime > 0);
         getParentFragmentManager().setFragmentResult(C.SHOW_BACKUP, result); //reset tokens service and wallet page with updated filters
 
-        startCheckSync();
+        addressAvatar.setWaiting();
     }
 
     private void setRealmListener(final long updateTime)
@@ -279,8 +283,9 @@ public class WalletFragment extends BaseFragment implements
 
     //Refresh value of wallet once sync is complete
     @Override
-    public void syncComplete(TokensService svs)
+    public void syncComplete(TokensService svs, boolean isMainnetSync)
     {
+        handler.post(() -> addressAvatar.finishWaiting());
         svs.getFiatValuePair()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -321,7 +326,6 @@ public class WalletFragment extends BaseFragment implements
         {
             setRealmListener(realmUpdateTime);
         }
-        startCheckSync();
     }
 
     @Override
@@ -395,7 +399,7 @@ public class WalletFragment extends BaseFragment implements
             }
         });
 
-        TabUtils.decorateTabLayout(getContext(), tabLayout);
+        //TabUtils.decorateTabLayout(getContext(), tabLayout);
     }
 
     private void setGridLayoutManager(int tab)
@@ -771,44 +775,6 @@ public class WalletFragment extends BaseFragment implements
     public Wallet getCurrentWallet()
     {
         return viewModel.getWallet();
-    }
-
-    //Don't show sync for the release yet
-    private void startCheckSync()
-    {
-        if (viewModel != null && getActivity() != null && !getActivity().isDestroyed())
-        {
-            if (viewModel.getTokensService().isSynced())
-            {
-                getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
-            }
-            if (checkSync == null || checkSync.isDisposed())
-            {
-                checkSync = Observable.interval(1, 4, TimeUnit.SECONDS)
-                        .doOnNext(l -> checkWalletSync()).subscribe();
-            }
-        }
-    }
-
-    private void checkWalletSync()
-    {
-        if (viewModel.getTokensService().isSynced())
-        {
-            if (checkSync != null && !checkSync.isDisposed()) { checkSync.dispose(); }
-            checkSync = null;
-
-            if (getActivity() != null && !getActivity().isDestroyed())
-            {
-                getActivity().runOnUiThread(() -> addressAvatar.finishWaiting());
-            }
-        }
-        else
-        {
-            if (getActivity() != null && !getActivity().isDestroyed())
-            {
-                getActivity().runOnUiThread(() -> addressAvatar.setWaiting());
-            }
-        }
     }
 
     @Override

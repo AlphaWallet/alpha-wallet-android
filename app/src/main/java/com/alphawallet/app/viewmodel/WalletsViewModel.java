@@ -246,7 +246,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     }
 
     @Override
-    public void syncComplete(final TokensService service)
+    public void syncComplete(final TokensService service, boolean isMainnetSync)
     {
         service.stopUpdateCycle();
         walletServices.remove(service.getCurrentAddress().toLowerCase());

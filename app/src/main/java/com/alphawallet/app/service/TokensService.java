@@ -214,8 +214,6 @@ public class TokensService
         {
             currentAddress = newWalletAddr.toLowerCase();
             stopUpdateCycle();
-            syncStart = System.currentTimeMillis();
-            syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
             addLockedTokens();
             openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
             if (openseaService != null) openseaService.resetOffsetRead();
@@ -224,6 +222,9 @@ public class TokensService
 
     private void updateCycle(boolean val)
     {
+        syncStart = System.currentTimeMillis();
+        syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
+
         eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
                 .doOnNext(l -> checkTokensBalance())
                 .observeOn(Schedulers.newThread()).subscribe();
@@ -323,19 +324,22 @@ public class TokensService
 
     private void syncChainTickers(TokenCardMeta[] tokenList, int chainIndex)
     {
-        //go through all mainnet chains
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-
-        for (int i = chainIndex; i < networks.length; i++)
+        if (mainNetActive)
         {
-            NetworkInfo info = networks[i];
-            if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
+            //go through all mainnet chains
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+
+            for (int i = chainIndex; i < networks.length; i++)
+            {
+                NetworkInfo info = networks[i];
+                if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
+            }
         }
 
         //complete
         if (completionCallback != null)
         {
-            completionCallback.syncComplete(this);
+            completionCallback.syncComplete(this, mainNetActive);
         }
     }
 
@@ -1145,6 +1149,20 @@ public class TokensService
     public boolean isSynced()
     {
         return (syncTimer == 0);
+    }
+
+    public boolean startWalletSync(ServiceSyncCallback cb)
+    {
+        if (ethereumNetworkRepository.isMainNetSelected())
+        {
+            setCompletionCallback(cb);
+            return true;
+        }
+        else
+        {
+            completionCallback = cb;
+            return false;
+        }
     }
 
     public void setCompletionCallback(ServiceSyncCallback cb)

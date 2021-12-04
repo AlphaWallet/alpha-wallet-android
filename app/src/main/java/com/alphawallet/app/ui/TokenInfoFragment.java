@@ -105,7 +105,7 @@ public class TokenInfoFragment extends BaseFragment {
             stats1YearLow = new TokenInfoView(getContext(), "1 Year Low");
             stats1YearHigh = new TokenInfoView(getContext(), "1 Year High");
 
-            tokenInfoHeaderView = new TokenInfoHeaderView(getContext(), token);
+            tokenInfoHeaderView = new TokenInfoHeaderView(getContext(), token, viewModel.getTokensService());
             tokenInfoHeaderLayout.addView(tokenInfoHeaderView);
 
             tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Portfolio"));
@@ -129,9 +129,7 @@ public class TokenInfoFragment extends BaseFragment {
             tokenInfoLayout.addView(stats1YearLow);
             tokenInfoLayout.addView(stats1YearHigh);
 
-
-
-            viewModel.marketPrice().observe(getViewLifecycleOwner(), this::onMarketPriceChanged);
+            //viewModel.marketPrice().observe(getViewLifecycleOwner(), this::onMarketPriceChanged);
             // TODO: Create entity for chart data
             // viewModel.chartData().observe(getViewLifecycleOwner(), this::onChartDataFetched);
             viewModel.portfolio().observe(getViewLifecycleOwner(), this::onPortfolioUpdated);
@@ -175,7 +173,7 @@ public class TokenInfoFragment extends BaseFragment {
 
     private void onMarketPriceChanged(String value)
     {
-        tokenInfoHeaderView.setMarketValue(value);
+        //tokenInfoHeaderView.setMarketValue(value);
         // TODO: Compute price change
         // tokenInfoHeaderView.setPriceChange();
     }

@@ -1,13 +1,22 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.util.Pair;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class TokenInfoHeaderView extends LinearLayout {
     private final ImageView icon;
@@ -31,15 +40,18 @@ public class TokenInfoHeaderView extends LinearLayout {
         priceChange = findViewById(R.id.price_change);
     }
 
-    public TokenInfoHeaderView(Context context, Token token)
+    public TokenInfoHeaderView(Context context, Token token, TokensService svs)
     {
         this(context);
         this.token = token;
         setIcon(EthereumNetworkBase.getChainLogo(token.tokenInfo.chainId));
         setAmount(token.getFixedFormattedBalance());
         setSymbol(token.tokenInfo.symbol);
-        // TODO: setMarketValue();
-        // TODO: setPriceChange();
+        //obtain from ticker
+        Pair<Double, Double> pricePair = svs.getFiatValuePair(token.tokenInfo.chainId, token.getAddress());
+
+        setMarketValue(pricePair.first);
+        setPriceChange(pricePair.second);
     }
 
     public void setIcon(int resId)
@@ -57,9 +69,9 @@ public class TokenInfoHeaderView extends LinearLayout {
         symbol.setText(text);
     }
 
-    public void setMarketValue(String text)
+    public void setMarketValue(double value)
     {
-        String formattedValue = String.format("$%s", text);
+        String formattedValue = TickerService.getCurrencyString(value);
         marketValue.setText(formattedValue);
     }
 
@@ -68,24 +80,15 @@ public class TokenInfoHeaderView extends LinearLayout {
      * Automatically formats the string based on the passed value
      *
      * **/
-    public void setPriceChange(String text)
+    private void setPriceChange(double percentChange24h)
     {
-        String formattedValue = String.format("(+%s%%)", text);
-        double value = Double.parseDouble(text);
-        if (value > 0)
-        {
-            priceChange.setTextColor(context.getColor(R.color.green));
-        }
-        else if (value < 0)
-        {
-            priceChange.setTextColor(context.getColor(R.color.danger));
-            formattedValue = String.format("(%s%%)", text);
-        }
-        else
-        {
-            priceChange.setTextColor(context.getColor(R.color.black));
-        }
-
-        priceChange.setText(formattedValue);
+        try {
+            priceChange.setVisibility(View.VISIBLE);
+            int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.red : R.color.green);
+            BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
+            String formattedPercents = (percentChange24h < 0 ? "(" : "(+") + percentChangeBI + "%)";
+            priceChange.setText(formattedPercents);
+            priceChange.setTextColor(color);
+        } catch (Exception ex) { /* Quietly */ }
     }
 }

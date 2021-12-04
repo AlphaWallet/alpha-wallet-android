@@ -18,6 +18,8 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.LongSparseArray;
+import android.util.SparseLongArray;
 
 import androidx.annotation.Nullable;
 
@@ -94,7 +96,7 @@ public class TickerService
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
     private static final Map<Long, Boolean> canUpdate = new ConcurrentHashMap<>();
-    private static final ConcurrentLinkedQueue<TokenCardMeta> dexGuruQuery = new ConcurrentLinkedQueue<>();
+    private static final Map<String, TokenCardMeta> dexGuruQuery = new ConcurrentHashMap<>();
 
     @Nullable
     private Disposable tickerUpdateTimer;
@@ -247,10 +249,34 @@ public class TickerService
         });
     }
 
+    public Single<Integer> syncERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
+    {
+        if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
+            return Single.fromCallable(() -> 0);
+        //this function called after sync is complete, only update tickers that need updating
+        //first fetch the tickers for these
+        long staleTime = System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS;
+        Map<String, Long> currentTickerMap = localSource.getTickerTimeMap(chainId, erc20Tokens);
+        final Map<String, TokenCardMeta> lookupMap = new HashMap<>();
+        for (TokenCardMeta tcm : erc20Tokens)
+        {
+            if (!currentTickerMap.containsKey(tcm.getAddress())
+                    || currentTickerMap.get(tcm.getAddress()) < staleTime) lookupMap.put(tcm.getAddress().toLowerCase(), tcm);
+        }
+
+        if (lookupMap.size() == 0) return Single.fromCallable(() -> 0);
+
+        return Single.fromCallable(() -> {
+            Map<String, TokenTicker> tickerMap = fetchERC20TokenTickers(chainId, lookupMap.values());
+            localSource.updateERC20Tickers(chainId, tickerMap);
+            return tickerMap.size();
+        });
+    }
+
     public Single<Integer> getERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
-        final String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
-        final String dexGuruName = dexGuruChainIdToAPISymbol.get(chainId);
+        //final String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
+        //final String dexGuruName = dexGuruChainIdToAPISymbol.get(chainId);
         if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
             return Single.fromCallable(() -> 0);
 
@@ -258,7 +284,12 @@ public class TickerService
         for (TokenCardMeta tcm : erc20Tokens) { lookupMap.put(tcm.getAddress().toLowerCase(), tcm); }
 
         return Single.fromCallable(() -> {
-            int newSize = 0;
+            Map<String, TokenTicker> tickerMap = fetchERC20TokenTickers(chainId, lookupMap.values());
+            localSource.updateERC20Tickers(chainId, tickerMap);
+            return tickerMap.size();
+        });
+
+            /*int newSize = 0;
             if (apiChainName == null) return 0;
 
             final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
@@ -302,12 +333,65 @@ public class TickerService
             }
 
             return newSize;
-        });
+        });*/
+    }
+
+    private Map<String, TokenTicker> fetchERC20TokenTickers(long chainId, Collection<TokenCardMeta> erc20Tokens)
+    {
+        final String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
+        final String dexGuruName = dexGuruChainIdToAPISymbol.get(chainId);
+        final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
+        if (apiChainName == null) return erc20Tickers;
+
+        final Map<String, TokenCardMeta> lookupMap = new HashMap<>();
+        for (TokenCardMeta tcm : erc20Tokens) { lookupMap.put(tcm.getAddress().toLowerCase(), tcm); }
+
+        //build ticker header
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+        for (TokenCardMeta t : erc20Tokens)
+        {
+            if (!isFirst) sb.append(",");
+            sb.append(t.getAddress());
+            isFirst = false;
+        }
+
+        Request request = new Request.Builder()
+                .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt))
+                .get()
+                .build();
+
+        try (okhttp3.Response response = httpClient.newCall(request)
+                .execute())
+        {
+            List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
+            for (CoinGeckoTicker t : tickers)
+            {
+                //store ticker
+                erc20Tickers.put(t.address, t.toTokenTicker(currentCurrencySymbolTxt));
+                lookupMap.remove(t.address.toLowerCase());
+            }
+
+            canUpdate.put(chainId, true);
+            //localSource.updateERC20Tickers(chainId, erc20Tickers);
+
+            if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        return erc20Tickers;
     }
 
     private void addDexGuruTickers(Collection<TokenCardMeta> tokens)
     {
-        dexGuruQuery.addAll(tokens);
+        for (TokenCardMeta tcm : tokens)
+        {
+            dexGuruQuery.put(tcm.tokenId, tcm);
+        }
+
         if (dexGuruLookup == null || dexGuruLookup.isDisposed())
         {
             dexGuruLookup = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
@@ -317,14 +401,12 @@ public class TickerService
 
     private void getDexGuruTicker()
     {
-        TokenCardMeta tcm = dexGuruQuery.poll();
+        if (dexGuruQuery.keySet().iterator().hasNext())
+        {
+            String key = dexGuruQuery.keySet().iterator().next();
+            TokenCardMeta tcm = dexGuruQuery.get(key);
+            dexGuruQuery.remove(key);
 
-        if (tcm == null)
-        {
-            if (dexGuruLookup != null && !dexGuruLookup.isDisposed()) dexGuruLookup.dispose();
-        }
-        else
-        {
             //fetch next token
             Request request = new Request.Builder()
                     .url(DEXGURU_API.replace(CHAIN_IDS, dexGuruChainIdToAPISymbol.get(tcm.getChain())).replace(CONTRACT_ADDR, tcm.getAddress()))
@@ -332,7 +414,7 @@ public class TickerService
                     .build();
 
             try (okhttp3.Response response = httpClient.newCall(request)
-                        .execute())
+                    .execute())
             {
                 if ((response.code() / 100) == 2 && response.body() != null)
                 {
@@ -355,6 +437,10 @@ public class TickerService
             {
                 if (BuildConfig.DEBUG) e.printStackTrace();
             }
+        }
+        else
+        {
+            if (dexGuruLookup != null && !dexGuruLookup.isDisposed()) dexGuruLookup.dispose();
         }
     }
 
@@ -647,6 +733,11 @@ public class TickerService
         put(MATIC_ID, "polygon");
         put(AVALANCHE_ID, "avalanche");
     }};
+
+    public void deleteTickers()
+    {
+        localSource.deleteTickers();
+    }
 
     private static class ChainPair
     {

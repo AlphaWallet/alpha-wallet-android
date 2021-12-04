@@ -42,6 +42,7 @@ import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
@@ -51,6 +52,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
@@ -79,7 +81,9 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -92,7 +96,8 @@ public class WalletFragment extends BaseFragment implements
         View.OnClickListener,
         Runnable,
         BackupTokenCallback,
-        AvatarWriteCallback
+        AvatarWriteCallback,
+        ServiceSyncCallback
 {
     private static final String TAG = "WFRAG";
     private static final int TAB_ALL = 0;
@@ -179,6 +184,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
+        viewModel.getTokensService().setCompletionCallback(this);
     }
 
     private void initViews(@NonNull View view) {
@@ -269,6 +275,17 @@ public class WalletFragment extends BaseFragment implements
                 systemView.hide();
             }
         });
+    }
+
+    //Refresh value of wallet once sync is complete
+    @Override
+    public void syncComplete(TokensService svs)
+    {
+        svs.getFiatValuePair()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::updateValue)
+                .isDisposed();
     }
 
     //Could the view have been destroyed?

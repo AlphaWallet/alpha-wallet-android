@@ -151,7 +151,7 @@ public class TokenIcon extends ConstraintLayout
     {
         chainIconBackground.setVisibility(View.VISIBLE);
         chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
+        chainIcon.setImageResource(EthereumNetworkRepository.getSmallChainLogo(chainId));
     }
 
     private void setupDefaultIcon(boolean loadFailed)

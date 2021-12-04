@@ -407,6 +407,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 CustomNetworks cn = new Gson().fromJson(networks, CustomNetworks.class);
                 this.list = cn.list;
                 this.mapToTestNet = cn.mapToTestNet;
+                checkCustomNetworkSetting();
 
                 for (NetworkInfo info : list) {
                     networkMap.put(info.chainId, info);
@@ -414,6 +415,19 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                        hasValue.add(info.chainId);
                     }
                 }
+            }
+        }
+
+        private void checkCustomNetworkSetting() {
+            if (list.size() > 0 && !list.get(0).isCustom) { //need to update the list
+                List<NetworkInfo> copyList = new ArrayList<>(list);
+                list.clear();
+                for (NetworkInfo n : copyList) {
+                    NetworkInfo newInfo = new NetworkInfo(n.name, n.symbol, n.rpcServerUrl, n.etherscanUrl, n.chainId, n.backupNodeUrl, n.etherscanAPI, true);
+                    list.add(newInfo);
+                }
+                //record back
+                preferences.setCustomRPCNetworks(new Gson().toJson(this));
             }
         }
 

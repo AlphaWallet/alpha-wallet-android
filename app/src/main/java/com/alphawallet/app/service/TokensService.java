@@ -103,6 +103,8 @@ public class TokensService
     @Nullable
     private Disposable openSeaQueryDisposable;
 
+    private static boolean done = false;
+
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
                          TickerService tickerService,
@@ -264,16 +266,10 @@ public class TokensService
             {
                 meta.lastUpdate = pendingTokenMap.get(key);
                 if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
-                {
-                    unSynced++;
-                }
+                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
             }
             else if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
-            {
-                unSynced++;
-            }
+                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
         }
 
         if (syncTimer > 0 && System.currentTimeMillis() > syncTimer)
@@ -285,11 +281,62 @@ public class TokensService
             else
             {
                 syncTimer = 0;
-                if (completionCallback != null) completionCallback.syncComplete(this);
+                //sync chain tickers
+                syncChainTickers(tokenList, 0);
             }
         }
 
         return tokenList;
+    }
+
+    private boolean syncERC20Tickers(final int chainIndex, final long chainId, final TokenCardMeta[] tokenList)
+    {
+        List<TokenCardMeta> erc20OnChain = getERC20OnChain(chainId, tokenList);
+        if (erc20OnChain.size() > 0)
+        {
+            tickerService.syncERC20Tickers(chainId, erc20OnChain)
+                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(v -> syncChainTickers(tokenList, chainIndex+1), this::onERC20Error)
+                    .isDisposed();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private List<TokenCardMeta> getERC20OnChain( long chainId, TokenCardMeta[] tokenList)
+    {
+        List<TokenCardMeta> allERC20 = new ArrayList<>();
+        for (TokenCardMeta tcm : tokenList)
+        {
+            if (tcm.type == ContractType.ERC20 && tcm.hasPositiveBalance() && tcm.getChain() == chainId)
+            {
+                allERC20.add(tcm);
+            }
+        }
+        return allERC20;
+    }
+
+    private void syncChainTickers(TokenCardMeta[] tokenList, int chainIndex)
+    {
+        //go through all mainnet chains
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+
+        for (int i = chainIndex; i < networks.length; i++)
+        {
+            NetworkInfo info = networks[i];
+            if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
+        }
+
+        //complete
+        if (completionCallback != null)
+        {
+            completionCallback.syncComplete(this);
+        }
     }
 
     /**
@@ -1121,4 +1168,16 @@ public class TokensService
             }
         }
     }
+
+    // For Debugging
+//        if (!done)
+//        {
+//            done = true;
+//            Single.fromCallable(() -> {
+//                tickerService.deleteTickers();
+//                return true;
+//            }).subscribeOn(Schedulers.io())
+//                    .observeOn(Schedulers.io()).subscribe(b -> {
+//            }).isDisposed();
+//        }
 }

@@ -256,8 +256,9 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         service.getFiatValuePair()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(value ->
-                        syncCallback.syncCompleted(new Wallet(service.getCurrentAddress().toLowerCase()), value)).isDisposed();
+                .subscribe(value -> {
+                    syncCallback.syncCompleted(new Wallet(service.getCurrentAddress().toLowerCase()), value);
+                }).isDisposed();
     }
 
     public void swipeRefreshWallets()
@@ -325,6 +326,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (walletBalanceUpdate != null && !walletBalanceUpdate.isDisposed()) walletBalanceUpdate.dispose();
         if (ensCheck != null && !ensCheck.isDisposed()) ensCheck.dispose();
         if (ensWrappingCheck != null && !ensWrappingCheck.isDisposed()) ensWrappingCheck.dispose();
+        if (walletSync != null && !walletSync.isDisposed()) walletSync.dispose();
     }
 
     private void onCreateWalletError(Throwable throwable)

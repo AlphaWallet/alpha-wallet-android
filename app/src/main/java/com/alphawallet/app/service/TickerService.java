@@ -734,6 +734,11 @@ public class TickerService
         put(AVALANCHE_ID, "avalanche");
     }};
 
+    public void deleteTickers()
+    {
+        localSource.deleteTickers();
+    }
+
     private static class ChainPair
     {
         final long chainId;

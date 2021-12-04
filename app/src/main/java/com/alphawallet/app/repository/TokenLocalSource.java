@@ -66,4 +66,6 @@ public interface TokenLocalSource {
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 
     Map<String, Long> getTickerTimeMap(long chainId, List<TokenCardMeta> erc20Tokens);
+
+    void deleteTickers();
 }

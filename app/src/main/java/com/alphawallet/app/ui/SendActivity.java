@@ -561,33 +561,13 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             //either sending base chain or ERC20 tokens.
             final byte[] transactionBytes = viewModel.getTransactionBytes(token, txSendAddress, sendAmount);
 
-            if (token.isEthereum())
-            {
-                checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);
-            }
-            else
-            {
-                calculateEstimateDialog();
-                //form payload and calculate tx cost
-                calcGasCost = viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
-                        .map(this::convertToGasLimit)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
-                                error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
-            }
-        }
-    }
-
-    private BigInteger convertToGasLimit(EthEstimateGas estimate)
-    {
-        if (estimate.hasError())
-        {
-            return BigInteger.ZERO;
-        }
-        else
-        {
-            return estimate.getAmountUsed();
+            calculateEstimateDialog();
+            //form payload and calculate tx cost
+            calcGasCost = viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
+                            error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
         }
     }
 

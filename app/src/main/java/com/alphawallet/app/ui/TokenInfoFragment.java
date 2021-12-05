@@ -4,7 +4,6 @@ package com.alphawallet.app.ui;
 import static com.alphawallet.app.service.TickerService.chainPairs;
 import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
 
-import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -15,17 +14,13 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenPerformance;
 import com.alphawallet.app.entity.tokens.TokenPortfolio;
-import com.alphawallet.app.entity.tokens.TokenStats;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.HistoryChart;
 import com.alphawallet.app.util.TabUtils;
@@ -42,14 +37,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -276,20 +267,14 @@ public class TokenInfoFragment extends BaseFragment {
 
                 //Add performance stats. This is the variance
                 double currentPrice = getDoubleValue(prices, prices.length() - 1);
-                System.out.println("YOLESS: CURRENT " + currentPrice);
 
                 BigDecimal correctedBalance = token.getCorrectedBalance(Convert.Unit.ETHER.getFactor());
-                //BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(Convert.Unit.ETHER.getFactor(), RoundingMode.DOWN);
 
                 BigDecimal yesterdayDiff = BigDecimal.valueOf(currentPrice - findValue(prices, getMidnightDateFromTimestamp(yesterdayTime))).multiply(correctedBalance);
                 BigDecimal oneWeekDiff = BigDecimal.valueOf(currentPrice - findValue(prices, getMidnightDateFromTimestamp(oneWeekTime))).multiply(correctedBalance);
                 BigDecimal oneMonthDiff = BigDecimal.valueOf(currentPrice - findValue(prices, getMidnightDateFromTimestamp(oneMonthTime))).multiply(correctedBalance);
                 BigDecimal oneYearDiff = BigDecimal.valueOf(currentPrice - getDoubleValue(prices, 0)).multiply(correctedBalance);
 
-                //values.add(findValue(prices, getMidnightDateFromTimestamp(yesterdayTime)));
-                //values.add(findValue(prices, getMidnightDateFromTimestamp(oneWeekTime)));
-                //values.add(findValue(prices, getMidnightDateFromTimestamp(oneMonthTime)));
-                //values.add(getDoubleValue(prices, 0));
                 values.add(yesterdayDiff.doubleValue());
                 values.add(oneWeekDiff.doubleValue());
                 values.add(oneMonthDiff.doubleValue());

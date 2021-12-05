@@ -11,6 +11,10 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.service.TickerService;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class TokenInfoView extends LinearLayout {
     private final TextView label;
@@ -46,6 +50,16 @@ public class TokenInfoView extends LinearLayout {
         if (text.startsWith("http")) { setLink(); }
         TextView useView = getTextView(text.length());
         useView.setText(text);
+    }
+
+    public void setCurrencyValue(double v)
+    {
+        value.setVisibility(View.VISIBLE);
+        valueLongText.setVisibility(View.GONE);
+        value.setText(TickerService.getFullCurrencyString(v));
+
+        int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.red : R.color.green);
+        value.setTextColor(color);
     }
 
     private TextView getTextView(int length)

@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.DexGuruTicker;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -84,6 +85,7 @@ public class TickerService
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" + CONTRACT_ADDR + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
     private static final String DEXGURU_API = "https://api.dex.guru/v1/tokens/" + CONTRACT_ADDR + "-" + CHAIN_IDS;
     private static final String CURRENCY_CONV = "currency";
+    private static final double ONE_BILLION = 1000000000.0;
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
     public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
@@ -195,13 +197,14 @@ public class TickerService
                     String result = response.body()
                             .string();
                     JSONObject data = new JSONObject(result);
-                    for (ChainPair p : chainPairs)
+                    for (long chainId : chainPairs.keySet())
                     {
-                        if (!data.has(p.chainSymbol)) continue;
-                        JSONObject tickerData = (JSONObject) data.get(p.chainSymbol);
+                        String chainSymbol = chainPairs.get(chainId);
+                        if (!data.has(chainSymbol)) continue;
+                        JSONObject tickerData = (JSONObject) data.get(chainSymbol);
                         TokenTicker tTicker = decodeCoinGeckoTicker(tickerData);
-                        ethTickers.put(p.chainId, tTicker);
-                        checkPeggedTickers(p.chainId, tTicker);
+                        ethTickers.put(chainId, tTicker);
+                        checkPeggedTickers(chainId, tTicker);
                         tickers++;
                     }
                 }
@@ -275,8 +278,6 @@ public class TickerService
 
     public Single<Integer> getERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
-        //final String apiChainName = coinGeckoChainIdToAPIName.get(chainId);
-        //final String dexGuruName = dexGuruChainIdToAPISymbol.get(chainId);
         if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
             return Single.fromCallable(() -> 0);
 
@@ -288,52 +289,6 @@ public class TickerService
             localSource.updateERC20Tickers(chainId, tickerMap);
             return tickerMap.size();
         });
-
-            /*int newSize = 0;
-            if (apiChainName == null) return 0;
-
-            final Map<String, TokenTicker> erc20Tickers = new HashMap<>();
-
-            //build ticker header
-            StringBuilder sb = new StringBuilder();
-            boolean isFirst = true;
-            for (TokenCardMeta t : erc20Tokens)
-            {
-                if (!isFirst) sb.append(",");
-                sb.append(t.getAddress());
-                isFirst = false;
-            }
-
-            Request request = new Request.Builder()
-                    .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt))
-                    .get()
-                    .build();
-
-            try (okhttp3.Response response = httpClient.newCall(request)
-                    .execute())
-            {
-                List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
-                newSize = tickers.size();
-
-                for (CoinGeckoTicker t : tickers)
-                {
-                    //store ticker
-                    erc20Tickers.put(t.address, t.toTokenTicker(currentCurrencySymbolTxt));
-                    lookupMap.remove(t.address.toLowerCase());
-                }
-
-                canUpdate.put(chainId, true);
-                localSource.updateERC20Tickers(chainId, erc20Tickers);
-
-                if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
-            }
-            catch (Exception e)
-            {
-                if (BuildConfig.DEBUG) e.printStackTrace();
-            }
-
-            return newSize;
-        });*/
     }
 
     private Map<String, TokenTicker> fetchERC20TokenTickers(long chainId, Collection<TokenCardMeta> erc20Tokens)
@@ -373,8 +328,6 @@ public class TickerService
             }
 
             canUpdate.put(chainId, true);
-            //localSource.updateERC20Tickers(chainId, erc20Tickers);
-
             if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
         }
         catch (Exception e)
@@ -659,9 +612,18 @@ public class TickerService
         throwable.printStackTrace();
     }
 
+    public static String getFullCurrencyString(double price)
+    {
+        return getCurrencyString(price) + " " + currentCurrencySymbolTxt;
+    }
+
     //TODO: Refactor this as required
     public static String getCurrencyString(double price)
     {
+        if (price > ONE_BILLION)
+        {
+            return getBillionsString(price);
+        }
         DecimalFormat df = new DecimalFormat("#,##0.00");
         df.setRoundingMode(RoundingMode.CEILING);
         if (price >= 0) {
@@ -669,6 +631,14 @@ public class TickerService
         } else {
             return "-" + currentCurrencySymbol + df.format(Math.abs(price));
         }
+    }
+
+    private static String getBillionsString(double price)
+    {
+        price /= ONE_BILLION;
+        DecimalFormat df = new DecimalFormat("#,##0.000");
+        df.setRoundingMode(RoundingMode.CEILING);
+        return currentCurrencySymbol + df.format(price) + "B";
     }
 
     public static String getCurrencyWithoutSymbol(double price)
@@ -739,39 +709,36 @@ public class TickerService
         localSource.deleteTickers();
     }
 
-    private static class ChainPair
+    public static final Map<Long, String> chainPairs = new HashMap<Long, String>(){{
+        put(MAINNET_ID, "ethereum");
+        put(CLASSIC_ID, "ethereum-classic");
+        put(POA_ID, "poa-network");
+        put(XDAI_ID, "xdai");
+        put(BINANCE_MAIN_ID, "binancecoin");
+        put(HECO_ID, "huobi-token");
+        put(AVALANCHE_ID, "avalanche-2");
+        put(FANTOM_ID, "fantom");
+        put(MATIC_ID, "matic-network");
+        put(ARBITRUM_MAIN_ID, "ethereum");
+        put(OPTIMISTIC_MAIN_ID, "ethereum");
+    }};
+
+    public static boolean validateCoinGeckoAPI(Token token)
     {
-        final long chainId;
-        final String chainSymbol;
-
-        public ChainPair(long chainId, String chainSymbol)
-        {
-            this.chainId = chainId;
-            this.chainSymbol = chainSymbol;
-        }
+        if (token.isEthereum() && chainPairs.containsKey(token.tokenInfo.chainId)) return true;
+        else if ((!token.isEthereum() && !token.isNonFungible()) && coinGeckoChainIdToAPIName.containsKey(token.tokenInfo.chainId)) return true;
+        else return false;
     }
-
-    private static final ChainPair[] chainPairs = {
-            new ChainPair(MAINNET_ID, "ethereum"),
-            new ChainPair(CLASSIC_ID, "ethereum-classic"),
-            new ChainPair(POA_ID, "poa-network"),
-            new ChainPair(XDAI_ID, "xdai"),
-            new ChainPair(BINANCE_MAIN_ID, "binancecoin"),
-            new ChainPair(HECO_ID, "huobi-token"),
-            new ChainPair(AVALANCHE_ID, "avalanche-2"),
-            new ChainPair(FANTOM_ID, "fantom"),
-            new ChainPair(MATIC_ID, "matic-network")
-    };
 
     private String getCoinGeckoChainCall()
     {
         StringBuilder tokenList = new StringBuilder();
         boolean firstPair = true;
-        for (ChainPair cp : chainPairs)
+        for (String cp : chainPairs.values())
         {
             if (!firstPair) tokenList.append(",");
             firstPair = false;
-            tokenList.append(cp.chainSymbol);
+            tokenList.append(cp);
         }
 
         return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt);
@@ -779,9 +746,9 @@ public class TickerService
 
     private boolean receivedAllChainPairs()
     {
-        for (ChainPair cp : chainPairs)
+        for (long chainId : chainPairs.keySet())
         {
-            if (!ethTickers.containsKey(cp.chainId)) { return false; }
+            if (!ethTickers.containsKey(chainId)) { return false; }
         }
 
         return true;

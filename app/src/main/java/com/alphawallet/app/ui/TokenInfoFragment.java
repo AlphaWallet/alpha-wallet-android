@@ -1,7 +1,12 @@
 package com.alphawallet.app.ui;
 
 
+import static com.alphawallet.app.service.TickerService.chainPairs;
+import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
+
 import android.os.Bundle;
+import android.text.format.DateUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +16,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenPerformance;
 import com.alphawallet.app.entity.tokens.TokenPortfolio;
-import com.alphawallet.app.entity.tokens.TokenStats;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.HistoryChart;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.TokenInfoViewModel;
@@ -25,11 +30,28 @@ import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoHeaderView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.tools.Convert;
 import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 public class TokenInfoFragment extends BaseFragment {
     public static final int CHART_1D = 0;
@@ -59,8 +81,8 @@ public class TokenInfoFragment extends BaseFragment {
     private TokenInfoView performance1M;
     private TokenInfoView performance1Y;
     private TokenInfoView statsMarketCap;
-    private TokenInfoView statsTotalSupply;
-    private TokenInfoView statsMaxSupply;
+    private TokenInfoView statsTradingVolume;
+    private TokenInfoView statsMaxVolume;
     private TokenInfoView stats1YearLow;
     private TokenInfoView stats1YearHigh;
 
@@ -89,34 +111,35 @@ public class TokenInfoFragment extends BaseFragment {
             tokenInfoHeaderLayout = view.findViewById(R.id.layout_token_header);
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
 
-            portfolioBalance = new TokenInfoView(getContext(), "Balance");
-            portfolioProfit24Hr = new TokenInfoView(getContext(), "24-H Return");
-            portfolioProfitTotal = new TokenInfoView(getContext(), "Profit/Loss");
-            portfolioShare = new TokenInfoView(getContext(), "Portfolio Share");
-            portfolioAverageCost = new TokenInfoView(getContext(), "Average Cost");
-            portfolioPaidFees = new TokenInfoView(getContext(), "Paid Fees");
+            //TODO: Work out how to source these
+            //portfolioBalance = new TokenInfoView(getContext(), "Balance");
+            //portfolioProfit24Hr = new TokenInfoView(getContext(), "24-H Return");
+            //portfolioProfitTotal = new TokenInfoView(getContext(), "Profit/Loss");
+            //portfolioShare = new TokenInfoView(getContext(), "Portfolio Share");
+            //portfolioAverageCost = new TokenInfoView(getContext(), "Average Cost");
+            //portfolioPaidFees = new TokenInfoView(getContext(), "Paid Fees");
             performance1D = new TokenInfoView(getContext(), "1 Day");
             performance1W = new TokenInfoView(getContext(), "1 Week");
             performance1M = new TokenInfoView(getContext(), "1 Month");
             performance1Y = new TokenInfoView(getContext(), "1 Year");
             statsMarketCap = new TokenInfoView(getContext(), "Market Cap");
-            statsTotalSupply = new TokenInfoView(getContext(), "Total Supply");
-            statsMaxSupply = new TokenInfoView(getContext(), "Max Supply");
+            statsTradingVolume = new TokenInfoView(getContext(), "Current Volume");
+            statsMaxVolume = new TokenInfoView(getContext(), "Max Volume");
             stats1YearLow = new TokenInfoView(getContext(), "1 Year Low");
             stats1YearHigh = new TokenInfoView(getContext(), "1 Year High");
 
             tokenInfoHeaderView = new TokenInfoHeaderView(getContext(), token, viewModel.getTokensService());
             tokenInfoHeaderLayout.addView(tokenInfoHeaderView);
 
-            tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Portfolio"));
+            /*tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Portfolio"));
             tokenInfoLayout.addView(portfolioBalance);
             tokenInfoLayout.addView(portfolioProfit24Hr);
             tokenInfoLayout.addView(portfolioProfitTotal);
             tokenInfoLayout.addView(portfolioShare);
             tokenInfoLayout.addView(portfolioAverageCost);
-            tokenInfoLayout.addView(portfolioPaidFees);
+            tokenInfoLayout.addView(portfolioPaidFees);*/
 
-            tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Performance"));
+            tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), getString(R.string.performance)));
             tokenInfoLayout.addView(performance1D);
             tokenInfoLayout.addView(performance1W);
             tokenInfoLayout.addView(performance1M);
@@ -124,20 +147,46 @@ public class TokenInfoFragment extends BaseFragment {
 
             tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Stats"));
             tokenInfoLayout.addView(statsMarketCap);
-            tokenInfoLayout.addView(statsTotalSupply);
-            tokenInfoLayout.addView(statsMaxSupply);
+            tokenInfoLayout.addView(statsTradingVolume);
+            tokenInfoLayout.addView(statsMaxVolume);
             tokenInfoLayout.addView(stats1YearLow);
             tokenInfoLayout.addView(stats1YearHigh);
 
-            //viewModel.marketPrice().observe(getViewLifecycleOwner(), this::onMarketPriceChanged);
-            // TODO: Create entity for chart data
-            // viewModel.chartData().observe(getViewLifecycleOwner(), this::onChartDataFetched);
-            viewModel.portfolio().observe(getViewLifecycleOwner(), this::onPortfolioUpdated);
-            viewModel.performance().observe(getViewLifecycleOwner(), this::onPerformanceUpdated);
-            viewModel.stats().observe(getViewLifecycleOwner(), this::onStatsUpdated);
-
-            historyChart.fetchHistory(token.tokenInfo, HistoryChart.Range.Day);
+            historyChart.fetchHistory(token, HistoryChart.Range.Day);
+            populateStats(token)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::handleValues, e -> { /*TODO: Hide stats*/ })
+                    .isDisposed();
         }
+    }
+
+    private void hideStats()
+    {
+        tokenInfoLayout.removeAllViews();
+        tokenInfoLayout.invalidate();
+    }
+
+    private void handleValues(List<Double> values)
+    {
+        if (values.size() == 0)
+        {
+            hideStats();
+            return;
+        }
+
+        int index = 0;
+
+        performance1D.setCurrencyValue(values.get(index++));
+        performance1W.setCurrencyValue(values.get(index++));
+        performance1M.setCurrencyValue(values.get(index++));
+        performance1Y.setCurrencyValue(values.get(index++));
+
+        statsMarketCap.setValue(TickerService.getFullCurrencyString(values.get(index++)));
+        statsTradingVolume.setValue(TickerService.getFullCurrencyString(values.get(index++)));
+        statsMaxVolume.setValue(TickerService.getFullCurrencyString(values.get(index++)));
+        stats1YearLow.setValue(TickerService.getFullCurrencyString(values.get(index++)));
+        stats1YearHigh.setValue(TickerService.getFullCurrencyString(values.get(index++)));
     }
 
     private void initTabLayout(View view)
@@ -154,7 +203,7 @@ public class TokenInfoFragment extends BaseFragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab)
             {
-                historyChart.fetchHistory(token.tokenInfo, HistoryChart.Range.values()[tab.getPosition()]);
+                historyChart.fetchHistory(token, HistoryChart.Range.values()[tab.getPosition()]);
             }
 
             @Override
@@ -171,18 +220,6 @@ public class TokenInfoFragment extends BaseFragment {
         TabUtils.setHighlightedTabColor(getContext(), tabLayout);
     }
 
-    private void onMarketPriceChanged(String value)
-    {
-        //tokenInfoHeaderView.setMarketValue(value);
-        // TODO: Compute price change
-        // tokenInfoHeaderView.setPriceChange();
-    }
-
-    private void onChartDataFetched()
-    {
-
-    }
-
     private void onPortfolioUpdated(TokenPortfolio tokenPortfolio)
     {
         portfolioBalance.setValue(tokenPortfolio.getBalance());
@@ -193,20 +230,152 @@ public class TokenInfoFragment extends BaseFragment {
         portfolioPaidFees.setValue(tokenPortfolio.getFees());
     }
 
-    private void onPerformanceUpdated(TokenPerformance tokenPerformance)
+    static final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(false)
+            .build();
+
+    private Single<List<Double>> populateStats(Token token)
     {
-        performance1D.setValue(tokenPerformance.getDay());
-        performance1W.setValue(tokenPerformance.getWeek());
-        performance1M.setValue(tokenPerformance.getMonth());
-        performance1Y.setValue(tokenPerformance.getYear());
+        List<Double> values = new ArrayList<>();
+        if (!TickerService.validateCoinGeckoAPI(token)) return Single.fromCallable(() -> values);
+
+        return Single.fromCallable(() -> {
+
+            String coinGeckotokenId = token.isEthereum() ? chainPairs.get(token.tokenInfo.chainId)
+                    : coinGeckoChainIdToAPIName.get(token.tokenInfo.chainId) + "/contract/" + token.getAddress().toLowerCase();
+
+            Request request = new Request.Builder()
+                    .url("https://api.coingecko.com/api/v3/coins/" + coinGeckotokenId + "/market_chart?vs_currency=" + TickerService.getCurrencySymbolTxt() + "&days=365")
+                    .get()
+                    .build();
+
+            try (okhttp3.Response response = httpClient.newCall(request)
+                    .execute())
+            {
+                String result = response.body().string();
+                //build mapping
+                JSONArray prices = new JSONObject(result).getJSONArray("prices");
+                JSONArray marketCaps = new JSONObject(result).getJSONArray("market_caps");
+                JSONArray totalVolumes = new JSONObject(result).getJSONArray("total_volumes");
+
+                long yesterdayTime = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS;
+                long oneWeekTime = System.currentTimeMillis() - 7 * DateUtils.DAY_IN_MILLIS;
+                long oneMonthTime = System.currentTimeMillis() - 30 * DateUtils.DAY_IN_MILLIS;
+
+                //Add performance stats. This is the variance
+                double currentPrice = getDoubleValue(prices, prices.length() - 1);
+
+                BigDecimal correctedBalance = token.getCorrectedBalance(Convert.Unit.ETHER.getFactor());
+
+                BigDecimal yesterdayDiff = BigDecimal.valueOf(currentPrice - findValue(prices, getMidnightDateFromTimestamp(yesterdayTime))).multiply(correctedBalance);
+                BigDecimal oneWeekDiff = BigDecimal.valueOf(currentPrice - findValue(prices, getMidnightDateFromTimestamp(oneWeekTime))).multiply(correctedBalance);
+                BigDecimal oneMonthDiff = BigDecimal.valueOf(currentPrice - findValue(prices, getMidnightDateFromTimestamp(oneMonthTime))).multiply(correctedBalance);
+                BigDecimal oneYearDiff = BigDecimal.valueOf(currentPrice - getDoubleValue(prices, 0)).multiply(correctedBalance);
+
+                values.add(yesterdayDiff.doubleValue());
+                values.add(oneWeekDiff.doubleValue());
+                values.add(oneMonthDiff.doubleValue());
+                values.add(oneYearDiff.doubleValue());
+
+                //add market cap
+                values.add(getDoubleValue(marketCaps,marketCaps.length() - 1));
+
+                //add total volume
+                values.add(getDoubleValue(totalVolumes,marketCaps.length() - 1));
+
+                //get trading volume high
+                Pair<Double, Double> minMax = getMinMax(totalVolumes);
+                values.add(minMax.second);
+
+                //get highs and lows
+                minMax = getMinMax(prices);
+                values.add(minMax.first);
+                values.add(minMax.second);
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+
+            return values;
+        });
     }
 
-    private void onStatsUpdated(TokenStats tokenStats)
+    private Pair<Double, Double> getMinMax(JSONArray valueArray)
     {
-        statsMarketCap.setValue(tokenStats.getMarketCap());
-        statsTotalSupply.setValue(tokenStats.getTotalSupply());
-        statsMaxSupply.setValue(tokenStats.getMaxSupply());
-        stats1YearLow.setValue(tokenStats.getYearLow());
-        stats1YearHigh.setValue(tokenStats.getYearHigh());
+        double min = Double.MAX_VALUE;
+        double max = 0.0;
+        try
+        {
+            for (int i = 0; i < valueArray.length(); i++)
+            {
+                JSONArray valueElement = valueArray.getJSONArray(i);
+                double value = valueElement.getDouble(1);
+                if (value < min) min = value;
+                if (value > max) max = value;
+            }
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        if (min == Double.MAX_VALUE) min = 0.0;
+
+        return new Pair<>(min, max);
+    }
+
+    private double findValue(JSONArray prices, Date targetDate)
+    {
+        try
+        {
+            long lastDate = System.currentTimeMillis();
+            long targetTime = targetDate.getTime();
+            for (int i = prices.length() - 2; i >= 0; i--)
+            {
+                JSONArray thisPrice = prices.getJSONArray(i);
+                long timeStamp = thisPrice.getLong(0);
+                if (lastDate > targetTime && targetTime >= timeStamp)
+                {
+                    //got it
+                    return thisPrice.getDouble(1);
+                }
+                lastDate = timeStamp;
+            }
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        return 0.0;
+    }
+
+    private double getDoubleValue(JSONArray prices, int i)
+    {
+        try
+        {
+            JSONArray thisPrice = prices.getJSONArray(i);
+            return thisPrice.getDouble(1);
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        return 0.0;
+    }
+
+    private Date getMidnightDateFromTimestamp(long timeStampInMillis) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        calendar.setTimeInMillis(timeStampInMillis);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        return calendar.getTime();
     }
 }

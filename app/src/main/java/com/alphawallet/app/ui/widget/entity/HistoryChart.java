@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import static com.alphawallet.app.service.TickerService.chainPairs;
 import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 
@@ -18,7 +19,9 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.web3.entity.Address;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -69,57 +72,14 @@ public class HistoryChart extends View {
 
     // store tokens mapping and chart data
     static class Cache {
-        static class CoinGeckoToken {
-            public String id;
-            public String symbol;
-            public String name;
-            public Map<String, String> platforms;
-        }
-
         Range range;
-        TokenInfo tokenInfo = null;
-        List<CoinGeckoToken> coinGeckoTokens;
-
         Map<Range, Datasource> datasourceMap = new HashMap<>();
 
-        Datasource getCurrentDatasource() {
+        Datasource getCurrentDatasource(Range range) {
             if (datasourceMap.containsKey(range)) {
                 return datasourceMap.get(range);
             }
             return null;
-        }
-
-        // Mapping created by examining CoinGecko API output empirically
-        boolean platformMatches(String platform, long chainId) {
-            if (coinGeckoChainIdToAPIName.containsKey(chainId))
-            {
-                return coinGeckoChainIdToAPIName.get(chainId).equals(platform);
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        boolean isServerSupported(long chainId) {
-            return coinGeckoChainIdToAPIName.containsKey(chainId);
-        }
-
-        static Single<List<CoinGeckoToken>> fetchList() {
-            return Single.fromCallable(() -> {
-                List<CoinGeckoToken> coinGeckoTokens = new ArrayList<>();
-                Request request = new Request.Builder()
-                        .url("https://api.coingecko.com/api/v3/coins/list?include_platform=true")
-                        .get()
-                        .build();
-                okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
-                if (response.code() / 200 == 1) {
-                    coinGeckoTokens = new Gson().fromJson(response.body().string(), new TypeToken<List<CoinGeckoToken>>() {
-                    }.getType());
-                }
-                return coinGeckoTokens;
-            });
         }
     }
 
@@ -230,7 +190,7 @@ public class HistoryChart extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Datasource datasource = cache.getCurrentDatasource();
+        Datasource datasource = cache.getCurrentDatasource(cache.range);
         if (datasource == null || datasource.entries.size() == 0) {
             // draw no chart data available message
             int xPos = (getWidth() / 2);
@@ -279,83 +239,30 @@ public class HistoryChart extends View {
         canvas.drawPath(path, paint);
     }
 
-    public void fetchHistory(TokenInfo info, Range range) {
-        cache.tokenInfo = info;
-        cache.range = range;
-        if (cache.coinGeckoTokens == null) {
-            Cache.fetchList()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokens, this::onError).isDisposed();
-        } else {
-            getCoingeckoTokenIdAndFetchHistory();
-        }
-    }
-
-
-    private void getCoingeckoTokenIdAndFetchHistory() {
-
+    public void fetchHistory(Token token, final Range range) {
         // use cache
-        if (cache.getCurrentDatasource() != null) {
+        cache.range = range;
+        if (cache.getCurrentDatasource(range) != null) {
             invalidate();
             return;
         }
 
-        if (!cache.isServerSupported(cache.tokenInfo.chainId)) {
-            return;
-        }
+        if (!TickerService.validateCoinGeckoAPI(token)) return; //wouldn't have tickers
 
-        final Address polygonMaticContract = new Address("0x0000000000000000000000000000000000001010");
-
-        String coingeckoTokenId = null;
-
-        for (Cache.CoinGeckoToken cgToken : cache.coinGeckoTokens) {
-            for (Map.Entry<String, String> entry : cgToken.platforms.entrySet()) {
-                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                    if (cache.platformMatches(entry.getKey(), cache.tokenInfo.chainId)) {
-                        if (new Address(entry.getValue()).equals(Address.EMPTY) &&
-                                cgToken.symbol.equalsIgnoreCase(cache.tokenInfo.symbol)
-                        ) {
-                            coingeckoTokenId = cgToken.id;
-                            break;
-                        } else if (new Address(entry.getValue()).equals(new Address(cache.tokenInfo.address))) {
-                            coingeckoTokenId = cgToken.id;
-                            break;
-                        } else if (cache.tokenInfo.chainId == MATIC_ID && new Address(cache.tokenInfo.address).equals(Address.EMPTY) &&
-                                new Address(entry.getValue()).equals(polygonMaticContract)) {
-                            coingeckoTokenId = cgToken.id;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (coingeckoTokenId == null) {
-                if (cgToken.symbol.equalsIgnoreCase(cache.tokenInfo.symbol)) {
-                    coingeckoTokenId = cgToken.id;
-                    break;
-                }
-            }
-        }
+        String coingeckoTokenId = token.isEthereum() ? chainPairs.get(token.tokenInfo.chainId)
+                : coinGeckoChainIdToAPIName.get(token.tokenInfo.chainId) + "/contract/" + token.getAddress().toLowerCase();
 
         if (coingeckoTokenId != null) {
-            Datasource.fetchHistory(cache.range, coingeckoTokenId)
+            Datasource.fetchHistory(range, coingeckoTokenId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onEntries, this::onError).isDisposed();
+                    .subscribe(datasource -> onEntries(range, datasource), this::onError).isDisposed();
         }
     }
 
-
-    private void onTokens(List<Cache.CoinGeckoToken> tokens) {
+    private void onEntries(Range range, Datasource datasource) {
         // invalidate
-        this.cache.coinGeckoTokens = tokens;
-        getCoingeckoTokenIdAndFetchHistory();
-    }
-
-    private void onEntries(Datasource datasource) {
-        // invalidate
-        cache.datasourceMap.put(cache.range, datasource);
+        cache.datasourceMap.put(range, datasource);
         invalidate();
     }
 

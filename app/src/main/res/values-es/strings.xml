@@ -824,4 +824,5 @@
     <string name="not_connected">No conectado</string>
     <string name="online">Conectado</string>
     <string name="summary_change_24h">%1$s (%2$s) Hoy</string>
+    <string name="performance">Performance</string>
 </resources>

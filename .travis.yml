@@ -12,20 +12,19 @@ android:
 
     # The SDK version used to compile your project
     - android-30
-    - android-24
 
     - extra-android-m2repository
     - extra-google-android-support
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-24
+    - sys-img-x86-android-30
+    - sys-img-x86-android-26
 
 licenses:
   - 'android-sdk-preview-license-.+'
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
-  - 'android-ndk-license-.+'
 
 before_install:
 - yes | sdkmanager "platforms;android-30"
@@ -33,24 +32,12 @@ before_install:
 install:
   - true
 
-before_script:
-  - echo y | sdkmanager "ndk-bundle"
-  - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-  - android list targets
-  - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a -c 100M
-  - export QEMU_AUDIO_DRV=none && emulator -avd test -no-window &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82
-  - adb shell input keyevent 84
-
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
 - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
-- ./gradlew test
-- sh ./e2e.sh
-- ./gradlew build -x test
+- ./gradlew build
 
 after_success:
  - bash <(curl -s https://codecov.io/bash)

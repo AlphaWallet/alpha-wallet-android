@@ -7,6 +7,7 @@ public class PriceAlert implements Parcelable {
     private String value;
     private String currency;
     private String token;
+    // true - means, rises above / false - means, drops to
     private boolean indicator;
     private boolean enabled;
 

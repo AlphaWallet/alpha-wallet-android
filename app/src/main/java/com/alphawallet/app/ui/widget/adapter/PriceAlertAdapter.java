@@ -12,6 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.repository.CurrencyRepository;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.ui.widget.entity.PriceAlertCallback;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -55,8 +58,9 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
             holder.indicator.setText("Below ");
         }
 
-        // TODO: Format currency value
-        holder.value.setText(alert.getValue());
+
+        CurrencyItem currencyItem = CurrencyRepository.getCurrencyByISO(alert.getCurrency());
+        holder.value.setText(currencyItem.getSymbol() + TickerService.getCurrencyWithoutSymbol(new Double(alert.getValue())));
 
         holder.alertSwitch.setChecked(alert.isEnabled());
 

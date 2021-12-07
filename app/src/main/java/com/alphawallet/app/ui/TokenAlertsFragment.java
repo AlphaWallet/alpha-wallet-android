@@ -4,9 +4,13 @@ package com.alphawallet.app.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextPaint;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +19,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -139,18 +144,39 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
         private Drawable icon;
         private ColorDrawable background;
+        private final Paint textPaint = new TextPaint();
+        private int swipeControlWidth;
 
         SwipeCallback()
         {
-            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+            super(0, ItemTouchHelper.LEFT);
             if (getActivity() != null)
             {
-                icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_hide_token);
+                icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_close);
                 if (icon != null)
                 {
                     icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
                 }
                 background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.cancel_red));
+
+                textPaint.setTextAlign(Paint.Align.CENTER);
+                textPaint.setTypeface(ResourcesCompat.getFont(getContext(), R.font.font_semibold));
+
+                int textSize = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_SP,
+                        17,
+                        getActivity().getResources().getDisplayMetrics()
+                );
+
+                swipeControlWidth = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        120,
+                        getActivity().getResources().getDisplayMetrics()
+                );
+
+
+                textPaint.setTextSize(textSize);
+                textPaint.setColor(getResources().getColor(R.color.white, getContext().getTheme()));
             }
         }
 
@@ -178,23 +204,15 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             View itemView = viewHolder.itemView;
             int offset = 20;
-            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
-            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconMargin = (itemView.getHeight() / 2 - icon.getIntrinsicHeight()) / 2;
+            int iconTop = itemView.getTop() + iconMargin * 2;
             int iconBottom = iconTop + icon.getIntrinsicHeight();
 
-            if (dX > 0)
+            if (dX < 0)
             {
-                int iconLeft = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
-                int iconRight = itemView.getLeft() + iconMargin;
-                icon.setBounds(iconRight, iconTop, iconLeft, iconBottom);
-                background.setBounds(itemView.getLeft(), itemView.getTop(),
-                        itemView.getLeft() + ((int) dX) + offset,
-                        itemView.getBottom());
-            }
-            else if (dX < 0)
-            {
-                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
-                int iconRight = itemView.getRight() - iconMargin;
+                int iconRight = itemView.getRight() - (iconMargin + swipeControlWidth - icon.getIntrinsicWidth()) / 2;
+                int iconLeft = iconRight - icon.getIntrinsicWidth();
+
                 icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
                 background.setBounds(itemView.getRight() + ((int) dX) - offset,
                         itemView.getTop(), itemView.getRight(), itemView.getBottom());
@@ -206,6 +224,10 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
 
             background.draw(c);
             icon.draw(c);
+
+            int xPos = (int)(itemView.getRight() - swipeControlWidth / 2);
+            int yPos = (int)(itemView.getTop() + (itemView.getHeight() * 0.75));
+            c.drawText(getContext().getString(R.string.delete), xPos, yPos, textPaint);
         }
     }
 }

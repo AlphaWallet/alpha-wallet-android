@@ -134,7 +134,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
         pages.add(0, new Pair<>("Info", tokenInfoFragment));
         pages.add(1, new Pair<>("Activity", tokenActivityFragment));
-        //pages.add(2, new Pair<>("Alerts", tokenAlertsFragment));  //TODO: Implement alert system
+        pages.add(2, new Pair<>("Alerts", tokenAlertsFragment));  //TODO: Implement alert system
 
         viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));

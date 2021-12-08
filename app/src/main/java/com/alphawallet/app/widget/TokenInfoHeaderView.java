@@ -25,14 +25,10 @@ public class TokenInfoHeaderView extends LinearLayout {
     private final TextView marketValue;
     private final TextView priceChange;
 
-    private Context context;
-    private Token token;
-
     public TokenInfoHeaderView(Context context)
     {
         super(context);
         inflate(context, R.layout.item_token_info_header, this);
-        this.context = context;
         icon = findViewById(R.id.token_icon);
         amount = findViewById(R.id.token_amount);
         symbol = findViewById(R.id.token_symbol);
@@ -43,7 +39,6 @@ public class TokenInfoHeaderView extends LinearLayout {
     public TokenInfoHeaderView(Context context, Token token, TokensService svs)
     {
         this(context);
-        this.token = token;
         setIcon(EthereumNetworkBase.getChainLogo(token.tokenInfo.chainId));
         setAmount(token.getFixedFormattedBalance());
         setSymbol(token.tokenInfo.symbol);

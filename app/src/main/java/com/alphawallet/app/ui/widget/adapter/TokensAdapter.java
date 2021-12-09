@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -180,7 +181,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
             }
             case ManageTokensHolder.VIEW_TYPE:
-                holder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
+                ManageTokensHolder manageTokensHolder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
+                manageTokensHolder.setOnTokenClickListener(tokensAdapterCallback);
+                holder = manageTokensHolder;
                 break;
 
             case HeaderHolder.VIEW_TYPE:

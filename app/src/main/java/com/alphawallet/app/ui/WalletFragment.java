@@ -452,6 +452,12 @@ public class WalletFragment extends BaseFragment implements
     }
 
     @Override
+    public void onBuyToken() {
+        Intent intent = viewModel.getBuyIntent(getCurrentWallet().address);
+        ((HomeActivity)getActivity()).onActivityResult(C.TOKEN_SEND_ACTIVITY, RESULT_OK, intent);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         currentTabPos = -1;

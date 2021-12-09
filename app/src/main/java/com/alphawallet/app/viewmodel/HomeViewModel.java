@@ -438,7 +438,7 @@ public class HomeViewModel extends BaseViewModel {
 
         contentView.setOnCloseActionListener(listener);
 
-        dialog = new BottomSheetDialog(activity);
+        dialog = new BottomSheetDialog(activity, R.style.FullscreenBottomSheetDialogStyle);
         dialog.setContentView(contentView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);

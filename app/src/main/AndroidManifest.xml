@@ -329,6 +329,10 @@
             android:label="@string/title_activity_add_custom_rpcnetwork"/>
 
         <activity
+            android:name=".ui.Erc721Activity"
+            android:label="ERC721 Master Activity" />
+
+        <activity
             android:name=".ui.Erc1155Activity"
             android:label="ERC1155 Master Activity" />
 

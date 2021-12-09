@@ -62,9 +62,9 @@ public class Erc1155InfoFragment extends BaseFragment {
             tokenDescription = view.findViewById(R.id.token_description);
             AssetContract assetContract = token.getAssetContract();
 
-            tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Details"));
             if (assetContract != null)
             {
+                tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Details"));
                 addInfoView("Issuer", assetContract.getName());
                 addInfoView("Created", assetContract.getCreationDate());
                 //addInfoView("Total Reserve", assetContract.getName());

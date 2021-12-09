@@ -14,6 +14,8 @@ import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.app.ui.Erc1155AssetsFragment;
 import com.alphawallet.app.ui.Erc1155InfoFragment;
 import com.alphawallet.app.ui.Erc20DetailActivity;
+import com.alphawallet.app.ui.Erc721Activity;
+import com.alphawallet.app.ui.Erc721AssetsFragment;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.GasSettingsActivity;
 import com.alphawallet.app.ui.HelpActivity;
@@ -240,4 +242,12 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = NameThisWalletModule.class)
 	abstract NameThisWalletActivity bindNameThisWalletActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = Erc721Module.class)
+	abstract Erc721Activity bindErc721Activity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = Erc721AssetsModule.class)
+	abstract Erc721AssetsFragment bindErc721AssetsFragment();
 }

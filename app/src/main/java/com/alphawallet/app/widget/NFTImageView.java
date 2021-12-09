@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
@@ -35,8 +34,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by JB on 30/05/2021.
  */
-public class NFTImageView extends RelativeLayout
-{
+public class NFTImageView extends RelativeLayout {
     private final ImageView image;
     private final RelativeLayout webLayout;
     private final WebView webView;
@@ -55,6 +53,25 @@ public class NFTImageView extends RelativeLayout
         //setup view attributes
         setAttrs(context, attrs);
     }
+    
+    /**
+     * Prevent glide dumping log errors - it is expected that load will fail
+     */
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
+        {
+            //couldn't load using glide, fallback to webview
+            if (model != null) setWebView(model.toString());
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource)
+        {
+            return false;
+        }
+    };
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
@@ -69,39 +86,28 @@ public class NFTImageView extends RelativeLayout
     private void loadTokenImage(NFTAsset asset, String imageUrl)
     {
         if (getContext() == null ||
-                (getContext() instanceof Activity && ((Activity)getContext()).isDestroyed())) return;
+                (getContext() instanceof Activity && ((Activity) getContext()).isDestroyed()))
+        {
+            return;
+        }
 
         image.setVisibility(View.VISIBLE);
 
-        Glide.with(getContext())
+        Glide.with(image.getContext())
                 .load(imageUrl)
+                .centerCrop()
                 .listener(requestListener)
                 .into(image);
 
-        if (!asset.needsLoading() && asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null")) {
+        if (!asset.needsLoading() && asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null"))
+        {
             int color = Color.parseColor("#" + asset.getBackgroundColor());
             holdingView.setBackgroundColor(color);
-        } else {
+        } else
+        {
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
     }
-
-    /**
-     * Prevent glide dumping log errors - it is expected that load will fail
-     */
-    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
-        @Override
-        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            //couldn't load using glide, fallback to webview
-            if (model != null) setWebView(model.toString());
-            return false;
-        }
-
-        @Override
-        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            return false;
-        }
-    };
 
     private void setWebView(String imageUrl)
     {
@@ -122,17 +128,24 @@ public class NFTImageView extends RelativeLayout
                 R.styleable.ERC721ImageView,
                 0, 0);
 
-        int height = a.getInteger(R.styleable.ERC721ImageView_webview_height, 0);
-        if (height > 0)
+        try
         {
-            int dpHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getContext().getResources().getDisplayMetrics());
-            ViewGroup.LayoutParams layoutParams = webLayout.getLayoutParams();
-            layoutParams.height = dpHeight;
-            webLayout.setLayoutParams(layoutParams);
-            layoutParams = holdingView.getLayoutParams();
-            layoutParams.height = dpHeight;
-            findViewById(R.id.layout_holder).setLayoutParams(layoutParams);
+            int height = a.getInteger(R.styleable.ERC721ImageView_webview_height, 0);
+            if (height > 0)
+            {
+                int dpHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getContext().getResources().getDisplayMetrics());
+                ViewGroup.LayoutParams layoutParams = webLayout.getLayoutParams();
+                layoutParams.height = dpHeight;
+                webLayout.setLayoutParams(layoutParams);
+                layoutParams = holdingView.getLayoutParams();
+                layoutParams.height = dpHeight;
+                findViewById(R.id.layout_holder).setLayoutParams(layoutParams);
+            }
+        } finally
+        {
+            a.recycle();
         }
+
     }
 
     public void blankViews()

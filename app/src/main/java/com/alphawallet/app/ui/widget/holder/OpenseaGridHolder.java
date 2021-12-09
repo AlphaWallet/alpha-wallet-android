@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,16 +14,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatRadioButton;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.AssetDisplayActivity;
-import com.alphawallet.app.ui.Erc1155AssetDetailActivity;
-import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.widget.NFTImageView;
@@ -43,18 +38,13 @@ import io.reactivex.schedulers.Schedulers;
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runnable {
-    public static final int VIEW_TYPE = 1302;
+public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements Runnable {
+    public static final int VIEW_TYPE = 1305;
     protected final Token token;
     private final TextView titleText;
-    private final TextView generation;
-    private final TextView cooldown;
-    private final LinearLayout layoutDetails;
-    private final RelativeLayout clickLayer;
-    private final ProgressBar loadingSpinner;
     private final NFTImageView tokenImageView;
+    private final RelativeLayout clickLayer;
     private TokensAdapterCallback tokenClickListener;
-    private final CheckBox itemSelect;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean activeClick;
     private final Activity activity;
@@ -63,14 +53,9 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     @Nullable
     private Disposable assetLoader;
 
-    public OpenseaHolder(int resId, ViewGroup parent, @NotNull Token token, Activity activity, boolean clickThrough) {
+    public OpenseaGridHolder(int resId, ViewGroup parent, @NotNull Token token, Activity activity, boolean clickThrough) {
         super(resId, parent);
         titleText = findViewById(R.id.name);
-        generation = findViewById(R.id.generation);
-        cooldown = findViewById(R.id.cooldown);
-        itemSelect = findViewById(R.id.radioBox);
-        layoutDetails = findViewById(R.id.layout_details);
-        loadingSpinner = findViewById(R.id.loading_spinner);
         tokenImageView = findViewById(R.id.asset_detail);
         clickLayer = findViewById(R.id.holding_view);
         this.token = token;
@@ -93,7 +78,6 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         BigInteger tokenId = data.tokenIds.get(0);
         NFTAsset asset = token.getAssetForToken(tokenId);
 
-        layoutDetails.setVisibility(View.GONE);
         tokenImageView.blankViews();
 
         displayAsset(data, asset, true);
@@ -117,14 +101,12 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     {
         if (BuildConfig.DEBUG) e.printStackTrace();
         NFTAsset asset = token.getAssetForToken(tokenId.toString());
-        loadingSpinner.setVisibility(View.GONE);
         String assetName;
         if (asset.getName() != null && !asset.getName().equals("null")) {
             assetName = asset.getName();
         } else {
             assetName = "ID# " + tokenId.toString();
         }
-        loadingSpinner.setVisibility(View.GONE);
         titleText.setText(assetName);
     }
 
@@ -134,7 +116,6 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
 
         if (entry && asset.needsLoading())
         {
-            loadingSpinner.setVisibility(View.VISIBLE);
             titleText.setText(asset.getName());
             assetLoader = Single.fromCallable(() -> {
                 return token.fetchTokenMetadata(data.tokenIds.get(0));//fetch directly from token
@@ -152,44 +133,15 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         } else {
             assetName = "ID# " + tokenId.toString();
         }
-        loadingSpinner.setVisibility(View.GONE);
         titleText.setText(assetName);
 
         if (data.exposeRadio)
         {
             asset.exposeRadio = true;
-            itemSelect.setVisibility(View.VISIBLE);
-            itemSelect.setChecked(data.isChecked);
         }
         else
         {
             asset.exposeRadio = false;
-            itemSelect.setVisibility(View.GONE);
-        }
-
-        if (asset.getAttributeValue("generation") != null) {
-            generation.setText(String.format("Gen %s",
-                    asset.getAttributeValue("generation")));
-            layoutDetails.setVisibility(View.VISIBLE);
-        } else if (asset.getAttributeValue("gen") != null){
-            generation.setText(String.format("Gen %s",
-                    asset.getAttributeValue("gen")));
-            layoutDetails.setVisibility(View.VISIBLE);
-        } else {
-            generation.setVisibility(View.GONE);
-        }
-
-        if (asset.getAttributeValue("cooldown_index") != null) {
-            cooldown.setText(String.format("%s Cooldown",
-                    KittyUtils.parseCooldownIndex(
-                            asset.getAttributeValue("cooldown_index"))));
-            layoutDetails.setVisibility(View.VISIBLE);
-        } else if (asset.getAttributeValue("cooldown") != null) { // Non-CK
-            cooldown.setText(String.format("%s Cooldown",
-                    asset.getAttributeValue("cooldown")));
-            layoutDetails.setVisibility(View.VISIBLE);
-        } else {
-            cooldown.setVisibility(View.GONE);
         }
 
         tokenImageView.setupTokenImageThumbnail(asset);
@@ -214,13 +166,11 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
             {
                 tokenClickListener.onTokenClick(v, token, data.tokenIds, true);
                 data.isChecked = true;
-                itemSelect.setChecked(true);
             }
             else
             {
                 tokenClickListener.onTokenClick(v, token, data.tokenIds, false);
                 data.isChecked = false;
-                itemSelect.setChecked(false);
             }
         }
         else
@@ -253,7 +203,6 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         //open up the radio view and signal to holding app
         tokenClickListener.onLongTokenClick(v, token, data.tokenIds);
         data.isChecked = true;
-        itemSelect.setChecked(true);
         return true;
     }
 

@@ -6,9 +6,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -21,7 +18,6 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
-import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.token.entity.TicketRange;
 
@@ -42,20 +38,22 @@ public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements 
     public static final int VIEW_TYPE = 1305;
     protected final Token token;
     private final TextView titleText;
+    private final TextView tokenIdText;
     private final NFTImageView tokenImageView;
     private final RelativeLayout clickLayer;
-    private TokensAdapterCallback tokenClickListener;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private boolean activeClick;
     private final Activity activity;
     private final boolean clickThrough;
-
+    private TokensAdapterCallback tokenClickListener;
+    private boolean activeClick;
     @Nullable
     private Disposable assetLoader;
 
-    public OpenseaGridHolder(int resId, ViewGroup parent, @NotNull Token token, Activity activity, boolean clickThrough) {
+    public OpenseaGridHolder(int resId, ViewGroup parent, @NotNull Token token, Activity activity, boolean clickThrough)
+    {
         super(resId, parent);
         titleText = findViewById(R.id.name);
+        tokenIdText = findViewById(R.id.token_id);
         tokenImageView = findViewById(R.id.asset_detail);
         clickLayer = findViewById(R.id.holding_view);
         this.token = token;
@@ -90,7 +88,7 @@ public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements 
         fetchedAsset.updateFromRaw(oldAsset);
         if (activity != null && activity instanceof AssetDisplayActivity)
         {
-            ((AssetDisplayActivity)activity).storeAsset(tokenId, fetchedAsset);
+            ((AssetDisplayActivity) activity).storeAsset(tokenId, fetchedAsset);
         }
 
         token.addAssetToTokenBalanceAssets(tokenId, fetchedAsset);
@@ -102,9 +100,11 @@ public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements 
         if (BuildConfig.DEBUG) e.printStackTrace();
         NFTAsset asset = token.getAssetForToken(tokenId.toString());
         String assetName;
-        if (asset.getName() != null && !asset.getName().equals("null")) {
+        if (asset.getName() != null && !asset.getName().equals("null"))
+        {
             assetName = asset.getName();
-        } else {
+        } else
+        {
             assetName = "ID# " + tokenId.toString();
         }
         titleText.setText(assetName);
@@ -117,29 +117,34 @@ public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements 
         if (entry && asset.needsLoading())
         {
             titleText.setText(asset.getName());
+
             assetLoader = Single.fromCallable(() -> {
                 return token.fetchTokenMetadata(data.tokenIds.get(0));//fetch directly from token
             }).map(newAsset -> storeAsset(tokenId, newAsset, asset))
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(a -> displayAsset(data, a, false), e -> handleError(e, tokenId));
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(a -> displayAsset(data, a, false), e -> handleError(e, tokenId));
 
             return;
         }
 
         String assetName;
-        if (asset.getName() != null && !asset.getName().equals("null")) {
+        if (asset.getName() != null && !asset.getName().equals("null"))
+        {
             assetName = asset.getName();
-        } else {
+            titleText.setText(assetName.substring(0, assetName.indexOf("#")).trim());
+            tokenIdText.setText(String.format("#%s", tokenId));
+        } else
+        {
             assetName = "ID# " + tokenId.toString();
+            titleText.setText(assetName);
+            tokenIdText.setVisibility(View.GONE);
         }
-        titleText.setText(assetName);
 
         if (data.exposeRadio)
         {
             asset.exposeRadio = true;
-        }
-        else
+        } else
         {
             asset.exposeRadio = false;
         }
@@ -166,14 +171,12 @@ public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements 
             {
                 tokenClickListener.onTokenClick(v, token, data.tokenIds, true);
                 data.isChecked = true;
-            }
-            else
+            } else
             {
                 tokenClickListener.onTokenClick(v, token, data.tokenIds, false);
                 data.isChecked = false;
             }
-        }
-        else
+        } else
         {
 //            if (activeClick) return;
 //

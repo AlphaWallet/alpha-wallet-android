@@ -53,7 +53,7 @@ public class NFTImageView extends RelativeLayout {
         //setup view attributes
         setAttrs(context, attrs);
     }
-    
+
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */

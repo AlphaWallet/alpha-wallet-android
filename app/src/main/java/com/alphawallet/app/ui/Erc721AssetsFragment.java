@@ -30,6 +30,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.holder.OpenseaGridHolder;
 import com.alphawallet.app.viewmodel.Erc721AssetsViewModel;
@@ -64,6 +65,7 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
     private Wallet wallet;
     private RecyclerView recyclerView;
     private NonFungibleTokenAdapter adapter;
+    private ItemOffsetDecoration itemDecoration;
 
     @Nullable
     @Override
@@ -87,6 +89,8 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
             wallet = getArguments().getParcelable(C.Key.WALLET);
 
             recyclerView = view.findViewById(R.id.recycler_view);
+
+            itemDecoration = new ItemOffsetDecoration(getContext(), R.dimen.grid_divider_offset);
 
             showGridView();
         }
@@ -121,14 +125,15 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
         recyclerView.setLayoutManager(gridLayoutManager);
         adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
         recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setAdapter(adapter);
     }
 
     public void showListView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.addItemDecoration(new ListDivider(getContext()));
         adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
         recyclerView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.background_bottom_border));
+        recyclerView.removeItemDecoration(itemDecoration);
         recyclerView.setAdapter(adapter);
     }
 }

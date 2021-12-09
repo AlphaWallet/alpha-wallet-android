@@ -129,17 +129,6 @@ android {
 
 }
 
-task disableAnimations(type: Exec) {
-    def adb = "$System.env.ANDROID_HOME/platform-tools/adb"
-    commandLine "$adb", 'shell', 'settings', 'put', 'global', 'window_animation_scale', '0'
-    commandLine "$adb", 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '0'
-    commandLine "$adb", 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0'
-}
-
-project.gradle.taskGraph.whenReady {
-    connectedAndroidTest.dependsOn disableAnimations
-}
-
 dependencies {
     implementation project(":lib")
 

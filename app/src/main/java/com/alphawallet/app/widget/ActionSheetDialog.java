@@ -72,7 +72,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                              String destName, String destAddress, TokensService ts,
                              ActionSheetCallback aCallBack)
     {
-        super(activity);
+        super(activity, R.style.FullscreenBottomSheetDialogStyle);
         setContentView(R.layout.dialog_action_sheet);
 
         gasWidget = findViewById(R.id.gas_widgetx);

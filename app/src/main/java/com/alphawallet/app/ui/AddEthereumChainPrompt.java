@@ -32,7 +32,7 @@ public class AddEthereumChainPrompt extends BottomSheetDialog implements Standar
     private final AddChainListener listener;
 
     public AddEthereumChainPrompt(@NonNull @NotNull Context context, WalletAddEthereumChainObject chainObject, AddChainListener listener) {
-        super(context);
+        super(context, R.style.FullscreenBottomSheetDialogStyle);
         setContentView(R.layout.dialog_add_ethereum_chain);
         this.chainObject = chainObject;
         this.listener = listener;

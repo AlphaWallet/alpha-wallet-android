@@ -64,6 +64,7 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
     private Token token;
     private FunctionButtonBar functionBar;
     private int menuItem;
+    private boolean isGridView = true;
 
     private Erc721AssetsFragment assetsFragment;
 
@@ -191,6 +192,16 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
         {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(menuItem, menu);
+            if (isGridView)
+            {
+                menu.findItem(R.id.action_list_view).setVisible(true);
+                menu.findItem(R.id.action_grid_view).setVisible(false);
+            }
+            else
+            {
+                menu.findItem(R.id.action_list_view).setVisible(false);
+                menu.findItem(R.id.action_grid_view).setVisible(true);
+            }
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -198,16 +209,16 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        MenuInflater inflater = getMenuInflater();
-
         if (item.getItemId() == R.id.action_list_view)
         {
+            isGridView = false;
             menu.findItem(R.id.action_list_view).setVisible(false);
             menu.findItem(R.id.action_grid_view).setVisible(true);
             assetsFragment.showListView();
         }
         else if (item.getItemId() == R.id.action_grid_view)
         {
+            isGridView = true;
             menu.findItem(R.id.action_list_view).setVisible(true);
             menu.findItem(R.id.action_grid_view).setVisible(false);
             assetsFragment.showGridView();

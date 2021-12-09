@@ -5,8 +5,8 @@
     android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/dp8"
-    android:layout_marginEnd="@dimen/dp8"
+    android:paddingStart="@dimen/dp8"
+    android:paddingEnd="@dimen/dp8"
     android:orientation="vertical">
 
     <CheckBox

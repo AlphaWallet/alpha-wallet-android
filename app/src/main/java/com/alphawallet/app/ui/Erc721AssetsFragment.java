@@ -16,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,7 +31,6 @@ import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.ui.widget.holder.OpenseaGridHolder;
 import com.alphawallet.app.viewmodel.Erc721AssetsViewModel;
 import com.alphawallet.app.viewmodel.Erc721AssetsViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -65,7 +63,10 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
     private Wallet wallet;
     private RecyclerView recyclerView;
     private NonFungibleTokenAdapter adapter;
-    private ItemOffsetDecoration itemDecoration;
+    private ItemOffsetDecoration gridItemDecoration;
+    private ListDivider listItemDecoration;
+
+    private View view;
 
     @Nullable
     @Override
@@ -90,7 +91,9 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
 
             recyclerView = view.findViewById(R.id.recycler_view);
 
-            itemDecoration = new ItemOffsetDecoration(getContext(), R.dimen.grid_divider_offset);
+            gridItemDecoration = new ItemOffsetDecoration(recyclerView.getContext(), R.dimen.grid_divider_offset);
+
+            listItemDecoration = new ListDivider(recyclerView.getContext());
 
             showGridView();
         }
@@ -121,19 +124,21 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
     }
 
     public void showGridView() {
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
-        recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.removeItemDecoration(listItemDecoration);
+        recyclerView.addItemDecoration(gridItemDecoration);
         adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
         recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-        recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setAdapter(adapter);
     }
 
     public void showListView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.removeItemDecoration(gridItemDecoration);
+        recyclerView.addItemDecoration(listItemDecoration);
         adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
         recyclerView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.background_bottom_border));
-        recyclerView.removeItemDecoration(itemDecoration);
         recyclerView.setAdapter(adapter);
+        recyclerView.setPadding(0,0,0,0);
     }
 }

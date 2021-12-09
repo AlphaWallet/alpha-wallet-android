@@ -68,5 +68,6 @@
 
     <!-- Item Offset Decoration -->
     <dimen name="grid_divider_offset">16dp</dimen>
+    <dimen name="list_divider_offset">0dp</dimen>
 
 </resources>

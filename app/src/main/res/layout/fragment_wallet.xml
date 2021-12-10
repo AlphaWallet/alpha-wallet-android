@@ -7,7 +7,14 @@
     android:background="@color/colorTheme"
     android:orientation="vertical">
 
+    <com.alphawallet.app.widget.SearchToolbar
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="48dp"/>
+
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="0dp"

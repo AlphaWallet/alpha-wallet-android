@@ -132,7 +132,10 @@ public class OpenseaGridHolder extends BinderViewHolder<TicketRange> implements 
         if (asset.getName() != null && !asset.getName().equals("null"))
         {
             assetName = asset.getName();
-            titleText.setText(assetName.substring(0, assetName.indexOf("#")).trim());
+            if (!assetName.isEmpty())
+            {
+                titleText.setText(assetName.substring(0, assetName.indexOf("#")).trim());
+            }
             tokenIdText.setText(String.format("#%s", tokenId));
         } else
         {

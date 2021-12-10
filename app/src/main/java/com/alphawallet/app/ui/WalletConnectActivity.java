@@ -857,8 +857,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confDialog.waitForEstimate();
 
                 viewModel.calculateGasEstimate(viewModel.getWallet(), Numeric.hexStringToByteArray(w3Tx.payload),
-                        chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value))
-                        .map(limit -> convertToGasLimit(limit, w3Tx))
+                        chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
@@ -873,22 +872,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
 
         return confDialog;
-    }
-
-    private BigInteger convertToGasLimit(EthEstimateGas estimate, Web3Transaction w3Tx)
-    {
-        if (!estimate.hasError() && estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
-        {
-            return estimate.getAmountUsed();
-        }
-        else if (w3Tx.gasLimit.equals(BigInteger.ZERO))
-        {
-            return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS); //cautious gas limit
-        }
-        else
-        {
-            return w3Tx.gasLimit;
-        }
     }
 
     private void killSession()

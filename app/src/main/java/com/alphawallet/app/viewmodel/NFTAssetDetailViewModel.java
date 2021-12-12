@@ -24,14 +24,14 @@ import java.util.Map;
 
 import io.reactivex.Single;
 
-public class Erc1155AssetDetailViewModel extends BaseViewModel {
+public class NFTAssetDetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final GenericWalletInteract walletInteract;
 
     private final MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
 
-    public Erc1155AssetDetailViewModel(
+    public NFTAssetDetailViewModel(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             GenericWalletInteract walletInteract)

@@ -337,7 +337,7 @@
             android:label="ERC1155 Asset Selection" />
 
         <activity
-            android:name=".ui.Erc1155AssetDetailActivity"
+            android:name=".ui.NFTAssetDetailActivity"
             android:label="ERC1155 Asset Details" />
 
         <activity

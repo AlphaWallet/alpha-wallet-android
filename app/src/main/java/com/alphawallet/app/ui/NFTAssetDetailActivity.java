@@ -20,8 +20,8 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
-import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModel;
-import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModelFactory;
+import com.alphawallet.app.viewmodel.NFTAssetDetailViewModel;
+import com.alphawallet.app.viewmodel.NFTAssetDetailViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
@@ -38,17 +38,30 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class Erc1155AssetDetailActivity extends BaseActivity implements StandardFunctionInterface {
+public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface {
     @Inject
-    Erc1155AssetDetailViewModelFactory viewModelFactory;
-    Erc1155AssetDetailViewModel viewModel;
+    NFTAssetDetailViewModelFactory viewModelFactory;
+    NFTAssetDetailViewModel viewModel;
 
     private Token token;
     private Wallet wallet;
     private BigInteger tokenId;
     private String sequenceId;
-
     private LinearLayout tokenInfoLayout;
+
+    private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                //process hash
+                if (!TextUtils.isEmpty(transactionHash))
+                {
+                    Intent intent = new Intent();
+                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+            });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -88,9 +101,18 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         //can be either: FT with a balance (balance > 1)
         //unique NFT with tokenId (sequenceId)
 
-        if (!TextUtils.isEmpty(sequenceId)) { addInfoView("Token #", sequenceId); }
-        if (asset.isAssetMultiple()) { addInfoView(getString(R.string.balance), asset.getBalance().toString()); }
-        if (!TextUtils.isEmpty(asset.getName())) { addInfoView(getString(R.string.hint_contract_name), asset.getName()); }
+        if (!TextUtils.isEmpty(sequenceId))
+        {
+            addInfoView("Token #", sequenceId);
+        }
+        if (asset.isAssetMultiple())
+        {
+            addInfoView(getString(R.string.balance), asset.getBalance().toString());
+        }
+        if (!TextUtils.isEmpty(asset.getName()))
+        {
+            addInfoView(getString(R.string.hint_contract_name), asset.getName());
+        }
         addInfoView("External Link", asset.getExternalLink());
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
         attrs.bind(token, asset);
@@ -111,7 +133,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     private void initViewModel()
     {
         viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(Erc1155AssetDetailViewModel.class);
+                .get(NFTAssetDetailViewModel.class);
     }
 
     private void setupFunctionBar()
@@ -135,20 +157,6 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         }
     }
 
-    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getData() == null) return;
-                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
-                //process hash
-                if (!TextUtils.isEmpty(transactionHash))
-                {
-                    Intent intent = new Intent();
-                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
-                    setResult(RESULT_OK, intent);
-                    finish();
-                }
-            });
-
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
@@ -160,7 +168,10 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
         }
         else
         {
-            if (asset.getSelectedBalance().compareTo(BigDecimal.ZERO) == 0) { asset.setSelectedBalance(BigDecimal.ONE); }
+            if (asset.getSelectedBalance().compareTo(BigDecimal.ZERO) == 0)
+            {
+                asset.setSelectedBalance(BigDecimal.ONE);
+            }
             viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
                     .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
         }

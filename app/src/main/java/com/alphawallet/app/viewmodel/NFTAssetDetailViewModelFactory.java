@@ -9,12 +9,12 @@ import com.alphawallet.app.service.TokensService;
 
 import io.reactivex.annotations.NonNull;
 
-public class Erc1155AssetDetailViewModelFactory implements ViewModelProvider.Factory {
+public class NFTAssetDetailViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final GenericWalletInteract walletInteract;
 
-    public Erc1155AssetDetailViewModelFactory(
+    public NFTAssetDetailViewModelFactory(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             GenericWalletInteract walletInteract
@@ -29,6 +29,6 @@ public class Erc1155AssetDetailViewModelFactory implements ViewModelProvider.Fac
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass)
     {
-        return (T) new Erc1155AssetDetailViewModel(assetDefinitionService, tokensService, walletInteract);
+        return (T) new NFTAssetDetailViewModel(assetDefinitionService, tokensService, walletInteract);
     }
 }

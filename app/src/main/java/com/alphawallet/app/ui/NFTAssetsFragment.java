@@ -82,7 +82,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         AndroidSupportInjection.inject(this);
-        return inflater.inflate(R.layout.fragment_erc1155_assets, container, false);
+        return inflater.inflate(R.layout.fragment_nft_assets, container, false);
     }
 
     @Override

@@ -4,20 +4,20 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModelFactory;
+import com.alphawallet.app.viewmodel.NFTAssetDetailViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
 
 @Module
-class Erc1155AssetDetailModule {
+class NFTAssetDetailModule {
     @Provides
-    Erc1155AssetDetailViewModelFactory provideErc1155AssetDetailViewModelFactory(
+    NFTAssetDetailViewModelFactory provideNftAssetDetailViewModelFactory(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             GenericWalletInteract walletInteract)
     {
-        return new Erc1155AssetDetailViewModelFactory(assetDefinitionService, tokensService, walletInteract);
+        return new NFTAssetDetailViewModelFactory(assetDefinitionService, tokensService, walletInteract);
     }
 
     @Provides

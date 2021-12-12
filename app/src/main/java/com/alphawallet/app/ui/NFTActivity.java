@@ -259,12 +259,9 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
     private void hideMenu()
     {
+        sendMultipleTokensMenuItem.setVisible(false);
         switchToGridViewMenuItem.setVisible(false);
         switchToListViewMenuItem.setVisible(false);
-        if (sendMultipleTokensMenuItem != null)
-        {
-            sendMultipleTokensMenuItem.setVisible(false);
-        }
     }
 
     private void showMenu()
@@ -279,7 +276,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
             switchToGridViewMenuItem.setVisible(true);
         }
 
-        if (sendMultipleTokensMenuItem != null)
+        if (token.isBatchTransferAvailable())
         {
             sendMultipleTokensMenuItem.setVisible(true);
         }

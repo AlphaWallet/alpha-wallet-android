@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.NFTInfoViewModel;
@@ -90,8 +89,6 @@ public class NFTInfoFragment extends BaseFragment {
                     }
                 }
             }
-
-
 
             TokenIcon icon = view.findViewById(R.id.token_icon);
             icon.bindData(token, viewModel.getAssetDefinitionService());

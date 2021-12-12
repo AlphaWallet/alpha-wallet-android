@@ -35,25 +35,39 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdapter.ViewHolder> {
+public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder> {
     private final List<Pair<BigInteger, NFTAsset>> actualData;
     private final Activity activity;
     private final OnAssetClickListener listener;
     private final Token token;
     private final boolean isGrid;
 
-    public Erc1155AssetsAdapter(Activity activity, Token token, Map<BigInteger, NFTAsset> data, OnAssetClickListener listener, boolean isGrid)
+    public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, boolean isGrid)
     {
         this.activity = activity;
         this.listener = listener;
         this.token = token;
-        actualData = new ArrayList<>(data.size());
-        for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
+        this.isGrid = isGrid;
+
+        actualData = new ArrayList<>();
+
+        if (token.isERC721())
         {
-            actualData.add(new Pair<>(d.getKey(), d.getValue()));
+            for (BigInteger i : token.getUniqueTokenIds())
+            {
+                NFTAsset asset = token.getAssetForToken(i);
+                actualData.add(new Pair<>(i, asset));
+            }
+        }
+        else
+        {
+            Map<BigInteger, NFTAsset> data = token.getCollectionMap();
+            for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
+            {
+                actualData.add(new Pair<>(d.getKey(), d.getValue()));
+            }
         }
 
-        this.isGrid = isGrid;
         sortData();
     }
 

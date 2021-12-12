@@ -26,9 +26,10 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
-import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
+import com.alphawallet.app.ui.widget.adapter.NFTAssetsAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
@@ -105,7 +106,8 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         if (item.second.isCollection())
         {
             handleTransactionSuccess.launch(viewModel.showAssetListDetails(getContext(), wallet, token, item.second));
-        } else
+        }
+        else
         {
             handleTransactionSuccess.launch(viewModel.showAssetDetails(getContext(), wallet, token, item.first));
         }
@@ -130,14 +132,16 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         recyclerView.addItemDecoration(gridItemDecoration);
         recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
 
-        if (token.isERC721())
+        if (hasTokenScriptOverride(token))
         {
             NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
             recyclerView.setAdapter(adapter);
-        } else
+        }
+        else
         {
-            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this, true);
+            NFTAssetsAdapter adapter = new NFTAssetsAdapter(getActivity(), token, this, true);
             recyclerView.setAdapter(adapter);
+
         }
     }
 
@@ -148,15 +152,20 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         recyclerView.addItemDecoration(listItemDecoration);
         recyclerView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.background_bottom_border));
         recyclerView.setPadding(0, 0, 0, 0);
-
-        if (token.isERC721())
+        if (hasTokenScriptOverride(token))
         {
             NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
             recyclerView.setAdapter(adapter);
-        } else
+        }
+        else
         {
-            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this, false);
+            NFTAssetsAdapter adapter = new NFTAssetsAdapter(getActivity(), token, this, false);
             recyclerView.setAdapter(adapter);
         }
+    }
+
+    private boolean hasTokenScriptOverride(Token t)
+    {
+        return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 }

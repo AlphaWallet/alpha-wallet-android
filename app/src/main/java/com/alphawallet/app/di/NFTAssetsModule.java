@@ -5,23 +5,26 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.viewmodel.Erc1155InfoViewModelFactory;
+import com.alphawallet.app.viewmodel.NFTAssetsViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
 
 @Module
-class Erc1155InfoModule {
+class NFTAssetsModule {
     @Provides
-    Erc1155InfoViewModelFactory provideErc1155InfoViewModelFactory(FetchTransactionsInteract fetchTransactionsInteract,
-                                                                   AssetDefinitionService assetDefinitionService,
-                                                                   TokensService tokensService)
+    NFTAssetsViewModelFactory provideNftAssetsViewModelFactory(FetchTransactionsInteract fetchTransactionsInteract,
+                                                                  AssetDefinitionService assetDefinitionService,
+                                                                  TokensService tokensService,
+                                                                  OpenSeaService openSeaService)
     {
-        return new Erc1155InfoViewModelFactory(
+        return new NFTAssetsViewModelFactory(
                 fetchTransactionsInteract,
                 assetDefinitionService,
-                tokensService);
+                tokensService,
+                openSeaService);
     }
 
     @Provides

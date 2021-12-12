@@ -12,10 +12,10 @@ import com.alphawallet.app.ui.Erc1155AssetDetailActivity;
 import com.alphawallet.app.ui.Erc1155AssetListActivity;
 import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.app.ui.Erc1155AssetsFragment;
-import com.alphawallet.app.ui.Erc1155InfoFragment;
+import com.alphawallet.app.ui.NFTInfoFragment;
 import com.alphawallet.app.ui.Erc20DetailActivity;
-import com.alphawallet.app.ui.Erc721Activity;
-import com.alphawallet.app.ui.Erc721AssetsFragment;
+import com.alphawallet.app.ui.NFTActivity;
+import com.alphawallet.app.ui.NFTAssetsFragment;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.GasSettingsActivity;
 import com.alphawallet.app.ui.HelpActivity;
@@ -216,10 +216,6 @@ public abstract class BuildersModule {
     abstract Erc1155AssetDetailActivity bindErc1155AssetDetailActivity();
 
     @FragmentScope
-    @ContributesAndroidInjector(modules = Erc1155InfoModule.class)
-    abstract Erc1155InfoFragment bindErc1155InfoFragment();
-
-    @FragmentScope
     @ContributesAndroidInjector(modules = Erc1155AssetsModule.class)
     abstract Erc1155AssetsFragment bindErc1155AssetsFragment();
 
@@ -244,10 +240,14 @@ public abstract class BuildersModule {
 	abstract NameThisWalletActivity bindNameThisWalletActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = Erc721Module.class)
-	abstract Erc721Activity bindErc721Activity();
+	@ContributesAndroidInjector(modules = NFTModule.class)
+	abstract NFTActivity bindNftActivity();
 
 	@FragmentScope
-	@ContributesAndroidInjector(modules = Erc721AssetsModule.class)
-	abstract Erc721AssetsFragment bindErc721AssetsFragment();
+	@ContributesAndroidInjector(modules = NFTInfoModule.class)
+	abstract NFTInfoFragment bindNftInfoFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = NFTAssetsModule.class)
+	abstract NFTAssetsFragment bindNftAssetsFragment();
 }

@@ -9,6 +9,7 @@ import com.alphawallet.app.ui.Erc1155Activity;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.Erc20DetailActivity;
+import com.alphawallet.app.ui.NFTActivity;
 
 public class TokenDetailRouter
 {
@@ -29,7 +30,7 @@ public class TokenDetailRouter
 
     public void openERC1155(Activity context, Token token, Wallet wallet, boolean hasDefinition)
     {
-        Intent intent = new Intent(context, Erc1155Activity.class);
+        Intent intent = new Intent(context, NFTActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_SYMBOL, token.getSymbol());

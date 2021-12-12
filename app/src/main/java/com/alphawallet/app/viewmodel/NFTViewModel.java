@@ -26,7 +26,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
-public class Erc721ViewModel extends BaseViewModel {
+public class NFTViewModel extends BaseViewModel {
     private final MutableLiveData<ActivityMeta[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
@@ -34,9 +34,9 @@ public class Erc721ViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
-    public Erc721ViewModel(FetchTransactionsInteract fetchTransactionsInteract,
-                           AssetDefinitionService assetDefinitionService,
-                           TokensService tokensService)
+    public NFTViewModel(FetchTransactionsInteract fetchTransactionsInteract,
+                        AssetDefinitionService assetDefinitionService,
+                        TokensService tokensService)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;

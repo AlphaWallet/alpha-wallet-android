@@ -9,15 +9,16 @@ import com.alphawallet.app.service.TokensService;
 
 import io.reactivex.annotations.NonNull;
 
-public class Erc1155InfoViewModelFactory implements ViewModelProvider.Factory {
+public class NFTViewModelFactory implements ViewModelProvider.Factory {
 
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
-    public Erc1155InfoViewModelFactory(FetchTransactionsInteract fetchTransactionsInteract,
-                                       AssetDefinitionService assetDefinitionService,
-                                       TokensService tokensService) {
+    public NFTViewModelFactory(FetchTransactionsInteract fetchTransactionsInteract,
+                               AssetDefinitionService assetDefinitionService,
+                               TokensService tokensService)
+    {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
@@ -25,7 +26,8 @@ public class Erc1155InfoViewModelFactory implements ViewModelProvider.Factory {
 
     @NonNull
     @Override
-    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new Erc1155InfoViewModel(fetchTransactionsInteract, assetDefinitionService, tokensService);
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass)
+    {
+        return (T) new NFTViewModel(fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 }

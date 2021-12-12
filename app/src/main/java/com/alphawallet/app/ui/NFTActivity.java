@@ -28,8 +28,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
-import com.alphawallet.app.viewmodel.Erc721ViewModel;
-import com.alphawallet.app.viewmodel.Erc721ViewModelFactory;
+import com.alphawallet.app.viewmodel.NFTViewModel;
+import com.alphawallet.app.viewmodel.NFTViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.android.material.tabs.TabLayout;
@@ -42,11 +42,21 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class Erc721Activity extends BaseActivity implements StandardFunctionInterface {
+public class NFTActivity extends BaseActivity implements StandardFunctionInterface {
     @Inject
-    Erc721ViewModelFactory viewModelFactory;
-    Erc721ViewModel viewModel;
-    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    NFTViewModelFactory viewModelFactory;
+    NFTViewModel viewModel;
+
+    private Menu menu;
+    private Wallet wallet;
+    private Token token;
+    private FunctionButtonBar functionBar;
+    private int menuItem;
+    private boolean isGridView = true;
+
+    private NFTAssetsFragment assetsFragment;
+
+    private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
@@ -59,14 +69,6 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
                     finish();
                 }
             });
-    private Menu menu;
-    private Wallet wallet;
-    private Token token;
-    private FunctionButtonBar functionBar;
-    private int menuItem;
-    private boolean isGridView = true;
-
-    private Erc721AssetsFragment assetsFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -90,7 +92,7 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
     private void initViewModel()
     {
         viewModel = new ViewModelProvider(this, viewModelFactory)
-                .get(Erc721ViewModel.class);
+                .get(NFTViewModel.class);
     }
 
     private void getIntentData()
@@ -102,8 +104,8 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
 
     private void setupViewPager()
     {
-        Erc1155InfoFragment infoFragment = new Erc1155InfoFragment();
-        assetsFragment = new Erc721AssetsFragment();
+        NFTInfoFragment infoFragment = new NFTInfoFragment();
+        assetsFragment = new NFTAssetsFragment();
         TokenActivityFragment tokenActivityFragment = new TokenActivityFragment();
 
         Bundle bundle = new Bundle();
@@ -134,7 +136,7 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
 
         viewPager.setCurrentItem(1, true);
 
-        menuItem = R.menu.menu_grid;
+        menuItem = R.menu.menu_select;
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -149,7 +151,7 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
                         break;
                     case 1:
                         showFunctionBar(false);
-                        menuItem = R.menu.menu_grid;
+                        menuItem = R.menu.menu_select;
                         invalidateOptionsMenu();
                         break;
                     default:
@@ -196,8 +198,7 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
             {
                 menu.findItem(R.id.action_list_view).setVisible(true);
                 menu.findItem(R.id.action_grid_view).setVisible(false);
-            }
-            else
+            } else
             {
                 menu.findItem(R.id.action_list_view).setVisible(false);
                 menu.findItem(R.id.action_grid_view).setVisible(true);
@@ -215,8 +216,7 @@ public class Erc721Activity extends BaseActivity implements StandardFunctionInte
             menu.findItem(R.id.action_list_view).setVisible(false);
             menu.findItem(R.id.action_grid_view).setVisible(true);
             assetsFragment.showListView();
-        }
-        else if (item.getItemId() == R.id.action_grid_view)
+        } else if (item.getItemId() == R.id.action_grid_view)
         {
             isGridView = true;
             menu.findItem(R.id.action_list_view).setVisible(true);

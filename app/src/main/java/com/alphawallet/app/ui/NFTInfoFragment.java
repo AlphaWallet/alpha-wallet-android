@@ -15,10 +15,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.viewmodel.Erc1155InfoViewModel;
-import com.alphawallet.app.viewmodel.Erc1155InfoViewModelFactory;
+import com.alphawallet.app.viewmodel.NFTInfoViewModel;
+import com.alphawallet.app.viewmodel.NFTInfoViewModelFactory;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
@@ -28,10 +29,10 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
-public class Erc1155InfoFragment extends BaseFragment {
+public class NFTInfoFragment extends BaseFragment {
     @Inject
-    Erc1155InfoViewModelFactory viewModelFactory;
-    private Erc1155InfoViewModel viewModel;
+    NFTInfoViewModelFactory viewModelFactory;
+    private NFTInfoViewModel viewModel;
 
     private Token token;
     private LinearLayout tokenInfoLayout;
@@ -53,32 +54,49 @@ public class Erc1155InfoFragment extends BaseFragment {
         if (getArguments() != null)
         {
             viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(Erc1155InfoViewModel.class);
+                    .get(NFTInfoViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
             tokenDescription = view.findViewById(R.id.token_description);
-            AssetContract assetContract = token.getAssetContract();
 
-            if (assetContract != null)
+            if (token.isERC721())
             {
                 tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Details"));
-                addInfoView("Issuer", assetContract.getName());
-                addInfoView("Created", assetContract.getCreationDate());
-                //addInfoView("Total Reserve", assetContract.getName());
-                //addInfoView("Assets", assetContract.getName());
-                //addInfoView("Melts", assetContract.getName());
-                //addInfoView("Hodlers", assetContract.getName());
-                //addInfoView("Transfers", assetContract.getName());
+                addInfoView("Issuer", token.tokenInfo.name);
+                addInfoView("Contract Address", token.tokenInfo.address);
+                addInfoView("Blockchain", token.getNetworkName());
+                NFTAsset asset = token.getTokenAssets().get(0);
 
-                if (!TextUtils.isEmpty(assetContract.getDescription()))
+
+
+                addInfoView("Blockchain", "asd");
+            }
+            else
+            {
+                AssetContract assetContract = token.getAssetContract();
+                if (assetContract != null)
                 {
-                    tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Description"));
-                    tokenDescription.setText(assetContract.getDescription());
+                    tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Details"));
+                    addInfoView("Issuer", assetContract.getName());
+                    addInfoView("Created", assetContract.getCreationDate());
+                    //addInfoView("Total Reserve", assetContract.getName());
+                    //addInfoView("Assets", assetContract.getName());
+                    //addInfoView("Melts", assetContract.getName());
+                    //addInfoView("Hodlers", assetContract.getName());
+                    //addInfoView("Transfers", assetContract.getName());
+
+                    if (!TextUtils.isEmpty(assetContract.getDescription()))
+                    {
+                        tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Description"));
+                        tokenDescription.setText(assetContract.getDescription());
+                    }
                 }
             }
+
+
 
             TokenIcon icon = view.findViewById(R.id.token_icon);
             icon.bindData(token, viewModel.getAssetDefinitionService());

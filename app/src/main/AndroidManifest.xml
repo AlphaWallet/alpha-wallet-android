@@ -329,7 +329,7 @@
             android:label="@string/title_activity_add_custom_rpcnetwork"/>
 
         <activity
-            android:name=".ui.Erc721Activity"
+            android:name=".ui.NFTActivity"
             android:label="ERC721 Master Activity" />
 
         <activity

@@ -16,16 +16,16 @@ import com.alphawallet.app.ui.Erc1155AssetListActivity;
 
 import java.math.BigInteger;
 
-public class Erc721AssetsViewModel extends BaseViewModel {
+public class NFTAssetsViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OpenSeaService openSeaService;
 
-    public Erc721AssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
-                                 AssetDefinitionService assetDefinitionService,
-                                 TokensService tokensService,
-                                 OpenSeaService openSeaService)
+    public NFTAssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
+                              AssetDefinitionService assetDefinitionService,
+                              TokensService tokensService,
+                              OpenSeaService openSeaService)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;

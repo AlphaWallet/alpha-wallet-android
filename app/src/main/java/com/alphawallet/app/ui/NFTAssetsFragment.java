@@ -28,11 +28,12 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.viewmodel.Erc721AssetsViewModel;
-import com.alphawallet.app.viewmodel.Erc721AssetsViewModelFactory;
+import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
+import com.alphawallet.app.viewmodel.NFTAssetsViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigInteger;
@@ -42,10 +43,19 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
-public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback {
+public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback {
     @Inject
-    Erc721AssetsViewModelFactory viewModelFactory;
-    ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    NFTAssetsViewModelFactory viewModelFactory;
+    private NFTAssetsViewModel viewModel;
+
+    private Token token;
+    private Wallet wallet;
+    private RecyclerView recyclerView;
+//    private NonFungibleTokenAdapter adapter;
+    private ItemOffsetDecoration gridItemDecoration;
+    private ListDivider listItemDecoration;
+
+    private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
@@ -58,15 +68,6 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
                     getActivity().finish();
                 }
             });
-    private Erc721AssetsViewModel viewModel;
-    private Token token;
-    private Wallet wallet;
-    private RecyclerView recyclerView;
-    private NonFungibleTokenAdapter adapter;
-    private ItemOffsetDecoration gridItemDecoration;
-    private ListDivider listItemDecoration;
-
-    private View view;
 
     @Nullable
     @Override
@@ -83,7 +84,7 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
         if (getArguments() != null)
         {
             viewModel = new ViewModelProvider(this, viewModelFactory)
-                    .get(Erc721AssetsViewModel.class);
+                    .get(NFTAssetsViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
@@ -95,7 +96,14 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
 
             listItemDecoration = new ListDivider(recyclerView.getContext());
 
-            showGridView();
+            if (token.isERC721())
+            {
+                showGridView();
+            }
+            else
+            {
+                showListView();
+            }
         }
     }
 
@@ -123,22 +131,42 @@ public class Erc721AssetsFragment extends BaseFragment implements OnAssetClickLi
 
     }
 
-    public void showGridView() {
+    public void showGridView()
+    {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.removeItemDecoration(listItemDecoration);
         recyclerView.addItemDecoration(gridItemDecoration);
-        adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
         recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-        recyclerView.setAdapter(adapter);
+
+        if (token.isERC721())
+        {
+            NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
+            recyclerView.setAdapter(adapter);
+        }
+        else
+        {
+            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this);
+            recyclerView.setAdapter(adapter);
+        }
     }
 
-    public void showListView() {
+    public void showListView()
+    {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.removeItemDecoration(gridItemDecoration);
         recyclerView.addItemDecoration(listItemDecoration);
-        adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
         recyclerView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.background_bottom_border));
-        recyclerView.setAdapter(adapter);
-        recyclerView.setPadding(0,0,0,0);
+        recyclerView.setPadding(0, 0, 0, 0);
+
+        if (token.isERC721())
+        {
+            NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
+            recyclerView.setAdapter(adapter);
+        }
+        else
+        {
+            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this);
+            recyclerView.setAdapter(adapter);
+        }
     }
 }

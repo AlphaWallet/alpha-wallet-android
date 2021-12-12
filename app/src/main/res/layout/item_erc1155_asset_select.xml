@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/dp8"
-    android:layout_marginEnd="@dimen/dp8"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingStart="@dimen/dp16"
+    android:paddingTop="@dimen/dp16"
+    android:paddingEnd="@dimen/dp8"
+    android:paddingBottom="@dimen/dp16">
 
     <CheckBox
         android:id="@+id/checkbox"
@@ -17,18 +19,16 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/dp8"
         android:button="@drawable/selector_round_checkbox"
-        android:visibility="gone"
-        android:clickable="false" />
+        android:clickable="false"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/icon_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/checkbox"
-        android:layout_marginEnd="@dimen/dp8"
-        android:layout_marginTop="@dimen/dp8"
-        android:layout_marginBottom="@dimen/dp8">
+        android:layout_marginEnd="@dimen/dp16"
+        android:layout_toEndOf="@id/checkbox">
 
         <com.alphawallet.app.widget.NFTImageView
             android:id="@+id/icon"
@@ -43,9 +43,9 @@
             android:layout_height="48dp"
             android:layout_centerInParent="true"
             android:background="@drawable/value_amount_overlay"
-            android:gravity="center"
             android:backgroundTint="@color/azure"
             android:fontFamily="@font/font_bold"
+            android:gravity="center"
             android:textColor="@color/white"
             android:visibility="gone"
             tools:text="25" />
@@ -54,10 +54,10 @@
             android:id="@+id/loading_spinner"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:layout_gravity="center"
             android:gravity="center"
             android:padding="@dimen/dp16"
-            android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </RelativeLayout>
 
@@ -65,34 +65,32 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/icon_wrapper"
         android:layout_toStartOf="@id/arrow_right"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/dp16"
-        android:paddingBottom="@dimen/dp16">
+        android:layout_toEndOf="@id/icon_wrapper"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_semibold"
             android:layout_alignParentStart="true"
+            android:ellipsize="end"
+            android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            tools:text="Title"
             android:textColor="@color/black"
-            android:textSize="@dimen/sp17" />
+            android:textSize="@dimen/sp20"
+            tools:text="Title" />
 
         <TextView
             android:id="@+id/token_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/subtitle"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="2dp"
             android:fontFamily="@font/font_semibold"
             android:singleLine="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignBottom="@id/subtitle"
             android:textColor="@color/black"
-            android:layout_marginEnd="2dp"
             android:textSize="@dimen/sp15"
             android:visibility="visible"
             tools:text="#1" />
@@ -101,24 +99,24 @@
             android:id="@+id/subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/title"
             android:layout_toStartOf="@id/count"
             android:layout_toEndOf="@id/token_id"
-            android:layout_below="@id/title"
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            tools:text="Infinite Fungible Token"
             android:textColor="@color/dove"
-            android:textSize="@dimen/sp15" />
+            android:textSize="@dimen/sp15"
+            tools:text="Infinite Fungible Token" />
 
         <TextView
             android:id="@+id/count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/subtitle"
+            android:layout_alignParentEnd="true"
             android:fontFamily="@font/font_semibold"
             android:singleLine="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignBottom="@id/subtitle"
             android:textColor="@color/black"
             android:textSize="@dimen/sp15"
             android:visibility="gone"
@@ -132,7 +130,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:visibility="gone"
-        android:src="@drawable/ic_arrow_right" />
+        android:src="@drawable/ic_arrow_right"
+        android:visibility="gone" />
 
 </RelativeLayout>

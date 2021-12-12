@@ -68,7 +68,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_erc1155_asset_detail);
+        setContentView(R.layout.activity_nft_asset_detail);
 
         toolbar();
 

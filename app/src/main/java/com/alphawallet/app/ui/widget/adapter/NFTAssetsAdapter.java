@@ -36,11 +36,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder> {
-    private final List<Pair<BigInteger, NFTAsset>> actualData;
     private final Activity activity;
     private final OnAssetClickListener listener;
     private final Token token;
     private final boolean isGrid;
+
+    private List<Pair<BigInteger, NFTAsset>> actualData;
+    private List<Pair<BigInteger, NFTAsset>> displayData;
 
     public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, boolean isGrid)
     {
@@ -50,7 +52,6 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         this.isGrid = isGrid;
 
         actualData = new ArrayList<>();
-
         if (token.isERC721())
         {
             for (BigInteger i : token.getUniqueTokenIds())
@@ -68,6 +69,8 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             }
         }
 
+        displayData = actualData;
+
         sortData();
     }
 
@@ -83,7 +86,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     @Override
     public void onBindViewHolder(@NotNull ViewHolder holder, int position)
     {
-        Pair<BigInteger, NFTAsset> pair = actualData.get(position);
+        Pair<BigInteger, NFTAsset> pair = displayData.get(position);
         NFTAsset item = pair.second;
         if (item != null)
         {
@@ -135,16 +138,36 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     @Override
     public int getItemCount()
     {
-        return actualData.size();
+        return displayData.size();
     }
 
     private void sortData()
     {
-        Collections.sort(actualData, (e1, e2) -> {
+        Collections.sort(displayData, (e1, e2) -> {
             BigInteger tokenId1 = e1.first;
             BigInteger tokenId2 = e2.first;
             return tokenId1.compareTo(tokenId2);
         });
+    }
+
+    public void updateList(List<Pair<BigInteger, NFTAsset>> list)
+    {
+        displayData = list;
+        notifyDataSetChanged();
+    }
+
+    public void filter(String searchFilter)
+    {
+        List<Pair<BigInteger, NFTAsset>> filteredList = new ArrayList<>();
+        for (Pair<BigInteger, NFTAsset> data : actualData)
+        {
+            NFTAsset asset = data.second;
+            if (asset.getName().toLowerCase().contains(searchFilter.toLowerCase()))
+            {
+                filteredList.add(data);
+            }
+        }
+        updateList(filteredList);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

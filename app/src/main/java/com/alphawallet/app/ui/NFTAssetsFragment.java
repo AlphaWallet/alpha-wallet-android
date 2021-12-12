@@ -5,11 +5,17 @@ import static android.app.Activity.RESULT_OK;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -45,15 +51,17 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 
 public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback {
+    private final Handler delayHandler = new Handler(Looper.getMainLooper());
     @Inject
     NFTAssetsViewModelFactory viewModelFactory;
     private NFTAssetsViewModel viewModel;
-
     private Token token;
     private Wallet wallet;
     private RecyclerView recyclerView;
     private ItemOffsetDecoration gridItemDecoration;
     private ListDivider listItemDecoration;
+    private EditText search;
+    private LinearLayout searchLayout;
 
     private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -91,6 +99,10 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
             wallet = getArguments().getParcelable(C.Key.WALLET);
 
             recyclerView = view.findViewById(R.id.recycler_view);
+
+            search = view.findViewById(R.id.edit_search);
+
+            searchLayout = view.findViewById(R.id.layout_search_tokens);
 
             gridItemDecoration = new ItemOffsetDecoration(recyclerView.getContext(), R.dimen.grid_divider_offset);
 
@@ -131,18 +143,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         recyclerView.removeItemDecoration(listItemDecoration);
         recyclerView.addItemDecoration(gridItemDecoration);
         recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-
-        if (hasTokenScriptOverride(token))
-        {
-            NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
-            recyclerView.setAdapter(adapter);
-        }
-        else
-        {
-            NFTAssetsAdapter adapter = new NFTAssetsAdapter(getActivity(), token, this, true);
-            recyclerView.setAdapter(adapter);
-
-        }
+        initAndAttachAdapter(true);
     }
 
     public void showListView()
@@ -152,14 +153,22 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         recyclerView.addItemDecoration(listItemDecoration);
         recyclerView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.background_bottom_border));
         recyclerView.setPadding(0, 0, 0, 0);
+        initAndAttachAdapter(false);
+    }
+
+    private void initAndAttachAdapter(boolean isGridView)
+    {
         if (hasTokenScriptOverride(token))
         {
-            NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
+            searchLayout.setVisibility(View.GONE);
+            NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), isGridView);
             recyclerView.setAdapter(adapter);
         }
         else
         {
-            NFTAssetsAdapter adapter = new NFTAssetsAdapter(getActivity(), token, this, false);
+            searchLayout.setVisibility(View.VISIBLE);
+            NFTAssetsAdapter adapter = new NFTAssetsAdapter(getActivity(), token, this, isGridView);
+            search.addTextChangedListener(setupTextWatcher(adapter));
             recyclerView.setAdapter(adapter);
         }
     }
@@ -167,5 +176,31 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     private boolean hasTokenScriptOverride(Token t)
     {
         return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
+    }
+
+    private TextWatcher setupTextWatcher(NFTAssetsAdapter adapter)
+    {
+        return new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+            }
+
+            @Override
+            public void afterTextChanged(final Editable searchFilter)
+            {
+                delayHandler.postDelayed(() -> {
+                    if (adapter != null)
+                    {
+                        adapter.filter(searchFilter.toString());
+                    }
+                }, 200);
+            }
+        };
     }
 }

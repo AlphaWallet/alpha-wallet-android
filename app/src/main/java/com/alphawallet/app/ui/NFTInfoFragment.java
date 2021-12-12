@@ -68,11 +68,6 @@ public class NFTInfoFragment extends BaseFragment {
                 addInfoView("Issuer", token.tokenInfo.name);
                 addInfoView("Contract Address", token.tokenInfo.address);
                 addInfoView("Blockchain", token.getNetworkName());
-                NFTAsset asset = token.getTokenAssets().get(0);
-
-
-
-                addInfoView("Blockchain", "asd");
             }
             else
             {

@@ -770,4 +770,10 @@ public class ERC1155Token extends Token
                 && getNFTTokenId(tokenId).compareTo(BigInteger.valueOf(0xFFFF)) < 0
                 && getNFTTokenId(tokenId).compareTo(BigInteger.ZERO) > 0;
     }
+
+    @Override
+    public boolean isBatchTransferAvailable()
+    {
+        return true;
+    }
 }

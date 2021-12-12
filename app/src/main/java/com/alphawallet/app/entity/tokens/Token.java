@@ -996,4 +996,9 @@ public class Token
         if (realmToken.getContractType() != contractType) { return true; }
         return realmToken.getDecimals() != tokenInfo.decimals;
     }
+
+    public boolean isBatchTransferAvailable()
+    {
+        return false;
+    }
 }

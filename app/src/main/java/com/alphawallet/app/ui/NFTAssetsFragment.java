@@ -51,7 +51,6 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     private Token token;
     private Wallet wallet;
     private RecyclerView recyclerView;
-//    private NonFungibleTokenAdapter adapter;
     private ItemOffsetDecoration gridItemDecoration;
     private ListDivider listItemDecoration;
 
@@ -96,14 +95,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
             listItemDecoration = new ListDivider(recyclerView.getContext());
 
-            if (token.isERC721())
-            {
-                showGridView();
-            }
-            else
-            {
-                showListView();
-            }
+            showGridView();
         }
     }
 
@@ -142,10 +134,9 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         {
             NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), true);
             recyclerView.setAdapter(adapter);
-        }
-        else
+        } else
         {
-            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this);
+            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this, true);
             recyclerView.setAdapter(adapter);
         }
     }
@@ -162,10 +153,9 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         {
             NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), false);
             recyclerView.setAdapter(adapter);
-        }
-        else
+        } else
         {
-            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this);
+            Erc1155AssetsAdapter adapter = new Erc1155AssetsAdapter(getActivity(), token, token.getCollectionMap(), this, false);
             recyclerView.setAdapter(adapter);
         }
     }

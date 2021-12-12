@@ -6,6 +6,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,8 +40,9 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
     private final Activity activity;
     private final OnAssetClickListener listener;
     private final Token token;
+    private final boolean isGrid;
 
-    public Erc1155AssetsAdapter(Activity activity, Token token, Map<BigInteger, NFTAsset> data, OnAssetClickListener listener)
+    public Erc1155AssetsAdapter(Activity activity, Token token, Map<BigInteger, NFTAsset> data, OnAssetClickListener listener, boolean isGrid)
     {
         this.activity = activity;
         this.listener = listener;
@@ -51,14 +53,16 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
             actualData.add(new Pair<>(d.getKey(), d.getValue()));
         }
 
+        this.isGrid = isGrid;
         sortData();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
+        int layoutRes = isGrid ? R.layout.item_erc1155_asset_select_grid : R.layout.item_erc1155_asset_select;
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_erc1155_asset_select, parent, false);
+                .inflate(layoutRes, parent, false);
         return new ViewHolder(itemView);
     }
 
@@ -135,6 +139,7 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
         TextView title;
         TextView subtitle;
         ProgressBar loadingSpinner;
+        ImageView arrowRight;
 
         @Nullable
         private Disposable assetLoader;
@@ -148,7 +153,9 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
             subtitle = view.findViewById(R.id.subtitle);
             loadingSpinner = view.findViewById(R.id.loading_spinner);
 
-            view.findViewById(R.id.arrow_right).setVisibility(View.VISIBLE);
+            arrowRight = view.findViewById(R.id.arrow_right);
+            if (arrowRight != null) arrowRight.setVisibility(View.VISIBLE);
+
         }
     }
 }

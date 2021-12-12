@@ -110,14 +110,14 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_select, menu);
+        getMenuInflater().inflate(R.menu.menu_nft_display, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_select)
+        if (item.getItemId() == R.id.action_send_multiple_tokens)
         {
             handleTransactionSuccess.launch(viewModel.openSelectionModeIntent(this, token, wallet, asset));
             return true;

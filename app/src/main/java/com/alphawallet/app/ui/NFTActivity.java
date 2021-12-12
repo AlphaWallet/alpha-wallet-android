@@ -51,8 +51,11 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     private Wallet wallet;
     private Token token;
     private FunctionButtonBar functionBar;
-    private int menuItem;
     private boolean isGridView = true;
+
+    private MenuItem sendMultipleTokensMenuItem;
+    private MenuItem switchToGridViewMenuItem;
+    private MenuItem switchToListViewMenuItem;
 
     private NFTAssetsFragment assetsFragment;
 
@@ -136,8 +139,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
         viewPager.setCurrentItem(1, true);
 
-        menuItem = R.menu.menu_select;
-
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab)
@@ -146,18 +147,15 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
                 {
                     case 0:
                         showFunctionBar(true);
-                        menuItem = 0;
-                        invalidateOptionsMenu();
+                        hideMenu();
                         break;
                     case 1:
                         showFunctionBar(false);
-                        menuItem = R.menu.menu_select;
-                        invalidateOptionsMenu();
+                        showMenu();
                         break;
                     default:
                         showFunctionBar(false);
-                        menuItem = 0;
-                        invalidateOptionsMenu();
+                        hideMenu();
                         break;
                 }
             }
@@ -187,22 +185,40 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        if (isGridView)
+        {
+            switchToListViewMenuItem.setVisible(true);
+            switchToGridViewMenuItem.setVisible(false);
+        } else
+        {
+            switchToListViewMenuItem.setVisible(false);
+            switchToGridViewMenuItem.setVisible(true);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         this.menu = menu;
-        if (menuItem != 0)
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_nft_display, menu);
+        sendMultipleTokensMenuItem = menu.findItem(R.id.action_send_multiple_tokens);
+        switchToGridViewMenuItem = menu.findItem(R.id.action_grid_view);
+        switchToListViewMenuItem = menu.findItem(R.id.action_list_view);
+        if (token.isBatchTransferAvailable())
         {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(menuItem, menu);
-            if (isGridView)
-            {
-                menu.findItem(R.id.action_list_view).setVisible(true);
-                menu.findItem(R.id.action_grid_view).setVisible(false);
-            } else
-            {
-                menu.findItem(R.id.action_list_view).setVisible(false);
-                menu.findItem(R.id.action_grid_view).setVisible(true);
-            }
+            sendMultipleTokensMenuItem.setVisible(true);
+            sendMultipleTokensMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
+            switchToGridViewMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
+            switchToListViewMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
+        } else
+        {
+            sendMultipleTokensMenuItem.setVisible(false);
+            switchToGridViewMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            switchToListViewMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -213,15 +229,18 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         if (item.getItemId() == R.id.action_list_view)
         {
             isGridView = false;
-            menu.findItem(R.id.action_list_view).setVisible(false);
-            menu.findItem(R.id.action_grid_view).setVisible(true);
+            switchToListViewMenuItem.setVisible(false);
+            switchToGridViewMenuItem.setVisible(true);
             assetsFragment.showListView();
         } else if (item.getItemId() == R.id.action_grid_view)
         {
             isGridView = true;
-            menu.findItem(R.id.action_list_view).setVisible(true);
-            menu.findItem(R.id.action_grid_view).setVisible(false);
+            switchToListViewMenuItem.setVisible(true);
+            switchToGridViewMenuItem.setVisible(false);
             assetsFragment.showGridView();
+        } else if (item.getItemId() == R.id.action_send_multiple_tokens)
+        {
+            handleTransactionSuccess.launch(viewModel.openSelectionModeIntent(this, token, wallet));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -235,6 +254,34 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
             functionBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void hideMenu()
+    {
+        switchToGridViewMenuItem.setVisible(false);
+        switchToListViewMenuItem.setVisible(false);
+        if (sendMultipleTokensMenuItem != null)
+        {
+            sendMultipleTokensMenuItem.setVisible(false);
+        }
+    }
+
+    private void showMenu()
+    {
+        if (isGridView)
+        {
+            switchToListViewMenuItem.setVisible(true);
+            switchToGridViewMenuItem.setVisible(false);
+        } else
+        {
+            switchToListViewMenuItem.setVisible(false);
+            switchToGridViewMenuItem.setVisible(true);
+        }
+
+        if (sendMultipleTokensMenuItem != null)
+        {
+            sendMultipleTokensMenuItem.setVisible(true);
         }
     }
 }

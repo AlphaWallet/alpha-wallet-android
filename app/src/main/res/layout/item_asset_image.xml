@@ -10,8 +10,8 @@
         android:id="@+id/image_asset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
         android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         android:src="@drawable/ic_token_eth" />
 
     <ProgressBar

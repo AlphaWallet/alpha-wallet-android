@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.ui.Erc1155Activity;
+import com.alphawallet.app.ui.NFTActivity;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.widget.NFTImageView;
 
@@ -98,15 +98,16 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
         }).map(newAsset -> storeAsset(pair.first, newAsset, pair.second))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(a -> displayAsset(holder, a, pair.first), e -> { });
+                .subscribe(a -> displayAsset(holder, a, pair.first), e -> {
+                });
     }
 
     private NFTAsset storeAsset(BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)
     {
         fetchedAsset.updateFromRaw(oldAsset);
-        if (activity != null && activity instanceof Erc1155Activity)
+        if (activity != null && activity instanceof NFTActivity)
         {
-            ((Erc1155Activity)activity).storeAsset(tokenId, fetchedAsset);
+            ((NFTActivity) activity).storeAsset(tokenId, fetchedAsset);
         }
 
         token.addAssetToTokenBalanceAssets(tokenId, fetchedAsset);
@@ -117,6 +118,15 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
     public int getItemCount()
     {
         return actualData.size();
+    }
+
+    private void sortData()
+    {
+        Collections.sort(actualData, (e1, e2) -> {
+            BigInteger tokenId1 = e1.first;
+            BigInteger tokenId2 = e2.first;
+            return tokenId1.compareTo(tokenId2);
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -140,14 +150,5 @@ public class Erc1155AssetsAdapter extends RecyclerView.Adapter<Erc1155AssetsAdap
 
             view.findViewById(R.id.arrow_right).setVisibility(View.VISIBLE);
         }
-    }
-
-    private void sortData()
-    {
-        Collections.sort(actualData, (e1, e2) -> {
-            BigInteger tokenId1 = e1.first;
-            BigInteger tokenId2 = e2.first;
-            return tokenId1.compareTo(tokenId2);
-        });
     }
 }

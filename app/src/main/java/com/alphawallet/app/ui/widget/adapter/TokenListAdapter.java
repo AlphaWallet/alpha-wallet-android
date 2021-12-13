@@ -150,6 +150,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         for (TokenCardMeta tokenCardMeta : tokens)
         {
             TokenSortedItem sortedItem = null;
+            if (tokenCardMeta.isEthereum()) continue; //no chain cards
             Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
             tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
 

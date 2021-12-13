@@ -255,16 +255,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         KeyboardVisibilityEvent.setEventListener(
                 this, isOpen -> {
-                    boolean requiresDappBrowserResize = !viewModel.fullScreenSelected() && viewPager.getCurrentItem() == DAPP_BROWSER.ordinal();
                     if (isOpen)
                     {
                         setNavBarVisibility(View.GONE);
-                        if (requiresDappBrowserResize) ((DappBrowserFragment) getFragment(DAPP_BROWSER)).softKeyboardVisible();
+                        getFragment(WalletPage.values()[viewPager.getCurrentItem()]).softKeyboardVisible();
                     }
                     else
                     {
                         setNavBarVisibility(View.VISIBLE);
-                        if (requiresDappBrowserResize) ((DappBrowserFragment) getFragment(DAPP_BROWSER)).softKeyboardGone();
+                        getFragment(WalletPage.values()[viewPager.getCurrentItem()]).softKeyboardGone();
                     }
                 });
 
@@ -413,11 +412,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (!viewModel.isFindWalletAddressDialogShown())
         {
             //check if wallet was imported - in which case no need to display
-            if (walletImported)
-            {
-                viewModel.setFindWalletAddressDialogShown(true);
-            }
-            else
+            if (!walletImported)
             {
                 int lighterBackground = Color.argb(102, 0, 0, 0); //40% opacity
                 backupWalletDialog = TutoShowcase.from(this);
@@ -433,8 +428,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                             showPage(SETTINGS);
                         })
                         .show();
-                viewModel.setFindWalletAddressDialogShown(true);
             }
+            viewModel.setFindWalletAddressDialogShown(true);
         }
     }
 
@@ -655,12 +650,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void signalPageVisibilityChange(WalletPage oldPage, WalletPage newPage)
     {
-        BaseFragment inFocus = (BaseFragment) getFragment(newPage);
+        BaseFragment inFocus = getFragment(newPage);
         inFocus.comeIntoFocus();
 
         if (oldPage != newPage)
         {
-            BaseFragment leavingFocus = (BaseFragment) getFragment(oldPage);
+            BaseFragment leavingFocus = getFragment(oldPage);
             leavingFocus.leaveFocus();
         }
     }

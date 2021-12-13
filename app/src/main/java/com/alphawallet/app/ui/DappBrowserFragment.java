@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
@@ -2096,6 +2097,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void softKeyboardVisible()
     {
         if (getActivity() == null) { return; }
+
+        //boolean requiresDappBrowserResize = !viewModel.fullScreenSelected();
 
         Rect r = new Rect();
         webFrame.getWindowVisibleDisplayFrame(r);

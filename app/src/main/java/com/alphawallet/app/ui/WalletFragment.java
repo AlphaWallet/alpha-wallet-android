@@ -8,6 +8,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -20,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -27,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -41,6 +44,7 @@ import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -56,31 +60,33 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
+import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-import com.alphawallet.app.util.TabUtils;
+import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
+import com.alphawallet.app.widget.SearchToolbar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.UserAvatar;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -105,6 +111,8 @@ public class WalletFragment extends BaseFragment implements
     private static final int TAB_COLLECTIBLES = 2;
     private static final int TAB_ATTESTATIONS = 3;
 
+    public static final String SEARCH_FRAGMENT = "w_search";
+
     @Inject
     WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
@@ -123,9 +131,6 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
-
-    @Nullable
-    private Disposable checkSync;
 
     @Nullable
     @Override
@@ -156,6 +161,17 @@ public class WalletFragment extends BaseFragment implements
         viewModel.prepare();
 
         addressAvatar.setWaiting();
+
+        getChildFragmentManager()
+                .setFragmentResultListener(SEARCH_FRAGMENT, this, (requestKey, bundle) -> {
+                    Fragment fragment = getChildFragmentManager().findFragmentByTag(SEARCH_FRAGMENT);
+                    if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
+                        fragment.onDetach();
+                        getChildFragmentManager().beginTransaction()
+                                .remove(fragment)
+                                .commitAllowingStateLoss();
+                    }
+                });
 
         return view;
     }
@@ -333,7 +349,7 @@ public class WalletFragment extends BaseFragment implements
             realmUpdates = null;
         }
         if (realm != null && !realm.isClosed()) realm.close();
-        if (checkSync != null && !checkSync.isDisposed()) checkSync.dispose();
+        softKeyboardGone();
     }
 
     @Override
@@ -568,7 +584,6 @@ public class WalletFragment extends BaseFragment implements
     public void onDestroy()
     {
         super.onDestroy();
-        if (checkSync != null && !checkSync.isDisposed()) checkSync.dispose();
         handler.removeCallbacksAndMessages(null);
         if (realmUpdates != null)
         {
@@ -805,6 +820,19 @@ public class WalletFragment extends BaseFragment implements
             });
         } else {
             notificationView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onSearchClicked()
+    {
+        if (getView() != null && getHost() != null && getChildFragmentManager().findFragmentByTag(SEARCH_FRAGMENT) == null)
+        {
+            getView().clearFocus();
+            Fragment f = new TokenSearchFragment();
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.coordinator, f, SEARCH_FRAGMENT)
+                    .commit();
         }
     }
 }

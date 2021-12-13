@@ -158,6 +158,15 @@ public class WalletViewModel extends BaseViewModel
         tokensService.updateTickers();
     }
 
+    public void searchTokens(String search)
+    {
+        disposable =
+                fetchTokensInteract.searchTokenMetas(defaultWallet.getValue(), tokensService.getNetworkFilters(), search)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokenMetas, this::onError);
+    }
+
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
@@ -226,7 +235,7 @@ public class WalletViewModel extends BaseViewModel
             context.startActivity(intent);
         });
 
-        dialog = new BottomSheetDialog(context);
+        dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
         dialog.setContentView(actionsView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);

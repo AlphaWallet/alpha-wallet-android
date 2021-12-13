@@ -1041,6 +1041,11 @@ public class TokensService
         //running or not?
     }
 
+    public boolean isMainNetActive()
+    {
+        return mainNetActive;
+    }
+
     public void walletOutOfFocus()
     {
         appHasFocus = false;

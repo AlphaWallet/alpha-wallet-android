@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -15,11 +16,14 @@ import androidx.annotation.NonNull;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
+import com.alphawallet.app.util.KeyboardUtils;
+
+import org.jetbrains.annotations.Contract;
 
 /**
  * Created by JB on 9/12/2021.
  */
-public class SearchToolbar extends FrameLayout
+public class SearchToolbar extends FrameLayout implements Runnable
 {
     private final View back;
     private final EditText searchText;
@@ -56,8 +60,9 @@ public class SearchToolbar extends FrameLayout
             cb.backPressed();
         });
 
-        searchCallback.searchText("");
         searchText.requestFocus();
+
+        KeyboardUtils.showKeyboard(searchText);
     }
 
     private void init()
@@ -66,6 +71,15 @@ public class SearchToolbar extends FrameLayout
         searchText.addTextChangedListener(textWatcher);
         clearText.setOnClickListener(v -> {
             searchText.setText("");
+        });
+
+        searchText.setOnEditorActionListener((textView, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                if (searchCallback != null) searchCallback.searchText(searchText.getText().toString());
+                textView.clearFocus();
+                KeyboardUtils.hideKeyboard(textView);
+            }
+            return actionId == EditorInfo.IME_ACTION_SEARCH;
         });
     }
 
@@ -76,9 +90,21 @@ public class SearchToolbar extends FrameLayout
         @Override
         public void afterTextChanged(final Editable s) {
             delayHandler.removeCallbacksAndMessages(null);
-            delayHandler.postDelayed(() -> {
-                if (searchCallback != null) searchCallback.searchText(s.toString());
-            }, 750);
+            delayHandler.postDelayed(getRunnable(), 250);
         }
     };
+
+    Runnable getRunnable() { return this; }
+
+    public EditText getEditView()
+    {
+        return searchText;
+    }
+
+    @Override
+    public void run()
+    {
+        if (searchText == null || searchText.getText() == null) return;
+        if (searchCallback != null) searchCallback.searchText(searchText.getText().toString());
+    }
 }

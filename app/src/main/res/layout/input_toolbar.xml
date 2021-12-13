@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="ContentDescription">
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/colorPrimary"
+    android:contentInsetEnd="0dp"
+    android:contentInsetLeft="0dp"
+    android:contentInsetRight="0dp"
+    android:contentInsetStart="0dp"
+    android:theme="@style/AppTheme.Toolbar"
+    app:contentInsetEnd="0dp"
+    app:contentInsetLeft="0dp"
+    app:contentInsetRight="0dp"
+    app:contentInsetStart="0dp"
+    app:popupTheme="@style/AppTheme.PopupOverlay"
+    app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/mt_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="2dp"
         app:cardBackgroundColor="@color/colorTheme"
         app:cardCornerRadius="2dp"
         app:cardElevation="2dp"
@@ -17,12 +31,12 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/root"
             android:layout_width="match_parent"
-            android:layout_height="48dp">
+            android:layout_height="?attr/actionBarSize">
 
             <ImageView
                 android:id="@+id/st_backArrow"
                 android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_height="match_parent"
                 android:background="@color/colorTheme"
                 android:clickable="true"
                 android:focusable="true"
@@ -35,7 +49,7 @@
             <ImageView
                 android:id="@+id/st_clear"
                 android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_height="match_parent"
                 android:background="@color/colorTheme"
                 android:padding="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -69,6 +83,7 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:hint="@string/token_name_hint"
+                android:textColorHint="@color/dove_hint"
                 android:imeOptions="flagNoExtractUi|actionSearch"
                 android:inputType="text"
                 android:maxLines="1"
@@ -80,4 +95,5 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-</merge>
+
+</androidx.appcompat.widget.Toolbar>

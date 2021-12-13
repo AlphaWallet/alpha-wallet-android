@@ -29,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -43,6 +44,7 @@ import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -65,6 +67,7 @@ import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
@@ -100,14 +103,15 @@ public class WalletFragment extends BaseFragment implements
         Runnable,
         BackupTokenCallback,
         AvatarWriteCallback,
-        ServiceSyncCallback,
-        SearchToolbarCallback
+        ServiceSyncCallback
 {
     private static final String TAG = "WFRAG";
     private static final int TAB_ALL = 0;
     private static final int TAB_CURRENCY = 1;
     private static final int TAB_COLLECTIBLES = 2;
     private static final int TAB_ATTESTATIONS = 3;
+
+    public static final String SEARCH_FRAGMENT = "w_search";
 
     @Inject
     WalletViewModelFactory walletViewModelFactory;
@@ -157,6 +161,17 @@ public class WalletFragment extends BaseFragment implements
         viewModel.prepare();
 
         addressAvatar.setWaiting();
+
+        getChildFragmentManager()
+                .setFragmentResultListener(SEARCH_FRAGMENT, this, (requestKey, bundle) -> {
+                    Fragment fragment = getChildFragmentManager().findFragmentByTag(SEARCH_FRAGMENT);
+                    if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
+                        fragment.onDetach();
+                        getChildFragmentManager().beginTransaction()
+                                .remove(fragment)
+                                .commitAllowingStateLoss();
+                    }
+                });
 
         return view;
     }
@@ -802,39 +817,16 @@ public class WalletFragment extends BaseFragment implements
         }
     }
 
-    public void softKeyboardVisible()
-    {
-        if (getActivity() == null) { return; }
-        //searching, switch to alt view
-
-        //View view = inflater.inflate(R.layout.fragment_wallet, container, false);
-        AppBarLayout appBar = getView().findViewById(R.id.appbar);
-        SearchToolbar searchBar = getView().findViewById(R.id.search);
-
-        appBar.setVisibility(View.GONE);
-        searchBar.setVisibility(View.VISIBLE);
-        searchBar.setSearchCallback(this);
-    }
-
-    public void softKeyboardGone()
-    {
-        if (getActivity() == null) { return; }
-        AppBarLayout appBar = getView().findViewById(R.id.appbar);
-        SearchToolbar searchBar = getView().findViewById(R.id.search);
-
-        appBar.setVisibility(View.VISIBLE);
-        searchBar.setVisibility(View.GONE);
-    }
-
     @Override
-    public void searchText(String search)
+    public void onSearchClicked()
     {
-        System.out.println("YOLESS!");
-    }
-
-    @Override
-    public void backPressed()
-    {
-        KeyboardUtils.hideKeyboard(getView());
+        if (getView() != null && getHost() != null && getChildFragmentManager().findFragmentByTag(SEARCH_FRAGMENT) == null)
+        {
+            getView().clearFocus();
+            Fragment f = new TokenSearchFragment();
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.coordinator, f, SEARCH_FRAGMENT)
+                    .commit();
+        }
     }
 }

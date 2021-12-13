@@ -153,6 +153,15 @@ public class WalletViewModel extends BaseViewModel
         tokensService.updateTickers();
     }
 
+    public void searchTokens(String search)
+    {
+        disposable =
+                fetchTokensInteract.searchTokenMetas(defaultWallet.getValue(), tokensService.getNetworkFilters(), search)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokenMetas, this::onError);
+    }
+
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;

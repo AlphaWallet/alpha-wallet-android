@@ -62,4 +62,9 @@ public class FetchTokensInteract {
     {
         return tokenRepository.fetchTokenMetas(wallet, networkFilters, svs);
     }
+
+    public Single<TokenCardMeta[]> searchTokenMetas(Wallet wallet, List<Long> networkFilters, String searchTerm)
+    {
+        return tokenRepository.fetchAllTokenMetas(wallet, networkFilters, searchTerm);
+    }
 }

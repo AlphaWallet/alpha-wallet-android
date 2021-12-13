@@ -10,22 +10,15 @@
     <com.alphawallet.app.widget.SearchToolbar
         android:id="@+id/search"
         android:layout_width="match_parent"
-        android:layout_height="48dp"/>
+        android:layout_height="wrap_content"/>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refresh_layout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:background="@color/alabaster"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="?actionBarSize"
-        android:background="@color/alabaster"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="?actionBarSize"/>
 
 </androidx.appcompat.widget.LinearLayoutCompat>
 

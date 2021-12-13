@@ -79,7 +79,7 @@ public class TokenSearchFragment extends Fragment implements SearchToolbarCallba
 
         initViewModel();
         initList();
-        setupKeyboardViewResizer(view);
+        setupKeyboardViewResizer(view, searchBar);
 
         return view;
     }
@@ -164,16 +164,18 @@ public class TokenSearchFragment extends Fragment implements SearchToolbarCallba
 
     }
 
-    private void setupKeyboardViewResizer(final View view)
+    private void setupKeyboardViewResizer(final View view, final SearchToolbar topBar)
     {
         KeyboardVisibilityEvent.setEventListener(
                 getActivity(), isOpen -> {
             if (isOpen)
             {
                 Rect r = new Rect();
+                topBar.getWindowVisibleDisplayFrame(r); //allow for fullscreen or notification bar
+                int topBarStart = r.top;
                 view.getWindowVisibleDisplayFrame(r);
                 ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) recyclerView.getLayoutParams();
-                layoutParams.bottomMargin = view.getRootView().getHeight() - (r.bottom - r.top);
+                layoutParams.bottomMargin = view.getRootView().getHeight() - (r.bottom - r.top) - topBarStart;
                 recyclerView.setLayoutParams(layoutParams);
             }
             else

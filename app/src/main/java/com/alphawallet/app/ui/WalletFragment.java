@@ -208,6 +208,7 @@ public class WalletFragment extends BaseFragment implements
         systemView = view.findViewById(R.id.system_view);
         recyclerView = view.findViewById(R.id.list);
         addressAvatar = view.findViewById(R.id.user_address_blockie);
+        addressAvatar.setVisibility(View.VISIBLE);
 
         systemView.showProgress(true);
 

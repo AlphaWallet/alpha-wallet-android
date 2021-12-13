@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
@@ -29,6 +30,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final ManageWalletsRouter manageWalletsRouter;
     private final PreferenceRepositoryType preferenceRepository;
     private final RealmManager realmManager;
+    private final OnRampRepositoryType onRampRepository;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   TokenDetailRouter tokenDetailRouter,
@@ -40,7 +42,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   MyAddressRouter myAddressRouter,
                                   ManageWalletsRouter manageWalletsRouter,
                                   PreferenceRepositoryType preferenceRepository,
-                                  RealmManager realmManager) {
+                                  RealmManager realmManager,
+                                  OnRampRepositoryType onRampRepository) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
@@ -52,6 +55,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
+        this.onRampRepository = onRampRepository;
     }
 
     @NonNull
@@ -68,6 +72,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 myAddressRouter,
                 manageWalletsRouter,
                 preferenceRepository,
-                realmManager);
+                realmManager,
+                onRampRepository);
     }
 }

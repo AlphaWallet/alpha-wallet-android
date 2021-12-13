@@ -26,6 +26,8 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.OnRampRepository;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
@@ -71,6 +73,7 @@ public class WalletViewModel extends BaseViewModel
     private final RealmManager realmManager;
     private long lastBackupCheck = 0;
     private BottomSheetDialog dialog;
+    private final OnRampRepositoryType onRampRepository;
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
@@ -83,7 +86,8 @@ public class WalletViewModel extends BaseViewModel
             MyAddressRouter myAddressRouter,
             ManageWalletsRouter manageWalletsRouter,
             PreferenceRepositoryType preferenceRepository,
-            RealmManager realmManager)
+            RealmManager realmManager,
+            OnRampRepositoryType onRampRepository)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -96,6 +100,7 @@ public class WalletViewModel extends BaseViewModel
         this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
+        this.onRampRepository = onRampRepository;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -151,6 +156,15 @@ public class WalletViewModel extends BaseViewModel
     {
         tokens.postValue(metaTokens);
         tokensService.updateTickers();
+    }
+
+    public void searchTokens(String search)
+    {
+        disposable =
+                fetchTokensInteract.searchTokenMetas(defaultWallet.getValue(), tokensService.getNetworkFilters(), search)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokenMetas, this::onError);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -221,7 +235,7 @@ public class WalletViewModel extends BaseViewModel
             context.startActivity(intent);
         });
 
-        dialog = new BottomSheetDialog(context);
+        dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
         dialog.setContentView(actionsView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -351,5 +365,11 @@ public class WalletViewModel extends BaseViewModel
     public void saveAvatar(Wallet wallet)
     {
         genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
+    }
+
+    public Intent getBuyIntent(String address) {
+        Intent intent = new Intent();
+        intent.putExtra(C.DAPP_URL_LOAD, onRampRepository.getUri(address, null));
+        return intent;
     }
 }

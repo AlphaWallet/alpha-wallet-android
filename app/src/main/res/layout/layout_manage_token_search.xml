@@ -28,6 +28,8 @@
             android:layout_marginStart="@dimen/dp8"
             android:inputType="textFilter"
             android:hint="@string/search_for_tokens"
+            android:focusable="false"
+            android:clickable="false"
             android:background="@null"
             android:layout_marginEnd="@dimen/dp16"
             android:maxLines="1"
@@ -38,4 +40,14 @@
             android:textSize="@dimen/sp17"/>
 
     </LinearLayout>
+
+    <View
+        android:id="@+id/click_layer"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp30"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_gravity="center_vertical"
+        android:background="@color/transparent"
+        />
 </FrameLayout>

@@ -987,13 +987,17 @@ public class TokensRealmSource implements TokenLocalSource {
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .beginGroup()
                         .like("auxData", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .or().like("symbol", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .or().like("name", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .endGroup()
                         .like("address", ADDRESS_FORMAT)
                         .findAll();
 
                 for (RealmToken t : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || t.getContractType() == ContractType.ETHEREUM) continue;
+                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType());
                     meta.lastTxUpdate = t.getLastTxTime();

@@ -110,7 +110,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         secondaryButton = findViewById(R.id.secondary_button);
         moreButton = findViewById(R.id.more_button);
 
-        bottomSheet = new BottomSheetDialog(getContext());
+        bottomSheet = new BottomSheetDialog(getContext(), R.style.FullscreenBottomSheetDialogStyle);
         bottomSheet.setCancelable(true);
         bottomSheet.setCanceledOnTouchOutside(true);
         moreActionsListView = new ListView(getContext());

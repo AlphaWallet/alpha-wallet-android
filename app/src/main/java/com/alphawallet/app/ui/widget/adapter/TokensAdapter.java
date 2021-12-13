@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -152,16 +153,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    private void filter(String searchString)
-    {
-        filter = searchString;
-        items.beginBatchedUpdates();
-        for (int i = 1; i < items.size(); i++) { items.removeItemAt(i); }
-        items.endBatchedUpdates();
-        tokensAdapterCallback.reloadTokens(); //re-fetch all tokens, filtering will be done when setTokens is called after the database load
-                                              //TODO: Optimise - pass the filter term to reload tokens, filter at database level.
-    }
-
     @NonNull
     @Override
     public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -180,7 +171,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
             }
             case ManageTokensHolder.VIEW_TYPE:
-                holder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
+                ManageTokensHolder manageTokensHolder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
+                manageTokensHolder.setOnTokenClickListener(tokensAdapterCallback);
+                holder = manageTokensHolder;
                 break;
 
             case HeaderHolder.VIEW_TYPE:
@@ -188,12 +181,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
-                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, (filter, skipDebounce) -> {
-                    delayHandler.removeCallbacksAndMessages(null);
-                    delayHandler.postDelayed(() -> {
-                        filter(filter);
-                    }, skipDebounce ? 0 : 750);
-                });
+                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, tokensAdapterCallback::onSearchClicked);
                 break;
 
             case WarningHolder.VIEW_TYPE:
@@ -273,7 +261,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     private void addManageTokensLayout() {
-        if (walletAddress != null && !walletAddress.isEmpty()) {
+        if (walletAddress != null && !walletAddress.isEmpty() && tokensService.isMainNetActive()) {
             items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher), Integer.MAX_VALUE));
         }
     }
@@ -534,16 +522,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void onDestroy(RecyclerView recyclerView)
     {
-//        //ensure all holders have their realm listeners cleaned up
-//        if (recyclerView != null)
-//        {
-//            for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
-//            {
-//                ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
-//            }
-//        }
-//
-//        if (realm != null) realm.close();
+
     }
 
     public void setDebug()

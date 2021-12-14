@@ -1118,12 +1118,10 @@ public class TokensService
 
     public String getFallbackUrlForToken(Token token)
     {
-        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-
         String tURL = tokenRepository.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = Utils.getTokenImageUrl(correctedAddr);
+            tURL = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         }
 
         return tURL;

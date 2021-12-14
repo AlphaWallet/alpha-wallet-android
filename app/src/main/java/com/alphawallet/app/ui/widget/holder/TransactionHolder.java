@@ -42,7 +42,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView type;
     private final TextView address;
     private final TextView value;
-    private final ChainName chainName;
     private final TextView supplemental;
     private final TokensService tokensService;
     private final LinearLayout transactionBackground;
@@ -61,7 +60,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        chainName = findViewById(R.id.chain_name);
         supplemental = findViewById(R.id.supplimental);
         transactionBackground = findViewById(R.id.layout_background);
         tokensService = service;
@@ -86,8 +84,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         value.setVisibility(View.VISIBLE);
 
-        setChainElement();
-
         Token token = getOperationToken();
         if (token == null) return;
 
@@ -105,6 +101,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         //set colours and up/down arrow
         tokenIcon.bindData(token, assetService);
         tokenIcon.setStatusIcon(token.getTxStatus(transaction));
+        tokenIcon.setChainIcon(token.tokenInfo.chainId);
 
         String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), EthereumNetworkBase.getChainSymbol(token.tokenInfo.chainId));
         supplemental.setText(supplementalTxt);
@@ -126,19 +123,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     public void setFromTokenView()
     {
         fromTokenView = true;
-    }
-
-    private void setChainElement()
-    {
-        if (transaction.chainId == MAINNET_ID)
-        {
-            chainName.setVisibility(View.GONE);
-        }
-        else
-        {
-            chainName.setVisibility(View.VISIBLE);
-            chainName.setChainID(transaction.chainId);
-        }
     }
 
     private Token getOperationToken()
@@ -194,7 +178,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);
             transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
-            chainName.setVisibility(View.GONE);
         }
         else if (transactionBackground != null)
         {

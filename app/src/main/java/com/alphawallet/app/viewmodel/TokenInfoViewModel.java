@@ -48,6 +48,8 @@ public class TokenInfoViewModel extends BaseViewModel {
 
     public TokensService getTokensService() { return tokensService; }
 
+    public AssetDefinitionService getAssetDefinitionService() { return assetDefinitionService; }
+
     public void fetchPortfolio()
     {
         TokenPortfolio tokenPortfolio = new TokenPortfolio();

@@ -53,7 +53,6 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private final TextView type;
     private final TextView address;
     private final TextView value;
-    private final ChainName chainName;
     private final TextView supplemental;
     private final LinearLayout transactionBackground;
 
@@ -76,7 +75,6 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        chainName = findViewById(R.id.chain_name);
         supplemental = findViewById(R.id.supplimental);
         transactionBackground = findViewById(R.id.layout_background);
         tokensService = service;
@@ -137,20 +135,11 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         //symbol.setText(sym);
         address.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
         tokenIcon.setStatusIcon(eventData.getEventStatusType());
+        tokenIcon.setChainIcon(token.tokenInfo.chainId);
 
         //timestamp
         date.setText(Utils.localiseUnixTime(getContext(), eventData.getResultTime()));
         date.setVisibility(View.VISIBLE);
-
-        if (token.tokenInfo.chainId == MAINNET_ID)
-        {
-            chainName.setVisibility(View.GONE);
-        }
-        else
-        {
-            chainName.setVisibility(View.VISIBLE);
-            chainName.setChainID(token.tokenInfo.chainId);
-        }
     }
 
     @Override

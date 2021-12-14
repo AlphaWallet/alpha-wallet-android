@@ -275,29 +275,62 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(KOVAN_ID, R.drawable.ic_kovan);
             put(ROPSTEN_ID, R.drawable.ic_ropsten);
             put(RINKEBY_ID, R.drawable.ic_rinkeby);
-            put(CLASSIC_ID, R.drawable.classic_logo);
+            put(CLASSIC_ID, R.drawable.ic_icons_network_etc); //classic_logo
             put(POA_ID, R.drawable.ic_poa_logo);
-            put(SOKOL_ID, R.drawable.ic_poa_sokol);
+            put(SOKOL_ID, R.drawable.ic_icons_tokens_sokol);
             put(XDAI_ID, R.drawable.xdai_logo);
             put(GOERLI_ID, R.drawable.ic_goerli);
             put(ARTIS_SIGMA1_ID, R.drawable.ic_artis_sigma_logo);
             put(ARTIS_TAU1_ID, R.drawable.ic_artis_tau_logo);
             put(BINANCE_MAIN_ID, R.drawable.ic_binance_logo);
-            put(BINANCE_TEST_ID, R.drawable.ic_binance_test_logo);
+            put(BINANCE_TEST_ID, R.drawable.ic_icons_tokens_bnb_testnet);
             put(HECO_ID, R.drawable.ic_heco_logo);
-            put(HECO_TEST_ID, R.drawable.ic_heco_logo);
+            put(HECO_TEST_ID, R.drawable.ic_icons_tokens_heco_testnet);
             put(FANTOM_ID, R.drawable.ic_fantom);
             put(FANTOM_TEST_ID, R.drawable.ic_icons_fantom_test);
             put(AVALANCHE_ID, R.drawable.ic_icons_tokens_avalanche);
             put(FUJI_TEST_ID, R.drawable.ic_icons_tokens_avalanche_testnet);
             put(MATIC_ID, R.drawable.ic_icons_polygon);
-            put(MATIC_TEST_ID, R.drawable.ic_icons_matic);
+            put(MATIC_TEST_ID, R.drawable.ic_icons_tokens_mumbai);
             put(OPTIMISTIC_MAIN_ID, R.drawable.ic_optimism_logo);
             put(OPTIMISTIC_TEST_ID, R.drawable.ic_optimism_testnet_logo);
             put(CRONOS_TEST_ID, R.drawable.ic_cronos);
             put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_arbitrum);
             put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
-            put(PALM_ID, R.drawable.palm_logo);
+            put(PALM_ID, R.drawable.ic_icons_network_palm);
+            put(PALM_TEST_ID, R.drawable.palm_logo_test);
+        }
+    };
+
+    private static final LongSparseArray<Integer> smallChainLogos = new LongSparseArray<Integer>() {
+        {
+            put(MAINNET_ID, R.drawable.ic_icons_network_eth);
+            put(KOVAN_ID, R.drawable.ic_kovan);
+            put(ROPSTEN_ID, R.drawable.ic_ropsten);
+            put(RINKEBY_ID, R.drawable.ic_rinkeby);
+            put(CLASSIC_ID, R.drawable.ic_icons_network_etc);
+            put(POA_ID, R.drawable.ic_icons_network_poa);
+            put(SOKOL_ID, R.drawable.ic_icons_tokens_sokol);
+            put(XDAI_ID, R.drawable.ic_icons_network_xdai);
+            put(GOERLI_ID, R.drawable.ic_goerli);
+            put(ARTIS_SIGMA1_ID, R.drawable.ic_icons_network_artis);
+            put(ARTIS_TAU1_ID, R.drawable.ic_artis_tau_logo);
+            put(BINANCE_MAIN_ID, R.drawable.ic_icons_network_bsc);
+            put(BINANCE_TEST_ID, R.drawable.ic_icons_tokens_bnb_testnet);
+            put(HECO_ID, R.drawable.ic_icons_network_heco);
+            put(HECO_TEST_ID, R.drawable.ic_icons_tokens_heco_testnet);
+            put(FANTOM_ID, R.drawable.ic_icons_network_fantom);
+            put(FANTOM_TEST_ID, R.drawable.ic_icons_fantom_test);
+            put(AVALANCHE_ID, R.drawable.ic_icons_network_avalanche);
+            put(FUJI_TEST_ID, R.drawable.ic_icons_tokens_avalanche_testnet);
+            put(MATIC_ID, R.drawable.ic_icons_network_polygon);
+            put(MATIC_TEST_ID, R.drawable.ic_icons_tokens_mumbai);
+            put(OPTIMISTIC_MAIN_ID, R.drawable.ic_icons_network_optimism);
+            put(OPTIMISTIC_TEST_ID, R.drawable.ic_optimism_testnet_logo);
+            put(CRONOS_TEST_ID, R.drawable.ic_cronos);
+            put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_network_arbitrum);
+            put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
+            put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
         }
     };
@@ -663,7 +696,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     //TODO: Fold this into file and add to database
-    public static int getChainLogo(long networkId) {
+    public static int getChainLogo(long networkId)
+    {
         if (chainLogos.indexOfKey(networkId) >= 0)
         {
             return chainLogos.get(networkId);
@@ -671,6 +705,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         else
         {
             return R.drawable.ic_ethereum_generic;
+        }
+    }
+
+    public static int getSmallChainLogo(long networkId)
+    {
+        if (smallChainLogos.indexOfKey(networkId) >= 0)
+        {
+            return smallChainLogos.get(networkId);
+        }
+        else
+        {
+            return getChainLogo(networkId);
         }
     }
 

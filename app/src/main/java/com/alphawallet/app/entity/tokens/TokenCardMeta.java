@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.interact.ATokensRepository;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -25,6 +26,9 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final int nameWeight;
     public final ContractType type;
     public final String balance;
+    private final String filterText;
+
+    public final TokenSortGroup group;
 
     /*
     Initial value is False as Token considered to be Hidden
@@ -38,6 +42,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.type = type;
         this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.balance = balance;
+        this.filterText = symbol + "'" + name;
+        this.group = defineSortGroup();
     }
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type)
@@ -48,6 +54,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.type = type;
         this.nameWeight = 1000;
         this.balance = balance;
+        this.filterText = null;
+        this.group = defineSortGroup();
     }
 
     public TokenCardMeta(Token token)
@@ -58,6 +66,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.type = token.getInterfaceSpec();
         this.nameWeight = 1000;
         this.balance = token.balance.toString();
+        this.filterText = token.getShortSymbol() + "'" + token.getName(); //TODO: will not find AssetDefinition names
+        this.group = defineSortGroup();
         this.isEnabled = true;
     }
 
@@ -69,6 +79,24 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         nameWeight = in.readInt();
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
+        filterText = in.readString();
+        group = defineSortGroup();
+    }
+
+    private TokenSortGroup defineSortGroup() {
+        TokenSortGroup tsg = TokenSortGroup.GENERAL;
+        if (isNFT()) {
+            tsg = TokenSortGroup.NFT;
+        } else if (isAToken()) {
+            tsg = TokenSortGroup.ATOKEN;
+        }
+
+        return tsg;
+    }
+
+    public String getFilterText()
+    {
+        return filterText;
     }
 
     public static final Creator<TokenCardMeta> CREATOR = new Creator<TokenCardMeta>() {
@@ -92,6 +120,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         dest.writeInt(nameWeight);
         dest.writeInt(type.ordinal());
         dest.writeString(balance);
+        dest.writeString(filterText);
     }
 
     public String getAddress()
@@ -123,7 +152,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    public static int calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
+    private int calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
     {
         int weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
@@ -206,6 +235,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public boolean isEthereum()
     {
         return type == ContractType.ETHEREUM;
+    }
+
+    public boolean isAToken() {
+        return ATokensRepository.isAToken(getAddress());
     }
 
     public boolean isNFT()

@@ -23,7 +23,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
@@ -52,7 +52,7 @@ public class TokenIcon extends ConstraintLayout
     private final ImageView chainIcon;
     private final ImageView chainIconBackground;
 
-    private OnTokenClickListener onTokenClickListener;
+    private TokensAdapterCallback tokensAdapterCallback;
     private Token token;
     private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
@@ -111,8 +111,9 @@ public class TokenIcon extends ConstraintLayout
      */
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
-        if (token == null) return;
-        this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
+        if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
+        this.tokenName = token.getName(assetDefinition, token.getTokenCount());
+        //this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
         this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
 
         bind(token, getIconUrl(token));
@@ -121,7 +122,7 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token)
     {
         if (token == null) return;
-        this.tokenName = token.getFullName();
+        this.tokenName = token.getName();
         this.fallbackIconUrl = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         bind(token, getIconUrl(token));
     }
@@ -129,7 +130,7 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, @NotNull TokensService svs)
     {
         if (token == null) return;
-        this.tokenName = token.getFullName();
+        this.tokenName = token.getName();
         this.fallbackIconUrl = svs.getFallbackUrlForToken(token);
         bind(token, getIconUrl(token));
     }
@@ -150,7 +151,7 @@ public class TokenIcon extends ConstraintLayout
     {
         chainIconBackground.setVisibility(View.VISIBLE);
         chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
+        chainIcon.setImageResource(EthereumNetworkRepository.getSmallChainLogo(chainId));
     }
 
     private void setupDefaultIcon(boolean loadFailed)
@@ -287,16 +288,16 @@ public class TokenIcon extends ConstraintLayout
         }
     }
 
-    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback)
     {
-        this.onTokenClickListener = onTokenClickListener;
+        this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
     private void performTokenClick(View v)
     {
-        if (onTokenClickListener != null)
+        if (tokensAdapterCallback != null)
         {
-            onTokenClickListener.onTokenClick(v, token, null, true);
+            tokensAdapterCallback.onTokenClick(v, token, null, true);
         }
     }
 

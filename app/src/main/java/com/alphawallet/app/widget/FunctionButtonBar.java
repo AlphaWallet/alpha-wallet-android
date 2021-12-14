@@ -39,8 +39,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -66,7 +65,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
-public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, OnTokenClickListener, View.OnClickListener {
+public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, TokensAdapterCallback, View.OnClickListener {
     private final Context context;
     private Map<String, TSAction> functions;
     private NonFungibleAdapterInterface adapter;
@@ -111,7 +110,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         secondaryButton = findViewById(R.id.secondary_button);
         moreButton = findViewById(R.id.more_button);
 
-        bottomSheet = new BottomSheetDialog(getContext());
+        bottomSheet = new BottomSheetDialog(getContext(), R.style.FullscreenBottomSheetDialogStyle);
         bottomSheet.setCancelable(true);
         bottomSheet.setCanceledOnTouchOutside(true);
         moreActionsListView = new ListView(getContext());

@@ -18,7 +18,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
 import com.alphawallet.app.ui.widget.entity.NFTSortedItem;
@@ -64,7 +64,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private FunctionCallback functionCallback;
     private final Activity activity;
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service,
+    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
                                    OpenSeaService opensea, Activity activity) {
         super(tokenClickListener, service);
         assetCount = 0;
@@ -75,7 +75,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         this.activity = activity;
     }
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, List<BigInteger> tokenSelection,
+    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, List<BigInteger> tokenSelection,
                                    AssetDefinitionService service)
     {
         super(tokenClickListener, service);
@@ -87,7 +87,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         this.activity = null;
     }
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
+    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
                                    AssetDefinitionService service)
     {
         super(tokenClickListener, service);
@@ -111,7 +111,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
-                holder.setOnTokenClickListener(onTokenClickListener);
+                holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
             case TotalBalanceHolder.VIEW_TYPE:
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
@@ -121,11 +121,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
                 break;
             case OpenseaHolder.VIEW_TYPE:
                 holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token, activity, clickThrough);
-                holder.setOnTokenClickListener(onTokenClickListener);
+                holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, token, assetService, clickThrough);
-                holder.setOnTokenClickListener(onTokenClickListener);
+                holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
             case NFTAssetHolder.VIEW_TYPE:
                 holder = new NFTAssetHolder(parent);

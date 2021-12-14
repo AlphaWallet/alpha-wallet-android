@@ -81,4 +81,7 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
     {
         //
     }
+
+    public void softKeyboardVisible() { }
+    public void softKeyboardGone() { }
 }

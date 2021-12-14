@@ -16,7 +16,7 @@
         android:ellipsize="end"
         android:fontFamily="@font/font_bold"
         android:singleLine="true"
-        android:text="Category"
+        android:text="@string/token_info_portfolio"
         android:textColor="@color/black"
         android:textSize="@dimen/sp24" />
 

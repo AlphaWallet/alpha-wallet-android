@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.R;
@@ -18,7 +17,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 
 public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, View.OnLongClickListener, PageReadyCallback
 {
@@ -26,7 +25,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private final Token token;
     private final Web3TokenView tokenView;
     private final LinearLayout webWrapper;
-    private OnTokenClickListener onTokenClickListener;
+    private TokensAdapterCallback tokensAdapterCallback;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final View activityView;
@@ -58,21 +57,21 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
 
     @Override
     public void onClick(View v) {
-        if (onTokenClickListener != null) {
-            onTokenClickListener.onTokenClick(v, token, thisData.tokenIds, true);
+        if (tokensAdapterCallback != null) {
+            tokensAdapterCallback.onTokenClick(v, token, thisData.tokenIds, true);
         }
     }
 
-    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
-        this.onTokenClickListener = onTokenClickListener;
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) {
+        this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
     @Override
     public boolean onLongClick(View view)
     {
-        if (onTokenClickListener != null)
+        if (tokensAdapterCallback != null)
         {
-            onTokenClickListener.onLongTokenClick(view, token, thisData.tokenIds);
+            tokensAdapterCallback.onLongTokenClick(view, token, thisData.tokenIds);
         }
 
         return true;

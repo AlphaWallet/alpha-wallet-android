@@ -167,4 +167,6 @@
 	<color name="grey_8d">#8d8d8d</color>
     <color name="greyf3">#f3f4f5</color>
 	<color name="logo_grey">#F2F4F7</color>
+	<color name="danger_10_percent">#19ff3b30</color>
+	<color name="green_10_percent">#1975b943</color>
 </resources>

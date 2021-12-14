@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,11 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.service.TokensService;
@@ -174,18 +171,18 @@ public class ActivityHistoryList extends LinearLayout
 
     private void initViews(boolean isEth)
     {
-        TextView noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
-
-        if (isEth)
-        {
-            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
-                    context.getString(R.string.no_recent_transactions_subtext_ether)));
-        }
-        else
-        {
-            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
-                    context.getString(R.string.no_recent_transactions_subtext_tokens)));
-        }
+//        TextView noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
+//
+//        if (isEth)
+//        {
+//            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
+//                    context.getString(R.string.no_recent_transactions_subtext_ether)));
+//        }
+//        else
+//        {
+//            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
+//                    context.getString(R.string.no_recent_transactions_subtext_tokens)));
+//        }
     }
 
     private RealmQuery<RealmTransaction> getContractListener(long chainId, String tokenAddress, int count)

@@ -51,6 +51,9 @@ public interface PreferenceRepositoryType {
 
     void setShownTestNetWarning();
 
+    void setPriceAlerts(String json);
+
+    String getPriceAlerts();
     void setHasSetNetworkFilters();
     boolean hasSetNetworkFilters();
     void blankHasSetNetworkFilters();

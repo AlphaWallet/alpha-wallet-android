@@ -38,7 +38,7 @@ public class GetKeystoreWalletRepoTest {
 		Context context = InstrumentationRegistry.getTargetContext();
 		accountKeystoreService = new KeystoreAccountService(new File(context.getFilesDir(), "store"),
 															new File(context.getFilesDir(), ""),
-															new KeyService(null));
+															new KeyService(null, null));
 	}
 
 //	Single<byte[]> signTransaction(

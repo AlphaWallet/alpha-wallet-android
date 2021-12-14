@@ -2,7 +2,7 @@ package com.alphawallet.app.entity;
 
 import android.text.TextUtils;
 
-import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,11 +51,24 @@ public class CoinGeckoTicker
                 fiatChangeStr = obj.getString("usd_24h_change");
             }
 
-            res.add(new CoinGeckoTicker(address, fiatPrice,
-                    !TextUtils.isEmpty(fiatChangeStr) && Character.isDigit(fiatChangeStr.charAt(0)) ? new BigDecimal(fiatChangeStr) : BigDecimal.ZERO));
+            res.add(new CoinGeckoTicker(address, fiatPrice, getFiatChange(fiatChangeStr)));
         }
 
         return res;
+    }
+
+    private static BigDecimal getFiatChange(String fiatChangeStr)
+    {
+        if (TextUtils.isEmpty(fiatChangeStr)) return BigDecimal.ZERO;
+
+        try
+        {
+            return new BigDecimal(fiatChangeStr);
+        }
+        catch (Exception e)
+        {
+            return BigDecimal.ZERO;
+        }
     }
 
     public TokenTicker toTokenTicker(String currentCurrencySymbolTxt)

@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
@@ -10,11 +11,12 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.entity.RealmAToken;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -28,6 +30,7 @@ import com.google.gson.JsonSyntaxException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,18 +43,19 @@ import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.realm.Case;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final String IMAGES_DB = "image_urls_db";
+    public static final String ATOKENS_DB = "a_tokens_db";
     public static final String TICKER_DB = "tickers_db";
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
 
@@ -852,60 +856,77 @@ public class TokensRealmSource implements TokenLocalSource {
                     tokenMetas.add(meta);
                     meta.isEnabled = t.isEnabled();
                 }
-
-                removeLocalTickers(realm); //delete any local tickers, these have all moved into a single realm
             }
             catch (Exception e)
             {
                 if (BuildConfig.DEBUG) e.printStackTrace();
             }
 
-            return tokenMetas.toArray(new TokenCardMeta[0]); //tokenMetas;
-        });//.flatMap(loadedMetas -> populateBaseCards(wallet, rootChainTokenCards, loadedMetas));
-    }
-
-    private Single<TokenCardMeta[]> populateBaseCards(Wallet wallet, List<Long> rootChainTokenCards, List<TokenCardMeta> loadedMetas)
-    {
-        return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                realm.executeTransaction(r -> {
-                    for (long requiredNetwork : rootChainTokenCards)
-                    {
-                        RealmToken realmItem = r.where(RealmToken.class)
-                                .equalTo("address", databaseKey(requiredNetwork, wallet.address))
-                                .findFirst();
-
-                        if (realmItem == null)
-                        {
-                            Token token = createCurrencyToken(ethereumNetworkRepository.getNetworkByChain(requiredNetwork), wallet);
-                            saveToken(r, token);
-                            loadedMetas.add(new TokenCardMeta(token));
-                        }
-                    }
-                });
-            }
-            return loadedMetas.toArray(new TokenCardMeta[0]);
+            return tokenMetas.toArray(new TokenCardMeta[0]);
         });
     }
 
-    private void removeLocalTickers(Realm realm)
+    @Override
+    public Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters)
     {
-        try
-        {
-            realm.executeTransactionAsync(r -> {
-                RealmResults<RealmTokenTicker> realmItems = r.where(RealmTokenTicker.class)
-                        .findAll();
-                if (realmItems.size() > 0)
+        final Wallet wallet = new Wallet(currentAddress);
+        return calculateWalletValue(fetchTokenMetasForUpdate(wallet, networkFilters), wallet);
+    }
+
+    private Single<Pair<Double, Double>> calculateWalletValue(TokenCardMeta[] metas, Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            //fetch all token tickers
+            Map<Long, Map<String, TokenTicker>> tickerMap = fetchAllTokenTickers();
+            BigDecimal historicalBalance = BigDecimal.ZERO;
+            BigDecimal newBalance = BigDecimal.ZERO;
+            BigDecimal hundred = BigDecimal.valueOf(100);
+            for (TokenCardMeta meta : metas)
+            {
+                long chainId = meta.getChain();
+                String address = meta.isEthereum() ? "eth" : meta.getAddress();
+                TokenTicker ticker = tickerMap.containsKey(chainId) ? tickerMap.get(chainId).get(address) : null;
+                if (ticker != null && meta.hasPositiveBalance() && !meta.isNFT()) //Currently we don't add NFT value. TODO: potentially get value from OpenSea
                 {
-                    realmItems.deleteAllFromRealm();
+                    Token t = fetchToken(chainId, wallet, meta.getAddress());
+                    BigDecimal correctedBalance = t.getCorrectedBalance(18);
+                    BigDecimal fiatValue = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
+                    historicalBalance = historicalBalance.add(fiatValue.add(fiatValue.multiply((new BigDecimal(ticker.percentChange24h)
+                            .divide(hundred)).negate())));
+                    newBalance = newBalance.add(fiatValue);
                 }
-            });
+            }
+
+            return new Pair<>(newBalance.doubleValue(), historicalBalance.doubleValue());
+        });
+    }
+
+    private Map<Long, Map<String, TokenTicker>> fetchAllTokenTickers()
+    {
+        Map<Long, Map<String, TokenTicker>> tickerMap = new HashMap<>();
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            RealmResults<RealmTokenTicker> realmTickers = realm.where(RealmTokenTicker.class)
+                    .findAll();
+
+            for (RealmTokenTicker ticker : realmTickers)
+            {
+                Map<String, TokenTicker> networkMap = tickerMap.get(ticker.getChain());
+                if (networkMap == null)
+                {
+                    networkMap = new HashMap<>();
+                    tickerMap.put(ticker.getChain(), networkMap);
+                }
+
+                networkMap.put(ticker.getContract(), convertRealmTicker(ticker));
+            }
         }
         catch (Exception e)
         {
             //
         }
+
+        return tickerMap;
     }
 
     /**
@@ -966,13 +987,17 @@ public class TokensRealmSource implements TokenLocalSource {
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .beginGroup()
                         .like("auxData", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .or().like("symbol", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .or().like("name", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .endGroup()
                         .like("address", ADDRESS_FORMAT)
                         .findAll();
 
                 for (RealmToken t : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || t.getContractType() == ContractType.ETHEREUM) continue;
+                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType());
                     meta.lastTxUpdate = t.getLastTxTime();
@@ -1116,6 +1141,51 @@ public class TokensRealmSource implements TokenLocalSource {
     public TokenTicker getCurrentTicker(Token token)
     {
         return getCurrentTicker(databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
+    }
+
+    @Override
+    public Map<String, Long> getTickerTimeMap(long chainId, List<TokenCardMeta> erc20Tokens)
+    {
+        Map<String, Long> updateMap = new HashMap<>();
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            for (TokenCardMeta meta : erc20Tokens)
+            {
+                String databaseKey = databaseKey(chainId, meta.getAddress().toLowerCase());
+                RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                        .equalTo("contract", databaseKey)
+                        .findFirst();
+
+                if (realmItem != null)
+                {
+                    updateMap.put(meta.getAddress(), realmItem.getUpdatedTime());
+                }
+            }
+        }
+
+        return updateMap;
+    }
+
+    @Override
+    public void deleteTickers()
+    {
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransaction(r -> {
+                RealmResults<RealmTokenTicker> realmItems = r.where(RealmTokenTicker.class)
+                        //.lessThan("updatedTime", System.currentTimeMillis() - TICKER_TIMEOUT)
+                        .findAll();
+
+                for (RealmTokenTicker data : realmItems)
+                {
+                    data.deleteFromRealm();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     @Override
@@ -1299,5 +1369,46 @@ public class TokensRealmSource implements TokenLocalSource {
         eth.setIsEthereum();
         eth.pendingBalance = balance;
         return eth;
+    }
+
+
+    public void storeATokenAddresses(List<String> addresses) {
+        try (Realm realm = realmManager.getRealmInstance(ATOKENS_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                // clean prev
+                r.where(RealmAToken.class).findAll().deleteAllFromRealm();
+
+                RealmList<RealmAToken> list = new RealmList<>();
+                for(String address : addresses) {
+                    RealmAToken rt = new RealmAToken();
+                    rt.address = address;
+                    list.add(rt);
+                }
+                r.insertOrUpdate(list);
+            });
+        }
+    }
+
+    public Single<List<String>> getATokenAddresses() {
+        return Single.fromCallable(() -> {
+
+            try (Realm realm = realmManager.getRealmInstance(ATOKENS_DB))
+            {
+                RealmResults<RealmAToken> rtokens = realm.where(RealmAToken.class).findAll();
+                List<RealmAToken> tokens = new ArrayList<RealmAToken>(rtokens);
+                List<String> result = new ArrayList<>();
+                for(RealmAToken rt : tokens) {
+                    result.add(rt.address);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+
+            return null;
+        });
     }
 }

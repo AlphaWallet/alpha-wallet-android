@@ -1,10 +1,13 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
+
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.util.LongSparseArray;
-import android.util.SparseArray;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -15,13 +18,14 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -34,8 +38,8 @@ import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +56,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-
 public class TokensService
 {
     private static final String TAG = "TOKENSSERVICE";
@@ -63,7 +63,6 @@ public class TokensService
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
     public static final long PENDING_TIME_LIMIT = 3*DateUtils.MINUTE_IN_MILLIS; //cut off pending chain after 3 minutes
 
-    private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>(); //this is used to compute the USD value of the tokens on an address
     private static final Map<Long, Long> pendingChainMap = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
@@ -86,6 +85,8 @@ public class TokensService
     private final TokenFactory tokenFactory = new TokenFactory();
     private long syncTimer;
     private long syncStart;
+    private ServiceSyncCallback completionCallback;
+    private int syncCount = 0;
 
     @Nullable
     private Disposable eventTimer;
@@ -101,6 +102,8 @@ public class TokensService
     private Disposable tokenStoreDisposable;
     @Nullable
     private Disposable openSeaQueryDisposable;
+
+    private static boolean done = false;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
@@ -120,6 +123,7 @@ public class TokensService
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
         transferCheckChain = 0;
+        completionCallback = null;
     }
 
     private void checkUnknownTokens()
@@ -210,16 +214,17 @@ public class TokensService
         {
             currentAddress = newWalletAddr.toLowerCase();
             stopUpdateCycle();
-            syncStart = System.currentTimeMillis();
-            syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
             addLockedTokens();
             openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
-            openseaService.resetOffsetRead();
+            if (openseaService != null) openseaService.resetOffsetRead();
         }
     }
 
     private void updateCycle(boolean val)
     {
+        syncStart = System.currentTimeMillis();
+        syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
+
         eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
                 .doOnNext(l -> checkTokensBalance())
                 .observeOn(Schedulers.newThread()).subscribe();
@@ -228,7 +233,6 @@ public class TokensService
     public void startUpdateCycle()
     {
         stopUpdateCycle();
-
         if (!Utils.isAddressValid(currentAddress)) return;
 
         setupFilters();
@@ -263,13 +267,19 @@ public class TokensService
             {
                 meta.lastUpdate = pendingTokenMap.get(key);
                 if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
-                {
-                    unSynced++;
-                }
+                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
             }
+            else if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
+                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
         }
 
+        checkSyncStatus(unSynced, tokenList);
+
+        return tokenList;
+    }
+
+    private void checkSyncStatus(int unSynced, TokenCardMeta[] tokenList)
+    {
         if (syncTimer > 0 && System.currentTimeMillis() > syncTimer)
         {
             if (unSynced > 0)
@@ -279,10 +289,63 @@ public class TokensService
             else
             {
                 syncTimer = 0;
+                //sync chain tickers
+                syncChainTickers(tokenList, 0);
+            }
+        }
+    }
+
+    private boolean syncERC20Tickers(final int chainIndex, final long chainId, final TokenCardMeta[] tokenList)
+    {
+        List<TokenCardMeta> erc20OnChain = getERC20OnChain(chainId, tokenList);
+        if (erc20OnChain.size() > 0)
+        {
+            tickerService.syncERC20Tickers(chainId, erc20OnChain)
+                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(v -> syncChainTickers(tokenList, chainIndex+1), this::onERC20Error)
+                    .isDisposed();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private List<TokenCardMeta> getERC20OnChain( long chainId, TokenCardMeta[] tokenList)
+    {
+        List<TokenCardMeta> allERC20 = new ArrayList<>();
+        for (TokenCardMeta tcm : tokenList)
+        {
+            if (tcm.type == ContractType.ERC20 && tcm.hasPositiveBalance() && tcm.getChain() == chainId)
+            {
+                allERC20.add(tcm);
+            }
+        }
+        return allERC20;
+    }
+
+    private void syncChainTickers(TokenCardMeta[] tokenList, int chainIndex)
+    {
+        if (mainNetActive)
+        {
+            //go through all mainnet chains
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+
+            for (int i = chainIndex; i < networks.length; i++)
+            {
+                NetworkInfo info = networks[i];
+                if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
             }
         }
 
-        return tokenList;
+        //complete
+        if (completionCallback != null)
+        {
+            completionCallback.syncComplete(this, mainNetActive, syncCount);
+        }
     }
 
     /**
@@ -320,7 +383,6 @@ public class TokensService
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
 
         IconItem.resetCheck();
-        tokenValueMap.clear();
         pendingChainMap.clear();
         tokenStoreList.clear();
         baseTokenCheck.clear();
@@ -473,6 +535,7 @@ public class TokensService
 
     private void checkIssueTokens()
     {
+        if (openseaService == null) return;
         tokenRepository.fetchTokensThatMayNeedUpdating(currentAddress, networkFilter)
                 .map(tokens -> {
                     for (Token t : tokens)
@@ -489,6 +552,7 @@ public class TokensService
 
     private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
     {
+        if (openseaService == null) return; //no need for this if syncing
         if (contractCandidates != null && contractCandidates.size() > 0)
         {
             for (ContractLocator cl : contractCandidates)
@@ -583,7 +647,8 @@ public class TokensService
 
     private void checkOpenSea()
     {
-        if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) return;
+        if ((openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed())
+            || openseaService == null) return;
         NetworkInfo info;
         if (networkFilter.contains(MAINNET_ID))
             info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
@@ -709,24 +774,23 @@ public class TokensService
         pendingChainMap.put(chainId, System.currentTimeMillis() + PENDING_TIME_LIMIT);
     }
 
-    public void addTokenValue(long chainId, String tokenAddress, float value)
+    public Single<Pair<Double, Double>> getFiatValuePair()
     {
-        if (EthereumNetworkRepository.hasRealValue(chainId))
-        {
-            if (tokenAddress.equalsIgnoreCase(currentAddress)) tokenAddress = String.valueOf(chainId);
-            tokenValueMap.put(tokenAddress, value);
-        }
+        return tokenRepository.getTotalValue(currentAddress, networkFilter);
     }
 
-    public double getUSDValue()
+    public double convertToUSD(double localFiatValue)
     {
-        double totalVal = 0.0f;
-        for (Float val : tokenValueMap.values())
-        {
-            totalVal += val;
-        }
+        return localFiatValue / tickerService.getCurrentConversionRate();
+    }
 
-        return totalVal*tickerService.getCurrentConversionRate();
+    public Pair<Double, Double> getFiatValuePair(long chainId, String address)
+    {
+        Token token = getToken(chainId, address);
+        TokenTicker tt = token != null ? getTokenTicker(token) : null;
+        if (tt == null) return new Pair<>(0.0, 0.0);
+
+        return new Pair<>(Double.parseDouble(tt.price), Double.parseDouble(tt.percentChange24h));
     }
 
     ///////////////////////////////////////////
@@ -738,7 +802,6 @@ public class TokensService
      * @return Token that needs updating
      */
 
-    private String lastUpdateKey = null;
     //TODO: Integrate the transfer check update time into the priority calculation
     //TODO: If we have done a transfer check recently then we don't need to check balance here
     public Token getNextInBalanceUpdateQueue()
@@ -806,7 +869,6 @@ public class TokensService
 
         if (highestToken != null)
         {
-            lastUpdateKey = databaseKey(highestToken.getChain(), highestToken.getAddress());
             pendingTokenMap.put(databaseKey(highestToken.getChain(), highestToken.getAddress()), System.currentTimeMillis());
             return getToken(highestToken.getChain(), highestToken.getAddress());
         }
@@ -979,6 +1041,11 @@ public class TokensService
         //running or not?
     }
 
+    public boolean isMainNetActive()
+    {
+        return mainNetActive;
+    }
+
     public void walletOutOfFocus()
     {
         appHasFocus = false;
@@ -991,10 +1058,13 @@ public class TokensService
      */
     public void track(String gasSpeed)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(gasSpeed);
+        if (analyticsService != null)
+        {
+            AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+            analyticsProperties.setData(gasSpeed);
 
-        analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+            analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+        }
     }
 
     public Token getTokenOrBase(long chainId, String address)
@@ -1048,12 +1118,10 @@ public class TokensService
 
     public String getFallbackUrlForToken(Token token)
     {
-        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-
         String tURL = tokenRepository.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         if (TextUtils.isEmpty(tURL))
         {
-            tURL = Utils.getTokenImageUrl(correctedAddr);
+            tURL = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
         }
 
         return tURL;
@@ -1088,5 +1156,56 @@ public class TokensService
     public boolean isSynced()
     {
         return (syncTimer == 0);
+    }
+
+    public boolean startWalletSync(ServiceSyncCallback cb)
+    {
+        if (ethereumNetworkRepository.isMainNetSelected())
+        {
+            setCompletionCallback(cb, 1);
+            return true;
+        }
+        else
+        {
+            completionCallback = cb;
+            return false;
+        }
+    }
+
+    public void setCompletionCallback(ServiceSyncCallback cb, int sync)
+    {
+        syncCount = sync;
+        completionCallback = cb;
+        syncTimer = System.currentTimeMillis();
+
+        //Setup
+        baseTokenCheck.clear();
+        mainNetActive = true;
+        networkFilter.clear();
+
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+
+        for (NetworkInfo info : networks)
+        {
+            if (info.hasRealValue())
+            {
+                networkFilter.add(info.chainId);
+                baseTokenCheck.add(info.chainId);
+            }
+        }
+    }
+
+    private void deleteTickers()
+    {
+        if (BuildConfig.DEBUG && !done) //Ensure release build never deletes all the tickers
+        {
+            done = true;
+            Single.fromCallable(() -> {
+                tickerService.deleteTickers();
+                return true;
+            }).subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io()).subscribe(b -> {
+            }).isDisposed();
+        }
     }
 }

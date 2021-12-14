@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,12 +24,13 @@ import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.WalletConnectService;
-import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
+import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
@@ -50,7 +52,8 @@ public class WalletsActivity extends BaseActivity implements
         AddWalletView.OnImportWalletClickListener,
         AddWalletView.OnWatchWalletClickListener,
         AddWalletView.OnCloseActionListener,
-        CreateWalletCallbackInterface
+        CreateWalletCallbackInterface,
+        SyncCallback
 {
     @Inject
     WalletsViewModelFactory walletsViewModelFactory;
@@ -61,7 +64,7 @@ public class WalletsActivity extends BaseActivity implements
     private SystemView systemView;
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
-    private WalletsAdapter adapter;
+    private WalletsSummaryAdapter adapter;
     private final Handler handler = new Handler();
     private Wallet selectedWallet;
 
@@ -75,7 +78,7 @@ public class WalletsActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallets);
         toolbar();
-        setTitle(getString(R.string.title_change_add_wallet));
+        setTitle(getString(R.string.title_wallets_summary));
         requiresHomeRefresh = false;
     }
 
@@ -102,7 +105,7 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.noWalletsError().observe(this, this::noWallets);
         }
 
-        viewModel.onPrepare(balanceChain); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+        viewModel.onPrepare(balanceChain, this); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 
     protected Activity getThisActivity()
@@ -122,7 +125,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract());
+        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract());
         list.setAdapter(adapter);
         list.addItemDecoration(new ListDivider(this));
 
@@ -139,6 +142,30 @@ public class WalletsActivity extends BaseActivity implements
     {
         dialogError = errorEnvelope.message;
         if (handler != null) handler.post(displayWalletError);
+    }
+
+    @Override
+    public void syncUpdate(String wallet, Pair<Double, Double> value)
+    {
+        runOnUiThread(() -> {
+            adapter.updateWalletState(wallet, value);
+        });
+    }
+
+    @Override
+    public void syncCompleted(String wallet, Pair<Double, Double> value)
+    {
+        runOnUiThread(() -> {
+            adapter.completeWalletSync(wallet, value);
+        });
+    }
+
+    @Override
+    public void syncStarted(String wallet, Pair<Double, Double> value)
+    {
+        runOnUiThread(() -> {
+            adapter.setUnsyncedWalletValue(wallet, value);
+        });
     }
 
     private final Runnable displayWalletError = new Runnable()
@@ -169,6 +196,7 @@ public class WalletsActivity extends BaseActivity implements
     public void onDestroy() {
         super.onDestroy();
         if (adapter != null) adapter.onDestroy();
+        if (viewModel != null) viewModel.onDestroy();
     }
 
     @Override
@@ -274,7 +302,7 @@ public class WalletsActivity extends BaseActivity implements
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
         addWalletView.setOnCloseActionListener(this);
-        dialog = new BottomSheetDialog(this);
+        dialog = new BottomSheetDialog(this, R.style.FullscreenBottomSheetDialogStyle);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);

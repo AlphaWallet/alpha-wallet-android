@@ -320,6 +320,11 @@
             android:label="Transaction Success" />
 
         <activity
+            android:name=".ui.SetPriceAlertActivity"
+            android:label="Set New Alert"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
             android:name=".ui.AddCustomRPCNetworkActivity"
             android:label="@string/title_activity_add_custom_rpcnetwork"/>
 

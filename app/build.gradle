@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 177
-        versionName "3.40.7"
+        versionCode 178
+        versionName "3.50.0"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -46,7 +46,7 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
 
-        buildConfigField 'int', 'DB_VERSION', '36'
+        buildConfigField 'int', 'DB_VERSION', '37'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -121,7 +121,7 @@ android {
                 implementation 'com.google.android.play:core:1.10.2'
                 implementation 'com.google.firebase:firebase-analytics:20.0.0'
                 implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-                implementation 'com.google.firebase:firebase-crashlytics:18.2.4'
+                implementation 'com.google.firebase:firebase-crashlytics:18.2.5'
             }
         }
     }
@@ -148,8 +148,8 @@ dependencies {
     //noinspection GradleDependency
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1' //This cannot be updated until minSdkVersion is 31.
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    //noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    //noinspection GradleDependency,GradleCompatible
+    implementation 'androidx.appcompat:appcompat:1.3.1' //Do not update; next version is incompatible with API30 and below
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
@@ -161,7 +161,7 @@ dependencies {
     implementation 'com.google.zxing:core:3.4.1'
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
 

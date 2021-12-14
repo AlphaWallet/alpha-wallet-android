@@ -16,7 +16,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
@@ -43,7 +43,7 @@ import static com.alphawallet.app.C.Key.TICKET_RANGE;
 /**
  * This is where we select indices to redeem
  */
-public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenClickListener
+public class RedeemAssetSelectActivity extends BaseActivity implements TokensAdapterCallback
 {
     @Inject
     protected RedeemAssetSelectViewModelFactory viewModelFactory;

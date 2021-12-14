@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 
@@ -19,7 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class TokenInfoHeaderView extends LinearLayout {
-    private final ImageView icon;
+    private final TokenIcon icon;
     private final TextView amount;
     private final TextView symbol;
     private final TextView marketValue;
@@ -39,7 +40,8 @@ public class TokenInfoHeaderView extends LinearLayout {
     public TokenInfoHeaderView(Context context, Token token, TokensService svs)
     {
         this(context);
-        setIcon(EthereumNetworkBase.getChainLogo(token.tokenInfo.chainId));
+        icon.bindData(token, svs);
+        if (!token.isEthereum()) icon.setChainIcon(token.tokenInfo.chainId);
         setAmount(token.getFixedFormattedBalance());
         setSymbol(token.tokenInfo.symbol);
         //obtain from ticker
@@ -47,11 +49,6 @@ public class TokenInfoHeaderView extends LinearLayout {
 
         setMarketValue(pricePair.first);
         setPriceChange(pricePair.second);
-    }
-
-    public void setIcon(int resId)
-    {
-        icon.setImageResource(resId);
     }
 
     public void setAmount(String text)

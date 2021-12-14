@@ -50,6 +50,9 @@ public class NFTImageView extends RelativeLayout {
         webView = findViewById(R.id.image_web_view);
         holdingView = findViewById(R.id.layout_holder);
 
+        webLayout.setVisibility(View.GONE);
+        webView.setVisibility(View.GONE);
+
         //setup view attributes
         setAttrs(context, attrs);
     }
@@ -117,6 +120,7 @@ public class NFTImageView extends RelativeLayout {
         handler.post(() -> {
             image.setVisibility(View.GONE);
             webLayout.setVisibility(View.VISIBLE);
+            webView.setVisibility(View.VISIBLE);
             webView.loadData(base64, "text/html; charset=utf-8", "base64");
         });
     }
@@ -141,7 +145,8 @@ public class NFTImageView extends RelativeLayout {
                 layoutParams.height = dpHeight;
                 findViewById(R.id.layout_holder).setLayoutParams(layoutParams);
             }
-        } finally
+        }
+        finally
         {
             a.recycle();
         }

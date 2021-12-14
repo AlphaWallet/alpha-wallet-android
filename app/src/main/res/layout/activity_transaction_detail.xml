@@ -141,6 +141,61 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/token_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/TransactionDetailsSubTitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/token_text" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.alphawallet.app.widget.TokenIcon
+                        android:id="@+id/token_icon"
+                        android:layout_width="@dimen/dp24"
+                        android:layout_height="@dimen/dp24"
+                        android:layout_marginEnd="@dimen/dp5"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/ic_coin_eth_small" />
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/token_name"
+                            style="@style/TransactionDetailsStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="2dp"
+                            android:text="@string/ethereum" />
+
+                        <com.alphawallet.app.widget.CopyTextView
+                            android:id="@+id/token_address"
+                            style="@style/TransactionDetailsCopyTextStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            custom:gravity="start"
+                            custom:bold="false"
+                            custom:textColor="@color/mine"
+                            custom:marginRight="@dimen/dp18" />
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                </LinearLayout>
+            </LinearLayout>
+
             <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"

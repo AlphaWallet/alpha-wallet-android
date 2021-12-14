@@ -780,7 +780,7 @@ public class Utils {
         String tURL = TRUST_ICON_REPO;
         String repoChain = twChainNames.get(chainId);
         if (repoChain == null) repoChain = "ethereum";
-        tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
+        tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address)).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
         return tURL;
     }
 

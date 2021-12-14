@@ -216,6 +216,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             intent.putExtra(C.EXTRA_TXHASH, transactionHash);
             intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
             intent.putExtra(C.Key.WALLET, viewModel.getWallet());
+            intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             txDetailPage.launch(intent);
         }

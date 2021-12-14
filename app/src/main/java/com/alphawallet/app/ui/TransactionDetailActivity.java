@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -36,6 +37,7 @@ import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -52,6 +54,8 @@ import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import org.web3j.crypto.Keys;
+
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
     @Inject
@@ -66,6 +70,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private AWalletAlertDialog dialog;
     private FunctionButtonBar functionBar;
     private ActionSheetDialog confirmationDialog;
+    private String tokenAddress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,6 +88,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
+        tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
         viewModel.fetchTransaction(wallet, txHash, chainId);
     }
 
@@ -131,14 +137,29 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
 
+        setupTokenDetails();
+
         ChainName chainName = findViewById(R.id.chain_name);
         chainName.setChainID(transaction.chainId);
 
         setOperationName();
 
-        //if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
         setupWalletDetails();
         checkFailed();
+    }
+
+    private void setupTokenDetails()
+    {
+        Token targetToken = viewModel.getToken(transaction.chainId, TextUtils.isEmpty(tokenAddress) ? transaction.to : tokenAddress );
+        if (targetToken.isEthereum()) return;
+        LinearLayout tokenDetailsLayout = findViewById(R.id.token_details);
+        tokenDetailsLayout.setVisibility(View.VISIBLE);
+        TokenIcon icon = findViewById(R.id.token_icon);
+        icon.bindData(targetToken, viewModel.getTokenService());
+        CopyTextView address = findViewById(R.id.token_address);
+        address.setText(Keys.toChecksumAddress(targetToken.getAddress()));
+        TextView tokenName = findViewById(R.id.token_name);
+        tokenName.setText(targetToken.getFullName());
     }
 
     private void onTxUpdated(Transaction latestTx)

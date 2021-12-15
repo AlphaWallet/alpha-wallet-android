@@ -68,6 +68,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
+import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
@@ -302,6 +303,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
             checkIntents(importData, importPath, intent);
         }
+
+        Intent i = new Intent(this, PriceAlertsService.class);
+        startService(i);
     }
 
     private void setupFragmentListeners()

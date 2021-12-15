@@ -7,25 +7,20 @@ public class PriceAlert implements Parcelable {
     private String value;
     private String currency;
     private String token;
+    private String address;
+    private long chainId;
     // true - means, rises above / false - means, drops to
     private boolean indicator;
     private boolean enabled;
 
-    public PriceAlert(String currency, String token)
+    public PriceAlert(String currency, String token, String address, long chainId)
     {
         this.currency = currency;
         this.token = token;
         this.indicator = true;
         this.enabled = true;
-    }
-
-    public PriceAlert(String value, String currency, String token)
-    {
-        this.value = value;
-        this.currency = currency;
-        this.token = token;
-        this.indicator = true;
-        this.enabled = true;
+        this.address = address;
+        this.chainId = chainId;
     }
 
     protected PriceAlert(Parcel in)
@@ -35,6 +30,8 @@ public class PriceAlert implements Parcelable {
         token = in.readString();
         indicator = in.readByte() != 0;
         enabled = in.readByte() != 0;
+        address = in.readString();
+        chainId = in.readLong();
     }
 
     public String getValue()
@@ -87,6 +84,24 @@ public class PriceAlert implements Parcelable {
         this.token = token;
     }
 
+    public String getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(String address)
+    {
+        this.address = address;
+    }
+
+    public long getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(long chainId) {
+        this.chainId = chainId;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
@@ -95,6 +110,8 @@ public class PriceAlert implements Parcelable {
         dest.writeString(token);
         dest.writeByte((byte) (indicator ? 1 : 0));
         dest.writeByte((byte) (enabled ? 1 : 0));
+        dest.writeString(address);
+        dest.writeLong(chainId);
     }
 
     @Override

@@ -352,6 +352,12 @@
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 
+        <service
+            android:name=".service.PriceAlertsService"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="true"/>
+        
     </application>
 
 </manifest>

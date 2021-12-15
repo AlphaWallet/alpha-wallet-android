@@ -81,4 +81,6 @@ public interface TokenRepositoryType {
     boolean hasVisibilityBeenChanged(Token token);
 
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
+
+    Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
 }

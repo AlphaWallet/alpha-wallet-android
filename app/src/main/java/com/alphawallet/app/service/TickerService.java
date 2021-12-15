@@ -87,7 +87,7 @@ public class TickerService
     private static final String CURRENCY_CONV = "currency";
     private static final double ONE_BILLION = 1000000000.0;
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
-    public static final long TICKER_TIMEOUT = DateUtils.HOUR_IN_MILLIS; //remove ticker if not seen in one hour
+    public static final long TICKER_TIMEOUT = DateUtils.WEEK_IN_MILLIS; //remove ticker if not seen in one week
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
 
     private final OkHttpClient httpClient;
@@ -441,7 +441,7 @@ public class TickerService
         if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
         localSource.updateEthTickers(ethTickers);
-        localSource.removeOutdatedTickers();
+        //localSource.removeOutdatedTickers();
         return tickerSize;
     }
 

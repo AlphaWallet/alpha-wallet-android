@@ -68,4 +68,6 @@ public interface TokenLocalSource {
     Map<String, Long> getTickerTimeMap(long chainId, List<TokenCardMeta> erc20Tokens);
 
     void deleteTickers();
+
+    Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
 }

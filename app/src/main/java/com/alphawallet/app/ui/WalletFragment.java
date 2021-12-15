@@ -8,7 +8,6 @@ import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -44,7 +42,6 @@ import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -60,23 +57,18 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
-import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
-import com.alphawallet.app.widget.SearchToolbar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.UserAvatar;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
@@ -88,7 +80,6 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -200,7 +191,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
-        largeTitleView.setVisibility(viewModel.getTokensService().startWalletSync(this) ? View.VISIBLE : View.GONE ); //show or hide Fiat summary
+        viewModel.getTokensService().startWalletSync(this);
     }
 
     private void initViews(@NonNull View view) {
@@ -296,14 +287,27 @@ public class WalletFragment extends BaseFragment implements
 
     //Refresh value of wallet once sync is complete
     @Override
-    public void syncComplete(TokensService svs, boolean isMainnetSync, int syncCount)
+    public void syncComplete(TokensService svs, int syncCount)
     {
-        handler.post(() -> addressAvatar.finishWaiting());
-        svs.getFiatValuePair()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateValue)
-                .isDisposed();
+        if (syncCount > 0) handler.post(() -> addressAvatar.finishWaiting());
+        if (viewModel.getTokensService().isMainNetActive())
+        {
+            svs.getFiatValuePair()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::updateValue)
+                    .isDisposed();
+        }
+
+        if (syncCount > 0)
+        {
+            //now refresh the tokens to pick up any new ticker updates
+            viewModel.getTokensService().getTickerUpdateList()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(adapter::notifyTickerUpdate)
+                    .isDisposed();
+        }
     }
 
     //Could the view have been destroyed?
@@ -482,6 +486,10 @@ public class WalletFragment extends BaseFragment implements
         if (viewModel == null)
         {
             ((HomeActivity)getActivity()).resetFragment(WalletPage.WALLET);
+        }
+        else if (largeTitleView != null)
+        {
+            largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
         }
     }
 

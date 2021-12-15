@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.SortedList;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.interact.ATokensRepository;
@@ -246,7 +248,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     //Only show the header if the item type is added to the list
     private void addHeaderLayout(TokenCardMeta tcm)
     {
-
+        //TODO: Use an enum in TokenCardMeta to designate type Chain/Asset(General)/NFT/ATOKEN/DeFi/GOVERNANCE
         if (tcm.isNFT())
         {
             items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
@@ -528,5 +530,22 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void setDebug()
     {
         debugView = true;
+    }
+
+    public void notifyTickerUpdate(List<String> updatedContracts)
+    {
+        //check through tokens; refresh relevant tickers
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenCardMeta tcm = ((TokenSortedItem) si).value;
+                if (tcm.isEthereum() || updatedContracts.contains(tcm.getAddress()))
+                {
+                    notifyItemChanged(i); //optimise update - no need to update elements without tickers
+                }
+            }
+        }
     }
 }

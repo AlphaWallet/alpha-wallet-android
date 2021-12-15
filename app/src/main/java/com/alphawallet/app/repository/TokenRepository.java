@@ -200,6 +200,12 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.getTotalValue(currentAddress, networkFilters);
     }
 
+    @Override
+    public Single<List<String>> getTickerUpdateList(List<Long> networkFilter)
+    {
+        return localSource.getTickerUpdateList(networkFilter);
+    }
+
     public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters,
                                                    AssetDefinitionService svs)
     {

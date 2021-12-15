@@ -110,7 +110,6 @@ public class UserAvatar extends LinearLayout
 
     public void bind(final Wallet wallet, AvatarWriteCallback avCallback)
     {
-        finishWaiting();
         if (iconRequest != null && iconRequest.isRunning()) iconRequest.clear();
         if (loadAvatarDisposable != null && !loadAvatarDisposable.isDisposed()) loadAvatarDisposable.dispose();
 

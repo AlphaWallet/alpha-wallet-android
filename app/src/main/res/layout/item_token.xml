@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/token_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -60,16 +61,17 @@
 
                     <TextView
                         android:id="@+id/eth_data"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="2dp"
                         android:layout_weight="1"
                         android:fontFamily="@font/font_regular"
-                        android:text="0 Ethereum"
+                        android:text=""
                         android:textColor="@color/text_black"
                         android:textSize="20sp"
                         android:singleLine="true"
-                        android:ellipsize="end"/>
+                        android:ellipsize="end"
+                        tools:text="Ethereum"/>
 
                     <TextView
                         android:id="@+id/balance_currency"
@@ -82,8 +84,8 @@
                         android:textColor="@color/black"
                         android:layout_marginEnd="@dimen/dp16"
                         android:visibility="gone"
-
-                        />
+                        tools:visibility="visible"
+                        tools:text="$208.26"/>
 
                 </LinearLayout>
 
@@ -93,11 +95,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="8dp"
+                    android:baselineAligned="false"
                     android:orientation="horizontal">
 
                     <LinearLayout
                         android:id="@+id/layout_extended_info"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -130,7 +133,9 @@
                             android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
                             android:textSize="15sp"
-                            android:visibility="gone"/>
+                            android:visibility="gone"
+                            tools:visibility="visible"
+                            tools:text="0.01234 ETH"/>
 
                         <View
                             android:id="@+id/contract_seperator"
@@ -162,7 +167,8 @@
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical"
                         android:paddingEnd="@dimen/dp16"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:id="@+id/text_appreciation"
@@ -172,13 +178,15 @@
                             android:fontFamily="@font/font_regular"
                             android:layout_marginEnd="@dimen/dp5"
                             android:text="@string/unknown_balance_without_symbol"
+                            tools:text="$3.47"
                             android:textSize="15sp" />
                         <LinearLayout
                             android:id="@+id/root_24_hrs"
                             android:orientation="horizontal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:padding="2dp">
+                            android:padding="2dp"
+                            tools:ignore="UseCompoundDrawables">
                             <ImageView
                                 android:id="@+id/image_24_hrs"
                                 android:padding="4dp"
@@ -193,6 +201,7 @@
                                 android:layout_gravity="center_horizontal"
                                 android:fontFamily="@font/font_regular"
                                 android:text="@string/unknown_balance_without_symbol"
+                                tools:text="1.659%"
                                 android:textSize="15sp"
                                 android:layout_marginEnd="4dp"/>
                         </LinearLayout>

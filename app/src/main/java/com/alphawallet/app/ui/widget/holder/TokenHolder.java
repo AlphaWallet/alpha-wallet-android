@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -40,7 +41,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
-    private static final long TICKER_PERIOD_VALIDITY = 20 * DateUtils.MINUTE_IN_MILLIS; //Tickers invalid after 20 minutes
+    private static final long TICKER_PERIOD_VALIDITY = 60 * DateUtils.MINUTE_IN_MILLIS; //Tickers stale after 60 minutes
 
     private final TokenIcon tokenIcon;
     private final TextView balanceEth;
@@ -50,9 +51,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final View     root24Hours;
     private final ImageView image24h;
     private final TextView textAppreciation;
-    //private final TextView issuer;
-    // private final TextView issuerPlaceholder;
-    // private final TextView contractType;
     private final View contractSeparator;
     private final View layoutAppreciation;
     private final LinearLayout extendedInfo;
@@ -60,7 +58,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
-    private boolean primaryElement;
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
@@ -77,9 +74,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         root24Hours = findViewById(R.id.root_24_hrs);
         image24h = findViewById(R.id.image_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
-        // issuer = findViewById(R.id.issuer);
-        // issuerPlaceholder = findViewById(R.id.issuerPlaceholder);
-        //contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
@@ -93,7 +87,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
     {
-        //findViewById(R.id.progress_spinner).setVisibility(View.GONE);
+        layoutAppreciation.setForeground(null);
+        balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
         if (data == null) { fillEmpty(); return; }
         try
         {
@@ -126,8 +121,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
                 balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, symbol));
             }
-
-            primaryElement = false;
 
             tokenIcon.bindData(token, assetDefinition);
             if (!token.isEthereum()) tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
@@ -190,18 +183,31 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if (ticker != null)
         {
-            primaryElement = true;
             hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
             setTickerInfo(ticker);
+            maskStaleTicker(ticker);
         }
         else
         {
             //Ethereum token without a ticker
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
-            primaryElement = true;
+        }
+    }
+
+    private void maskStaleTicker(TokenTicker ticker)
+    {
+        if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
+        {
+            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhiteSolid));
+            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.dove_hint));
+        }
+        else
+        {
+            layoutAppreciation.setForeground(null);
+            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
         }
     }
 
@@ -214,8 +220,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     }
 
     private void fillEmpty() {
-        //findViewById(R.id.ticker_update).setVisibility(View.GONE);
-        //findViewById(R.id.progress_spinner).setVisibility(View.VISIBLE);
         balanceEth.setText(R.string.empty);
         balanceCurrency.setText(EMPTY_BALANCE);
     }
@@ -280,13 +284,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             image24h.setImageResource(percentage < 0 ? R.drawable.ic_price_down : R.drawable.ic_price_up);
         } catch (Exception ex) { /* Quietly */ }
 
-        if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
-        {
-            extendedInfo.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhite));
-            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhite));
-            //findViewById(R.id.ticker_update).setVisibility(View.VISIBLE);
-        }
-
         //This sets the crypto price value (middle amount)
         BigDecimal currencyChange = new BigDecimal(fiatBalance.doubleValue()).multiply((
                 new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100)));
@@ -295,13 +292,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(formattedValue);
     }
-
-        /*String formattedValue = TickerService.getCurrencyString(new BigDecimal(ticker.price).doubleValue());
-
-        lbl = getString(R.string.token_balance, "", formattedValue);
-        //lbl += " " + ticker.priceSymbol;
-        textAppreciation.setText(lbl);
-        textAppreciation.setTextColor(getContext().getColor(R.color.text_dark_gray));*/
 
     private String shortTitle() {
         String localizedNameFromAssetDefinition = token.getTSName(assetDefinition, token.getTokenCount());
@@ -317,6 +307,5 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         extendedInfo.setForeground(null);
         layoutAppreciation.setForeground(null);
-        //findViewById(R.id.ticker_update).setVisibility(View.GONE);
     }
 }

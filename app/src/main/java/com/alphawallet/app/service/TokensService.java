@@ -235,6 +235,8 @@ public class TokensService
         stopUpdateCycle();
         if (!Utils.isAddressValid(currentAddress)) return;
 
+        syncCount = 0;
+
         setupFilters();
         openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
 
@@ -344,7 +346,7 @@ public class TokensService
         //complete
         if (completionCallback != null)
         {
-            completionCallback.syncComplete(this, mainNetActive, syncCount);
+            completionCallback.syncComplete(this, syncCount);
         }
     }
 
@@ -607,6 +609,7 @@ public class TokensService
         if (t.isEthereum() && newBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             checkChainVisibility(t);
+            if (syncCount == 0 && completionCallback != null) { completionCallback.syncComplete(this, -1); }
         }
 
         if (t.isEthereum())
@@ -779,6 +782,11 @@ public class TokensService
         return tokenRepository.getTotalValue(currentAddress, networkFilter);
     }
 
+    public Single<List<String>> getTickerUpdateList()
+    {
+        return tokenRepository.getTickerUpdateList(networkFilter);
+    }
+
     public double convertToUSD(double localFiatValue)
     {
         return localFiatValue / tickerService.getCurrentConversionRate();
@@ -889,6 +897,10 @@ public class TokensService
         }
         else
         {
+            if (syncCount == 0)
+            {
+                syncCount = 1;
+            }
             return null;
         }
     }
@@ -1162,7 +1174,7 @@ public class TokensService
     {
         if (ethereumNetworkRepository.isMainNetSelected())
         {
-            setCompletionCallback(cb, 1);
+            setCompletionCallback(cb, 0);
             return true;
         }
         else

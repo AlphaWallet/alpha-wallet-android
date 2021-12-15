@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1164,6 +1165,33 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         return updateMap;
+    }
+
+    /**
+     * Returns list of recently updated tickers.
+     * This is an optimisation for the TokenAdapter to only update UI elements with recent ticker update
+     * @param networkFilter list of displayed networks
+     * @return list of recently updated tickers
+     */
+    @Override
+    public Single<List<String>> getTickerUpdateList(List<Long> networkFilter)
+    {
+        return Single.fromCallable(() -> {
+            List<String> tickerContracts = new ArrayList<>();
+            try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+            {
+                RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
+                        .greaterThan("updatedTime", System.currentTimeMillis() - 5*DateUtils.MINUTE_IN_MILLIS)
+                        .findAll();
+
+                for (RealmTokenTicker ticker : realmItems)
+                {
+                    if (networkFilter.contains(ticker.getChain())) tickerContracts.add(ticker.getContract());
+                }
+            }
+
+            return tickerContracts;
+        });
     }
 
     @Override

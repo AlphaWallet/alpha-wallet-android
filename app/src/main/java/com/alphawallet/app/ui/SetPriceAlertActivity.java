@@ -59,7 +59,7 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
             long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             Token token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
-            newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.name);
+            newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.name, token.tokenInfo.address, token.tokenInfo.chainId);
 
             inputView.showKeyboard();
         }

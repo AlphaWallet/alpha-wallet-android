@@ -358,6 +358,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     tokenClicked = true;
                     handler.postDelayed(() -> tokenClicked = false, 10000);
                 });
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(C.CHANGED_LOCALE, this, (requestKey, b) -> {
+                    ((WalletFragment) getFragment(WALLET)).changedLocale();
+                });
     }
 
     @Override
@@ -904,12 +909,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         ((ActivityFragment) getFragment(ACTIVITY)).resetTokens();
         ((WalletFragment) getFragment(WALLET)).resetTokens();
-    }
-
-    @Override
-    public void changedLocale()
-    {
-        ((WalletFragment) getFragment(WALLET)).changedLocale();
     }
 
     @Override

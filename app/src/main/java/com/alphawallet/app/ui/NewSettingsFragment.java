@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 
 import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
@@ -518,6 +519,10 @@ public class NewSettingsFragment extends BaseFragment {
                 else if (data.getBooleanExtra(CHANGE_CURRENCY, false))
                 {
                     getParentFragmentManager().setFragmentResult(CHANGE_CURRENCY, new Bundle());
+                }
+                else if (data.getBooleanExtra(CHANGED_LOCALE, false))
+                {
+                    getParentFragmentManager().setFragmentResult(CHANGED_LOCALE, new Bundle());
                 }
             });
 

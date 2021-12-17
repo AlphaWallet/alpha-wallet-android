@@ -1,5 +1,11 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -51,8 +57,6 @@ import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -65,13 +69,6 @@ import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
@@ -561,12 +558,14 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             //either sending base chain or ERC20 tokens.
             final byte[] transactionBytes = viewModel.getTransactionBytes(token, txSendAddress, sendAmount);
 
+            final String txDestAddress = token.isEthereum() ? txSendAddress : token.getAddress(); //either another address, or ERC20 Token address
+
             calculateEstimateDialog();
             //form payload and calculate tx cost
-            calcGasCost = viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, token.getAddress(), BigDecimal.ZERO)
+            calcGasCost = viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, txDestAddress, BigDecimal.ZERO)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(estimate -> checkConfirm(estimate, transactionBytes, token.getAddress(), txSendAddress),
+                    .subscribe(estimate -> checkConfirm(estimate, transactionBytes, txDestAddress, txSendAddress),
                             error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
         }
     }

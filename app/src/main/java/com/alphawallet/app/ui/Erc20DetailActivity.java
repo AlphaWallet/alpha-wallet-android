@@ -85,6 +85,11 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private TokenActivityFragment tokenActivityFragment;
     private TokenAlertsFragment tokenAlertsFragment;
 
+    private enum DetailPages
+    {
+        PERFORMANCE, ACTIVITY, ALERTS
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
@@ -132,9 +137,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         tokenActivityFragment.setArguments(bundle);
         tokenAlertsFragment.setArguments(bundle);
 
-        pages.add(0, new Pair<>("Info", tokenInfoFragment));
-        pages.add(1, new Pair<>("Activity", tokenActivityFragment));
-        pages.add(2, new Pair<>("Alerts", tokenAlertsFragment));  //TODO: Implement alert system
+        pages.add(DetailPages.PERFORMANCE.ordinal(), new Pair<>("Info", tokenInfoFragment));
+        pages.add(DetailPages.ACTIVITY.ordinal(), new Pair<>("Activity", tokenActivityFragment));
+        pages.add(DetailPages.ALERTS.ordinal(), new Pair<>("Alerts", tokenAlertsFragment)); 
 
         viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
@@ -398,8 +403,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 if (data != null) transactionHash = data.getStringExtra(C.EXTRA_TXHASH);
                 if (transactionHash != null)
                 {
-                    //display transaction complete message
-
+                    //switch to activity view
+                    viewPager.setCurrentItem(DetailPages.ACTIVITY.ordinal());
                 }
                 break;
         }

@@ -40,6 +40,7 @@ import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.TokenInfoFragment;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
+import com.alphawallet.app.ui.TokenSearchFragment;
 import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.TransferNFTActivity;
@@ -114,6 +115,10 @@ public abstract class BuildersModule {
 	@FragmentScope
 	@ContributesAndroidInjector(modules = WalletModule.class)
 	abstract WalletFragment bindWalletFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = WalletModule.class)
+	abstract TokenSearchFragment bindTokenSearchFragment();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = HomeModule.class)

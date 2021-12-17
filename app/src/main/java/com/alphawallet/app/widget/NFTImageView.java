@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
@@ -52,6 +51,9 @@ public class NFTImageView extends RelativeLayout
         webView = findViewById(R.id.image_web_view);
         holdingView = findViewById(R.id.layout_holder);
 
+        webLayout.setVisibility(View.GONE);
+        webView.setVisibility(View.GONE);
+
         //setup view attributes
         setAttrs(context, attrs);
     }
@@ -73,7 +75,7 @@ public class NFTImageView extends RelativeLayout
 
         image.setVisibility(View.VISIBLE);
 
-        Glide.with(getContext())
+        Glide.with(image.getContext())
                 .load(imageUrl)
                 .listener(requestListener)
                 .into(image);
@@ -111,6 +113,7 @@ public class NFTImageView extends RelativeLayout
         handler.post(() -> {
             image.setVisibility(View.GONE);
             webLayout.setVisibility(View.VISIBLE);
+            webView.setVisibility(View.VISIBLE);
             webView.loadData(base64, "text/html; charset=utf-8", "base64");
         });
     }
@@ -122,16 +125,23 @@ public class NFTImageView extends RelativeLayout
                 R.styleable.ERC721ImageView,
                 0, 0);
 
-        int height = a.getInteger(R.styleable.ERC721ImageView_webview_height, 0);
-        if (height > 0)
+        try
         {
-            int dpHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getContext().getResources().getDisplayMetrics());
-            ViewGroup.LayoutParams layoutParams = webLayout.getLayoutParams();
-            layoutParams.height = dpHeight;
-            webLayout.setLayoutParams(layoutParams);
-            layoutParams = holdingView.getLayoutParams();
-            layoutParams.height = dpHeight;
-            findViewById(R.id.layout_holder).setLayoutParams(layoutParams);
+            int height = a.getInteger(R.styleable.ERC721ImageView_webview_height, 0);
+            if (height > 0)
+            {
+                int dpHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getContext().getResources().getDisplayMetrics());
+                ViewGroup.LayoutParams layoutParams = webLayout.getLayoutParams();
+                layoutParams.height = dpHeight;
+                webLayout.setLayoutParams(layoutParams);
+                layoutParams = holdingView.getLayoutParams();
+                layoutParams.height = dpHeight;
+                findViewById(R.id.layout_holder).setLayoutParams(layoutParams);
+            }
+        }
+        finally
+        {
+            a.recycle();
         }
     }
 

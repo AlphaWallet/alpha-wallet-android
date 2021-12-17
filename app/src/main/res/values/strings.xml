@@ -863,4 +863,5 @@
     <string name="online">Online</string>
     <string name="summary_change_24h">%1$s (%2$s) Today</string>
     <string name="performance">Performance</string>
+    <string name="token_name_hint">Token Name</string>
 </resources>

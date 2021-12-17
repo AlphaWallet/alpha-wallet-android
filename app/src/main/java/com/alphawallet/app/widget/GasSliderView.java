@@ -140,12 +140,9 @@ public class GasSliderView extends RelativeLayout
                 {
                     limitInit = true;
                     handler.removeCallbacks(null);
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateSliderSettingsFromText(); //ensure sliders reflect new values
-                            updateGasControl();
-                        }
+                    handler.postDelayed(() -> {
+                        updateSliderSettingsFromText(); //ensure sliders reflect new values
+                        updateGasControl();
                     },2000);
                 }
             }

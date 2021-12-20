@@ -90,4 +90,7 @@ public interface PreferenceRepositoryType {
 
     void storeLastFragmentPage(int ordinal);
     int getLastFragmentPage();
+
+    int getLastVersionCode();
+    void setLastVersionCode(int code);
 }

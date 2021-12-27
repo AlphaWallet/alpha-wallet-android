@@ -24,7 +24,7 @@ public interface AccountKeystoreService {
 	 * @return included {@link Wallet} if success
 	 */
 	Single<Wallet> importKeystore(String store, String password, String newPassword);
-    Single<Wallet> importPrivateKey(String privateKey, String newPassword);
+	Single<Wallet> importPrivateKey(String privateKey, String newPassword);
 
 	/**
 	 * Export wallet to keystore
@@ -55,24 +55,6 @@ public interface AccountKeystoreService {
 			BigInteger amount,
 			BigInteger gasPrice,
 			BigInteger gasLimit,
-			long nonce,
-			byte[] data,
-			long chainId);
-
-	/**
-	 * Sign transaction EIP1559
-	 * @param signer {@link Wallet}
-	 * @param toAddress transaction destination address
-	 * @param nonce
-	 * @return sign data
-	 */
-	Single<SignatureFromKey> signTransactionEIP1559(
-			Wallet signer,
-			String toAddress,
-			BigInteger amount,
-			BigInteger gasLimit,
-			BigInteger gasPremium,
-			BigInteger feeCap,
 			long nonce,
 			byte[] data,
 			long chainId);

@@ -139,7 +139,7 @@ dependencies {
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    implementation "org.web3j:core:4.8.8-android"
+    implementation "org.web3j:core:4.6.0-android"
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"

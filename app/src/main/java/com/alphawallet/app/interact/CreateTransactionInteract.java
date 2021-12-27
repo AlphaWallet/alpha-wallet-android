@@ -55,6 +55,15 @@ public class CreateTransactionInteract
                                          .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Single<TransactionData> create1559WithSig(Wallet from, Web3Transaction web3Tx, long chainId)
+    {
+        return transactionRepository.createTransactionWithSig(from, web3Tx.recipient.toString(), web3Tx.value,
+                web3Tx.gasPrice, web3Tx.gasLimit, web3Tx.nonce,
+                !TextUtils.isEmpty(web3Tx.payload) ? Numeric.hexStringToByteArray(web3Tx.payload) : new byte[0], chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
     {
         return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, -1, data, chainId)

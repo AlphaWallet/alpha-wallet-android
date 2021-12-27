@@ -72,7 +72,7 @@ public interface AccountKeystoreService {
 			BigInteger amount,
 			BigInteger gasLimit,
 			BigInteger gasPremium,
-			BigInteger feeCap,
+			BigInteger gasMax,
 			long nonce,
 			byte[] data,
 			long chainId);

@@ -27,6 +27,10 @@ public class Web3Transaction implements Parcelable {
     public final BigInteger value;
     public final BigInteger gasPrice;
     public final BigInteger gasLimit;
+
+    //public final BigDecimal baseFee;
+    //public final
+
     public final long nonce;
     public final String payload;
     public final long leafPosition;

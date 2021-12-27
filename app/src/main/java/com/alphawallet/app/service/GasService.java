@@ -17,20 +17,27 @@ import androidx.annotation.NonNull;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.FeeHistory;
 import com.alphawallet.app.entity.GasPriceSpread;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.tools.Numeric;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 
 import java.math.BigInteger;
@@ -44,6 +51,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Created by JB on 18/11/2020.
@@ -54,6 +62,7 @@ public class GasService implements ContractGasProvider
 {
     public final static long FETCH_GAS_PRICE_INTERVAL_SECONDS = 15;
     private final String WHALE_ACCOUNT = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"; //used for calculating gas estimate where a tx would exceed the limits with default gas settings
+    private final static String FEE_HISTORY_CALL = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_feeHistory\",\"params\":[100, \"latest\", []],\"id\":1}";
 
     private final EthereumNetworkRepositoryType networkRepository;
     private final OkHttpClient httpClient;
@@ -200,8 +209,7 @@ public class GasService implements ContractGasProvider
         else
         {
             final long nodeId = currentChainId;
-            return Single.fromCallable(() -> web3j
-                    .ethGasPrice().send())
+            return Single.fromCallable(() -> web3j.ethGasPrice().send())
                     .map(price -> updateGasPrice(price, nodeId));
         }
     }
@@ -375,6 +383,7 @@ public class GasService implements ContractGasProvider
                                                   BigInteger gasLimit, String toAddress,
                                                   BigInteger amount, String txData)
     {
+        FeeHistory history = getChainFeeHistory().blockingGet();
         final Transaction transaction = new Transaction (
                 fromAddress,
                 nonce,
@@ -408,5 +417,32 @@ public class GasService implements ContractGasProvider
                 //unknown
                 return BigInteger.valueOf(GAS_LIMIT_CONTRACT);
         }
+    }
+
+    public Single<FeeHistory> getChainFeeHistory()
+    {
+        RequestBody requestBody = RequestBody.create(FEE_HISTORY_CALL, HttpService.JSON_MEDIA_TYPE);
+        NetworkInfo info = networkRepository.getNetworkByChain(currentChainId);
+
+        return Single.fromCallable(() -> {
+            Request request = new Request.Builder()
+                    .url(info.rpcServerUrl)
+                    .post(requestBody)
+                    .build();
+            try (okhttp3.Response response = httpClient.newCall(request).execute())
+            {
+                if (response.code() / 200 == 1)
+                {
+                    JSONObject jsonData = new JSONObject(response.body().string());
+                    return new Gson().fromJson(jsonData.getJSONObject("result").toString(), FeeHistory.class);
+                }
+            }
+            catch (Exception e)
+            {
+                if (BuildConfig.DEBUG) e.printStackTrace();
+            }
+
+            return new FeeHistory();
+        });
     }
 }

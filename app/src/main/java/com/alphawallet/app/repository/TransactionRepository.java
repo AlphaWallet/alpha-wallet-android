@@ -128,6 +128,36 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId) {
+		final Web3j web3j = getWeb3jService(chainId);
+
+		TransactionData txData = new TransactionData();
+
+		return getNonceForTransaction(web3j, from.address, nonce)
+				.flatMap(txNonce -> {
+					txData.nonce = txNonce;
+					return accountKeystoreService.signTransactionEIP1559(from, toAddress, subunitAmount, gasLimit, gasPremium, gasMax, txNonce.longValue(), data, chainId);
+				})
+				.flatMap(signedMessage -> Single.fromCallable( () -> {
+					if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+					{
+						throw new Exception(signedMessage.failMessage);
+					}
+					txData.signature = Numeric.toHexString(signedMessage.signature);
+					EthSendTransaction raw = web3j
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
+							.send();
+					if (raw.hasError()) {
+						throw new Exception(raw.getError().getMessage());
+					}
+					txData.txHash = raw.getTransactionHash();
+					return txData;
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, tx.nonce, gasPremium, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x", ""))
+				.subscribeOn(Schedulers.io());
+	}
+
+	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
@@ -339,7 +369,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		//detect if transaction is success
 		return Single.fromCallable(() -> {
-			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getTransaction().orElseThrow();
+			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getResult();// .getTransaction();
 			Web3j web3j = getWeb3jService(fetchedTx.getChainId());
 			TransactionReceipt txr = web3j.ethGetTransactionReceipt(fetchedTx.getHash()).send().getResult();
 			return inDiskCache.storeRawTx(wallet, fetchedTx.getChainId(), rawTx, timeStamp, txr.isStatusOK());

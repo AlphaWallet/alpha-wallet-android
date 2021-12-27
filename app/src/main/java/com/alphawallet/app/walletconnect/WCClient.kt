@@ -303,6 +303,9 @@ open class WCClient(
             WCMethod.GET_ACCOUNTS -> {
                 onGetAccounts(request.id)
             }
+            null -> { //Shouldn't need this
+
+            }
         }
     }
 

@@ -3,8 +3,7 @@ package com.alphawallet.app;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.AccountKeystoreService;
@@ -35,7 +34,7 @@ public class GetKeystoreWalletRepoTest {
 
 	@Before
 	public void setUp() {
-		Context context = InstrumentationRegistry.getTargetContext();
+		Context context = androidx.test.core.app.ApplicationProvider.getApplicationContext();
 		accountKeystoreService = new KeystoreAccountService(new File(context.getFilesDir(), "store"),
 															new File(context.getFilesDir(), ""),
 															new KeyService(null, null));

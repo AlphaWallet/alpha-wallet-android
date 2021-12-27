@@ -82,7 +82,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
             return objectMapper.writeValueAsString(walletFile);
         }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
-                .subscribeOn(Schedulers.io());
+        .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -238,7 +238,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                     toAddress,
                     amount,
                     dataStr
-            );
+                    );
 
             byte[] signData = TransactionEncoder.encode(rtx, chainId);
             returnSig = keyService.signData(signer, signData);
@@ -251,7 +251,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             returnSig.signature = encode(rtx, sigData);
             return returnSig;
         })
-                .subscribeOn(Schedulers.io());
+        .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -383,7 +383,7 @@ public class KeystoreAccountService implements AccountKeystoreService
 
             return wallets.toArray(new Wallet[0]);
         })
-                .subscribeOn(Schedulers.io());
+        .subscribeOn(Schedulers.io());
     }
 
     /**

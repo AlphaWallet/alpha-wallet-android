@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.repository.entity.RealmTokenMapping;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -62,6 +63,9 @@ public interface TokenLocalSource {
 
     void storeATokenAddresses(List<String> addresses);
     Single<List<String>> getATokenAddresses();
+
+    void storeTokensMapping(List<RealmTokenMapping> mappings);
+    Single<List<RealmTokenMapping>> getTokensMapping();
 
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 

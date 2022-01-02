@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.interact.ATokensRepository;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 
@@ -84,14 +85,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     }
 
     private TokenSortGroup defineSortGroup() {
-        TokenSortGroup tsg = TokenSortGroup.GENERAL;
-        if (isNFT()) {
-            tsg = TokenSortGroup.NFT;
-        } else if (isAToken()) {
-            tsg = TokenSortGroup.ATOKEN;
-        }
-
-        return tsg;
+        return new TokenSortGroup(getTokenGroup());
     }
 
     public String getFilterText()
@@ -239,6 +233,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public boolean isAToken() {
         return ATokensRepository.isAToken(getAddress());
+    }
+
+    public String getTokenGroup() {
+        return TokensMappingRepository.getGroup(getChain(), getAddress());
     }
 
     public boolean isNFT()

@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.interact.ATokensRepository;
+import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -61,6 +62,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
     private final ATokensRepository aTokensRepository;
+    private final TokensMappingRepository tokensMappingRepository;
     private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
@@ -125,6 +127,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::notifyDataSetChanged).isDisposed();
+
+        this.tokensMappingRepository = new TokensMappingRepository(aService.getTokenLocalSource());
+        this.tokensMappingRepository.getTokensMapping()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::notifyDataSetChanged).isDisposed();
     }
 
     protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService) {
@@ -133,6 +141,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.tokensService = null;
         this.aTokensRepository = new ATokensRepository(aService.getTokenLocalSource());
         aTokensRepository.getTokensList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::notifyDataSetChanged).isDisposed();
+
+        this.tokensMappingRepository = new TokensMappingRepository(aService.getTokenLocalSource());
+        this.tokensMappingRepository.getTokensMapping()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::notifyDataSetChanged).isDisposed();
@@ -248,18 +262,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     //Only show the header if the item type is added to the list
     private void addHeaderLayout(TokenCardMeta tcm)
     {
-        //TODO: Use an enum in TokenCardMeta to designate type Chain/Asset(General)/NFT/ATOKEN/DeFi/GOVERNANCE
-        if (tcm.isNFT())
-        {
-            items.add(new HeaderItem("NFT", 2, TokenSortGroup.NFT));
-        }
-        else if (tcm.isAToken()) {
-            items.add(new HeaderItem("aToken", 3, TokenSortGroup.ATOKEN));
-        }
-        else
-        {
-            items.add(new HeaderItem("Assets", 1, TokenSortGroup.GENERAL));
-        }
+        items.add(new HeaderItem(tcm.group));
     }
 
     private void addManageTokensLayout() {

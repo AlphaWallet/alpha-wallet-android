@@ -10,8 +10,8 @@ public class HeaderItem extends SortedItem<String> {
 
     final TokenSortGroup group;
 
-    public HeaderItem(String data, int weight, TokenSortGroup group) {
-        super(HeaderHolder.VIEW_TYPE, data, weight);
+    public HeaderItem(TokenSortGroup group) {
+        super(HeaderHolder.VIEW_TYPE, group.data, group.weight);
         this.group = group;
     }
 

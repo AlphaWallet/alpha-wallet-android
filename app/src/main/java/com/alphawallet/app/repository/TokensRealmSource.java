@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.entity.RealmAToken;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmTokenMapping;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -57,6 +58,7 @@ public class TokensRealmSource implements TokenLocalSource {
     public static final String TAG = "TLS";
     public static final String IMAGES_DB = "image_urls_db";
     public static final String ATOKENS_DB = "a_tokens_db";
+    public static final String TOKENS_MAPPING_DB = "tokens_mapping_db";
     public static final String TICKER_DB = "tickers_db";
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
 
@@ -1430,6 +1432,39 @@ public class TokensRealmSource implements TokenLocalSource {
                     result.add(rt.address);
                 }
                 return result;
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+
+            return null;
+        });
+    }
+
+    public void storeTokensMapping(List<RealmTokenMapping> mappings) {
+        try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                // clean prev
+                r.where(RealmTokenMapping.class).findAll().deleteAllFromRealm();
+
+                RealmList<RealmTokenMapping> list = new RealmList<>();
+
+                list.addAll(mappings);
+
+                r.insertOrUpdate(list);
+            });
+        }
+    }
+
+    public Single<List<RealmTokenMapping>> getTokensMapping() {
+        return Single.fromCallable(() -> {
+
+            try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
+            {
+                RealmResults<RealmTokenMapping> rtokens = realm.where(RealmTokenMapping.class).findAll();
+                return new ArrayList<>(rtokens);
             }
             catch (Exception ex)
             {

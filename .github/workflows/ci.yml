@@ -1,0 +1,27 @@
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [30, 31]
+        target: [default]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: Nexus 6
+          script: ./e2e.sh --CI
+
+      - name: E2E tests results
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: e2e-tests-results
+          path: DCIM/

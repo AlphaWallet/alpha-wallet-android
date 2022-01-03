@@ -63,6 +63,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
@@ -224,6 +225,10 @@ dependencies {
     androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 

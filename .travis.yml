@@ -25,6 +25,9 @@ licenses:
   - 'android-sdk-preview-license-.+'
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
+  
+ jdk:
+  - oraclejdk11
 
 before_install:
 - yes | sdkmanager "platforms;android-30"

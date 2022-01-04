@@ -1,5 +1,7 @@
 package com.alphawallet.app;
 
+import android.util.Log;
+
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.GetTextAction;
@@ -64,7 +66,7 @@ public class TransferTest {
         selectTestNet();
         sendBalanceTo(newWalletAddress, 0.001);
         ensureTransactionConfirmed();
-        switchToWallet(0);
+        switchToWallet(newWalletAddress);
         assertBalanceIs(0.001);
     }
 
@@ -126,10 +128,10 @@ public class TransferTest {
     }
 
 
-    private void switchToWallet(int index) {
+    private void switchToWallet(String address) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
-        onView(withId(R.id.list)).perform(actionOnItemAtPosition(index + 3, ViewActions.click()));
+        onView(withSubstring(address.substring(0, 6))).perform(ViewActions.click());
     }
 
     private String getWalletAddress() {

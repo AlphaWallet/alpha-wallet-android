@@ -22,6 +22,6 @@ public class SuggestEIP1559Fees
     public SuggestEIP1559Fees(FeeHistory feeHistory)
     {
         this.feeHistory = feeHistory;
-
+        
     }
 }

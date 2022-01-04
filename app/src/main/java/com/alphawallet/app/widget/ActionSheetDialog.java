@@ -39,6 +39,8 @@ import java.util.List;
 
 import io.realm.Realm;
 
+import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
+
 /**
  * Created by JB on 17/11/2020.
  */
@@ -73,7 +75,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                              ActionSheetCallback aCallBack)
     {
         super(activity, R.style.FullscreenBottomSheetDialogStyle);
-        setContentView(R.layout.dialog_action_sheet);
+        View view = View.inflate(getContext(), R.layout.dialog_action_sheet, null);
+        setContentView(view);
+
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
+        behavior.setState(STATE_EXPANDED);
+        behavior.setSkipCollapsed(true);
 
         gasWidget = findViewById(R.id.gas_widgetx);
         balanceDisplay = findViewById(R.id.balance);
@@ -544,7 +551,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         if (lock)
         {
             FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+            if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
         }
     }
 
@@ -552,7 +559,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void fullExpand()
     {
         FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
     }
 
     public void setGasEstimate(BigInteger estimate)

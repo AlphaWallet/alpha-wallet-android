@@ -70,9 +70,6 @@ public interface PreferenceRepositoryType {
     void setShowZeroBalanceTokens(boolean shouldShow);
     boolean shouldShowZeroBalanceTokens();
 
-    boolean showShowRootWarning();
-    void setShowRootWarning(boolean shouldShow);
-
     int getUpdateWarningCount();
     void setUpdateWarningCount(int count);
 

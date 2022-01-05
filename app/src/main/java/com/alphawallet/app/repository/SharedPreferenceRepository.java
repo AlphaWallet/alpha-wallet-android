@@ -271,16 +271,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean showShowRootWarning() {
-        return pref.getBoolean(SHOULD_SHOW_ROOT_WARNING, true);
-    }
-
-    @Override
-    public void setShowRootWarning(boolean shouldShow) {
-        pref.edit().putBoolean(SHOULD_SHOW_ROOT_WARNING, shouldShow).apply();
-    }
-
-    @Override
     public int getUpdateWarningCount() {
         return pref.getInt(UPDATE_WARNINGS, 0);
     }

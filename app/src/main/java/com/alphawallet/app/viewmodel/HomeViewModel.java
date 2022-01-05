@@ -520,14 +520,6 @@ public class HomeViewModel extends BaseViewModel {
         RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 
-    public boolean shouldShowRootWarning() {
-        return preferenceRepository.showShowRootWarning();
-    }
-
-    public void setShowRootWarning(boolean shouldShow) {
-        preferenceRepository.setShowRootWarning(shouldShow);
-    }
-
     public int getUpdateWarnings() {
         return preferenceRepository.getUpdateWarningCount();
     }

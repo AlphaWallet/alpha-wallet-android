@@ -1,7 +1,5 @@
 package com.alphawallet.app;
 
-import android.util.Log;
-
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.GetTextAction;
@@ -34,6 +32,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
+import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -91,15 +90,10 @@ public class TransferTest {
     }
 
     private void createNewWalletOnFirstStart() {
-        click(withText("CREATE A NEW WALLET"));
-        if (com.alphawallet.app.util.RootUtil.isDeviceRooted()) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if (isDeviceRooted()) {
             click(withText(R.string.ok));
         }
+        click(withText("CREATE A NEW WALLET"));
         click(withText("CLOSE"));
     }
 

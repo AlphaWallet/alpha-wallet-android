@@ -94,7 +94,7 @@ public class TransferTest {
             click(withText(R.string.ok));
         }
         click(withText("CREATE A NEW WALLET"));
-        click(withText("CLOSE"));
+        click(withId(R.id.btn_close));
     }
 
     private void selectTestNet() {

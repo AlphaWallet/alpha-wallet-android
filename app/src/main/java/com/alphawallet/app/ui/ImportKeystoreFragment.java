@@ -1,30 +1,28 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
-import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class ImportKeystoreFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
+public class ImportKeystoreFragment extends ImportFragment
 {
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};
-    private static final Pattern keystore_json = Pattern.compile("[\\n\\r\\t\" a-zA-Z0-9{}:,-]{10,}", Pattern.MULTILINE);
+    private static final Pattern keystore_json = Pattern.compile("($|\\s?)(\\{)([\\n\\r\\t\" a-zA-Z0-9{}:,-]{12,})(\\})($|\\s?)", Pattern.MULTILINE);
 
     private PasswordInputView keystore;
     private PasswordInputView password;
@@ -79,12 +77,9 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     }
 
     @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isResumed())
-        {
-            if (isVisibleToUser) reset();
-        }
+    public void comeIntoFocus()
+    {
+        reset();
     }
 
     private void updateButtonState(boolean enabled)

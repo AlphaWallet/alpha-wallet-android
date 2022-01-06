@@ -57,7 +57,7 @@ public class TokenInfoView extends LinearLayout {
     {
         value.setVisibility(View.VISIBLE);
         valueLongText.setVisibility(View.GONE);
-        String prefix = hasPrefix ? (v > 0 ? "+" : "") : "";
+        String prefix = hasPrefix && v > 0 ? "+" : "";
         value.setText(prefix + TickerService.getFullCurrencyString(v));
 
         int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.red : R.color.green);

@@ -27,11 +27,11 @@ licenses:
   - 'google-gdk-license-.+'
   
  env:
-  matrix:
-  - TRAVIS_JDK=adopt-openj9@1.11.0-4
+   matrix:
+     - TRAVIS_JDK=adopt-openj9@1.11.0-4
   
- jdk:
-  - oraclejdk11
+   jdk:
+     - oraclejdk11
 
 before_install:
 - yes | sdkmanager "platforms;android-30"

@@ -1,0 +1,887 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <!-- String related to sending -->
+    <string name="action_send">ပို့သည်</string>
+    <string name="action_send_tkn">ပို့သည် %1$s</string>
+    <string name="recipient">လက်ခံသူ</string>
+    <string name="error_field_required">ယခုကွက်လပ်ကိုဖြည့်ဖို့လိုအပ်သည်</string>
+    <string name="action_settings">သတ်မှတ်ချက်များ</string>
+    <string name="title_account_list">ဝေါလက်များ</string>
+    <string name="confirm_delete_account">‌ယခုဝေါလက်ကိုအရံသိမ်းဆည်းခြင်းပြုလုပ်ပြီးကြောင်းအတည်ပြုပါ</string>
+    <string name="copy">Clipboardဆီသို့ကူးယူမည်</string>
+    <string name="sent">ပို့ပြီးပါပြီ</string>
+    <string name="received">လက်ခံရရှိပြီးဖြစ်သည်</string>
+    <string name="ok">OK</string>
+    <string name="barcode_error_format">ဘားကုတ်မှားယွင်းနေပါသည်: %s</string>
+    <string name="title_delete_account">ယခုဝေါလက်ကိုဖျက်ရန်သေချာပါသလား?</string>
+
+    <string name="error_import">ထည့်သွင်းထားသောKeystoreမှားယွင်းနေပါသည်</string>
+    <string name="error_deleting_account">ဝေါလက်ဖျက်သိမ်းခြင်းမှားယွင်းနေပါသည်</string>
+    <string name="do_manage_make_backup">အရံသိမ်းဆည်းခြင်းပြုလုပ်ခဲ့ပြီးပြီလား</string>
+    <string name="yes_continue">ပြုလုပ်ခဲ့ပြီးပါပြီ။ ရှေ့ဆက်သွားမည်။</string>
+    <string name="no_repeat">မလုပ်ရသေးပါ။ ပြန်လုပ်မည်။</string>
+    <string name="transfer">ပြောင်းရွှေ့မည် %s</string>
+    <string name="action_buy">ဝယ်မည် %s</string>
+    <string name="empty" />
+    <string name="try_again">ပြန်လုပ်မည်</string>
+    <string name="already_have_account">ဝေါလက် ရှိပြီးဖြစ်ပါသလား။</string>
+    <string name="action_create_new_account">ဝေါလက် အသစ်တစ်ခုဖန်တီးမည်</string>
+    <string name="unknown_error">အမှားအယွင်းတစ်ခုဖြစ်နေပါသည်။</string>
+    <string name="no_tokens">တိုကင် ကိုရှာမတွေ့ပါ။</string>
+
+    <!-- Titles -->
+    <string name="title_my_address">ကျွန်ုပ်လိပ်စာ</string>
+    <string name="title_activity_send">ပို့မည်</string>
+    <string name="title_activity_confirmation">အတည်ပြုမည်</string>
+    <string name="title_transaction_details">လုပ်ငန်းစဥ်အသေးစိတ်</string>
+
+    <!-- Dialog titles -->
+    <string name="title_dialog_error">မှားယွင်းနေပါသည်</string>
+    <string name="title_dialog_handling">ကိုင်တွယ်နေပါသည် \.\.\.</string>
+    <string name="title_dialog_add_account">ဝေါလက် ထည့်သွင်းမည်</string>
+    <string name="title_dialog_deposit">မည်ကဲ့သို့ဝယ်ယူချင်ပါသလဲ။</string>
+
+    <!-- Dialog messages-->
+    <string name="toast_message_wallet_imported">ဝေါလက် ထည့်သွင်းပြီးပါပြီ</string>
+    <string name="toast_message_wallet_exported">အရံသိမ်းဆည်းခြင်းကိုဖန်တီးပြီးပါပြီ</string>
+    <string name="toast_qr_code_no_address">QRကုတ်၏လိပ်စာမှားယွင်းနေပါသည်</string>
+
+    <!-- Labels -->
+    <string name="label_from">မှ</string>
+    <string name="label_to">သို့</string>
+    <string name="label_gas_limit">ခွင့်ပြုလုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="label_gas_price">လုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="label_gas_price_gwei">လုပ်ငန်းဆောင်ရွက်ခ (GWEI)</string>
+    <string name="label_old_gas_price">မူလလုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="label_network_fee">ကွန်ရက် အသုံးပြုခ (Maximum)</string>
+    <string name="button_ok">OK</string>
+
+    <!-- Subtitles -->
+    <string name="subtitle_from">မှ</string>
+    <string name="subtitle_to">သို့</string>
+    <string name="subtitle_gas_fee">လုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="subtitle_gas_price">လုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="subtitle_gas_used">ကုန်ကျသောလုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="subtitle_network_fee">Network အသုံးပြုခ</string>
+    <string name="subtitle_transaction_num">အရောင်းအဝယ် #</string>
+    <string name="subtitle_transaction_hash_num">အရောင်းအဝယ်ရည်ရွယ်ချက် #</string>
+    <string name="subtitle_transaction_time">အရောင်းအဝယ်ပြုလုပ်ချိန်</string>
+    <string name="subtitle_block_num">Block #</string>
+    <string name="subtitle_block">Block</string>
+
+    <!-- Actions -->
+    <string name="action_share">မျှဝေမည်</string>
+    <string name="action_more_details">ပို၍အသေးစိတ်ပြုလုပ်ရန်</string>
+    <string name="action_add_wallet">ဝေါလက် ထည့်မည်</string>
+    <string name="action_add_token">တိုကင်ထည့်မည်</string>
+    <string name="action_open_etherscan">Ethersacan တွင်ကြည့်မည်</string>
+    <string name="action_coinbase">Coinbase</string>
+    <string name="action_localeth">LocalEthereum</string>
+    <string name="action_changelly">Changelly (ခရစ်ဒစ်ကတ်ဖြင့်ဝယ်မည်)</string>
+
+    <!-- Subject -->
+    <string name="subject_transaction_detail">လုပ်ငန်းစဥ်အသေးစိတ်</string>
+    <string name="error_fail_generate_qr">QRကုတ်ကိုဖတ်ခြင်းမပြုလုပ်နိုင်ပါ။</string>
+    <string name="error_invalid_address">လိပ်စာမှားယွင်းနေပါသည်</string>
+    <string name="error_invalid_amount">ပမာဏမှားယွင်းနေပါသည်</string>
+    <string name="error_transaction_failed">လုပ်ငန်းစဥ်တွင်အမှားအယွင်းရှိနေပါသည်</string>
+    <string name="error_transaction_may_fail">လုပ်ငန်းစဥ်ပျက်သွားနိုင်ကြောင်းNodeမှသတိပေးနေပါသည်။ ဆက်လက်ပြုလုပ်ပါမည်လား။</string>
+    <string name="error_import_failed">တိုကင်ထည့်သွင်းခြင်းပျက်ပြယ်သွားပါသည်</string>
+    <string name="error_must_numeric">နံပတ်များကိုသာအသုံးပြုရမည်ဖြစ်သည်။</string>
+    <string name="transaction_succeeded">လုပ်ငန်းစဥ်အောင်မြင်ပါသည်</string>
+    <string name="NA">မရှိပါ</string>
+    <string name="error_wallet_not_selected">ဝေါလက်ကိုမရွေးချယ်ရသေးပါ</string>
+    <string name="no_transactions_yet">ဤနေရာတွင်လုပ်ဆောင်မှုများကိုပြထားမည်ဖြစ်သည်</string>
+    <string name="unknown_balance_without_symbol">--</string>
+    <string name="dummy_transaction_value">&#45;&#45;</string>
+    <string name="title_dialog_sending">ပို့နေပါသည်…</string>
+    <string name="scan_qr">လိပ်စာကို QRကုတ်မှတဆင့်ရယူမည်</string>
+    <string name="info_gas_price">လုပ်ငန်းဆောင်ရွက်ခ ကြီးမြင့်လာသည်နှင့်အမျှ လုပ်ငန်းစဥ်ဆောင်ရွက်ခပို၍ဈေးကြီးလာမည်ဖြစ်သည်။ သို့သော်လည်း Ethereum ကွန်ရက် ပေါ်ရှိသင်၏လုပ်ငန်းစဥ်ကိုပို၍မြန်ဆန်စွာပြီးမြောက်စေမည်ဖြစ်သည်။</string>
+    <string name="info_gas_limit">အသုံးပြုမည်လုပ်ငန်းဆောင်ရွက်ခကိုသတ်မှတ်ထားခြင်းဖြင့် Smart Contractများမှ သင်၏Ethereumအားစိတ်ကြိုက်သုံးစွဲခြင်းကိုကာကွယ်နိုင်ပါသည်။ ကျွန်ုပ်တို့အနေဖြင့် ကုန်ကျနိုင်မည့် လုပ်ငန်းဆောင်ရွက်ခကို အလိုအလျောက်တွက်ချက်ပေးမည်ဖြစ်ပါသည်။ သို့သော်လည်းတချို့ Smart Contract များအတွက်ခွင့်ပြုမည့် လုပ်ငန်းဆောင်ရွက်ခကို ကိုယ်တိုင်သတ်မှတ်ပေးရန်လိုအပ်မည်ဖြစ်သည်။</string>
+    <string name="title_send_settings">အဆင့်မြှင့်တင်ခြင်း</string>
+    <!--<string name="title_activity_barcode">ဘားကုတ်ကိုဖတ်မည်</string>-->
+    <string name="error_add_token">ယခုတိုကင်ကိုထည့်၍မရပါ။</string>
+    <string name="error_already_added">ထည့်သွင်းပြီးသားဖြစ်သည်။</string>
+    <string name="error_export">ဝေါလက်ထုတ်ယူခြင်းပျက်ပြယ်ပါသည်</string>
+    <string name="error_fail_load_tokens">တိုကင်စာရင်းပြလုပ်ခြင်းပျက်ပြယ်ပါသည်</string>
+    <string name="error_create_wallet">ဝေါလက် အသစ်ပြုလုပ်ခြင်းပျက်ပြယ်ပါသည်</string>
+
+    <string name="app_name">AlphaWallet</string>
+    <string name="all">အားလုံး</string>
+    <string name="currency">ငွေကြေးများ</string>
+    <string name="advanced">အသေးစိတ်အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="copy_wallet_address">ဝေါလက်လိပ်စာကိုကူးယူမည်</string>
+    <string name="hint_contract_name">အမည်</string>
+    <string name="hint_contract_venue">နေရာ</string>
+    <string name="hint_contract_date">နေ့ရက်</string>
+    <string name="hint_contract_price">ဈေးနှုန်း</string>
+
+
+    <!-- Price -->
+    <string name="action_use">ထုတ်ယူမည်</string>
+    <string name="action_sell">ရောင်းသည်</string>
+    <string name="action_transfer">ပြောင်းရွှေ့မည်</string>
+    <string name="address">လိပ်စာ</string>
+    <string name="action_redeem">ထုတ်ယူမည်</string>
+    <string name="add_ids_to_redeem">ထုတ်ယူပြီးလက်မှတ်များ</string>
+    <string name="title_use_token">တိုကင်ကိုအသုံးပြုမည်</string>
+    <string name="token_balance">%1$s%2$s</string>
+
+    <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
+    <string name="token_name">%1$s (%2$s)</string>
+    <string name="create_sell_order">အရောင်းစာရင်းပြုလုပ်မည်</string>
+    <string name="select_tickets">%1$s ကိုရောင်းရန်ရွေးချယ်သည်:</string>
+    <string name="select_tickets_redeem">ထုတ်ယူမည့်လက်မှတ်များကိုရွေးချယ်ပါ</string>show
+    <string name="action_purchase">ဝယ်ယူမည်</string>
+    <string name="toolbar_header_wallet">ဝေါလက်</string>
+    <string name="toolbar_header_settings">အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="toolbar_header_help">အကူအညီ \u0026 FAQ</string>
+    <string name="toolbar_header_transactions">လုပ်ငန်းစဥ်များ</string>
+    <string name="settings_my_wallet_address">ကျွန်ုပ်၏ဝေါလက်လိပ်စာ</string>
+    <string name="settings_notification">အသိပေးစာ</string>
+    <string name="title_redeem">လက်မှတ်ကိုထုတ်ယူမည်</string>
+    <string name="waiting_for_blockchain">Blockchainကိုစောင့်ဆိုင်းနေသည်…</string>
+    <string name="btn_text_apply">လျှောက်မည်</string>
+    <string name="filter_by">စစ်ထုတ်ခြင်း</string>
+    <string name="filter_date_label">နေ့စွဲ</string>
+    <string name="filter_price_label">ဈေးနှုန်း</string>
+    <string name="filter_distance_label">အကွာအဝေး</string>
+    <string name="filter_timeframe_label">သတ်မှတ်ချိန်</string>
+    <string name="set_a_price">ဈေးနှုန်းသတ်မှတ်မည်</string>
+    <string name="learn_more_about_ethereum">Ethereum အကြောင်းပိုမိုလေ့လာရန်</string>
+    <string name="price_per_ticket">လက်မှတ်တစောင်ဈေးနှုန်း</string>
+    <string name="set_price_subtext_abr">ဈေးနှုန်းသတ်မှတ်ခြင်း %1$s (%2$s)</string>
+    <string name="transfer_tickets">လက်မှတ်အပြောင်းရွှေ့</string>
+    <string name="link_valid_until">MagicLinkကို %1$s %2$s အထိအသုံးပြုနိုင်သည် </string>
+    <string name="generate_pick_up_link">MagicLinkတခုပြုလုပ်မည်</string>
+    <string name="transfer_now">ယခုပြောင်းရွှေ့မည်</string>
+    <string name="to">သို့</string>
+
+    <string-array name="filter_date">
+        <item>နောက်ဆုံးပြုလုပ်ထားသည့်အရာများ</item>
+        <item>ရှေ့ဆုံးရက်</item>
+    </string-array>
+    <string-array name="filter_price">
+        <item>အနိမ့်ဆုံးမှအမြင့်ဆုံးသို့</item>
+        <item>အမြင့်ဆုံးမှအနိမ့်ဆုံးသို့</item>
+    </string-array>
+    <string-array name="filter_distance">
+        <item>အားလုံး</item>
+        <item>၁ကီလိုမီတာ</item>
+        <item>၅ကီလိုမီတာ</item>
+        <item>၁၀ကီလိုမီတာ</item>
+    </string-array>
+    <string-array name="filter_timeframe">
+        <item>အားလုံး</item>
+        <item>၁ပတ်</item>
+        <item>၁လ</item>
+        <item>၁နှစ်</item>
+    </string-array>
+    <string-array name="filter_match">
+        <item>အားလုံး</item>
+        <item>၁-၆၄</item>
+    </string-array>
+    <string-array name="filter_class">
+        <item>အားလုံး</item>
+        <item>အထူးသီးသန့်</item>
+    </string-array>
+    <string-array name="filter_seats">
+        <item>အားလုံး</item>
+        <item>၂</item>
+        <item>၃</item>
+    </string-array>
+    <string-array name="filter_search_date">
+        <item>ရက်/လ/နှစ်</item>
+
+    </string-array>
+    <string name="eth">ETH</string>
+    <string name="quantity_of_tickets">လက်မှတ်အရေအတွက်</string>
+    <string name="total_cost_label">စုစုပေါင်းကုန်ကျငွေ:</string>
+    <string name="equivalent_in_usd">USDဖြင့်</string>
+    <string name="total_cost">%1$s %2$s</string>
+    <string name="select_quantity_tickets">%1$s ပမာဏာကိုရွေးချယ်ပါ</string>
+    <string name="ticket_redeemed">သင်၏လက်မှတ်ကိုထုတ်ယူပြီးပါပြီ</string>
+    <string name="search_for">ရှာရန်</string>
+    <string name="filter_search_class">အမျိုးအစား</string>
+    <string name="filter_search_seats">ဘေးချင်းကပ်ခုံနံပတ်များ</string>
+    <string name="search_label_match">ကိုက်ညီမှုများ</string>
+    <string name="help_question1">ETHခေါ်Ethereum ဆိုသည်မှာအဘယ်နည်း။</string>
+    <string name="help_question2">ဝေါလက်တခုသည် အဘယ်ကြောင့် Ethereum ကိုအသုံးပြုသနည်း။</string>
+    <string name="help_question3">မိမိငွေကြေးကိုမည်ကဲ့သို့ရရှိနိုင်မည်နည်း။</string>
+    <string name="help_question4">Seed Phrase ဆိုသည်မှာအဘယ်နည်း။</string>
+    <string name="help_question5">ETHကိုမိမိ ဝေါလက်အတွင်းသို့မည်ကဲ့သို့လွှဲပြောင်းရမည်နည်း။</string>
+    <string name="help_question6">Tokenscriptဆိုသည်မှာအဘယ်နည်း။</string>
+    <string name="help_question7" translatable="false">ကိုယ်ရေးအချက်အလက်ဆိုင်ရာမူဝါဒ</string>
+    <string name="help_question8" translatable="false">ဝန်ဆောင်မှုစည်းမျဥ်းများ</string>
+    <string name="privacy_policy" translatable="false">ကိုယ်ရေးအချက်အလက်ဆိုင်ရာမူဝါဒ.html</string>
+    <string name="terms_of_service" translatable="false"> ဝန်ဆောင်မှုစည်းမျဥ်းများ.html</string>
+    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
+    <string name="twenty_four_hours">၂၄နာရီ</string>
+    <string name="appreciation">ကျေးဇူးတင်ရှိခြင်း</string>
+    <string name="eth_per_ticket">%1$s/လက်မှတ်</string>
+    <string name="ethereum">Ethereum</string>
+    <string name="ethereum_blockchain">Ethereum Blockchain</string>
+    <string name="issuer">ထုတ်ပေးသူ</string>
+    <string name="root_title"> စက်လုံခြုံရေးစိတ်မချရပါ။</string>
+    <string name="root_body">သင်၏ဖုန်းသည် Root ဖောက်ထားပြီးဖြစ်သော်လည်း သော့များသည် Android ဖုန်းများတွင်အသုံးပြုသော လုံခြုံရေးဝှက်စာစနစ်ဖြင့်ကာကွယ်မှုအောက်တွင်ရှိနေဆဲဖြစ်သည်။ ဖြစ်ပွားခဲ့သောဝေါလက်ဖောက်ထွင်းမှုများသည် ကီးဘုတ်အပလီကေးရှင်းတစ်ခုခု (သို့မဟုတ်) မိမိရိုက်ထည့်သောစကားလုံးများကို မှတ်သားသည့်ဆော့ဝဲများမှ ခိုးယူခံရခြင်းဖြစ်နိုင်ပါသည်။ Alphawallet သည် ထိုအန္တရာယ်များကိုကာကွယ်ရန်အတွက် စာရိုက်ထည့်သည့်အခါကီးဘုတ်မှရိုက်ထည့်မည့်စကားလုံးများကိုအလိုအလျောက်ခန့်မှန်းပေးသည့်လုပ်ငန်းစဥ်ကိုပိတ်ထားပါသည်။ Root ဖောက်ထားသောဖုန်းဖြစ်လျှင် မူလကီးဘုတ်အပလီကေးရှင်းကိုသာအသုံးပြုရန်တိုက်တွန်းပါသည်။ အရည်အသွေးကောင်းမွန်သော Anti-Virus အပလီကေးရှင်းများကိုလည်းအသုံးပြုရန်တိုက်တွန်းပါသည်။ Root ဖောက်ရာတွင် Magisk၊ SuperSUစသော သုံးစွဲသူအားလေးစားမှုရှိသည့် အပလီကေးရှင်းများကိုအသုံးပြုရန်တိုက်တွန်းပါသည်။ အချုပ်အားဖြင့်မိမိသော့လုံခြုံမှုအတွက်မိမိတွင်သာတာဝန်ရှိပါသည်။ </string>
+    <string name="contact_us">အကူအညီလိုအပ်နေဆဲဖြစ်ပါသလား။ ကျွန်ုပ်တို့ကိုဆက်သွယ်ပါ။</string>
+    <string name="confirm_sale_title">ရောင်းရန်အတည်ပြုပါသလား။</string>
+    <string name="dialog_cancel_back">ပယ်ဖျက်၍ နောက်သို့ပြန်သွားမည်။</string>
+    <string name="seekbar_max">အများဆုံး</string>
+    <string name="seekbar_min">အနည်းဆုံး</string>
+    <string name="seekbar_label_default_value">$0.00</string>
+    <string name="confirm_purchase_button_text">ဝယ်ယူရန်အတည်ပြုသည်</string>
+    <string name="label_transfer_ticket_detail">အပြောင်းအရွှေ့လက်မှတ်အသေးစိတ်</string>
+    <string name="label_transfer_ticket">လက်မှတ်ရွှေ့ပြောင်းခြင်း</string>
+    <string name="select_tickets_transfer">ပြောင်းရွှေ့မည့်လက်မှတ်များကိုရွေးချယ်ပါ:</string>
+    <string name="dialog_go_to_listings">ကျွန်ုပ်၏စာရင်းကိုသွားပါ။</string>
+    <string name="dialog_marketplace_success">သင်၏လက်မှတ်ကိုဈေးကွက်တွင်အရောင်းစာရင်းတင်ပြီးပါပြီ</string>
+    <string name="dialog_process_error">အရောင်းအဝယ်ပြုလုပ်၍မရပါ</string>
+    <string name="dialog_ok">OK</string>
+    <string name="wallet_label">ဝေါလက်</string>
+    <string name="tx_label">လုပ်ငန်းစဥ်များ</string>
+    <string name="browser_label">Browser</string>
+    <string name="settings_label">အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="activity_label">လုပ်ငန်းစဥ်</string>
+    <string name="toolbar_header_importing_tickets">တိုကင်ထည့်သွင်းခြင်း</string>
+    <string name="ticket">လက်မှတ်</string>
+    <string name="tickets">လက်မှတ်များ</string>
+    <string name="failed">မအောင်မြင်ပါ</string>
+    <string name="total_cost_for_x_tickets">%1$d %2$sအတွက် စုစု‌ပေါင်းကုန်ကျစားရိတ်:</string>
+    <string name="title_import_token">လက်မှတ်များထည့်သွင်းသည်</string>
+    <string name="action_cancel">ပယ်ဖျက်သည်</string>
+    <string name="confirm_purchase">ဝယ်ယူမှုကိုအတည်ပြုသည်</string>
+    <string name="bad_import_link">ထည့်သွင်းထားသောLinkမှားယွင်းနေပါသည်</string>
+    <string name="bad_import_link_body">ထည့်သွင်းထားသောlinkတွင်အမှားအယွင်းတစ်ခုရှိနေပါသည်။ ကျေးဇူးပြု၍ linkကို ပြန်တောင်းပါ။</string>
+    <string name="depreciation">တန်ဖိုးလျှော့ခြင်း</string>
+    <string name="generate_free_transfer_link">အခမဲ့အပြောင်းအ‌ရွှေ့Linkကိုဖန်တီးပါမည်လား။</string>
+    <string name="send_universal_link">MagicLinkကိုဝေမျှမည်</string>
+    <string name="generate_sale_transfer_link">MagicLinkကိုထုတ်ပေးပါ</string>
+    <string name="place_tickets_marketplace">ဈေးကွက်တွင်စာရင်းတင်မည်</string>
+    <string name="hint_time">--:--</string>
+    <string name="link_expiry_time">MagicLink သက်တမ်းကုန်ဆုံးချိန်</string>
+    <string name="error_time">သက်တမ်းကုန်ဆုံးချိန်ကိုရွေးပါ</string>
+    <string name="error_date">သက်တမ်းကုန်ဆုံးမည့်ရက်ကိုရွေးပါ</string>
+    <string name="error_invalid_quantity">ထည့်သွင်းသောပမာဏသည်(၀)ထက်များရမည်ဖြစ်သည်</string>
+    <string name="link_expiry_date">MagicLink သက်တမ်းကုန်ဆုံးရက်</string>
+    <string name="amount">ပမာဏ</string>
+    <string name="confirm_transfer_details">အပြောင်းအရွှေ့အသေးစိတ်ကိုအတည်ပြုမည်</string>
+    <string name="advanced_settings">အသေးစိတ်အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="action_confirm">အတည်ပြုသည်</string>
+    <string name="scan_qr_label">QRကုတ်ကိုဖတ်ပါ(သို့မဟုတ်)အောက်တွင်ဖော်ပြထားသောစာကိုကူးယူပါ:</string>
+    <string name="my_wallet_address">ကျွန်ုပ်၏ဝေါလက်လိပ်စာ</string>
+    <string name="copied_to_clipboard">Clipboardသို့ကူးယူပါ</string>
+    <string name="universal_link_expiry_on">MagicLinkသည်အဆိုပါအချိန်တွင်သက်တမ်းကုန်ဆုံးမည်ဖြစ်သည်:</string>
+    <string name="confirm_sale_total">စုစုပေါင်း: %s</string>
+    <string name="set_universal_link_expiry">MagicLinkသက်တမ်းကုန်ဆုံးမည့်အချိန်ကိုပြုလုပ်ပါ:</string>
+    <string name="tickets_selected">%1$s %2$s တို့ကိုရွေးချယ်ထားပါသည်</string>
+    <string name="eth_per_ticket_w_value">%1$s %2$s/လက်မှတ်</string>
+    <string name="universal_link_info">သင်၏လက်မှတ်များကိုဝယ်ယူသူများဝယ်ယူနိုင်ရန်အတွက် MagicLink ကိုဖန်တီးပြီးပါပြီ။</string>
+    <string name="date_hint">ရက်/လ/နှစ်</string>
+    <string name="universal_link_notice">မည်သူမဆိုသင်၏လက်မှတ်ကိုLinkသက်တမ်းမကုန်ဆုံးမီကလစ်တချက်နှိပ်ရုံဖြစ်ဝယ်ယူနိုင်မည်ဖြစ်သည်။</string>
+    <string name="label_important">အရေးကြီးသောအရာများ</string>
+    <string name="eth_00">0.00 ETH</string>
+    <string name="toolbar_title_wallets">ဝေါလက်ပြောင်းမည်</string>
+    <string name="facebook">Facebook</string>
+    <string name="twitter">Twitter</string>
+    <string name="erc20">ERC 20</string>
+    <string name="erc875">ERC 875</string>
+    <string name="erc875legacy">ERC 875*</string>
+    <string name="erc1155" translatable="false">ERC 1155</string>
+    <string name="what_is_eth">Ethereum သည် အများသူငှာပါဝင်နိုင်သော open-source နှင့် Blockchain အခြေခံ နည်းပညာပလက်‌ဖောင်းတစ်ခုဖြစ်ပါသည်။ Ethereum ပေါ်တွင် smart contract ဖြင့်လုပ်ငန်းများကိုလည်ပတ်နိုင်သောစနစ်တစ်ခုပါဝင်ပါသည်။ ၄င်းသည် blockchain နည်းပညာထုတ်ကုန်များနှင့် ဝန်ဆောင်မှုများကိုအတွက်အခြေခံကျသောအဆောက်အဦးတစ်ခုလည်းဖြစ်ပါသည်။ \n\nETH/Ether သည် Ethereum ပလက်ဖောင်းပေါ်ရှိ Blockchain ပေါ်တွင်လည်ပတ်နေသော ခရစ်ပ်တိုငွေကြေးတစ်မျိုးဖြစ်ပါသည်။ Ether ကိုအကောင့်အချင်းချင်းလွှဲပြောင်း‌ပေးပို့မှုများပြုလုပ်နိုင်သလို သက်ဆိုင်ရာNodeများရှိmining လုပ်ငန်းများတွင်ပါဝင်ကူညီတွက်ချက်ပေးခြင်းဖြင့်လည်း ဆုကြေးအဖြစ်ရရှိနိုင်ပါသည်။ Ethereum သည် EVM(Ethereum Virtual Machine) ဟုခေါ်သော လုံးဝဗဟိုချုပ်ကိုင်မှုလုံးဝမရှိသော Turing-virtual machine ကိုထောက်ပံ့ကူညီပေး၍ နိုင်ငံတကာကွန်ရက်ပေါ်ရှိNodeများတွင်scripts များကိုလည်ပတ်ဆောက်ရွက်စေပါသည်။ Gas ဆိုသည်မှာ blockchain ပေါ်တွင်အရောင်းအဝယ်များပြုလုပ်ရန်အတွက်ကုန်ကျစားရိတ်ကိုသတ်မှတ်ပေးသာစနစ်ဖြစ်ပါသည်။ Gasကို network ပေါ်ရှိအရင်းအမြစ်များကို ခွဲဝေနေရာချထားရန်နှင့်အသုံးမဝင်သောအရာများကိုလျှော့ချရန်အတွက်အသုံးပြုပါသည်။</string>
+    <string name="why_alphawallet_eth">လက်ရှိတွင် Ethereum သည် smart contract အပလီကေးရှင်းများနှင့် ဝန်ဆောင်မှုများကိုပြုလုပ်ရန်အတွက် အကောင်းဆုံးနှင့်အကြီးမားဆုံးသောBlockchain ဖြစ်ပါသည်။ Alphawallet သည် Ethereum Blockchain ကိုစတင်ပံ့ပိုးနေပြီး ၄င်း၏နည်းပညာများကို တိုးတက်အောင်ပြုလုပ်နေပါသည်။</string>
+    <string name="how_i_get_money">သင်၏Ethereumများကို ငွေကြေးအဖြစ်သို့ပြောင်းလဲနိုင်ပြီး ခရစ်ပ်တိုငွေကြေးလဲလှယ်သည့်ဝန်ဆောင်မှုကုမ္ပဏီများမှတဆင့်သင်၏ဘဏ်အကောင့်သို့ငွေကြေးများကိုပြောင်းရွှေ့နိုင်ပါသည်။</string>
+    <string name="how_i_transfer_into_wallet">သင်၏ဝေါလက်လိပ်စာကို ပေးပို့မည့်သူထံသို့မျှဝေနိုင်ပါသည်။ ပေးပို့မည်သူသည်သင်၏ဝေါလက် လိပ်စာမှတဆင့်သင့်ထံသို့ ETHများကိုပေးပို့ပါလိမ့်မည်။</string>
+    <string name="ticket_import_valid">ထည့်သွင်း၍ရသောလက်မှတ်များ</string>
+    <string name="ticket_already_imported">လက်မှတ်များထည့်သွင်းပြီးဖြစ်သည်</string>
+    <string name="ticket_range_inavlid">လက်မှတ်တချို့တဝက်ကိုထည့်သွင်းပြီးဖြစ်သည်</string>
+    <string name="free_import">အခမဲ့ထည့်သွင်းသည်</string>
+    <string name="title_select_ticket_quantity">%1$s အရေအတွက်ကိုရွေးချယ်ပါ:</string>
+    <string name="title_select_transfer_method">ပေးပို့မည်နည်းလမ်းကိုရွေးချယ်ပါ:</string>
+    <string name="title_set_universal_link_expiry">MagicLink သက်တမ်းကုန်ဆုံးချိန်ကိုသတ်မှတ်ပါ:</string>
+    <string name="title_input_wallet_address">ပေးပို့မည်လိပ်စာကိုထည့်သွင်းပါ:</string>
+    <string name="title_import">ဝေါလက်ထည့်သွင်းပါ</string>
+    <string name="action_import">ထည့်သွင်းသည်</string>
+    <string name="prompt_password">လျှို့ဝှက်စကားလုံး</string>
+    <string name="enter_password">လျှို့ဝှက်စကားလုံးထည့်သွင်းပါ</string>
+    <string name="hint_keystore">Keystore JSONကိုထည့်သွင်းပါ</string>
+    <string name="tab_seed">Seed</string>
+    <string name="tab_keystore">Keystore</string>
+    <string name="tab_private_key">သီးသန့်သော့</string>
+    <string name="hint_contract_symbol">သင်္ကေတ</string>
+    <string name="hint_contract_decimals">ဒသမကိန်းများ</string>
+    <string name="title_add_token">သီးခြားတိုကင်ကိုထည့်မည်</string>
+    <string name="suggestion_private_key">သီးသန့်သော့သည် စကားလုံး၆၄လုံးရှိရန်လိုအပ်သည်။</string>
+    <integer name="viewfinder_border_width">15</integer>
+    <integer name="viewfinder_border_length">160</integer>
+    <string name="qr_scanner">QR ကုတ်ဖတ်ရန်</string>
+    <string name="dialog_title_select_locale">ဘာသာစကားရွေးချယ်ပါ:</string>
+    <string name="settings_locale_lang">ဘာသာစကားပြောင်းပါ</string>
+    <string name="ticket_redeem">ထုတ်ယူမည်</string>
+    <string name="ticket_receive_from">ထံမှရရှိသည်</string>
+    <string name="ticket_transfer_to">ပြောင်းရွှေ့မည်</string>
+    <string name="ticket_transfer_from">ထံမှပြောင်းရွှေ့မည်</string>
+    <string name="ticket_load_new_tickets">လက်မှတ်အသစ်များကိုဖော်ပြပါ</string>
+    <string name="ticket_pass_from">MagicLink မှအခမဲ့ရယူမည်</string>
+    <string name="ticket_pass_to">MagicLink အပြောင်းအရွှေ့</string>
+    <string name="ticket_terminate_contract">စာချုပ်ဖျက်သိမ်းသည်</string>
+    <string name="ticket_contract_constructor">တည်ဆောက်သူ</string>
+    <string name="ticket_invalid_op">လုပ်ငန်းဆောင်ရွက်၍မရပါ</string>
+    <string name="ticket_admin_redeem">အက်ဒမင်ကမှထုတ်ယူသည်</string>
+    <string name="ticket_magiclink_pickup">MagicLinkမှလက်ခံရရှိသည်</string> <!-- receive ticket from magic link -->
+    <string name="ticket_magiclink_transfer">MagicLinkကိုပြောင်းရွှေသည်</string> <!-- transfer out of our wallet by magiclink -->
+    <string name="ticket_magiclink_sale">MagicLinkမှတဆင့်ရောင်းခဲ့သည်</string>
+    <string name="ticket_magiclink_purchase">MagicLinkကိုဝယ်ယူသည်</string>
+    <string name="token_mint">ထုတ်လုပ်သည်</string>
+    <string name="token_burn">ဖျက်ဆီးသည်</string>
+    <string name="remix" translatable="false">ပြန်လည်ရောနှောသည်</string>
+    <string name="commit_nft" translatable="false">NFTပြုလုပ်သည်</string>
+
+    <string name="action_next">ရှေ့သို့သွားမည်</string>
+    <string name="action_save">သိမ်းဆည်းမည်</string>
+    <string name="action_contract_info">စာချုပ်အချက်အလက်</string>
+    <string name="contract_address">စာချုပ်လိပ်စာ</string>
+    <string name="input_address">Ethereum လိပ်စာ (သို့) ENS နာမည်</string>
+    <string name="ens_name">ENS နာမည်</string>
+    <string name="enter_ens">သင်၏ ENS နာမည်</string>
+    <string name="ticket_range_expired">Magiclink သက်တမ်းကုန်ဆုံးနေပါသည်</string>
+    <string name="ticket_not_valid">တိုကင်မရှိပါ</string>
+    <string name="ticket_not_valid_body">ယခုNetworkပေါ်တွင် ယခုလိပ်စာနှင့်ပတ်သက်သောစာချုပ်ရှိမနေပါ။ စာချုပ်သည်ဖျက်သိမ်းသွားပြီဖြစ်နိုင်သလို တခြားNetwork ပေါ်တွင် ရှိနေနိုင်ပါသည်။ \'Ropsten (Test) ပြောင်း၍ချိတ်ဆက်ကြည့်ပါ။</string>
+    <string name="new_version_title">အသစ်ပြုပြင်မှုများရှိနေပါသည်</string>
+    <string name="new_version">အသစ်ပြုပြင်မှုများကိုAlphaWallet ဝက်ဘ်ဆိုဒ်တွင်ရယူနိုင်ပါသည်။</string>
+    <string name="confirm_update">ဒေါင်းလုပ်ဆွဲ၍ထည့်သွင်းမည်</string>
+    <string name="dialog_later">နောက်မှပြုလုပ်မည်</string>
+    <string name="alphawallet_update">Alphawallet အသစ်ပြုပြင်မှုများ</string>
+    <string name="install_error">Appကို အသစ်ပြုပြင်မှုများပြုလုပ်၍မရပါ</string>
+    <string name="require_write_permission">သိမ်းဆည်းရန်ခွင့်မပြုရသေးပါ။</string>
+    <string name="dialog_not_again">နောက်ထပ်အသစ်မွမ်းမံမှုများကိုချန်လှပ်ထားမည်</string>
+    <string name="enable_xml_override_dir">XMLပေါ်တွင်မွမ်းမံပြုပြင်ရန်ခွင့်ပြုမည်</string>
+    <string name="explain_xml_override">Enable XML override will create a directory \'AlphaWallet\' in your phone storage. Token config files (XML) can be dropped into this directory which will override default or network Token configs.</string>
+    <string name="ask_user_about_xml_override">Do you wish to enable Token config override directory?</string>
+    <string name="label_contract">စာချုပ်</string>
+    <string name="toolbar_header_browser">DApp Browser</string>
+    <string name="message_to_sign">မက်ဆေ့</string>
+    <string name="signer_address">လိပ်စာ</string>
+    <string name="requester_url">တောင်းခံသူ</string>
+    <string name="dialog_title_sign_message">မက်ဆေ့ကိုလက်မှတ်ထိုးမည်</string>
+    <string name="dialog_title_sign_personal_message">ကိုယ်ပိုင်မက်ဆေ့လက်မှတ်ထိုးမည်</string>
+    <string name="dialog_title_sign_typed_message">ရေးထားသောမက်ဆေ့ကိုလက်မှတ်ထိုးမည်</string>
+    <string name="dialog_reject">ငြင်းပယ်သည်</string>
+    <string name="dialog_approve">လက်ခံသည်</string>
+    <string name="transaction_value">လုပ်ငန်းစဥ်တန်ဖိုး</string>
+    <string name="dialog_title_sign_transaction">လုပ်ငန်းစဥ်ပြုလုပ်ရန်ကိုလက်မှတ်ထိုးမည်</string>
+    <string name="action_view_bookmarks">မှတ်သားထားသောလိပ်စာကိုကြည့်မည်</string>
+    <string name="erc721">ERC721</string>
+    <string name="status_pending">စောင့်ဆိုင်းနေသည်</string>
+    <string name="status_incomplete_data">အချက်အလက်မပြည့်စုံသေးပါ</string>
+    <string name="token_details">တိုကင်အသေးစိတ်</string>
+    <string name="label_cattributes">Cattributes</string>
+    <string name="label_attributes">အရည်အသွေးများ</string>
+    <string name="open_on_external_link">%1$s ပေါ်တွင်ဖွင့်မည်</string>
+    <string name="action_reload">ပြန်လည်စတင်မည်</string>
+    <string name="free_import_with_gas">လုပ်ငန်းစဥ်ကုန်ကျစားရိတ်ပေး၍ အခမဲ့ထည့်သွင်းမည်</string>
+    <string name="confirm_dapp_transaction">DApp လုပ်ငန်းစဥ်ကိုအတည်ပြုမည်</string>
+    <string name="ens_address">လိပ်စာကို ပြန်ပြင်ခဲ့သည်</string>
+    <string name="confirm_erc721_transfer">တိုကင်အပြောင်းအရွှေကိုအတည်ပြုသည်</string>
+    <string name="title_dialog_check_ens">Blockchainနာမည်ကိုစစ်ဆေးနေပါသည်</string>
+    <string name="allocate_to">သို့ ခွဲဝေပေးရန်</string>
+    <string name="approve">လက်ခံသည်</string>
+    <string name="check_feemaster">လုပ်ငန်းစဥ်ဝန်ဆောင်မှုအခမဲ့ ရရှိနိုင်ခြင်းရှိမရှိစစ်ဆေးနေပါသည်</string>
+    <string name="erc20_details">ERC20 အသေးစိတ်များ</string>
+    <string name="title_send_activity">ပို့သည်</string>
+    <string name="available">ရရှိနိုင်သောအရာများ</string>
+    <string name="usd_label">US$</string>
+    <string name="recent_transactions">နောက်ဆုံးလုပ်ငန်းစဥ်များ</string>
+    <string name="no_recent_transactions">သင်သည်မည်သည့်လုပ်ငန်းစဥ်မှပြုလုပ်ထားခြင်းမရှိသေးပါ</string>
+    <string name="paste">ထည့်သည်</string>
+    <string name="no_recent_transactions_subtext">သင်သည် %1$sကို ပို့ခဲ့(သို့) ရရှိသောအခါ သင်၏လုပ်ငန်းစဥ်များကို ဒီနေရာတွင်ဖော်ပြပါလိမ့်မည်</string>
+    <string name="no_recent_transactions_subtext_ether">ether</string>
+    <string name="no_recent_transactions_subtext_tokens">တိုကင်များ</string>
+    <string name="invalid_transaction">မပြီးမြောက်ခဲ့သောလုပ်ငန်းစဥ်များ</string>
+    <string name="contains_no_data">DApp ရှိလုပ်ငန်းစဥ်တွင်အချက်လက်များမပါဝင်နေပါ</string>
+    <string name="error_insufficient_funds">%1$s မလုံလောက်ပါ</string>
+    <string name="ssl_cert_invalid">SSL Certificateမရှိပါ။ ဝက်ဘ်ဆိုဒ်သည်လုံခြုံမှုမရှိပါ။ ဆက်လက်လုပ်ဆောင်ပါမည်လား။</string>
+    <string name="import_spawnable">တိုကင်များထည့်သွင်းမည်</string>
+    <string name="currency_drop">ငွေကြေးတန်ဖိုးကျနေချိန်တွင်ယူမည်</string>
+    <string name="currency_import">ငွေကြေးများကိုထည့်သွင်းမည်</string>
+    <string name="you_will_receive">သင်လက်ခံရရှိလိမ့်မည်</string>
+    <string name="dust_value"><![CDATA[~0.00]]></string>
+    <string name="action_scan_dapp">QR ကုတ်ကိုဖတ်မည်</string>
+    <string name="toast_invalid_code">စကင်ဖတ်ရာတွင်ရလာဒ်များမမှန်ကန်ပါ</string>
+    <string name="address_found">Ethereum လိပ်စာ</string>
+    <string name="is_address">Ethereum လိပ်စာကိုဖတ်ပြီးပါပြီ။ တိုကင်အဖြစ်ထည့်သွင်းရန်ကြိုးစားကြည့်ပါမည်လား။</string>
+    <string name="dialog_load_as_contract">တိုကင်ကိုဖော်ပြမည်</string>
+    <string name="blockchain">%1$s Blockchain</string>
+    <string name="currency_00">0.00 %s</string>
+    <string name="telegram">Telegram</string>
+    <string name="transfer_request">အပြောင်းအရွှေ့တောင်းဆိုမှု</string>
+    <string name="token_transfer_request">တိုကင်အပြောင်းအရွှေ့တောင်းဆိုမှု: %1$s</string>
+    <string name="generate_payment_request">ငွေပေးချေရန်တောင်းဆိုမှုကိုပြုလုပ်မည်</string>
+    <string name="enter_the_requested_amount">တောင်းမည့်ပမာဏကိုထည့်ပါ:</string>
+    <string name="feemaster_service_not_available">Feemaster ဝန်ဆောင်မှုကိုလတ်တလောတွင်မရနိုင်သေးပါ။ နောက်ထပ်ကြိုးစားကြည့်ပါ။ </string>
+    <string name="importing_tickets">တိုကင်များထည့်သွင်းနေသည်</string>
+    <string name="wallet_name">ဝေါလက်နာမည်</string>
+    <string name="wallet_name_template">Wallet %1$d</string>
+    <string name="no_token_found_title">တိုကင်ကိုရှာမတွေ့ပါ</string>
+    <string name="no_token_found">ယခုလိပ်စာနှင့်ပတ်သက်၍Ethereum Chain ပေါ်တွင်မည်သည့်တိုကင်မျှရှာမတွေ့ပါ။</string>
+    <string name="welcome_to_the_decentralized_web">ဗဟိုချုပ်ကိုင်မှုမရှိသောဝက်ဘ်စာမျက်နှာမှကြိုဆိုပါသည်</string>
+    <string name="action_remove">ဖယ်ရှားသည်</string>
+    <string name="title_remove_dapp">DAppကိုဖယ်ရှားသည်</string>
+    <string name="remove_from_my_dapps">%1$sကို ကျွန်ုပ် Dappမှဖယ်ရှားပါမည်လား။</string>
+    <string name="dialog_title_clear">မှတ်တမ်းများကိုရှင်းလင်းပါ</string>
+    <string name="action_clear">ရှင်းလင်းမည်</string>
+    <string name="dialog_message_clear">Browserပေါ်ရှိမှတ်တမ်းများကိုရှင်းလင်းရန်သေချာပါသလား။</string>
+    <string name="your_browser_history_appears_here">Browser၏မှတ်တမ်းများကိုဒီနေရာတွင်ဖော်ပြပါမည်။</string>
+    <string name="browser_history">Browser သုံးစွဲမှုမှတ်တမ်း</string>
+    <string name="you_have_no_dapps_displayed_yet_start_by_surfing_the_browser">You have no DApps displayed yet.\nStart by surfing the browser.</string>
+    <string name="my_dapps">My DApps</string>
+    <string name="add">ထည့်မည်</string>
+    <string name="edit">တည်းဖြတ်မည်</string>
+    <string name="history">မှတ်တမ်း</string>
+    <string name="discover_dapps">DAppsများကိုရှာဖွေမည်</string>
+    <string name="action_add">ထည့်မည်</string>
+    <string name="add_to_my_dapps">ကျွန်ုပ်၏DAppsသို့ထည့်မည်</string>
+    <string name="edit_dapp">DAppကိုတည်းဖြတ်မည်</string>
+    <string name="dapp_title">ခေါင်းစဥ်</string>
+    <string name="dapp_address">လိပ်စာ</string>
+    <string name="search_or_type_web_address">ဝက်ဘ်လိပ်စာကိုရိုက်ထည့်ရှာဖွေပါ</string>
+    <string name="network">ကွန်ရက်</string>
+    <string name="select_active_networks">အသက်ဝင်နေသောကွန်ရက်များကိုရွေးချယ်ပါ</string>
+    <string name="collectibles">စုဆောင်ထားသောအရများ</string>
+    <string name="token_function">တိုကင်လုပ်ငန်းစဥ်များ</string>
+    <string name="channel_description">Alphawallet အသိပေးစာလမ်းကြောင်းများ</string>
+    <string name="error_camera_permission_denied">ကင်မရာအသုံးပြုရန်ခွင့်ပြုချက်တောင်းခံမှုကိုငြင်းပယ်ထားပါသည်။</string>
+    <string name="confirm_tokenscript_transaction">TokenScript အရောင်းအဝယ်ကိုအတည်ပြုသည်</string>
+    <string name="tokenscript_send_native">%1$s %2$sကို %3$s (%4$s)သို့ပိုမည်။</string>
+    <string name="current_funds">လက်ရှိရံပုံငွေ: %1$s %2$s</string>
+    <string name="invalid_address_explain">%1$s သည် Ethereum လိပ်စာတွင်မရှိပါ</string>
+    <string name="select_single_network">အသက်ဝင်နေသောNetwork</string>
+    <string name="searching_for_token">တိုကင်များကိုကြည့်ရှုစစ်ဆေးနေပါသည်</string>
+    <string name="token_selection">Tokenများကိုရွေးချယ်ရန်</string>
+    <string name="token_requirement">ယခုလုပ်ငန်းစဥ်ကိုပြုလုပ်ရန် %1$s tokenများကိုလိုအပ်သည်</string>
+    <string name="contains_no_recipient">လုပ်ငန်းစဥ်တွင်လက်ခံမည့်သူကိုမထည့်ရသေးပါ</string>
+    <string name="contains_no_value">DApp လုပ်ငန်းစဥ်တွင်မည်သည့်တန်ဖိုးမှမရှိပါ။ </string>
+    <string name="wallet_not_backed_up">သင်၏ဝေါလက်ကိုသိမ်းဆည်းခြင်းမလုပ်ရသေးပါ</string>
+    <string name="not_backed_up_detail">သင့်တွင် USD 200$ ရှိနေပါပြီ။ သင်၏Walletကို သိမ်းဆည်းခြင်းမပြုလုပ်ရသေးပါ။ သိမ်းဆည်းခြင်းကိုယခုပြုလုပ်ပါ။</string>
+    <string name="back_up_wallet_action"> %1$s Walletကိုသိမ်းဆည်းခြင်းပြုလုပ်ပါ→</string>
+    <string name="authentication_cancelled">ခွင့်ပြုချက်ကိုပယ်ဖျက်သည်</string>
+    <string name="authentication_failed">ခွင့်ပြုချက်ပျက်ပြယ်သည်</string>
+    <string name="backup_seed_phrase">သင့်ဝေါလက်၏ seed phrase များကို သိမ်းဆည်းပါ</string>
+    <string name="backup_seed_phrase_detail">အလွန်လွယ်ကူလုံခြုံစွာသိမ်းဆည်းနိုင်ပါသည်။ လုံခြုံသောနေရာတခုကိုသွား၍ သိမ်းဆည်းရန်လိုအပ်သည့်စကားလုံး၁၂လုံးကိုရေးမှတ်ထားပါ။</string>
+    <string name="action_back_up_my_wallet">ကျွန်ုပ်၏ဝေါလက်ကိုသိမ်းဆည်းမည်</string>
+    <string name="write_down_seed_phrase">Seed Phrase ကိုစာရွက်ပေါ်တွင်ရေးမှတ်ပါ</string>
+    <string name="wrote_down_seed_phrase">ဟုတ်ကဲ့၊ ရေးချပြီးပါပြီ</string>
+    <string name="verify_seed_phrase">Seed Phraseများကိုအတည်ပြုမည်</string>
+    <string name="action_continue">ရှေ့ဆက်သွားမည်</string>
+    <string name="invalid_phrase">Recovery Phraseမှားယွင်းနေပါသည်။ ကျေးဇူးပြု၍ ပြန်လည်စစ်ဆေး၍ထပ်မံကြိုးစားပါ။</string>
+    <string name="manage_wallet">ဝေါလက်ကိုစီမံခန့်ခွဲမည်</string>
+    <string name="show_seed_phrase">Seed Phraseများကိုဖော်ပြပါ</string>
+    <string name="lose_this_wallet">ယခုWalletပျောက်ဆုံးသွားပါသည်</string>
+    <string name="seed_phrase_loss_warning">အကယ်၍သင်၏စက်သို့ဝင်ရောက်ခွင့်ဆုံးရှုံးခဲ့လျှင်အရံသိမ်းဆည်းခြင်းများပြုလုပ်ထားခဲ့သည့်တိုင်အောင်သင်၏ငွေများဆုံးရှုံးသွားမည်ဖြစ်သည်။</string>
+    <string name="delete_lose_funds_warning">သင်၏Walletကိုဖျက်သိမ်းရာတွင်သတိထားပါ။ သင်၏Walletကိုသိမ်းဆည်းထားခြင်းများမပြုလုပ်ထားခဲ့လျှင်သင်၏ငွေများအကုန်ဆုံးရှုံးနိုင်ပါသည်။</string>
+    <string name="export_keystore_json">Keystore JSONကိုယူမည်</string>
+    <string name="what_is_keystore_json">Keystore JSONဆိုသည်မှာအဘယ်နည်း။</string>
+    <string name="export_keystore_detail">Keystore ဆိုသည်မှာ စာလုံးများဖြင့်မှတ်သားထားသောဖိုင်တစ်ခုဖြစ်သည်။ ၄င်းကိုကူးယူ၍သင်၏Wallet တွင် ထည့်သွင်းအသုံးပြုနိုင်ပါသည်။</string>
+    <string name="test_seed_phrase">ကျွန်ုပ်၏seed phraseကိုစမ်းသပ်မည်</string>
+    <string name="make_a_backup">သိမ်းဆည်းခြင်းသည်အလွန်လွယ်ကူ၍လုံခြုံပါသည်။ %1$s၏စကားလုံးများကိုရေးချ၍လုံခြုံသောနေရာများတွင်သိမ်းဆည်းထားပါ။</string>
+    <string name="keystore_detail_text">Keystore ဆိုသည်မှာ စာလုံးများဖြင့်မှတ်သားထားသောဖိုင်တစ်ခုဖြစ်သည်။ ၄င်းကိုကူးယူ၍သင်၏Wallet တွင် ထည့်သွင်းအသုံးပြုနိုင်ပါသည်။ ၄င်းနည်းလမ်းဖြင့် Wallet ကိုလုံခြုံစွာသိမ်းဆည်းနိုင်ပါသည်။</string>
+    <string name="set_keystore_password">Keystore လျှို့ဝှက်စကားလုံးများကိုသတ်မှတ်ပါ</string>
+    <string name="keystore_loss_warning">သတိပြုရန်: သင်၏လျှို့ဝှက်စကားလုံးများကိုမှတ်မိနေရန်လိုအပ်သည်။ ကျွန်ုပ်တို့အနေဖြင့်သင်၏လျှို့ဝှက်စကားလုံးများကို သိမ်းဆည်းထားမည်မဟုတ်ပါ။ KeyStore ကိုဝှက်စာစနစ်ဖြင့်ပြုလုပ်ထားပါသည်။ မဟုတ်လျှင်သင်၏ငွေကြေးများကိုမည်သူမဆိုရယူသွားနိုင်ပါသည်။</string>
+    <string name="save_keystore">Keystorများကိုသိမ်းဆည်းမည်။</string>
+    <string name="do_not_share">သင်သိမ်းဆည်းထားသောအရာများကိုမဝေမျှပါနှင့်။ AlphaWallet အဖွဲ့ဝင်များသည်သင်သိမ်းဆည်းထားသောအရာများကိုမည်သည့်အခါမျှမေးမြန်းခြင်းမပြုလုပ်ပါ။</string>
+    <string name="enter_seed_phrase">Seed Phraseကိုထည့်သွင်းပါ</string>
+    <string name="seed_phrase_conversion_message">သင်၏Seed Phrase သည်အင်္ဂလိပ်စကားလုံးမဟုတ်လျှင် ကျေးဇူးပြု၍ https://iancoleman.io/bip39/ သို့သွား၍ အင်္ဂလိပ်စကားလုံးအဖြင့်ပြောင်းနိုင်ပါသည်။</string>
+    <string name="bad_seed_phrase">Recovery Phraseမှားယွင်းနေပါသည်။ ကျေးဇူးပြု၍ပြန်လည်စစ်ဆေး၍ ထပ်မံကြိုးစားကြည့်ပါ။</string>
+    <string name="import_from_cloud">ICLOUD/DROPBOX/GOOGLE DRIVEများမှထည့်သွင်းမည်</string>
+    <string name="enter_private_key">Private Keyကိုထည့်သွင်းမည်</string>
+    <string name="remember_your_password">သတိပြုရန်: သင်၏လျှို့ဝှက်စကားလုံးများကိုမှတ်မိနေရန်လိုအပ်သည်။ ကျွန်ုပ်တို့အနေဖြင့်သင်၏လျှို့ဝှက်စကားလုံးများကို သိမ်းဆည်းထားမည်မဟုတ်ပါ။ KeyStore ကိုဝှက်စာစနစ်ဖြင့်ပြုလုပ်ထားပါသည်။ မဟုတ်လျှင်သင်၏ငွေကြေးများကိုမည်သူမဆိုရယူသွားနိုင်ပါသည်။</string>
+    <string name="private_key_check">Private key သည် Hexစကားလုံးများကိုသာလက်ခံပါသည်။ a–f A–F and 0–9 စသောစကားလုံးများကိုအသုံးပြုပါ</string>
+    <string name="nothing_to_share">ဝေမျှရန်မရှိပါ</string>
+    <string name="nothing_to_share_message">ဝေမျှရန် DApp တွင်ရှာဖွေမည်</string>
+    <string name="time_to_backup_wallet">သင်၏ဝေါလက်ကိုသိမ်းဆည်းသင့်သောအချိန်ဖြစ်ပါသည်</string>
+    <string name="recommend_monthly_backup">သင်၏ဝေါလက်ကိုလစဥ်မှန်မှန်သိမ်းဆည်းရန် ကျွန်ုပ်တို့အလေးအနက်အကြံပြုပါသည်။</string>
+    <string name="use_pin">Pinနံပတ်ကိုအသုံးပြုပါ</string>
+    <string name="touch_fingerprint_sensor">လက်ဗွေဖတ်သည့်ဆင်ဆာကိုအသုံးပြုပါ</string>
+    <string name="unlock_private_key">Private Keyကိုဖွင့်ပါ</string>
+    <string name="device_insecure">ယခုစက်သည်မလုံခြုံပါ</string>
+    <string name="device_not_secure_warning">သင်၏စက်ကိုလက်ဗွေရာ၊ Pinနံပတ်(သို့) မျက်နှာပြင်ဖတ်သည့်နည်းလမ်းများဖြင့်သော့ခတ်ခြင်းမပြုလုပ်ထားပါ။ ယခုစက်သည်တချို့သောကာကွယ်မှုများပြုလုပ်ထားသည့်တိုင်အောင် လုံခြုံသော Private Key ကိုပြုလုပ်၍မရပါ။</string>
+    <string name="action_remind_later">နောက်မှသတိပေးပါ</string>
+    <string name="title_change_wallet">ဝေါလက်ပြောင်းမည်</string>
+    <string name="legacy_wallets">Legacy ဝေါလက်များ</string>
+    <string name="postponed_backup_warning">သိမ်းဆည်းခြင်းကိုခေတ္တရပ်နားထားပါသည်</string>
+    <string name="key_error">Key မှားယွင်းနေပါသည်</string>
+    <string name="password_6_characters_or_more">လျှို့ဝှက်စကားလုံးသည် စကားလုံး၆လုံးနှင့်အထက်ဖြစ်ရမည်။</string>
+    <string name="create_a_new_wallet">Walletအသစ်တခုဖန်တီးမည်</string>
+    <string name="watch">စောင့်ကြည့်သည်</string>
+    <string name="already_have_a_wallet">ကျန်ုပ်တွင်ဝေါလက်ရှိပြီးသားဖြစ်သည်:</string>
+    <string name="watch_wallet">ကြည့်ရှုရန်သက်သက် Walletများ</string>
+    <string name="suggestion_address">Ethereum လိပ်စာကိုထည့်ပါ</string>
+    <string name="ethereum_address_hint">Ethereum လိပ်စာ: 0x ဖြင့်စ၍ f 0–9 a-f A-F စသောစကားလုံး၄၀</string>
+    <string name="action_watch_account">ဝေါလက်ကိုကြည့်မည်</string>
+    <string name="receive_payment">ပေးချေမှုကိုလက်ခံရရှိသည်</string>
+    <string name="title_back_up_your_wallet">သင်၏ Walletကိုသိမ်းဆည်းပါ</string>
+    <string name="nudge_user_to_backup_wallet">သင်၏Walletကိုသိမ်းဆည်းထားခြင်းမပြုလုပ်လျှင် သင်၏ငွေကြေးများဆုံးရှုံးနိုင်သည့်အန္တရာယ်ရှိပါသည်။</string>
+    <string name="action_close">ပိတ်မည်</string>
+    <string name="back_up_this_wallet">ယခုWalletကိုသိမ်းဆည်းပါ</string>
+    <string name="not_locked">သော့မခတ်ရသေးပါ</string>
+    <string name="back_up_now">ယခုသိမ်းဆည်းပါ။</string>
+    <string name="key_secure">သင်၏သော့ကိုမရှဲပါနှင့်</string>
+    <string name="lock_key_upgrade">လုံခြုံရေးတိုးမြှင့်ရန်သင်၏See Phrase ကိုသော့ခတ်ထားပါ။</string>
+    <string name="upgrade_key_security_detail">AlphaWallet သည်အကောင်းမွန်ဆုံးလုံခြုံမှုကိုရရှိနိုင်ရန်အတွက် အဆင့်မြှင့်တင်မှုများပြုလုပ်နေပါသည်။ မျက်နှာပြင်ဖတ်သည့်နည်းဖြင့် သင်၏Seed Phrase ကိုသော့ခတ်ထားပါ။</string>
+    <string name="action_upgrade_key">သော့လုံခြုံရေးကိုအဆင့်မြှင်တင်မည်</string>
+    <string name="backup_wallet_detail">သင်၏Walletကိုသိမ်းဆည်းထားရန်အလေးအနက်အကြံပြုပါသည်။</string>
+    <string name="skip_upgrade">အဆင့်မြှင့်တင်မှုကိုချန်လှပ်မည်</string>
+    <string name="lock_keystore_upgrade">လုံခြုံရေးတိုးမြှင့်ရန်သင်၏Keystore ကိုသော့ခတ်ထားပါ။</string>
+    <string name="invalid_keystore">ထည့်သွင်းသော Keystore JSONမရှိပါ</string>
+    <string name="invalid_private_key">ထည့်သွင်းသောPrivate Keyမရှိပါ</string>
+    <string name="reimport_wallet_detail">ဝေါလက် %1$s မှာဖန်တီးထားပြီးဖြစ်သည်။ ဝေါလက်ကို ပြန်လည်ထည့်သွင်းလိုပါသလား။</string>
+    <string name="reimport_wallet_title">ဝေါလက် ပြန်လည်ထည့်သွင်းပါမည်လား။</string>
+    <string name="provide_authentication">သော့ဖန်တီးရန်ခွင့်ပြုချက်ပေးမည်</string>
+    <string name="import_error">ထည့်သွင်းမှုမှားယွင်းနေပါသည်။ ပြန်လည်ထည့်သွင်းကြည့်ပါ။</string>
+    <string name="watch_exists">Wallet %1$s already full wallet - no need to watch</string>
+    <string name="welcome_to_alphawallet">AlphaWalletမှကြိုဆိုပါသည်။</string>
+    <string name="lock_seed_phrase">Seed Phraseကိုသော့ခတ်မည်</string>
+    <string name="no_key">Key သော့ရှာမတွေ့ပါ</string>
+    <string name="pending_transaction">လုပ်ငန်းစဥ်ကိုဆိုင်းငံ့ထားပါသည်။ </string>
+    <string name="title_enable_debug">Local Scripts Not Enabled</string>
+    <string name="need_to_enable_debug">To use local TokenScripts you need to enable TokenScript override. Go to Settings, then click \'Enable TokenScript Override\'.</string>
+    <string name="too_many_fails">လက်ဗွေဖတ်မှုအကြိမ်ကြိမ်မှားယွင်းခဲ့ပါသည်။ Pin နံပတ်သုံး၍ဖွင့်ရန်(သို့) စက္ကန့်၃၀ ခန့်စောင့်ပါ။ </string>
+    <string name="no_fingerprint_enrolled">လက်ဗွေရာများမထည့်သွင်းရသေးပါ။ PINနံပတ်ကိုအသုံးပြုမည်။</string>
+    <string name="cannot_process_fingerprint">လက်ဗွေရာဖတ်၍မရပါ။ PINနံပတ်ကိုအသုံးပြုပါ။</string>
+    <string name="action_receive">လက်ခံရရှိသည်။</string>
+    <string name="tokenscript_error">TokenScript Element Error</string>
+    <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
+    <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
+    <string name="complete_tokenscript_value">Invalid input value: %1$s</string>
+    <string name="value">VALUE</string>
+    <string name="linkedin">LinkedIn</string>
+    <string name="please_enable_security">သော့ကိုဖန်တီး၍မရပါ။ သင်၏ဖုန်းတွင်လုံခြုုံရေးခွင့်ပြုချက်ပြုလုပ်ပေးပါ။</string>
+    <string name="what_is_seed_phrase">Recovery Phrase(သို့)Seed Phrase သိမ်းဆည်းခြင်းဆိုသည်မှာ ခရစ်ပ်တိုဝေါလက်တစ်ခုကိုပြန်လည်ရယူရန်အတွက် လိုအပ်သောစကားလုံးများကိုသိမ်းဆည်းသော လုပ်ငန်းစဥ်ဖြစ်ပါသည်။ အသုံးပြုသူများသည်ပုံမှန်အားဖြင့်ဝေါလက်အသုံးပြုရန် seed phrase ကိုထည့်သွင်းရမည်ဖြစ်ပြီး ထို Seed Phrase ကို စာရွက်ပေါ်တွင် မှတ်သားထားရန်ညွှန်ကြားထားလေ့ရှိသည်။</string>
+    <string name="transaction_too_large">လုပ်ငန်းစဥ်ကြီးမားလွန်းနေသည်။</string>
+    <string name="unable_to_handle_tx">လုပ်ငန်းစဥ်ကုန်ကျစားရိတ်များပြားလွန်းနေသည်။</string>
+    <string name="show_token_contract">တိုကင်စာချုပ်ကိုဖော်ပြပါ</string>
+    <string name="signature_details">လက်မှတ်အသေးစိတ်</string>
+    <string name="copy_contract_address">စာချုပ်လက်မှတ်ကိုကူးယူမည်</string>
+    <string name="self">Self</string>
+    <string name="ERC721T">ERC721T</string>
+    <string name="fail_sign">ထုတ်ယူရန်မက်ဆေ့ကိုလက်မှတ်ထိုးခြင်းမအောင်မြင်ပါ။</string>
+    <string name="hint_contract_type">တိုကင်အမျိုးအစား</string>
+    <string name="reddit">Reddit</string>
+    <string name="tokenscript_compatibility">CHANGE: TokenScript Compatibiity</string>
+    <string name="debug_script">TokenScript debug</string>
+    <string name="unsigned_script">မယုံကြည်ရပါ</string>
+    <string name="show_qr_code_to_redemption_booth">Redemption Boothတွင်QRကုတ်ကိုပြပါ:</string>
+    <string name="manage_tokens">တိုကင်များကိုစီမံခန့်ခွဲမည်</string>
+    <string name="apply_filters">စစ်ထုတ်ခြင်းပြုလုပ်မည်</string>
+    <string name="zero_balance_tokens_off">အလွတ်ဖြစ်နေသောတိုကင်များကိုမပြပါနှင့်</string>
+    <string name="zero_balance_tokens_are_switched_off">ယခုတိုကင်တွင်တန်ဖိုးမရှိပါ။ ထိုကြောင့်ပြသမည်မဟုတ်ပါ။ ရှေ့ဆက်သွားပါမည်လား။</string>
+    <string name="dialog_switch_zero_balance_tokens_on">ဖွင့်ပါ</string>
+    <string name="cannot_read_encrypt_file">Walletသည်ဝှက်စာဖြင့်ပြုလုပ်ထားသောသော့များကိုမဖတ်နိုင်ပါ။ ပြန်လည်ထည့်သွင်းရန်လိုအပ်ပါသည်။</string>
+    <string name="authentication_error">သော့ဖွင့်ရန်ခွင့်ပြုချက်မပေးထားပါ(သို့)ခွင့်ပြုချိန်ကျော်လွန်သွားပြီဖြစ်သည်။ ထပ်မံ၍ကြိုးစားကြည့်ပါ။ </string>
+    <string name="device_security_changed">Since this key was created the mobile device security has changed and the OS has invalidated the key. Please re-import your key.</string>
+    <string name="fingerprint_authentication_failed">လက်ဗွေရာဖြင့်အထောက်အထားပြခြင်းမအောင်မြင်ပါ။</string>
+    <string name="action_snackbar_undo">အနောက်ပြန်သွားမည်</string>
+    <string name="token_hidden">ပုန်းကွယ်ပြီးပါပြီ</string>
+    <string name="confirmations">အတည်ပြုချက်များ</string>
+    <string name="change_chain_message">တခြား Blockchain ကိုပြောင်းရန် QRကုတ်မှတောင်းဆိုနေပါသည်။ လုပ်ဆောင်ပါမည်လား။</string>
+    <string name="change_chain_request">တခြား Blockchain ကို ပြောင်းရန်တောင်းဆိုသည်</string>
+    <string name="error_zero_balance">ကုန်ကျစားရိတ်မရှိသောလုပ်ငန်းစဥ်</string>
+    <string name="attestations">သက်သေများ</string>
+    <string name="favourites">စိတ်ကြိုက်အရာများ</string>
+    <string name="support">အကူအညီ</string>
+    <string name="system">စနစ်</string>
+
+    <!-- Settings -->
+    <string name="title_show_wallet_address">ကျွန်ုပ်၏ဝေါလက်လိပ်စာကိုဖော်ပြပါ</string>
+    <string name="title_change_add_wallet">ဝေါလက် ထည့်မည်/ပြောင်းမည်</string>
+    <string name="title_back_up_wallet">ယခု ဝေါလက် ကိုအရံသိမ်းဆည်းမည်</string>
+    <string name="title_notifications">အသိပေးကြေငြာချက်</string>
+    <string name="title_biometrics">လျှို့ဝှက်ကုဒ်/ Touch ID</string>
+    <string name="title_advanced">အသေးစိတ်အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="title_support">အကူအညီ</string>
+    <string name="title_blog">ဘ‌လော့ဂ်</string>
+    <string name="title_faq">အမေးများသောမေးခွန်းများ</string>
+    <string name="title_console">ထိန်းချုပ်ခန်း</string>
+    <string name="title_clear_browser_cache">Browser Cacheဖိုင်များကိုရှင်းလင်းမည်</string>
+    <string name="title_reload_token_data">တိုကင်အချက်အလက်များကိုပြန်လည်ဖော်ပြပါ</string>
+    <string name="title_tokenscript">TokenScript</string>
+    <string name="title_change_language">ဘာသာစကားပြောင်းမည်</string>
+    <string name="add_hide_tokens">တိုကင်များကိုပုန်းကွယ်မည်/ထည့်မည်</string>
+    <string name="instagram">Instagram</string>
+    <string name="settings_locale_currency">ငွေကြေးအမျိုးအစားပြောင်းမည်</string>
+    <string name="dialog_title_select_currency">တရားဝင်ငွေကြေးအမျိုးအစားကိုရွေးချယ်ပါ</string>
+    <string name="tokenscript_file_error">TokenScript ဖိုင်အမှားအယွင်းဖြစ်နေပါသည်</string>
+    <string name="toast_browser_cache_cleared">Browser cache ဖိုင်များကိုရှင်းလင်းမည်</string>
+    <string name="toast_token_data_cleared">တိုကင်အချက်အလက်များကိုရှင်းလင်းပြီးပါပြီ</string>
+    <string name="connected_wallets" translatable="false">ချိတ်ဆက်ထားသောဝေါလက်များ</string> <!--- What's this for? -->
+    <string name="token_data_being_cleared">တိုကင်အချက်လက်များကိုရှင်းလင်းနေပါသည်။ ခေတ္တစောင့်ဆိုင်းပါ။</string>
+    <string name="your_wallets">သင်၏ ဝေါလက်များ</string>
+    <string name="action_copy">ကူးယူမည်</string>
+    <string name="title_version_support_warning">အရေးကြီးသောအသစ်ပြုပြင်မွမ်းမံမှုများ</string>
+    <string name="message_version_support_warning">Alphawalletဗားရှင်း 3.0မှစ၍ Wallet သည် Android ဗားရှင်း 6.0ထက်နိမ့်သောစက်များတွင်အသုံးမပြုနိုင်တော့ပါ။</string>
+    <string name="hide_notification">အသိပေးကြေငြာချက်များကိုပုန်းကွယ်မည်</string>
+    <string name="card_view_not_found_error">%1$s ကိုရှာမတွေ့ပါ</string>
+    <string name="tokenscript_management">TokenScriptကို စီမံခန့်ခွဲခြင်း</string>
+    <string name="subtitle_network">Network</string>
+
+    <!-- Gas Slider -->
+    <string name="speed_gas">Speed (Gas)</string>
+    <string name="slow">အနှေး</string>
+    <string name="fast">အမြန်</string>
+    <string name="label_estimated_transaction_time">ခန့်မှန်းလုပ်ငန်းစဥ်ပြီးမြောက်ရန်ကြာချိန်</string>
+    <string name="minutes_0">၀ မိနစ်</string>
+    <string name="created_aw_directory">Alphawalletလမ်းညွှန်စာအုပ်ကိုဖန်တီးပြီးပါပြီ</string>
+    <string name="created_aw_directory_detail">AlphaWallet လမ်းညွှန်စာအုပ်ကိုဖန်တီးပြီးပါပြီ။ သင်၏scritps များကိုအသုံးပြုနိုင်ရန်အတွက် scripts များကို လမ်းညွှန်စာအုပ်ထဲသို့ထည့်ပါ။ သင်၏Tokenအတွက်လုံခြုံ၍အသုံးဝင်သောကြားခံစနစ်များလွယ်ကူစွာဖန်တီးရန် အသေးစိတ်ကို tokenscripts.org တွင်ကြည့်ရှုနိုင်ပါသည်။</string>
+    <string name="title_no_need_to_watch">စောင့်ကြည့်နေပြီးဖြစ်သည်</string>
+    <string name="error_while_signing_transaction">လုပ်ငန်းစဥ်လက်မှတ်ထိုးရာတွင် အမှားအယွင်းဖြစ်ပွားခဲ့ပါသည်။ ကျေးဇူးပြု၍ ယခု ဝေါလက်အတွက် Key များကို ပြန်လည်ထည့်သွင်းပါ။</string>
+    <string name="error_not_whitelisted">စာမျက်နှာကို ခွင့်ပြုစာရင်းတွင်မထည့်ရသေးပါ။</string>
+    <string name="explain_not_whitelisted">TokenScript သည် ခွင့်ပြုစာရင်းတွင်မပါဝင်သောဝက်ဘ်စာမျက်နှာနှင့်ချိတ်ဆက်ရန်ပြုလုပ်နေပါသည်။ သင်သည်ဝက်ဘ်ဆိုဒ်ပိုင်ရှင်ဖြစ်လျှင်ခွင့်ပြုစာရင်းတင်ရန်အတွက် ကျေးဇူးပြု၍PRကို Alphawalletကိုတင်ပေးပါ။</string>
+    <string name="token_spec">%1$s (%2$s)</string>
+    <string name="check_function_availability">လုပ်ဆောင်နိုင်သောလုပ်ငန်းများ</string>
+    <string name="invalid_parameters">Invalid parameter while calling TokenScript Transaction. Please check inputs.</string>
+    <string name="file_override">TokenScript overridden by %1$s%2$s\n\n</string>
+    <string name="origin_token_title">မူလတိုကင်များ:\n\n</string>
+    <string name="tokenscript_contract_line">%1$s -> %2$s\n\n</string>
+    <string name="is_debug_script"> (Debug)</string>
+    <string name="confirm_delete_file">ဖိုင်ဖျက်ရန်အတည်ပြုသည်</string>
+    <string name="confirm_delete_file_message">%1$sဖိုင်ကိုဖျက်မည်</string>
+    <string name="delete">ဖျက်မည်</string>
+    <string name="refreshing_tokenscripts"> TokenScripts ကိုပြန်လည်ဖော်ပြမည်</string>
+    <string name="speedup_transaction">အရောင်းအဝယ်မြန်မြန်ပြုလုပ်မည်</string>
+    <string name="cancel_transaction">ပယ်ဖျက်သည်</string>
+
+
+
+    <string name="day_single">၁ရက်</string>
+    <string name="day_plural">%s ရက်</string>
+    <string name="hour_single">၁နာရီ</string>
+    <string name="hour_plural">%s နာရီ</string>
+    <string name="minute_single">တမိနစ်</string>
+    <string name="minute_plural">%s မိနစ်</string>
+    <string name="second_single">၁စက္ကန့်</string>
+    <string name="second_plural">%s စက္ကန့်</string>
+    <string name="never">အမည်မသိ</string>
+    <string name="transaction_pending_for">%s အတွက်လုပ်ငန်းစဥ်ဆိုင်းငံ့နေပါသည် </string>
+    <string name="speedup_tx_description">ပို၍မြင့်မားသောလုပ်ငန်းစဥ်ဆောင်ရွက်ခ ဖြင့် လုပ်ငန်းစဥ်အစားထိုးခြင်းကို ပြုလုပ်ပါ။</string>
+    <string name="cancel_tx_description">လုပ်ငန်းစဥ်ကို စောင့်ဆိုင်းလုပ်ငန်းစဥ်တန်ဖိုးသုညပမာဏဖြင့်အစားထိုး၍ပယ်ဖျက်ပါ။</string>
+    <string name="file_error">TokenScript error : %1$s\n\n</string>
+    <string name="message_scan_camera">သင်၏ကင်မရာဖြင့် QRကုဒ်ကိုဖတ်ပါ</string>
+    <string name="light">အလင်းရောင်</string>
+    <string name="my_qr_code">ကျွန်ုပ်၏QRကုဒ်</string>
+    <string name="browse">ရှာဖွေသည်</string>
+    <string name="label_gas_estimate">ခန့်မှန်းလုပ်ငန်းစဥ်ကုန်ကျစားရိတ် </string>
+    <string name="label_estimated_network_fee">ခန့်မှန်း ကွန်ရက်ကုန်ကျစားရိတ်</string>
+    <string name="transaction_already_written">လုပ်ငန်းစဥ်ကို Blockchain ပေါ်တွင်ထည့်သွင်းပြီးပါပြီ။ ထပ်မံပို့ခြင်းနှင့်ပယ်ဖျက်ခြင်းပြုလုပ်၍မရတော့ပါ။</string>
+    <string name="transaction_already_written_title">လုပ်ငန်းစဥ်ကိုထည့်သွင်းပြီးပါပြီ</string>
+    <string name="transaction_fail_warning">လုပ်ငန်းစဥ်ပျက်ပြယ်နိုင်ကြောင်းသတိပေးချက်</string>
+    <string name="node_predicts_tx_will_fail">လုပ်ငန်းစဥ်ပျက်ပြယ်နိုင်သည်ဟုNode မှသတိပေးနေပါသည်: %1$s</string>
+    <string name="error_browse_selection">ရွေးချယ်ထားသောပုံများတွင်မည်သည့်သတင်းအချက်အလက်မျှမပါဝင်ပါ</string>
+    <string name="display_tokens">တိုကင်များကိုဖော်ပြပါ</string>
+    <string name="hidden_tokens">ပုန်းကွယ်ထားသောတိုကင်များ</string>
+    <string name="ignore">ချန်လှပ်သည်</string>
+    <string name="search_for_tokens">Tokens များကိုရှာရန်....</string>
+    <string name="title_wallet_connect">WalletConnect</string>
+    <string name="action_end_session">လုပ်ငန်းစဥ်ရပ်နားမည်</string>
+    <string name="dialog_send_eth_transaction">ETH လုပ်ငန်းစဥ်ကိုပေးပို့သည်</string>
+    <string name="message_reject_request">အသုံးပြုသူမှငြင်းပယ်သည်</string>
+    <string name="dialog_title_disconnect_session">လုပ်ငန်းစဥ်အဆက်ဖြတ်သည်</string>
+    <string name="message_authentication_failed">ခွင့်ပြုချက်မအောင်မြင်ပါ</string>
+    <string name="tx_rejected">လုပ်ငန်းစဥ်ငြင်းပယ်သည် (လုပ်ငန်းဆောင်ရွက်ခ များပိုမိုအသုံးပြု၍ထပ်မံကြိုးစားကြည့်ပါ)</string>
+    <string name="from">မှ: %1$s</string>
+    <string name="from_op">မှ</string>
+    <string name="valueSymbol">%1$s %2$s</string>
+    <string name="sent_to">to: %1$s</string>
+    <string name="operation_definition" translatable="false">%1$s: %2$s</string>
+    <string name="approval_granted_to">တိုကင်များကိုပြောင်းရွှေ့ရန်ခွင့်ပြုသည်: %1$s</string>
+    <string name="approval_obtained_from">%1$sကိုယ်စားသုံးစွဲရန်</string>
+    <string name="unknown_event">အမည်မသိဖြစ်ရပ်</string>
+    <string name="activity_sent">ပို့ခဲ့သည်</string>
+    <string name="activity_received">လက်ခံရရှိသည်</string>
+    <string name="activity_approved">ခွင့်ပြုသည်</string>
+    <string name="activity_approval_granted">ခွင့်ပြုချက်ပေးခဲ့ပါသည်</string>
+    <string name="tokenscript_call">TokenScript call:</string>
+    <string name="testnet" translatable="false">စမ်းသပ်ကွန်ရက်</string>
+
+
+
+    <string name="today">ယနေ့</string>
+    <string name="go_to_token">တိုကင်ဆီသို့သွားပါ</string>
+    <string name="invalid_walletconnect_session">WalletCoonnect လုပ်ငန်းစဥ်မှားယွင်းနေပါသည်။</string>
+    <string name="restart_walletconnect_session">WalletConnect နှင့်ချိတ်ဆက်ထားသောလုပ်ငန်းစဥ်ကို မှန်ကန်စွာမပိတ်ရသေးပါ။ ကျေးဇူးပြု၍ အင်တာနက်စာမျက်နှာကိုပြန်သွား၍ ချိတ်ဆက်ထားမှုကိုဖြုတ်ပါ။ ထို့နောက် ချိတ်ထားမှုလုပ်ငန်းစဥ်အသစ်ကိုပြန်စပါ။</string>
+    <string name="invalid_walletconnect_data">WalletConnectမှပြထားသောQRကုတ်သည်အသုံးပြု၍မရပါ</string>
+    <string name="label_nonce">Nonce</string>
+    <string name="payload">ဝန်ချိန်</string>
+    <string name="signed_transactions">လုပ်ငန်းစဥ်ကိုလက်မှတ်ထိုးပြီးပါပြီ</string>
+    <string name="delete_session">%1$s</string>
+    <string name="title_delete_session">ယခုလုပ်ငန်းစဥ်မှတ်တမ်းကိုဖျက်ပစ်ပါမည်လား။</string>
+    <string name="session_terminated">လုပ်ငန်းစဥ်ကိုပိတ်ချပြီးပါပြီ။ Dappကိုပြန်သွား၍ WalletConnectလုပ်ငန်းစဥ်ကိုအသစ်ပြန်စပါ။</string>
+    <string name="message_transaction_not_sent">လုပ်ငန်းစဥ်မပို့ခဲ့ပါ</string>
+    <string name="popular_tokens">လူကြိုက်များသောတိုကင်များ</string>
+    <string name="unable_to_get_biometrics">မျက်နှာမြင်စကင်ဖတ်၍သော့ဖွင့်ခြင်းပြုလုပ်၍မရသေးပါ</string>
+    <string name="all_funds">ရံပုံငွေအားလုံး</string>
+    <string name="recipient_address">လက်ခံမည့်သူ၏လိပ်စာ</string>
+
+    <string name="address_separator" translatable="false">%1$s | %2$s</string>
+    <string name="bracketed" translatable="false">(%1$s)</string>
+    <string name="ens_resolved" translatable="false">ENS: %1$s</string>
+    <string name="fiat_format" translatable="false">%1$s %2$s ≈ %3$s %4$s</string>
+    <string name="gas_amount" translatable="false">&lt; %1$s %2$s</string>
+    <string name="gas_fiat_suffix" translatable="false">(%1$s %2$s)</string>
+    <string name="gas_time_suffix" translatable="false"> ≈ %1$s</string>
+    <string name="confirm_transaction">လုပ်ငန်းစဥ်ကိုအတည်ပြုသည်၊</string>
+    <string name="balance">လက်ကျန်ငွေ</string>
+    <string name="speed_average">ပျမ်းမျှ</string>
+    <string name="speed_rapid">အမြန်</string>
+    <string name="speed_fast">လျင်မြန်</string>
+    <string name="speed_slow">နှေးနှေး</string>
+    <string name="speed_custom">ကိုယ်တိုင်သတ်မှတ်</string>
+    <string name="speed_too_low">နှေးလွန်း</string>
+    <string name="speed_high_gas">များပြားသောလုပ်ငန်းဆောင်ရွက်ခ</string>
+    <string name="speed_dapp">Dapp အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="new_balance">(New: %1$s %2$s)</string>
+    <string name="set_speed_title">အမြန်နှုန်းသတ်မှတ်မည်</string>
+    <string name="gas_price_widget">Gas Price: %1$s</string>
+    <string name="gas_message">လုပ်ငန်းဆောင်ရွက်ခများသည် AlphaWallet နှင့်မသက်ဆိုင်ပဲ Etheruem Blockchain ၏ကွန်ရက်ကြပ်မှုအပေါ်မူတည်ပါသည်။ AlphaWallet သည် လုပ်ငန်းဆောင်ရွက်ခကို ၁၅စက္ကန့်တကြိမ် gasnow.org မှကိုးကား၍ အသုံးပြုပါသည်။</string>
+    <string name="set_your_speed">ကိုယ်တိုင်အမြန်နှုန်းသတ်မှတ်မည်</string>
+    <string name="nonce_optional">Nonce (optional)</string>
+    <string name="calc_gas_limit">ခွင့်ပြုလုပ်ငန်းဆောင်ရွက်ခကိုတွက်ချက်ခြင်း</string>
+    <string name="wallet_address">ဝေါလက်လိပ်စာ</string>
+    <string name="transaction_in_progress">လုပ်ငန်းစဥ်ကိုဆောင်ရွက်နေပါပြီ</string>
+    <string name="transaction_progress_detail">လုပ်ငန်းစဥ်ကို Ethereum Blockchain ပေါ်သို့တင်ပြီးပြီပါပြီ။ အတည်ပြုသူများမှအတည်ပြုနေသည့်အတွက် မိနစ်အနည်းအငယ်ခန့်ကြာမြင့်နိုင်ပါသည်။</string>
+    <string name="action_show_tx_details">လုပ်ငန်းစဥ်အသေးစိတ်ကိုဖော်ပြမည်</string>
+    <string name="default_to">%1$s %2$s တို့သည် %3$sကိုပို့ပြီးပါပြီ</string>
+    <string name="default_from">%1$s နှင့် %2$s တို့သည် #3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
+    <string name="default_approved">%3$sမှ %1$s နှင့် %2$s သို့ရွှေ့ရန် သဘောတူလွှာကိုသင်လက်ခံရရှိပြီးပါပြီ</string>
+    <string name="default_approve">%2$sကို %1$sသို့ပို့ရန်သဘောတူသည်</string>
+    <string name="contract_call">စာချုပ်ချုပ်ဆိုခြင်း</string>
+    <string name="insufficient_gas">လုပ်ငန်းစဥ်ဆောင်ရွက်ခ မလုံလောက်ပါ</string>
+    <string name="not_enough_gas_message">ကျွန်ုပ်တို့ခန့်မှန်းချက်အရ လက်ကျန်ငွေမလုံလောက်ပါသဖြင့် လုပ်ငန်းစဥ်ပျက်ပြယ်သွားနိုင်ပါသည်။ ပို့ရန်ကြိုးစားဦးမည်လား။</string>
+    <string name="action_send_eth">Eth ပို့မည်</string>
+    <string name="action_token_swap">တိုကင်လဲလှယ်ခြင်း</string>
+    <string name="action_withdraw">ထုတ်ယူသည်</string>
+    <string name="deposit">ငွေသွင်းသည်</string>
+    <string name="body_low_gas">ယခုပေးရန်သဘောတူထားသောGas price သည်အနိမ့်ဆုံးပေးရမည့်ပမာဏထည့်နည်းပါးနေပါသည်။ ထို့ကြောင့်အရောင်းအဝယ်ဖြစ်မြောက်ရန် အချိန်ပိုကြာနိုင်သလို အပြောင်းအရွှေ့စာရင်းပျက်ပြယ်ခြင်းလဲဖြစ်သွားနိုင်ပါသည်။</string>
+    <string name="low_gas_setting">Gas fee ပမာဏ အလွန်နည်းပါးနေပါသည်။</string>
+    <string name="body_high_gas">သုံးစွဲမည့် Gas Fee ပမာဏမြင့်မားနေပါသည်။ မှားယွင်းစွာပြုလုပ်ထားခြင်းမရှိစေရန်သတိပြုပါ။ Alphawallet သည် gasnow.org မှနောက်ဆုံးသတ်မှတ်ထားသော gas fee ကိုသာတောင်းခံနေမည်ဖြစ်ပြီး gass price သည် 15စက္ကန့်တိုင်းupdate ပြုလုပ်နေပါသည်။</string>
+    <string name="high_gas_setting">ပြောင်းရွှေ့ခမြင့်မားနေသည်</string>
+    <string name="body_insufficient_warning">လုပ်ငန်းစဥ်တန်ဖိုးနှင့် လုပ်ငန်းစဥ်ဆောင်ရွက်ခအတွက် သင်၏လက်ကျန်ငွေမလုံလောက်ပါ။</string>
+    <string name="convert_to_xdai">xDaiသို့ပြောင်းလဲမည်</string>
+    <string name="crypto">ခရစ်ပ်တို</string>
+
+
+    <string name="action_buy_crypto">%1$sကိုဝယ်မည်</string>
+    <string name="fullscreen">မျက်နှာပြင်အပြည့်ဖြင့်ကြည့်ရှုမည်</string>
+    <string name="change_network_title">Dapp Browser ကွန်ရက်အသစ်ကိုရွေးချယ်ပေးပါ။</string>
+    <string name="change_network_message">%1$sမှ အင်တာနက် Browser နှင့်ချိတ်ဆက်မှုဖြုတ်သိမ်းခဲ့ပြီးဖြစ်သည်။ Browser နှင့်ချိတ်ဆက်ရန် Networkအသစ်တခုကိုရွေးချယ်ပေးပါ။</string>
+    <string name="disconnect_title">%1$s Networkနှင့်ချိတ်ဆက်မှုဖြုတ်သိမ်းမည်ဟုတ်ပါသလား။</string>
+    <string name="disconnect_body">သင်သည် %1$s ကွန်ရက်ကို အင်တာနက် Browserတွင်ချိတ်ဆက်ထားသော်လည်း ကွန်ရက်အသက်ဝင်နေမှုကို ယခုပိတ်လိုက်သည်။ %1$s Network နှင့်ချိတ်ဆက်ပါမည်လား။</string>
+    <string name="disconnect">ချိတ်ဆက်မှုဖြုတ်သိမ်းမည်</string>
+    <string name="keep_connect">ဆက်လက်ချိတ်ဆက်ထားမည်</string>
+    <string name="beware_of_scammers">လိမ်လည်သူများကိုသတိပြုပါ။ Seed Phraseကို လုံးဝမမျှဝေပါနှင့်။</string>
+    <string name="alphawallet_never_ask">AlphaWalletသည်သင်၏Seed Phraseအားမည်သည့်အခါမှ(အထူးသဖြင့် Telegramတွင်) မေးမြန်းခြင်းမပြုပါ။.</string>
+    <string name="your_seed_phrase">သင်၏Seed Phrase(တခြားသူအားမဝေမျှမိရန်သတိပြုပါ)</string>
+    <string name="hide_seed_text">Seed Phraseကိုဖုန်းကွယ်မည်။</string>
+
+
+
+    <string name="ens_not_match_wallet">ENS နာမည်သည် ဝေါလက်လိပ်စာနှင့်ကိုက်ညီမှုမရှိပါ</string>
+    <string name="action_allow_webkit_camera">ခွင့်ပြုသည်</string>
+    <string name="action_deny_webkit_camera">ငြင်းပယ်သည်</string>
+    <string name="message_permission_request_webkit_camera">%sမှသင်၏ကင်မရာကိုအသုံးပြုခွင့်တောင်းသည်။</string>
+    <string name="mainnet">မူလကွန်ရက်</string>
+    <string name="title_dialog_what_testnet">Testnetဆိုသည်မှာအဘယ်နည်း။</string>
+    <string name="action_enable_testnet">နားလည်သည်။ Testnetကိုအသုံးပြုမည်။</string>
+    <string name="message_dialog_testnet">Testnetတိုကင်သည်မိုနိုပိုလီဆော့သောပိုက်ဆံနှင့်တူသည်။ ၄င်းတို့သည်ငွေကြေးအားဖြင့်တန်ဖိုးမရှိသော်လည်းဆော့ဝဲရေးဆွဲသူများမှအမှန်တကယ်တန်ဖိုးရှိသောCoinများကိုသုံးစွဲရန်မလိုပဲရေးဆွဲထားသောပရိုဂရမ်ဒီဇိုင်းများမှန်ကန်စွာအလုပ်လုပ်နိုင်ခြင်းရှိမရှိကိုစမ်းသပ်နိုင်သည်။</string>
+
+    <string name="select_dappbrowser_network">ကွန်ရက်ဖြင့်ချိတ်ဆက်မည်</string>
+    <string name="choose_network_preference">နှစ်သက်ရာကွန်ရက်ကိုရွေးချယ်ပေးပါ</string>
+    <string name="please_select_at_least_one_network">ကျေးဇူးပြု၍ကွန်ရက်တစ်ခုကိုအနည်းဆုံးရွေးချယ်ပေးပါ။</string>
+
+    <string name="token_info_portfolio">ရင်းနှီးမြှုပ်နှံမှုအစုစု</string>
+    <string name="enter_target_price">သတ်မှတ်ဈေးနှုန်းကိုထည့်ပါ</string>
+    <string name="title_set_new_alert">သတိပေးရန်သတ်မှတ်ပါ</string>
+    <string name="action_save_alert">သတိပေးရန်ကိုသိမ်းဆည်းပါ</string>
+    <string name="alerts_will_appear_here">သတိ‌ပေးချက်များကို ထိုနေရာတွင်ဖော်ပြမည်Alerts will appear here</string>
+    <string name="token_text">တိုကင်</string>
+    <string name="buy_eth">ETHဝယ်မည်</string>
+    <string name="reload_token_data_desc">သိမ်းဆည်းထားသောတိုကင်အချက်အလက်များကို ပြန်လည်သတ်မှတ်မည် (ဥပမာ-မှတ်တမ်းယူထားသော လက်ကျန်ငွေများအပါအဝင်)။ AlphaWallet မှ သင်ဝေါလက်၏ လက်ရှိအခြေအနေကို ပြန်လည်ဖော်ပြပါလိမ့်မည်။ သင်၏သော့များနှင့်ပိုင်ဆိုင်မှုများကို ထိခိုက်မှုမရှိပါ။</string>
+
+    <string name="title_activity_add_custom_rpcnetwork">သီးသန့် RPC ကွန်ရက်ကိုထည့်သွင်းမည်</string>
+    <string name="hint_network_name">ကွန်ရက်နာမည်</string>
+    <string name="hint_network_rpc_url">RPC URL</string>
+    <string name="hint_network_chain_id">Chain ID</string>
+    <string name="hint_network_symbol">Symbol</string>
+    <string name="hint_network_block_explorer_url">လုပ်ငန်းစဥ်များကိုဖော်ပြထားမည့်နေရာ</string>
+    <string name="action_add_network">ကွန်ရက်ထည့်သွင်းမည်</string>
+    <string name="error_invalid_url">Invalid URL</string>
+
+    <string name="text_speedup_note">သတိပြုရန်- ယခုလုပ်ငန်းစဥ်ပိုမိုပြီးမြောက်ရန်အတွက်ဝန်ဆောင်ခကိုထပ်မံထည့်သွင်းလိုက်သော်လည်းပိုမိုမြန်ဆန်စွာဆောင်ရွက်ပြီးစီးမည်ဟုအာမခံလိုက်သည်မဟုတ်ပါ။သင်၏လုပ်ဆောင်မှုအောင်မြင်ခဲ့လျှင် Miner များကိုဝန်ဆောင်ခကို အထက်ဖော်ပြပါအတိုင်းပေးဆောင်ရမည်ဖြစ်သည်။</string>
+    <string name="text_cancel_note">သတိပြုရန်- ယခုလုပ်ငန်းစဥ်သည်သင်၏မူလလုပ်ငန်းစဥ်ကိုဖျက်သိမ်းလိုက်မည်ဟုအာမခံမည်မဟုတ်ပါ။ သင်၏လုပ်ဆောင်မှုအောင်မြင်ခဲ့လျှင် Miner များကိုဝန်ဆောင်ခကို အထက်ဖော်ပြပါအတိုင်းပေးဆောင်ရမည်ဖြစ်သည်။</string>
+    <string name="text_resend_gas_note"> ယခုလုပ်ငန်းစဥ်ပြီးမြောက်အောင်မြင်ရန်အတွက် မူလလုပ်ငန်းစဥ်ဝန်ဆောင်ခထက်၁၀%ပို၍ ပေးရန်ပေးဆောင်ရမည်ဖြစ်ပါသည်။ </string>
+    <string name="title_speed_resend">ပိုမိုမြန်ဆန်စေရန်အဆင့်မြှင့်တင်ခြင်း</string>
+    <string name="title_speed_cancel">အဆင့်မြင့်တင်ခြင်းကိုဖျက်သိမ်းခြင်း</string>
+    <string name="action_select">ရွေးချယ်သည်</string>
+    <string name="title_x_selected">%s ရွေးချယ်ခဲ့သည်</string>
+    <string name="request_change_chain">ဤဝက်ဘ်ဆိုဒ်သည် %1$s chain၊ chain ID: %2$s သို့ပြောင်းရန်တောင်းဆိုနေပါသည်။ စာမျက်နှာကို ပြန်လည်စတင်ပါလိမ့်မည်။</string>
+    <string name="warning_switch_to_main">သတိပေးချက် - မူလကွန်ရက်သို့ပြောင်းရွှေ့ခြင်း</string>
+    <string name="warning_switching_to_test">သတိပေးချက် - စမ်းသပ်ကွန်ရက်သို့ပြောင်းရွှေ့ခြင်း</string>
+    <string name="unsupported_walletconnect">WalletConnect: ကွန်ရက်အားမထောက်ပံ့ထားပါ။ ဆက်သွယ်မှုအားပိတ်သိမ်း၍ DappBrowser ကွန်ရက်အား ပြောင်းလဲပါ။</string>
+    <string name="asset_description_text">%1$s Asset | %2$s</string>
+    <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
+    <string name="erc1155_idname" translatable="false">%1$s #%2$s</string>
+    <string name="asset_count_val" translatable="false">x%1$s</string>
+    <string name="input_amount_max" translatable="false">(max. %1$s)</string>
+    <string name="this_is_testnet">စမ်းသပ်ကွန်ရက်သို့ရောက်ရှိနေပါသည်</string>
+    <string name="swap_with_quickswap">Quickswapဖြင့် ပြောင်းလဲမည်</string>
+    <string name="email">Email</string>
+    <string name="discord">Discord</string>
+    <string name="name_this_wallet">ယခုဝေါလက်ကိုအမည်ပေးပါ</string>
+    <string name="enter_wallet_name">ဝေါလက်အမည်ကိုထည့်သွင်းပါ</string>
+    <string name="action_save_name">အမည်ကိုသိမ်းဆည်းမည်</string>
+    <string name="select_amount">ပမာဏကိုရွေးချယ်ပါ</string>
+    <string name="safe_transfer" translatable="false">လုံခြုံစွာပြောင်းရွှေ့မည်</string>
+    <string name="safe_batch_transfer" translatable="false">Safe Batch Transfer</string>
+    <string name="hash_tokenid" translatable="false">#%1$s</string>
+    <string name="selected_tokens">ရွေးချယ်ထားသောတိုကင်များ</string>
+    <string name="send_tokens">တိုကင်များကိုပို့မည်</string>
+    <string name="rate_prompt">အသုံးပြုသည်ကိုကျေနပ်မှုရှိလျှင် ကျေးဇူးပြု၍ ကျွန်တော်တို့အားအဆင့်သတ်မှတ်ပေး၍ကူညီပါ။</string>
+    <string name="rate_later">နောက်မှ</string>
+    <string name="rate_rate">အဆင့်သတ်မှတ်သည်</string>
+    <string name="rate_no_thanks">မပြုလုပ်ပါ၊ ကျေးဇူးတင်ပါသည်။</string>
+    <string name="rate_title">အဆင့်သတ်မှတ်သည် %1$s</string>
+    <string name="installed_version">ထည့်သွင်းထားသော: %1$s</string>
+    <string name="available_version">ရရှိနိုင်သော: %1$s</string>
+    <string name="hint_network_explorer_api">Explorer API</string>
+    <string name="action_update_network">ကွန်ရက်ကို အဆင့်မြှင့်တင်မည်</string>
+    <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
+    <string name="add_chain_dialog_message">ယခုဝက်ဘ်ဆိုဒ်သည် the %1$s Chain၊ chain ID: %2$s သို့ပြောင်းဖွင့်ရန်တောင်းဆိုနေပါသည်။</string>
+    <string name="switch_chain_request">Chain တောင်းဆိုမှုကိုပြောင်းလဲမည်</string>
+    <string name="no_chart_data_available">ဇယားအချက်အလက်မရရှိနိုင်ပါ</string>
+    <string name="wallet_total_change">%1$s (%2$.2f%%) ယနေ့</string>
+    <string name="title_wallets_summary">ဝေါလက်များ</string>
+    <string name="summary">အနှစ်ချုပ်</string>
+    <string name="network_menu_item">ကွန်ရက်: %1$s</string>
+    <string name="action_set_as_homepage">Set as Home Page</string>
+    <string name="action_networks">Networks</string>
+    <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="action_send_to_this_address">ထိုလိပ်စာကိုပို့ပါ</string>
+    <string name="stay_updated">Stay Updated</string>
+    <string name="email_prompt_hint">ကျွန်ုပ်တို့မှအဓိကပြုပြင်ပြောင်းလဲမှုများပြုလုပ်ခဲ့လျှင်အီးမေးလ်ပို့ပါမည်။ ၄င်းအီးမေးလ်များကို(အများဆုံးတပတ်တခါ)လက်ခံရရှိလိုပါသလား။</string>
+    <string name="hint_email_address">အီးမေးလ်လိပ်စာ</string>
+    <string name="action_want_to_receive_email">အီးမေးလ်များလက်ခံရရှိလိုပါသည်။</string>
+    <string name="email_is_invalid">ကျေးဇူးပြု၍ မှန်ကန်သောအီးမေးလ်ကို ထည့်သွင်းပါ</string>
+    <string name="github">Github (File an issue)</string>
+    <string name="chains_to_scan">Chains to scan</string>
+    <string name="action_view">မြင်ကွင်း</string>
+    <string name="error_chainid_already_taken">Chain Id ကိုယူပြီးပါပြီ</string>
+    <string name="status">အခြေအနေ</string>
+    <string name="connected_to">သို့ ချိတ်ဆက်ထားသည်</string>
+    <string name="not_connected">မချိတ်ဆက်ထားပါ</string>
+    <string name="online">Online</string>
+    <string name="summary_change_24h">%1$s (%2$s) ယနေ့</string>
+    <string name="performance">ဆောင်ရွက်မှု</string>
+    <string name="token_name_hint">တိုကင်နာမည်</string>
+    <string name="version">ဗားရှင်း</string>
+</resources>

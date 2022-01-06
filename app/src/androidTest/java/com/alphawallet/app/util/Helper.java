@@ -1,6 +1,5 @@
 package com.alphawallet.app.util;
 
-import android.util.Log;
 import android.view.View;
 
 import org.hamcrest.Matcher;
@@ -16,7 +15,6 @@ import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -79,6 +77,24 @@ public class Helper {
 
     public static void click(Matcher<View> matcher) {
         onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed())));
-        onView(matcher).perform(ViewActions.click()); // Can not combine with above line
+        onView(matcher).perform(ViewActions.click(doNothing())); // if click executed as long press, do nothing and retry clicking
+    }
+
+    private static ViewAction doNothing() {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isDisplayed();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Do nothing.";
+            }
+
+            @Override
+            public void perform(UiController uiController, View view) {
+            }
+        };
     }
 }

@@ -73,7 +73,6 @@ public class ScammerWarningActivity extends BaseActivity {
         setShowSeedPhraseSplash();
     }
 
-
     @SuppressLint("SourceLockedOrientationActivity")
     private void lockOrientation() {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

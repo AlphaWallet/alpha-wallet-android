@@ -87,6 +87,11 @@ public class QRSelectionTest
             }
 
             @Override
+            public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId) {
+                return null;
+            }
+
+            @Override
             public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, long chainId)
             {
                 return null;

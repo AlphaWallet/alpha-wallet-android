@@ -25,12 +25,12 @@ licenses:
   - 'android-sdk-preview-license-.+'
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
-  
- env:
+
+env:
   matrix:
   - TRAVIS_JDK=adopt-openj9@1.11.0-4
-  
- jdk:
+
+  jdk:
   - oraclejdk11
 
 before_install:

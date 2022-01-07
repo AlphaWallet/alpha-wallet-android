@@ -146,9 +146,18 @@ public class TransferTest {
     private void importWalletFromSettingsPage(String seedPhrase) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
+        sleepSeconds(3);
         click(withId(R.id.action_add));
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         click(withId(R.id.import_action));
+    }
+
+    private void sleepSeconds(int seconds){
+        try {
+            Thread.sleep(seconds * 1000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

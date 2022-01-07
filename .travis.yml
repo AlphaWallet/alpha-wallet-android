@@ -30,7 +30,7 @@ env:
   matrix:
   - TRAVIS_JDK=adopt-openj9@1.11.0-4
 
-  jdk:
+jdk:
   - oraclejdk11
 
 before_install:
@@ -41,7 +41,9 @@ install:
 
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
-- java -version
+- javac -version
+- jdk_switcher use oraclejdk11
+- javac -version
 - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..

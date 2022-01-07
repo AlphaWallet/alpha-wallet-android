@@ -29,6 +29,7 @@ licenses:
 env:
   matrix:
   - TRAVIS_JDK=adopt-openj9@1.11.0-4
+  - JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee'
 
 jdk:
   - oraclejdk11
@@ -41,9 +42,7 @@ install:
 
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
-- javac -version
-- jdk_switcher use oraclejdk11
-- javac -version
+- java -version
 - cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..

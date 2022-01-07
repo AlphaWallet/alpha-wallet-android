@@ -119,6 +119,9 @@ public class BackupKeyActivity extends BaseActivity implements
 
         assert state != null;
         switch (state) {
+            case SHOW_SEED_PHRASE_SINGLE:
+                showSeedPhrase();
+                break;
             case ENTER_BACKUP_STATE_HD:
                 WriteDownSeedPhrase();
                 DisplaySeed();
@@ -144,6 +147,14 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
+    private void showSeedPhrase() {
+        setupTestSeed();
+        ((TextView)findViewById(R.id.text_title)).setText(R.string.your_seed_phrase);
+        DisplaySeed();
+        functionButtonBar.setPrimaryButtonText(R.string.hide_seed_text);
+        functionButtonBar.setPrimaryButtonClickListener(this);
+    }
+
     private void initBackupType() {
         BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
         if (type == null) type = BackupOperationType.UNDEFINED;
@@ -161,10 +172,6 @@ public class BackupKeyActivity extends BaseActivity implements
             case BACKUP_KEYSTORE_KEY:
                 state = BackupState.ENTER_JSON_BACKUP;
                 JSONBackup();
-                break;
-            case SHOW_SEED_PHRASE_SETTINGS:
-                state = BackupState.SHOW_SEED_PHRASE_SETTINGS;
-                setShowSeedPhraseSplash();
                 break;
             case SHOW_SEED_PHRASE:
                 state = BackupState.SHOW_SEED_PHRASE;
@@ -280,14 +287,6 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void setShowSeedPhraseSplash() {
-        setContentView(R.layout.activity_show_seed);
-        initViews();
-        //title.setText(R.string.backup_seed_phrase);
-        functionButtonBar.setPrimaryButtonText(R.string.show_seed_phrase);
-        functionButtonBar.setPrimaryButtonClickListener(this);
-    }
-
     private void setHDBackupSplash() {
         setContentView(R.layout.activity_backup);
         initViews();
@@ -348,8 +347,7 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
 
             case SHOW_SEED_PHRASE_SINGLE:
-                state = BackupState.SHOW_SEED_PHRASE_SETTINGS;
-                handleClick("", 0);
+                finish();
                 break;
 
             case SEED_PHRASE_INVALID:
@@ -417,7 +415,6 @@ public class BackupKeyActivity extends BaseActivity implements
                 keyFailure("");
                 break;
             case FINISH:
-            case SHOW_SEED_PHRASE_SETTINGS:
             case SHOW_SEED_PHRASE_SINGLE:
                 state = BackupState.FINISH;
                 finish();
@@ -867,7 +864,6 @@ public class BackupKeyActivity extends BaseActivity implements
                 functionButtonBar.setPrimaryButtonEnabled(txt.length() >= 6);
                 break;
             case SHOW_SEED_PHRASE:
-            case SHOW_SEED_PHRASE_SETTINGS:
                 break;
         }
     }
@@ -914,14 +910,6 @@ public class BackupKeyActivity extends BaseActivity implements
             case SEED_PHRASE_INVALID:
                 ResetInputBox();
                 VerifySeedPhrase();
-                break;
-            case SHOW_SEED_PHRASE_SETTINGS:
-                state = BackupState.SHOW_SEED_PHRASE_SINGLE;
-                setupTestSeed();
-                ((TextView)findViewById(R.id.text_title)).setText(R.string.your_seed_phrase);
-                DisplaySeed();
-                functionButtonBar.setPrimaryButtonText(R.string.hide_seed_text);
-                functionButtonBar.setPrimaryButtonClickListener(this);
                 break;
             case SHOW_SEED_PHRASE_SINGLE:
                 state = BackupState.FINISH;

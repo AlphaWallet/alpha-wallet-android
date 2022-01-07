@@ -75,7 +75,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             }
             else
             {
-                return Integer.compare(o1.weight, o2.weight);
+                return o1.compare(o2);
             }
         }
 
@@ -157,21 +157,21 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             if (token.tokenInfo.isEnabled)
             {
                 sortedItem = new TokenSortedItem(
-                        DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                        DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.getNameWeight()
                 );
             }
             else if(!isContractPopularToken(token.getAddress()))
             {
                 hiddenTokensCount++;
                 sortedItem = new TokenSortedItem(
-                        HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                        HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.getNameWeight()
                 );
             }
             else
             {
                 popularTokensCount++;
                 sortedItem = new TokenSortedItem(
-                        POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                        POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.getNameWeight()
                 );
             }
 
@@ -295,7 +295,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         TokenCardMeta tcm = (TokenCardMeta)items.get(position).value;
 
         TokenSortedItem updateItem = new TokenSortedItem(
-                DISPLAY_TOKEN, tcm, tcm.nameWeight
+                DISPLAY_TOKEN, tcm, tcm.getNameWeight()
         );
 
         items.beginBatchedUpdates();
@@ -439,21 +439,21 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
         if (token.tokenInfo.isEnabled)
         {
             sortedItem = new TokenSortedItem(
-                    DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                    DISPLAY_TOKEN, tokenCardMeta, tokenCardMeta.getNameWeight()
             );
         }
         else if (!isContractPopularToken(token.getAddress()))
         {
             hiddenTokensCount++;
             sortedItem = new TokenSortedItem(
-                    HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                    HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.getNameWeight()
             );
         }
         else
         {
             popularTokensCount++;
             sortedItem = new TokenSortedItem(
-                    POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
+                    POPULAR_TOKEN, tokenCardMeta, tokenCardMeta.getNameWeight()
             );
         }
 

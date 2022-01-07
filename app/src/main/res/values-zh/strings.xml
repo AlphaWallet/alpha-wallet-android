@@ -437,6 +437,7 @@
     <string name="searching_for_token">通证扫描</string>
     <string name="token_selection">通证选择</string>
     <string name="token_requirement">此功能需要 %1$s 个通证</string>
+    <string name="token_count">%1$s 个通证</string>
     <string name="contains_no_recipient">交易尚无接收人</string>
     <string name="contains_no_value">DApp 交易未包含任何值。</string>
     <string name="wallet_not_backed_up">您的钱包未备份！</string>
@@ -826,4 +827,8 @@
     <string name="summary_change_24h">%1$s (%2$s) 今天</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="assets">Assets</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">Governance</string>
+    <string name="collectibles_header">Collectibles</string>
 </resources>

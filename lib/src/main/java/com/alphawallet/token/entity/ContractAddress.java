@@ -15,6 +15,18 @@ public class ContractAddress
         this.address = address;
     }
 
+    public ContractAddress(String chainAddr)
+    {
+        String[] sp = chainAddr.split("-");
+        this.address = sp[0];
+        this.chainId = Long.parseLong(sp[1]);
+    }
+
+    public String getAddressKey()
+    {
+        return address.toLowerCase() + "-" + chainId;
+    }
+
     //TODO: Only allow FunctionDefinition to have one contract
     public ContractAddress(FunctionDefinition fd)
     {

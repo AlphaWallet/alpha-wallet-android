@@ -1,27 +1,41 @@
 package com.alphawallet.app.repository.entity;
 
-import com.alphawallet.app.entity.TokensMapping;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import android.text.TextUtils;
 
-import java.util.List;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.token.entity.ContractAddress;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 public class RealmTokenMapping extends RealmObject {
-    public String address;
-    public Long chainId;
-    public String group;
 
-    public RealmTokenMapping() {
-        super();
+    @PrimaryKey
+    public String address;  // ContractAddress String (addr-chainId) for derivative
+    public String base;     // Base contract, usually main net (eg DAI)
+    public int group;       // Ordinal for enum TokenGroup
+
+    public ContractAddress getBase()
+    {
+        if (!TextUtils.isEmpty(base))
+        {
+            return new ContractAddress(base);
+        }
+        else
+        {
+            return null;
+        }
     }
 
-    public RealmTokenMapping(String address, Long chainId, String group) {
-        super();
-        this.address = address;
-        this.chainId = chainId;
-        this.group = group;
+    public TokenGroup getGroup()
+    {
+        if (group >= 0 && group < TokenGroup.values().length)
+        {
+            return TokenGroup.values()[group];
+        }
+        else
+        {
+            return TokenGroup.ASSET;
+        }
     }
 }

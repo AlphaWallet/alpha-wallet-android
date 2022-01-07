@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.view.View;
+import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -15,16 +15,15 @@ import androidx.recyclerview.widget.SortedList;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.tokendata.TokenTicker;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.TokenFilter;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.tokens.TokenSortGroup;
-import com.alphawallet.app.interact.ATokensRepository;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.app.ui.widget.entity.ChainItem;
 import com.alphawallet.app.ui.widget.entity.HeaderItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
@@ -36,6 +35,7 @@ import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
+import com.alphawallet.app.ui.widget.holder.ChainNameHeaderHolder;
 import com.alphawallet.app.ui.widget.holder.HeaderHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
@@ -48,29 +48,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
-    public static final int FILTER_ALL = 0;
-    public static final int FILTER_CURRENCY = 1;
-    public static final int FILTER_ASSETS = 2;
-    public static final int FILTER_COLLECTIBLES = 3;
 
-    private int filterType;
+    private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
-    private final ATokensRepository aTokensRepository;
-    private final TokensMappingRepository tokensMappingRepository;
     private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
     private String walletAddress;
     private boolean debugView = false;
-    private String filter = "";
-
-    private final Handler delayHandler = new Handler(Looper.getMainLooper());
 
     private boolean gridFlag;
 
@@ -122,35 +110,16 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.assetService = aService;
         this.tokensService = tService;
         this.managementLauncher = launcher;
-        this.aTokensRepository = new ATokensRepository(aService.getTokenLocalSource());
-        aTokensRepository.getTokensList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::notifyDataSetChanged).isDisposed();
 
-        this.tokensMappingRepository = new TokensMappingRepository(aService.getTokenLocalSource());
-        this.tokensMappingRepository.getTokensMapping()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::notifyDataSetChanged).isDisposed();
+        new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
     protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService) {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
-        this.aTokensRepository = new ATokensRepository(aService.getTokenLocalSource());
-        aTokensRepository.getTokensList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::notifyDataSetChanged).isDisposed();
 
-        this.tokensMappingRepository = new TokensMappingRepository(aService.getTokenLocalSource());
-        this.tokensMappingRepository.getTokensMapping()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::notifyDataSetChanged).isDisposed();
-
+        new TokensMappingRepository(aService.getTokenLocalSource());
         this.managementLauncher = null;
     }
 
@@ -171,21 +140,23 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @NonNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        BinderViewHolder<?> holder = null;
-        switch (viewType) {
-            case TokenHolder.VIEW_TYPE: {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    {
+        BinderViewHolder<?> holder;
+        switch (viewType)
+        {
+            case TokenHolder.VIEW_TYPE:
                 TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService);
                 tokenHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenHolder;
                 break;
-            }
-            case TokenGridHolder.VIEW_TYPE: {
+
+            case TokenGridHolder.VIEW_TYPE:
                 TokenGridHolder tokenGridHolder = new TokenGridHolder(R.layout.item_token_grid, parent, assetService, tokensService);
                 tokenGridHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenGridHolder;
                 break;
-            }
+
             case ManageTokensHolder.VIEW_TYPE:
                 ManageTokensHolder manageTokensHolder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
                 manageTokensHolder.setOnTokenClickListener(tokensAdapterCallback);
@@ -203,14 +174,20 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             case WarningHolder.VIEW_TYPE:
                 holder = new WarningHolder(R.layout.item_warning, parent);
                 break;
+
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, false);
                 break;
+
+            case ChainNameHeaderHolder.VIEW_TYPE:
+                holder = new ChainNameHeaderHolder(R.layout.item_chainname_header, parent);
+                break;
+
+                // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
+            case TotalBalanceHolder.VIEW_TYPE:
             default:
-            // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
-            case TotalBalanceHolder.VIEW_TYPE: {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
-            }
+                break;
         }
         return holder;
     }
@@ -263,11 +240,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void addHeaderLayout(TokenCardMeta tcm)
     {
         items.add(new HeaderItem(tcm.group));
+        items.add(new ChainItem(tcm.getChain(), tcm.group));
     }
 
     private void addManageTokensLayout() {
-        if (walletAddress != null && !walletAddress.isEmpty() && tokensService.isMainNetActive()) {
-            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher), Integer.MAX_VALUE));
+        if (walletAddress != null && !walletAddress.isEmpty() && tokensService.isMainNetActive()
+            && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS)) { //only show buy button if filtering all or assets
+            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher)));
         }
     }
 
@@ -308,11 +287,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             int position = -1;
             if (gridFlag)
             {
-                position = items.add(new TokenSortedItem(TokenGridHolder.VIEW_TYPE, token, token.nameWeight));
+                position = items.add(new TokenSortedItem(TokenGridHolder.VIEW_TYPE, token, token.getNameWeight()));
             }
             else
             {
-                TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.nameWeight);
+                TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.getNameWeight());
+                //get fiat value
+                tsi.setFiatValue(tokensService.getTokenFiatValue(token.getChain(), token.getAddress()));
                 if (debugView) tsi.debug();
                 position = items.add(tsi);
                 addHeaderLayout(token);
@@ -335,7 +316,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 TokenSortedItem tsi = (TokenSortedItem) items.get(i);
                 if (tsi.value.equals(token))
                 {
-                    if (tsi.value.nameWeight != token.nameWeight)
+                    if (tsi.value.getNameWeight() != token.getNameWeight())
                     {
                         notifyItemChanged(i);
                         items.removeItemAt(i);
@@ -384,27 +365,27 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         switch (filterType)
         {
-            case FILTER_ASSETS:
-                if (token.isEthereum())
+            case ALL:
+                if (token.isNFT())
                 {
                     allowThroughFilter = false;
                 }
                 break;
-            case FILTER_CURRENCY:
-                if (!token.isEthereum())
-                {
-                    allowThroughFilter = false;
-                }
+            case ASSETS:
+                allowThroughFilter = allowThroughFilter && token.group == TokenGroup.ASSET;
                 break;
-            case FILTER_COLLECTIBLES:
+            case DEFI:
+                allowThroughFilter = allowThroughFilter && token.group == TokenGroup.DEFI;
+                break;
+            case GOVERNANCE:
+                allowThroughFilter = allowThroughFilter && token.group == TokenGroup.GOVERNANCE;
+                break;
+            case COLLECTIBLES:
                 allowThroughFilter = allowThroughFilter && token.isNFT();
                 break;
-            default:
+            case ATTESTATIONS:
+                //TODO
                 break;
-        }
-
-        if (!TextUtils.isEmpty(filter)) {
-            allowThroughFilter = token.getFilterText().toLowerCase().contains(filter.toLowerCase());
         }
 
         return allowThroughFilter;
@@ -413,7 +394,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     // This checks to see if the token is likely malformed
     private boolean checkTokenValue(TokenCardMeta token, boolean allowThroughFilter)
     {
-        return allowThroughFilter && token.nameWeight < Integer.MAX_VALUE;
+        return allowThroughFilter && token.getNameWeight() < Long.MAX_VALUE;
     }
 
     private void populateTokens(TokenCardMeta[] tokens, boolean clear)
@@ -476,10 +457,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         populateTokens(filterTokens.toArray(new TokenCardMeta[0]), true);
     }
 
-    public void setFilterType(int filterType)
+    public void setFilterType(TokenFilter filterType)
     {
         this.filterType = filterType;
-        gridFlag = filterType == FILTER_COLLECTIBLES;
+        gridFlag = filterType == TokenFilter.COLLECTIBLES;
         filterAdapterItems();
     }
 

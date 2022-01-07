@@ -1,59 +1,35 @@
 package com.alphawallet.app.entity;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.token.entity.ContractAddress;
 
 import java.util.List;
 
 public class TokensMapping {
 
-    public class Contract {
-
-        @SerializedName("address")
-        @Expose
-        private String address;
-        @SerializedName("chainId")
-        @Expose
-        private Long chainId;
-
-        public String getAddress() {
-            return address;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        public Long getChainId() {
-            return chainId;
-        }
-
-        public void setChainId(Long chainId) {
-            this.chainId = chainId;
-        }
-    }
-
-    @SerializedName("contracts")
-    @Expose
-    private List<Contract> contracts = null;
-    @SerializedName("group")
-    @Expose
+    private List<ContractAddress> contracts = null;
     private String group;
 
-    public List<Contract> getContracts() {
+    public List<ContractAddress> getContracts() {
         return contracts;
     }
 
-    public void setContracts(List<Contract> contracts) {
+    public void setContracts(List<ContractAddress> contracts) {
         this.contracts = contracts;
     }
 
-    public String getGroup() {
-        return group;
-    }
+    public TokenGroup getGroup() {
+        if (group == null) return TokenGroup.ASSET;
 
-    public void setGroup(String group) {
-        this.group = group;
+        switch (group)
+        {
+            default:
+            case "Assets":
+                return TokenGroup.ASSET;
+            case "Governance":
+                return TokenGroup.GOVERNANCE;
+            case "DeFi":
+                return TokenGroup.DEFI;
+        }
     }
-
 }

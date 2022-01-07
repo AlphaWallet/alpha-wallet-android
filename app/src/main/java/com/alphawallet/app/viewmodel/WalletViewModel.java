@@ -1,17 +1,24 @@
 package com.alphawallet.app.viewmodel;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
+import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Pair;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
@@ -19,16 +26,21 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.OnRampRepository;
+import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.AssetDisplayRouter;
-import com.alphawallet.app.router.TokenDetailRouter;
+import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.ui.TokenManagementActivity;
+import com.alphawallet.app.widget.WalletFragmentActionsView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -46,6 +58,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
+    private final MutableLiveData<Pair<Double, Double>> fiatValues = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final TokenDetailRouter tokenDetailRouter;
@@ -56,8 +69,11 @@ public class WalletViewModel extends BaseViewModel
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
+    private final ManageWalletsRouter manageWalletsRouter;
     private final RealmManager realmManager;
     private long lastBackupCheck = 0;
+    private BottomSheetDialog dialog;
+    private final OnRampRepositoryType onRampRepository;
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
@@ -68,8 +84,10 @@ public class WalletViewModel extends BaseViewModel
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
+            ManageWalletsRouter manageWalletsRouter,
             PreferenceRepositoryType preferenceRepository,
-            RealmManager realmManager)
+            RealmManager realmManager,
+            OnRampRepositoryType onRampRepository)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -79,8 +97,10 @@ public class WalletViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
+        this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
+        this.onRampRepository = onRampRepository;
     }
 
     public LiveData<TokenCardMeta[]> tokens() {
@@ -88,6 +108,7 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Wallet> defaultWallet() { return defaultWallet; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
+    public LiveData<Pair<Double, Double>> onFiatValues() { return fiatValues; }
 
     public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : ""; }
     public WalletType getWalletType() { return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE; }
@@ -137,6 +158,15 @@ public class WalletViewModel extends BaseViewModel
         tokensService.updateTickers();
     }
 
+    public void searchTokens(String search)
+    {
+        disposable =
+                fetchTokensInteract.searchTokenMetas(defaultWallet.getValue(), tokensService.getNetworkFilters(), search)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokenMetas, this::onError);
+    }
+
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
@@ -182,7 +212,36 @@ public class WalletViewModel extends BaseViewModel
 
     public void showMyAddress(Context context)
     {
-        myAddressRouter.open(context, defaultWallet.getValue());
+        // show bottomsheet dialog
+        WalletFragmentActionsView actionsView = new WalletFragmentActionsView(context);
+        actionsView.setOnCopyWalletAddressClickListener(v -> {
+            dialog.dismiss();
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, getWalletAddr());
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(clip);
+            }
+
+            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+        });
+        actionsView.setOnShowMyWalletAddressClickListener(v -> {
+            dialog.dismiss();
+            myAddressRouter.open(context, defaultWallet.getValue());
+        });
+        actionsView.setOnAddHideTokensClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(context, TokenManagementActivity.class);
+            intent.putExtra(EXTRA_ADDRESS, getWalletAddr());
+            context.startActivity(intent);
+        });
+
+        dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+        dialog.setContentView(actionsView);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) actionsView.getParent());
+        dialog.setOnShowListener(dialog -> behavior.setPeekHeight(actionsView.getHeight()));
+        dialog.show();
     }
 
     public void showQRCodeScanning(Activity activity) {
@@ -233,11 +292,11 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    public void checkBackup()
+    public void checkBackup(double fiatValue)
     {
         if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
         lastBackupCheck = System.currentTimeMillis();
-        double walletUSDValue = tokensService.getUSDValue();
+        double walletUSDValue = tokensService.convertToUSD(fiatValue);
 
         if (walletUSDValue > 0.0)
         {
@@ -282,6 +341,19 @@ public class WalletViewModel extends BaseViewModel
         return tokensService.isChainToken(chainId, tokenAddress);
     }
 
+    public void calculateFiatValues()
+    {
+        disposable = tokensService.getFiatValuePair()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(fiatValues::postValue);
+    }
+
+    public void showManageWallets(Context context, boolean clearStack)
+    {
+        manageWalletsRouter.open(context, clearStack);
+    }
+
     public boolean isMarshMallowWarningShown() {
         return preferenceRepository.isMarshMallowWarningShown();
     }
@@ -293,5 +365,11 @@ public class WalletViewModel extends BaseViewModel
     public void saveAvatar(Wallet wallet)
     {
         genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
+    }
+
+    public Intent getBuyIntent(String address) {
+        Intent intent = new Intent();
+        intent.putExtra(C.DAPP_URL_LOAD, onRampRepository.getUri(address, null));
+        return intent;
     }
 }

@@ -29,6 +29,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String ACTIVE_MAINNET = "active_mainnet";
     public static final String SHOWN_WARNING = "shown_warning";
+    public static final String PRICE_ALERTS = "price_alerts";
     private static final String SET_NETWORK_FILTERS = "set_filters";
     private static final String SHOULD_SHOW_ROOT_WARNING = "should_show_root_warning";
     private static final String UPDATE_WARNINGS = "update_warns";
@@ -38,6 +39,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String DEVICE_COUNTRY = "device_country";
     public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
     private static final String LAST_FRAGMENT_ID = "lastfrag_id";
+    private static final String LAST_VERSION_CODE = "last_version_code";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -197,6 +199,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
+    public void setPriceAlerts(String json)
+    {
+        pref.edit().putString(PRICE_ALERTS, json).apply();
+    }
+
+    @Override
+    public String getPriceAlerts()
+    {
+        return pref.getString(PRICE_ALERTS, "");
+    }
+
     public void setHasSetNetworkFilters()
     {
         pref.edit().putBoolean(SET_NETWORK_FILTERS, true).apply();
@@ -328,5 +341,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public int getLastFragmentPage()
     {
         return pref.getInt(LAST_FRAGMENT_ID, -1);
+    }
+
+    @Override
+    public int getLastVersionCode() {
+        return pref.getInt(LAST_VERSION_CODE, 0);
+    }
+
+    @Override
+    public void setLastVersionCode(int code) {
+        pref.edit().putInt(LAST_VERSION_CODE, code).apply();
     }
 }

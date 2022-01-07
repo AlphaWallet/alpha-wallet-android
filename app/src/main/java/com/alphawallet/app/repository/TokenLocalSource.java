@@ -1,11 +1,12 @@
 package com.alphawallet.app.repository;
 
-import com.alphawallet.app.entity.ContractType;
+import android.util.Pair;
+
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -58,4 +59,15 @@ public interface TokenLocalSource {
 
     void updateNFTAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
     void storeAsset(String wallet, Token token, BigInteger tokenId, NFTAsset asset);
+
+    void storeATokenAddresses(List<String> addresses);
+    Single<List<String>> getATokenAddresses();
+
+    Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
+
+    Map<String, Long> getTickerTimeMap(long chainId, List<TokenCardMeta> erc20Tokens);
+
+    void deleteTickers();
+
+    Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
 }

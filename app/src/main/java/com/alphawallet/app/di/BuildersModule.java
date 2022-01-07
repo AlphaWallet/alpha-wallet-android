@@ -29,13 +29,17 @@ import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.app.ui.SetPriceAlertActivity;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.TokenActivityFragment;
+import com.alphawallet.app.ui.TokenAlertsFragment;
 import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.TokenFunctionActivity;
+import com.alphawallet.app.ui.TokenInfoFragment;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
+import com.alphawallet.app.ui.TokenSearchFragment;
 import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.TransferNFTActivity;
@@ -110,6 +114,10 @@ public abstract class BuildersModule {
 	@FragmentScope
 	@ContributesAndroidInjector(modules = WalletModule.class)
 	abstract WalletFragment bindWalletFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = WalletModule.class)
+	abstract TokenSearchFragment bindTokenSearchFragment();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = HomeModule.class)
@@ -189,6 +197,18 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletConnectModule.class)
 	abstract WalletConnectSessionActivity bindWalletConnectSessionActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TokenInfoModule.class)
+	abstract TokenInfoFragment bindTokenInfoFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TokenAlertsModule.class)
+	abstract TokenAlertsFragment bindTokenAlertsFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SetPriceAlertModule.class)
+	abstract SetPriceAlertActivity bindSetPriceAlertActivity();
 
     @ActivityScope
     @ContributesAndroidInjector(modules = Erc1155Module.class)

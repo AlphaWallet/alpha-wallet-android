@@ -18,7 +18,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.TokenFunctionActivity;
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
@@ -37,7 +37,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final LinearLayout clickWrapper;
     private final LinearLayout webWrapper;
     private final boolean iconified;
-    private OnTokenClickListener tokenClickListener;
+    private TokensAdapterCallback tokenClickListener;
     private final AppCompatRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
@@ -142,9 +142,9 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         return true;
     }
 
-    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback)
     {
-        tokenClickListener = onTokenClickListener;
+        tokenClickListener = tokensAdapterCallback;
     }
 
     @Override

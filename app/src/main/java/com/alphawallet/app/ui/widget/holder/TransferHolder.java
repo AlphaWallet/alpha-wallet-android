@@ -48,7 +48,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     private final TextView type;
     private final TextView address;
     private final TextView value;
-    private final ChainName chainName;
 
     private final AssetDefinitionService assetDefinition;
     private Token token;
@@ -68,7 +67,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        chainName = findViewById(R.id.chain_name);
         tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
@@ -131,20 +129,11 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         type.setText(typeValue);
         address.setText(data.getDetail(getContext(), tx, token, itemView));
         tokenIcon.setStatusIcon(data.getEventStatusType());
+        tokenIcon.setChainIcon(token.tokenInfo.chainId);
 
         //timestamp
         date.setText(Utils.localiseUnixTime(getContext(), data.getTimeStampSeconds()));
         date.setVisibility(View.VISIBLE);
-
-        if (token.tokenInfo.chainId == MAINNET_ID)
-        {
-            chainName.setVisibility(View.GONE);
-        }
-        else
-        {
-            chainName.setVisibility(View.VISIBLE);
-            chainName.setChainID(token.tokenInfo.chainId);
-        }
 
         hashKey = data.hash;
     }

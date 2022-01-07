@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorTheme"
@@ -16,12 +17,20 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|enterAlways"
+            app:layout_scrollFlags="scroll|snap"
             app:titleEnabled="false">
 
             <include layout="@layout/layout_simple_toolbar_no_divider" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <com.alphawallet.app.widget.LargeTitleView
+            android:id="@+id/large_title_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|snap"
+            />
+
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
@@ -29,8 +38,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:background="@drawable/background_tab_layout"
-            android:paddingStart="12dp"
             app:layout_scrollFlags="enterAlways"
             app:tabGravity="center"
             app:tabIndicatorColor="@color/colorHighlight"
@@ -38,7 +45,8 @@
             app:tabMode="scrollable"
             app:tabSelectedTextColor="@color/colorHighlight"
             app:tabTextAppearance="@style/WalletTabTextAppearance"
-            app:tabTextColor="@color/dove" />
+            app:tabTextColor="@color/dove"
+            android:background="@color/white"/>
 
         <View
             android:layout_width="match_parent"

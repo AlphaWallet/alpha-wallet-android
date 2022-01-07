@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_add_new_price_alert"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="@color/alabaster"
+    android:gravity="end"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/dp16"
+    android:paddingEnd="@dimen/dp16">
+
+    <TextView
+        android:id="@+id/text_add_new_price_alert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="@dimen/dp8"
+        android:fontFamily="@font/font_semibold"
+        android:text="Add New Price Alert"
+        android:textColor="@color/azure"
+        android:textSize="@dimen/sp17" />
+
+    <ImageView
+        android:id="@+id/img_add_token"
+        android:layout_width="@dimen/dp24"
+        android:layout_height="@dimen/dp24"
+        android:layout_gravity="end|center_vertical"
+        android:src="@drawable/ic_icons_system_add_border_circle"
+        android:visibility="visible" />
+
+</LinearLayout>

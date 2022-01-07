@@ -51,6 +51,9 @@ public interface PreferenceRepositoryType {
 
     void setShownTestNetWarning();
 
+    void setPriceAlerts(String json);
+
+    String getPriceAlerts();
     void setHasSetNetworkFilters();
     boolean hasSetNetworkFilters();
     void blankHasSetNetworkFilters();
@@ -87,4 +90,7 @@ public interface PreferenceRepositoryType {
 
     void storeLastFragmentPage(int ordinal);
     int getLastFragmentPage();
+
+    int getLastVersionCode();
+    void setLastVersionCode(int code);
 }

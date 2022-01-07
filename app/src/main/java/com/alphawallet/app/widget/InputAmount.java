@@ -179,7 +179,7 @@ public class InputAmount extends LinearLayout
         }
         else
         {
-            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getSymbolOrShortName()));
+            errorText.setText(String.format(getResources().getString(R.string.error_insufficient_funds), token.getShortSymbol()));
         }
 
         if (showError)
@@ -458,11 +458,19 @@ public class InputAmount extends LinearLayout
         {
             boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, true);
             boolean showAllFunds = a.getBoolean(R.styleable.InputView_show_allFunds, true);
+            boolean showChainName = a.getBoolean(R.styleable.InputView_showChainName, true);
+            boolean currencyMode = a.getBoolean(R.styleable.InputView_currencyMode, false);
             int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.amount);
             findViewById(R.id.layout_header_amount).setVisibility(showHeader ? View.VISIBLE : View.GONE);
             allFunds.setVisibility(showAllFunds ? View.VISIBLE : View.GONE);
             TextView headerText = findViewById(R.id.text_header);
             headerText.setText(headerTextId);
+            chainName.setVisibility(showChainName ? View.VISIBLE : View.GONE);
+            if (currencyMode)
+            {
+                symbolText.setText(TickerService.getCurrencySymbolTxt());
+                icon.showLocalCurrency();
+            }
         }
         finally
         {

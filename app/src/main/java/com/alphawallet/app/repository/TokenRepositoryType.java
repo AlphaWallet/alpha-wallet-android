@@ -1,14 +1,26 @@
 package com.alphawallet.app.repository;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.SubscribeWrapper;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.TransferFromEventResponse;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.service.AssetDefinitionService;
+
+import io.reactivex.disposables.Disposable;
+
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -67,4 +79,8 @@ public interface TokenRepositoryType {
     
     boolean isEnabled(Token newToken);
     boolean hasVisibilityBeenChanged(Token token);
+
+    Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
+
+    Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
 }

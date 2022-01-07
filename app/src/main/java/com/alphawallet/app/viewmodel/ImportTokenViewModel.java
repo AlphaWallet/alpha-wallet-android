@@ -1,5 +1,12 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.entity.MagicLinkParcel.generateReverseTradeData;
+import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
+import static com.alphawallet.token.tools.ParseMagicLink.customizable;
+import static com.alphawallet.token.tools.ParseMagicLink.normal;
+import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
+import static com.alphawallet.token.tools.ParseMagicLink.unassigned;
+
 import android.app.Activity;
 import android.util.Log;
 
@@ -16,10 +23,10 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -50,13 +57,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.entity.MagicLinkParcel.generateReverseTradeData;
-import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
-import static com.alphawallet.token.tools.ParseMagicLink.customizable;
-import static com.alphawallet.token.tools.ParseMagicLink.normal;
-import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
-import static com.alphawallet.token.tools.ParseMagicLink.unassigned;
 
 /**
  * Created by James on 9/03/2018.

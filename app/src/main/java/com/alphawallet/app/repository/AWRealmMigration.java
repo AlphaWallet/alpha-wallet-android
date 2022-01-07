@@ -6,10 +6,8 @@ import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
-import io.realm.RealmObject;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
-import io.realm.annotations.PrimaryKey;
 
 
 /**
@@ -308,13 +306,15 @@ public class AWRealmMigration implements RealmMigration
 
         if (oldVersion == 28)
         {
-            RealmObjectSchema realmData = schema.get("RealmTransaction");
-            if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
+            schema.create("RealmAToken")
+                    .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
             oldVersion++;
         }
 
         if (oldVersion == 29 || oldVersion == 30)
         {
+            RealmObjectSchema realmData = schema.get("RealmTransaction");
+            if (realmData != null && !realmData.hasField("contractAddress")) realmData.addField("contractAddress", String.class);
             oldVersion = 31;
         }
 
@@ -342,6 +342,7 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
 
+        //Migrate from int to long
         if (oldVersion == 34)
         {
             RealmObjectSchema realmData = schema.get("RealmToken");
@@ -378,8 +379,15 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
 
-        if (oldVersion == 35)
+        if (oldVersion == 35 || oldVersion == 36)
         {
+            RealmObjectSchema realmData = schema.get("RealmAToken");
+            if (realmData == null)
+            {
+                schema.create("RealmAToken")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
+            }
+
             oldVersion++;
         }
     }

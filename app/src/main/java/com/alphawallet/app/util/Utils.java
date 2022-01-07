@@ -252,7 +252,7 @@ public class Utils {
 
     public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
     {
-        String symbol = token != null ? token.getSymbolOrShortName() : "";
+        String symbol = token != null ? token.getShortSymbol() : "";
         boolean needsBreak = false;
 
         if ((symbol.length() + operationName.length()) > 16 && symbol.length() > 0)
@@ -780,7 +780,7 @@ public class Utils {
         String tURL = TRUST_ICON_REPO;
         String repoChain = twChainNames.get(chainId);
         if (repoChain == null) repoChain = "ethereum";
-        tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, address).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
+        tURL = tURL.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address)).replace(CHAIN_REPO_ADDRESS_TOKEN, repoChain);
         return tURL;
     }
 

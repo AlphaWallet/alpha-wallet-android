@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?actionBarSize"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/layout_token_header"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_components_charts_graph_stable" />
+
+            <com.alphawallet.app.ui.widget.entity.HistoryChart
+                android:id="@+id/history_chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            style="@style/ChartTabLayoutStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginStart="@dimen/dp10"
+            android:layout_marginEnd="@dimen/dp10"
+            app:tabGravity="center"
+            app:tabIndicatorColor="@color/mine"
+            app:tabIndicatorFullWidth="true"
+            app:tabMode="fixed"
+            app:tabSelectedTextColor="@color/mine"
+            app:tabTextAppearance="@style/ChartTabTextAppearance"
+            app:tabTextColor="@color/dove" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="@dimen/dp8"
+            android:layout_marginTop="@dimen/dp24"
+            android:layout_marginEnd="@dimen/dp8"
+            android:background="@color/mercury" />
+
+        <LinearLayout
+            android:id="@+id/layout_token_info"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

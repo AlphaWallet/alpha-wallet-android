@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/colorPrimary"
+    android:contentInsetEnd="0dp"
+    android:contentInsetLeft="0dp"
+    android:contentInsetRight="0dp"
+    android:contentInsetStart="0dp"
+    android:theme="@style/AppTheme.Toolbar"
+    app:contentInsetEnd="0dp"
+    app:contentInsetLeft="0dp"
+    app:contentInsetRight="0dp"
+    app:contentInsetStart="0dp"
+    app:popupTheme="@style/AppTheme.PopupOverlay"
+    app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mt_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="2dp"
+        app:cardBackgroundColor="@color/colorTheme"
+        app:cardCornerRadius="2dp"
+        app:cardElevation="2dp"
+        app:cardPreventCornerOverlap="false">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/root"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+
+            <ImageView
+                android:id="@+id/st_backArrow"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorTheme"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="12dp"
+                android:src="@drawable/ic_arrow_back"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/st_clear"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorTheme"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:src="@drawable/ic_close" />
+
+            <View
+                android:id="@+id/click_back"
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                app:layout_constraintStart_toStartOf="@id/st_backArrow"
+                app:layout_constraintTop_toTopOf="@id/st_backArrow"
+                app:layout_constraintEnd_toEndOf="@id/st_backArrow"
+                app:layout_constraintBottom_toBottomOf="@id/st_backArrow"
+                />
+
+            <View
+                android:id="@+id/click_clear"
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                app:layout_constraintStart_toStartOf="@id/st_clear"
+                app:layout_constraintTop_toTopOf="@id/st_clear"
+                app:layout_constraintEnd_toEndOf="@id/st_clear"
+                app:layout_constraintBottom_toBottomOf="@id/st_clear"
+                />
+
+            <EditText
+                android:id="@+id/st_editText"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="@string/token_name_hint"
+                android:textColorHint="@color/dove_hint"
+                android:imeOptions="flagNoExtractUi|actionSearch"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/text_black"
+                app:layout_constraintEnd_toStartOf="@id/st_clear"
+                app:layout_constraintStart_toEndOf="@id/st_backArrow" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.appcompat.widget.Toolbar>

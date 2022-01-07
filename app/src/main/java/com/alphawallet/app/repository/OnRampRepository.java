@@ -38,17 +38,20 @@ public class OnRampRepository implements OnRampRepositoryType {
     @Override
     public String getUri(String address, Token token)
     {
-        OnRampContract contract = getContract(token);
+        if (token != null) {
+            OnRampContract contract = getContract(token);
 
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(contract.getSymbol());
-        analyticsService.track(C.AN_USE_ONRAMP, analyticsProperties);
+            AnalyticsProperties analyticsProperties = new AnalyticsProperties();
+            analyticsProperties.setData(contract.getSymbol());
+            analyticsService.track(C.AN_USE_ONRAMP, analyticsProperties);
 
-        switch (contract.getProvider().toLowerCase())
-        {
-            case RAMP:
-            default:
-                return buildRampUri(address, contract.getSymbol()).toString();
+            switch (contract.getProvider().toLowerCase()) {
+                case RAMP:
+                default:
+                    return buildRampUri(address, contract.getSymbol()).toString();
+            }
+        } else {
+            return buildRampUri(address, "").toString();
         }
     }
 

@@ -27,8 +27,6 @@ licenses:
   - 'google-gdk-license-.+'
 
 env:
-  matrix:
-  - TRAVIS_JDK=adopt-openj9@1.11.0-4
   - JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee'
 
 jdk:

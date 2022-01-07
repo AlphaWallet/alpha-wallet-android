@@ -11,4 +11,4 @@ jobs:
         with:
           java-version: 11
       - name: Build the app
-        run: ./build.sh
+        run: sh ./build.sh

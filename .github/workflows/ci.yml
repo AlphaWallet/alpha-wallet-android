@@ -18,6 +18,8 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           profile: Nexus 6
+          ram-size: 4096M
+          sdcard-path-or-size: 4096M
           script: ./e2e.sh --CI
 
       - name: E2E tests results

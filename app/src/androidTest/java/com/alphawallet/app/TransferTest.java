@@ -14,7 +14,6 @@ import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.uiautomator.UiDevice;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
@@ -95,12 +94,7 @@ public class TransferTest {
             click(withText(R.string.ok));
         }
         click(withText("CREATE A NEW WALLET"));
-        closeBackupTipsDialog();
-    }
-
-    private void closeBackupTipsDialog() {
-//        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(200, 200);
+        click(withId(R.id.btn_close));
     }
 
     private void selectTestNet() {

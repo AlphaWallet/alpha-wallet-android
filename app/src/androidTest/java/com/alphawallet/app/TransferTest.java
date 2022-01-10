@@ -86,7 +86,7 @@ public class TransferTest {
     private void ensureTransactionConfirmed() {
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
         click(withId(R.string.action_show_tx_details));
-        onView(isRoot()).perform(waitUntil(withSubstring("Sent ETH"), 5 * 60));
+        onView(isRoot()).perform(waitUntil(withSubstring("Sent ETH"), 30 * 60));
         pressBack();
     }
 

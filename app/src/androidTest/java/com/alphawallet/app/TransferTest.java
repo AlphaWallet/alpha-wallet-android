@@ -100,6 +100,7 @@ public class TransferTest {
 
     private void closeBackupTipsDialog() {
 //        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
+        sleepSeconds(3);
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(300, 300);
     }
 

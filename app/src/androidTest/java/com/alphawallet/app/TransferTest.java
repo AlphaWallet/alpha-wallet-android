@@ -94,7 +94,12 @@ public class TransferTest {
             click(withText(R.string.ok));
         }
         click(withText("CREATE A NEW WALLET"));
-//        click(withId(R.id.btn_close));
+        closeBackupTipsDialog();
+    }
+
+    private void closeBackupTipsDialog() {
+        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
+//        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(200, 200);
     }
 
     private void selectTestNet() {

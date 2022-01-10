@@ -52,7 +52,7 @@ public class TransferTest {
             = new ActivityScenarioRule<>(SplashActivity.class);
 
     @Test
-    public void should_transfer_from_an_account_to_another() throws InterruptedException {
+    public void should_transfer_from_an_account_to_another() {
         String seedPhrase = "essence allow crisp figure tired task melt honey reduce planet twenty rookie";
         String existedWalletAddress = "0xD0c424B3016E9451109ED97221304DeC639b3F84";
 
@@ -79,13 +79,13 @@ public class TransferTest {
         if (balance == 0) {
             balanceString = "0";
         }
-        onView(isRoot()).perform(waitUntil(withText(startsWith(balanceString)), 240));
+        onView(isRoot()).perform(waitUntil(withText(startsWith(balanceString)), 5 * 60));
     }
 
     private void ensureTransactionConfirmed() {
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
         click(withId(R.string.action_show_tx_details));
-        onView(isRoot()).perform(waitUntil(withSubstring("Sent ETH"), 120));
+        onView(isRoot()).perform(waitUntil(withSubstring("Sent ETH"), 5 * 60));
         pressBack();
     }
 

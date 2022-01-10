@@ -76,18 +76,20 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
     @Override
     public void onInputChanged(String s)
     {
-        if (!s.isEmpty())
+        if (s.isEmpty()) {
+            functionBar.setPrimaryButtonEnabled(false);
+            return;
+        }
+
+        double value = Double.parseDouble(s);
+        if (value > 0)
         {
-            double value = Double.parseDouble(s);
-            if (value > 0)
-            {
-                functionBar.setPrimaryButtonEnabled(true);
-                newPriceAlert.setValue(String.valueOf(value));
-            }
-            else
-            {
-                functionBar.setPrimaryButtonEnabled(false);
-            }
+            functionBar.setPrimaryButtonEnabled(true);
+            newPriceAlert.setValue(String.valueOf(value));
+        }
+        else
+        {
+            functionBar.setPrimaryButtonEnabled(false);
         }
     }
 

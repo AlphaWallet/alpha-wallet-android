@@ -1,5 +1,7 @@
 package com.alphawallet.app;
 
+import android.os.Build;
+
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.GetTextAction;
@@ -8,6 +10,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
@@ -39,9 +44,17 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.Assert.fail;
 
 @RunWith(AndroidJUnit4.class)
 public class TransferTest {
+    // On CI server, run tests on different API levels concurrently may cause failure: Replacement transaction underpriced.
+    // Use different wallet to transfer token from can avoid this error
+    private static final Map<String, String[]> WALLETS = new HashMap<String, String[]>() {{
+        put("24", new String[]{"essence allow crisp figure tired task melt honey reduce planet twenty rookie", "0xD0c424B3016E9451109ED97221304DeC639b3F84"});
+        put("30", new String[]{"deputy review citizen bacon measure combine bag dose chronic retreat attack fly", "0xD8790c1eA5D15F8149C97F80524AC87f56301204"});
+        put("31", new String[]{"omit mobile upgrade warm flock two era hamster local cat wink virus", "0x32f6F38137a79EA8eA237718b0AFAcbB1c58ca2e"});
+    }};
 
     @Before
     public void setUp() {
@@ -54,8 +67,14 @@ public class TransferTest {
 
     @Test
     public void should_transfer_from_an_account_to_another() {
-        String seedPhrase = "essence allow crisp figure tired task melt honey reduce planet twenty rookie";
-        String existedWalletAddress = "0xD0c424B3016E9451109ED97221304DeC639b3F84";
+        int apiLevel = Build.VERSION.SDK_INT;
+        String[] array = WALLETS.get(String.valueOf(apiLevel));
+        if (array == null) {
+            fail("Please config seed phrase and wallet address for this API level first.");
+        }
+
+        String seedPhrase = array[0];
+        String existedWalletAddress = array[1];
 
         createNewWalletOnFirstStart();
         String newWalletAddress = getWalletAddress();
@@ -155,7 +174,7 @@ public class TransferTest {
         click(withId(R.id.import_action));
     }
 
-    private void sleepSeconds(int seconds){
+    private void sleepSeconds(int seconds) {
         try {
             Thread.sleep(seconds * 1000L);
         } catch (InterruptedException e) {

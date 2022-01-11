@@ -99,7 +99,7 @@ public class TransferTest {
         if (balance == 0) {
             balanceString = "0";
         }
-        onView(isRoot()).perform(waitUntil(withText(startsWith(balanceString)), 5 * 60));
+        onView(isRoot()).perform(waitUntil(withText(startsWith(balanceString)), 10 * 60));
     }
 
     private void ensureTransactionConfirmed() {

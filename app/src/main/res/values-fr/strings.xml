@@ -852,4 +852,5 @@
     <string name="summary_change_24h">%1$s (%2$s) Aujourd\'hui</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="rename_this_wallet_action">Renommer ce portefeuille</string>
 </resources>

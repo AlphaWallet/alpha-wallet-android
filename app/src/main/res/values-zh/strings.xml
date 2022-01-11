@@ -102,6 +102,7 @@
     <string name="currency">币类</string>
     <string name="advanced">高级设置</string>
     <string name="copy_wallet_address">复制钱包地址</string>
+    <string name="rename_this_wallet_action">重命名此钱包</string>
     <string name="hint_contract_name">名称</string>
     <string name="hint_contract_venue">场馆</string>
     <string name="hint_contract_date">日期</string>

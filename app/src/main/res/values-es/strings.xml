@@ -826,4 +826,5 @@
     <string name="summary_change_24h">%1$s (%2$s) Hoy</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="rename_this_wallet_action">Cambiar el nombre de esta billetera</string>
 </resources>

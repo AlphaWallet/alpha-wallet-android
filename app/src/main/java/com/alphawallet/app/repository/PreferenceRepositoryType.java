@@ -88,6 +88,6 @@ public interface PreferenceRepositoryType {
     void storeLastFragmentPage(int ordinal);
     int getLastFragmentPage();
 
-    int getLastVersionCode();
+    int getLastVersionCode(int currentCode);
     void setLastVersionCode(int code);
 }

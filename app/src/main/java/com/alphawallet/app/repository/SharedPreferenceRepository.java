@@ -334,8 +334,14 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public int getLastVersionCode() {
-        return pref.getInt(LAST_VERSION_CODE, 0);
+    public int getLastVersionCode(int currentCode) {
+        int versionCode = pref.getInt(LAST_VERSION_CODE, 0);
+        if (versionCode == 0)
+        {
+            setLastVersionCode(currentCode);
+            versionCode = Integer.MAX_VALUE;
+        }
+        return versionCode; // First time users won't see the 'what's new' since the app is new, only start to see these on first update
     }
 
     @Override

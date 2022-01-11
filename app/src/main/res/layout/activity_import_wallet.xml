@@ -26,7 +26,7 @@
             app:tabPaddingEnd="-1dp"
             app:tabIndicatorColor="@color/colorHighlight"
             app:tabIndicatorFullWidth="true"
-            app:tabMode="fixed"
+            app:tabMode="scrollable"
             app:tabSelectedTextColor="@color/colorHighlight"
             app:tabTextAppearance="@style/WalletTabTextAppearance"
             app:tabTextColor="@color/dove" />

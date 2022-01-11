@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import com.alphawallet.app.entity.tokendata.TokenGroup;
+
 import java.util.Date;
 
 public abstract class TimestampSortedItem<T> extends SortedItem<T> {
@@ -13,7 +15,7 @@ public abstract class TimestampSortedItem<T> extends SortedItem<T> {
 
 
     public TimestampSortedItem(int viewType, T value, int weight, int order) {
-        super(viewType, value, weight);
+        super(viewType, value, new TokenPosition(TokenGroup.ASSET, 1, weight));
         tags.add(IS_TIMESTAMP_TAG);
         this.order = order;
     }

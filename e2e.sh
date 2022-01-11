@@ -10,6 +10,7 @@ adb shell settings put global animator_duration_scale 0.0
 adb shell settings put secure long_press_timeout 1500
 
 rm -rf output
+mkdir output
 adb shell rm /storage/emulated/0/DCIM/*.png
 
 adb logcat -c                             # clear logs

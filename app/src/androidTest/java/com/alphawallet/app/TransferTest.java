@@ -5,6 +5,7 @@ import android.os.Build;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.GetTextAction;
+import com.alphawallet.app.util.SnapshotUtil;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -166,7 +167,9 @@ public class TransferTest {
     private void importWalletFromSettingsPage(String seedPhrase) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
+        SnapshotUtil.take("before-add");
         click(withId(R.id.action_add));
+        SnapshotUtil.take("after-add");
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         click(withId(R.id.import_action));

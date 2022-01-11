@@ -110,6 +110,7 @@
     <string name="currency">Tài sản</string>
     <string name="advanced">Tùy chọn nâng cao</string>
     <string name="copy_wallet_address">Sao chép địa chỉ ví</string>
+    <string name="rename_this_wallet_action">Đổi tên Ví này</string>
     <string name="hint_contract_name">Tên</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Ngày</string>

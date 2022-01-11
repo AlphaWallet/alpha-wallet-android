@@ -1,30 +1,25 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.alphawallet.app.widget.LayoutCallbackListener;
-import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.R;
-
+import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
+public class ImportPrivateKeyFragment extends ImportFragment
 {
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
     private static final String validator = "[^0x^\\s^a-f^A-F^0-9]";

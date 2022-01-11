@@ -2,8 +2,10 @@ package com.alphawallet.app.repository;
 
 import android.util.Pair;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -60,8 +62,8 @@ public interface TokenLocalSource {
     void updateNFTAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals);
     void storeAsset(String wallet, Token token, BigInteger tokenId, NFTAsset asset);
 
-    void storeATokenAddresses(List<String> addresses);
-    Single<List<String>> getATokenAddresses();
+    int storeTokensMapping(Pair<Map<String, ContractAddress>, Map<String, TokenGroup>> mappings);
+    long getLastMappingsUpdate();
 
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 
@@ -70,4 +72,7 @@ public interface TokenLocalSource {
     void deleteTickers();
 
     Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
+
+    ContractAddress getBaseToken(long chainId, String address);
+    TokenGroup getTokenGroup(long chainId, String address, ContractType type);
 }

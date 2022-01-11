@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -60,6 +61,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         splashViewModel.wallets().observe(this, this::onWallets);
         splashViewModel.createWallet().observe(this, this::onWalletCreate);
         splashViewModel.fetchWallets();
+
+        checkRoot();
     }
 
     protected Activity getThisActivity()
@@ -178,5 +181,19 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     {
         new HomeRouter().open(this, true);
         finish();
+    }
+
+    private void checkRoot()
+    {
+        if (RootUtil.isDeviceRooted())
+        {
+            AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+            dialog.setTitle(R.string.root_title);
+            dialog.setMessage(R.string.root_body);
+            dialog.setButtonText(R.string.ok);
+            dialog.setIcon(AWalletAlertDialog.ERROR);
+            dialog.setButtonListener(v -> dialog.dismiss());
+            dialog.show();
+        }
     }
 }

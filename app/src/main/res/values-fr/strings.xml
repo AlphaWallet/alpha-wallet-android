@@ -450,6 +450,7 @@
     <string name="searching_for_token">Recherche de Token</string>
     <string name="token_selection">Selection de Token</string>
     <string name="token_requirement">Cette fonction requiert %1$s tokens</string>
+    <string name="token_count">%1$s Tokens</string>
     <string name="contains_no_recipient">La transaction n\'a pas de destinataire</string>
     <string name="contains_no_value">La transaction DApp ne contient pas de valeur.</string>
     <string name="wallet_not_backed_up">Votre portefeuille n\'est pas sauvegardé!</string>
@@ -852,4 +853,9 @@
     <string name="summary_change_24h">%1$s (%2$s) Aujourd\'hui</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="assets">Assets</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">Gouvernance</string>
+    <string name="collectibles_header">Collectibles</string>
+    <string name="whats_new">Quoi de neuf?</string>
 </resources>

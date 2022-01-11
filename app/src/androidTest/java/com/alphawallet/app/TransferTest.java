@@ -167,6 +167,7 @@ public class TransferTest {
     private void importWalletFromSettingsPage(String seedPhrase) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
+        sleepSeconds(10);
         SnapshotUtil.take("before-add");
         click(withId(R.id.action_add));
         SnapshotUtil.take("after-add");

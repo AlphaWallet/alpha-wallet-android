@@ -9,13 +9,19 @@ adb shell settings put global animator_duration_scale 0.0
 # https://stackoverflow.com/questions/32330671/android-espresso-performs-longclick-instead-of-click
 adb shell settings put secure long_press_timeout 1500
 
-rm -rf DCIM
+rm -rf output
 adb shell rm /storage/emulated/0/DCIM/*.png
+
+adb logcat -c                             # clear logs
+touch output/emulator.log                    # create log file
+chmod 666 output/emulator.log                # allow writing to log file
+adb logcat >> output/emulator.log &
+
 ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
 if [ "$?" != "0" ]; then
-  adb pull /storage/emulated/0/DCIM/ .
+  adb pull /storage/emulated/0/DCIM/ output
   if [ "$1" != "--CI" ]; then
-    open DCIM/*.png
+    open output/DCIM/*.png
   fi
 
   exit 1

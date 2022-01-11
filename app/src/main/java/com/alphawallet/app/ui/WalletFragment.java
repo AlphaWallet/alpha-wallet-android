@@ -319,7 +319,7 @@ public class WalletFragment extends BaseFragment implements
         int color = ContextCompat.getColor(getContext(), changePercent < 0 ? R.color.red : R.color.green);
         largeTitleView.subtitle.setTextColor(color);
 
-        if (viewModel.getWallet().type != WalletType.WATCH && isVisible)
+        if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
         {
             viewModel.checkBackup(fiatValues.first);
         }

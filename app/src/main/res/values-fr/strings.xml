@@ -855,6 +855,7 @@
     <string name="token_name_hint">Token Name</string>
     <string name="assets">Assets</string>
     <string name="defi_header">DeFi</string>
-    <string name="governance_header">Governance</string>
+    <string name="governance_header">Gouvernance</string>
     <string name="collectibles_header">Collectibles</string>
+    <string name="whats_new">Quoi de neuf?</string>
 </resources>

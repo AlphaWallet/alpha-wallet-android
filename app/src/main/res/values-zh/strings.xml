@@ -827,8 +827,9 @@
     <string name="summary_change_24h">%1$s (%2$s) 今天</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
-    <string name="assets">Assets</string>
+    <string name="assets">资产</string>
     <string name="defi_header">DeFi</string>
-    <string name="governance_header">Governance</string>
-    <string name="collectibles_header">Collectibles</string>
+    <string name="governance_header">治理</string>
+    <string name="collectibles_header">NFT</string>
+    <string name="whats_new">什么是新的？</string>
 </resources>

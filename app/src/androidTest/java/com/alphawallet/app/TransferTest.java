@@ -156,6 +156,7 @@ public class TransferTest {
     }
 
     private String getWalletAddress() {
+        SnapshotUtil.take("");
         gotoSettingsPage();
         click(withText("Show My Wallet Address"));
         GetTextAction getTextAction = new GetTextAction();
@@ -174,6 +175,7 @@ public class TransferTest {
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         click(withId(R.id.import_action));
+        sleepSeconds(10);
     }
 
     private void sleepSeconds(int seconds) {

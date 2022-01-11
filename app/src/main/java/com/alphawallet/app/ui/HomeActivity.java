@@ -469,7 +469,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             homeReceiver = new HomeReceiver(this, this);
         }
-        checkRoot();
         initViews();
 
         handler.post(() -> {
@@ -550,21 +549,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         }
         return false;
-    }
-
-    private void checkRoot()
-    {
-        if (RootUtil.isDeviceRooted() && viewModel.shouldShowRootWarning())
-        {
-            viewModel.setShowRootWarning(false);
-            AWalletAlertDialog dialog = new AWalletAlertDialog(this);
-            dialog.setTitle(R.string.root_title);
-            dialog.setMessage(R.string.root_body);
-            dialog.setButtonText(R.string.ok);
-            dialog.setIcon(AWalletAlertDialog.ERROR);
-            dialog.setButtonListener(v -> dialog.dismiss());
-            dialog.show();
-        }
     }
 
     public void onBrowserWithURL(String url)

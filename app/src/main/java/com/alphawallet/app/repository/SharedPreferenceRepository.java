@@ -272,16 +272,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean showShowRootWarning() {
-        return pref.getBoolean(SHOULD_SHOW_ROOT_WARNING, true);
-    }
-
-    @Override
-    public void setShowRootWarning(boolean shouldShow) {
-        pref.edit().putBoolean(SHOULD_SHOW_ROOT_WARNING, shouldShow).apply();
-    }
-
-    @Override
     public int getUpdateWarningCount() {
         return pref.getInt(UPDATE_WARNINGS, 0);
     }
@@ -344,8 +334,14 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public int getLastVersionCode() {
-        return pref.getInt(LAST_VERSION_CODE, 0);
+    public int getLastVersionCode(int currentCode) {
+        int versionCode = pref.getInt(LAST_VERSION_CODE, 0);
+        if (versionCode == 0)
+        {
+            setLastVersionCode(currentCode);
+            versionCode = Integer.MAX_VALUE;
+        }
+        return versionCode; // First time users won't see the 'what's new' since the app is new, only start to see these on first update
     }
 
     @Override

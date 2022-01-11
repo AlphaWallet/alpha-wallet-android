@@ -70,9 +70,6 @@ public interface PreferenceRepositoryType {
     void setShowZeroBalanceTokens(boolean shouldShow);
     boolean shouldShowZeroBalanceTokens();
 
-    boolean showShowRootWarning();
-    void setShowRootWarning(boolean shouldShow);
-
     int getUpdateWarningCount();
     void setUpdateWarningCount(int count);
 
@@ -91,6 +88,6 @@ public interface PreferenceRepositoryType {
     void storeLastFragmentPage(int ordinal);
     int getLastFragmentPage();
 
-    int getLastVersionCode();
+    int getLastVersionCode(int currentCode);
     void setLastVersionCode(int code);
 }

@@ -44,11 +44,10 @@ public class SetPriceAlertViewModel extends BaseViewModel {
         return currencyRepository.getCurrencyList();
     }
 
-    public void openCurrencySelection(Activity context, int requestCode)
+    public void openCurrencySelection(Activity context, int requestCode, String currency)
     {
         Intent intent = new Intent(context, SelectCurrencyActivity.class);
-        String currentLocale = getDefaultCurrency();
-        intent.putExtra(EXTRA_CURRENCY, currentLocale);
+        intent.putExtra(EXTRA_CURRENCY, currency);
         intent.putParcelableArrayListExtra(EXTRA_STATE, getCurrencyList());
         context.startActivityForResult(intent, requestCode);
     }

@@ -432,8 +432,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void showBackupWalletDialog(boolean walletImported)
     {
+        Log.d("e2e", String.valueOf(viewModel.isFindWalletAddressDialogShown()));
         if (!viewModel.isFindWalletAddressDialogShown())
         {
+            Log.d("e2e", String.valueOf(walletImported));
             //check if wallet was imported - in which case no need to display
             if (!walletImported)
             {

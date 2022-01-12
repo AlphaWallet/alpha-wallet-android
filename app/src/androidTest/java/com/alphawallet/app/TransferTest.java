@@ -5,6 +5,7 @@ import android.os.Build;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.GetTextAction;
+import com.alphawallet.app.util.Helper;
 import com.alphawallet.app.util.SnapshotUtil;
 
 import org.junit.Before;
@@ -120,7 +121,7 @@ public class TransferTest {
 
     private void closeBackupTipsDialog() {
 //        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
-        sleepSeconds(3);
+        Helper.wait(3);
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(300, 300);
     }
 
@@ -168,21 +169,14 @@ public class TransferTest {
     private void importWalletFromSettingsPage(String seedPhrase) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
-        sleepSeconds(10);
+        Helper.wait(10);
         SnapshotUtil.take("before-add");
         click(withId(R.id.action_add));
         SnapshotUtil.take("after-add");
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         click(withId(R.id.import_action));
-        sleepSeconds(10);
+        Helper.wait(10);
     }
 
-    private void sleepSeconds(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }

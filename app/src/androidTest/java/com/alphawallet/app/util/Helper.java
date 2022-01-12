@@ -75,6 +75,26 @@ public class Helper {
         };
     }
 
+    public static void wait(int seconds) {
+        onView(isRoot()).perform(new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription() {
+                return "wait " + seconds + " seconds.";
+            }
+
+            @Override
+            public void perform(final UiController uiController, final View view) {
+                uiController.loopMainThreadUntilIdle();
+                uiController.loopMainThreadForAtLeast(seconds * 1000L);
+            }
+        });
+    }
+
     public static void click(Matcher<View> matcher) {
         onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed())));
         onView(matcher).perform(ViewActions.click(doNothing())); // if click executed as long press, do nothing and retry clicking

@@ -287,29 +287,6 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void setHDBackupSplash() {
-        setContentView(R.layout.activity_backup);
-        initViews();
-        title.setText(R.string.backup_seed_phrase);
-        backupImage.setImageResource(R.drawable.seed);
-        detail.setText(R.string.backup_seed_phrase_detail);
-        functionButtonBar.setPrimaryButtonText(R.string.action_back_up_my_wallet);
-        functionButtonBar.setPrimaryButtonClickListener(this);
-    }
-
-    private void setupJSONExport() {
-        setContentView(R.layout.activity_backup);
-        initViews();
-        title.setText(R.string.what_is_keystore_json);
-        backupImage.setImageResource(R.drawable.ic_keystore);
-        detail.setText(R.string.keystore_detail_text);
-        state = BackupState.ENTER_JSON_BACKUP;
-        functionButtonBar.setPrimaryButtonText(R.string.export_keystore_json);
-        functionButtonBar.setPrimaryButtonClickListener(this);
-
-        secureWindow();
-    }
-
     private void setupTestSeed() {
         setContentView(R.layout.activity_backup_write_seed);
         initViews();

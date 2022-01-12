@@ -120,9 +120,9 @@ public class TransferTest {
     }
 
     private void closeBackupTipsDialog() {
-//        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
-        Helper.wait(3);
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(300, 300);
+        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
+//        Helper.wait(3);
+//        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(300, 300);
     }
 
     private void selectTestNet() {

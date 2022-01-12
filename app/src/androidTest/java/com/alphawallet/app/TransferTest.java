@@ -115,8 +115,8 @@ public class TransferTest {
             click(withText(R.string.ok));
         }
         click(withText("CREATE A NEW WALLET"));
+        Helper.wait(10);
         click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
-//        Helper.wait(3);
 //        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(300, 300);
     }
 

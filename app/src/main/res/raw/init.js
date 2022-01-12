@@ -1,7 +1,13 @@
 
-const __addressHex = "%1$s";
-const __rpcURL = "%2$s";
-const __chainID = "%3$s";
+if (typeof __addressHex == 'undefined') {
+    __addressHex = "%1$s";
+}
+if (typeof __rpcURL == 'undefined') {
+    __rpcURL = "%2$s";
+}
+if (typeof __chainID == 'undefined') {
+    __chainID = "%3$s";
+}
 
 function executeCallback (id, error, value) {
   AlphaWallet.executeCallback(id, error, value)

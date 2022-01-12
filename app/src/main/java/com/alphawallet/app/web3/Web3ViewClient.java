@@ -113,11 +113,15 @@ public class Web3ViewClient extends WebViewClient {
             return null;
         }
 
+
+
         if (isInjected
                 || request.getUrl().toString().contains("infura")
                 || request.getUrl().toString().contains(".auth0.com/")
+                || request.getUrl().toString().contains("analytics.com/analytics.js")
                 || handleTrustedExtension(request.getUrl().toString()))
         {
+            System.out.println("YOLESS: No Inject: " + request.getUrl().toString());
             return super.shouldInterceptRequest(view, request);
         }
         else if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame())
@@ -128,6 +132,7 @@ public class Web3ViewClient extends WebViewClient {
                         || request.getUrl().toString().contains("css"))) {
                 synchronized (lock) {
                     if (!isInjected) {
+                        System.out.println("YOLESS: Inject: " + request.getUrl().toString());
                         injectScriptFile(view);
                         isInjected = true;
                     }
@@ -135,6 +140,8 @@ public class Web3ViewClient extends WebViewClient {
             }
             return super.shouldInterceptRequest(view, request);
         }
+
+        System.out.println("YOLESS: No Inject: " + request.getUrl().toString());
 
         HttpUrl httpUrl = HttpUrl.parse(request.getUrl().toString());
         if (httpUrl == null) {

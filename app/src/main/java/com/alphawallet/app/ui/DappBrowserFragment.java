@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
@@ -135,7 +133,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -1608,8 +1605,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 refresh.setEnabled(false);
             }
             web3.resetView();
-            web3.reload();
+            web3.loadUrl("javascript:" + getJavaScript());
         }
+    }
+
+    private String getJavaScript() {
+        return "window.Promise && navigator.serviceWorker.getRegistrations().then( function(registrations) { Promise.all(registrations.map((r) => r.unregister())).then(() => { window.location.reload(true);}) }); ";
     }
 
     @Override

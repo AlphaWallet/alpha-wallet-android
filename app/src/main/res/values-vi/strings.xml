@@ -854,4 +854,6 @@
     <string name="summary_change_24h">%1$s (%2$s) Hôm nay</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="price_alert_indicator_below">Phía dưới</string>
+    <string name="price_alert_indicator_above">Bên trên</string>
 </resources>

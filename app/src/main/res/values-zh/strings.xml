@@ -826,4 +826,6 @@
     <string name="summary_change_24h">%1$s (%2$s) 今天</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="price_alert_indicator_below">低于</string>
+    <string name="price_alert_indicator_above">高于</string>
 </resources>

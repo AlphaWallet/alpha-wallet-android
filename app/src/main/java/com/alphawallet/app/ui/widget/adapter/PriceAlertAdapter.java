@@ -50,12 +50,12 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
         if (alert.getIndicator())
         {
             holder.icon.setImageResource(R.drawable.ic_system_up);
-            holder.indicator.setText("Above ");
+            holder.indicator.setText(R.string.price_alert_indicator_above);
         }
         else
         {
             holder.icon.setImageResource(R.drawable.ic_system_down);
-            holder.indicator.setText("Below ");
+            holder.indicator.setText(R.string.price_alert_indicator_below);
         }
 
 

@@ -861,4 +861,6 @@
     <string name="governance_header">Quản trị</string>
     <string name="collectibles_header">Sưu tầm</string>
     <string name="whats_new">Có gì mới?</string>
+    <string name="price_alert_indicator_below">Phía dưới</string>
+    <string name="price_alert_indicator_above">Bên trên</string>
 </resources>

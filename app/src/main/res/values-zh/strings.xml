@@ -833,4 +833,6 @@
     <string name="governance_header">治理</string>
     <string name="collectibles_header">NFT</string>
     <string name="whats_new">什么是新的？</string>
+    <string name="price_alert_indicator_below">低于</string>
+    <string name="price_alert_indicator_above">高于</string>
 </resources>

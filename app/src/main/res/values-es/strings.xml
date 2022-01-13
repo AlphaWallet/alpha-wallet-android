@@ -833,4 +833,6 @@
     <string name="governance_header">Gobernancia</string>
     <string name="collectibles_header">Coleccionables</string>
     <string name="whats_new">¿Qué hay de nuevo?</string>
+    <string name="price_alert_indicator_below">Debajo</string>
+    <string name="price_alert_indicator_above">Sobre</string>
 </resources>

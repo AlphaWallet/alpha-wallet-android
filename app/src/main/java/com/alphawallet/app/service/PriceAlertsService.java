@@ -4,7 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
+
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -16,11 +16,15 @@ import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
+
+import androidx.annotation.Nullable;
 import dagger.android.AndroidInjection;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -121,7 +125,7 @@ public class PriceAlertsService extends Service {
             if (!priceAlert.isEnabled() || defaultWallet == null) {
                 continue;
             }
-            tickerService.convertPair(priceAlert.getCurrency(), TickerService.getCurrencySymbolTxt())
+            tickerService.convertPair(TickerService.getCurrencySymbolTxt(), priceAlert.getCurrency())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((rate) -> {
@@ -130,10 +134,8 @@ public class PriceAlertsService extends Service {
                             return;
                         }
                         double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price);
-                        double alertPrice = Double.parseDouble(priceAlert.getValue()) * rate;
 
-                        if ((priceAlert.getIndicator() && currentTokenPrice < alertPrice) ||
-                                (!priceAlert.getIndicator() && currentTokenPrice > alertPrice)) {
+                        if (priceAlert.match(rate, currentTokenPrice)) {
                             // raise alert
                             boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
                             Intent intent = tokenDetailRouter.makeERC20DetailsIntent(this, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,

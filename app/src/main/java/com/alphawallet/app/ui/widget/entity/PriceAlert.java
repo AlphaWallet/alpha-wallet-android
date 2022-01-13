@@ -133,4 +133,9 @@ public class PriceAlert implements Parcelable {
             return new PriceAlert[size];
         }
     };
+
+    public boolean match(Double rate, double currentTokenPrice) {
+        return (getIndicator() && currentTokenPrice * rate > Double.parseDouble(getValue())) ||
+                (!getIndicator() && currentTokenPrice * rate < Double.parseDouble(getValue()));
+    }
 }

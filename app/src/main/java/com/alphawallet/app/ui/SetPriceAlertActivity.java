@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.service.TickerService;
@@ -79,7 +80,11 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((rate) -> {
-                    double currentTokenPrice = Double.parseDouble(viewModel.getTokensService().getTokenTicker(token).price);
+                    TokenTicker tokenTicker = viewModel.getTokensService().getTokenTicker(token);
+                    if (tokenTicker == null) {
+                        return;
+                    }
+                    double currentTokenPrice = Double.parseDouble(tokenTicker.price);
                     CurrencyItem currencyItem = CurrencyRepository.getCurrencyByISO(newPriceAlert.getCurrency());
                     if (currencyItem != null) {
                         String text = currencyItem.getCurrencyText(currentTokenPrice * rate);

@@ -333,6 +333,8 @@ public class Web3View extends WebView {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            clearCache(true);
+            clearFormData();
             if (!redirect)
             {
                 internalClient.resetInject();
@@ -345,7 +347,16 @@ public class Web3View extends WebView {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
-            if (!internalClient.didInjection()) { internalClient.injectScriptFileFinal(view); }
+            if (!internalClient.didInjection())
+            {
+                String script1 = internalClient.getInjectionString1(view);
+                String script2 = internalClient.getInjectionString2(view);
+                //view.evaluateJavascript(script2, null);
+                internalClient.didInjection(true);
+                //view.evaluateJavascript(script, null);
+                //System.out.println("YOLESS: Inject2: " + url);
+                //internalClient.injectScriptFileFinal(view);
+            }
 
             if (!redirect && !loadingError)
             {

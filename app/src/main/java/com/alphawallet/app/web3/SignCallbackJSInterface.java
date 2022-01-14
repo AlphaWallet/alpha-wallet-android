@@ -149,6 +149,24 @@ public class SignCallbackJSInterface
         }
     }
 
+    @JavascriptInterface
+    public void walletSwitchEthereumChain(int callbackId, String msgParams) {
+        //TODO: Implement custom chains from dapp browser: see OnWalletAddEthereumChainObject in class DappBrowserFragment
+        //First draft: attempt to match this chain with known chains; switch to known chain if we match
+        try
+        {
+            WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
+            if (!TextUtils.isEmpty(chainObj.chainId))
+            {
+                webView.post(() -> onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
+            }
+        }
+        catch (JsonSyntaxException e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+    }
+
     private String getUrl() {
         return webView == null ? "" : webView.getUrl();
     }

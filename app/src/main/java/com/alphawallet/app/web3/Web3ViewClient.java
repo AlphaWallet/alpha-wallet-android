@@ -80,6 +80,11 @@ public class Web3ViewClient extends WebViewClient {
         return isInjected;
     }
 
+    public void didInjection(boolean injection)
+    {
+        isInjected = injection;
+    }
+
     private boolean shouldOverrideUrlLoading(WebView webView, String url, boolean isMainFrame, boolean isRedirect) {
         boolean result = false;
         synchronized (lock) {
@@ -113,12 +118,10 @@ public class Web3ViewClient extends WebViewClient {
             return null;
         }
 
-
-
         if (isInjected
                 || request.getUrl().toString().contains("infura")
                 || request.getUrl().toString().contains(".auth0.com/")
-                || request.getUrl().toString().contains("analytics.com/analytics.js")
+                /*|| request.getUrl().toString().contains("analytics.com/analytics.js")*/
                 || handleTrustedExtension(request.getUrl().toString()))
         {
             System.out.println("YOLESS: No Inject: " + request.getUrl().toString());
@@ -173,6 +176,21 @@ public class Web3ViewClient extends WebViewClient {
     private void injectScriptFile(WebView view) {
         if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: ");
         view.post(() -> injectScriptFileFinal(view));
+    }
+
+    public String getInjectionString(WebView view)
+    {
+        return jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
+    }
+
+    public String getInjectionString1(WebView view)
+    {
+        return jsInjectorClient.assembleJs1(view.getContext());
+    }
+
+    public String getInjectionString2(WebView view)
+    {
+        return jsInjectorClient.assembleJs2(view.getContext());
     }
 
     public void injectScriptFileFinal(WebView view) {

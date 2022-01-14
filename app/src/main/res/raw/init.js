@@ -1,4 +1,3 @@
-
 if (typeof __addressHex == 'undefined') {
     __addressHex = "%1$s";
 }
@@ -41,7 +40,7 @@ window.AlphaWallet.init(__rpcURL, {
     alpha.signPersonalMessage(id, data);
   },
   signTypedMessage: function (msgParams, cb) {
-    console.log('signTypedMessage ', msgParams)
+    console.log('signTypedMessage', msgParams)
     const { data } = msgParams
     const { id = 8888 } = msgParams
     AlphaWallet.addCallback(id, cb)
@@ -63,6 +62,14 @@ window.AlphaWallet.init(__rpcURL, {
     alpha.walletAddEthereumChain(id, JSON.stringify(msgParams));
     //webkit.messageHandlers.walletAddEthereumChain.postMessage({"name": "walletAddEthereumChain", "object": data, id: id})
   },
+  walletSwitchEthereumChain: function (msgParams, cb) {
+    const data = msgParams
+    const { id = Math.floor((Math.random() * 100000) + 1) } = msgParams
+    console.log("walletSwitchEthereumChain", msgParams)
+    AlphaWallet.addCallback(id, cb)
+    alpha.walletSwitchEthereumChain(id, JSON.stringify(msgParams));
+    //webkit.messageHandlers.walletSwitchEthereumChain.postMessage({"name": "walletSwitchEthereumChain", "object": data, id: id})
+  },
   enable: function() {
       return new Promise(function(resolve, reject) {
           //send back the coinbase account as an array of one
@@ -71,7 +78,7 @@ window.AlphaWallet.init(__rpcURL, {
   }
 }, {
     address: __addressHex,
-    networkVersion: __chainID
+    networkVersion: "0x" + parseInt(__chainID).toString(16) || null
 })
 
 window.web3.setProvider = function () {

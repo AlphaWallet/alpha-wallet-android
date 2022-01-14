@@ -1605,12 +1605,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 refresh.setEnabled(false);
             }
             web3.resetView();
-            web3.loadUrl("javascript:" + getJavaScript());
+            web3.reload();
         }
-    }
-
-    private String getJavaScript() {
-        return "window.Promise && navigator.serviceWorker.getRegistrations().then( function(registrations) { Promise.all(registrations.map((r) => r.unregister())).then(() => { window.location.reload(true);}) }); ";
     }
 
     @Override

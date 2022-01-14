@@ -89,7 +89,11 @@ public class Web3View extends WebView {
     public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders)
     {
         checkDOMUsage(url);
-        super.loadUrl(url, additionalHttpHeaders);
+        super.loadUrl("javascript:" + getJavaScript(url), additionalHttpHeaders);
+    }
+
+    private String getJavaScript(String url) {
+        return "window.Promise && navigator.serviceWorker.getRegistrations().then( function(registrations) { Promise.all(registrations.map((r) => r.unregister())).then(() => { window.location.replace('" + url + "');}) }); ";
     }
 
     @Override

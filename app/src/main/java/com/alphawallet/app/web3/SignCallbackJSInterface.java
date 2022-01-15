@@ -95,6 +95,12 @@ public class SignCallbackJSInterface
     }
 
     @JavascriptInterface
+    public void requestAccounts(int callbackId) {
+        //webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId, SignMessageType.SIGN_PERSONAL_MESSAGE)));
+        webView.post(() -> onEthCallListener.onEthCall(null) );
+    }
+
+    @JavascriptInterface
     public void signTypedMessage(int callbackId, String data) {
         webView.post(() -> {
             try

@@ -101,7 +101,7 @@ public class JsInjectorClient {
 
     public String assembleJs2(Context context)
     {
-        return loadFile(context, R.raw.alphawallet_min2);
+        return loadFile(context, R.raw.alphawallet_min);
     }
 
     @Nullable

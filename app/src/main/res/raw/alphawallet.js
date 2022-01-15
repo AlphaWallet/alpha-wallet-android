@@ -40065,14 +40065,14 @@ ProviderEngine.prototype.sendAsync = function (payload, cb) {
       };
       cb(null, result);
       break;
-    case 'eth_requestAccounts':
-      var result = {
-        id: payload.id,
-        jsonrpc: payload.jsonrpc,
-        result: [globalSyncOptions.address]
-      };
-      cb(null, result);
-      break;
+//    case 'eth_requestAccounts':
+//      var result = {
+//        id: payload.id,
+//        jsonrpc: payload.jsonrpc,
+//        result: [globalSyncOptions.address]
+//      };
+//      cb(null, result);
+//      break;
     case 'eth_chainId':
       var result = {
         id: payload.id,
@@ -62656,6 +62656,13 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
         (cb) => self.processTransaction(txParams, cb),
       ], end)
       return
+
+    case 'eth_requestAccounts':
+            waterfall([
+                    // (cb) => self.validateTransaction(txParams, cb),
+                    (cb) => self.requestAccounts(params, cb),
+                  ], end)
+            break;
 
     case 'eth_signTransaction':
       txParams = payload.params[0]

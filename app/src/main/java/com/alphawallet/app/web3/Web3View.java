@@ -334,9 +334,10 @@ public class Web3View extends WebView {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
             clearCache(true);
-            clearFormData();
             if (!redirect)
             {
+                view.evaluateJavascript(internalClient.getInjectionString2(view), null);
+                view.evaluateJavascript(internalClient.getInjectionString1(view), null);
                 internalClient.resetInject();
             }
 

@@ -108,7 +108,14 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
             listItemDecoration = new ListDivider(recyclerView.getContext());
 
-            showGridView();
+            if (hasTokenScriptOverride(token))
+            {
+                showListView();
+            }
+            else
+            {
+                showGridView();
+            }
         }
     }
 

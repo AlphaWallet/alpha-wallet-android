@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
@@ -51,7 +52,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     private Wallet wallet;
     private Token token;
     private FunctionButtonBar functionBar;
-    private boolean isGridView = true;
+    private boolean isGridView;
 
     private MenuItem sendMultipleTokensMenuItem;
     private MenuItem switchToGridViewMenuItem;
@@ -84,7 +85,13 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         initViewModel();
         getIntentData();
         setTitle(token.tokenInfo.name);
+        isGridView = !hasTokenScriptOverride(token);
         setupViewPager();
+    }
+
+    private boolean hasTokenScriptOverride(Token t)
+    {
+        return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 
     public void storeAsset(BigInteger tokenId, NFTAsset asset)
@@ -194,7 +201,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         } else
         {
             switchToListViewMenuItem.setVisible(false);
-            switchToGridViewMenuItem.setVisible(true);
+            switchToGridViewMenuItem.setVisible(!hasTokenScriptOverride(token));
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -273,7 +280,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         } else
         {
             switchToListViewMenuItem.setVisible(false);
-            switchToGridViewMenuItem.setVisible(true);
+            switchToGridViewMenuItem.setVisible(!hasTokenScriptOverride(token));
         }
 
         if (token.isBatchTransferAvailable())

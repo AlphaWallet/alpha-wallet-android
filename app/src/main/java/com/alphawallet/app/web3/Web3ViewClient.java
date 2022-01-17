@@ -121,19 +121,14 @@ public class Web3ViewClient extends WebViewClient {
         return super.shouldInterceptRequest(view, request);
     }
 
-    public String getInjectionString(WebView view)
+    public String getInitString(WebView view)
     {
-        return jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
+        return jsInjectorClient.initJs(view.getContext());
     }
 
-    public String getInjectionString1(WebView view)
+    public String getProviderString(WebView view)
     {
-        return jsInjectorClient.assembleJs1(view.getContext());
-    }
-
-    public String getInjectionString2(WebView view)
-    {
-        return jsInjectorClient.assembleJs2(view.getContext());
+        return jsInjectorClient.providerJs(view.getContext());
     }
 
     @Override

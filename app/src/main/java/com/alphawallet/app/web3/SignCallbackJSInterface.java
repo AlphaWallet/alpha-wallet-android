@@ -149,7 +149,7 @@ public class SignCallbackJSInterface
             WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
             if (!TextUtils.isEmpty(chainObj.chainId))
             {
-                webView.post(() -> onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
+                webView.post(() -> onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(callbackId, chainObj));
             }
         }
         catch (JsonSyntaxException e)
@@ -161,11 +161,11 @@ public class SignCallbackJSInterface
     @JavascriptInterface
     public void walletSwitchEthereumChain(int callbackId, String msgParams) {
         try
-        {
+        { //{"chainId":"0x89","chainType":"ETH"}
             WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
             if (!TextUtils.isEmpty(chainObj.chainId))
             {
-                webView.post(() -> onWalletActionListener.onWalletSwitchEthereumChain onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
+                webView.post(() -> onWalletActionListener.onWalletSwitchEthereumChain(callbackId, chainObj));// onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
             }
         }
         catch (JsonSyntaxException e)

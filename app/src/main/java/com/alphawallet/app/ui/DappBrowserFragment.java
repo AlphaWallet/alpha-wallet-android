@@ -1158,7 +1158,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     @Override
-    public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
+    public void onWalletAddEthereumChainObject(long callbackId, WalletAddEthereumChainObject chainObj)
     {
         // read chain value
         long chainId = chainObj.getChainId();
@@ -1178,11 +1178,21 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 addCustomChainDialog.dismiss();
             });
             addCustomChainDialog.show();
+        }
+        else
+        {
+            changeChainRequest(callbackId, info);
+        }
+    }
+
+    private void changeChainRequest(long callbackId, NetworkInfo info)
+    {
+        //Don't show dialog if network doesn't need to be changed or if already showing
+        if ((activeNetwork != null && activeNetwork.chainId == info.chainId) || (chainSwapDialog != null && chainSwapDialog.isShowing()))
+        {
+            web3.onWalletActionSuccessful(callbackId, null);
             return;
         }
-
-        //Don't show dialog if network doesn't need to be changed or if already showing
-        if ((activeNetwork != null && activeNetwork.chainId == chainId) || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
 
         //if we're switching between mainnet and testnet we need to pop open the 'switch to testnet' dialog (class TestNetDialog)
         // - after the user switches to testnet, go straight to switching the network (loadNewNetwork)
@@ -1197,7 +1207,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         else
         {
             //go straight to chain change dialog
-            showChainChangeDialog(info);
+            showChainChangeDialog(callbackId, info);
         }
     }
 
@@ -1214,11 +1224,40 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.onWalletActionSuccessful(callbackId, "[" + wallet.address + "]");
     }
 
-    private void showChainChangeDialog(NetworkInfo newNetwork)
+    //EIP-3326
+    @Override
+    public void onWalletSwitchEthereumChain(long callbackId, WalletAddEthereumChainObject chainObj)
+    {
+        //request user to change chains
+        long chainId = chainObj.getChainId();
+        final NetworkInfo info = viewModel.getNetworkInfo(chainId);
+        if (info == null)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.unknown_network_title)
+                    .setMessage(getString(R.string.unknown_network, String.valueOf(chainId)))
+                    .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                        if (chainSwapDialog != null && chainSwapDialog.isShowing()) chainSwapDialog.dismiss();
+                    })
+                    .setCancelable(true);
+
+            chainSwapDialog = builder.create();
+            chainSwapDialog.show();
+        }
+        else
+        {
+            changeChainRequest(callbackId, info);
+        }
+    }
+
+    private void showChainChangeDialog(long chainId, NetworkInfo newNetwork)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                 .setMessage(getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId)))
-                .setPositiveButton(R.string.dialog_ok, (d, w) -> loadNewNetwork(newNetwork.chainId))
+                .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                    loadNewNetwork(newNetwork.chainId);
+                    web3.onWalletActionSuccessful(chainId, null);
+                })
                 .setNegativeButton(R.string.action_cancel, (d, w) -> chainSwapDialog.dismiss())
                 .setCancelable(true);
 

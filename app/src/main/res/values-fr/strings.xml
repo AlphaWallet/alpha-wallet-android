@@ -858,4 +858,6 @@
     <string name="governance_header">Gouvernance</string>
     <string name="collectibles_header">Collectibles</string>
     <string name="whats_new">Quoi de neuf?</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
 </resources>

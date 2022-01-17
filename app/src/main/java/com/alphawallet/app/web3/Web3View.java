@@ -93,7 +93,6 @@ public class Web3View extends WebView {
     @Override
     public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders)
     {
-        checkDOMUsage(url);
         super.loadUrl(url, additionalHttpHeaders);
     }
 
@@ -307,9 +306,9 @@ public class Web3View extends WebView {
     private final OnWalletAddEthereumChainObjectListener innerAddChainListener = new OnWalletAddEthereumChainObjectListener()
     {
         @Override
-        public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
+        public void onWalletAddEthereumChainObject(long callbackId, WalletAddEthereumChainObject chainObject)
         {
-            onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObject);
+            onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(callbackId, chainObject);
         }
     };
 
@@ -318,6 +317,12 @@ public class Web3View extends WebView {
         public void onRequestAccounts(long callbackId)
         {
             onWalletActionListener.onRequestAccounts(callbackId);
+        }
+
+        @Override
+        public void onWalletSwitchEthereumChain(long callbackId, WalletAddEthereumChainObject chainObj)
+        {
+            onWalletActionListener.onWalletSwitchEthereumChain(callbackId, chainObj);
         }
     };
 
@@ -361,8 +366,8 @@ public class Web3View extends WebView {
             clearCache(true);
             if (!redirect)
             {
-                view.evaluateJavascript(internalClient.getInjectionString2(view), null);
-                view.evaluateJavascript(internalClient.getInjectionString1(view), null);
+                view.evaluateJavascript(internalClient.getProviderString(view), null);
+                view.evaluateJavascript(internalClient.getInitString(view), null);
                 internalClient.resetInject();
             }
 
@@ -405,41 +410,10 @@ public class Web3View extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             redirect = true;
-            if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
 
             return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, request);
         }
-
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);
-            if (response != null) {
-                try {
-                    InputStream in = response.getData();
-                    int len = in.available();
-                    byte[] data = new byte[len];
-                    int readLen = in.read(data);
-                    if (readLen == 0) {
-                        throw new IOException("Nothing is read.");
-                    }
-                    String injectedHtml = internalClient.getJsInjectorClient().injectJS(new String(data));
-                    response.setData(new ByteArrayInputStream(injectedHtml.getBytes()));
-                } catch (IOException ex) {
-                    Log.d("INJECT AFTER_EXTERNAL", "", ex);
-                }
-            } else {
-                response = internalClient.shouldInterceptRequest(view, request);
-            }
-            return response;
-        }
-    }
-
-    // Grim hack for dapps that still use local storage
-    private void checkDOMUsage(@NotNull String url)
-    {
-        // may need other sites added
-        getSettings().setDomStorageEnabled(!url.equals("https://wallet.matic.network/bridge/"));
     }
 
     private static boolean isJson(String value) {

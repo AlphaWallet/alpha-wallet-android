@@ -169,6 +169,9 @@ public class InputView extends LinearLayout {
 
     public void setText(CharSequence text) {
         this.editText.setText(text);
+        if (text != null) {
+            this.editText.setSelection(text.length());
+        }
     }
 
     public void setError(int resId) {

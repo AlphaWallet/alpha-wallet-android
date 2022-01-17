@@ -109,6 +109,7 @@
     <string name="currency">Devises</string>
     <string name="advanced">Options avancées</string>
     <string name="copy_wallet_address">Copier l\'adresse du portefeuille</string>
+    <string name="rename_this_wallet_action">Renommer ce portefeuille</string>
     <string name="hint_contract_name">Nom</string>
     <string name="hint_contract_venue">Lieu</string>
     <string name="hint_contract_date">Date</string>

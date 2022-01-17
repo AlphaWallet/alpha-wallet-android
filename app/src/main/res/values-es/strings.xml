@@ -102,6 +102,7 @@
     <string name="currency">Monedas</string>
     <string name="advanced">Opciones avanzadas</string>
     <string name="copy_wallet_address">Copiar la dirección del monedero</string>
+    <string name="rename_this_wallet_action">Cambiar el nombre de esta billetera</string>
     <string name="hint_contract_name">Nombre</string>
     <string name="hint_contract_venue">Ubicación</string>
     <string name="hint_contract_date">Fecha</string>

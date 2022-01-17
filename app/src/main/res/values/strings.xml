@@ -110,6 +110,7 @@
     <string name="currency">Currencies</string>
     <string name="advanced">Advanced Options</string>
     <string name="copy_wallet_address">Copy Wallet Address</string>
+    <string name="rename_this_wallet_action">Rename this Wallet</string>
     <string name="hint_contract_name">Name</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>

@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -801,6 +802,16 @@ public class TokensService
         return new Pair<>(Double.parseDouble(tt.price), Double.parseDouble(tt.percentChange24h));
     }
 
+    public double getTokenFiatValue(long chainId, String address)
+    {
+        Token token = getToken(chainId, address);
+        TokenTicker tt = token != null ? getTokenTicker(token) : null;
+        if (tt == null) return 0.0;
+        BigDecimal correctedBalance = token.getCorrectedBalance(18);
+        BigDecimal fiatValue = correctedBalance.multiply(new BigDecimal(tt.price)).setScale(18, RoundingMode.DOWN);
+        return fiatValue.doubleValue();
+    }
+
     ///////////////////////////////////////////
     // Update Heuristics - timings and weightings for token updates
     // Fine tune how and when tokens are updated here
@@ -1220,4 +1231,13 @@ public class TokensService
             }).isDisposed();
         }
     }
+
+    // TODO: This may be refactored once we have switched over to a more efficient Token database model
+    // That is - common data like Name, Decimals, Address goes into a single Token database,
+    //   wallet specific data like balance, update time etc goes into the per-wallet database
+    public TokenGroup getTokenGroup(Token token)
+    {
+        return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
+    }
+
 }

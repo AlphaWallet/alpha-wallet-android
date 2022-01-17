@@ -1,13 +1,27 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.getChainOrdinal;
+
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class TokenSortedItem extends SortedItem<TokenCardMeta> {
 
     private boolean debugging = false;
+    private double fiatValue = 0;
+    public final int chainOrdinal;
 
-    public TokenSortedItem(int viewType, TokenCardMeta value, int weight) {
-        super(viewType, value, weight);
+    public TokenSortedItem(int viewType, TokenCardMeta value, long weight) {
+        super(viewType, value, new TokenPosition(value.group, value.getChain(), weight));
+        chainOrdinal = getChainOrdinal(value.getChain());
+    }
+
+    public void setFiatValue(double v)
+    {
+        fiatValue = v;
     }
 
     public void debug()
@@ -16,26 +30,50 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
     }
 
     @Override
-    public int compare(SortedItem other) {
-        if (debugging) System.out.println("DEBUG: Compare: " + weight + " " + other.weight);
-
-
-        if (other.value instanceof TokenCardMeta) {
-            // if tokens has different group - sort by group
-            if (value.group != ((TokenCardMeta)other.value).group) {
-                return value.group.compareTo(((TokenCardMeta)other.value).group);
-            }
-        } else if (other instanceof HeaderItem) {
-            // if header is from the other group - sort by group
-            if (value.group != ((HeaderItem)other).group) {
-                return value.group.compareTo(((HeaderItem)other).group);
-            } else {
-                // header is from the same group - should be the very first item
-                return 1;
-            }
+    public int compare(SortedItem other)
+    {
+        if (other instanceof TokenSortedItem)
+        {
+            return weight.compare(other.weight, compareTokens(other));
         }
+        else
+        {
+            return super.compare(other);
+        }
+    }
 
-        return weight - other.weight;
+    private int compareTokens(SortedItem other)
+    {
+        TokenCardMeta otherTcm = ((TokenSortedItem)other).value;
+        TokenSortedItem otherTsi = (TokenSortedItem) other;
+        //compare tokens with old model
+        //check value comparison
+        if (value.getAddress().hashCode() == otherTcm.getAddress().hashCode())
+        {
+            return 0;
+        }
+        else if (value.isEthereum())
+        {
+            if (otherTcm.isEthereum()) return 0;
+            else return -1; // always going to be before
+        }
+        else if (otherTcm.isEthereum())
+        {
+            return 1; //other will be first
+        }
+        else if (fiatValue > 0 || otherTsi.fiatValue > 0)
+        {
+            return Double.compare(otherTsi.fiatValue, fiatValue);
+        }
+        else if (weight.weighting != otherTsi.weight.weighting)
+        {
+            return Long.compare(weight.weighting, otherTsi.weight.weighting);
+        }
+        else //if weighting is the same, compare addresses if it's a Token item, otherwise it should be a match
+        {
+            //finally compare identical token names against address
+            return Integer.compare(value.getAddress().hashCode(), otherTcm.getAddress().hashCode());
+        }
     }
 
     @Override

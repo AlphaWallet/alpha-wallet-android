@@ -517,18 +517,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.show();
     }
 
-    private void showTransactionError()
-    {
-        hideDialog();
-        alertDialog = new AWalletAlertDialog(this);
-        alertDialog.setIcon(AWalletAlertDialog.ERROR);
-        alertDialog.setTitle(R.string.tokenscript_error);
-        alertDialog.setMessage(getString(R.string.invalid_parameters));
-        alertDialog.setButtonText(R.string.button_ok);
-        alertDialog.setButtonListener(v ->alertDialog.dismiss());
-        alertDialog.show();
-    }
-
     @Override
     public void signMessage(Signable message, DAppFunction dAppFunction)
     {

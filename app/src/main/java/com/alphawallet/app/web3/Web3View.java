@@ -28,7 +28,6 @@ import com.alphawallet.token.entity.Signable;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 import org.web3j.crypto.Keys;
 
 import java.util.HashMap;
@@ -59,10 +58,6 @@ public class Web3View extends WebView {
     private OnEthCallListener onEthCallListener;
     @Nullable
     private OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
-    @Nullable
-    private OnVerifyListener onVerifyListener;
-    @Nullable
-    private OnGetBalanceListener onGetBalanceListener;
     private final Web3ViewClient webViewClient;
     private URLLoadInterface loadInterface;
 
@@ -167,19 +162,6 @@ public class Web3View extends WebView {
         loadInterface = iFace;
     }
 
-    @Nullable
-    public String getRpcUrl() {
-        return webViewClient.getJsInjectorClient().getRpcUrl();
-    }
-
-    public void addUrlHandler(@NonNull UrlHandler urlHandler) {
-        webViewClient.addUrlHandler(urlHandler);
-    }
-
-    public void removeUrlHandler(@NonNull UrlHandler urlHandler) {
-        webViewClient.removeUrlHandler(urlHandler);
-    }
-
     public void setOnSignTransactionListener(@Nullable OnSignTransactionListener onSignTransactionListener) {
         this.onSignTransactionListener = onSignTransactionListener;
     }
@@ -204,14 +186,6 @@ public class Web3View extends WebView {
         this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
     }
 
-    public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
-        this.onVerifyListener = onVerifyListener;
-    }
-
-    public void setOnGetBalanceListener(@Nullable OnGetBalanceListener onGetBalanceListener) {
-        this.onGetBalanceListener = onGetBalanceListener;
-    }
-
     public void onSignTransactionSuccessful(Web3Transaction transaction, String signHex) {
         long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
@@ -232,11 +206,6 @@ public class Web3View extends WebView {
 
     public void onSignError(Web3Transaction transaction, String error) {
         long callbackId = transaction.leafPosition;
-        callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
-    }
-
-    public void onSignError(EthereumMessage message, String error) {
-        long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
@@ -296,24 +265,6 @@ public class Web3View extends WebView {
         public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
         {
             onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObject);
-        }
-    };
-
-    private final OnVerifyListener innerOnVerifyListener = new OnVerifyListener() {
-        @Override
-        public void onVerify(String message, String signHex) {
-            if (onVerifyListener != null) {
-                onVerifyListener.onVerify(message, signHex);
-            }
-        }
-    };
-
-    private final OnGetBalanceListener innerOnGetBalanceListener = new OnGetBalanceListener() {
-        @Override
-        public void onGetBalance(String balance) {
-            if (onGetBalanceListener != null) {
-                onGetBalanceListener.onGetBalance(balance);
-            }
         }
     };
 
@@ -383,14 +334,5 @@ public class Web3View extends WebView {
     {
         // may need other sites added
         getSettings().setDomStorageEnabled(!url.equals("https://wallet.matic.network/bridge/"));
-    }
-
-    private static boolean isJson(String value) {
-        try {
-            JSONObject stateData = new JSONObject(value);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

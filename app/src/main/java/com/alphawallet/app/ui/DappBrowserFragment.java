@@ -44,7 +44,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -106,8 +105,6 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
 
@@ -120,7 +117,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.SignatureException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -145,7 +141,6 @@ import io.realm.RealmResults;
 
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
@@ -1609,27 +1604,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         loadUrl(url);
     }
 
-    public void testRecoverAddressFromSignature(@NotNull String message, String sig)
-    {
-        String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
-        byte[] msgHash = (prefix + message).getBytes();
-
-        byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
-        Sign.SignatureData sd = sigFromByteArray(signatureBytes);
-        String addressRecovered;
-
-        try
-        {
-            BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
-            addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
-        }
-        catch (SignatureException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     private void resetDappBrowser()
     {
         web3.clearHistory();
@@ -1898,8 +1872,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             oos.writeObject(CURRENT_FRAGMENT);
             oos.writeObject(currentFragment);
             oos.writeObject(CURRENT_URL);
-            String uurl = urlTv.getText().toString();
-            String uurl2 = web3.getUrl();
             oos.writeObject(urlTv.getText().toString());
         }
         return bos;
@@ -2112,7 +2084,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @NotNull
     private String determineMimeType(@NotNull WebChromeClient.FileChooserParams fileChooserParams)
     {
-        if (fileChooserParams == null || fileChooserParams.getAcceptTypes().length == 0) return "*/*"; // Allow anything
+        if (fileChooserParams.getAcceptTypes().length == 0) return "*/*"; // Allow anything
         String mime;
         String firstType = fileChooserParams.getAcceptTypes()[0];
 

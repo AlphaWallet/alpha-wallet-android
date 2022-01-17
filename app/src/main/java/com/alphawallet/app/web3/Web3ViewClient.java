@@ -39,14 +39,6 @@ public class Web3ViewClient extends WebViewClient {
         this.context = context;
     }
 
-    void addUrlHandler(UrlHandler urlHandler) {
-        urlHandlerManager.add(urlHandler);
-    }
-
-    void removeUrlHandler(UrlHandler urlHandler) {
-        urlHandlerManager.remove(urlHandler);
-    }
-
     public JsInjectorClient getJsInjectorClient()
     {
         return jsInjectorClient;

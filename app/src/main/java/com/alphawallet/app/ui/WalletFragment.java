@@ -8,7 +8,6 @@ import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -44,9 +42,9 @@ import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
+import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
@@ -60,23 +58,18 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
-import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
-import com.alphawallet.app.widget.SearchToolbar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.UserAvatar;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
@@ -88,7 +81,6 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -106,10 +98,6 @@ public class WalletFragment extends BaseFragment implements
         ServiceSyncCallback
 {
     private static final String TAG = "WFRAG";
-    private static final int TAB_ALL = 0;
-    private static final int TAB_CURRENCY = 1;
-    private static final int TAB_COLLECTIBLES = 2;
-    private static final int TAB_ATTESTATIONS = 3;
 
     public static final String SEARCH_FRAGMENT = "w_search";
 
@@ -126,7 +114,7 @@ public class WalletFragment extends BaseFragment implements
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
     private boolean isVisible;
-    private int currentTabPos = -1;
+    private TokenFilter currentTabPos = TokenFilter.ALL;
     private Realm realm = null;
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
@@ -180,7 +168,7 @@ public class WalletFragment extends BaseFragment implements
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
                 tokenManagementLauncher);
         adapter.setHasStableIds(true);
-        setLinearLayoutManager(TAB_ALL);
+        setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);
         if (recyclerView.getItemAnimator() != null)
             ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
@@ -190,6 +178,7 @@ public class WalletFragment extends BaseFragment implements
 
         refreshLayout.setOnRefreshListener(this::refreshList);
         recyclerView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     private void initViewModel() {
@@ -200,7 +189,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
-        largeTitleView.setVisibility(viewModel.getTokensService().startWalletSync(this) ? View.VISIBLE : View.GONE ); //show or hide Fiat summary
+        viewModel.getTokensService().startWalletSync(this);
     }
 
     private void initViews(@NonNull View view) {
@@ -268,7 +257,8 @@ public class WalletFragment extends BaseFragment implements
                 String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
-                        t.getUpdateTime(), viewModel.getAssetDefinitionService(), t.getName(), t.getSymbol(), t.getContractType());
+                        t.getUpdateTime(), viewModel.getAssetDefinitionService(), t.getName(), t.getSymbol(), t.getContractType(),
+                        viewModel.getTokenGroup(t.getChainId(), t.getTokenAddress()));
                 meta.lastTxUpdate = t.getLastTxTime();
                 meta.isEnabled = t.isEnabled();
                 metas.add(meta);
@@ -296,14 +286,27 @@ public class WalletFragment extends BaseFragment implements
 
     //Refresh value of wallet once sync is complete
     @Override
-    public void syncComplete(TokensService svs, boolean isMainnetSync, int syncCount)
+    public void syncComplete(TokensService svs, int syncCount)
     {
-        handler.post(() -> addressAvatar.finishWaiting());
-        svs.getFiatValuePair()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateValue)
-                .isDisposed();
+        if (syncCount > 0) handler.post(() -> addressAvatar.finishWaiting());
+        if (viewModel.getTokensService().isMainNetActive())
+        {
+            svs.getFiatValuePair()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::updateValue)
+                    .isDisposed();
+        }
+
+        if (syncCount > 0)
+        {
+            //now refresh the tokens to pick up any new ticker updates
+            viewModel.getTokensService().getTickerUpdateList()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(adapter::notifyTickerUpdate)
+                    .isDisposed();
+        }
     }
 
     //Could the view have been destroyed?
@@ -316,7 +319,7 @@ public class WalletFragment extends BaseFragment implements
         int color = ContextCompat.getColor(getContext(), changePercent < 0 ? R.color.red : R.color.green);
         largeTitleView.subtitle.setTextColor(color);
 
-        if (viewModel.getWallet().type != WalletType.WATCH && isVisible)
+        if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
         {
             viewModel.checkBackup(fiatValues.first);
         }
@@ -368,8 +371,10 @@ public class WalletFragment extends BaseFragment implements
             return;
         }
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.defi_header));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.governance_header));
         //tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
@@ -377,26 +382,22 @@ public class WalletFragment extends BaseFragment implements
             @Override
             public void onTabSelected(TabLayout.Tab tab)
             {
-                switch (tab.getPosition())
+                TokenFilter newFilter = setLinearLayoutManager(tab.getPosition());
+                adapter.setFilterType(newFilter);
+                switch (newFilter)
                 {
-                    case TAB_ALL:
-                        setLinearLayoutManager(tab.getPosition());
-                        adapter.setFilterType(TokensAdapter.FILTER_ALL);
+                    case ALL:
+                    case ASSETS:
+                    case DEFI:
+                    case GOVERNANCE:
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         viewModel.prepare();
                         break;
-                    case TAB_CURRENCY:
-                        setLinearLayoutManager(tab.getPosition());
-                        adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
+                    case COLLECTIBLES:
+                        setGridLayoutManager(TokenFilter.COLLECTIBLES);
                         viewModel.prepare();
                         break;
-                    case TAB_COLLECTIBLES:
-                        setGridLayoutManager(tab.getPosition());
-                        adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
-                        viewModel.prepare();
-                        break;
-                    case TAB_ATTESTATIONS: // TODO: Filter Attestations
-                        break;
-                    default:
+                    case ATTESTATIONS: // TODO: Filter Attestations
                         break;
                 }
             }
@@ -411,11 +412,9 @@ public class WalletFragment extends BaseFragment implements
             {
             }
         });
-
-        //TabUtils.decorateTabLayout(getContext(), tabLayout);
     }
 
-    private void setGridLayoutManager(int tab)
+    private void setGridLayoutManager(TokenFilter tab)
     {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup()
@@ -434,13 +433,10 @@ public class WalletFragment extends BaseFragment implements
         currentTabPos = tab;
     }
 
-    private void setLinearLayoutManager(int tab)
+    private TokenFilter setLinearLayoutManager(int selectedTab)
     {
-        if (currentTabPos != TAB_ALL && currentTabPos != TAB_CURRENCY)
-        {
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        }
-        currentTabPos = tab;
+        currentTabPos = TokenFilter.values()[selectedTab];
+        return currentTabPos;
     }
 
     @Override
@@ -477,11 +473,15 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void onResume() {
         super.onResume();
-        currentTabPos = -1;
+        currentTabPos = TokenFilter.ALL;
         selectedToken = null;
         if (viewModel == null)
         {
             ((HomeActivity)getActivity()).resetFragment(WalletPage.WALLET);
+        }
+        else if (largeTitleView != null)
+        {
+            largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
         }
     }
 

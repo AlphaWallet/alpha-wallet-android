@@ -3,12 +3,7 @@ package com.alphawallet.app.ui.widget.entity;
 public class ManageTokensLabelSortedItem extends SortedItem<ManageTokensLabelData> {
 
     public ManageTokensLabelSortedItem(int type, ManageTokensLabelData data, int weight) {
-        super(type, data, weight);
-    }
-
-    @Override
-    public int compare(SortedItem other) {
-        return weight - other.weight;
+        super(type, data, new TokenPosition(weight));
     }
 
     @Override

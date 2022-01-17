@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -25,6 +27,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
+import com.alphawallet.app.entity.GitHubRelease;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
@@ -56,20 +59,27 @@ import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
+import com.alphawallet.app.widget.WhatsNewView;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
@@ -93,6 +103,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MyAddressRouter myAddressRouter;
     private final AnalyticsServiceType analyticsService;
     private final ExternalBrowserRouter externalBrowserRouter;
+    private final OkHttpClient httpClient;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -116,7 +127,8 @@ public class HomeViewModel extends BaseViewModel {
             TransactionsService transactionsService,
             TickerService tickerService,
             AnalyticsServiceType analyticsService,
-            ExternalBrowserRouter externalBrowserRouter ) {
+            ExternalBrowserRouter externalBrowserRouter,
+            OkHttpClient httpClient) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.localeRepository = localeRepository;
@@ -130,6 +142,7 @@ public class HomeViewModel extends BaseViewModel {
         this.tickerService = tickerService;
         this.analyticsService = analyticsService;
         this.externalBrowserRouter = externalBrowserRouter;
+        this.httpClient = httpClient;
     }
 
     @Override
@@ -520,14 +533,6 @@ public class HomeViewModel extends BaseViewModel {
         RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 
-    public boolean shouldShowRootWarning() {
-        return preferenceRepository.showShowRootWarning();
-    }
-
-    public void setShowRootWarning(boolean shouldShow) {
-        preferenceRepository.setShowRootWarning(shouldShow);
-    }
-
     public int getUpdateWarnings() {
         return preferenceRepository.getUpdateWarningCount();
     }
@@ -577,8 +582,55 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
-    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
-    {
+    public void tryToShowWhatsNewDialog(Context context) {
+        PackageInfo packageInfo;
+        try {
+            packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+
+            int versionCode = packageInfo.versionCode;
+            if (preferenceRepository.getLastVersionCode(versionCode) < versionCode) {
+                // load what's new
+                Request request = new Request.Builder()
+                        .header("Accept", "application/vnd.github.v3+json")
+                        .url("https://api.github.com/repos/alphawallet/alpha-wallet-android/releases")
+                        .get()
+                        .build();
+
+                Single.fromCallable(() -> {
+                    try (okhttp3.Response response = httpClient.newCall(request)
+                            .execute()) {
+                        return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>() {
+                        }.getType());
+                    } catch (Exception e) {
+                        if (BuildConfig.DEBUG) e.printStackTrace();
+                    }
+                    return null;
+                }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
+
+                    BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+
+                    WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss());
+
+                    dialog.setContentView(view);
+                    dialog.setCancelable(true);
+                    dialog.setCanceledOnTouchOutside(true);
+                    BottomSheetBehavior behavior = BottomSheetBehavior.from((View) view.getParent());
+                    dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
+                    dialog.show();
+
+                    preferenceRepository.setLastVersionCode(versionCode);
+
+                }).isDisposed();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception {
         Locale locale;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             locale = ctx.getResources().getConfiguration().getLocales().get(0);

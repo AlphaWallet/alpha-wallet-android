@@ -6,7 +6,6 @@ public interface HomeCommsInterface
     void requestNotificationPermission();
     void backupSuccess(String keyAddress);
     void resetTokens();
-    void changedLocale();
     void resetTransactions();
     void openWalletConnect(String sessionId);
 }

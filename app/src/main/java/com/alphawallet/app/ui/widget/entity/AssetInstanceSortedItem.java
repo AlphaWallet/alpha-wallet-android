@@ -15,14 +15,8 @@ public class AssetInstanceSortedItem extends SortedItem<TicketRange>
 {
     public static final int VIEW_TYPE = AssetInstanceScriptHolder.VIEW_TYPE;
 
-    public AssetInstanceSortedItem(TicketRange data, int weight) {
+    public AssetInstanceSortedItem(TicketRange data, TokenPosition weight) {
         super(VIEW_TYPE, data, weight);
-    }
-
-    @Override
-    public int compare(SortedItem other)
-    {
-        return weight - other.weight;
     }
 
     @Override

@@ -86,7 +86,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			walletClickLayout.setOnClickListener(this);
 			manageWalletLayout.setOnClickListener(this);
 
-			// manageWalletBtn.setVisibility(View.VISIBLE);
+			manageWalletBtn.setVisibility(View.VISIBLE);
 
 			if (wallet.name != null && !wallet.name.isEmpty()) {
 				walletNameText.setText(wallet.name);

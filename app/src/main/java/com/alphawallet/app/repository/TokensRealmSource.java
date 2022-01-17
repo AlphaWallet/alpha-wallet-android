@@ -1,6 +1,10 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
+import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
+
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -11,15 +15,16 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.entity.RealmAToken;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmTokenMapping;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -37,25 +42,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.realm.Case;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
-
-import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
-import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
 public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final String IMAGES_DB = "image_urls_db";
     public static final String ATOKENS_DB = "a_tokens_db";
+    public static final String TOKENS_MAPPING_DB = "tokens_mapping_db";
     public static final String TICKER_DB = "tickers_db";
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
 
@@ -785,7 +785,8 @@ public class TokensRealmSource implements TokenLocalSource {
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(),
                         convertStringBalance(t.getBalance(), t.getContractType()), t.getUpdateTime(),
-                        null, t.getName(), t.getSymbol(), t.getContractType());
+                        null, t.getName(), t.getSymbol(), t.getContractType(),
+                        getTokenGroup(t.getChainId(), t.getTokenAddress(), t.getContractType()));
                 meta.lastTxUpdate = t.getLastTxTime();
                 meta.isEnabled = t.isEnabled();
 
@@ -801,7 +802,7 @@ public class TokensRealmSource implements TokenLocalSource {
             //create metas for any card not previously saved
             for (Long chainId : rootChainTokenCards)
             {
-                TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, null, "", "", ContractType.ETHEREUM);
+                TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, null, "", "", ContractType.ETHEREUM, TokenGroup.ASSET);
                 meta.lastTxUpdate = 0;
                 meta.isEnabled = true;
                 tokenMetas.add(meta);
@@ -851,7 +852,9 @@ public class TokensRealmSource implements TokenLocalSource {
                         }
                     }
 
-                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), t.getContractType());
+                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
+                            t.getUpdateTime(), svs, t.getName(), t.getSymbol(), t.getContractType(),
+                            getTokenGroup(t.getChainId(), t.getTokenAddress(), t.getContractType()));
                     meta.lastTxUpdate = t.getLastTxTime();
                     tokenMetas.add(meta);
                     meta.isEnabled = t.isEnabled();
@@ -999,7 +1002,9 @@ public class TokensRealmSource implements TokenLocalSource {
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
-                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType());
+                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
+                            t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType(),
+                            getTokenGroup(t.getChainId(), t.getTokenAddress(), t.getContractType()));
                     meta.lastTxUpdate = t.getLastTxTime();
                     meta.isEnabled = t.isEnabled();
                     tokenMetas.add(meta);
@@ -1164,6 +1169,33 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         return updateMap;
+    }
+
+    /**
+     * Returns list of recently updated tickers.
+     * This is an optimisation for the TokenAdapter to only update UI elements with recent ticker update
+     * @param networkFilter list of displayed networks
+     * @return list of recently updated tickers
+     */
+    @Override
+    public Single<List<String>> getTickerUpdateList(List<Long> networkFilter)
+    {
+        return Single.fromCallable(() -> {
+            List<String> tickerContracts = new ArrayList<>();
+            try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+            {
+                RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
+                        .greaterThan("updatedTime", System.currentTimeMillis() - 5*DateUtils.MINUTE_IN_MILLIS)
+                        .findAll();
+
+                for (RealmTokenTicker ticker : realmItems)
+                {
+                    if (networkFilter.contains(ticker.getChain())) tickerContracts.add(ticker.getContract());
+                }
+            }
+
+            return tickerContracts;
+        });
     }
 
     @Override
@@ -1371,44 +1403,129 @@ public class TokensRealmSource implements TokenLocalSource {
         return eth;
     }
 
-
-    public void storeATokenAddresses(List<String> addresses) {
-        try (Realm realm = realmManager.getRealmInstance(ATOKENS_DB))
+    public long getLastMappingsUpdate()
+    {
+        long lastUpdate = 0;
+        try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
         {
-            realm.executeTransactionAsync(r -> {
-                // clean prev
-                r.where(RealmAToken.class).findAll().deleteAllFromRealm();
+            RealmAuxData lastUpdateTime = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", "UPDATETIME")
+                    .findFirst();
 
-                RealmList<RealmAToken> list = new RealmList<>();
-                for(String address : addresses) {
-                    RealmAToken rt = new RealmAToken();
-                    rt.address = address;
-                    list.add(rt);
-                }
-                r.insertOrUpdate(list);
-            });
+            if (lastUpdateTime != null)
+            {
+                lastUpdate = lastUpdateTime.getResultTime();
+            }
         }
+
+        return lastUpdate;
     }
 
-    public Single<List<String>> getATokenAddresses() {
-        return Single.fromCallable(() -> {
+    public int storeTokensMapping(Pair<Map<String, ContractAddress>, Map<String, TokenGroup>> mappings) {
+        try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
+        {
+            realm.executeTransaction(r -> {
+                for (String tokenMapping : mappings.first.keySet())
+                {
+                    ContractAddress mapping = new ContractAddress(tokenMapping);
 
-            try (Realm realm = realmManager.getRealmInstance(ATOKENS_DB))
-            {
-                RealmResults<RealmAToken> rtokens = realm.where(RealmAToken.class).findAll();
-                List<RealmAToken> tokens = new ArrayList<RealmAToken>(rtokens);
-                List<String> result = new ArrayList<>();
-                for(RealmAToken rt : tokens) {
-                    result.add(rt.address);
+                    ContractAddress baseContract = mappings.first.get(tokenMapping);
+                    if (baseContract != null && mappings.second.containsKey(baseContract.getAddressKey()))
+                    {
+                        RealmTokenMapping rtm = r.where(RealmTokenMapping.class)
+                                .equalTo("address", mapping.getAddressKey())
+                                .findFirst();
+
+                        if (rtm == null) rtm = r.createObject(RealmTokenMapping.class, mapping.getAddressKey());
+
+                        TokenGroup baseGroup = mappings.second.get(baseContract.getAddressKey());
+                        rtm.base = baseContract.getAddressKey();
+                        rtm.group = baseGroup.ordinal();
+                        r.insertOrUpdate(rtm);
+                    }
                 }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
 
-            return null;
-        });
+                //now store base contracts, note that since ASSET is the default, we don't need to store the ASSET keys
+                for (String baseToken : mappings.second.keySet())
+                {
+                    TokenGroup baseGroup = mappings.second.get(baseToken);
+                    if (baseGroup == null || baseGroup == TokenGroup.ASSET) continue; //no need to explicitly declare ASSET
+
+                    RealmTokenMapping rtm = r.where(RealmTokenMapping.class)
+                            .equalTo("address", baseToken)
+                            .findFirst();
+
+                    if (rtm == null) rtm = r.createObject(RealmTokenMapping.class, baseToken);
+                    rtm.group = baseGroup.ordinal();
+                    rtm.base = "";
+                    r.insertOrUpdate(rtm);
+                }
+
+                RealmAuxData lastUpdateTime = r.where(RealmAuxData.class)
+                        .equalTo("instanceKey", "UPDATETIME")
+                        .findFirst();
+
+                if (lastUpdateTime == null) lastUpdateTime = r.createObject(RealmAuxData.class, "UPDATETIME");
+                lastUpdateTime.setResultTime(System.currentTimeMillis());
+                r.insertOrUpdate(lastUpdateTime);
+            });
+        }
+
+        return mappings.first.keySet().size();
+    }
+
+    public ContractAddress getBaseToken(long chainId, String address)
+    {
+        try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
+        {
+            RealmTokenMapping rtm = realm.where(RealmTokenMapping.class)
+                    .equalTo("address", databaseKey(chainId, address))
+                    .findFirst();
+
+            if (rtm != null)
+            {
+                return rtm.getBase();
+            }
+        }
+
+        return null;
+    }
+
+    public TokenGroup getTokenGroup(long chainId, String address, ContractType type)
+    {
+        TokenGroup tg = TokenGroup.ASSET;
+        try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
+        {
+            RealmTokenMapping rtm = realm.where(RealmTokenMapping.class)
+                    .equalTo("address", databaseKey(chainId, address))
+                    .findFirst();
+
+            if (rtm != null)
+            {
+                tg = rtm.getGroup();
+            }
+        }
+
+        switch (type)
+        {
+            case NOT_SET:
+            case OTHER:
+            case ETHEREUM:
+            case CURRENCY:
+            case CREATION:
+            case DELETED_ACCOUNT:
+            case ERC20:
+            default:
+                return tg;
+
+            case ERC721:
+            case ERC875_LEGACY:
+            case ERC875:
+            case ERC1155:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                return TokenGroup.NFT;
+        }
     }
 }

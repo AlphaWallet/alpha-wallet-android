@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 
 import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
@@ -274,10 +275,8 @@ public class NewSettingsFragment extends BaseFragment {
     {
         if (wallet.type != WalletType.HDKEY) return;
 
-        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+        Intent intent = new Intent(getContext(), ScammerWarningActivity.class);
         intent.putExtra(WALLET, wallet);
-        intent.putExtra("TYPE", BackupOperationType.SHOW_SEED_PHRASE_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);
     }
 
@@ -518,6 +517,10 @@ public class NewSettingsFragment extends BaseFragment {
                 else if (data.getBooleanExtra(CHANGE_CURRENCY, false))
                 {
                     getParentFragmentManager().setFragmentResult(CHANGE_CURRENCY, new Bundle());
+                }
+                else if (data.getBooleanExtra(CHANGED_LOCALE, false))
+                {
+                    getParentFragmentManager().setFragmentResult(CHANGED_LOCALE, new Bundle());
                 }
             });
 

@@ -246,7 +246,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     }
 
     @Override
-    public void syncComplete(final TokensService service, boolean isMainnetSync, int syncCount)
+    public void syncComplete(final TokensService service, int syncCount)
     {
         if (syncCount == 2)
         {

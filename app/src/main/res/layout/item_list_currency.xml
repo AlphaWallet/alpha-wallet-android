@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_light"
             android:textColor="@color/dove"
-            android:textSize="12sp"
+            android:textSize="15sp"
             tools:text="AUD" />
     </LinearLayout>
 

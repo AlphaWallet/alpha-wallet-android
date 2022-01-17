@@ -324,8 +324,11 @@ public class AdvancedSettingsActivity extends BaseActivity {
             String oldLocale = viewModel.getActiveLocale();
             if (!TextUtils.isEmpty(newLocale) && !newLocale.equals(oldLocale))
             {
-                sendBroadcast(new Intent(CHANGED_LOCALE));
                 viewModel.updateLocale(newLocale, this);
+                Intent intent = new Intent();
+                setResult(RESULT_OK, intent);
+                intent.putExtra(CHANGED_LOCALE, true);
+                finish();
             }
         }
     }

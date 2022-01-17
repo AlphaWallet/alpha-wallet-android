@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -235,6 +236,8 @@ public class TokensService
         stopUpdateCycle();
         if (!Utils.isAddressValid(currentAddress)) return;
 
+        syncCount = 0;
+
         setupFilters();
         openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
 
@@ -344,7 +347,7 @@ public class TokensService
         //complete
         if (completionCallback != null)
         {
-            completionCallback.syncComplete(this, mainNetActive, syncCount);
+            completionCallback.syncComplete(this, syncCount);
         }
     }
 
@@ -607,6 +610,7 @@ public class TokensService
         if (t.isEthereum() && newBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             checkChainVisibility(t);
+            if (syncCount == 0 && completionCallback != null) { completionCallback.syncComplete(this, -1); }
         }
 
         if (t.isEthereum())
@@ -779,6 +783,11 @@ public class TokensService
         return tokenRepository.getTotalValue(currentAddress, networkFilter);
     }
 
+    public Single<List<String>> getTickerUpdateList()
+    {
+        return tokenRepository.getTickerUpdateList(networkFilter);
+    }
+
     public double convertToUSD(double localFiatValue)
     {
         return localFiatValue / tickerService.getCurrentConversionRate();
@@ -791,6 +800,16 @@ public class TokensService
         if (tt == null) return new Pair<>(0.0, 0.0);
 
         return new Pair<>(Double.parseDouble(tt.price), Double.parseDouble(tt.percentChange24h));
+    }
+
+    public double getTokenFiatValue(long chainId, String address)
+    {
+        Token token = getToken(chainId, address);
+        TokenTicker tt = token != null ? getTokenTicker(token) : null;
+        if (tt == null) return 0.0;
+        BigDecimal correctedBalance = token.getCorrectedBalance(18);
+        BigDecimal fiatValue = correctedBalance.multiply(new BigDecimal(tt.price)).setScale(18, RoundingMode.DOWN);
+        return fiatValue.doubleValue();
     }
 
     ///////////////////////////////////////////
@@ -889,6 +908,10 @@ public class TokensService
         }
         else
         {
+            if (syncCount == 0)
+            {
+                syncCount = 1;
+            }
             return null;
         }
     }
@@ -1162,7 +1185,7 @@ public class TokensService
     {
         if (ethereumNetworkRepository.isMainNetSelected())
         {
-            setCompletionCallback(cb, 1);
+            setCompletionCallback(cb, 0);
             return true;
         }
         else
@@ -1208,4 +1231,13 @@ public class TokensService
             }).isDisposed();
         }
     }
+
+    // TODO: This may be refactored once we have switched over to a more efficient Token database model
+    // That is - common data like Name, Decimals, Address goes into a single Token database,
+    //   wallet specific data like balance, update time etc goes into the per-wallet database
+    public TokenGroup getTokenGroup(Token token)
+    {
+        return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
+    }
+
 }

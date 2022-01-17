@@ -1,20 +1,5 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
-import static com.alphawallet.app.C.ETHER_DECIMALS;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
-import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
-import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
-import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
-import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
-import static com.alphawallet.app.util.Utils.isValidUrl;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
-
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
@@ -58,16 +43,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -135,7 +110,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -151,6 +125,15 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -159,6 +142,19 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+
+import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
+import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
+import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
+import static com.alphawallet.app.util.Utils.isValidUrl;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
@@ -833,7 +829,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         viewModel.setNetwork(chainId);
         startBalanceListener();
         setupWeb3();
-        web3.resetView();
         web3.reload();
     }
 
@@ -1040,7 +1035,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             web3.clearCache(false); //on restart with stored app, we usually need this
             addToBackStack(DAPP_BROWSER);
-            web3.resetView();
             web3.loadUrl(Utils.formatUrl(loadOnInit));
             setUrlText(Utils.formatUrl(loadOnInit));
             loadOnInit = null;
@@ -1384,7 +1378,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             //load homepage
             homePressed = true;
-            web3.resetView();
             web3.loadUrl(getDefaultDappUrl());
             setUrlText(getDefaultDappUrl());
             checkBackClickArrowVisibility();
@@ -1571,7 +1564,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         addToBackStack(DAPP_BROWSER);
         cancelSearchSession();
         if (checkForMagicLink(urlText)) return true;
-        web3.resetView();
         web3.loadUrl(Utils.formatUrl(urlText));
         setUrlText(Utils.formatUrl(urlText));
         web3.requestFocus();
@@ -1593,7 +1585,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             cancelSearchSession();
             addToBackStack(DAPP_BROWSER);
             setUrlText(Utils.formatUrl(urlText));
-            web3.resetView();
             web3.loadUrl(Utils.formatUrl(urlText));
             //ensure focus isn't on the keyboard
             KeyboardUtils.hideKeyboard(urlTv);
@@ -1607,7 +1598,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             if (refresh != null) {
                 refresh.setEnabled(false);
             }
-            web3.resetView();
             web3.reload();
         }
     }
@@ -1644,7 +1634,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         web3.clearHistory();
         web3.stopLoading();
-        web3.resetView();
         web3.loadUrl(getDefaultDappUrl());
         setUrlText(getDefaultDappUrl());
     }

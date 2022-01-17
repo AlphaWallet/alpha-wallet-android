@@ -10,8 +10,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -19,7 +17,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
@@ -31,14 +28,10 @@ import okhttp3.HttpUrl;
 
 public class Web3ViewClient extends WebViewClient {
 
-    private final Object lock = new Object();
-
     private final JsInjectorClient jsInjectorClient;
     private final UrlHandlerManager urlHandlerManager;
 
     private final Context context;
-
-    private boolean isInjected;
 
     public Web3ViewClient(Context context) {
         this.jsInjectorClient = new JsInjectorClient(context);
@@ -75,16 +68,8 @@ public class Web3ViewClient extends WebViewClient {
         return shouldOverrideUrlLoading(view, url, isMainFrame, isRedirect);
     }
 
-    public boolean didInjection()
-    {
-        return isInjected;
-    }
-
     private boolean shouldOverrideUrlLoading(WebView webView, String url, boolean isMainFrame, boolean isRedirect) {
         boolean result = false;
-        synchronized (lock) {
-            isInjected = false;
-        }
         String urlToOpen = urlHandlerManager.handle(url);
         //manually handle trusted intents
         if (handleTrustedApps(url))
@@ -112,77 +97,8 @@ public class Web3ViewClient extends WebViewClient {
         if (request == null) {
             return null;
         }
-
-        if (isInjected
-                || request.getUrl().toString().contains("infura")
-                || request.getUrl().toString().contains(".auth0.com/")
-                || handleTrustedExtension(request.getUrl().toString()))
-        {
-            return super.shouldInterceptRequest(view, request);
-        }
-        else if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame())
-        {
-             if (request.getMethod().equalsIgnoreCase("GET")
-                     && (request.getUrl().toString().contains(".js")
-                        || request.getUrl().toString().contains("json")
-                        || request.getUrl().toString().contains("css"))) {
-                synchronized (lock) {
-                    if (!isInjected) {
-                        injectScriptFile(view);
-                        isInjected = true;
-                    }
-                }
-            }
-            return super.shouldInterceptRequest(view, request);
-        }
-
-        HttpUrl httpUrl = HttpUrl.parse(request.getUrl().toString());
-        if (httpUrl == null) {
-            return null;
-        }
-        Map<String, String> headers = request.getRequestHeaders();
-
-        JsInjectorResponse response;
-        try {
-            response = jsInjectorClient.loadUrl(httpUrl.toString(), headers);
-        } catch (Exception ex) {
-            return null;
-        }
-        if (response == null || response.isRedirect) {
-            return null;
-        } else if (TextUtils.isEmpty(response.data)){
-            return null;
-        } else {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(response.data.getBytes());
-            WebResourceResponse webResourceResponse = new WebResourceResponse(
-                    response.mime, response.charset, inputStream);
-            synchronized (lock) {
-                isInjected = true;
-            }
-            return webResourceResponse;
-        }
-    }
-
-    private void injectScriptFile(WebView view) {
-        if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: ");
-        view.post(() -> injectScriptFileFinal(view));
-    }
-
-    public void injectScriptFileFinal(WebView view) {
-        if (BuildConfig.DEBUG) Log.d("W3VIEW", "Inject: " + view.getUrl());
-        isInjected = true;
-        String js = jsInjectorClient.assembleJs(view.getContext(), "%1$s%2$s");
-        byte[] buffer = js.getBytes();
-        String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
-
-        view.loadUrl("javascript:(function() {" +
-                "var parent = document.getElementsByTagName('head').item(0);" +
-                "var script = document.createElement('script');" +
-                "script.type = 'text/javascript';" +
-                // Tell the browser to BASE64-decode the string into your script !!!
-                "script.innerHTML = window.atob('" + encoded + "');" +
-                "parent.appendChild(script)" +
-                "})()");
+        handleTrustedExtension(request.getUrl().toString());
+        return super.shouldInterceptRequest(view, request);
     }
 
     @Override
@@ -203,12 +119,6 @@ public class Web3ViewClient extends WebViewClient {
             aDialog.dismiss();
         });
         aDialog.show();
-    }
-
-    public void onReload() {
-        synchronized (lock) {
-            isInjected = false;
-        }
     }
 
     //Handling of trusted apps
@@ -296,10 +206,5 @@ public class Web3ViewClient extends WebViewClient {
         {
             return false;
         }
-    }
-
-    public void resetInject()
-    {
-        isInjected = false;
     }
 }

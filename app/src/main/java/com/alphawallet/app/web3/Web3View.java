@@ -10,17 +10,14 @@ import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.URLLoadInterface;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
@@ -32,12 +29,18 @@ import com.alphawallet.token.entity.Signable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+import org.web3j.crypto.Keys;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import timber.log.Timber;
+
+import static com.alphawallet.app.util.Utils.loadFile;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
@@ -89,11 +92,7 @@ public class Web3View extends WebView {
     public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders)
     {
         checkDOMUsage(url);
-        super.loadUrl("javascript:" + getJavaScript(url), additionalHttpHeaders);
-    }
-
-    private String getJavaScript(String url) {
-        return "window.Promise && navigator.serviceWorker.getRegistrations().then( function(registrations) { Promise.all(registrations.map((r) => r.unregister())).then(() => { window.location.replace('" + url + "');}) }); ";
+        super.loadUrl(url, additionalHttpHeaders);
     }
 
     @Override
@@ -318,16 +317,10 @@ public class Web3View extends WebView {
         }
     };
 
-    public void resetView()
-    {
-        webViewClient.resetInject();
-    }
-
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;
         private final WebViewClient externalClient;
         private boolean loadingError = false;
-        private boolean redirect = false;
 
         public WrapWebViewClient(Web3ViewClient internalClient, WebViewClient externalClient) {
             this.internalClient = internalClient;
@@ -337,37 +330,22 @@ public class Web3View extends WebView {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
-            if (!redirect)
-            {
-                internalClient.resetInject();
-            }
-
-            redirect = false;
+            injectJavaScript(view);
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
-            if (!internalClient.didInjection()) { internalClient.injectScriptFileFinal(view); }
-
-            if (!redirect && !loadingError)
-            {
-                if (loadInterface != null) { loadInterface.onWebpageLoaded(url, view.getTitle()); }
-            }
-            else if (!loadingError && loadInterface != null)
-            {
-                loadInterface.onWebpageLoadComplete();
+            if (!loadingError && loadInterface != null) {
+                loadInterface.onWebpageLoaded(url, view.getTitle());
             }
 
-            redirect = false;
             loadingError = false;
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            redirect = true;
-
             return externalClient.shouldOverrideUrlLoading(view, url)
                     || internalClient.shouldOverrideUrlLoading(view, url);
         }
@@ -382,35 +360,22 @@ public class Web3View extends WebView {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            redirect = true;
             if (!TextUtils.isEmpty(request.getUrl().toString())) { checkDOMUsage(request.getUrl().toString()); }
 
             return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, request);
         }
+    }
 
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);
-            if (response != null) {
-                try {
-                    InputStream in = response.getData();
-                    int len = in.available();
-                    byte[] data = new byte[len];
-                    int readLen = in.read(data);
-                    if (readLen == 0) {
-                        throw new IOException("Nothing is read.");
-                    }
-                    String injectedHtml = internalClient.getJsInjectorClient().injectJS(new String(data));
-                    response.setData(new ByteArrayInputStream(injectedHtml.getBytes()));
-                } catch (IOException ex) {
-                    Log.d("INJECT AFTER_EXTERNAL", "", ex);
-                }
-            } else {
-                response = internalClient.shouldInterceptRequest(view, request);
-            }
-            return response;
-        }
+    private void injectJavaScript(WebView view) {
+        String awSrc = loadFile(getContext(), R.raw.alphawallet_min);
+        view.evaluateJavascript(awSrc, (result) -> {
+            Timber.d(result);
+            String initSrc = loadFile(getContext(), R.raw.init);
+            String address = getWalletAddress() == null ? Address.EMPTY.toString() : Keys.toChecksumAddress(getWalletAddress().toString());
+            String formattedInitJs = String.format(initSrc, address, EthereumNetworkRepository.getDefaultNodeURL(MAINNET_ID), getChainId());
+            view.evaluateJavascript(formattedInitJs, null);
+        });
     }
 
     // Grim hack for dapps that still use local storage

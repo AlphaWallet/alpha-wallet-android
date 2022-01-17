@@ -1,13 +1,7 @@
 (function() {
-if (typeof __addressHex == 'undefined') {
-    __addressHex = "%1$s";
-}
-if (typeof __rpcURL == 'undefined') {
-    __rpcURL = "%2$s";
-}
-if (typeof __chainID == 'undefined') {
-    __chainID = "%3$s";
-}
+const __addressHex = "%1$s";
+const __rpcURL = "%2$s";
+const __chainID = "%3$s";
 
 function executeCallback (id, error, value) {
   AlphaWallet.executeCallback(id, error, value)
@@ -41,7 +35,7 @@ window.AlphaWallet.init(__rpcURL, {
     alpha.signPersonalMessage(id, data);
   },
   signTypedMessage: function (msgParams, cb) {
-    console.log('signTypedMessage', msgParams)
+    console.log('signTypedMessage ', msgParams)
     const { data } = msgParams
     const { id = 8888 } = msgParams
     AlphaWallet.addCallback(id, cb)
@@ -71,13 +65,12 @@ window.AlphaWallet.init(__rpcURL, {
     alpha.walletSwitchEthereumChain(id, JSON.stringify(msgParams));
     //webkit.messageHandlers.walletSwitchEthereumChain.postMessage({"name": "walletSwitchEthereumChain", "object": data, id: id})
   },
-  requestAccounts: function(msgParams, cb) {
-      const data = msgParams
-      const { id = Math.floor((Math.random() * 100000) + 1) } = msgParams
-      console.log("requestAccounts", msgParams)
+  requestAccounts: function(cb) {
+      id = Math.floor((Math.random() * 100000) + 1)
+      console.log("requestAccounts", id)
       AlphaWallet.addCallback(id, cb)
       alpha.requestAccounts(id);
-  }
+  },
   enable: function() {
       return new Promise(function(resolve, reject) {
           //send back the coinbase account as an array of one

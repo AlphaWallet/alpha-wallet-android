@@ -112,6 +112,7 @@ import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.OnSignTransactionListener;
 import com.alphawallet.app.web3.OnSignTypedMessageListener;
+import com.alphawallet.app.web3.OnWalletActionListener;
 import com.alphawallet.app.web3.OnWalletAddEthereumChainObjectListener;
 import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
@@ -162,8 +163,8 @@ import io.realm.RealmResults;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
-        URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
-        ActionSheetCallback, TestNetDialog.TestNetDialogCallback
+        OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
+        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -1035,6 +1036,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setOnSignTypedMessageListener(this);
         web3.setOnEthCallListener(this);
         web3.setOnWalletAddEthereumChainObjectListener(this);
+        web3.setOnWalletActionListener(this);
 
         if (loadOnInit != null)
         {
@@ -1197,6 +1199,19 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             //go straight to chain change dialog
             showChainChangeDialog(info);
         }
+    }
+
+    @Override
+    public void onRequestAccounts(long callbackId)
+    {
+        //TODO: Pop open dialog which asks user to confirm they wish to expose their address to this dapp eg:
+        //title = "Request Account Address"
+        //message = "${dappUrl} requests your address. \nAuthorise?"
+        //if user authorises, then do an evaluateJavascript to populate the web3.eth.getCoinbase with the current address,
+        //and additionally add a window.ethereum.setAddress function in init.js to set up addresses
+        //together with this update, also need to track which websites have been given permission, and if they already have it (can probably get away with using SharedPrefs)
+        //then automatically perform with step without a dialog (ie same as it does currently)
+        web3.onWalletActionSuccessful(callbackId, "[" + wallet.address + "]");
     }
 
     private void showChainChangeDialog(NetworkInfo newNetwork)

@@ -42,6 +42,8 @@ public class SignCallbackJSInterface
     private final OnEthCallListener onEthCallListener;
     @NonNull
     private final OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
+    @NonNull
+    private final OnWalletActionListener onWalletActionListener;
 
     public SignCallbackJSInterface(
             WebView webView,
@@ -50,7 +52,8 @@ public class SignCallbackJSInterface
             @NonNull OnSignPersonalMessageListener onSignPersonalMessageListener,
             @NonNull OnSignTypedMessageListener onSignTypedMessageListener,
             @NotNull OnEthCallListener onEthCallListener,
-            @NonNull OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener) {
+            @NonNull OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener,
+            @NonNull OnWalletActionListener onWalletActionListener) {
         this.webView = webView;
         this.onSignTransactionListener = onSignTransactionListener;
         this.onSignMessageListener = onSignMessageListener;
@@ -58,6 +61,7 @@ public class SignCallbackJSInterface
         this.onSignTypedMessageListener = onSignTypedMessageListener;
         this.onEthCallListener = onEthCallListener;
         this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
+        this.onWalletActionListener = onWalletActionListener;
     }
 
     @JavascriptInterface
@@ -95,9 +99,8 @@ public class SignCallbackJSInterface
     }
 
     @JavascriptInterface
-    public void requestAccounts(int callbackId) {
-        //webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId, SignMessageType.SIGN_PERSONAL_MESSAGE)));
-        webView.post(() -> onEthCallListener.onEthCall(null) );
+    public void requestAccounts(long callbackId) {
+        webView.post(() -> onWalletActionListener.onRequestAccounts(callbackId) );
     }
 
     @JavascriptInterface
@@ -157,14 +160,12 @@ public class SignCallbackJSInterface
 
     @JavascriptInterface
     public void walletSwitchEthereumChain(int callbackId, String msgParams) {
-        //TODO: Implement custom chains from dapp browser: see OnWalletAddEthereumChainObject in class DappBrowserFragment
-        //First draft: attempt to match this chain with known chains; switch to known chain if we match
         try
         {
             WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
             if (!TextUtils.isEmpty(chainObj.chainId))
             {
-                webView.post(() -> onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
+                webView.post(() -> onWalletActionListener.onWalletSwitchEthereumChain onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
             }
         }
         catch (JsonSyntaxException e)

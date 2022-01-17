@@ -88,7 +88,7 @@ public class JsInjectorClient {
 
     String assembleJs(Context context, String template) {
         if (TextUtils.isEmpty(jsLibrary)) {
-            jsLibrary = loadFile(context, R.raw.alphawallet_min2);
+            jsLibrary = loadFile(context, R.raw.alphawallet_min);
         }
         String initJs = loadInitJs(context);
         return String.format(template, jsLibrary, initJs);
@@ -101,7 +101,7 @@ public class JsInjectorClient {
 
     public String assembleJs2(Context context)
     {
-        return loadFile(context, R.raw.alphawallet_min);
+        return loadFile(context, R.raw.alphawallet);
     }
 
     @Nullable

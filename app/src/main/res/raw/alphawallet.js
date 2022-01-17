@@ -39960,6 +39960,8 @@ var AlphaWallet = {
     engine.enable = options.enable;
     engine.chainId = syncOptions.networkVersion;
     engine.isAlphaWallet = true;
+    engine.isMetaMask = true;
+    engine.networkVersion = syncOptions.networkVersion;
     engine.start();
 
     return engine;
@@ -40065,14 +40067,7 @@ ProviderEngine.prototype.sendAsync = function (payload, cb) {
       };
       cb(null, result);
       break;
-//    case 'eth_requestAccounts':
-//      var result = {
-//        id: payload.id,
-//        jsonrpc: payload.jsonrpc,
-//        result: [globalSyncOptions.address]
-//      };
-//      cb(null, result);
-//      break;
+
     case 'eth_chainId':
       var result = {
         id: payload.id,
@@ -62593,6 +62588,7 @@ function HookedWalletSubprovider(opts){
   if (opts.walletAddEthereumChain) self.walletAddEthereumChain = opts.walletAddEthereumChain
   // EIP3326
   if (opts.walletSwitchEthereumChain) self.walletSwitchEthereumChain = opts.walletSwitchEthereumChain
+  if (opts.requestAccounts) self.requestAccounts = opts.requestAccounts
 }
 
 HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
@@ -62648,6 +62644,12 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       ], end)
       return
 
+    case 'eth_requestAccounts':
+      waterfall([
+        (cb) => self.requestAccounts(cb),
+      ], end)
+      return
+
     case 'eth_sendTransaction':
       txParams = payload.params[0]
       txParams.chainType = "ETH"
@@ -62656,13 +62658,6 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
         (cb) => self.processTransaction(txParams, cb),
       ], end)
       return
-
-    case 'eth_requestAccounts':
-            waterfall([
-                    // (cb) => self.validateTransaction(txParams, cb),
-                    (cb) => self.requestAccounts(params, cb),
-                  ], end)
-            break;
 
     case 'eth_signTransaction':
       txParams = payload.params[0]

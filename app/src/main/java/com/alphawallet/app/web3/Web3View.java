@@ -39,10 +39,12 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import timber.log.Timber;
+
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
-    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
-    private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
+    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "AlphaWallet.executeCallback(%1$s, null, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_FAILURE = "AlphaWallet.executeCallback(%1$s, \"%2$s\", null)";
 
     @Nullable
     private OnSignTransactionListener onSignTransactionListener;
@@ -60,6 +62,9 @@ public class Web3View extends WebView {
     private OnVerifyListener onVerifyListener;
     @Nullable
     private OnGetBalanceListener onGetBalanceListener;
+    @Nullable
+    private OnWalletActionListener onWalletActionListener;
+
     private final Web3ViewClient webViewClient;
     private URLLoadInterface loadInterface;
 
@@ -135,7 +140,8 @@ public class Web3View extends WebView {
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener,
                 innerOnEthCallListener,
-                innerAddChainListener), "alpha");
+                innerAddChainListener,
+                innerOnWalletActionListener), "alpha");
     }
 
     public void setWalletAddress(@NonNull Address address) {
@@ -201,6 +207,10 @@ public class Web3View extends WebView {
         this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
     }
 
+    public void setOnWalletActionListener(@Nullable OnWalletActionListener onWalletActionListener) {
+        this.onWalletActionListener = onWalletActionListener;
+    }
+
     public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
         this.onVerifyListener = onVerifyListener;
     }
@@ -244,6 +254,13 @@ public class Web3View extends WebView {
     private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
         post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
+    }
+
+    public void onWalletActionSuccessful(long callbackId, String message) {
+        String callback = String.format(JS_PROTOCOL_ON_SUCCESSFUL, callbackId, message);
+        post(() -> {
+            evaluateJavascript(callback, Timber::d);
+        });
     }
 
     private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {
@@ -293,6 +310,14 @@ public class Web3View extends WebView {
         public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject)
         {
             onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObject);
+        }
+    };
+
+    private final OnWalletActionListener innerOnWalletActionListener = new OnWalletActionListener() {
+        @Override
+        public void onRequestAccounts(long callbackId)
+        {
+            onWalletActionListener.onRequestAccounts(callbackId);
         }
     };
 
@@ -347,17 +372,6 @@ public class Web3View extends WebView {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-
-            if (!internalClient.didInjection())
-            {
-                String script1 = internalClient.getInjectionString1(view);
-                String script2 = internalClient.getInjectionString2(view);
-                //view.evaluateJavascript(script2, null);
-                internalClient.didInjection(true);
-                //view.evaluateJavascript(script, null);
-                //System.out.println("YOLESS: Inject2: " + url);
-                //internalClient.injectScriptFileFinal(view);
-            }
 
             if (!redirect && !loadingError)
             {

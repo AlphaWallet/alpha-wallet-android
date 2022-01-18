@@ -39,6 +39,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String DEVICE_COUNTRY = "device_country";
     public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
     private static final String LAST_FRAGMENT_ID = "lastfrag_id";
+    private static final String LAST_VERSION_CODE = "last_version_code";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -271,16 +272,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean showShowRootWarning() {
-        return pref.getBoolean(SHOULD_SHOW_ROOT_WARNING, true);
-    }
-
-    @Override
-    public void setShowRootWarning(boolean shouldShow) {
-        pref.edit().putBoolean(SHOULD_SHOW_ROOT_WARNING, shouldShow).apply();
-    }
-
-    @Override
     public int getUpdateWarningCount() {
         return pref.getInt(UPDATE_WARNINGS, 0);
     }
@@ -340,5 +331,21 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public int getLastFragmentPage()
     {
         return pref.getInt(LAST_FRAGMENT_ID, -1);
+    }
+
+    @Override
+    public int getLastVersionCode(int currentCode) {
+        int versionCode = pref.getInt(LAST_VERSION_CODE, 0);
+        if (versionCode == 0)
+        {
+            setLastVersionCode(currentCode);
+            versionCode = Integer.MAX_VALUE;
+        }
+        return versionCode; // First time users won't see the 'what's new' since the app is new, only start to see these on first update
+    }
+
+    @Override
+    public void setLastVersionCode(int code) {
+        pref.edit().putInt(LAST_VERSION_CODE, code).apply();
     }
 }

@@ -5,7 +5,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
-import androidx.core.content.ContextCompat;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
@@ -15,14 +16,13 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.util.Utils;
@@ -44,11 +44,11 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private int lines;
     private String inputType;
     private int minHeight;
-    private int innerPadding;
     private String imeOptions;
     private String hintTxt;
     private Activity activity;
     private LayoutCallbackListener callbackListener;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -113,7 +113,6 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             inputType = a.getString(R.styleable.InputView_inputType);
             imeOptions = a.getString(R.styleable.InputView_imeOptions);
             minHeight = a.getInteger(R.styleable.InputView_minHeightValue, 0);
-            innerPadding = a.getInteger(R.styleable.InputView_innerPadding, 0);
             hintTxt = a.getString(R.styleable.InputView_hint);
         } finally {
             a.recycle();
@@ -269,8 +268,22 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     @Override
     public boolean onEditorAction(TextView view, int i, KeyEvent keyEvent)
     {
-        if (callbackListener != null) callbackListener.onInputDoneClick(view);
+        if (isErrorState())
+        {
+            flashLayout();
+        }
+        else if (callbackListener != null)
+        {
+            callbackListener.onInputDoneClick(view);
+        }
+
         return true;
+    }
+
+    private void flashLayout()
+    {
+        editText.setBackgroundResource(R.drawable.background_password_flash);
+        handler.postDelayed(() -> editText.setBackgroundResource(R.drawable.background_password_error), 300);
     }
 }
 

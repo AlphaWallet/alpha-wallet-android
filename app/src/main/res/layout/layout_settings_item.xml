@@ -40,13 +40,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
-            android:fontFamily="@font/font_light"
+            android:fontFamily="@font/font_regular"
             android:lines="1"
             android:maxLines="1"
 
             android:text="Setting Subtitle"
             android:textColor="@color/dove"
-            android:textSize="12sp"
+            android:textSize="15sp"
             android:visibility="gone" />
     </LinearLayout>
 

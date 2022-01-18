@@ -11,13 +11,7 @@ public class QuantitySelectorSortedItem extends SortedItem<Token>
 {
     public QuantitySelectorSortedItem(Token value)
     {
-        super(QuantitySelectorHolder.VIEW_TYPE, value, 0);
-    }
-
-    @Override
-    public int compare(SortedItem other)
-    {
-        return weight - other.weight;
+        super(QuantitySelectorHolder.VIEW_TYPE, value, new TokenPosition(0));
     }
 
     @Override

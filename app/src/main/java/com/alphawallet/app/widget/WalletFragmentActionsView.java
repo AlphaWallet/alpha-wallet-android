@@ -14,6 +14,7 @@ public class WalletFragmentActionsView extends FrameLayout implements View.OnCli
     private OnClickListener onCopyWalletAddressClickListener;
     private OnClickListener onShowMyWalletAddressClickListener;
     private OnClickListener onAddHideTokensClickListener;
+    private OnClickListener onRenameThisWalletListener;
 
     public WalletFragmentActionsView(Context context) {
         this(context, R.layout.layout_dialog_wallet_actions);
@@ -30,6 +31,7 @@ public class WalletFragmentActionsView extends FrameLayout implements View.OnCli
         findViewById(R.id.copy_wallet_address_action).setOnClickListener(this);
         findViewById(R.id.show_my_wallet_address_action).setOnClickListener(this);
         findViewById(R.id.add_hide_tokens_action).setOnClickListener(this);
+        findViewById(R.id.rename_this_wallet_action).setOnClickListener(this);
     }
 
     @Override
@@ -54,6 +56,11 @@ public class WalletFragmentActionsView extends FrameLayout implements View.OnCli
                 }
                 break;
             }
+            case R.id.rename_this_wallet_action: {
+                if (onRenameThisWalletListener != null) {
+                    onRenameThisWalletListener.onClick(view);
+                }
+            }
         }
     }
 
@@ -67,5 +74,9 @@ public class WalletFragmentActionsView extends FrameLayout implements View.OnCli
 
     public void setOnAddHideTokensClickListener(OnClickListener onClickListener) {
         this.onAddHideTokensClickListener = onClickListener;
+    }
+
+    public void setOnRenameThisWalletClickListener(OnClickListener onClickListener) {
+        this.onRenameThisWalletListener = onClickListener;
     }
 }

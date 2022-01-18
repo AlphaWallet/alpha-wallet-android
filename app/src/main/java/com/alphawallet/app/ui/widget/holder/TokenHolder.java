@@ -98,7 +98,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 fillEmpty();
                 return;
             }
-            else if (data.nameWeight < 1000 && !token.isEthereum())
+            else if (data.getNameWeight() < 1000L && !token.isEthereum())
             {
                 //edge condition - looking at a contract as an account
                 Token backupChain = tokensService.getToken(data.getChain(), "eth");

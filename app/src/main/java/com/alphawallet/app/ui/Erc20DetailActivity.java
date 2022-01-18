@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.BuyCryptoInterface;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -195,9 +196,10 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void onNewScript(Boolean hasNewScript)
     {
+        final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
         //found a new tokenscript for this token, create a new meta with balance set to trigger view update; view will update the token name
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
-                token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec()), true);
+                token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group), true);
         viewModel.checkTokenScriptValidity(token); //check script signature
     }
 
@@ -244,6 +246,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         wallet = getIntent().getParcelableExtra(WALLET);
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        token.group = viewModel.getTokensService().getTokenGroup(token);
         tokenMeta = new TokenCardMeta(token);
         viewModel.checkForNewScript(token);
     }
@@ -263,6 +266,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (realm == null) realm = viewModel.getRealmInstance(wallet);
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
+        final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
                 .greaterThan("addedTime", System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
@@ -270,7 +274,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             for (RealmToken t : realmTokens)
             {
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
-                        t.getUpdateTime(), t.getLastTxTime(), t.getContractType());
+                        t.getUpdateTime(), t.getLastTxTime(), t.getContractType(), group);
                 meta.isEnabled = t.isEnabled();
 
                 if (tokenMeta == null)

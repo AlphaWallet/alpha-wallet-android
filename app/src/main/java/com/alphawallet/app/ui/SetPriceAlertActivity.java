@@ -109,14 +109,18 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
             return;
         }
 
-        double value = Double.parseDouble(s);
-        if (value > 0)
-        {
-            functionBar.setPrimaryButtonEnabled(true);
-            newPriceAlert.setValue(String.valueOf(value));
-        }
-        else
-        {
+        try {
+            double value = Double.parseDouble(s);
+            if (value > 0)
+            {
+                functionBar.setPrimaryButtonEnabled(true);
+                newPriceAlert.setValue(String.valueOf(value));
+            }
+            else
+            {
+                functionBar.setPrimaryButtonEnabled(false);
+            }
+        } catch (NumberFormatException nfe) {
             functionBar.setPrimaryButtonEnabled(false);
         }
     }

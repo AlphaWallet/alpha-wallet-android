@@ -25,18 +25,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class TokenAlertsViewModel extends BaseViewModel {
-    private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
     private final TickerService tickerService;
     private final MutableLiveData<List<PriceAlert>> priceAlerts = new MutableLiveData<>();
     private Token token;
 
-    public TokenAlertsViewModel(AssetDefinitionService assetDefinitionService,
-                                PreferenceRepositoryType preferenceRepository,
+    public TokenAlertsViewModel(PreferenceRepositoryType preferenceRepository,
                                 TokensService tokensService, TickerService tickerService)
     {
-        this.assetDefinitionService = assetDefinitionService;
         this.preferenceRepository = preferenceRepository;
         this.tokensService = tokensService;
         this.tickerService = tickerService;
@@ -92,7 +89,7 @@ public class TokenAlertsViewModel extends BaseViewModel {
                 // check if current price is higher than in alert, mark as 'drops to' or 'rises above' otherwise
                 double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price);
                 double alertPrice = Double.parseDouble(priceAlert.getValue()) * rate;
-                priceAlert.setIndicator(currentTokenPrice < alertPrice);
+                priceAlert.setAbove(currentTokenPrice < alertPrice);
                 Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
                 String json = preferenceRepository.getPriceAlerts();
                 ArrayList<PriceAlert> list = json.isEmpty() ? new ArrayList<>() : new Gson().fromJson(json, listType);

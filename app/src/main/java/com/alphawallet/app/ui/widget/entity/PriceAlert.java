@@ -9,15 +9,14 @@ public class PriceAlert implements Parcelable {
     private String token;
     private String address;
     private long chainId;
-    // true - means, rises above / false - means, drops to
-    private boolean indicator;
+    private boolean isAbove;
     private boolean enabled;
 
     public PriceAlert(String currency, String token, String address, long chainId)
     {
         this.currency = currency;
         this.token = token;
-        this.indicator = true;
+        this.isAbove = true;
         this.enabled = true;
         this.address = address;
         this.chainId = chainId;
@@ -28,7 +27,7 @@ public class PriceAlert implements Parcelable {
         value = in.readString();
         currency = in.readString();
         token = in.readString();
-        indicator = in.readByte() != 0;
+        isAbove = in.readByte() != 0;
         enabled = in.readByte() != 0;
         address = in.readString();
         chainId = in.readLong();
@@ -44,14 +43,14 @@ public class PriceAlert implements Parcelable {
         this.value = value;
     }
 
-    public boolean getIndicator()
+    public boolean getAbove()
     {
-        return indicator;
+        return isAbove;
     }
 
-    public void setIndicator(boolean indicator)
+    public void setAbove(boolean above)
     {
-        this.indicator = indicator;
+        this.isAbove = above;
     }
 
     public boolean isEnabled()
@@ -108,7 +107,7 @@ public class PriceAlert implements Parcelable {
         dest.writeString(value);
         dest.writeString(currency);
         dest.writeString(token);
-        dest.writeByte((byte) (indicator ? 1 : 0));
+        dest.writeByte((byte) (isAbove ? 1 : 0));
         dest.writeByte((byte) (enabled ? 1 : 0));
         dest.writeString(address);
         dest.writeLong(chainId);
@@ -135,7 +134,7 @@ public class PriceAlert implements Parcelable {
     };
 
     public boolean match(Double rate, double currentTokenPrice) {
-        return (getIndicator() && currentTokenPrice * rate > Double.parseDouble(getValue())) ||
-                (!getIndicator() && currentTokenPrice * rate < Double.parseDouble(getValue()));
+        return (getAbove() && currentTokenPrice * rate > Double.parseDouble(getValue())) ||
+                (!getAbove() && currentTokenPrice * rate < Double.parseDouble(getValue()));
     }
 }

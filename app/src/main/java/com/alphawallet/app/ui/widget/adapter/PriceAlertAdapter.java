@@ -7,29 +7,28 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.repository.CurrencyRepository;
-import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.ui.widget.entity.PriceAlertCallback;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import static com.alphawallet.app.service.TickerService.getCurrencyWithoutSymbol;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.PriceAlertViewHolder> {
+public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.PriceAlertViewHolder>
+{
     private List<PriceAlert> items;
-    private Context context;
-    private PriceAlertCallback callback;
+    private final Context context;
+    private final PriceAlertCallback callback;
 
     public PriceAlertAdapter(Context context, List<PriceAlert> items, PriceAlertCallback callback)
     {
@@ -52,12 +51,11 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
         PriceAlert alert = items.get(position);
 
         int indicator;
-        if (alert.getIndicator())
+        if (alert.getAbove())
         {
             holder.icon.setImageResource(R.drawable.ic_system_up);
             indicator = R.string.price_alert_indicator_above;
-        }
-        else
+        } else
         {
             holder.icon.setImageResource(R.drawable.ic_system_down);
             indicator = R.string.price_alert_indicator_below;
@@ -68,7 +66,8 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
 
         holder.alertSwitch.setChecked(alert.isEnabled());
 
-        holder.alertSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        holder.alertSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+        {
             PriceAlert item = items.get(position);
             item.setEnabled(isChecked);
             notifyItemChanged(position);
@@ -82,14 +81,16 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
         return items.size();
     }
 
-    public void add(PriceAlert item) {
+    public void add(PriceAlert item)
+    {
         items.add(item);
-        notifyItemChanged(items.size()-1);
+        notifyItemChanged(items.size() - 1);
     }
 
-    public void remove(int position) {
+    public void remove(int position)
+    {
         items.remove(position);
-        notifyDataSetChanged();
+        notifyItemRemoved(position);
     }
 
     public List<PriceAlert> getItems()
@@ -102,7 +103,8 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
         this.items = items;
     }
 
-    public static class PriceAlertViewHolder extends RecyclerView.ViewHolder {
+    public static class PriceAlertViewHolder extends RecyclerView.ViewHolder
+    {
         ImageView icon;
         TextView rule;
         SwitchMaterial alertSwitch;

@@ -32,9 +32,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class PriceAlertsService extends Service {
-
-    private static final String TAG = PriceAlertsService.class.getSimpleName();
+public class PriceAlertsService extends Service
+{
 
     @Inject
     TokenLocalSource localSource;
@@ -57,14 +56,13 @@ public class PriceAlertsService extends Service {
     @Inject
     AssetDefinitionService assetDefinitionService;
 
-    public PriceAlertsService() {
-    }
-
     @Nullable
     private Disposable heartBeatTimer;
 
-    public class LocalBinder extends Binder {
-        public PriceAlertsService getService() {
+    public class LocalBinder extends Binder
+    {
+        public PriceAlertsService getService()
+        {
             return PriceAlertsService.this;
         }
     }
@@ -72,12 +70,14 @@ public class PriceAlertsService extends Service {
     private final IBinder mBinder = new PriceAlertsService.LocalBinder();
 
     @Override
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(Intent intent)
+    {
         return mBinder;
     }
 
     @Override
-    public void onCreate() {
+    public void onCreate()
+    {
         super.onCreate();
         AndroidInjection.inject(this);
 
@@ -87,7 +87,8 @@ public class PriceAlertsService extends Service {
 
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
         tokensService.startUpdateCycle();
@@ -95,36 +96,45 @@ public class PriceAlertsService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        startSessionPinger();
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        startHearBeatTimer();
         return START_STICKY;
     }
 
-    private void startSessionPinger() {
-        if (heartBeatTimer == null || heartBeatTimer.isDisposed()) {
+    private void startHearBeatTimer()
+    {
+        if (heartBeatTimer == null || heartBeatTimer.isDisposed())
+        {
             heartBeatTimer = Observable.interval(0, 30, TimeUnit.SECONDS)
                     .doOnNext(l -> heartBeat()).subscribe();
         }
     }
 
-    private void heartBeat() {
-        if (defaultWallet == null) {
+    private void heartBeat()
+    {
+        if (defaultWallet == null)
+        {
             return;
         }
 
         List<PriceAlert> enabledPriceAlerts = getEnabledPriceAlerts();
-        for (PriceAlert priceAlert : enabledPriceAlerts) {
+        for (PriceAlert priceAlert : enabledPriceAlerts)
+        {
             tickerService.convertPair(TickerService.getCurrencySymbolTxt(), priceAlert.getCurrency())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe((rate) -> {
+                    .subscribe((rate) ->
+                    {
                         Token token = tokensService.getToken(priceAlert.getChainId(), priceAlert.getAddress());
-                        if (token == null) {
+                        if (token == null)
+                        {
                             return;
                         }
                         double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price);
 
-                        if (priceAlert.match(rate, currentTokenPrice)) {
+                        if (priceAlert.match(rate, currentTokenPrice))
+                        {
                             String content = constructContent(priceAlert, Objects.requireNonNull(CurrencyRepository.getCurrencyByISO(priceAlert.getCurrency())));
                             notificationService.displayPriceAlertNotification(priceAlert.getToken(), content, 0, constructIntent(token));
                             // disable notification to avoid run multiple times
@@ -135,43 +145,55 @@ public class PriceAlertsService extends Service {
         }
     }
 
-    private List<PriceAlert> getEnabledPriceAlerts() {
+    private List<PriceAlert> getEnabledPriceAlerts()
+    {
         List<PriceAlert> enabledPriceAlerts = new ArrayList<>();
-        for (PriceAlert pa : getPriceAlerts()) {
-            if (pa.isEnabled()) {
+        for (PriceAlert pa : getPriceAlerts())
+        {
+            if (pa.isEnabled())
+            {
                 enabledPriceAlerts.add(pa);
             }
         }
         return enabledPriceAlerts;
     }
 
-    private List<PriceAlert> getPriceAlerts() {
+    private List<PriceAlert> getPriceAlerts()
+    {
         String json = preferenceRepository.getPriceAlerts();
-        if (json.isEmpty()) {
+        if (json.isEmpty())
+        {
             return new ArrayList<>();
         }
-        return new Gson().fromJson(json, new TypeToken<List<PriceAlert>>() {
+        return new Gson().fromJson(json, new TypeToken<List<PriceAlert>>()
+        {
         }.getType());
     }
 
-    private void updatePriceAlerts(List<PriceAlert> priceAlerts) {
-        String json = new Gson().toJson(priceAlerts, new TypeToken<List<PriceAlert>>() {
+    private void updatePriceAlerts(List<PriceAlert> priceAlerts)
+    {
+        String json = new Gson().toJson(priceAlerts, new TypeToken<List<PriceAlert>>()
+        {
         }.getType());
         preferenceRepository.setPriceAlerts(json);
     }
 
-    private Intent constructIntent(Token token) {
+    private Intent constructIntent(Token token)
+    {
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
         return tokenDetailRouter.makeERC20DetailsIntent(this, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
                 !token.isEthereum(), defaultWallet, token, hasDefinition);
     }
 
-    private String constructContent(PriceAlert priceAlert, CurrencyItem currencyItem) {
-        return getIndicatorText(priceAlert.getIndicator()) + " " + currencyItem.getSymbol() + TickerService.getCurrencyWithoutSymbol(Double.parseDouble(priceAlert.getValue()));
+    private String constructContent(PriceAlert priceAlert, CurrencyItem currencyItem)
+    {
+        return getIndicatorText(priceAlert.getAbove()) + " " + currencyItem.getSymbol() + TickerService.getCurrencyWithoutSymbol(Double.parseDouble(priceAlert.getValue()));
     }
 
-    private String getIndicatorText(boolean isAbove) {
-        if (isAbove) {
+    private String getIndicatorText(boolean isAbove)
+    {
+        if (isAbove)
+        {
             return getString(R.string.price_alert_indicator_above);
         }
         return getString(R.string.price_alert_indicator_below);

@@ -31,6 +31,6 @@ public class TokenAlertsViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass)
     {
-        return (T) new TokenAlertsViewModel(assetDefinitionService, preferenceRepository, tokensService, tickerService);
+        return (T) new TokenAlertsViewModel(preferenceRepository, tokensService, tickerService);
     }
 }

@@ -5,12 +5,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PriceAlertTest {
+public class PriceAlertTest
+{
 
     @Test
-    public void should_match_above_expect_price() {
+    public void should_match_above_expect_price()
+    {
         PriceAlert priceAlert = PriceAlertFactory.create();
-        priceAlert.setIndicator(true);
+        priceAlert.setAbove(true);
         priceAlert.setCurrency("AUD");
         priceAlert.setValue("2500");
 
@@ -24,9 +26,10 @@ public class PriceAlertTest {
     }
 
     @Test
-    public void should_match_below_expect_price() {
+    public void should_match_below_expect_price()
+    {
         PriceAlert priceAlert = PriceAlertFactory.create();
-        priceAlert.setIndicator(false);
+        priceAlert.setAbove(false);
         priceAlert.setCurrency("AUD");
         priceAlert.setValue("2500");
 

@@ -435,33 +435,24 @@ public class NFTAsset implements Parcelable
     public List<BigInteger> getCollectionIds()
     {
         //return sorted list
-        Collections.sort(tokenIdList);/*, (e1, e2) -> {
-            BigInteger tokenId1 = e1.first;
-            BigInteger tokenId2 = e2.first;
-            return tokenId1.compareTo(tokenId2);
-        });*/
-
+        Collections.sort(tokenIdList);
         return tokenIdList;
     }
 
     public String getAssetCategory()
     {
-        if (tokenIdList != null && tokenIdList.size() > 1)
+        if (tokenIdList != null && isCollection())
         {
             return "Collection";
         }
-        else if (balance.compareTo(BigDecimal.ONE) > 0)
-        {
-            return "Fungible Token";
-        }
-        else if (tokenIdList != null && tokenIdList.size() == 1
-                && ERC1155Token.getNFTTokenId(tokenIdList.get(0)).compareTo(BigInteger.ZERO) > 0)
+        else if (tokenIdList == null || tokenIdList.size() == 1
+                && ERC1155Token.isNFT(tokenIdList.get(0)))
         {
             return "NFT";
         }
         else
         {
-            return "Fungible Token"; //?
+            return "Fungible Token";
         }
     }
 }

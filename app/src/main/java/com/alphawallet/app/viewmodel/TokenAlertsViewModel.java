@@ -1,7 +1,10 @@
 package com.alphawallet.app.viewmodel;
 
+import android.app.Activity;
 import android.content.Intent;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -72,12 +75,25 @@ public class TokenAlertsViewModel extends BaseViewModel {
         return filteredList;
     }
 
-    public void openAddPriceAlertMenu(Fragment fragment, int requestCode)
+    public void openAddPriceAlertMenu(Fragment fragment)
     {
         Intent intent = new Intent(fragment.getContext(), SetPriceAlertActivity.class);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-        fragment.startActivityForResult(intent, requestCode); //Samoa TODO: de-deprecate (see ActivityResultLauncher paradigm in eg DappBrowserFragment)
+
+        ActivityResultLauncher<Intent> launcher = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->
+                {
+                    if (result.getResultCode() == Activity.RESULT_OK)
+                    {
+                        if (result.getData() != null)
+                        {
+                            saveAlert(result.getData().getParcelableExtra(C.EXTRA_PRICE_ALERT));
+                        }
+                    }
+                }
+        );
+
+        launcher.launch(intent);
     }
 
     public void saveAlert(PriceAlert priceAlert)

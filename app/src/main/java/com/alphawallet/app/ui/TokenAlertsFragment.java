@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -16,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -41,7 +42,8 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
-public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener, PriceAlertCallback {
+public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener, PriceAlertCallback
+{
     public static final int REQUEST_SET_PRICE_ALERT = 4000;
 
     @Inject
@@ -96,11 +98,6 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         noAlertsLayout.setVisibility(priceAlerts.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
-    private void addAlert(PriceAlert alert)
-    {
-        viewModel.saveAlert(alert);
-    }
-
     private void removeAlert(int position)
     {
         adapter.remove(position);
@@ -112,26 +109,7 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     {
         if (v.getId() == R.id.layout_add_new_price_alert)
         {
-            viewModel.openAddPriceAlertMenu(this, REQUEST_SET_PRICE_ALERT);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
-    {
-        if (requestCode == REQUEST_SET_PRICE_ALERT)
-        {
-            if (resultCode == Activity.RESULT_OK)
-            {
-                if (data != null)
-                {
-                    addAlert(data.getParcelableExtra(C.EXTRA_PRICE_ALERT));
-                }
-            }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
+            viewModel.openAddPriceAlertMenu(this);
         }
     }
 
@@ -141,7 +119,8 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         viewModel.updateStoredAlerts(adapter.getItems());
     }
 
-    public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
+    public class SwipeCallback extends ItemTouchHelper.SimpleCallback
+    {
         private Drawable icon;
         private ColorDrawable background;
         private final Paint textPaint = new TextPaint();
@@ -216,8 +195,7 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
                 icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
                 background.setBounds(itemView.getRight() + ((int) dX) - offset,
                         itemView.getTop(), itemView.getRight(), itemView.getBottom());
-            }
-            else
+            } else
             {
                 background.setBounds(0, 0, 0, 0);
             }
@@ -225,8 +203,8 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             background.draw(c);
             icon.draw(c);
 
-            int xPos = (int)(itemView.getRight() - swipeControlWidth / 2);
-            int yPos = (int)(itemView.getTop() + (itemView.getHeight() * 0.75));
+            int xPos = (int) (itemView.getRight() - swipeControlWidth / 2);
+            int yPos = (int) (itemView.getTop() + (itemView.getHeight() * 0.75));
             c.drawText(getContext().getString(R.string.delete), xPos, yPos, textPaint);
         }
     }

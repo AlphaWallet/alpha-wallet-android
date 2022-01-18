@@ -8,4 +8,5 @@ public class FeeHistory
     public String[] baseFeePerGas;
     public double[] gasUsedRatio;
     public String oldestBlock;
+    public String[][] reward;
 }

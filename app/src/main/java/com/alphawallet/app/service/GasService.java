@@ -17,9 +17,11 @@ import androidx.annotation.NonNull;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.FeeHistory;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.SuggestEIP1559kKt;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -41,6 +43,7 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -383,7 +386,10 @@ public class GasService implements ContractGasProvider
                                                   BigInteger gasLimit, String toAddress,
                                                   BigInteger amount, String txData)
     {
-        FeeHistory history = getChainFeeHistory().blockingGet();
+        //FeeHistory history = getChainFeeHistory().blockingGet();
+        NetworkInfo info = networkRepository.getNetworkByChain(1);
+        Map<Integer, EIP1559FeeOracleResult> feeStructure = SuggestEIP1559kKt.SuggestEIP1559k(info, httpClient);
+
         final Transaction transaction = new Transaction (
                 fromAddress,
                 nonce,

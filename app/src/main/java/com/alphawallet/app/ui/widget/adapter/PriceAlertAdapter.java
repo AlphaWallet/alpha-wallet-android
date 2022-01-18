@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,6 +20,11 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static com.alphawallet.app.service.TickerService.getCurrencyWithoutSymbol;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.PriceAlertViewHolder> {
     private List<PriceAlert> items;
@@ -47,20 +51,20 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
     {
         PriceAlert alert = items.get(position);
 
+        int indicator;
         if (alert.getIndicator())
         {
             holder.icon.setImageResource(R.drawable.ic_system_up);
-            holder.indicator.setText(R.string.price_alert_indicator_above);
+            indicator = R.string.price_alert_indicator_above;
         }
         else
         {
             holder.icon.setImageResource(R.drawable.ic_system_down);
-            holder.indicator.setText(R.string.price_alert_indicator_below);
+            indicator = R.string.price_alert_indicator_below;
         }
 
-
         CurrencyItem currencyItem = CurrencyRepository.getCurrencyByISO(alert.getCurrency());
-        holder.value.setText(currencyItem.getSymbol() + TickerService.getCurrencyWithoutSymbol(new Double(alert.getValue())));
+        holder.rule.setText(format("%s %s%s", context.getText(indicator), requireNonNull(currencyItem).getSymbol(), getCurrencyWithoutSymbol(Double.parseDouble(alert.getValue()))));
 
         holder.alertSwitch.setChecked(alert.isEnabled());
 
@@ -100,16 +104,14 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
 
     public static class PriceAlertViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
-        TextView indicator;
-        TextView value;
+        TextView rule;
         SwitchMaterial alertSwitch;
 
         public PriceAlertViewHolder(@NonNull View itemView)
         {
             super(itemView);
             icon = itemView.findViewById(R.id.icon);
-            indicator = itemView.findViewById(R.id.indicator);
-            value = itemView.findViewById(R.id.value);
+            rule = itemView.findViewById(R.id.rule);
             alertSwitch = itemView.findViewById(R.id.alert_switch);
         }
     }

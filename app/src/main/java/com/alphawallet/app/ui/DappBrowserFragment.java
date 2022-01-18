@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
@@ -136,7 +134,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -1250,25 +1247,33 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
-    private void showChainChangeDialog(long chainId, NetworkInfo newNetwork)
+    /**
+     *
+     * This will pop the ActionSheetDialog to request a chain change, with appropriate warning
+     * if switching between mainnets and testnets
+     *
+     * @param callbackId
+     * @param newNetwork
+     */
+    private void showChainChangeDialog(long callbackId, NetworkInfo newNetwork)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setMessage(getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId)))
-                .setPositiveButton(R.string.dialog_ok, (d, w) -> {
-                    loadNewNetwork(newNetwork.chainId);
-                    web3.onWalletActionSuccessful(chainId, null);
-                })
-                .setNegativeButton(R.string.action_cancel, (d, w) -> chainSwapDialog.dismiss())
-                .setCancelable(true);
-
-        //Warn if we're switching between network types
+        Token baseToken = viewModel.getTokenService().getTokenOrBase(newNetwork.chainId, wallet.address);
+        String message = getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId));
         if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
         {
-            builder.setTitle(R.string.warning_switch_to_main);
+            message += "\n" + getString(R.string.warning_switch_to_main);
+        }
+        else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
+        {
+            message += "\n" + getString(R.string.warning_switching_to_test);
         }
 
-        chainSwapDialog = builder.create();
-        chainSwapDialog.show();
+        confirmationDialog = new ActionSheetDialog(getActivity(), this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+                                callbackId, baseToken);
+
+        confirmationDialog.setCanceledOnTouchOutside(true);
+        confirmationDialog.show();
+        confirmationDialog.fullExpand();
     }
 
     private void handleSignMessage(Signable message)
@@ -2053,6 +2058,20 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             confirmationDialog.completeSignRequest(gotAuth);
         }
+    }
+
+    @Override
+    public void buttonClick(long callbackId, Token baseToken)
+    {
+        //handle button click
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.dismiss();
+        }
+
+        //switch network
+        loadNewNetwork(baseToken.tokenInfo.chainId);
+        web3.onWalletActionSuccessful(callbackId, null);
     }
 
     @Override

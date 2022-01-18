@@ -83,6 +83,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/title"
                     android:gravity="center"
+                    android:visibility="gone"
                     android:singleLine="true"
                     android:textColor="@color/dove"
                     android:textSize="@dimen/sp15"

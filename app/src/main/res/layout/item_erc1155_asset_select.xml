@@ -107,6 +107,7 @@
             android:singleLine="true"
             android:textColor="@color/dove"
             android:textSize="@dimen/sp15"
+            android:visibility="gone"
             tools:text="Infinite Fungible Token" />
 
         <TextView

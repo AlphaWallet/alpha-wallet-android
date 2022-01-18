@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -34,7 +34,7 @@ import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
-import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
+import com.alphawallet.app.ui.widget.adapter.TabPager2Adapter;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.util.Utils;
@@ -43,6 +43,7 @@ import com.alphawallet.app.viewmodel.ImportWalletViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -99,37 +100,46 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         pages.add(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
         if (isWatch) pages.add(ImportType.WATCH_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.watch_wallet), SetWatchWalletFragment.create()));
 
-        ViewPager viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
-        viewPager.setOffscreenPageLimit(4);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new TabPager2Adapter(this, pages));
+        viewPager.setOffscreenPageLimit(pages.size());
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+            }
 
             @Override
             public void onPageSelected(int position) {
+                super.onPageSelected(position);
                 int oldPos = currentPage.ordinal();
                 currentPage = ImportType.values()[position];
                 handlePageChange(oldPos, position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) { }
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+            }
         });
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
-        tabLayout.setupWithViewPager(viewPager);
-
+        new TabLayoutMediator(tabLayout, viewPager,
+                ((tab, position) -> tab.setText(pages.get(position).first))
+        ).attach();
         TabUtils.decorateTabLayout(this, tabLayout);
 
         if (isWatch)
         {
             tabLayout.setVisibility(View.GONE);
-            viewPager.setCurrentItem(ImportType.WATCH_FORM_INDEX.ordinal());
+            viewPager.setCurrentItem(ImportType.WATCH_FORM_INDEX.ordinal(), false);
+            viewPager.setUserInputEnabled(false);
             setTitle(getString(R.string.watch_wallet));
         }
         else
         {
+            viewPager.setUserInputEnabled(true);
             setTitle(getString(R.string.title_import));
         }
 
@@ -140,7 +150,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         importWalletViewModel.wallet().observe(this, this::onWallet);
         importWalletViewModel.badSeed().observe(this, this::onBadSeed);
         importWalletViewModel.watchExists().observe(this, this::onWatchExists);
-
 
     }
 

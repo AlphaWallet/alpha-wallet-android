@@ -53,13 +53,13 @@ public class ImportKeystoreFragment extends ImportFragment
 
     private void setupView()
     {
-        keystore = getActivity().findViewById(R.id.input_keystore);
-        password = getActivity().findViewById(R.id.input_password);
-        passwordText = getActivity().findViewById(R.id.text_password_notice);
-        importText = getActivity().findViewById(R.id.import_text);
+        keystore = getView().findViewById(R.id.input_keystore);
+        password = getView().findViewById(R.id.input_password);
+        passwordText = getView().findViewById(R.id.text_password_notice);
+        importText = getView().findViewById(R.id.import_text);
         passwordText.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
-        importButton = getActivity().findViewById(R.id.import_action_ks);
+        importButton = getView().findViewById(R.id.import_action_ks);
         importButton.setOnClickListener(this);
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);

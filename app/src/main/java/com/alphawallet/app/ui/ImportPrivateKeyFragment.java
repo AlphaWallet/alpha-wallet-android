@@ -50,9 +50,9 @@ public class ImportPrivateKeyFragment extends ImportFragment
 
     private void setupView()
     {
-        privateKey = getActivity().findViewById(R.id.input_private_key);
-        importButton = getActivity().findViewById(R.id.import_action_pk);
-        buttonHolder = getActivity().findViewById(R.id.button_holder_pk);
+        privateKey = getView().findViewById(R.id.input_private_key);
+        importButton = getView().findViewById(R.id.import_action_pk);
+        buttonHolder = getView().findViewById(R.id.button_holder_pk);
         importButton.setOnClickListener(this);
         privateKey.getEditText().addTextChangedListener(this);
         updateButtonState(false);

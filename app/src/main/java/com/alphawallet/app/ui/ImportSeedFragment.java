@@ -72,11 +72,11 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
 
     private void setupView()
     {
-        seedPhrase = getActivity().findViewById(R.id.input_seed);
-        importButton = getActivity().findViewById(R.id.import_action);
-        wordCount = getActivity().findViewById(R.id.text_word_count);
-        listSuggestions = getActivity().findViewById(R.id.list_suggestions);
-        nonEnglishHint = getActivity().findViewById(R.id.text_non_english_hint);
+        seedPhrase = getView().findViewById(R.id.input_seed);
+        importButton = getView().findViewById(R.id.import_action);
+        wordCount = getView().findViewById(R.id.text_word_count);
+        listSuggestions = getView().findViewById(R.id.list_suggestions);
+        nonEnglishHint = getView().findViewById(R.id.text_non_english_hint);
         importButton.setOnClickListener(this);
         seedPhrase.getEditText().addTextChangedListener(this);
         updateButtonState(false);

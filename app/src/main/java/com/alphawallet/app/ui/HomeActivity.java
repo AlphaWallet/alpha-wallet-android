@@ -42,14 +42,16 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentOnAttachListener;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -69,7 +71,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
-import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.util.UpdateUtils;
@@ -104,17 +105,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private HomeViewModel viewModel;
 
     private Dialog dialog;
-    private ScrollControlViewPager viewPager;
-    private final PagerAdapter pagerAdapter;
+    private ViewPager2 viewPager2;
+    private final FragmentStateAdapter pager2Adapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private HomeReceiver homeReceiver;
     private String buildVersion;
-    private final Fragment settingsFragment;
-    private final Fragment dappBrowserFragment;
-    private final Fragment walletFragment;
-    private final Fragment activityFragment;
+    private Fragment settingsFragment;
+    private Fragment dappBrowserFragment;
+    private Fragment walletFragment;
+    private Fragment activityFragment;
     private String walletTitle;
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
@@ -132,12 +133,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public HomeActivity()
     {
-        if (CustomViewSettings.hideDappBrowser()) dappBrowserFragment = new Fragment();
-        else dappBrowserFragment = new DappBrowserFragment();
-        settingsFragment = new NewSettingsFragment();
-        walletFragment = new WalletFragment();
-        activityFragment = new ActivityFragment();
-        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        // fragment creation is shifted to adapter
+        pager2Adapter = new ScreenSlidePager2Adapter(this);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -213,29 +210,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         initViews();
         toolbar();
 
-        viewPager = findViewById(R.id.view_pager);
-        viewPager.lockPages(true);
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(WalletPage.values().length);
-        viewPager.setCompletionCallback(this);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
-        {
+        viewPager2 = findViewById(R.id.view_pager);
+        viewPager2.setUserInputEnabled(false);      // i think this replicates lockPages(true)
+        viewPager2.setAdapter(pager2Adapter);
+        viewPager2.setOffscreenPageLimit(WalletPage.values().length);
+        // vp2
+        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-            {
-
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
             }
 
             @Override
-            public void onPageSelected(int position)
-            {
-
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state)
-            {
-
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
             }
         });
 
@@ -258,12 +251,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     if (isOpen)
                     {
                         setNavBarVisibility(View.GONE);
-                        getFragment(WalletPage.values()[viewPager.getCurrentItem()]).softKeyboardVisible();
+                        getFragment(WalletPage.values()[viewPager2.getCurrentItem()]).softKeyboardVisible();
                     }
                     else
                     {
                         setNavBarVisibility(View.VISIBLE);
-                        getFragment(WalletPage.values()[viewPager.getCurrentItem()]).softKeyboardGone();
+                        getFragment(WalletPage.values()[viewPager2.getCurrentItem()]).softKeyboardGone();
                     }
                 });
 
@@ -301,6 +294,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
             checkIntents(importData, importPath, intent);
         }
+
+        // once settings fragment is added, need to call loadingComplete().
+        getSupportFragmentManager().addFragmentOnAttachListener(new FragmentOnAttachListener() {
+            @Override
+            public void onAttachFragment(@NonNull FragmentManager fragmentManager, @NonNull Fragment fragment) {
+                if (fragment instanceof NewSettingsFragment) {
+                    loadingComplete();
+                }
+            }
+        });
     }
 
     private void setupFragmentListeners()
@@ -495,7 +498,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
+        savedInstanceState.putInt(STORED_PAGE, viewPager2.getCurrentItem());
         if (getSelectedItem() != null)
         {
             viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
@@ -572,14 +575,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void showPage(WalletPage page)
     {
-        WalletPage oldPage = WalletPage.values()[viewPager.getCurrentItem()];
+        WalletPage oldPage = WalletPage.values()[viewPager2.getCurrentItem()];
 
         switch (page)
         {
             case DAPP_BROWSER:
             {
                 hideToolbar();
-                viewPager.setCurrentItem(DAPP_BROWSER.ordinal());
+                viewPager2.setCurrentItem(DAPP_BROWSER.ordinal());
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
                 enableDisplayHomeAsHome(true);
@@ -589,7 +592,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case WALLET:
             {
                 showToolbar();
-                viewPager.setCurrentItem(WALLET.ordinal());
+                viewPager2.setCurrentItem(WALLET.ordinal());
                 if (walletTitle == null || walletTitle.isEmpty())
                 {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -606,7 +609,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case SETTINGS:
             {
                 showToolbar();
-                viewPager.setCurrentItem(SETTINGS.ordinal());
+                viewPager2.setCurrentItem(SETTINGS.ordinal());
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
                 enableDisplayHomeAsHome(false);
@@ -616,7 +619,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case ACTIVITY:
             {
                 showToolbar();
-                viewPager.setCurrentItem(ACTIVITY.ordinal());
+                viewPager2.setCurrentItem(ACTIVITY.ordinal());
                 setTitle(getString(R.string.activity_label));
                 selectNavigationItem(ACTIVITY);
                 enableDisplayHomeAsHome(false);
@@ -625,7 +628,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             default:
                 showToolbar();
-                viewPager.setCurrentItem(WALLET.ordinal());
+                viewPager2.setCurrentItem(WALLET.ordinal());
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);
@@ -800,36 +803,39 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter
+    private class ScreenSlidePager2Adapter extends FragmentStateAdapter
     {
-        public ScreenSlidePagerAdapter(FragmentManager fm)
-        {
-            super(fm);
+        public ScreenSlidePager2Adapter(@NonNull FragmentActivity fragmentActivity) {
+            super(fragmentActivity);
         }
 
         @NonNull
         @Override
-        public Fragment getItem(int position)
-        {
+        public Fragment createFragment(int position) {
             switch (WalletPage.values()[position])
             {
                 case WALLET:
                 default:
+                    walletFragment = new WalletFragment();
                     return walletFragment;
                 case ACTIVITY:
+                    activityFragment = new ActivityFragment();
                     return activityFragment;
                 case DAPP_BROWSER:
+                    if (CustomViewSettings.hideDappBrowser()) dappBrowserFragment = new Fragment();
+                    else dappBrowserFragment = new DappBrowserFragment();
                     return dappBrowserFragment;
                 case SETTINGS:
+                    settingsFragment = new NewSettingsFragment();
                     return settingsFragment;
             }
         }
 
         @Override
-        public int getCount()
-        {
+        public int getItemCount() {
             return WalletPage.values().length;
         }
+
     }
 
     private BaseFragment getFragment(WalletPage page)
@@ -1192,11 +1198,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onBackPressed()
     {
         //Check if current page is WALLET or not
-        if (viewPager.getCurrentItem() == DAPP_BROWSER.ordinal())
+        if (viewPager2.getCurrentItem() == DAPP_BROWSER.ordinal())
         {
             ((DappBrowserFragment) getFragment(DAPP_BROWSER)).backPressed();
         }
-        else if (viewPager.getCurrentItem() != WALLET.ordinal() && isNavBarVisible())
+        else if (viewPager2.getCurrentItem() != WALLET.ordinal() && isNavBarVisible())
         {
             showPage(WALLET);
         }

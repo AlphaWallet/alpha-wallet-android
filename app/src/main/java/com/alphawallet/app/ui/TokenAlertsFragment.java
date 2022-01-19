@@ -37,6 +37,7 @@ import com.alphawallet.app.viewmodel.TokenAlertsViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -217,9 +218,9 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             background.draw(c);
             icon.draw(c);
 
-            int xPos = (int) (itemView.getRight() - swipeControlWidth / 2);
+            int xPos = itemView.getRight() - swipeControlWidth / 2;
             int yPos = (int) (itemView.getTop() + (itemView.getHeight() * 0.75));
-            c.drawText(getContext().getString(R.string.delete), xPos, yPos, textPaint);
+            c.drawText(requireContext().getString(R.string.delete), xPos, yPos, textPaint);
         }
     }
 }

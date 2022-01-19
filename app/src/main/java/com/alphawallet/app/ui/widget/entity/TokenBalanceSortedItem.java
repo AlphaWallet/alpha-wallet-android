@@ -10,12 +10,7 @@ import com.alphawallet.app.entity.tokens.Token;
 public class TokenBalanceSortedItem extends SortedItem<Token> {
 
     public TokenBalanceSortedItem(Token value) {
-        super(TokenDescriptionHolder.VIEW_TYPE, value, 0);
-    }
-
-    @Override
-    public int compare(SortedItem other) {
-        return weight - other.weight;
+        super(TokenDescriptionHolder.VIEW_TYPE, value, new TokenPosition(0));
     }
 
     @Override

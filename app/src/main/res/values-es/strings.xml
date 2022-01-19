@@ -102,6 +102,7 @@
     <string name="currency">Monedas</string>
     <string name="advanced">Opciones avanzadas</string>
     <string name="copy_wallet_address">Copiar la dirección del monedero</string>
+    <string name="rename_this_wallet_action">Cambiar el nombre de esta billetera</string>
     <string name="hint_contract_name">Nombre</string>
     <string name="hint_contract_venue">Ubicación</string>
     <string name="hint_contract_date">Fecha</string>
@@ -437,6 +438,7 @@
     <string name="searching_for_token">Buscando token</string>
     <string name="token_selection">Selección de tokens</string>
     <string name="token_requirement">Esta función requiere %1$s tokens</string>
+    <string name="token_count">%1$s Tokens</string>
     <string name="contains_no_recipient">La transacción no tiene destinatario</string>
     <string name="contains_no_value">La transacción DApp no contiene valor.</string>
     <string name="wallet_not_backed_up">¡No has hecho una copia de seguridad de tu monedero!</string>
@@ -830,4 +832,9 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="assets">Assets</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">Gobernancia</string>
+    <string name="collectibles_header">Coleccionables</string>
+    <string name="whats_new">¿Qué hay de nuevo?</string>
 </resources>

@@ -78,6 +78,9 @@
         <attr name="borderAlpha" format="float" />
         <attr name="finderOffset" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="TokenIcon">
+        <attr name="square" format="boolean" />
+    </declare-styleable>
     <declare-styleable name="AppWidgetAttrs">
         <attr name="appWidgetPadding" format="dimension" />
         <attr name="appWidgetInnerRadius" format="dimension" />

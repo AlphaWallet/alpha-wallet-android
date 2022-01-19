@@ -12,7 +12,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SetPriceAlertActivity;
@@ -53,16 +52,11 @@ public class TokenAlertsViewModel extends BaseViewModel {
     {
         this.token = token;
 
-        Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
-
-        String json = preferenceRepository.getPriceAlerts();
-
-        List<PriceAlert> list = json.isEmpty() ? new ArrayList<>() : new Gson().fromJson(json, listType);
-
-        priceAlerts.postValue(getFilteredList(list));
+        List<PriceAlert> list = getPriceAlerts();
+        priceAlerts.postValue(filterByToken(list));
     }
 
-    private List<PriceAlert> getFilteredList(List<PriceAlert> source)
+    private List<PriceAlert> filterByToken(List<PriceAlert> source)
     {
         List<PriceAlert> filteredList = new ArrayList<>();
         for (PriceAlert p : source)
@@ -75,55 +69,38 @@ public class TokenAlertsViewModel extends BaseViewModel {
         return filteredList;
     }
 
-    public void openAddPriceAlertMenu(Fragment fragment)
-    {
-        Intent intent = new Intent(fragment.getContext(), SetPriceAlertActivity.class);
-        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
-        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-
-        ActivityResultLauncher<Intent> launcher = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->
-                {
-                    if (result.getResultCode() == Activity.RESULT_OK)
-                    {
-                        if (result.getData() != null)
-                        {
-                            saveAlert(result.getData().getParcelableExtra(C.EXTRA_PRICE_ALERT));
-                        }
-                    }
-                }
-        );
-
-        launcher.launch(intent);
-    }
-
     public void saveAlert(PriceAlert priceAlert)
     {
-        tickerService.convertPair(priceAlert.getCurrency(), TickerService.getCurrencySymbolTxt())
+        tickerService.convertPair(TickerService.getCurrencySymbolTxt(), priceAlert.getCurrency())
                 .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe((rate) -> {
                 // check if current price is higher than in alert, mark as 'drops to' or 'rises above' otherwise
-                double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price);
-                double alertPrice = Double.parseDouble(priceAlert.getValue()) * rate;
-                priceAlert.setAbove(currentTokenPrice < alertPrice);
-                Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
-                String json = preferenceRepository.getPriceAlerts();
-                ArrayList<PriceAlert> list = json.isEmpty() ? new ArrayList<>() : new Gson().fromJson(json, listType);
+                double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price) * rate;
+                double alertPrice = Double.parseDouble(priceAlert.getValue());
+                priceAlert.setAbove(alertPrice > currentTokenPrice);
+
+                List<PriceAlert> list = getPriceAlerts();
                 list.add(priceAlert);
-                String updatedJson = new Gson().toJson(list, listType);
-                preferenceRepository.setPriceAlerts(updatedJson);
-                priceAlerts.postValue(getFilteredList(list));
+
+                updateStoredAlerts(list);
             }, Throwable::printStackTrace).isDisposed();
+    }
+
+    private List<PriceAlert> getPriceAlerts()
+    {
+        Type listType = new TypeToken<List<PriceAlert>>()
+        {
+        }.getType();
+        String json = preferenceRepository.getPriceAlerts();
+        return json.isEmpty() ? new ArrayList<>() : new Gson().fromJson(json, listType);
     }
 
     public void updateStoredAlerts(List<PriceAlert> items)
     {
         Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
-
         String updatedJson = items.isEmpty() ? "" : new Gson().toJson(items, listType);
-
         preferenceRepository.setPriceAlerts(updatedJson);
-
-        priceAlerts.postValue(getFilteredList(items));
+        priceAlerts.postValue(filterByToken(items));
     }
 }

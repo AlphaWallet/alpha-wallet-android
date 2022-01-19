@@ -44,16 +44,15 @@ import dagger.android.support.AndroidSupportInjection;
 
 public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener, PriceAlertCallback
 {
-    public static final int REQUEST_SET_PRICE_ALERT = 4000;
-
     @Inject
     TokenAlertsViewModelFactory viewModelFactory;
     private TokenAlertsViewModel viewModel;
 
-    private LinearLayout layoutAddPriceAlert;
     private LinearLayout noAlertsLayout;
     private RecyclerView recyclerView;
     private PriceAlertAdapter adapter;
+    private ActivityResultLauncher<Intent> launcher;
+    private Token token;
 
     @Nullable
     @Override
@@ -73,9 +72,20 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
                     .get(TokenAlertsViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-            Token token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
+            token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
-            layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
+            launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->
+                    {
+                        if (result.getResultCode() == Activity.RESULT_OK)
+                        {
+                            if (result.getData() != null)
+                            {
+                                viewModel.saveAlert(result.getData().getParcelableExtra(C.EXTRA_PRICE_ALERT));
+                            }
+                        }
+                    }
+            );
+            LinearLayout layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
             layoutAddPriceAlert.setOnClickListener(this);
 
             recyclerView = view.findViewById(R.id.recycler_view);
@@ -109,7 +119,11 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     {
         if (v.getId() == R.id.layout_add_new_price_alert)
         {
-            viewModel.openAddPriceAlertMenu(this);
+            Intent intent = new Intent(getContext(), SetPriceAlertActivity.class);
+            intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+            intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+
+            launcher.launch(intent);
         }
     }
 

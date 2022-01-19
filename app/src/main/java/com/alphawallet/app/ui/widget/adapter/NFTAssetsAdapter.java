@@ -103,14 +103,11 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     private void displayAsset(@NotNull ViewHolder holder, NFTAsset asset, BigInteger tokenId)
     {
-        int assetCount = asset.isCollection() ? asset.getCollectionCount() : asset.getBalance().intValue();
+        int assetCount = asset.isCollection() ? asset.getCollectionCount() : token.balance.intValue();
         int textId = assetCount == 1 ? R.string.asset_description_text : R.string.asset_description_text_plural;
         holder.title.setText(asset.getName());
-        if (assetCount > 0)
-        {
-            holder.subtitle.setVisibility(View.VISIBLE);
-            holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory()));
-        }
+        holder.subtitle.setVisibility(View.VISIBLE);
+        holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory()));
         holder.icon.setupTokenImageThumbnail(asset);
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
         holder.loadingSpinner.setVisibility(View.GONE);

@@ -9,7 +9,12 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 public class WarningSortedItem extends SortedItem<WarningData> {
 
     public WarningSortedItem(WarningData value, int weight) {
-        super(WarningHolder.VIEW_TYPE, value, new TokenPosition(weight));
+        super(WarningHolder.VIEW_TYPE, value, weight);
+    }
+
+    @Override
+    public int compare(SortedItem other) {
+        return weight - other.weight;
     }
 
     @Override

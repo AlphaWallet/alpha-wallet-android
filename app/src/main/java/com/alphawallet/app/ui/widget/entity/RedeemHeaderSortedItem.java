@@ -11,7 +11,13 @@ public class RedeemHeaderSortedItem extends SortedItem<Token>
 {
     public RedeemHeaderSortedItem(Token value)
     {
-        super(RedeemTicketHolder.VIEW_TYPE, value, new TokenPosition(0));
+        super(RedeemTicketHolder.VIEW_TYPE, value, 0);
+    }
+
+    @Override
+    public int compare(SortedItem other)
+    {
+        return weight - other.weight;
     }
 
     @Override

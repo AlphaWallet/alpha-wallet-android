@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,7 +98,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
     private ActionSheetDialog confirmationDialog;
-    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler();
     private int checkVal;
     private int itemViewHeight;
 

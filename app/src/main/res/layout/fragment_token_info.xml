@@ -45,7 +45,7 @@
             app:tabGravity="center"
             app:tabIndicatorColor="@color/mine"
             app:tabIndicatorFullWidth="true"
-            app:tabMode="scrollable"
+            app:tabMode="fixed"
             app:tabSelectedTextColor="@color/mine"
             app:tabTextAppearance="@style/ChartTabTextAppearance"
             app:tabTextColor="@color/dove" />

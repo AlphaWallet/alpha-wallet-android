@@ -5,7 +5,6 @@ import android.util.Pair;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SubscribeWrapper;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -84,5 +83,4 @@ public interface TokenRepositoryType {
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 
     Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
-    TokenGroup getTokenGroup(long chainId, String address, ContractType type);
 }

@@ -18,8 +18,6 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 
-import okhttp3.OkHttpClient;
-
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final PreferenceRepositoryType preferenceRepository;
     private final ImportTokenRouter importTokenRouter;
@@ -34,7 +32,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final TickerService tickerService;
     private final AnalyticsServiceType analyticsService;
     private final ExternalBrowserRouter externalBrowserRouter;
-    private final OkHttpClient httpClient;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -49,8 +46,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             TransactionsService transactionsService,
             TickerService tickerService,
             AnalyticsServiceType analyticsService,
-            ExternalBrowserRouter externalBrowserRouter,
-            OkHttpClient httpClient) {
+            ExternalBrowserRouter externalBrowserRouter) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -64,7 +60,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.tickerService = tickerService;
         this.analyticsService = analyticsService;
         this.externalBrowserRouter = externalBrowserRouter;
-        this.httpClient = httpClient;
     }
 
     @NonNull
@@ -83,8 +78,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 transactionsService,
                 tickerService,
                 analyticsService,
-                externalBrowserRouter,
-                httpClient
+                externalBrowserRouter
         );
     }
 }

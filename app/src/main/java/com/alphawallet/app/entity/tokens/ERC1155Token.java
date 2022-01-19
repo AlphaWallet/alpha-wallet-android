@@ -11,7 +11,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -75,7 +74,6 @@ public class ERC1155Token extends Token
             assets = new ConcurrentHashMap<>();
         }
         setInterfaceSpec(ContractType.ERC1155);
-        group = TokenGroup.NFT;
     }
 
     @Override

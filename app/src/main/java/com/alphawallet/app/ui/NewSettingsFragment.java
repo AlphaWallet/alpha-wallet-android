@@ -275,8 +275,10 @@ public class NewSettingsFragment extends BaseFragment {
     {
         if (wallet.type != WalletType.HDKEY) return;
 
-        Intent intent = new Intent(getContext(), ScammerWarningActivity.class);
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
+        intent.putExtra("TYPE", BackupOperationType.SHOW_SEED_PHRASE_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);
     }
 

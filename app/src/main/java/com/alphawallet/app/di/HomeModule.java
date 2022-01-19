@@ -20,7 +20,6 @@ import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.OkHttpClient;
 
 @Module
 class HomeModule {
@@ -38,8 +37,7 @@ class HomeModule {
             TransactionsService transactionsService,
             TickerService tickerService,
             AnalyticsServiceType analyticsService,
-            ExternalBrowserRouter externalBrowserRouter,
-            OkHttpClient httpClient) {
+            ExternalBrowserRouter externalBrowserRouter) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -53,8 +51,7 @@ class HomeModule {
                 transactionsService,
                 tickerService,
                 analyticsService,
-                externalBrowserRouter,
-                httpClient);
+                externalBrowserRouter);
     }
 
     @Provides

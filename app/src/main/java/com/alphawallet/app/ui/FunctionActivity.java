@@ -543,11 +543,32 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         handler.postDelayed(closer, 1000);
     }
 
-    private final Runnable closer = () -> finish();
+    private final Runnable closer = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            finish();
+        }
+    };
 
-    private final Runnable progress = () -> onProgress(true);
+    private final Runnable progress = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            onProgress(true);
+        }
+    };
 
-    private final Runnable progressOff = () -> onProgress(false);
+    private final Runnable progressOff = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            onProgress(false);
+        }
+    };
 
     @Override
     public void functionFailed()
@@ -876,18 +897,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         if (actionCompleted)
         {
-            intent.putExtra(C.EXTRA_TXHASH, TextUtils.isEmpty(txHash) ? "" : txHash);
+            intent.putExtra(C.EXTRA_TXHASH, "");
             setResult(RESULT_OK, intent);
-            if (!TextUtils.isEmpty(txHash))
-            {
-                functionSuccess();
-            }
         }
         else
         {
             setResult(RESULT_CANCELED, intent);
-            finish();
         }
+
+        finish();
     }
 
     @Override

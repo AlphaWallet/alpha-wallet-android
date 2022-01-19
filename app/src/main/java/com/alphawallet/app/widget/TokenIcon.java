@@ -2,7 +2,6 @@ package com.alphawallet.app.widget;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,7 +30,6 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -62,15 +60,12 @@ public class TokenIcon extends ConstraintLayout
     private String fallbackIconUrl;
     private Request currentRq;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final boolean squareToken;
 
     public TokenIcon(Context context, AttributeSet attrs)
     {
         super(context, attrs);
 
-        squareToken = getViewId(context, attrs);
-
-        inflate(context, squareToken ? R.layout.item_token_icon_square : R.layout.item_token_icon, this);
+        inflate(context, R.layout.item_token_icon, this);
 
         icon = findViewById(R.id.icon);
         textIcon = findViewById(R.id.text_icon);
@@ -100,28 +95,6 @@ public class TokenIcon extends ConstraintLayout
                 icon.setImageDrawable(bitmap);
             }
         };
-    }
-
-    private boolean getViewId(Context context, AttributeSet attrs)
-    {
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.TokenIcon,
-                0, 0
-        );
-
-        boolean sq;
-
-        try
-        {
-            sq = a.getBoolean(R.styleable.TokenIcon_square, false);
-        }
-        finally
-        {
-            a.recycle();
-        }
-
-        return sq;
     }
 
     private void bindViews()
@@ -286,13 +259,11 @@ public class TokenIcon extends ConstraintLayout
             }
         }
 
-        final RequestOptions optionalCircleCrop = squareToken ? new RequestOptions() : new RequestOptions().circleCrop();
-
         handler.post(() ->
                 currentRq = Glide.with(getContext())
                 .load(this.fallbackIconUrl)
                 .placeholder(R.drawable.ic_token_eth)
-                .apply(optionalCircleCrop)
+                .apply(new RequestOptions().circleCrop())
                 .listener(requestListenerTW)
                 .into(viewTarget).getRequest());
     }
@@ -303,7 +274,7 @@ public class TokenIcon extends ConstraintLayout
      */
     private void setupTextIcon(@NotNull Token token, boolean loadFailed)
     {
-        icon.setImageResource(R.drawable.ic_clock);
+        if (loadFailed) icon.setVisibility(View.GONE);
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), EthereumNetworkBase.getChainColour(token.tokenInfo.chainId)));
         //try symbol first
@@ -356,10 +327,10 @@ public class TokenIcon extends ConstraintLayout
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
+
+            icon.setVisibility(View.GONE);
             if (token != null)
-            {
                 IconItem.noIconFound(token.getAddress()); //don't try to load this asset again for this session
-            }
             return false;
         }
 

@@ -12,8 +12,13 @@ import java.util.List;
  */
 public class AssetSortedItem extends SortedItem<TicketRange>
 {
-    public AssetSortedItem(TicketRange value, TokenPosition weight) {
+    public AssetSortedItem(TicketRange value, int weight) {
         super(OpenseaHolder.VIEW_TYPE, value, weight);
+    }
+
+    @Override
+    public int compare(SortedItem other) {
+        return weight - other.weight;
     }
 
     @Override

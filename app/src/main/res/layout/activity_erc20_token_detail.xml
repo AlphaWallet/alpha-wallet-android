@@ -34,7 +34,7 @@
             app:layout_scrollFlags="enterAlways"
             app:tabIndicatorColor="@color/colorHighlight"
             app:tabIndicatorFullWidth="true"
-            app:tabMode="scrollable"
+            app:tabMode="fixed"
             app:tabSelectedTextColor="@color/colorHighlight"
             app:tabTextAppearance="@style/WalletTabTextAppearance"
             app:tabTextColor="@color/dove" />

@@ -1,7 +1,5 @@
 package com.alphawallet.app.viewmodel;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
 import android.app.Activity;
 
 import androidx.lifecycle.LiveData;
@@ -29,6 +27,8 @@ import org.web3j.utils.Numeric;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
 {
@@ -155,12 +155,19 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     public Single<Boolean> checkKeystorePassword(String keystore, String keystoreAddress, String password)
     {
         return Single.fromCallable(() -> {
-            boolean isValid = false;
-            ObjectMapper objectMapper = new ObjectMapper();
-            WalletFile walletFile = objectMapper.readValue(keystore, WalletFile.class);
-            ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
-            String address = Numeric.prependHexPrefix(Keys.getAddress(kp));
-            if (address.equalsIgnoreCase(keystoreAddress)) isValid = true;
+            Boolean isValid = false;
+            try
+            {
+                ObjectMapper objectMapper = new ObjectMapper();
+                WalletFile walletFile = objectMapper.readValue(keystore, WalletFile.class);
+                ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
+                String address = Numeric.prependHexPrefix(Keys.getAddress(kp));
+                if (address.equalsIgnoreCase(keystoreAddress)) isValid = true;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
             return isValid;
         });
     }

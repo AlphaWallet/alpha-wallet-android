@@ -1,13 +1,19 @@
 package com.alphawallet.app.ui.widget.holder;
 
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 

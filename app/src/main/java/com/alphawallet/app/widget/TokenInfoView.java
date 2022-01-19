@@ -21,7 +21,6 @@ public class TokenInfoView extends LinearLayout {
     private final TextView value;
     private final TextView valueLongText;
     private boolean isLink;
-    private boolean hasPrefix = false;
 
     public TokenInfoView(Context context, String labelText)
     {
@@ -57,8 +56,7 @@ public class TokenInfoView extends LinearLayout {
     {
         value.setVisibility(View.VISIBLE);
         valueLongText.setVisibility(View.GONE);
-        String prefix = hasPrefix && v > 0 ? "+" : "";
-        value.setText(prefix + TickerService.getFullCurrencyString(v));
+        value.setText(TickerService.getFullCurrencyString(v));
 
         int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.red : R.color.green);
         value.setTextColor(color);
@@ -93,9 +91,5 @@ public class TokenInfoView extends LinearLayout {
                 getContext().startActivity(i);
             }
         });
-    }
-
-    public void setHasPrefix(boolean hasPrefix) {
-        this.hasPrefix = hasPrefix;
     }
 }

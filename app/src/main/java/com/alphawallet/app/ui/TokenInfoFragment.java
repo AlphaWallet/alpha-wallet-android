@@ -119,13 +119,9 @@ public class TokenInfoFragment extends BaseFragment {
             //portfolioAverageCost = new TokenInfoView(getContext(), "Average Cost");
             //portfolioPaidFees = new TokenInfoView(getContext(), "Paid Fees");
             performance1D = new TokenInfoView(getContext(), "1 Day");
-            performance1D.setHasPrefix(true);
             performance1W = new TokenInfoView(getContext(), "1 Week");
-            performance1W.setHasPrefix(true);
             performance1M = new TokenInfoView(getContext(), "1 Month");
-            performance1M.setHasPrefix(true);
             performance1Y = new TokenInfoView(getContext(), "1 Year");
-            performance1Y.setHasPrefix(true);
             statsMarketCap = new TokenInfoView(getContext(), "Market Cap");
             statsTradingVolume = new TokenInfoView(getContext(), "Current Volume");
             statsMaxVolume = new TokenInfoView(getContext(), "Max Volume");

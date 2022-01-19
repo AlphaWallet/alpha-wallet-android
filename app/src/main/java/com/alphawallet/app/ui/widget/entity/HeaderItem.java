@@ -1,16 +1,34 @@
 package com.alphawallet.app.ui.widget.entity;
 
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenSortGroup;
 import com.alphawallet.app.ui.widget.holder.HeaderHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
 
 
-public class HeaderItem extends SortedItem<TokenGroup> {
+public class HeaderItem extends SortedItem<String> {
 
-    public HeaderItem(TokenGroup group) {
-        super(HeaderHolder.VIEW_TYPE, group, new TokenPosition(group, 1, 1, true));
+    final TokenSortGroup group;
+
+    public HeaderItem(String data, int weight, TokenSortGroup group) {
+        super(HeaderHolder.VIEW_TYPE, data, weight);
+        this.group = group;
+    }
+
+    @Override
+    public int compare(SortedItem other) {
+
+        if (other instanceof TokenSortedItem) {
+            // if token from the other group = sort by group
+            if (group != ((TokenCardMeta)other.value).group) {
+                return group.compareTo(((TokenCardMeta)other.value).group);
+            } else {
+                // token is from the same group, should be after the header
+                return -1;
+            }
+        }
+
+        return weight - other.weight;
     }
 
     @Override

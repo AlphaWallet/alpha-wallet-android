@@ -1,8 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
-import static com.alphawallet.app.repository.TokensRealmSource.TOKENS_MAPPING_DB;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 import android.app.Activity;
@@ -21,10 +19,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
@@ -33,7 +29,6 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.OnRampRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.repository.entity.RealmTokenMapping;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -41,7 +36,6 @@ import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.NameThisWalletActivity;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
@@ -240,11 +234,6 @@ public class WalletViewModel extends BaseViewModel
             intent.putExtra(EXTRA_ADDRESS, getWalletAddr());
             context.startActivity(intent);
         });
-        actionsView.setOnRenameThisWalletClickListener(v -> {
-            dialog.dismiss();
-            Intent intent = new Intent(context, NameThisWalletActivity.class);
-            context.startActivity(intent);
-        });
 
         dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
         dialog.setContentView(actionsView);
@@ -264,11 +253,6 @@ public class WalletViewModel extends BaseViewModel
     public Realm getRealmInstance()
     {
         return realmManager.getRealmInstance(getWallet());
-    }
-
-    public TokenGroup getTokenGroup(long chainId, String address)
-    {
-        return tokensService.getTokenGroup(tokensService.getToken(chainId, address));
     }
 
     public void showTokenDetail(Activity activity, Token token)

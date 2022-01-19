@@ -4,6 +4,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,6 +22,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
 import com.alphawallet.app.ui.widget.OnSuggestionClickListener;
 import com.alphawallet.app.ui.widget.adapter.SuggestionsAdapter;
+import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 import com.google.common.collect.Collections2;
 
@@ -27,10 +30,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ImportSeedFragment extends ImportFragment implements OnSuggestionClickListener {
+public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener, OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";
     private final int maxWordCount = 12;
@@ -201,19 +205,19 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
 
         if (inputWords == maxWordCount)
         {
-            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.nasty_green));
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.nasty_green));
             wordCount.setTypeface(boldTypeface);
             updateButtonState(true);
         }
         else if (inputWords == (maxWordCount -1))
         {
-            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.colorPrimaryDark));
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.colorPrimaryDark));
             wordCount.setTypeface(normalTypeface);
             updateButtonState(false);
         }
         else if (inputWords > maxWordCount)
         {
-            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.dark_seed_danger));
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.dark_seed_danger));
             updateButtonState(false);
         }
 

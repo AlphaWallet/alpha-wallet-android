@@ -5,8 +5,13 @@ import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 
 public class ManageTokensSortedItem extends SortedItem<ManageTokensData> {
 
-    public ManageTokensSortedItem(ManageTokensData data) {
-        super(ManageTokensHolder.VIEW_TYPE, data, new TokenPosition(Long.MAX_VALUE));
+    public ManageTokensSortedItem(ManageTokensData data, int weight) {
+        super(ManageTokensHolder.VIEW_TYPE, data, weight);
+    }
+
+    @Override
+    public int compare(SortedItem other) {
+        return weight - other.weight;
     }
 
     @Override

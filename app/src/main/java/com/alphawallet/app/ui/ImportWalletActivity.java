@@ -46,7 +46,6 @@ import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
@@ -108,9 +107,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
             @Override
             public void onPageSelected(int position) {
-                int oldPos = currentPage.ordinal();
                 currentPage = ImportType.values()[position];
-                handlePageChange(oldPos, position);
             }
 
             @Override
@@ -142,19 +139,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         importWalletViewModel.watchExists().observe(this, this::onWatchExists);
 
 
-    }
-
-    private void handlePageChange(int oldPos, int position)
-    {
-        if (getSupportFragmentManager().getFragments().size() >= oldPos + 1)
-        {
-            ((ImportFragment) getSupportFragmentManager().getFragments().get(oldPos)).leaveFocus();
-        }
-
-        if (getSupportFragmentManager().getFragments().size() >= position + 1)
-        {
-            ((ImportFragment) getSupportFragmentManager().getFragments().get(position)).comeIntoFocus();
-        }
     }
 
     @Override
@@ -299,20 +283,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             importWalletViewModel.checkKeystorePassword(keystore, address, password)
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(result -> keyStoreValid(result, address), this::reportKeystoreError)
-                    .isDisposed();
-        }
-        else
-        {
-            keyImportError(getString(R.string.invalid_keystore));
-        }
-    }
-
-    private void reportKeystoreError(Throwable e)
-    {
-        if (e instanceof CipherException)
-        {
-            keyImportError(e.getMessage());
+                    .subscribe(result -> keyStoreValid(result, address)).isDisposed();
         }
         else
         {
@@ -325,7 +296,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         onProgress(false);
         if (!result)
         {
-            keyImportError(getString(R.string.invalid_keystore));
+            keyImportError("Invalid Password for Keystore");
         }
         else if (importWalletViewModel.keystoreExists(address))
         {

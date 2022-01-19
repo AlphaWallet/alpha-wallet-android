@@ -3,7 +3,6 @@ package com.alphawallet.app.ui.widget.entity;
 import android.util.Pair;
 
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
 
 import java.math.BigInteger;
@@ -14,7 +13,12 @@ import java.math.BigInteger;
 public class NFTSortedItem extends SortedItem<Pair<BigInteger, NFTAsset>>
 {
     public NFTSortedItem(Pair<BigInteger, NFTAsset> value, int weight) {
-        super(NFTAssetHolder.VIEW_TYPE, value, new TokenPosition(TokenGroup.NFT, 1, weight));
+        super(NFTAssetHolder.VIEW_TYPE, value, weight);
+    }
+
+    @Override
+    public int compare(SortedItem other) {
+        return weight - other.weight;
     }
 
     @Override

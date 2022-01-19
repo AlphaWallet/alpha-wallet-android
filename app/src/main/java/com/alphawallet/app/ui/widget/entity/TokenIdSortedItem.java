@@ -12,8 +12,14 @@ public class TokenIdSortedItem extends SortedItem<TicketRange>
 {
     public static final int VIEW_TYPE = TicketHolder.VIEW_TYPE;
 
-    public TokenIdSortedItem(TicketRange range, TokenPosition weight) {
+    public TokenIdSortedItem(TicketRange range, int weight) {
         super(VIEW_TYPE, range, weight);
+    }
+
+    @Override
+    public int compare(SortedItem other)
+    {
+        return weight - other.weight;
     }
 
     @Override

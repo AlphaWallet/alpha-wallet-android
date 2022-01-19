@@ -29,6 +29,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
 import com.alphawallet.app.viewmodel.TokenManagementViewModelFactory;
@@ -211,11 +212,9 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
                 if (adapter.isTokenPresent(token.getTokenAddress())) continue;
 
                 String balance = TokensRealmSource.convertStringBalance(token.getBalance(), token.getContractType());
-                Token t = viewModel.getTokensService().getToken(token.getChainId(), token.getTokenAddress()); //may not be needed to group
 
                 TokenCardMeta meta = new TokenCardMeta(token.getChainId(), token.getTokenAddress(), balance,
-                        token.getUpdateTime(), viewModel.getAssetDefinitionService(), token.getName(), token.getSymbol(), token.getContractType(),
-                        viewModel.getTokensService().getTokenGroup(t));
+                        token.getUpdateTime(), viewModel.getAssetDefinitionService(), token.getName(), token.getSymbol(), token.getContractType());
                 meta.lastTxUpdate = token.getLastTxTime();
                 adapter.addToken(meta);
             }

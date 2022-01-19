@@ -10,27 +10,17 @@ public abstract class SortedItem<T> {
     protected final List<Integer> tags = new ArrayList<>();
 
     public int viewType;
-    public final T value;
-    public TokenPosition weight;
+    public T value;
+    public final int weight;
     public BinderViewHolder view;
 
-    public SortedItem(int viewType, T value, TokenPosition weight) {
+    public SortedItem(int viewType, T value, int weight) {
         this.viewType = viewType;
         this.value = value;
         this.weight = weight;
     }
 
-    public int compare(SortedItem other)
-    {
-        if (value instanceof TokenSortedItem && other.value instanceof TokenSortedItem) //we may need to order tokens with the same name
-        {
-            return ((TokenSortedItem) value).compare(other);
-        }
-        else
-        {
-            return weight.compare(other.weight);
-        }
-    }
+    public abstract int compare(SortedItem other);
 
     public abstract boolean areContentsTheSame(SortedItem newItem);
 

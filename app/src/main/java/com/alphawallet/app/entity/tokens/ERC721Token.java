@@ -7,7 +7,6 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -55,7 +54,6 @@ public class ERC721Token extends Token
             tokenBalanceAssets = new ConcurrentHashMap<>();
         }
         setInterfaceSpec(type);
-        group = TokenGroup.NFT;
     }
 
     @Override

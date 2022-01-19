@@ -13,7 +13,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -27,7 +26,6 @@ import com.alphawallet.app.ui.widget.entity.QuantitySelectorSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
-import com.alphawallet.app.ui.widget.entity.TokenPosition;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
@@ -221,19 +219,18 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     @SuppressWarnings("unchecked")
     protected <T> T generateType(TicketRange range, int weight, int id)
     {
-        TokenPosition tp = new TokenPosition(TokenGroup.NFT, 1, weight);
         T item;
         switch (id)
         {
             case AssetInstanceScriptHolder.VIEW_TYPE:
-                item = (T) new AssetInstanceSortedItem(range, tp);
+                item = (T) new AssetInstanceSortedItem(range, weight);
                 break;
             case OpenseaHolder.VIEW_TYPE:
-                item = (T) new AssetSortedItem(range, tp);
+                item = (T) new AssetSortedItem(range, weight);
                 break;
             case TicketHolder.VIEW_TYPE:
             default:
-                item = (T) new TokenIdSortedItem(range, tp);
+                item = (T) new TokenIdSortedItem(range, weight);
                 break;
         }
 

@@ -15,21 +15,15 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -48,9 +42,8 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
-public class TokenDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
+public class TokenDetailActivity extends BaseActivity implements StandardFunctionInterface
 {
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
@@ -66,8 +59,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     private TextView openExternal;
     private NFTAttributeLayout attributeLayout;
     private FunctionButtonBar functionBar;
-    private ActionSheetDialog confirmationDialog;
-    private AWalletAlertDialog dialog;
     private Token token;
     private NFTAsset asset;
     private BigInteger tokenId;
@@ -100,8 +91,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         setContentView(R.layout.activity_token_detail);
         viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
-        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
-        viewModel.transactionFinalised().observe(this, this::txWritten);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
             asset = getIntent().getExtras().getParcelable(C.EXTRA_NFTASSET);
@@ -113,7 +102,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
             toolbar();
             setTitle(token.getFullName());
             setupPage();
-            viewModel.prepare();
         } else {
             finish();
         }
@@ -144,10 +132,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         if (action != null && action.view == null && action.function != null)
         {
             //go straight to function call
-            Web3Transaction w3Tx = viewModel.handleFunction(action, selection.get(0), token, this);
-            calculateEstimateDialog();
-            //get gas estimate
-            viewModel.estimateGasLimit(w3Tx, token.tokenInfo.chainId);
+            viewModel.handleFunction(action, selection.get(0), token, this);
         }
         else
         {
@@ -172,17 +157,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     private void setNameAndDesc(NFTAsset asset) {
         name.setText(asset.getName());
         desc.setText(asset.getDescription());
-    }
-
-    private void calculateEstimateDialog()
-    {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(getString(R.string.calc_gas_limit));
-        dialog.setIcon(AWalletAlertDialog.NONE);
-        dialog.setProgressMode();
-        dialog.setCancelable(false);
-        dialog.show();
     }
 
     private void setDetails(NFTAsset asset) {
@@ -252,76 +226,5 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
-    }
-
-    private void checkConfirm(Web3Transaction w3tx)
-    {
-        if (w3tx.gasLimit.equals(BigInteger.ZERO))
-        {
-            estimateError(w3tx);
-        }
-        else
-        {
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
-                    w3tx.recipient.toString(), viewModel.getTokenService(), this);
-            confirmationDialog.setURL("TokenScript");
-            confirmationDialog.setCanceledOnTouchOutside(false);
-            confirmationDialog.show();
-        }
-    }
-
-    private void estimateError(final Web3Transaction w3tx)
-    {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(WARNING);
-        dialog.setTitle(R.string.confirm_transaction);
-        dialog.setMessage(R.string.error_transaction_may_fail);
-        dialog.setButtonText(R.string.button_ok);
-        dialog.setSecondaryButtonText(R.string.action_cancel);
-        dialog.setButtonListener(v -> {
-            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
-            checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
-        });
-
-        dialog.setSecondaryButtonListener(v -> {
-            dialog.dismiss();
-        });
-
-        dialog.show();
-    }
-
-    /**
-     * Final return path
-     * @param transactionData
-     */
-    private void txWritten(TransactionData transactionData)
-    {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
-    }
-
-    @Override
-    public void getAuthorisation(SignAuthenticationCallback callback)
-    {
-        viewModel.getAuthentication(this, callback);
-    }
-
-    @Override
-    public void sendTransaction(Web3Transaction finalTx)
-    {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
-    }
-
-    @Override
-    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
-    {
-        //no action
-    }
-
-    @Override
-    public void notifyConfirm(String mode)
-    {
-        viewModel.actionSheetConfirm(mode);
     }
 }

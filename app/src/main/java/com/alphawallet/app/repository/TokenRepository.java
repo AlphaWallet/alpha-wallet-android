@@ -17,7 +17,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
@@ -370,12 +369,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<TokenInfo> update(String contractAddr, long chainId)
     {
         return setupTokensFromLocal(contractAddr, chainId);
-    }
-
-    @Override
-    public TokenGroup getTokenGroup(long chainId, String address, ContractType type)
-    {
-        return localSource.getTokenGroup(chainId, address, type);
     }
 
     @Override

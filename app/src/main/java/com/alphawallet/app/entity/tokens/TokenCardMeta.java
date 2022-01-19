@@ -1,25 +1,19 @@
 package com.alphawallet.app.entity.tokens;
 
-import static com.alphawallet.app.ui.widget.entity.ChainItem.CHAIN_ITEM_WEIGHT;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.interact.ATokensRepository;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 12/07/2020.
@@ -29,19 +23,19 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final String tokenId;
     public long lastUpdate;
     public long lastTxUpdate;
-    private final long nameWeight;
+    public final int nameWeight;
     public final ContractType type;
     public final String balance;
     private final String filterText;
 
-    public final TokenGroup group;
+    public final TokenSortGroup group;
 
     /*
     Initial value is False as Token considered to be Hidden
      */
     public boolean isEnabled = false;
 
-    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group)
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
     {
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
         this.lastUpdate = timeStamp;
@@ -49,10 +43,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.balance = balance;
         this.filterText = symbol + "'" + name;
-        this.group = group;
+        this.group = defineSortGroup();
     }
 
-    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type, TokenGroup group)
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type)
     {
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
         this.lastUpdate = timeStamp;
@@ -61,7 +55,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = 1000;
         this.balance = balance;
         this.filterText = null;
-        this.group = group;
+        this.group = defineSortGroup();
     }
 
     public TokenCardMeta(Token token)
@@ -73,7 +67,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.nameWeight = 1000;
         this.balance = token.balance.toString();
         this.filterText = token.getShortSymbol() + "'" + token.getName(); //TODO: will not find AssetDefinition names
-        this.group = token.group;
+        this.group = defineSortGroup();
         this.isEnabled = true;
     }
 
@@ -86,18 +80,18 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
         filterText = in.readString();
-        int groupOrdinal = in.readInt();
-        group = TokenGroup.values()[groupOrdinal];
+        group = defineSortGroup();
     }
 
-    public long getNameWeight()
-    {
-        return nameWeight;
-    }
+    private TokenSortGroup defineSortGroup() {
+        TokenSortGroup tsg = TokenSortGroup.GENERAL;
+        if (isNFT()) {
+            tsg = TokenSortGroup.NFT;
+        } else if (isAToken()) {
+            tsg = TokenSortGroup.ATOKEN;
+        }
 
-    public static long groupWeight(TokenGroup group)
-    {
-        return group.ordinal() + 1;
+        return tsg;
     }
 
     public String getFilterText()
@@ -123,11 +117,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         dest.writeString(tokenId);
         dest.writeLong(lastUpdate);
         dest.writeLong(lastTxUpdate);
-        dest.writeLong(nameWeight);
+        dest.writeInt(nameWeight);
         dest.writeInt(type.ordinal());
         dest.writeString(balance);
         dest.writeString(filterText);
-        dest.writeInt(group.ordinal());
     }
 
     public String getAddress()
@@ -142,7 +135,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public boolean hasValidName()
     {
-        return nameWeight < Long.MAX_VALUE;
+        return nameWeight < Integer.MAX_VALUE;
     }
 
     public long getChain()
@@ -159,7 +152,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
+    private int calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
     {
         int weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
@@ -174,14 +167,14 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
         if (chainId == EthereumNetworkRepository.getOverrideToken().chainId && tokenAddress.equalsIgnoreCase(EthereumNetworkRepository.getOverrideToken().address))
         {
-            return CHAIN_ITEM_WEIGHT + 1;
+            return 1;
         }
         else if (isEth)
         {
-            return CHAIN_ITEM_WEIGHT + 1 + EthereumNetworkBase.getChainOrdinal(chainId);
+            return 1 + EthereumNetworkBase.getChainOrdinal(chainId);
         }
 
-        if (TextUtils.isEmpty(name)) return Long.MAX_VALUE;
+        if (TextUtils.isEmpty(name)) return Integer.MAX_VALUE;
 
         int i = 4;
         int pos = 0;
@@ -236,10 +229,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     @Override
     public int compareTo(@NonNull TokenCardMeta otherToken)
     {
-        long result = nameWeight - otherToken.nameWeight;
-        if (result < Integer.MIN_VALUE) result = Integer.MIN_VALUE;
-        if (result > Integer.MAX_VALUE) result = Integer.MAX_VALUE;
-        return (int) result;
+        return nameWeight - otherToken.nameWeight;
     }
 
     public boolean isEthereum()
@@ -247,13 +237,32 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         return type == ContractType.ETHEREUM;
     }
 
-    public TokenGroup getTokenGroup() {
-        return group;
+    public boolean isAToken() {
+        return ATokensRepository.isAToken(getAddress());
     }
 
     public boolean isNFT()
     {
-        return group == TokenGroup.NFT;
+        switch (type)
+        {
+            case NOT_SET:
+            case OTHER:
+            case ETHEREUM:
+            case CURRENCY:
+            case CREATION:
+            case DELETED_ACCOUNT:
+            case ERC20:
+            default:
+                return false;
+            case ERC721:
+            case ERC875_LEGACY:
+            case ERC875:
+            case ERC1155:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                return true;
+        }
     }
 
     public float calculateBalanceUpdateWeight()

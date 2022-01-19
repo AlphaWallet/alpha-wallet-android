@@ -390,26 +390,6 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion++;
         }
-
-        if (oldVersion == 37 || oldVersion == 38)
-        {
-            RealmObjectSchema realmData = schema.get("RealmTokenMapping");
-            if (realmData != null) schema.remove("RealmTokenMapping");
-            schema.create("RealmTokenMapping")
-                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY)
-                        .addField("base", String.class)
-                        .addField("group", int.class);
-
-            oldVersion = 39;
-        }
-
-        if (oldVersion == 39)
-        {
-            RealmObjectSchema realmData = schema.get("RealmAToken");
-            if (realmData != null) schema.remove("RealmAToken");
-
-            oldVersion++;
-        }
     }
 
     @Override

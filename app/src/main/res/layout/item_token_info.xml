@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
+            android:fontFamily="@font/font_bold"
             android:gravity="end|center_vertical"
             android:singleLine="true"
             tools:text="-"

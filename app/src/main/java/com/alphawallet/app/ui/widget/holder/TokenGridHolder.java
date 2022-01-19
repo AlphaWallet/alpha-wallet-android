@@ -3,7 +3,6 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,6 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
 
     private final LinearLayout clickLayer;
     private final TextView name;
-    private final TextView count;
     private final TokenIcon imageIcon;
     private final AssetDefinitionService assetDefinition;
     private final TokensService tokensService;
@@ -33,12 +31,9 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
     public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs) {
         super(resId, parent);
 
-        RelativeLayout ll = findViewById(R.id.token_layout);
         clickLayer = findViewById(R.id.click_layer);
         imageIcon = findViewById(R.id.token_icon);
-        ll.setClipToOutline(true);
         name = findViewById(R.id.token_name);
-        count = findViewById(R.id.token_count);
         tokensService = tSvs;
         assetDefinition = assetService;
     }
@@ -48,8 +43,34 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
         if (tcm != null) {
             Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
             imageIcon.bindData(token, assetDefinition);
-            name.setText(token.getName(assetDefinition, token.balance.intValue()));
-            count.setText(getString(R.string.token_count, token.balance.intValue()));
+            name.setText(token.getFullName(assetDefinition, token.balance.intValue()));
+
+            /*if (token.isERC721()) {
+                ERC721Token tkn = (ERC721Token) token;
+                Collection<NFTAsset> assets = tkn.getTokenAssets().values();
+                if (assets != null && assets.size() > 0) {
+                    NFTAsset firstAsset = assets.iterator().next();
+                    if (firstAsset != null) {
+                        Glide.with(getContext())
+                                .load(firstAsset.getThumbnail())
+                                .override(72)
+                                .into(imageIcon);
+                        name.setText(token.tokenInfo.name);
+                        textIcon.setVisibility(View.GONE);
+                        imageIcon.setVisibility(View.VISIBLE);
+                    } else {
+                        setupIcon(token);
+                    }
+                }
+            } else if (token.isERC721Ticket()) {
+                ERC721Ticket tkn = (ERC721Ticket) token;
+                String tokenName = tkn.getTokenName(assetDefinition, 0);
+                name.setText(tokenName);
+                setupIcon(token);
+            } else {
+                name.setText(token.tokenInfo.name);
+                setupIcon(token);
+            }*/
 
             clickLayer.setOnClickListener(v -> {
                 if (tokensAdapterCallback != null) {
@@ -58,6 +79,13 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
             });
         }
     }
+
+    /*private void setupIcon(@NotNull Token token) {
+        imageIcon.setVisibility(View.GONE);
+        textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
+        textIcon.setText(Utils.getIconisedText(token.tokenInfo.name));
+    }*/
 
     public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) {
         this.tokensAdapterCallback = tokensAdapterCallback;

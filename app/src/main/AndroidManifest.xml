@@ -277,11 +277,6 @@
             android:name=".ui.SelectCurrencyActivity"
             android:label="Select Currency" />
         <activity
-            android:name=".ui.ScammerWarningActivity"
-            android:noHistory="true"
-            android:label="Scammer Warning" />
-
-        <activity
             android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity

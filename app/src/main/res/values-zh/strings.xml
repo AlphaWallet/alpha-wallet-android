@@ -837,4 +837,7 @@
     <string name="price_alert_indicator_above">高于</string>
     <string name="add_new_price_alert">添加新价格通知</string>
     <string name="current_price">当前价格：</string>
+    <string name="tab_info">Info</string>
+    <string name="tab_activity">Activity</string>
+    <string name="tab_alert">Alerts</string>
 </resources>

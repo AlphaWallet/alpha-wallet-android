@@ -864,4 +864,21 @@
     <string name="summary_change_24h">%1$s (%2$s) Today</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
+    <string name="app_widget_description">AlphaWallet\'s Crypto Ticker</string>
+    <string-array name="currency" translatable="false">
+        <item >USD</item>
+        <item >AUD</item>
+        <item >BRL</item>
+        <item >CAD</item>
+        <item >CNY</item>
+        <item >EUR</item>
+        <item >GBP</item>
+        <item >IDR</item>
+        <item >ILS</item>
+        <item >INR</item>
+        <item >JPY</item>
+    </string-array>
 </resources>

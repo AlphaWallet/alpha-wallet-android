@@ -20,30 +20,54 @@
         android:required="false" />
 
     <application
-        android:extractNativeLibs="true"
         android:name=".App"
         android:allowBackup="false"
+        android:extractNativeLibs="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:requestLegacyExternalStorage="true"
         android:label="@string/app_name"
         android:launchMode="singleTask"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="false"
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true"
         tools:replace="android:name, android:theme, android:allowBackup">
+        <service
+            android:name=".widget.homewidget.CryptoUpdateService"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <receiver
+            android:name=".widget.homewidget.HomeScreenTickerProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/home_screen_ticker_info" />
+        </receiver>
+
         <activity
-            android:launchMode="singleTask"
+            android:name=".widget.homewidget.HomeScreenTickerConfigureActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ui.HomeActivity"
-            android:theme="@style/SplashTheme"
-            android:label="@string/app_name"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan"
-            >
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/SplashTheme"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -103,12 +127,15 @@
             </intent-filter>
             <intent-filter>
                 <data android:scheme="wc" />
+
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -142,216 +169,172 @@
         <activity
             android:name=".ui.WalletsActivity"
             android:label="@string/title_account_list" />
-
-        <activity android:name=".ui.SplashActivity"
+        <activity
+            android:name=".ui.SplashActivity"
             android:theme="@style/SplashTheme" />
 
         <service
             android:name=".service.WalletConnectService"
-            android:enabled="true">
-        </service>
+            android:enabled="true" />
 
-        <activity android:name=".ui.NameThisWalletActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/name_this_wallet" />
+        <activity
+            android:name=".ui.NameThisWalletActivity"
+            android:label="@string/name_this_wallet"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
             android:screenOrientation="sensor"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
-
         <activity
             android:name=".ui.TransactionDetailActivity"
             android:label="@string/title_transaction_details" />
         <activity
             android:name=".ui.MyAddressActivity"
             android:label="@string/title_my_address" />
-
         <activity
             android:name=".ui.SendActivity"
             android:label="@string/title_activity_send"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".ui.AddTokenActivity"
             android:label="@string/title_add_token" />
-
         <activity
             android:name=".ui.AssetDisplayActivity"
             android:label="@string/title_use_token" />
-
         <activity
             android:name=".ui.RedeemSignatureDisplayActivity"
             android:label="@string/title_use_token" />
-
         <activity
             android:name=".ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
-
         <activity
             android:name=".ui.SellDetailActivity"
             android:label="@string/action_sell"
             android:windowSoftInputMode="adjustPan" />
-
         <activity
             android:name=".ui.RedeemAssetSelectActivity"
             android:label="@string/title_redeem" />
-
-        <!--<activity
+        <!--
+<activity
             android:name=".ui.HomeActivity"
             android:label="@string/toolbar_header_wallet"
-            android:windowSoftInputMode="adjustPan" />-->
-
+            android:windowSoftInputMode="adjustPan" />
+        -->
         <activity
             android:name=".ui.ImportTokenActivity"
             android:label="@string/title_import_token" />
-
         <activity
             android:name=".ui.TransferTicketDetailActivity"
             android:label="@string/label_transfer_ticket_detail" />
-
         <activity
             android:name=".ui.HelpActivity"
             android:label="@string/toolbar_header_help" />
-
         <activity
             android:name=".ui.TokenDetailActivity"
             android:label="@string/token_details" />
-
         <activity
             android:name=".ui.Erc20DetailActivity"
             android:label="@string/erc20_details" />
-
         <activity
             android:name=".ui.TokenFunctionActivity"
             android:label="@string/token_function" />
-
         <activity
             android:name=".ui.FunctionActivity"
-            android:label="@string/token_function" />
-
-        <!--<service android:name="AlphaWalletFirebaseMessagingService">-->
-        <!--<intent-filter>-->
-        <!--<action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-        <!--</intent-filter>-->
-        <!--</service>-->
-
-        <!--<meta-data-->
-        <!--android:name="preloaded_fonts"-->
-        <!--android:resource="@array/preloaded_fonts" />-->
-
-        <!--<meta-data-->
-        <!--android:name="com.google.firebase.messaging.default_notification_icon"-->
-        <!--android:resource="@mipmap/ic_alpha" />-->
-
-        <!--<meta-data-->
-        <!--android:name="com.google.firebase.messaging.default_notification_color"-->
-        <!--android:resource="@color/colorAccent" />-->
-
+            android:label="@string/token_function" /> <!-- <service android:name="AlphaWalletFirebaseMessagingService"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="com.google.firebase.MESSAGING_EVENT" /> -->
+        <!-- </intent-filter> -->
+        <!-- </service> -->
+        <!-- <meta-data -->
+        <!-- android:name="preloaded_fonts" -->
+        <!-- android:resource="@array/preloaded_fonts" /> -->
+        <!-- <meta-data -->
+        <!-- android:name="com.google.firebase.messaging.default_notification_icon" -->
+        <!-- android:resource="@mipmap/ic_alpha" /> -->
+        <!-- <meta-data -->
+        <!-- android:name="com.google.firebase.messaging.default_notification_color" -->
+        <!-- android:resource="@color/colorAccent" /> -->
         <activity
             android:name=".ui.WalletActionsActivity"
             android:label="Wallet Actions" />
-
         <activity
             android:name=".ui.AddEditDappActivity"
             android:label="Add DApp" />
-
         <activity
             android:name=".ui.SelectNetworkActivity"
             android:label="Select DApp Browser Network" />
-
         <activity
             android:name=".ui.SelectNetworkFilterActivity"
             android:label="Select Network Filters" />
-
         <activity
             android:name=".ui.TokenManagementActivity"
             android:label="Manage Tokens" />
-
         <activity
             android:name=".ui.SelectLocaleActivity"
             android:label="Select Language" />
-
         <activity
             android:name=".ui.SelectCurrencyActivity"
             android:label="Select Currency" />
-
         <activity
             android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
-
         <activity
             android:name=".ui.SupportSettingsActivity"
             android:label="Support Settings" />
-
         <activity
             android:name=".ui.AdvancedSettingsActivity"
             android:label="Advanced Settings" />
-
         <activity
             android:name=".ui.StaticViewer"
             android:label="View Text" />
-
-        <activity android:name=".ui.TokenScriptManagementActivity"
-            android:label="@string/tokenscript_management"/>
-
-        <activity android:name=".ui.TokenActivity"
-            android:label="@string/activity_label"/>
-
+        <activity
+            android:name=".ui.TokenScriptManagementActivity"
+            android:label="@string/tokenscript_management" />
+        <activity
+            android:name=".ui.TokenActivity"
+            android:label="@string/activity_label" />
         <activity
             android:name=".ui.WalletConnectActivity"
-            android:launchMode="singleTop"
-            android:label="WalletConnect" />
-
+            android:label="WalletConnect"
+            android:launchMode="singleTop" />
         <activity
             android:name=".ui.BackupFlowActivity"
             android:label="WalletConnect" />
-
         <activity
             android:name=".ui.SignDetailActivity"
             android:label="Sign Details" />
-
         <activity
             android:name=".ui.WalletConnectSessionActivity"
             android:label="WalletConnect Sessions" />
-
         <activity
             android:name=".ui.TransactionSuccessActivity"
             android:label="Transaction Success" />
-
         <activity
             android:name=".ui.SetPriceAlertActivity"
             android:label="Set New Alert"
-            android:windowSoftInputMode="adjustResize"/>
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.AddCustomRPCNetworkActivity"
-            android:label="@string/title_activity_add_custom_rpcnetwork"/>
-
+            android:label="@string/title_activity_add_custom_rpcnetwork" />
         <activity
             android:name=".ui.Erc1155Activity"
             android:label="ERC1155 Master Activity" />
-
         <activity
             android:name=".ui.Erc1155AssetSelectActivity"
             android:label="ERC1155 Asset Selection" />
-
         <activity
             android:name=".ui.Erc1155AssetDetailActivity"
             android:label="ERC1155 Asset Details" />
-
         <activity
             android:name=".ui.Erc1155AssetListActivity"
             android:label="ERC1155 Asset Details" />
-
         <activity
             android:name=".ui.TransferNFTActivity"
             android:label="NFT Transfer" />
-
         <activity
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
-
     </application>
 
 </manifest>

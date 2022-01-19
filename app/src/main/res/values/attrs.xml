@@ -24,7 +24,7 @@
         <attr name="settingType" format="string" />
     </declare-styleable>
     <declare-styleable name="NotificationView">
-        <attr name="backgroundColour" format="integer"/>
+        <attr name="backgroundColour" format="integer" />
         <attr name="textColor" format="integer" />
     </declare-styleable>
     <declare-styleable name="ChainName" />
@@ -32,10 +32,10 @@
     <declare-styleable name="InputAddress" />
     <declare-styleable name="InputFiatView" />
     <declare-styleable name="ERC721ImageView">
-        <attr name="webview_height" format="integer"/>
+        <attr name="webview_height" format="integer" />
     </declare-styleable>
     <declare-styleable name="StandardHeader">
-        <attr name="headerText" format="string"/>
+        <attr name="headerText" format="string" />
     </declare-styleable>
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
@@ -61,7 +61,7 @@
         <attr name="bold" format="boolean" />
         <attr name="removePadding" format="boolean" />
         <attr name="marginRight" format="dimension" />
-        <attr name="textColour" format="color"/>
+        <attr name="textColour" format="color" />
         <attr name="android:gravity" />
     </declare-styleable>
     <declare-styleable name="BarcodeScannerView">
@@ -77,5 +77,10 @@
         <attr name="squaredFinder" format="boolean" />
         <attr name="borderAlpha" format="float" />
         <attr name="finderOffset" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="AppWidgetAttrs">
+        <attr name="appWidgetPadding" format="dimension" />
+        <attr name="appWidgetInnerRadius" format="dimension" />
+        <attr name="appWidgetRadius" format="dimension" />
     </declare-styleable>
 </resources>

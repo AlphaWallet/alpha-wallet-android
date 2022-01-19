@@ -9,6 +9,9 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
@@ -30,6 +33,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
+import com.alphawallet.app.widget.homewidget.JobReceiver;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
@@ -877,5 +881,30 @@ public class Utils {
         }
 
         return cleanInput.length() == 64;
+    }
+
+
+    public static void scheduleJob(Context context)
+    {
+        ComponentName serviceComponent = new ComponentName(context, JobReceiver.class);
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (jobScheduler != null)
+        {
+            cancelAllPendingJobs(jobScheduler);
+            JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+            builder.setMinimumLatency(5 * 60 * 1000); //perform operation every 5 minutes
+            builder.setOverrideDeadline(7 * 60 * 1000); //ensure job performs after at least 7 minutes
+            jobScheduler.schedule(builder.build());
+        }
+    }
+
+    private static void cancelAllPendingJobs(JobScheduler jobScheduler)
+    {
+        List<JobInfo> jobList = jobScheduler.getAllPendingJobs();
+        for (JobInfo j : jobList)
+        {
+            int jId = j.getId();
+            jobScheduler.cancel(jId);
+        }
     }
 }

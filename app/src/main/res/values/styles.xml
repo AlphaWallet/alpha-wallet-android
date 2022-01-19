@@ -34,7 +34,9 @@
         <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="android:windowLightStatusBar">true</item>
 
-        <item name="android:autoCompleteTextViewStyle">@style/Widget.AppCompat.Light.AutoCompleteTextView</item>
+        <item name="android:autoCompleteTextViewStyle">
+            @style/Widget.AppCompat.Light.AutoCompleteTextView
+        </item>
         <item name="android:dialogTheme">@style/MyDialogTheme</item>
         <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
         <item name="colorSurface">#FFFFFF</item>
@@ -173,6 +175,16 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+    <style name="Widget.Alphawalletandroid.AppWidget.Container" parent="android:Widget">
+        <item name="android:id">@android:id/background</item>
+        <item name="android:background">?android:attr/colorBackground</item>
+    </style>
+
+    <style name="Widget.Alphawalletandroid.AppWidget.InnerView" parent="android:Widget">
+        <item name="android:background">?android:attr/colorBackground</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
 </resources>

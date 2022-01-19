@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SVG used in this layout.  The previous community-based support library MrVector
+is deprecated by official support.
+https://github.com/telly/MrVector
+
+The official Android Support Library has it in the master
+https://android.googlesource.com/platform/frameworks/support/+/master/v7
+but not in 22.2
+https://android.googlesource.com/platform/frameworks/support/+/tools_r22.2/v7/
+
+There is no commandline tool to converts SVG to VectorDrawable XML or java code
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_password_entry">
+
+
+    <TextView
+        android:id="@+id/textCrypto"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:text="Bitcoin"
+        android:textColor="@color/orangey_red" />
+
+    <TextView
+        android:id="@+id/textCounterRed"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="8sp"
+        android:text="1"
+        android:textColor="@color/red" />
+
+    <TextView
+        android:id="@+id/textCounterGreen"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textSize="8sp"
+        android:text="Current"
+        android:textColor="@color/green" />
+
+
+    <LinearLayout
+        android:id="@+id/servicePadding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal"
+        android:visibility="visible" >
+
+        <TextView
+            android:id="@+id/textValue"
+            android:layout_below="@id/textCrypto"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="1054.34"
+            android:textColor="@color/orangey_red" />
+
+        <TextView
+            android:id="@+id/textType"
+            android:layout_toRightOf="@id/textValue"
+            android:layout_alignBottom="@id/textValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="AUD"
+            android:textColor="@color/orangey_red"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linChangesGreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/servicePadding"
+        android:layout_centerHorizontal="true"
+        android:visibility="visible" >
+
+        <TextView
+            android:id="@+id/text24hChangeGreenR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="24h: "
+            android:textColor="@color/black"
+            android:textSize="7sp"/>
+
+        <TextView
+            android:id="@+id/text24hChangeGreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+0.50"
+            android:textColor="@color/green"
+            android:textSize="8sp"/>
+
+        <TextView
+            android:id="@+id/text7dChangeRedR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="week: "
+            android:textColor="@color/black"
+            android:layout_marginLeft="4dp"
+            android:textSize="7sp"/>
+
+        <TextView
+            android:id="@+id/text7dChangeGreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+0.50"
+            android:textColor="@color/green"
+            android:textSize="8sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linChangesRed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/servicePadding"
+        android:layout_centerHorizontal="true"
+        android:visibility="visible" >
+
+        <TextView
+            android:id="@+id/text24hChangeRedR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="24h: "
+            android:visibility="invisible"
+            android:textColor="@color/black"
+            android:textSize="7sp"/>
+
+        <TextView
+            android:id="@+id/text24hChangeRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+0.50"
+            android:textColor="@color/red"
+            android:textSize="8sp"/>
+
+        <TextView
+            android:id="@+id/text7dChangeRedR2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="week: "
+            android:textColor="@color/black"
+            android:visibility="invisible"
+            android:layout_marginLeft="4dp"
+            android:textSize="7sp"/>
+
+        <TextView
+            android:id="@+id/text7dChangeRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+0.50"
+            android:textColor="@color/red"
+            android:textSize="8sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linChangeGreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/textCrypto"
+        android:layout_marginTop="-3dp"
+        android:visibility="visible" >
+
+        <TextView
+            android:id="@+id/textChange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1h: "
+            android:textColor="@color/black"
+            android:textSize="7sp"/>
+
+        <TextView
+            android:id="@+id/textChangeGreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+1.3"
+            android:textColor="@color/green"
+            android:textSize="8sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linChangeRed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/textCrypto"
+        android:layout_marginTop="-3dp"
+        android:visibility="visible" >
+
+        <TextView
+            android:id="@+id/textChangeRedTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1h: "
+            android:textColor="@color/black"
+            android:visibility="invisible"
+            android:textSize="7sp"/>
+
+        <TextView
+            android:id="@+id/textChangeRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/red"
+            android:textSize="8sp"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

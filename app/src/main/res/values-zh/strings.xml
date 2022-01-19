@@ -826,4 +826,8 @@
     <string name="summary_change_24h">%1$s (%2$s) 今天</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="app_widget_description">AlphaWallet\'s Crypto Ticker</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 </resources>

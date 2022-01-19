@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.alphawallet.app.widget.homewidget.HomeScreenTickerConfigureActivity"
+    android:description="@string/app_widget_description"
+    android:initialKeyguardLayout="@layout/layout_widget_crypto"
+    android:initialLayout="@layout/layout_widget_crypto"
+    android:previewImage="@drawable/ic_ethereum_logo"
+    android:resizeMode="horizontal"
+    android:minHeight="20dp"
+    android:minWidth="80dp"
+    android:minResizeHeight="20dp"
+    android:minResizeWidth="40dp"
+    android:updatePeriodMillis="120000" />

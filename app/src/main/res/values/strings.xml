@@ -509,7 +509,7 @@
     <string name="key_error">Key Error</string>
     <string name="password_6_characters_or_more">Password 6 characters or more</string>
     <string name="create_a_new_wallet">Create a new Wallet</string>
-    <string name="watch">WATCH</string>
+    <string name="watch">Watch</string>
     <string name="already_have_a_wallet">I already have a wallet:</string>
     <string name="watch_wallet">Watch-only Wallets</string>
     <string name="suggestion_address">Enter Ethereum Address</string>

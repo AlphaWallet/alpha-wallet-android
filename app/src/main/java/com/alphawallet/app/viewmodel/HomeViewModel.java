@@ -220,9 +220,8 @@ public class HomeViewModel extends BaseViewModel {
         importTokenRouter.open(activity, importData);
     }
 
-    public void updateLocale(String newLocale, Context context)
+    public void restartHomeActivity(Context context)
     {
-        localeRepository.setLocale(context, newLocale);
         //restart activity
         Intent intent = new Intent(context, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -71,7 +71,6 @@ import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
-import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
@@ -360,8 +359,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(C.CHANGED_LOCALE, this, (requestKey, b) -> {
-                    ((WalletFragment) getFragment(WALLET)).changedLocale();
+                .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) -> {
+                    viewModel.restartHomeActivity(getApplicationContext());
                 });
     }
 
@@ -1090,9 +1089,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         break;
                 }
                 break;
-            case C.UPDATE_LOCALE:
-                updateLocale(data);
-                break;
             case C.REQUEST_UNIVERSAL_SCAN:
                 if (data != null && resultCode == Activity.RESULT_OK)
                 {
@@ -1178,14 +1174,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     void postponeWalletBackupWarning(String walletAddress)
     {
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
-    }
-
-    public void updateLocale(Intent data)
-    {
-        if (data == null) return;
-        String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
-        sendBroadcast(new Intent(CHANGED_LOCALE));
-        viewModel.updateLocale(newLocale, this);
     }
 
     @Override

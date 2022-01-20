@@ -608,11 +608,6 @@ public class WalletFragment extends BaseFragment implements
         }
     }
 
-    public void changedLocale()
-    {
-        refreshList();
-    }
-
     @Override
     public void run()
     {

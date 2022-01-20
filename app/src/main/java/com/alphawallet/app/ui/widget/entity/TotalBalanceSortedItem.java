@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
@@ -7,12 +8,7 @@ import java.math.BigDecimal;
 public class TotalBalanceSortedItem extends SortedItem<BigDecimal> {
 
     public TotalBalanceSortedItem(BigDecimal value) {
-        super(TotalBalanceHolder.VIEW_TYPE, value, 0);
-    }
-
-    @Override
-    public int compare(SortedItem other) {
-        return weight - other.weight;
+        super(TotalBalanceHolder.VIEW_TYPE, value, new TokenPosition(TokenGroup.ASSET, 1, 0));
     }
 
     @Override

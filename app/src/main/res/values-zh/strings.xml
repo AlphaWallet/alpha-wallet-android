@@ -102,6 +102,7 @@
     <string name="currency">币类</string>
     <string name="advanced">高级设置</string>
     <string name="copy_wallet_address">复制钱包地址</string>
+    <string name="rename_this_wallet_action">重命名此钱包</string>
     <string name="hint_contract_name">名称</string>
     <string name="hint_contract_venue">场馆</string>
     <string name="hint_contract_date">日期</string>
@@ -437,6 +438,7 @@
     <string name="searching_for_token">通证扫描</string>
     <string name="token_selection">通证选择</string>
     <string name="token_requirement">此功能需要 %1$s 个通证</string>
+    <string name="token_count">%1$s 个通证</string>
     <string name="contains_no_recipient">交易尚无接收人</string>
     <string name="contains_no_value">DApp 交易未包含任何值。</string>
     <string name="wallet_not_backed_up">您的钱包未备份！</string>
@@ -826,5 +828,9 @@
     <string name="summary_change_24h">%1$s (%2$s) 今天</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
-    <string name="whats_new">新功能</string>
+    <string name="assets">资产</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">治理</string>
+    <string name="collectibles_header">NFT</string>
+    <string name="whats_new">什么是新的？</string>
 </resources>

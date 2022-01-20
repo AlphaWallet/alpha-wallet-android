@@ -110,6 +110,7 @@
     <string name="currency">Tài sản</string>
     <string name="advanced">Tùy chọn nâng cao</string>
     <string name="copy_wallet_address">Sao chép địa chỉ ví</string>
+    <string name="rename_this_wallet_action">Đổi tên Ví này</string>
     <string name="hint_contract_name">Tên</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Ngày</string>
@@ -453,6 +454,7 @@
     <string name="searching_for_token">Quét Token</string>
     <string name="token_selection">Token Selection</string>
     <string name="token_requirement">This function requires %1$s tokens</string>
+    <string name="token_count">%1$s Tokens</string>
     <string name="contains_no_recipient">Transaction has no recipient</string>
     <string name="contains_no_value">DApp transaction contains no value.</string>
     <string name="wallet_not_backed_up">Ví của bạn chưa được sao lưu!</string>
@@ -854,5 +856,9 @@
     <string name="summary_change_24h">%1$s (%2$s) Hôm nay</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
-    <string name="whats_new">What\'s new?</string>
+    <string name="assets">Assets</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">Quản trị</string>
+    <string name="collectibles_header">Sưu tầm</string>
+    <string name="whats_new">Có gì mới?</string>
 </resources>

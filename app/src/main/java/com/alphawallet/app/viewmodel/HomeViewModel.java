@@ -533,14 +533,6 @@ public class HomeViewModel extends BaseViewModel {
         RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 
-    public boolean shouldShowRootWarning() {
-        return preferenceRepository.showShowRootWarning();
-    }
-
-    public void setShowRootWarning(boolean shouldShow) {
-        preferenceRepository.setShowRootWarning(shouldShow);
-    }
-
     public int getUpdateWarnings() {
         return preferenceRepository.getUpdateWarningCount();
     }
@@ -597,7 +589,7 @@ public class HomeViewModel extends BaseViewModel {
                     .getPackageInfo(context.getPackageName(), 0);
 
             int versionCode = packageInfo.versionCode;
-            if (preferenceRepository.getLastVersionCode() < versionCode) {
+            if (preferenceRepository.getLastVersionCode(versionCode) < versionCode) {
                 // load what's new
                 Request request = new Request.Builder()
                         .header("Accept", "application/vnd.github.v3+json")

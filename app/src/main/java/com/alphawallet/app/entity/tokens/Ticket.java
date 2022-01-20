@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.Utils;
@@ -43,12 +44,14 @@ public class Ticket extends Token
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
         balance = balanceArray != null ? BigDecimal.valueOf(balanceArray.size()) : BigDecimal.ZERO;
+        group = TokenGroup.NFT;
     }
 
     public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
         balance = BigDecimal.valueOf(balanceArray.size());
+        group = TokenGroup.NFT;
     }
 
     @Override

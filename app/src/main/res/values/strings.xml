@@ -110,6 +110,7 @@
     <string name="currency">Currencies</string>
     <string name="advanced">Advanced Options</string>
     <string name="copy_wallet_address">Copy Wallet Address</string>
+    <string name="rename_this_wallet_action">Rename this Wallet</string>
     <string name="hint_contract_name">Name</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>
@@ -454,6 +455,7 @@
     <string name="searching_for_token">Scanning for Token</string>
     <string name="token_selection">Token Selection</string>
     <string name="token_requirement">This function requires %1$s tokens</string>
+    <string name="token_count">%1$s Tokens</string>
     <string name="contains_no_recipient">Transaction has no recipient</string>
     <string name="contains_no_value">DApp transaction contains no value.</string>
     <string name="wallet_not_backed_up">Your Wallet is not backed up!</string>
@@ -864,5 +866,9 @@
     <string name="summary_change_24h">%1$s (%2$s) Today</string>
     <string name="performance">Performance</string>
     <string name="token_name_hint">Token Name</string>
+    <string name="assets">Assets</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">Governance</string>
+    <string name="collectibles_header">Collectibles</string>
     <string name="whats_new">What\'s new?</string>
 </resources>

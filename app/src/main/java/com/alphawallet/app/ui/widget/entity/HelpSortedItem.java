@@ -5,12 +5,12 @@ import com.alphawallet.app.entity.HelpItem;
 public class HelpSortedItem extends SortedItem<HelpItem> {
 
     public HelpSortedItem(int viewType, HelpItem value, int weight) {
-        super(viewType, value, weight);
+        super(viewType, value, new TokenPosition(weight));
     }
 
     @Override
     public int compare(SortedItem other) {
-        return weight - other.weight;
+        return Long.compare(weight.weighting, other.weight.weighting);
     }
 
     @Override

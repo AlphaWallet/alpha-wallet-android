@@ -1,18 +1,20 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import com.alphawallet.app.entity.EIP1559FeeOracleResult;
+
 import java.math.BigInteger;
 
 /**
- * Created by JB on 22/11/2020.
+ * Created by JB on 20/01/2022.
  */
-public class GasSpeed
+public class GasSpeed2
 {
     public final String speed;
     public long seconds;
-    public final BigInteger gasPrice;
+    public final EIP1559FeeOracleResult gasPrice;
     public final boolean isCustom;
 
-    public GasSpeed(String speed, long seconds, BigInteger gasPrice)
+    public GasSpeed2(String speed, long seconds, EIP1559FeeOracleResult gasPrice)
     {
         this.speed = speed;
         this.seconds = seconds;
@@ -20,7 +22,7 @@ public class GasSpeed
         this.isCustom = false;
     }
 
-    public GasSpeed(String speed, long seconds, BigInteger gasPrice, boolean isCustom)
+    public GasSpeed2(String speed, long seconds, EIP1559FeeOracleResult gasPrice, boolean isCustom)
     {
         this.speed = speed;
         this.seconds = seconds;

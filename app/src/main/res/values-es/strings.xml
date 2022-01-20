@@ -837,7 +837,7 @@
     <string name="price_alert_indicator_above">Sobre</string>
     <string name="add_new_price_alert">Agregar nueva alerta de precio</string>
     <string name="current_price">Precio actual:</string>
-    <string name="tab_info">Info</string>
-    <string name="tab_activity">Activity</string>
-    <string name="tab_alert">Alerts</string>
+    <string name="tab_info">Información</string>
+    <string name="tab_activity">Actividad</string>
+    <string name="tab_alert">Alertas</string>
 </resources>

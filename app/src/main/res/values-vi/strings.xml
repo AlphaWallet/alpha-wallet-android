@@ -865,7 +865,7 @@
     <string name="price_alert_indicator_above">Bên trên</string>
     <string name="add_new_price_alert">Thêm thông báo giá mới</string>
     <string name="current_price">Giá hiện tại:</string>
-    <string name="tab_info">Info</string>
-    <string name="tab_activity">Activity</string>
-    <string name="tab_alert">Alerts</string>
+    <string name="tab_info">Thông tin</string>
+    <string name="tab_activity">Hoạt động</string>
+    <string name="tab_alert">Cảnh báo</string>
 </resources>

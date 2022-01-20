@@ -34,12 +34,9 @@
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true"
         tools:replace="android:name, android:theme, android:allowBackup">
-        <service
-            android:name=".widget.homewidget.CryptoUpdateService"
-            android:enabled="true"
-            android:exported="true"></service>
 
-        <receiver
+
+    <receiver
             android:name=".widget.homewidget.HomeScreenTickerProvider"
             android:exported="true">
             <intent-filter>

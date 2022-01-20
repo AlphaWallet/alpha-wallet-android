@@ -64,7 +64,6 @@ import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.viewmodel.WalletViewModel;
-import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
@@ -79,7 +78,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
@@ -88,7 +87,7 @@ import io.realm.RealmResults;
 /**
  * Created by justindeguzman on 2/28/18.
  */
-
+@AndroidEntryPoint
 public class WalletFragment extends BaseFragment implements
         TokensAdapterCallback,
         View.OnClickListener,
@@ -101,8 +100,6 @@ public class WalletFragment extends BaseFragment implements
 
     public static final String SEARCH_FRAGMENT = "w_search";
 
-    @Inject
-    WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
 
     private SystemView systemView;
@@ -124,7 +121,6 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
 
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
@@ -182,7 +178,7 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, walletViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(WalletViewModel.class);
         viewModel.progress().observe(getViewLifecycleOwner(), systemView::showProgress);
         viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);

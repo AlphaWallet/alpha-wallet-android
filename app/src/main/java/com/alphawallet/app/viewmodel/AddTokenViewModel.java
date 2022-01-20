@@ -29,11 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+@HiltViewModel
 public class AddTokenViewModel extends BaseViewModel {
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -75,6 +78,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private final List<Disposable> scanThreads = new ArrayList<>();
 
+    @Inject
     AddTokenViewModel(
             GenericWalletInteract genericWalletInteract,
             FetchTokensInteract fetchTokensInteract,

@@ -8,7 +8,9 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickListener {
     private Toolbar toolbar;
     private TextView toolbarTitle;

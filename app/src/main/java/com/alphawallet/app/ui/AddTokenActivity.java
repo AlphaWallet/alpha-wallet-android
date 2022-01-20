@@ -39,7 +39,6 @@ import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
-import com.alphawallet.app.viewmodel.AddTokenViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -55,16 +54,15 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
+@AndroidEntryPoint
 public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface
 {
-    @Inject
-    protected AddTokenViewModelFactory addTokenViewModelFactory;
     private AddTokenViewModel viewModel;
 
     private final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
@@ -93,7 +91,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
@@ -125,7 +122,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         contractType = null;
 
-        viewModel = new ViewModelProvider(this, addTokenViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(AddTokenViewModel.class);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);

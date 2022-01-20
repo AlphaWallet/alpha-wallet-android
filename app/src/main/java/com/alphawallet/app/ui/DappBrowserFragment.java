@@ -106,7 +106,6 @@ import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
-import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
 import com.alphawallet.app.web3.OnEthCallListener;
 import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
@@ -151,7 +150,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -160,6 +159,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+@AndroidEntryPoint
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
@@ -195,8 +195,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
      */
     private final int ANIMATION_DURATION = 100;
 
-    @Inject
-    DappBrowserViewModelFactory dappBrowserViewModelFactory;
     private DappBrowserViewModel viewModel;
 
     private DappBrowserSwipeLayout swipeRefreshLayout;
@@ -278,7 +276,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        AndroidSupportInjection.inject(this);
         LocaleUtils.setActiveLocale(getContext());
         loadOnInit = null;
         int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
@@ -768,7 +765,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, dappBrowserViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);

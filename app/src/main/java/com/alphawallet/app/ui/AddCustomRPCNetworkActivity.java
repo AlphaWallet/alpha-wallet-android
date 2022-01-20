@@ -15,7 +15,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModel;
-import com.alphawallet.app.viewmodel.CustomNetworkViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -25,14 +24,13 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class AddCustomRPCNetworkActivity extends BaseActivity implements StandardFunctionInterface {
 
     public static final String CHAIN_ID = "chain_id";
 
-    @Inject
-    CustomNetworkViewModelFactory walletViewModelFactory;
     private CustomNetworkViewModel viewModel;
 
     private InputView nameInputView;
@@ -50,7 +48,6 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_custom_rpc_network);
-        AndroidInjection.inject(this);
 
         toolbar();
 
@@ -122,7 +119,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, walletViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(CustomNetworkViewModel.class);
     }
 

@@ -19,7 +19,6 @@ import com.alphawallet.app.ui.widget.adapter.HelpAdapter;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.HelpItem;
 import com.alphawallet.app.viewmodel.HelpViewModel;
-import com.alphawallet.app.viewmodel.HelpViewModelFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,17 +26,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class HelpActivity extends BaseActivity {
-    @Inject
-    HelpViewModelFactory helpViewModelFactory;
     private HelpViewModel viewModel;
     private WebView webView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_help);
         toolbar();

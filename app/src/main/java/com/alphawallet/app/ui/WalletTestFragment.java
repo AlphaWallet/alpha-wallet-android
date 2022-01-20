@@ -10,10 +10,12 @@ import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Created by justindeguzman on 2/28/18.
  */
-
+@AndroidEntryPoint
 public class WalletTestFragment extends Fragment {
     @Nullable
     @Override

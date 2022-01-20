@@ -15,11 +15,17 @@ import com.alphawallet.app.ui.Erc1155AssetListActivity;
 
 import java.math.BigInteger;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class Erc1155AssetsViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
+    @Inject
     public Erc1155AssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                                   AssetDefinitionService assetDefinitionService,
                                   TokensService tokensService)

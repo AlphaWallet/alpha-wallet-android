@@ -43,6 +43,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -51,6 +52,9 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class TransactionDetailViewModel extends BaseViewModel {
     private final ExternalBrowserRouter externalBrowserRouter;
 
@@ -83,6 +87,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     @Nullable
     private Disposable currentBlockUpdateDisposable;
 
+    @Inject
     TransactionDetailViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             ExternalBrowserRouter externalBrowserRouter,

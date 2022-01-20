@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -69,6 +70,9 @@ import io.realm.Sort;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class WalletConnectViewModel extends BaseViewModel {
     public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -92,6 +96,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     private static final String TAG = "WCClientVM";
 
+    @Inject
     WalletConnectViewModel(KeyService keyService,
                            FindDefaultNetworkInteract findDefaultNetworkInteract,
                            CreateTransactionInteract createTransactionInteract,

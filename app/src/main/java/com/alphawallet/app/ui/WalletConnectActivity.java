@@ -44,7 +44,6 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
-import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
@@ -80,12 +79,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
 
+@AndroidEntryPoint
 public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface, WalletConnectCallback
 {
     private static final String TAG = "WCClient";
@@ -93,8 +93,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public static final String WC_LOCAL_PREFIX = "wclocal:";
     public static final String WC_INTENT = "wcintent:";
 
-    @Inject
-    WalletConnectViewModelFactory viewModelFactory;
     WalletConnectViewModel viewModel;
 
     private WCClient client;
@@ -133,7 +131,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onCreate(savedInstanceState);
 
-        AndroidInjection.inject(this);
 
         setContentView(R.layout.activity_wallet_connect);
 
@@ -269,7 +266,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(WalletConnectViewModel.class);
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);

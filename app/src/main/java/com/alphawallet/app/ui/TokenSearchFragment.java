@@ -33,7 +33,6 @@ import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
-import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.SearchToolbar;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
@@ -44,16 +43,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
+
 
 /**
  * Created by JB on 11/12/2021.
  */
-
+@AndroidEntryPoint
 public class TokenSearchFragment extends Fragment implements SearchToolbarCallback, TokensAdapterCallback
 {
-    @Inject
-    WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
@@ -66,7 +64,6 @@ public class TokenSearchFragment extends Fragment implements SearchToolbarCallba
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
 
         final View view = inflater.inflate(R.layout.fragment_wallet_search, container, false);
 
@@ -153,7 +150,7 @@ public class TokenSearchFragment extends Fragment implements SearchToolbarCallba
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, walletViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(WalletViewModel.class);
         viewModel.tokens().observe(getViewLifecycleOwner(), this::onTokens);
         viewModel.prepare();

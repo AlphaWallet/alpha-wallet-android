@@ -28,7 +28,6 @@ import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
-import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -47,7 +46,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
@@ -56,10 +54,11 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import org.web3j.crypto.Keys;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
-    @Inject
-    TransactionDetailViewModelFactory transactionDetailViewModelFactory;
     private TransactionDetailViewModel viewModel;
 
     private Transaction transaction;
@@ -74,11 +73,10 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_detail);
 
-        viewModel = new ViewModelProvider(this, transactionDetailViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TransactionDetailViewModel.class);
         viewModel.latestBlock().observe(this, this::onLatestBlock);
         viewModel.onTransaction().observe(this, this::onTransaction);

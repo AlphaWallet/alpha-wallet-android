@@ -19,11 +19,17 @@ import java.util.List;
 import static com.alphawallet.app.C.EXTRA_CURRENCY;
 import static com.alphawallet.app.C.EXTRA_STATE;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class SetPriceAlertViewModel extends BaseViewModel {
     private final CurrencyRepositoryType currencyRepository;
     private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
 
+    @Inject
     SetPriceAlertViewModel(
             CurrencyRepositoryType currencyRepository,
             PreferenceRepositoryType preferenceRepository,

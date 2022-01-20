@@ -29,7 +29,6 @@ import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc1155ViewModel;
-import com.alphawallet.app.viewmodel.Erc1155ViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.android.material.tabs.TabLayout;
@@ -40,11 +39,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class Erc1155Activity extends BaseActivity implements StandardFunctionInterface {
-    @Inject
-    Erc1155ViewModelFactory viewModelFactory;
+
     Erc1155ViewModel viewModel;
 
     private Menu menu;
@@ -56,7 +55,6 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc1155);
         toolbar();
@@ -73,7 +71,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(Erc1155ViewModel.class);
     }
 

@@ -76,7 +76,6 @@ import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -94,13 +93,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
         FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
 {
-    @Inject
-    HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
 
     private Dialog dialog;
@@ -194,7 +192,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         LocaleUtils.setDeviceLocale(getBaseContext());
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
@@ -202,7 +199,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
-        viewModel = new ViewModelProvider(this, homeViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(HomeViewModel.class);
         viewModel.identify(this);
         viewModel.setWalletStartup();

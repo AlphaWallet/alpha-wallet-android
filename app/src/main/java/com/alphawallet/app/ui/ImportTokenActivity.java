@@ -29,7 +29,6 @@ import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
-import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -46,7 +45,6 @@ import java.math.BigDecimal;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.IMPORT_STRING;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -55,14 +53,14 @@ import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Created by James on 9/03/2018.
  */
-
+@AndroidEntryPoint
 public class ImportTokenActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback, PageReadyCallback
 {
-    @Inject
-    protected ImportTokenViewModelFactory importTokenViewModelFactory;
     private ImportTokenViewModel viewModel;
     private SystemView systemView;
 
@@ -87,7 +85,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
@@ -119,7 +116,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Button cancel = findViewById(R.id.cancel_button);
         cancel.setOnClickListener(this);
 
-        viewModel = new ViewModelProvider(this, importTokenViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(ImportTokenViewModel.class);
         viewModel.importRange().observe(this, this::onImportRange);
         viewModel.invalidRange().observe(this, this::invalidTicket);

@@ -36,7 +36,6 @@ import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
-import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -50,7 +49,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -60,10 +59,10 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_MODE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+@AndroidEntryPoint
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
 {
-    @Inject
-    Erc20DetailViewModelFactory erc20DetailViewModelFactory;
+
     Erc20DetailViewModel viewModel;
 
     public static final int HISTORY_LENGTH = 5;
@@ -94,7 +93,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
         symbol = null;
@@ -186,7 +184,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (viewModel == null)
         {
-            viewModel = new ViewModelProvider(this, erc20DetailViewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(Erc20DetailViewModel.class);
             viewModel.newScriptFound().observe(this, this::onNewScript);
 //            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar

@@ -20,6 +20,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class TokenAlertsViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
@@ -27,6 +32,7 @@ public class TokenAlertsViewModel extends BaseViewModel {
     private final MutableLiveData<List<PriceAlert>> priceAlerts = new MutableLiveData<>();
     private Token token;
 
+    @Inject
     public TokenAlertsViewModel(AssetDefinitionService assetDefinitionService,
                                 PreferenceRepositoryType preferenceRepository,
                                 TokensService tokensService)

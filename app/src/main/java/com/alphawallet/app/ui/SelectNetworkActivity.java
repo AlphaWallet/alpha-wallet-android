@@ -18,7 +18,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
-import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
 import com.alphawallet.app.widget.TestNetDialog;
 
 import java.util.ArrayList;
@@ -27,13 +26,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class SelectNetworkActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
     private static final int REQUEST_SELECT_ACTIVE_NETWORKS = 2000;
 
-    @Inject
-    SelectNetworkViewModelFactory viewModelFactory;
     boolean localSelectionMode;
     private SelectNetworkViewModel viewModel;
     private SingleSelectNetworkAdapter mainNetAdapter;
@@ -42,11 +40,10 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkViewModel.class);
 
         prepare(getIntent());

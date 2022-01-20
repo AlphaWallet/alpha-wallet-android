@@ -40,6 +40,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -47,6 +51,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+@HiltViewModel
 public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallback
 {
     private final static String TAG = WalletsViewModel.class.getSimpleName();
@@ -94,6 +99,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     @Nullable
     private Disposable walletSync;
 
+    @Inject
     WalletsViewModel(
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
@@ -106,7 +112,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             TokenRepositoryType tokenRepository,
             TickerService tickerService,
             AssetDefinitionService assetService,
-            Context context)
+            @ApplicationContext Context context)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;

@@ -33,7 +33,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
-import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 import com.alphawallet.app.widget.ChainName;
 import com.bumptech.glide.Glide;
 
@@ -41,15 +40,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
+
 
 /**
  * Created by JB on 9/09/2020.
  */
+@AndroidEntryPoint
 public class WalletConnectSessionActivity extends BaseActivity
 {
-    @Inject
-    WalletConnectViewModelFactory viewModelFactory;
     WalletConnectViewModel viewModel;
 
     private RecyclerView recyclerView;
@@ -65,7 +64,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        AndroidInjection.inject(this);
 
         setContentView(R.layout.basic_list_activity);
         toolbar();
@@ -78,7 +76,7 @@ public class WalletConnectSessionActivity extends BaseActivity
     {
         if (viewModel == null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(WalletConnectViewModel.class);
             viewModel.serviceReady().observe(this, this::onServiceReady);
         }

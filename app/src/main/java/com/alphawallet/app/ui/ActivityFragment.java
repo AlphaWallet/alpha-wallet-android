@@ -28,6 +28,7 @@ import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.ActivityViewModel;
 import com.alphawallet.app.viewmodel.ActivityViewModelFactory;
 import com.alphawallet.app.widget.EmptyTransactionsView;
@@ -67,6 +68,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
+        LocaleUtils.setActiveLocale(getContext());
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
         toolbar(view);
         setToolbarTitle(R.string.activity_label);

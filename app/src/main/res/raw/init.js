@@ -1,4 +1,4 @@
-
+(function() {
 const __addressHex = "%1$s";
 const __rpcURL = "%2$s";
 const __chainID = "%3$s";
@@ -57,6 +57,20 @@ window.AlphaWallet.init(__rpcURL, {
     alpha.walletAddEthereumChain(id, JSON.stringify(msgParams));
     //webkit.messageHandlers.walletAddEthereumChain.postMessage({"name": "walletAddEthereumChain", "object": data, id: id})
   },
+  walletSwitchEthereumChain: function (msgParams, cb) {
+    const data = msgParams
+    const { id = Math.floor((Math.random() * 100000) + 1) } = msgParams
+    console.log("walletSwitchEthereumChain", msgParams)
+    AlphaWallet.addCallback(id, cb)
+    alpha.walletSwitchEthereumChain(id, JSON.stringify(msgParams));
+    //webkit.messageHandlers.walletSwitchEthereumChain.postMessage({"name": "walletSwitchEthereumChain", "object": data, id: id})
+  },
+  requestAccounts: function(cb) {
+      id = Math.floor((Math.random() * 100000) + 1)
+      console.log("requestAccounts", id)
+      AlphaWallet.addCallback(id, cb)
+      alpha.requestAccounts(id);
+  },
   enable: function() {
       return new Promise(function(resolve, reject) {
           //send back the coinbase account as an array of one
@@ -66,6 +80,7 @@ window.AlphaWallet.init(__rpcURL, {
 }, {
     address: __addressHex,
     networkVersion: __chainID
+    //networkVersion: "0x" + parseInt(__chainID).toString(16) || null
 })
 
 window.web3.setProvider = function () {
@@ -81,3 +96,4 @@ window.web3.eth.getCoinbase = function(cb) {
 window.web3.eth.defaultAccount = __addressHex
 
 window.ethereum = web3.currentProvider
+})();

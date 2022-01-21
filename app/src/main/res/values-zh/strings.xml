@@ -840,4 +840,7 @@
     <string name="tab_info">信息</string>
     <string name="tab_activity">活动</string>
     <string name="tab_alert">通知</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
+    <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
 </resources>

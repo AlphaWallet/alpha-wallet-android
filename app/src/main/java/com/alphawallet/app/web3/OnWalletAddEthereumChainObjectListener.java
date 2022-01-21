@@ -4,5 +4,5 @@ import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 
 public interface OnWalletAddEthereumChainObjectListener
 {
-    void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObject);
+    void onWalletAddEthereumChainObject(long callbackId, WalletAddEthereumChainObject chainObject);
 }

@@ -868,4 +868,7 @@
     <string name="tab_info">Thông tin</string>
     <string name="tab_activity">Hoạt động</string>
     <string name="tab_alert">Cảnh báo</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
+    <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
 </resources>

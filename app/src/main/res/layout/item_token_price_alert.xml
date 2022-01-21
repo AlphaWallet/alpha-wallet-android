@@ -26,26 +26,14 @@
             android:background="@drawable/ic_system_up" />
 
         <TextView
-            android:id="@+id/indicator"
+            android:id="@+id/rule"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            android:text="Above "
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17" />
-
-        <TextView
-            android:id="@+id/value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
-            android:singleLine="true"
-            android:text="$17,500"
+            android:text="Above $17,500"
             android:textColor="@color/black"
             android:textSize="@dimen/sp17" />
     </LinearLayout>

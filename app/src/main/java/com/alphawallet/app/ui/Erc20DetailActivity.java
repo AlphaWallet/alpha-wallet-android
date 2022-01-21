@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -9,6 +10,7 @@ import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
@@ -82,13 +84,26 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private ScrollControlViewPager viewPager;
 
-    private TokenInfoFragment tokenInfoFragment;
-    private TokenActivityFragment tokenActivityFragment;
-    private TokenAlertsFragment tokenAlertsFragment;
-
     private enum DetailPages
     {
-        PERFORMANCE, ACTIVITY, ALERTS
+        INFO(R.string.tab_info, new TokenInfoFragment()),
+        ACTIVITY(R.string.tab_activity, new TokenActivityFragment()),
+        ALERTS(R.string.tab_alert, new TokenAlertsFragment());
+
+        private final int tabNameResourceId;
+        private final Fragment fragment;
+
+        DetailPages(int tabNameResourceId, Fragment fragment)
+        {
+            this.tabNameResourceId = tabNameResourceId;
+            this.fragment = fragment;
+        }
+
+        public Pair<String, Fragment> init(Context context, Bundle bundle)
+        {
+            this.fragment.setArguments(bundle);
+            return new Pair<>(context.getString(tabNameResourceId), fragment);
+        }
     }
 
     @Override
@@ -123,24 +138,14 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void initViews()
     {
-        tokenInfoFragment = new TokenInfoFragment();
-        tokenActivityFragment = new TokenActivityFragment();
-        tokenAlertsFragment = new TokenAlertsFragment();
-
-        List<Pair<String, Fragment>> pages = new ArrayList<>();
 
         Bundle bundle = new Bundle();
         //Samoa TODO: Use TokensService getToken in the 3 fragments
         bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
         bundle.putLong(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         bundle.putParcelable(WALLET, wallet);
-        tokenInfoFragment.setArguments(bundle);
-        tokenActivityFragment.setArguments(bundle);
-        tokenAlertsFragment.setArguments(bundle);
 
-        pages.add(DetailPages.PERFORMANCE.ordinal(), new Pair<>("Info", tokenInfoFragment));
-        pages.add(DetailPages.ACTIVITY.ordinal(), new Pair<>("Activity", tokenActivityFragment));
-        //pages.add(DetailPages.ALERTS.ordinal(), new Pair<>("Alerts", tokenAlertsFragment));  //TODO: Implement alert system
+        List<Pair<String, Fragment>> pages = getPages(bundle);
 
         viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
@@ -168,6 +173,17 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         // TODO: addOnTabSelectedListener if you need to refresh values when switching tabs
 
         TabUtils.decorateTabLayout(this, tabLayout);
+    }
+
+    private List<Pair<String, Fragment>> getPages(Bundle bundle)
+    {
+        List<Pair<String, Fragment>> pages = new ArrayList<>();
+        for (DetailPages detailPages : DetailPages.values())
+        {
+            pages.add(detailPages.ordinal(), detailPages.init(this, bundle));
+
+        }
+        return pages;
     }
 
     private void setupButtons()

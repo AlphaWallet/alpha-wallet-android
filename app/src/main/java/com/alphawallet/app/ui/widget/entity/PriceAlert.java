@@ -7,24 +7,19 @@ public class PriceAlert implements Parcelable {
     private String value;
     private String currency;
     private String token;
-    private boolean indicator;
+    private String address;
+    private long chainId;
+    private boolean isAbove;
     private boolean enabled;
 
-    public PriceAlert(String currency, String token)
+    public PriceAlert(String currency, String token, String address, long chainId)
     {
         this.currency = currency;
         this.token = token;
-        this.indicator = true;
+        this.isAbove = true;
         this.enabled = true;
-    }
-
-    public PriceAlert(String value, String currency, String token)
-    {
-        this.value = value;
-        this.currency = currency;
-        this.token = token;
-        this.indicator = true;
-        this.enabled = true;
+        this.address = address;
+        this.chainId = chainId;
     }
 
     protected PriceAlert(Parcel in)
@@ -32,8 +27,10 @@ public class PriceAlert implements Parcelable {
         value = in.readString();
         currency = in.readString();
         token = in.readString();
-        indicator = in.readByte() != 0;
+        isAbove = in.readByte() != 0;
         enabled = in.readByte() != 0;
+        address = in.readString();
+        chainId = in.readLong();
     }
 
     public String getValue()
@@ -46,14 +43,14 @@ public class PriceAlert implements Parcelable {
         this.value = value;
     }
 
-    public boolean getIndicator()
+    public boolean getAbove()
     {
-        return indicator;
+        return isAbove;
     }
 
-    public void setIndicator(boolean indicator)
+    public void setAbove(boolean above)
     {
-        this.indicator = indicator;
+        this.isAbove = above;
     }
 
     public boolean isEnabled()
@@ -86,14 +83,34 @@ public class PriceAlert implements Parcelable {
         this.token = token;
     }
 
+    public String getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(String address)
+    {
+        this.address = address;
+    }
+
+    public long getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(long chainId) {
+        this.chainId = chainId;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
         dest.writeString(value);
         dest.writeString(currency);
         dest.writeString(token);
-        dest.writeByte((byte) (indicator ? 1 : 0));
+        dest.writeByte((byte) (isAbove ? 1 : 0));
         dest.writeByte((byte) (enabled ? 1 : 0));
+        dest.writeString(address);
+        dest.writeLong(chainId);
     }
 
     @Override
@@ -115,4 +132,9 @@ public class PriceAlert implements Parcelable {
             return new PriceAlert[size];
         }
     };
+
+    public boolean match(Double rate, double currentTokenPrice) {
+        return (getAbove() && currentTokenPrice * rate > Double.parseDouble(getValue())) ||
+                (!getAbove() && currentTokenPrice * rate < Double.parseDouble(getValue()));
+    }
 }

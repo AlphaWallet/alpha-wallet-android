@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -119,6 +120,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
+    private String openLink;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -128,6 +130,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
     public static final String STORED_PAGE = "currentPage";
     public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
+    public static final String AW_MAGICLINK = "aw.app/"; //https://aw.app/openurl?url=http://app.uniswap.org/test/Dvalue1
+    public static final String AW_MAGICLINK_DIRECT = "openurl?url=";
 
     public HomeActivity()
     {
@@ -782,8 +786,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void loadingComplete()
     {
         int lastId = viewModel.getLastFragmentId();
-
-        if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
+        if (!TextUtils.isEmpty(openLink))
+        {
+            showPage(DAPP_BROWSER);
+            ((DappBrowserFragment)dappBrowserFragment).loadDirect(openLink);
+            openLink = null;
+            viewModel.storeCurrentFragmentId(-1);
+        }
+        else if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
         {
             showPage(SETTINGS);
         }
@@ -1227,18 +1237,38 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
         }
-        else if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
+        else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK) )
         {
-            try
+            int directLinkIndex = importData.indexOf(AW_MAGICLINK_DIRECT);
+            if (directLinkIndex > 0)
             {
-                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                if (parser.parseUniversalLink(importData).chainId > 0)
+                //get link
+                String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
+                if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                 {
-                    new ImportTokenRouter().open(this, importData);
-                    finish();
+                    showPage(DAPP_BROWSER);
+                    ((DappBrowserFragment)dappBrowserFragment).loadDirect(link);
+                }
+                else
+                {
+                    openLink = link;
                 }
             }
-            catch (SalesOrderMalformed ignored) { }
+            else
+            {
+                try
+                {
+                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                    if (parser.parseUniversalLink(importData).chainId > 0)
+                    {
+                        new ImportTokenRouter().open(this, importData);
+                        finish();
+                    }
+                }
+                catch (SalesOrderMalformed ignored)
+                {
+                }
+            }
         }
         else if (importData != null && importData.startsWith("wc:"))
         {

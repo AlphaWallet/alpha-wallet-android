@@ -874,4 +874,6 @@
     <string name="unknown_network_title">Unkown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
+    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_connect_wallet">Connect Wallet</string>
 </resources>

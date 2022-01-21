@@ -42,6 +42,8 @@ public class SignCallbackJSInterface
     private final OnEthCallListener onEthCallListener;
     @NonNull
     private final OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener;
+    @NonNull
+    private final OnWalletActionListener onWalletActionListener;
 
     public SignCallbackJSInterface(
             WebView webView,
@@ -50,7 +52,8 @@ public class SignCallbackJSInterface
             @NonNull OnSignPersonalMessageListener onSignPersonalMessageListener,
             @NonNull OnSignTypedMessageListener onSignTypedMessageListener,
             @NotNull OnEthCallListener onEthCallListener,
-            @NonNull OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener) {
+            @NonNull OnWalletAddEthereumChainObjectListener onWalletAddEthereumChainObjectListener,
+            @NonNull OnWalletActionListener onWalletActionListener) {
         this.webView = webView;
         this.onSignTransactionListener = onSignTransactionListener;
         this.onSignMessageListener = onSignMessageListener;
@@ -58,6 +61,7 @@ public class SignCallbackJSInterface
         this.onSignTypedMessageListener = onSignTypedMessageListener;
         this.onEthCallListener = onEthCallListener;
         this.onWalletAddEthereumChainObjectListener = onWalletAddEthereumChainObjectListener;
+        this.onWalletActionListener = onWalletActionListener;
     }
 
     @JavascriptInterface
@@ -92,6 +96,11 @@ public class SignCallbackJSInterface
     @JavascriptInterface
     public void signPersonalMessage(int callbackId, String data) {
         webView.post(() -> onSignPersonalMessageListener.onSignPersonalMessage(new EthereumMessage(data, getUrl(), callbackId, SignMessageType.SIGN_PERSONAL_MESSAGE)));
+    }
+
+    @JavascriptInterface
+    public void requestAccounts(long callbackId) {
+        webView.post(() -> onWalletActionListener.onRequestAccounts(callbackId) );
     }
 
     @JavascriptInterface
@@ -140,7 +149,23 @@ public class SignCallbackJSInterface
             WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
             if (!TextUtils.isEmpty(chainObj.chainId))
             {
-                webView.post(() -> onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
+                webView.post(() -> onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(callbackId, chainObj));
+            }
+        }
+        catch (JsonSyntaxException e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+    }
+
+    @JavascriptInterface
+    public void walletSwitchEthereumChain(int callbackId, String msgParams) {
+        try
+        { //{"chainId":"0x89","chainType":"ETH"}
+            WalletAddEthereumChainObject chainObj = new Gson().fromJson(msgParams, WalletAddEthereumChainObject.class);
+            if (!TextUtils.isEmpty(chainObj.chainId))
+            {
+                webView.post(() -> onWalletActionListener.onWalletSwitchEthereumChain(callbackId, chainObj));// onWalletAddEthereumChainObjectListener.onWalletAddEthereumChainObject(chainObj));
             }
         }
         catch (JsonSyntaxException e)

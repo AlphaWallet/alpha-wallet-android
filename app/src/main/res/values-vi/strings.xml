@@ -861,4 +861,7 @@
     <string name="governance_header">Quản trị</string>
     <string name="collectibles_header">Sưu tầm</string>
     <string name="whats_new">Có gì mới?</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
+    <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
 </resources>

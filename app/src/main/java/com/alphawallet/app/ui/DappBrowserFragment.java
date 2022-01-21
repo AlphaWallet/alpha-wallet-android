@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
@@ -112,6 +110,7 @@ import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.OnSignTransactionListener;
 import com.alphawallet.app.web3.OnSignTypedMessageListener;
+import com.alphawallet.app.web3.OnWalletActionListener;
 import com.alphawallet.app.web3.OnWalletAddEthereumChainObjectListener;
 import com.alphawallet.app.web3.Web3View;
 import com.alphawallet.app.web3.entity.Address;
@@ -135,7 +134,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -162,8 +160,8 @@ import io.realm.RealmResults;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
-        URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface, SignAuthenticationCallback,
-        ActionSheetCallback, TestNetDialog.TestNetDialogCallback
+        OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
+        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -1035,6 +1033,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setOnSignTypedMessageListener(this);
         web3.setOnEthCallListener(this);
         web3.setOnWalletAddEthereumChainObjectListener(this);
+        web3.setOnWalletActionListener(this);
 
         if (loadOnInit != null)
         {
@@ -1156,7 +1155,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     @Override
-    public void onWalletAddEthereumChainObject(WalletAddEthereumChainObject chainObj)
+    public void onWalletAddEthereumChainObject(long callbackId, WalletAddEthereumChainObject chainObj)
     {
         // read chain value
         long chainId = chainObj.getChainId();
@@ -1176,11 +1175,21 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 addCustomChainDialog.dismiss();
             });
             addCustomChainDialog.show();
+        }
+        else
+        {
+            changeChainRequest(callbackId, info);
+        }
+    }
+
+    private void changeChainRequest(long callbackId, NetworkInfo info)
+    {
+        //Don't show dialog if network doesn't need to be changed or if already showing
+        if ((activeNetwork != null && activeNetwork.chainId == info.chainId) || (chainSwapDialog != null && chainSwapDialog.isShowing()))
+        {
+            web3.onWalletActionSuccessful(callbackId, null);
             return;
         }
-
-        //Don't show dialog if network doesn't need to be changed or if already showing
-        if ((activeNetwork != null && activeNetwork.chainId == chainId) || (chainSwapDialog != null && chainSwapDialog.isShowing())) return;
 
         //if we're switching between mainnet and testnet we need to pop open the 'switch to testnet' dialog (class TestNetDialog)
         // - after the user switches to testnet, go straight to switching the network (loadNewNetwork)
@@ -1195,26 +1204,76 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         else
         {
             //go straight to chain change dialog
-            showChainChangeDialog(info);
+            showChainChangeDialog(callbackId, info);
         }
     }
 
-    private void showChainChangeDialog(NetworkInfo newNetwork)
+    @Override
+    public void onRequestAccounts(long callbackId)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setMessage(getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId)))
-                .setPositiveButton(R.string.dialog_ok, (d, w) -> loadNewNetwork(newNetwork.chainId))
-                .setNegativeButton(R.string.action_cancel, (d, w) -> chainSwapDialog.dismiss())
-                .setCancelable(true);
+        //TODO: Pop open dialog which asks user to confirm they wish to expose their address to this dapp eg:
+        //title = "Request Account Address"
+        //message = "${dappUrl} requests your address. \nAuthorise?"
+        //if user authorises, then do an evaluateJavascript to populate the web3.eth.getCoinbase with the current address,
+        //and additionally add a window.ethereum.setAddress function in init.js to set up addresses
+        //together with this update, also need to track which websites have been given permission, and if they already have it (can probably get away with using SharedPrefs)
+        //then automatically perform with step without a dialog (ie same as it does currently)
+        web3.onWalletActionSuccessful(callbackId, "[" + wallet.address + "]");
+    }
 
-        //Warn if we're switching between network types
+    //EIP-3326
+    @Override
+    public void onWalletSwitchEthereumChain(long callbackId, WalletAddEthereumChainObject chainObj)
+    {
+        //request user to change chains
+        long chainId = chainObj.getChainId();
+        final NetworkInfo info = viewModel.getNetworkInfo(chainId);
+        if (info == null)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.unknown_network_title)
+                    .setMessage(getString(R.string.unknown_network, String.valueOf(chainId)))
+                    .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                        if (chainSwapDialog != null && chainSwapDialog.isShowing()) chainSwapDialog.dismiss();
+                    })
+                    .setCancelable(true);
+
+            chainSwapDialog = builder.create();
+            chainSwapDialog.show();
+        }
+        else
+        {
+            changeChainRequest(callbackId, info);
+        }
+    }
+
+    /**
+     *
+     * This will pop the ActionSheetDialog to request a chain change, with appropriate warning
+     * if switching between mainnets and testnets
+     *
+     * @param callbackId
+     * @param newNetwork
+     */
+    private void showChainChangeDialog(long callbackId, NetworkInfo newNetwork)
+    {
+        Token baseToken = viewModel.getTokenService().getTokenOrBase(newNetwork.chainId, wallet.address);
+        String message = getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId));
         if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
         {
-            builder.setTitle(R.string.warning_switch_to_main);
+            message += "\n" + getString(R.string.warning_switch_to_main);
+        }
+        else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
+        {
+            message += "\n" + getString(R.string.warning_switching_to_test);
         }
 
-        chainSwapDialog = builder.create();
-        chainSwapDialog.show();
+        confirmationDialog = new ActionSheetDialog(getActivity(), this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+                                callbackId, baseToken);
+
+        confirmationDialog.setCanceledOnTouchOutside(true);
+        confirmationDialog.show();
+        confirmationDialog.fullExpand();
     }
 
     private void handleSignMessage(Signable message)
@@ -1999,6 +2058,20 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             confirmationDialog.completeSignRequest(gotAuth);
         }
+    }
+
+    @Override
+    public void buttonClick(long callbackId, Token baseToken)
+    {
+        //handle button click
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.dismiss();
+        }
+
+        //switch network
+        loadNewNetwork(baseToken.tokenInfo.chainId);
+        web3.onWalletActionSuccessful(callbackId, null);
     }
 
     @Override

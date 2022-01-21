@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
         android:adjustViewBounds="true"
-        android:src="@drawable/ic_token_eth" />
+        tools:src="@drawable/ic_token_eth" />
 
     <ProgressBar
         android:id="@+id/avatar_progress_spinner"

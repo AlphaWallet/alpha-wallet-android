@@ -24,6 +24,9 @@ import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
@@ -62,11 +65,13 @@ public class NFTInfoFragment extends BaseFragment {
 
             if (token.isERC721())
             {
-                NFTAsset asset = token.getAssetForToken(token.getUniqueTokenIds().get(0));
-
-                assetImage.setupTokenImage(asset);
-
-                tokenDescription.setText(asset.getDescription());
+                List<BigInteger> assetList = token.getUniqueTokenIds();
+                if (!assetList.isEmpty())
+                {
+                    NFTAsset asset = token.getAssetForToken(token.getUniqueTokenIds().get(0));
+                    assetImage.setupTokenImage(asset);
+                    tokenDescription.setText(asset.getDescription());
+                }
 
                 tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Details"));
                 addInfoView("Issuer", token.tokenInfo.name);

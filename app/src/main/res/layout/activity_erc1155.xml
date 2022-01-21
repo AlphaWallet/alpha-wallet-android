@@ -24,7 +24,7 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
-            style="@style/TokenInfoTabLayoutStyle"
+            style="@style/AwTabLayout.Fixed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
@@ -36,7 +36,7 @@
             app:tabIndicatorFullWidth="true"
             app:tabMode="scrollable"
             app:tabSelectedTextColor="@color/colorHighlight"
-            app:tabTextAppearance="@style/WalletTabTextAppearance"
+            app:tabTextAppearance="@style/AwTextAppearance.Tab"
             app:tabTextColor="@color/dove" />
 
         <View

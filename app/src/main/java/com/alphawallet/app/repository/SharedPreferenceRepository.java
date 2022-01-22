@@ -139,6 +139,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
     @Override
     public void setDefaultCurrency(CurrencyItem currencyItem) {
+        if (currencyItem == null) return;
         pref.edit().putString(CURRENCY_CODE_KEY, currencyItem.getCode()).apply();
         pref.edit().putString(CURRENCY_SYMBOL_KEY, currencyItem.getSymbol()).apply();
     }

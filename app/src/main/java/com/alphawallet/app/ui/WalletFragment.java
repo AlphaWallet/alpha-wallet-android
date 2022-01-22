@@ -599,12 +599,17 @@ public class WalletFragment extends BaseFragment implements
 
     public void resetTokens()
     {
-        //first abort the current operation
         if (viewModel != null && adapter != null)
         {
-            adapter.clear();
             //reload tokens
             viewModel.reloadTokens();
+
+            handler.post(() -> {
+                //first abort the current operation
+                adapter.clear();
+                //show syncing
+                addressAvatar.setWaiting();
+            });
         }
     }
 

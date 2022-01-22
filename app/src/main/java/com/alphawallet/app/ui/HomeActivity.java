@@ -793,7 +793,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (!TextUtils.isEmpty(openLink))
         {
             showPage(DAPP_BROWSER);
-            ((DappBrowserFragment)dappBrowserFragment).loadDirect(openLink);
+            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
+            if (!dappFrag.isDetached()) dappFrag.loadDirect(openLink);
             openLink = null;
             viewModel.storeCurrentFragmentId(-1);
         }
@@ -1228,6 +1229,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void checkIntents(String importData, String importPath, Intent startIntent)
     {
+        DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
         if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
         {
             importData = importData.substring(NotificationService.AWSTARTUP.length());
@@ -1238,7 +1240,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             String url = startIntent.getStringExtra("url");
             showPage(DAPP_BROWSER);
-            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
         }
         else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK) )
@@ -1251,7 +1252,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                 {
                     showPage(DAPP_BROWSER);
-                    ((DappBrowserFragment)dappBrowserFragment).loadDirect(link);
+                    if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
                 }
                 else
                 {

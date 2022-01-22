@@ -525,7 +525,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             if (si instanceof TokenSortedItem)
             {
                 TokenCardMeta tcm = ((TokenSortedItem) si).value;
-                if (tcm.isEthereum() || updatedContracts.contains(tcm.getAddress()))
+                if (updatedContracts.contains(tcm.getAddress()))
                 {
                     notifyItemChanged(i); //optimise update - no need to update elements without tickers
                 }

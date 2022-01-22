@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.NFTInfoViewModel;
@@ -78,7 +79,7 @@ public class NFTInfoFragment extends BaseFragment {
                 addInfoView("Contract Address", token.tokenInfo.address);
                 addInfoView("Blockchain", token.getNetworkName());
             }
-            else
+            else if (token.getInterfaceSpec() == ContractType.ERC1155)
             {
                 NFTAsset asset = token.getCollectionMap().entrySet().iterator().next().getValue(); // Get first asset
 

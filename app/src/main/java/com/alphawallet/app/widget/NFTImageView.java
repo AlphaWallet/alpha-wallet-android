@@ -106,7 +106,8 @@ public class NFTImageView extends RelativeLayout {
         {
             int color = Color.parseColor("#" + asset.getBackgroundColor());
             holdingView.setBackgroundColor(color);
-        } else
+        }
+        else
         {
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }

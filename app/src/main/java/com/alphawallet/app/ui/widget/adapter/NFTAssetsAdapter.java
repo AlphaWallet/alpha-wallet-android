@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.NFTActivity;
@@ -24,6 +25,7 @@ import com.alphawallet.app.widget.NFTImageView;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +62,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
                 actualData.add(new Pair<>(i, asset));
             }
         }
-        else
+        else if (token.getInterfaceSpec() == ContractType.ERC1155)
         {
             Map<BigInteger, NFTAsset> data = token.getCollectionMap();
             for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())

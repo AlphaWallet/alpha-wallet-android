@@ -121,4 +121,8 @@ public class InputFiatView extends LinearLayout {
     public void showKeyboard() {
         amountInput.requestFocus();
     }
+
+    public void setSubTextValue(String text) {
+        subTextValue.setText(text);
+    }
 }

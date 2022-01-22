@@ -21,16 +21,13 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 
 public class SetPriceAlertViewModel extends BaseViewModel {
     private final CurrencyRepositoryType currencyRepository;
-    private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
 
     SetPriceAlertViewModel(
             CurrencyRepositoryType currencyRepository,
-            PreferenceRepositoryType preferenceRepository,
             TokensService tokensService)
     {
         this.currencyRepository = currencyRepository;
-        this.preferenceRepository = preferenceRepository;
         this.tokensService = tokensService;
     }
 
@@ -44,51 +41,12 @@ public class SetPriceAlertViewModel extends BaseViewModel {
         return currencyRepository.getCurrencyList();
     }
 
-    public void openCurrencySelection(Activity context, int requestCode)
+    public void openCurrencySelection(Activity context, int requestCode, String currency)
     {
         Intent intent = new Intent(context, SelectCurrencyActivity.class);
-        String currentLocale = getDefaultCurrency();
-        intent.putExtra(EXTRA_CURRENCY, currentLocale);
+        intent.putExtra(EXTRA_CURRENCY, currency);
         intent.putParcelableArrayListExtra(EXTRA_STATE, getCurrencyList());
         context.startActivityForResult(intent, requestCode);
-    }
-
-    public void saveAlert(PriceAlert priceAlert)
-    {
-        Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
-
-        ArrayList<PriceAlert> list;
-        String json = preferenceRepository.getPriceAlerts();
-        if (!json.isEmpty())
-        {
-            list = new Gson().fromJson(json, listType);
-        }
-        else
-        {
-            list = new ArrayList<>();
-            list.add(priceAlert);
-        }
-
-        String updatedJson = new Gson().toJson(list, listType);
-
-        preferenceRepository.setPriceAlerts(updatedJson);
-    }
-
-    public List<PriceAlert> fetchPriceAlerts()
-    {
-        Type listType = new TypeToken<List<PriceAlert>>() {}.getType();
-
-        ArrayList<PriceAlert> list;
-        String json = preferenceRepository.getPriceAlerts();
-        if (!json.isEmpty())
-        {
-            list = new Gson().fromJson(json, listType);
-        }
-        else
-        {
-            list = new ArrayList<>();
-        }
-        return list;
     }
 
     public TokensService getTokensService() { return tokensService; }

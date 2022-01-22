@@ -1,5 +1,6 @@
 package com.alphawallet.app.di;
 
+import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.ActivityFragment;
 import com.alphawallet.app.ui.AddCustomRPCNetworkActivity;
 import com.alphawallet.app.ui.AddTokenActivity;
@@ -245,4 +246,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = Erc1155AssetListModule.class)
 	abstract Erc1155AssetListActivity bindErc1155AssetListActivity();
+
+	@ServiceScope
+	@ContributesAndroidInjector(modules = PriceAlertServiceModule.class)
+	abstract PriceAlertsService bindPriceAlertService();
 }

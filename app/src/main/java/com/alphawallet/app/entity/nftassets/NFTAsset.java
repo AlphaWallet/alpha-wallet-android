@@ -69,7 +69,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.clear();
         attributeMap.clear();
-        balance = BigDecimal.ZERO;
+        balance = BigDecimal.ONE;
         assetMap.put(LOADING_TOKEN, ".");
     }
 
@@ -77,7 +77,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.clear();
         attributeMap.clear();
-        balance = BigDecimal.ZERO;
+        balance = BigDecimal.ONE;
         assetMap.put(NAME, "ID #" + tokenId.toString());
     }
 

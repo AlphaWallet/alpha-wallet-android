@@ -13,26 +13,19 @@ import com.alphawallet.app.R;
 
 public class CertifiedToolbarView extends androidx.appcompat.widget.Toolbar
 {
-    private final Context context;
     private Activity activity;
     private AWalletAlertDialog dialog;
     private int lockResource;
 
-    public CertifiedToolbarView(Context ctx)
+    public CertifiedToolbarView(Context ctx, @Nullable AttributeSet attrs)
     {
-        super(ctx);
-        context = ctx;
-    }
-
-    public CertifiedToolbarView(Context ctx, @Nullable AttributeSet attrs) {
         super(ctx, attrs);
-        context = ctx;
+        inflate(ctx, R.layout.layout_certified_toolbar, this);
     }
 
     public void onSigData(final XMLDsigDescriptor sigData, final Activity act)
     {
         activity = act;
-        findViewById(R.id.certificate_spinner).setVisibility(View.GONE);
         ImageView lockStatus = findViewById(R.id.image_lock);
         lockStatus.setVisibility(View.VISIBLE);
 
@@ -42,34 +35,34 @@ public class CertifiedToolbarView extends androidx.appcompat.widget.Toolbar
 
         SigReturnType type = sigData.type != null ? sigData.type : SigReturnType.NO_TOKENSCRIPT;
 
+        lockResource = 0;
+
         switch (type)
         {
             case NO_TOKENSCRIPT:
                 lockStatus.setVisibility(View.GONE);
                 break;
             case DEBUG_NO_SIGNATURE:
-                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                lockResource = R.mipmap.ic_unlocked_debug;
                 break;
             case DEBUG_SIGNATURE_INVALID:
                 lockResource = R.mipmap.ic_unlocked_debug;
-                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
                 break;
             case DEBUG_SIGNATURE_PASS:
                 lockResource = R.mipmap.ic_locked_debug;
-                lockStatus.setImageResource(R.mipmap.ic_locked_debug);
                 break;
             case NO_SIGNATURE:
-                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                lockResource = R.mipmap.ic_unverified;
                 break;
             case SIGNATURE_INVALID:
                 lockResource = R.mipmap.ic_unverified;
-                lockStatus.setImageResource(R.mipmap.ic_unverified);
                 break;
             case SIGNATURE_PASS:
                 lockResource = R.mipmap.ic_locked;
-                lockStatus.setImageResource(R.mipmap.ic_locked);
                 break;
         }
+
+        if (lockResource != 0) lockStatus.setImageResource(lockResource);
     }
 
     private void showCertificateDetails(final XMLDsigDescriptor sigData)

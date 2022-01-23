@@ -42,6 +42,7 @@ import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.google.android.material.tabs.TabLayout;
 
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Token token;
     private TokenCardMeta tokenMeta;
     private RecyclerView tokenView;
-    private CertifiedToolbarView toolbarView;
+    private CertifiedToolbarView certificateToolbar;
 
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
@@ -138,7 +139,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void initViews()
     {
-
         Bundle bundle = new Bundle();
         //Samoa TODO: Use TokensService getToken in the 3 fragments
         bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
@@ -205,6 +205,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             viewModel = new ViewModelProvider(this, erc20DetailViewModelFactory)
                     .get(Erc20DetailViewModel.class);
             viewModel.newScriptFound().observe(this, this::onNewScript);
+            viewModel.sig().observe(this, this::onSignature);
 //            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar
         }
     }
@@ -217,6 +218,12 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
                 token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group), true);
         viewModel.checkTokenScriptValidity(token); //check script signature
+    }
+
+    private void onSignature(XMLDsigDescriptor descriptor)
+    {
+        certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.onSigData(descriptor, this);
     }
 
     private void setUpRecentTransactionsView()

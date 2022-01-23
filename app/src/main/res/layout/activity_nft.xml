@@ -37,7 +37,9 @@
             app:tabMode="fixed"
             app:tabSelectedTextColor="@color/colorHighlight"
             app:tabTextAppearance="@style/WalletTabTextAppearance"
-            app:tabTextColor="@color/dove" />
+            app:tabTextColor="@color/dove"
+            app:tabMaxWidth="0dp"
+            app:tabGravity="fill"/>
 
         <View
             android:layout_width="match_parent"

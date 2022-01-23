@@ -153,7 +153,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         tokenView.setHapticFeedbackEnabled(true);
 
         finishReceiver = new FinishReceiver(this);
-        //findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
         token.clearResultMap();
 

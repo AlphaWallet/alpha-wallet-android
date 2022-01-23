@@ -543,20 +543,13 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         setupCustomTokenActions();
 
-        //Only add TokenScript if not already overridden
-        /*if (hasOverrideFunctions)
-        {
-            token.setFunctionAvailability(null);
-            //functions = null;
-        }*/
-
         //Add buy function
         if (hasBuyFunction)
         {
             addBuyFunction();
         }
 
-        //now add the standard functions for NonFungibles
+        //now add the standard functions for NonFungibles (since these are lower priority)
         if (token.isNonFungible())
         {
             addStandardTokenFunctions(token);

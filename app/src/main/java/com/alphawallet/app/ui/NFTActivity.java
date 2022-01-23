@@ -107,9 +107,18 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
     private void getIntentData()
     {
-        wallet = getIntent().getParcelableExtra(WALLET);
-        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        Intent data = getIntent();
+        if (data != null)
+        {
+            wallet = data.getParcelableExtra(WALLET);
+            long chainId = data.getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+            String address = data.getStringExtra(C.EXTRA_ADDRESS);
+            token = viewModel.getTokensService().getToken(chainId, address);
+        }
+        else
+        {
+            finish();
+        }
     }
 
     private void setupViewPager()

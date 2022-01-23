@@ -10,7 +10,6 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -21,7 +20,6 @@ import com.alphawallet.app.service.TokensService;
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final TokenDetailRouter tokenDetailRouter;
-    private final AssetDisplayRouter assetDisplayRouter;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -34,7 +32,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   TokenDetailRouter tokenDetailRouter,
-                                  AssetDisplayRouter assetDisplayRouter,
                                   GenericWalletInteract genericWalletInteract,
                                   AssetDefinitionService assetDefinitionService,
                                   TokensService tokensService,
@@ -46,7 +43,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   OnRampRepositoryType onRampRepository) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
-        this.assetDisplayRouter = assetDisplayRouter;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
@@ -64,7 +60,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         return (T) new WalletViewModel(
                 fetchTokensInteract,
                 tokenDetailRouter,
-                assetDisplayRouter,
                 genericWalletInteract,
                 assetDefinitionService,
                 tokensService,

@@ -8,7 +8,6 @@ import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -26,7 +25,6 @@ public class WalletModule {
     WalletViewModelFactory provideWalletViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
             TokenDetailRouter tokenDetailRouter,
-            AssetDisplayRouter assetDisplayRouter,
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
@@ -39,7 +37,6 @@ public class WalletModule {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 tokenDetailRouter,
-                assetDisplayRouter,
                 genericWalletInteract,
                 assetDefinitionService,
                 tokensService,
@@ -59,11 +56,6 @@ public class WalletModule {
     @Provides
     TokenDetailRouter provideErc20DetailRouterRouter() {
         return new TokenDetailRouter();
-    }
-
-    @Provides
-    AssetDisplayRouter provideAssetDisplayRouter() {
-        return new AssetDisplayRouter();
     }
 
     @Provides

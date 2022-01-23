@@ -532,24 +532,23 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         Map<String, TSAction> availableFunctions = new HashMap<>();
 
+        //TokenScript first:
+        addTokenScriptFunctions(availableFunctions, token, tokenId);
+
         //If Token is Non-Fungible then display the custom functions first - usually these are more frequently used
         if (!token.isNonFungible())
         {
             addStandardTokenFunctions(token);
         }
 
-        boolean hasOverrideFunctions = setupCustomTokenActions();
+        setupCustomTokenActions();
 
         //Only add TokenScript if not already overridden
-        if (!hasOverrideFunctions)
-        {
-            addTokenScriptFunctions(availableFunctions, token, tokenId);
-        }
-        else
+        /*if (hasOverrideFunctions)
         {
             token.setFunctionAvailability(null);
-            functions = null;
-        }
+            //functions = null;
+        }*/
 
         //Add buy function
         if (hasBuyFunction)

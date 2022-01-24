@@ -136,9 +136,9 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         tokenActivityFragment.setArguments(bundle);
 
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        pages.add(0, new Pair<>("Info", infoFragment));
-        pages.add(1, new Pair<>("Assets", assetsFragment));
-        pages.add(2, new Pair<>("Activity", tokenActivityFragment));
+//        pages.add(0, new Pair<>("Info", infoFragment));
+        pages.add(0, new Pair<>("Assets", assetsFragment));
+        pages.add(1, new Pair<>("Activity", tokenActivityFragment));
 
         ScrollControlViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
@@ -153,7 +153,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
         TabUtils.decorateTabLayout(this, tabLayout);
 
-        viewPager.setCurrentItem(1, true);
+//        viewPager.setCurrentItem(1, true);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

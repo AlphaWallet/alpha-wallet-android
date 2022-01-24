@@ -286,6 +286,10 @@ public class TokensRealmSource implements TokenLocalSource {
                 setTokenUpdateTime(r, token, assetCount);
             });
         }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
     }
 
     private void createTokenIfRequired(Realm realm, Token token)
@@ -319,10 +323,11 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setEnabled(false);
             }
 
+            realmToken.setLastTxTime(System.currentTimeMillis());
+            realmToken.setAssetUpdateTime(System.currentTimeMillis());
+
             if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(assetCount)))
             {
-                realmToken.setLastTxTime(System.currentTimeMillis());
-                realmToken.setAssetUpdateTime(System.currentTimeMillis());
                 realmToken.setBalance(String.valueOf(assetCount));
             }
         }
@@ -548,6 +553,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
                 instance.setResult(imageUrl);
                 instance.setResultTime(System.currentTimeMillis());
+                r.insertOrUpdate(instance);
             });
         }
     }
@@ -573,6 +579,7 @@ public class TokensRealmSource implements TokenLocalSource {
             token.setRealmLastBlock(realmToken);
             realmToken.setEnabled(token.tokenInfo.isEnabled);
             realmToken.setChainId(token.tokenInfo.chainId);
+            realm.insertOrUpdate(realmToken);
             wasNew = true;
         }
         else
@@ -625,6 +632,8 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             realmNFT.setMetaData(token.getAssetContract().getJSON());
         }
+
+        realm.insertOrUpdate(realmNFT);
     }
 
     @Override
@@ -702,6 +711,8 @@ public class TokensRealmSource implements TokenLocalSource {
 
         realmAsset.setMetaData(asset.jsonMetaData());
         realmAsset.setBalance(asset.getBalance());
+
+        realm.insertOrUpdate(realmAsset);
     }
 
     private void deleteAllAssets(Realm realm, String dbKey) throws RealmException
@@ -1289,6 +1300,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 : ticker.image);
         realmItem.setUpdatedTime(ticker.updateTime);
         realmItem.setCurrencySymbol(ticker.priceSymbol);
+        realm.insertOrUpdate(realmItem);
         return true;
     }
 

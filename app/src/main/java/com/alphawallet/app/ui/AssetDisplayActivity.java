@@ -135,7 +135,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         testView = findViewById(R.id.test_web3);
 
         tokenView = findViewById(R.id.token_view);
-        toolbarView = findViewById(R.id.toolbar);
+        toolbarView = findViewById(R.id.certified_toolbar);
 
 
         viewModel.pushToast().observe(this, this::displayToast);
@@ -152,7 +152,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         tokenView.setHapticFeedbackEnabled(true);
 
         finishReceiver = new FinishReceiver(this);
-        findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
         token.clearResultMap();
 

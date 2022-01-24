@@ -39,6 +39,10 @@ import java.util.List;
 
 import io.realm.Realm;
 
+import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
+
+import org.w3c.dom.Text;
+
 /**
  * Created by JB on 17/11/2020.
  */
@@ -73,7 +77,12 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                              ActionSheetCallback aCallBack)
     {
         super(activity, R.style.FullscreenBottomSheetDialogStyle);
-        setContentView(R.layout.dialog_action_sheet);
+        View view = View.inflate(getContext(), R.layout.dialog_action_sheet, null);
+        setContentView(view);
+
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
+        behavior.setState(STATE_EXPANDED);
+        behavior.setSkipCollapsed(true);
 
         gasWidget = findViewById(R.id.gas_widgetx);
         balanceDisplay = findViewById(R.id.balance);
@@ -184,6 +193,42 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         isAttached = true;
     }
 
+    public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, int titleId, String message, int buttonTextId,
+                             long cId, Token baseToken)
+    {
+        super(activity);
+        setContentView(R.layout.dialog_action_sheet_message);
+
+        TextView titleView = findViewById(R.id.text_sign_title);
+        TextView messageView = findViewById(R.id.text_message);
+        functionBar = findViewById(R.id.layoutButtons);
+        this.activity = activity;
+
+        actionSheetCallback = aCallback;
+        mode = ActionSheetMode.MESSAGE;
+
+        titleView.setText(titleId);
+        messageView.setText(message);
+
+        gasWidget = null;
+        balanceDisplay = null;
+        cancelButton = findViewById(R.id.image_close);
+        confirmationWidget = null;
+        addressDetail  = null;
+        amountDisplay = null;
+        assetDetailView = null;
+        detailWidget = null;
+        callbackId = cId;
+        token = baseToken;
+        tokensService = null;
+        candidateTransaction = null;
+
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
+        functionBar.revealButtons();
+        setupCancelListeners();
+        isAttached = true;
+    }
+
     public void setSignOnly()
     {
         //sign only, and return signature to process
@@ -277,6 +322,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 break;
             case SIGN_TRANSACTION:
                 signTransaction();
+                break;
+            case MESSAGE:
+                actionSheetCallback.buttonClick(callbackId, token);
                 break;
         }
 
@@ -544,7 +592,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         if (lock)
         {
             FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+            if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
         }
     }
 
@@ -552,7 +600,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void fullExpand()
     {
         FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
     }
 
     public void setGasEstimate(BigInteger estimate)

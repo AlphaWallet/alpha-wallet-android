@@ -532,24 +532,16 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         Map<String, TSAction> availableFunctions = new HashMap<>();
 
+        //TokenScript first:
+        addTokenScriptFunctions(availableFunctions, token, tokenId);
+
         //If Token is Non-Fungible then display the custom functions first - usually these are more frequently used
         if (!token.isNonFungible())
         {
             addStandardTokenFunctions(token);
         }
 
-        boolean hasOverrideFunctions = setupCustomTokenActions();
-
-        //Only add TokenScript if not already overridden
-        if (!hasOverrideFunctions)
-        {
-            addTokenScriptFunctions(availableFunctions, token, tokenId);
-        }
-        else
-        {
-            token.setFunctionAvailability(null);
-            functions = null;
-        }
+        setupCustomTokenActions();
 
         //Add buy function
         if (hasBuyFunction)
@@ -557,7 +549,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             addBuyFunction();
         }
 
-        //now add the standard functions for NonFungibles
+        //now add the standard functions for NonFungibles (since these are lower priority)
         if (token.isNonFungible())
         {
             addStandardTokenFunctions(token);

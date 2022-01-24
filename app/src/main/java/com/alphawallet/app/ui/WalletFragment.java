@@ -62,6 +62,7 @@ import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
@@ -130,6 +131,7 @@ public class WalletFragment extends BaseFragment implements
         AndroidSupportInjection.inject(this);
 
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
+        LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
 
         if (CustomViewSettings.canAddTokens()) {
             toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
@@ -605,18 +607,18 @@ public class WalletFragment extends BaseFragment implements
 
     public void resetTokens()
     {
-        //first abort the current operation
         if (viewModel != null && adapter != null)
         {
-            adapter.clear();
             //reload tokens
             viewModel.reloadTokens();
-        }
-    }
 
-    public void changedLocale()
-    {
-        refreshList();
+            handler.post(() -> {
+                //first abort the current operation
+                adapter.clear();
+                //show syncing
+                addressAvatar.setWaiting();
+            });
+        }
     }
 
     @Override

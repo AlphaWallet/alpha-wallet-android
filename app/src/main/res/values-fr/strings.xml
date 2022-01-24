@@ -776,10 +776,10 @@
     <string name="choose_network_preference">Choisir la Préférence du Réseau</string>
     <string name="please_select_at_least_one_network">Veuillez choisir au moins un réseau.</string>
     <string name="token_info_portfolio">Portfolio</string>
-    <string name="enter_target_price">Enter Target Price</string>
-    <string name="title_set_new_alert">Set New Alert</string>
-    <string name="action_save_alert">Save Alert</string>
-    <string name="alerts_will_appear_here">Alerts will appear here</string>
+    <string name="enter_target_price">Entrez le prix cible</string>
+    <string name="title_set_new_alert">Définir une nouvelle alerte</string>
+    <string name="action_save_alert">Enregistrer l\'alerte</string>
+    <string name="alerts_will_appear_here">Les alertes apparaîtront ici</string>
     <string name="token_text">Token</string>
     <string name="buy_eth">Buy ETH</string>
     <string name="reload_token_data_desc">Reset all cached token data (eg recorded balance etc). AlphaWallet will re-load the current status of your wallet. Doesn\'t affect the keys or assets.</string>
@@ -856,4 +856,14 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="price_alert_indicator_below">Au dessous de</string>
+    <string name="price_alert_indicator_above">Au dessus</string>
+    <string name="add_new_price_alert">Ajouter une nouvelle alerte de prix</string>
+    <string name="current_price">Prix actuel:</string>
+    <string name="tab_info">Info</string>
+    <string name="tab_activity">Activité</string>
+    <string name="tab_alert">Alertes</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
+    <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
 </resources>

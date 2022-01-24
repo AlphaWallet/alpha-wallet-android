@@ -849,7 +849,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private BaseFragment getFragment(WalletPage page)
     {
         //build map, return correct fragment.
-        return (BaseFragment) getSupportFragmentManager().getFragments().get(page.ordinal());
+        if (getSupportFragmentManager().getFragments().size() < page.ordinal())
+        {
+            switch (page)
+            {
+                default:
+                case WALLET:
+                    return (BaseFragment)walletFragment;
+                case ACTIVITY:
+                    return (BaseFragment)activityFragment;
+                case DAPP_BROWSER:
+                    return (BaseFragment)dappBrowserFragment;
+                case SETTINGS:
+                    return (BaseFragment)settingsFragment;
+            }
+        }
+        else return (BaseFragment) getSupportFragmentManager().getFragments().get(page.ordinal());
     }
 
     @Override

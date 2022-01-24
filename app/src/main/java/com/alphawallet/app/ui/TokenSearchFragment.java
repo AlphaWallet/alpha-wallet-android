@@ -146,12 +146,6 @@ public class TokenSearchFragment extends Fragment implements SearchToolbarCallba
     @Override
     public void backPressed()
     {
-        requireActivity().getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(false)
-        {
-            @Override
-            public void handleOnBackPressed() { }
-        });
-
         //terminate fragment
         Bundle result = new Bundle();
         result.putBoolean(SEARCH_FRAGMENT, true);

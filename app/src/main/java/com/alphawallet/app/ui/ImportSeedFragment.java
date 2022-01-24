@@ -20,6 +20,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
 import com.alphawallet.app.ui.widget.OnSuggestionClickListener;
 import com.alphawallet.app.ui.widget.adapter.SuggestionsAdapter;
+import com.alphawallet.app.viewmodel.PasswordPhraseCounter;
 import com.alphawallet.app.widget.PasswordInputView;
 import com.google.common.collect.Collections2;
 
@@ -33,7 +34,6 @@ import java.util.regex.Pattern;
 public class ImportSeedFragment extends ImportFragment implements OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";
-    private final int maxWordCount = 12;
 
     private PasswordInputView seedPhrase;
     private Button importButton;
@@ -49,7 +49,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
 
     @NonNull
     private OnImportSeedListener onImportSeedListener = dummyOnImportSeedListener;
-    private int inputWords = 0;
+    private PasswordPhraseCounter passwordPhraseCounter;
 
     public static ImportSeedFragment create() {
         return new ImportSeedFragment();
@@ -172,46 +172,39 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     @Override
     public void afterTextChanged(Editable editable)
     {
-        if (seedPhrase.isErrorState()) seedPhrase.setError(null);
         String value = seedPhrase.getText().toString();
+        passwordPhraseCounter = new PasswordPhraseCounter(wordCount(value));
+
+        if (seedPhrase.isErrorState()) seedPhrase.setError(null);
         final Matcher matcher = pattern.matcher(value);
         if (matcher.find())
         {
             seedPhrase.setError("Seed phrase can only contain words");
             wordCount.setVisibility(View.GONE);
         }
-        else if (value.length() > 5)
-        {
-            wordCount.setVisibility(View.VISIBLE);
-        }
         else
         {
             wordCount.setVisibility(View.VISIBLE);
         }
 
-        inputWords = wordCount(value);
-        String wordCountDisplay = inputWords + "/" + maxWordCount;
-        wordCount.setText(wordCountDisplay);
+        wordCount.setText(passwordPhraseCounter.getText());
 
-        if (inputWords != maxWordCount && importButton != null && importButton.getVisibility() == View.VISIBLE)
+        if (!passwordPhraseCounter.match() && importButton != null && importButton.getVisibility() == View.VISIBLE)
         {
             importButton.setVisibility(View.GONE);
             setHintState(false);
         }
 
-        if (inputWords == maxWordCount)
-        {
+        if (passwordPhraseCounter.match()) {
             wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.nasty_green));
             wordCount.setTypeface(boldTypeface);
             updateButtonState(true);
-        }
-        else if (inputWords == (maxWordCount -1))
+        } else if (passwordPhraseCounter.notEnough())
         {
             wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.colorPrimaryDark));
             wordCount.setTypeface(normalTypeface);
             updateButtonState(false);
-        }
-        else if (inputWords > maxWordCount)
+        } else if (passwordPhraseCounter.exceed())
         {
             wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.dark_seed_danger));
             updateButtonState(false);
@@ -230,7 +223,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
                     listSuggestions.setVisibility(View.GONE);
                     showImport();
                 }
-                else if (!(suggestionsAdapter.getSingleSuggestion().equals(lastWord) && inputWords == maxWordCount) && listSuggestions.getVisibility() == View.GONE)
+                else if (!(suggestionsAdapter.getSingleSuggestion().equals(lastWord) && passwordPhraseCounter.match()) && listSuggestions.getVisibility() == View.GONE)
                 {
                     listSuggestions.setVisibility(View.VISIBLE);
                     importButton.setVisibility(View.GONE);
@@ -271,7 +264,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     @Override
     public void onLayoutShrunk()
     {
-        if (listSuggestions.getVisibility() == View.GONE && inputWords != maxWordCount)
+        if (listSuggestions.getVisibility() == View.GONE && passwordPhraseCounter != null && !passwordPhraseCounter.match())
         {
             if (importButton != null) importButton.setVisibility(View.GONE);
             setHintState(false);
@@ -288,7 +281,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
 
     private void showImport()
     {
-        if (inputWords == maxWordCount)
+        if (passwordPhraseCounter.match())
         {
             if (importButton != null) importButton.setVisibility(View.VISIBLE);
             setHintState(true);

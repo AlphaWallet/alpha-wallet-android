@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -19,6 +20,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.fragment.app.FragmentActivity;
+
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.util.Utils;
 
@@ -31,64 +35,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class HomeScreenTickerConfigureActivity extends Activity {
-
-    private static final String PREFS_NAME = "com.alphawallet.app.widget.homewidget.HomeScreenTicker";
-    private static final String PREF_PREFIX_KEY = "appwidget_";
-    int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetText;
-    View.OnClickListener mOnClickListener = new View.OnClickListener()
-    {
-        public void onClick(View v) {
-            final Context context = HomeScreenTickerConfigureActivity.this;
-
-            // When the button is clicked, store the string locally
-            String widgetText = mAppWidgetText.getText().toString();
-            saveTitlePref(context, mAppWidgetId, widgetText);
-
-            // It is the responsibility of the configuration activity to update the app widget
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            //HomeScreenTickerProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId);
-
-            // Make sure we pass back the original appWidgetId
-            Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-            setResult(RESULT_OK, resultValue);
-            finish();
-        }
-    };
-    //private HomeScreenTickerConfigureBinding binding;
-
-    public HomeScreenTickerConfigureActivity() {
-        super();
-    }
-
-    // Write the prefix to the SharedPreferences object for this widget
-    static void saveTitlePref(Context context, int appWidgetId, String text) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
-        prefs.apply();
-    }
-
-    // Read the prefix from the SharedPreferences object for this widget.
-    // If there is no preference saved, get the default from a resource
-    static String loadTitlePref(Context context, int appWidgetId) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
-        if (titleValue != null) {
-            return titleValue;
-        } else {
-            return context.getString(R.string.appwidget_text);
-        }
-    }
-
-    static void deleteTitlePref(Context context, int appWidgetId)
-    {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.remove(PREF_PREFIX_KEY + appWidgetId);
-        prefs.apply();
-    }
-
+public class HomeScreenTickerConfigureActivity extends FragmentActivity {
     private Button mButtonSave;
     private Button mButtonCancel;
 
@@ -98,7 +45,7 @@ public class HomeScreenTickerConfigureActivity extends Activity {
     private TextView mTextDirections;
     private TextView mTextWidgetStart;
 
-    private static int mWidgetId = 0;
+    private static int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private static int mCryptoIndex = 0;
     private static int mFiatIndex = 0;
 
@@ -109,10 +56,12 @@ public class HomeScreenTickerConfigureActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+
         super.onCreate(savedInstanceState);
-        String action = getIntent().getAction();
+
+        setResult(RESULT_CANCELED);
         setContentView(R.layout.activity_ticker_configure);
-        mWidgetId = 0;
+        mAppWidgetId = getIntent().getIntExtra(C.EXTRA_WIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID);
 
         mButtonSave = findViewById(R.id.buttonSave);
         mButtonCancel = findViewById(R.id.buttonCancel);
@@ -124,23 +73,17 @@ public class HomeScreenTickerConfigureActivity extends Activity {
         //kick off a retrieval of existing cryptos
         boolean gotCryptos = CoinList.loadCryptoList(this);
 
-        try
+        if (mAppWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID)
         {
-            if (action != null && action.contains("startWidget"))
+            try
             {
-                mWidgetId = Integer.valueOf(action.substring("startWidget".length()));
-                //restore previously chosen choices
                 restoreWidgetChoice();
             }
-            else
+            catch (Exception e)
             {
-                appOpenedDirectly();
+                e.printStackTrace();
             }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            appOpenedDirectly();
+
         }
 
         //start service for the first time to initialise the widget
@@ -189,20 +132,19 @@ public class HomeScreenTickerConfigureActivity extends Activity {
     {
         error.printStackTrace();
     }
-
-    private void appOpenedDirectly()
-    {
-        //tell user to open the app from widget
-        mTextDirections.setVisibility(View.GONE);
-        mTextWidgetStart.setVisibility(View.VISIBLE);
-        mButtonCancel.setText(R.string.ok);
-        mButtonSave.setVisibility(View.INVISIBLE);
-        mSpinnerCrypto.setVisibility(View.GONE);
-        mSpinnerFiat.setVisibility(View.GONE);
-
-        TextView tv = findViewById(R.id.textName);
-        tv.setText("Add widget to screen");
-    }
+//
+//    private void appOpenedDirectly()
+//    {
+//        //tell user to open the app from widget
+//        mTextDirections.setVisibility(View.GONE);
+//        mTextWidgetStart.setVisibility(View.VISIBLE);
+//        mButtonCancel.setText(R.string.ok);
+//        mButtonSave.setVisibility(View.INVISIBLE);
+//        mSpinnerCrypto.setVisibility(View.GONE);
+//        mSpinnerFiat.setVisibility(View.GONE);
+//
+//        TextView tv = findViewById(R.id.textName);
+//    }
 
     private void populateCryptoList(CoinData[] coinList)
     {
@@ -223,7 +165,7 @@ public class HomeScreenTickerConfigureActivity extends Activity {
     private void restoreWidgetChoice()
     {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String key = "pre" + mWidgetId;
+        String key = "pre" + mAppWidgetId;
         String chosenCryptoCode = sp.getString(key + "CRYPTSTR", "BTC");
         mCryptoIndex = CoinList.getCryptoIndex(chosenCryptoCode);
         mFiatIndex = sp.getInt("FIAT", 0);
@@ -268,7 +210,7 @@ public class HomeScreenTickerConfigureActivity extends Activity {
             String fiatSelected = currencies[mFiatIndex];
 
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            String key = "pre" + mWidgetId;
+            String key = "pre" + mAppWidgetId;
             SharedPreferences.Editor editor = sp.edit();
             editor.putString(key + "CRYPTSTR", cryptoStr);
             editor.putInt("FIAT", mFiatIndex);
@@ -285,5 +227,4 @@ public class HomeScreenTickerConfigureActivity extends Activity {
         {
             e.printStackTrace();
         }
-    }
-}
+    }}

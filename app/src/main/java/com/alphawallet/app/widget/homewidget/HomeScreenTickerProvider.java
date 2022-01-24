@@ -11,7 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.widget.homewidget.HomeScreenTickerConfigureActivity;
 
 /**
  * Implementation of App Widget functionality.
@@ -19,25 +21,12 @@ import com.alphawallet.app.R;
  */
 public class HomeScreenTickerProvider extends AppWidgetProvider {
 
-    //Wizard added function
-//    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-//                                int appWidgetId) {
-//
-//        CharSequence widgetText = HomeScreenTickerConfigureActivity.loadTitlePref(context, appWidgetId);
-//        // Construct the RemoteViews object
-//        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.layout_widget_crypto);
-//        views.setTextViewText(R.id.appwidget_text, widgetText);
-//
-//        // Instruct the widget manager to update the widget
-//        appWidgetManager.updateAppWidget(appWidgetId, views);
-//    }
-
     @SuppressLint("NewApi")
     private RemoteViews inflateLayout(Context context, int appWidgetId)
     {
         Intent resultIntent = new Intent(context, HomeScreenTickerConfigureActivity.class);
         resultIntent.setAction("startWidget" + appWidgetId);
-        resultIntent.putExtra("id", appWidgetId);
+        resultIntent.putExtra(C.EXTRA_WIDGET_ID, appWidgetId);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(HomeScreenTickerConfigureActivity.class);
         stackBuilder.addNextIntent(resultIntent);

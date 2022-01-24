@@ -10,4 +10,6 @@
     android:minWidth="80dp"
     android:minResizeHeight="20dp"
     android:minResizeWidth="40dp"
-    android:updatePeriodMillis="120000" />
+    android:updatePeriodMillis="120000"
+    android:widgetFeatures="reconfigurable">
+</appwidget-provider>

@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-SVG used in this layout.  The previous community-based support library MrVector
-is deprecated by official support.
-https://github.com/telly/MrVector
-
-The official Android Support Library has it in the master
-https://android.googlesource.com/platform/frameworks/support/+/master/v7
-but not in 22.2
-https://android.googlesource.com/platform/frameworks/support/+/tools_r22.2/v7/
-
-There is no commandline tool to converts SVG to VectorDrawable XML or java code
--->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/relLayout"
     android:layout_width="match_parent"

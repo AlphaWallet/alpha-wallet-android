@@ -17,6 +17,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -73,6 +74,7 @@ import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
@@ -82,6 +84,7 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.app.widget.homewidget.HomeScreenTickerConfigureActivity;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
@@ -289,10 +292,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
+        String action = intent.getAction();
+
         if (intent.hasExtra(C.FROM_HOME_ROUTER) && intent.getStringExtra(C.FROM_HOME_ROUTER).equals(C.FROM_HOME_ROUTER))
         {
             viewModel.storeCurrentFragmentId(-1);
         }
+//      this isn't necessary because the settings trigger even without going through homeactivity.
+//        if (action != null && action.contains("startWidget"))
+//        {
+//            int mWidgetId = intent.getIntExtra(C.EXTRA_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+//            openWidget(this, mWidgetId);
+//        }
 
         if (data != null)
         {
@@ -1306,4 +1317,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             viewModel.importScriptFile(this, importData, useAppExternalDir);
         }
     }
+//
+//    public void openWidget(Context context, int mWidgetID){
+//        Intent intent = new Intent(context, HomeScreenTickerConfigureActivity.class);
+//        intent.putExtra(C.EXTRA_WIDGET_ID, mWidgetID);
+//        context.startActivity(intent);
+//    }
 }

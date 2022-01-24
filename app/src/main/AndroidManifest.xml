@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.alphawallet.app"
-    android:targetSandboxVersion="1">
+    android:targetSandboxVersion="1" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -14,6 +14,9 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature
         android:name="android.hardware.fingerprint"
@@ -33,12 +36,10 @@
         android:testOnly="false"
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true"
-        tools:replace="android:name, android:theme, android:allowBackup">
-
-
-    <receiver
+        tools:replace="android:name, android:theme, android:allowBackup" >
+        <receiver
             android:name=".widget.homewidget.HomeScreenTickerProvider"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -48,20 +49,39 @@
                 android:resource="@xml/home_screen_ticker_info" />
         </receiver>
 
-        <activity
-            android:name=".widget.homewidget.HomeScreenTickerConfigureActivity"
-            android:exported="true">
+        <service
+            android:name=".widget.homewidget.CryptoUpdateService"
+            android:enabled="true"
+            android:exported="true"
+            android:label="AlphaTicker"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+            android:persistent="true" >
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+                <action android:name=".widget.homewidget.START_SERVICE" />
             </intent-filter>
-        </activity>
+        </service>
+        <service
+            android:name=".widget.homewidget.JobReceiver"
+            android:label="Binding Helper"
+            android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <receiver
+            android:name=".widget.homewidget.WidgetReceiver"
+            android:process=":remote" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".ui.HomeActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/SplashTheme"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -130,7 +150,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
-            <intent-filter android:priority="999">
+            <intent-filter android:priority="999" >
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -157,7 +177,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true" >
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
@@ -332,13 +352,15 @@
         <activity
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
-
+        <activity
+            android:name=".widget.homewidget.HomeScreenTickerConfigureActivity"
+            android:label="Configure Widget" >
+        </activity>
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"
             android:exported="false"
-            android:stopWithTask="true"/>
-
+            android:stopWithTask="true" />
     </application>
 
 </manifest>

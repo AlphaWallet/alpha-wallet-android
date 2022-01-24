@@ -314,16 +314,23 @@ public class WalletFragment extends BaseFragment implements
     //Could the view have been destroyed?
     private void updateValue(Pair<Double, Double> fiatValues)
     {
-        // to avoid NaN
-        double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second)/fiatValues.second)*100.0 : 0.0;
-        largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
-        largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
-        int color = ContextCompat.getColor(getContext(), changePercent < 0 ? R.color.red : R.color.green);
-        largeTitleView.subtitle.setTextColor(color);
-
-        if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
+        try
         {
-            viewModel.checkBackup(fiatValues.first);
+            // to avoid NaN
+            double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second) / fiatValues.second) * 100.0 : 0.0;
+            largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
+            largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
+            int color = ContextCompat.getColor(requireContext(), changePercent < 0 ? R.color.red : R.color.green);
+            largeTitleView.subtitle.setTextColor(color);
+
+            if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
+            {
+                viewModel.checkBackup(fiatValues.first);
+            }
+        }
+        catch (Exception e)
+        {
+            // empty: expected if view has terminated before we can shut down the service return
         }
     }
 

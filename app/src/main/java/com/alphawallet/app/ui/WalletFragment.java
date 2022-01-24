@@ -591,7 +591,6 @@ public class WalletFragment extends BaseFragment implements
         if (realmUpdates != null)
         {
             realmUpdates.removeAllChangeListeners();
-            realm.removeAllChangeListeners();
         }
         if (realm != null && !realm.isClosed()) realm.close();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);

@@ -179,7 +179,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
         final Matcher matcher = pattern.matcher(value);
         if (matcher.find())
         {
-            seedPhrase.setError("Seed phrase can only contain words");
+            seedPhrase.setError(getString(R.string.error_seed_phrase_must_words));
             wordCount.setVisibility(View.GONE);
         }
         else

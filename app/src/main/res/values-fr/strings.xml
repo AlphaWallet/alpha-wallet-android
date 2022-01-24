@@ -869,4 +869,5 @@
     <string name="unknown_network_title">Unkown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
+    <string name="error_seed_phrase_must_words">La phrase de graine ne peut contenir que des mots</string>
 </resources>

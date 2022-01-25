@@ -63,6 +63,7 @@ import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.LargeTitleView;
@@ -127,6 +128,7 @@ public class WalletFragment extends BaseFragment implements
         AndroidSupportInjection.inject(this);
 
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
+        LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
 
         if (CustomViewSettings.canAddTokens()) {
             toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
@@ -312,16 +314,23 @@ public class WalletFragment extends BaseFragment implements
     //Could the view have been destroyed?
     private void updateValue(Pair<Double, Double> fiatValues)
     {
-        // to avoid NaN
-        double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second)/fiatValues.second)*100.0 : 0.0;
-        largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
-        largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
-        int color = ContextCompat.getColor(getContext(), changePercent < 0 ? R.color.red : R.color.green);
-        largeTitleView.subtitle.setTextColor(color);
-
-        if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
+        try
         {
-            viewModel.checkBackup(fiatValues.first);
+            // to avoid NaN
+            double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second) / fiatValues.second) * 100.0 : 0.0;
+            largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
+            largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
+            int color = ContextCompat.getColor(requireContext(), changePercent < 0 ? R.color.red : R.color.green);
+            largeTitleView.subtitle.setTextColor(color);
+
+            if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
+            {
+                viewModel.checkBackup(fiatValues.first);
+            }
+        }
+        catch (Exception e)
+        {
+            // empty: expected if view has terminated before we can shut down the service return
         }
     }
 
@@ -589,7 +598,6 @@ public class WalletFragment extends BaseFragment implements
         if (realmUpdates != null)
         {
             realmUpdates.removeAllChangeListeners();
-            realm.removeAllChangeListeners();
         }
         if (realm != null && !realm.isClosed()) realm.close();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
@@ -597,18 +605,18 @@ public class WalletFragment extends BaseFragment implements
 
     public void resetTokens()
     {
-        //first abort the current operation
         if (viewModel != null && adapter != null)
         {
-            adapter.clear();
             //reload tokens
             viewModel.reloadTokens();
-        }
-    }
 
-    public void changedLocale()
-    {
-        refreshList();
+            handler.post(() -> {
+                //first abort the current operation
+                adapter.clear();
+                //show syncing
+                addressAvatar.setWaiting();
+            });
+        }
     }
 
     @Override

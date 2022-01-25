@@ -3,6 +3,8 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.service.TickerService;
+
 public class CurrencyItem implements Parcelable
 {
     private String code;
@@ -85,5 +87,9 @@ public class CurrencyItem implements Parcelable
 
     public int getFlag() {
         return flag;
+    }
+
+    public String getCurrencyText(double value) {
+        return TickerService.getCurrencyWithoutSymbol(value) + " " + getCode();
     }
 }

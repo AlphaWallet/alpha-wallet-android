@@ -254,7 +254,7 @@ public class TransactionsService
         long oldestCheck = Long.MAX_VALUE;
         long checkChainId = 0;
 
-        for (Long chainId : chains)
+        for (long chainId : chains)
         {
             long checkTime = chainTransactionCheckTimes.get(chainId, 0L);
             if (checkTime == 0L)

@@ -117,7 +117,7 @@
                 android:id="@+id/subtext_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Current Price: "
+                android:text="@string/current_price"
                 android:textColor="@color/dove"
                 android:textSize="12sp" />
 

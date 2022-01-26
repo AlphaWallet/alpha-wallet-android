@@ -3,6 +3,7 @@ package com.alphawallet.app.ui.widget.entity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -12,24 +13,28 @@ import androidx.gridlayout.widget.GridLayout;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.widget.TokenInfoCategoryView;
 
 import java.util.Map;
 
 /**
  * Created by JB on 2/09/2021.
  */
-public class NFTAttributeLayout extends LinearLayout
-{
+public class NFTAttributeLayout extends LinearLayout {
+    private final FrameLayout layout;
     private final GridLayout grid;
-    private final TextView labelAttributes;
+    private TokenInfoCategoryView labelAttributes;
 
     public NFTAttributeLayout(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
         View view = inflate(context, R.layout.item_nft_attributes, this);
 
+        layout = view.findViewById(R.id.layout);
         grid = view.findViewById(R.id.grid);
-        labelAttributes = view.findViewById(R.id.label_attributes);
+
+        labelAttributes = new TokenInfoCategoryView(context, context.getString(R.string.label_attributes));
+        layout.addView(labelAttributes);
 
         grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
         grid.setUseDefaultMargins(false);
@@ -58,11 +63,11 @@ public class NFTAttributeLayout extends LinearLayout
     {
         if (size > 0 && token.tokenInfo.name.toLowerCase().contains("cryptokitties"))
         {
-            labelAttributes.setText(R.string.label_cattributes);
+            labelAttributes.setTitle(getContext().getString(R.string.label_cattributes));
         }
         else if (size > 0)
         {
-            labelAttributes.setText(R.string.label_attributes);
+            labelAttributes.setTitle(getContext().getString(R.string.label_attributes));
         }
         else
         {

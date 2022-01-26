@@ -375,6 +375,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void checkForUpdate()
     {
+        if (realm.isClosed()) return;
         RealmTransaction realmTransaction = realm.where(RealmTransaction.class)
                 .equalTo("hash", transactionHash)
                 .findFirst();

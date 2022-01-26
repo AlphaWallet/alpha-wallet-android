@@ -50,7 +50,7 @@ import io.realm.RealmQuery;
  */
 public class GasWidget2 extends LinearLayout implements Runnable
 {
-    private Realm1559Gas realmGasEstimate;
+    private GasPriceSpread2 gasSpread;
     private TokensService tokensService;
     private BigInteger customGasLimit;    //from slider
     private BigInteger initialTxGasLimit; //this is the gas limit specified from the dapp transaction.
@@ -71,12 +71,10 @@ public class GasWidget2 extends LinearLayout implements Runnable
     private final LinearLayout speedWarning;
     private final Context context;
 
-    private final List<GasSpeed2> gasSpeeds2 = new ArrayList<>();
     private int currentGasSpeedIndex = -1;
     private int customGasSpeedIndex = 0;
     private long customNonce = -1;
     private boolean isSendingAll;
-    private boolean forceCustomGas;
     private BigInteger resendGasPrice = BigInteger.ZERO;
 
     public GasWidget2(Context ctx, AttributeSet attrs)
@@ -91,17 +89,15 @@ public class GasWidget2 extends LinearLayout implements Runnable
         speedWarning = findViewById(R.id.layout_speed_warning);
 
         setOnClickListener(v -> {
-            if (gasSpeeds2.size() == 0) return;
             Token baseEth = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
             Intent intent = new Intent(context, GasSettingsActivity.class);
-            intent.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex);
             intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
             intent.putExtra(C.EXTRA_GAS_LIMIT, baseLineGasLimit.toString());
             intent.putExtra(C.EXTRA_CUSTOM_GAS_LIMIT, customGasLimit.toString());
             intent.putExtra(C.EXTRA_GAS_LIMIT_PRESET, presetGasLimit.toString());
             intent.putExtra(C.EXTRA_TOKEN_BALANCE, baseEth.balance.toString());
             intent.putExtra(C.EXTRA_AMOUNT, transactionValue.toString());
-            intent.putExtra(C.EXTRA_GAS_PRICE, gasSpeeds2.get(customGasSpeedIndex).gasPrice.toString());
+            intent.putExtra(C.EXTRA_GAS_PRICE, gasSpread);  //Parcelised
             intent.putExtra(C.EXTRA_NONCE, customNonce);
             intent.putExtra(C.EXTRA_MIN_GAS_PRICE, resendGasPrice.longValue());
             baseActivity.startActivityForResult(intent, C.SET_GAS_SETTINGS);
@@ -348,7 +344,7 @@ public class GasWidget2 extends LinearLayout implements Runnable
         EIP1559FeeOracleResult average = result.get(result.size()/2);
         try
         {
-            GasPriceSpread2 gs = new GasPriceSpread2(result, context);
+            GasPriceSpread2 gs = new GasPriceSpread2(context, result);
             currentGasSpeedIndex = gs.setupGasSpeeds(context, gasSpeeds2, currentGasSpeedIndex);
             customGasSpeedIndex = gs.getCustomIndex();
             if (forceCustomGas)

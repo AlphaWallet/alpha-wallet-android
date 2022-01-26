@@ -12,6 +12,7 @@ import com.alphawallet.app.web3.entity.Address;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,18 +38,19 @@ public class GasPriceSpread2 implements Parcelable
     public final long timeStamp;
     public TXSpeed speedIndex = TXSpeed.STANDARD;
 
-    public final List<EIP1559FeeOracleResult> fees = new ArrayList<>();
+    public final Map<TXSpeed, GasSpeed2> fees = new HashMap<>();
 
-    public GasPriceSpread2(Map<Integer, EIP1559FeeOracleResult> result, Context ctx)
+    public GasPriceSpread2(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
     {
         timeStamp = System.currentTimeMillis();
         if (result == null || result.size() == 0) return;
         int third = result.size()/3;
 
-        fees.add(new EIP1559FeeOracleResult(result.get(result.size()-1), ctx.getString(R.string.speed_rapid)));
-        fees.add(new EIP1559FeeOracleResult(result.get(result.get(third*2)), ctx.getString(R.string.speed_fast)));
-        fees.add(new EIP1559FeeOracleResult(result.get(result.get(third)), ctx.getString(R.string.speed_average)));
-        fees.add(new EIP1559FeeOracleResult(result.get(result.get(0)), ctx.getString(R.string.speed_slow)));
+        fees.put(TXSpeed.RAPID, new GasSpeed2(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
+        fees.put(TXSpeed.FAST, new GasSpeed2(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(result.get(third*2)))));
+        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(result.get(third)))));
+        fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(0))));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), 0, new EIP1559FeeOracleResult(BigInteger.ZERO, BigInteger.ZERO)));
     }
 
     protected GasPriceSpread2(Parcel in)
@@ -60,8 +62,9 @@ public class GasPriceSpread2 implements Parcelable
 
         for (int i = 0; i < feeCount; i++)
         {
-            EIP1559FeeOracleResult r = in.readParcelable(EIP1559FeeOracleResult.class.getClassLoader());
-            fees.add(r);
+            int entry = in.readInt();
+            GasSpeed2 r = in.readParcelable(GasSpeed2.class.getClassLoader());
+            fees.put(TXSpeed.values()[entry], r);
         }
     }
 
@@ -89,65 +92,38 @@ public class GasPriceSpread2 implements Parcelable
         dest.writeLong(timeStamp);
         dest.writeInt(fees.size());
         dest.writeInt(speedIndex.ordinal());
-        for (EIP1559FeeOracleResult r : fees)
+
+        for (Map.Entry<TXSpeed, GasSpeed2> entry : fees.entrySet())
         {
-            dest.writeParcelable(r, flags);
+            dest.writeInt(entry.getKey().ordinal());
+            dest.writeParcelable(entry.getValue(), flags);
         }
     }
 
-    public int setupGasSpeeds(Context ctx, int currentGasSpeedIndex)
+    public void addCustomGas(long seconds, EIP1559FeeOracleResult fee)
     {
-        boolean hasRapid = false;
-        GasSpeed customGas = null;
-        if (gasSpeeds.size() > 0) customGas = gasSpeeds.get(gasSpeeds.size()-1);
-
-        gasSpeeds.clear();
-
-        if (rapid.compareTo(BigInteger.ZERO) > 0)
-        {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_rapid), GasPriceSpread.RAPID_SECONDS, rapid));
-            hasRapid = true;
-        }
-
-        if (fast.compareTo(BigInteger.ZERO) > 0)
-        {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_fast), GasPriceSpread.FAST_SECONDS, fast));
-            hasRapid = true;
-        }
-
-        if (standard.compareTo(BigInteger.ZERO) > 0)
-        {
-            long txTime = GasPriceSpread.STANDARD_SECONDS;
-            if (currentGasSpeedIndex == -1) currentGasSpeedIndex = gasSpeeds.size();
-            if (!hasRapid) txTime = GasPriceSpread.FAST_SECONDS; //for non mainnet chains, assume standard tx time is 1 minute
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_average), txTime, standard));
-        }
-
-        if (slow.compareTo(BigInteger.ZERO) > 0)
-        {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_slow), GasPriceSpread.SLOW_SECONDS, slow));
-        }
-
-        customIndex = gasSpeeds.size();
-        if (customGas != null)
-        {
-            gasSpeeds.add(customGas);
-        }
-        else
-        {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_custom), 0, BigInteger.ZERO, true));
-        }
-
-        if (currentGasSpeedIndex < 0 || currentGasSpeedIndex >= gasSpeeds.size())
-        {
-            currentGasSpeedIndex = 0;
-        }
-
-        return currentGasSpeedIndex;
+        GasSpeed2 currentCustom = fees.get(TXSpeed.CUSTOM);
+        fees.put(TXSpeed.CUSTOM,
+                new GasSpeed2(currentCustom.speed, seconds, fee));
     }
 
-    public int getCustomIndex()
+    public EIP1559FeeOracleResult getCurrentGasFee()
     {
-        return customIndex;
+        return fees.get(this.speedIndex).gasPrice;
+    }
+
+    public long getCurrentTimeEstimate()
+    {
+        return fees.get(this.speedIndex).seconds;
+    }
+
+    public GasSpeed2 getGasSpeed()
+    {
+        return fees.get(this.speedIndex);
+    }
+
+    public boolean hasCustom()
+    {
+        return fees.get(TXSpeed.CUSTOM).seconds != 0;
     }
 }

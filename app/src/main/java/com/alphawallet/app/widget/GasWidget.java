@@ -13,13 +13,10 @@ import android.widget.TextView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.GasPriceSpread;
-import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.GasService;
@@ -27,7 +24,6 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.GasSettingsActivity;
 import com.alphawallet.app.ui.widget.entity.GasSpeed;
-import com.alphawallet.app.ui.widget.entity.GasSpeed2;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -36,7 +32,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import io.realm.Realm;
 import io.realm.RealmQuery;
@@ -53,7 +48,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 public class GasWidget extends LinearLayout implements Runnable
 {
     private RealmGasSpread realmGasSpread;
-    private Realm1559Gas realmGasEstimate;
     private TokensService tokensService;
     private BigInteger customGasLimit;    //from slider
     private BigInteger initialTxGasLimit; //this is the gas limit specified from the dapp transaction.
@@ -75,7 +69,6 @@ public class GasWidget extends LinearLayout implements Runnable
     private final Context context;
 
     private final List<GasSpeed> gasSpeeds;
-    private final List<GasSpeed2> gasSpeeds2 = new ArrayList<>();
     private int currentGasSpeedIndex = -1;
     private int customGasSpeedIndex = 0;
     private long customNonce = -1;
@@ -98,7 +91,6 @@ public class GasWidget extends LinearLayout implements Runnable
 
         setOnClickListener(v -> {
             if (gasSpeeds.size() == 0) return;
-            if (gasSpeeds2.size() == 0) return;
             Token baseEth = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
             Intent intent = new Intent(context, GasSettingsActivity.class);
             intent.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex);
@@ -329,56 +321,6 @@ public class GasWidget extends LinearLayout implements Runnable
         }
 
         return sendAllValue;
-    }
-
-    private RealmQuery<Realm1559Gas> getGasQuery2()
-    {
-        return tokensService.getTickerRealmInstance().where(Realm1559Gas.class)
-                .equalTo("chainId", token.tokenInfo.chainId);
-    }
-
-    private void startGasListener2()
-    {
-        if (realmGasEstimate != null) realmGasEstimate.removeAllChangeListeners();
-        realmGasEstimate = getGasQuery2().findFirstAsync();
-        realmGasEstimate.addChangeListener(realmToken -> {
-            if (realmGasEstimate.isValid())
-            {
-                initGasSpeeds2(((Realm1559Gas) realmToken).getResult());
-            }
-        });
-    }
-
-    private void initGasSpeeds2(Map<Integer, EIP1559FeeOracleResult> result)
-    {
-        //use average gas
-        EIP1559FeeOracleResult average = result.get(result.size()/2);
-        try
-        {
-            GasPriceSpread2 gs = new GasPriceSpread2(result);
-            currentGasSpeedIndex = gs.setupGasSpeeds(context, gasSpeeds2, currentGasSpeedIndex);
-            customGasSpeedIndex = gs.getCustomIndex();
-            if (forceCustomGas)
-            {
-                currentGasSpeedIndex = customGasSpeedIndex;
-                forceCustomGas = false;
-            }
-
-            TextView editTxt = findViewById(R.id.edit_text);
-
-            if (gs.lockedGas && editTxt.getVisibility() == View.VISIBLE)
-            {
-                findViewById(R.id.edit_text).setVisibility(View.GONE);
-                setOnClickListener(null);
-            }
-            //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
-            handler.post(this);
-        }
-        catch (Exception e)
-        {
-            currentGasSpeedIndex = 0;
-            if (BuildConfig.DEBUG) e.printStackTrace();
-        }
     }
 
     private RealmQuery<RealmGasSpread> getGasQuery()

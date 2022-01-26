@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 178
-        versionName "3.50.0"
+        versionCode 179
+        versionName "3.51.0"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23

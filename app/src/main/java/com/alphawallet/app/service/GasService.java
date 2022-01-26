@@ -315,6 +315,7 @@ public class GasService implements ContractGasProvider
                     rgs = r.createObject(RealmGasSpread.class, chainId);
 
                 rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
+                r.insertOrUpdate(rgs);
             });
         }
     }
@@ -331,6 +332,7 @@ public class GasService implements ContractGasProvider
                     rgs = r.createObject(Realm1559Gas.class, chainId);
 
                 rgs.setResultData(result, System.currentTimeMillis());
+                r.insertOrUpdate(rgs);
             });
         }
     }

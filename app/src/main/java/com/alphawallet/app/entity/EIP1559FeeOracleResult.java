@@ -12,27 +12,23 @@ public class EIP1559FeeOracleResult implements Parcelable
 {
     public final BigInteger maxFeePerGas;
     public final BigInteger maxPriorityFeePerGas;
-    public final String name;
 
     public EIP1559FeeOracleResult(BigInteger maxFee, BigInteger maxPriority)
     {
         maxFeePerGas = maxFee;
         maxPriorityFeePerGas = maxPriority;
-        name = null;
     }
 
-    public EIP1559FeeOracleResult(EIP1559FeeOracleResult r, String n)
+    public EIP1559FeeOracleResult(EIP1559FeeOracleResult r)
     {
         maxFeePerGas = r.maxFeePerGas;
         maxPriorityFeePerGas = r.maxPriorityFeePerGas;
-        name = n;
     }
 
     protected EIP1559FeeOracleResult(Parcel in)
     {
         maxFeePerGas = new BigInteger(in.readString(), 16);
         maxPriorityFeePerGas = new BigInteger(in.readString(), 16);
-        name = in.readString();
     }
 
     public static final Creator<EIP1559FeeOracleResult> CREATOR = new Creator<EIP1559FeeOracleResult>() {
@@ -58,6 +54,5 @@ public class EIP1559FeeOracleResult implements Parcelable
     {
         dest.writeString(maxFeePerGas.toString(16));
         dest.writeString(maxPriorityFeePerGas.toString(16));
-        dest.writeString(name);
     }
 }

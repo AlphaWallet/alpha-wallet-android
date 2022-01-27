@@ -6,17 +6,15 @@ import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPINam
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.LinearGradient;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -79,8 +77,10 @@ public class HistoryChart extends View
         }
     }
 
-    static class Datasource {
-        ArrayList<Pair<Long, Float>> getEntries() {
+    static class Datasource
+    {
+        ArrayList<Pair<Long, Float>> getEntries()
+        {
             return entries;
         }
 
@@ -90,10 +90,12 @@ public class HistoryChart extends View
 
         ArrayList<Pair<Long, Float>> entries = new ArrayList<>();
 
-        static Single<Datasource> fetchHistory(Range range, String tokenId) {
+        static Single<Datasource> fetchHistory(Range range, String tokenId)
+        {
             return Single.fromCallable(() -> {
                 ArrayList<Pair<Long, Float>> entries = new ArrayList<>();
-                try {
+                try
+                {
                     Request request = new Request.Builder()
                             .url("https://api.coingecko.com/api/v3/coins/" + tokenId + "/market_chart?days=" + range.value + "&vs_currency=USD")
                             .get()
@@ -104,15 +106,18 @@ public class HistoryChart extends View
                         JSONArray prices = new JSONObject(response.body().string()).getJSONArray("prices");
                         float minValue = Float.MAX_VALUE;
                         float maxValue = 0;
-                        for (int i = 0; i < prices.length(); i++) {
+                        for (int i = 0; i < prices.length(); i++)
+                        {
                             JSONArray entry = prices.getJSONArray(i);
                             long timestamp = entry.getLong(0);
                             float value = (float) entry.getDouble(1);
                             entries.add(Pair.create(timestamp, value));
-                            if (minValue > value) {
+                            if (minValue > value)
+                            {
                                 minValue = value;
                             }
-                            if (maxValue < value) {
+                            if (maxValue < value)
+                            {
                                 maxValue = value;
                             }
                         }
@@ -139,6 +144,11 @@ public class HistoryChart extends View
             return entries.get(entries.size() - 1).first;
         }
 
+        boolean isGreen()
+        {
+            return (entries.get(0).second - entries.get(entries.size() - 1).second) < 0;
+        }
+
         float minValue()
         {
             return minValue;
@@ -156,7 +166,8 @@ public class HistoryChart extends View
     Paint textPaint = new Paint();
     Path path = new Path();
 
-    private void init() {
+    private void init()
+    {
         paint.setColor(getResources().getColor(R.color.green, getContext().getTheme()));
 
 
@@ -202,6 +213,8 @@ public class HistoryChart extends View
         }
 
         path.reset();
+        int color = datasource.isGreen() ? R.color.green : R.color.danger;
+        paint.setColor(getResources().getColor(color,getContext().getTheme()));
 
         // draw chart
         float width = getWidth();
@@ -231,7 +244,8 @@ public class HistoryChart extends View
         canvas.drawPath(path, paint);
     }
 
-    public void fetchHistory(Token token, final Range range) {
+    public void fetchHistory(Token token, final Range range)
+    {
         // use cache
         cache.range = range;
         if (cache.getCurrentDatasource(range) != null) {
@@ -239,12 +253,13 @@ public class HistoryChart extends View
             return;
         }
 
-        if (!TickerService.validateCoinGeckoAPI(token)) return; //wouldn't have tickers
+        if (!TickerService.validateCoinGeckoAPI(token)) { return; } //wouldn't have tickers
 
         String coingeckoTokenId = token.isEthereum() ? chainPairs.get(token.tokenInfo.chainId)
                 : coinGeckoChainIdToAPIName.get(token.tokenInfo.chainId) + "/contract/" + token.getAddress().toLowerCase();
 
-        if (coingeckoTokenId != null) {
+        if (coingeckoTokenId != null)
+        {
             Datasource.fetchHistory(range, coingeckoTokenId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -252,7 +267,9 @@ public class HistoryChart extends View
         }
     }
 
-    private void onEntries(Range range, Datasource datasource) {
+
+    private void onEntries(Range range, Datasource datasource)
+    {
         // invalidate
         cache.datasourceMap.put(range, datasource);
         invalidate();

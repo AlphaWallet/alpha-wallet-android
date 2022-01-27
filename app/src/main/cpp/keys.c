@@ -15,6 +15,12 @@
 #   define HAS_INFURA 0
 #endif
 
+#ifdef OSKEY
+#   define HAS_OS 1
+#else
+#   define HAS_OS 0
+#endif
+
 JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_EthereumNetworkBase_getAmberDataKey( JNIEnv* env, jobject thiz )
 {
@@ -166,6 +172,19 @@ Java_com_alphawallet_app_service_TransactionsNetworkClient_getCovalentKey( JNIEn
     return getDecryptedCKey(env, 4, '_', covalentKey);
 #else
     const jstring key = "ckey_9bfb5c8fe0f04c7491231e60ee8"; // <-- Add your covalent key here. This public one could be rate limited
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_OpenSeaService_getOpenSeaKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, openSeaKey);
+#elif (HAS_OS == 1)
+    return (*env)->NewStringUTF(env, OSKEY);
+#else
+    const jstring key = "...";
     return (*env)->NewStringUTF(env, key);
 #endif
 }

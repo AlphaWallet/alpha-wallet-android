@@ -47,6 +47,7 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
     public void bind(@Nullable TokenCardMeta tcm, @NonNull Bundle addition) {
         if (tcm != null) {
             Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
+            if (token == null) return; //TODO: Generate placeholder
             imageIcon.bindData(token, assetDefinition);
             name.setText(token.getName(assetDefinition, token.balance.intValue()));
             count.setText(getString(R.string.token_count, token.balance.intValue()));

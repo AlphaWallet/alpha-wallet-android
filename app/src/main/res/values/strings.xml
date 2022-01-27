@@ -871,9 +871,17 @@
     <string name="governance_header">Governance</string>
     <string name="collectibles_header">Collectibles</string>
     <string name="whats_new">What\'s new?</string>
+    <string name="price_alert_indicator_below">Below</string>
+    <string name="price_alert_indicator_above">Above</string>
+    <string name="add_new_price_alert">Add New Price Alert</string>
+    <string name="current_price">Current Price:</string>
+    <string name="tab_info">Info</string>
+    <string name="tab_activity">Activity</string>
+    <string name="tab_alert">Alerts</string>
     <string name="unknown_network_title">Unkown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
+    <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
 </resources>

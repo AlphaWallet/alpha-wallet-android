@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.entity;
 
 import static com.alphawallet.app.service.TickerService.chainPairs;
 import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -17,21 +16,17 @@ import android.util.TypedValue;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.web3.entity.Address;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -41,7 +36,8 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-public class HistoryChart extends View {
+public class HistoryChart extends View
+{
 
     static OkHttpClient httpClient = new OkHttpClient.Builder()
             .connectTimeout(5, TimeUnit.SECONDS)
@@ -133,19 +129,23 @@ public class HistoryChart extends View {
             });
         }
 
-        long minTime() {
+        long minTime()
+        {
             return entries.get(0).first;
         }
 
-        long maxTime() {
+        long maxTime()
+        {
             return entries.get(entries.size() - 1).first;
         }
 
-        float minValue() {
+        float minValue()
+        {
             return minValue;
         }
 
-        float maxValue() {
+        float maxValue()
+        {
             return maxValue;
         }
     }
@@ -155,16 +155,15 @@ public class HistoryChart extends View {
     Paint paint = new Paint();
     Paint textPaint = new Paint();
     Path path = new Path();
-    LinearGradient gradient = null;
 
     private void init() {
-        paint.setColor(getResources().getColor(R.color.nasty_green, getContext().getTheme()));
+        paint.setColor(getResources().getColor(R.color.green, getContext().getTheme()));
 
 
         Resources r = getResources();
         int strokeWidth = (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
-                5,
+                3,
                 r.getDisplayMetrics()
         );
 
@@ -181,17 +180,20 @@ public class HistoryChart extends View {
         textPaint.setColor(getResources().getColor(R.color.black, getContext().getTheme()));
     }
 
-    public HistoryChart(Context context, @Nullable AttributeSet attrs) {
+    public HistoryChart(Context context, @Nullable AttributeSet attrs)
+    {
         super(context, attrs);
         init();
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(Canvas canvas)
+    {
         super.onDraw(canvas);
 
         Datasource datasource = cache.getCurrentDatasource(cache.range);
-        if (datasource == null || datasource.entries.size() == 0) {
+        if (datasource == null || datasource.entries.size() == 0)
+        {
             // draw no chart data available message
             int xPos = (getWidth() / 2);
             int yPos = (int) ((getHeight() / 2) - ((textPaint.descent() + textPaint.ascent()) / 2));
@@ -208,34 +210,24 @@ public class HistoryChart extends View {
         float xScale = width / (datasource.maxTime() - datasource.minTime());
         float yScale = (height * 0.9f) / (datasource.maxValue() - datasource.minValue());
 
-        for (int i = 0; i < datasource.entries.size(); i++) {
+        for (int i = 0; i < datasource.entries.size(); i++)
+        {
             Pair<Long, Float> entry = datasource.entries.get(i);
 
             float x = (entry.first - datasource.minTime()) * xScale;
             float y = height - (entry.second - datasource.minValue()) * yScale;
 
-            if (i == 0) {
+            if (i == 0)
+            {
                 path.moveTo(x, y);
-            } else {
+            } else
+            {
                 path.lineTo(x, y);
             }
         }
 
         paint.setStyle(Paint.Style.STROKE);
         paint.setShader(null);
-        canvas.drawPath(path, paint);
-
-        if (gradient == null) {
-            // create gradient fill on the first run
-            gradient = new LinearGradient(0, 0, 0, height, 0xFFf7fbf4, 0xffffffff, Shader.TileMode.CLAMP);
-        }
-
-        paint.setShader(gradient);
-
-        // add bottom points
-        paint.setStyle(Paint.Style.FILL);
-        path.lineTo(width, height);
-        path.lineTo(0, height);
         canvas.drawPath(path, paint);
     }
 

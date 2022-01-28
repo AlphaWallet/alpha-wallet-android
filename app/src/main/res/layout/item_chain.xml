@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingVertical="@dimen/dp10">
+    android:paddingVertical="@dimen/dp8">
 
     <ImageView
         android:id="@+id/chain_icon"

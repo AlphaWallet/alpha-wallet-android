@@ -15,6 +15,8 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
+import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
+import com.alphawallet.app.util.LayoutHelper;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.bumptech.glide.Glide;
@@ -42,6 +44,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private LinearLayout infoLayout;
     private FunctionButtonBar functionBar;
     private ListView chainList;
+    private ListView methodList;
 
     private String url;
     private WalletConnectV2SessionItem session;
@@ -115,8 +118,9 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(session.url);
 
         chainList.setAdapter(new ChainAdapter(this, getChains(session.accounts)));
-//            chainIcon.bindData(viewModel.getTokensService().getServiceToken(viewModel.getChainId(sessionId)));
-//            viewModel.startGasCycle(viewModel.getChainId(sessionId));
+        methodList.setAdapter(new MethodAdapter(this, session.methods));
+        LayoutHelper.resizeList(chainList);
+        LayoutHelper.resizeList(methodList);
     }
 
     private List<String> getChains(List<String> accounts)
@@ -137,6 +141,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerName = findViewById(R.id.peer_name);
         peerUrl = findViewById(R.id.peer_url);
         chainList = findViewById(R.id.chain_list);
+        methodList = findViewById(R.id.method_list);
 
         progressBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.GONE);
@@ -236,6 +241,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(sessionProposal.getUrl());
 
         chainList.setAdapter(new ChainAdapter(this, sessionProposal.getChains()));
+        methodList.setAdapter(new MethodAdapter(this, sessionProposal.getMethods()));
     }
 
     @Override

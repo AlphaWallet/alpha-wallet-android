@@ -58,63 +58,75 @@
             android:background="@color/mercury" />
 
 
-        <LinearLayout
-            android:id="@+id/layout_network"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_bottom_border"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/dp16"
-            android:paddingEnd="@dimen/dp16">
-
-            <TextView
-                android:layout_width="95dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/subtitle_network"
-                android:paddingVertical="@dimen/dp16"
-                android:textColor="@color/dove"
-                android:textSize="18sp" />
-
-            <ListView
-                android:id="@+id/chain_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-            </ListView>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_methods"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/background_bottom_border"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="@dimen/dp16"
-            android:paddingEnd="@dimen/dp16">
-
-            <TextView
-                android:layout_width="95dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="Methods"
-                android:textColor="@color/dove"
-                android:textSize="18sp" />
+            android:layout_height="match_parent"
+            android:layout_marginBottom="?actionBarSize">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center_vertical"
-                android:gravity="center_vertical">
+                android:orientation="vertical"
+                >
 
+                <LinearLayout
+                    android:id="@+id/layout_network"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/background_bottom_border"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/dp16"
+                    android:paddingEnd="@dimen/dp16">
+
+                    <TextView
+                        android:layout_width="95dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/subtitle_network"
+                        android:paddingTop="@dimen/dp16"
+                        android:textColor="@color/dove"
+                        android:textSize="18sp" />
+
+                    <ListView
+                        android:id="@+id/chain_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                    </ListView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_methods"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_bottom_border"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/dp16"
+                    android:paddingEnd="@dimen/dp16">
+
+                    <TextView
+                        android:layout_width="95dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_regular"
+                        android:text="方法"
+                        android:paddingTop="@dimen/dp16"
+                        android:textColor="@color/dove"
+                        android:textSize="18sp" />
+
+                    <ListView
+                        android:id="@+id/method_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                    </ListView>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+
+        </ScrollView>
 
     </LinearLayout>
 

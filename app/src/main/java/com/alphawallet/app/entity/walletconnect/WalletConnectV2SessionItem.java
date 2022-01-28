@@ -2,11 +2,9 @@ package com.alphawallet.app.entity.walletconnect;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +12,7 @@ import java.util.Objects;
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
     public final List<String> accounts = new ArrayList<>();
+    public final List<String> methods = new ArrayList<>();
     public WalletConnectV2SessionItem(WalletConnect.Model.SettledSession s)
     {
         super();
@@ -23,6 +22,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
         accounts.addAll(s.getAccounts());
+        methods.addAll(s.getPermissions().getJsonRpc().getMethods());
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -33,6 +33,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         sessionId = in.readString();
         localSessionId = in.readString();
         in.readStringList(accounts);
+        in.readStringList(methods);
     }
 
     @Override
@@ -50,6 +51,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeString(sessionId);
         dest.writeString(localSessionId);
         dest.writeStringList(accounts);
+        dest.writeStringList(methods);
     }
 
     public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR

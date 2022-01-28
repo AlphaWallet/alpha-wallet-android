@@ -7,11 +7,13 @@ import android.util.Log;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
+    public final List<String> accounts = new ArrayList<>();
     public WalletConnectV2SessionItem(WalletConnect.Model.SettledSession s)
     {
         super();
@@ -20,7 +22,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         icon = s.getPeerAppMetaData().getIcons().isEmpty() ? null : s.getPeerAppMetaData().getIcons().get(0);
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
-        chainId = getFirstChainId(s.getAccounts());
+        accounts.addAll(s.getAccounts());
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -30,13 +32,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         icon = in.readString();
         sessionId = in.readString();
         localSessionId = in.readString();
-        chainId = in.readLong();
-    }
-
-    private long getFirstChainId(List<String> accounts)
-    {
-        Log.d("seaborn", accounts.get(0));
-        return Long.parseLong(accounts.get(0).split(":")[1]);
+        in.readStringList(accounts);
     }
 
     @Override
@@ -53,7 +49,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeString(icon);
         dest.writeString(sessionId);
         dest.writeString(localSessionId);
-        dest.writeLong(chainId);
+        dest.writeStringList(accounts);
     }
 
     public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR

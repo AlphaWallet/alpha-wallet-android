@@ -224,12 +224,30 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                 })
                 .setNegativeButton(R.string.dialog_reject, (d, w) ->
                 {
-//                    client.rejectSession(getString(R.string.message_reject_request));
+                    reject(sessionProposal);
                     finish();
                 })
                 .setCancelable(false)
                 .create();
         dialog.show();
+    }
+
+    private void reject(WalletConnect.Model.SessionProposal sessionProposal)
+    {
+        WalletConnectClient.INSTANCE.reject(new WalletConnect.Params.Reject(getString(R.string.message_reject_request), sessionProposal.getTopic()), new WalletConnect.Listeners.SessionReject()
+        {
+            @Override
+            public void onSuccess(@NonNull WalletConnect.Model.RejectedSession rejectedSession)
+            {
+
+            }
+
+            @Override
+            public void onError(@NonNull Throwable throwable)
+            {
+
+            }
+        });
     }
 
     private void approve(WalletConnect.Model.SessionProposal sessionProposal)

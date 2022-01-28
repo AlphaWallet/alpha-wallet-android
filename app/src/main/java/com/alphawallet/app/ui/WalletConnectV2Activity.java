@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.Spannable;
 import android.util.Log;
 import android.view.View;
@@ -58,6 +57,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     @Inject
     WalletConnectV2ViewModelFactory viewModelFactory;
     private String url;
+    private WalletConnectV2SessionItem session;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -71,6 +71,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         initViews();
         initViewModel();
         this.url = retrieveQrCode();
+        this.session = retrieveSession();
         viewModel.prepare();
     }
 
@@ -100,7 +101,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             progressBar.setVisibility(View.GONE);
             functionBar.setVisibility(View.VISIBLE);
             infoLayout.setVisibility(View.VISIBLE);
-            displaySessionStatus(retrieveSession());
+            displaySessionStatus(session);
         } else
         {
             WalletConnectClient.INSTANCE.setWalletDelegate(this);
@@ -153,6 +154,49 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_end_session)));
         functionBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void handleClick(String action, int id)
+    {
+        if (id == R.string.action_end_session)
+        {
+            endSessionDialog();
+        }
+    }
+
+    private void endSessionDialog()
+    {
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectV2Activity.this);
+            AlertDialog dialog = builder.setTitle(R.string.dialog_title_disconnect_session)
+                    .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                        killSession(session);
+                    })
+                    .setNegativeButton(R.string.action_cancel, (d, w) -> {
+                        d.dismiss();
+                    })
+                    .create();
+            dialog.show();
+        });
+    }
+
+    private void killSession(WalletConnectV2SessionItem session)
+    {
+        WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(session.sessionId, "User disconnect the session."), new WalletConnect.Listeners.SessionDelete()
+        {
+            @Override
+            public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)
+            {
+                finish();
+            }
+
+            @Override
+            public void onError(@NonNull Throwable throwable)
+            {
+
+            }
+        });
     }
 
     @Override

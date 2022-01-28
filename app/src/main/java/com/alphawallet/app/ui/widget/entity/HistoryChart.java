@@ -6,7 +6,6 @@ import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPINam
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
@@ -161,15 +160,16 @@ public class HistoryChart extends View
     }
 
     Cache cache = new Cache();
-
     Paint paint = new Paint();
-    Paint textPaint = new Paint();
+    Paint noDataTextPaint = new Paint();
     Path path = new Path();
+    Paint greyPaint = new Paint();
+    Path greyLines = new Path();
+    Paint edgeValPaint = new Paint();
 
     private void init()
     {
         paint.setColor(getResources().getColor(R.color.green, getContext().getTheme()));
-
 
         Resources r = getResources();
         int strokeWidth = (int) TypedValue.applyDimension(
@@ -181,14 +181,29 @@ public class HistoryChart extends View
         paint.setStrokeWidth(strokeWidth);
         paint.setDither(true);
 
-        textPaint.setTextAlign(Paint.Align.CENTER);
+
+        greyPaint.setColor(getResources().getColor(R.color.black_12,getContext().getTheme()));
+        greyPaint.setStrokeWidth(1);
+
+        noDataTextPaint.setTextAlign(Paint.Align.CENTER);
         int textSize = (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP,
                 14,
                 r.getDisplayMetrics()
         );
-        textPaint.setTextSize(textSize);
-        textPaint.setColor(getResources().getColor(R.color.black, getContext().getTheme()));
+        noDataTextPaint.setTextSize(textSize);
+        noDataTextPaint.setColor(getResources().getColor(R.color.black_12, getContext().getTheme()));
+
+        edgeValPaint.setTextAlign(Paint.Align.RIGHT);
+        edgeValPaint.setTextSize(
+                TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_SP,
+                        12,
+                        r.getDisplayMetrics()
+                )
+        );
+        edgeValPaint.setColor(getResources().getColor(R.color.black, getContext().getTheme()));
+
     }
 
     public HistoryChart(Context context, @Nullable AttributeSet attrs)
@@ -207,21 +222,34 @@ public class HistoryChart extends View
         {
             // draw no chart data available message
             int xPos = (getWidth() / 2);
-            int yPos = (int) ((getHeight() / 2) - ((textPaint.descent() + textPaint.ascent()) / 2));
-            canvas.drawText(getContext().getString(R.string.no_chart_data_available), xPos, yPos, textPaint);
+            int yPos = (int) ((getHeight() / 2) - ((noDataTextPaint.descent() + noDataTextPaint.ascent()) / 2));
+            canvas.drawText(getContext().getString(R.string.no_chart_data_available), xPos, yPos, noDataTextPaint);
             return;
         }
 
-        path.reset();
-        int color = datasource.isGreen() ? R.color.green : R.color.danger;
-        paint.setColor(getResources().getColor(color,getContext().getTheme()));
 
         // draw chart
         float width = getWidth();
         float height = getHeight();
 
+        //colour changes depending on first and last values
+        path.reset();
+        int color = datasource.isGreen() ? R.color.green : R.color.danger;
+        paint.setColor(getResources().getColor(color,getContext().getTheme()));
+
+
         float xScale = width / (datasource.maxTime() - datasource.minTime());
-        float yScale = (height * 0.9f) / (datasource.maxValue() - datasource.minValue());
+        float yScale = ((height * 0.9f) / (datasource.maxValue() - datasource.minValue()));
+
+        for (float i = datasource.minValue();
+             i <= datasource.maxValue();
+             i = i + (datasource.maxValue() - datasource.minValue())/4) {
+            float lineVal = height - (i - datasource.minValue()) * yScale;
+            greyLines.moveTo(0, lineVal);
+            greyLines.lineTo(width, lineVal);
+        }
+        greyPaint.setStyle(Paint.Style.STROKE);
+        canvas.drawPath(greyLines,greyPaint);
 
         for (int i = 0; i < datasource.entries.size(); i++)
         {
@@ -242,6 +270,10 @@ public class HistoryChart extends View
         paint.setStyle(Paint.Style.STROKE);
         paint.setShader(null);
         canvas.drawPath(path, paint);
+
+        // add min/max values to chart
+        canvas.drawText(String.format("%.02f", datasource.minValue()),width,height,edgeValPaint);
+        canvas.drawText(String.format("%.02f",datasource.maxValue()),width,0.05f*height,edgeValPaint);
     }
 
     public void fetchHistory(Token token, final Range range)

@@ -29,12 +29,12 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
-import com.alphawallet.app.widget.ChainName;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
@@ -199,10 +199,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             holder.peerUrl.setText(session.url);
             holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {
-                //go to wallet connect session page
-                Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-                intent.putExtra("session", session.sessionId);
-                startActivity(intent);
+                viewSession(session);
             });
 
             setupClient(session.sessionId, holder);
@@ -218,6 +215,20 @@ public class WalletConnectSessionActivity extends BaseActivity
         public int getItemCount()
         {
             return wcSessions.size();
+        }
+    }
+
+    private void viewSession(WalletConnectSessionItem session)
+    {
+        if (session instanceof WalletConnectV2SessionItem)
+        {
+            Intent intent = new Intent(getApplication(), WalletConnectV2Activity.class);
+            intent.putExtra("session", (WalletConnectV2SessionItem) session);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+            intent.putExtra("session", session.sessionId);
+            startActivity(intent);
         }
     }
 

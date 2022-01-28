@@ -11,6 +11,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.viewmodel.WalletConnectV2ViewModelFactory;
 import com.alphawallet.app.viewmodel.WalletConnectViewModelFactory;
 
 import dagger.Module;
@@ -18,6 +19,12 @@ import dagger.Provides;
 
 @Module
 class WalletConnectModule {
+    @Provides
+    WalletConnectV2ViewModelFactory provideWalletConnectV2ViewModelFactory(GenericWalletInteract genericWalletInteract)
+    {
+        return new WalletConnectV2ViewModelFactory(genericWalletInteract);
+    }
+
     @Provides
     WalletConnectViewModelFactory provideWalletConnectViewModelFactory(
             KeyService keyService,

@@ -30,6 +30,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -44,7 +45,6 @@ import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -341,7 +341,14 @@ public class QRScanner extends BaseActivity
 
     private void startWalletConnect(String qrCode)
     {
-        Intent intent = new Intent(this, WalletConnectActivity.class);
+        Class<? extends Activity> cls;
+        if (QRCodeHelper.isWalletConnectV1(qrCode)) {
+            cls = WalletConnectActivity.class;
+        } else {
+            cls = WalletConnectV2Activity.class;
+        }
+
+        Intent intent = new Intent(this, cls);
         intent.putExtra("qrCode", qrCode);
         intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         startActivity(intent);

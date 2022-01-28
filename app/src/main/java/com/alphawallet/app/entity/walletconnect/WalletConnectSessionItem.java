@@ -7,12 +7,12 @@ import com.alphawallet.app.repository.entity.RealmWCSession;
  */
 public class WalletConnectSessionItem
 {
-    public final String name;
-    public final String url;
-    public final String icon;
-    public final String sessionId;
-    public final String localSessionId;
-    public final long chainId;
+    public String name;
+    public String url;
+    public String icon;
+    public String sessionId;
+    public String localSessionId;
+    public long chainId;
 
     public WalletConnectSessionItem(RealmWCSession s)
     {
@@ -22,5 +22,10 @@ public class WalletConnectSessionItem
         sessionId = s.getSession().getTopic();
         localSessionId = s.getSessionId();
         chainId = s.getChainId() == 0 ? 1 : s.getChainId(); //older sessions without chainId set must be mainnet
+    }
+
+    public WalletConnectSessionItem()
+    {
+
     }
 }

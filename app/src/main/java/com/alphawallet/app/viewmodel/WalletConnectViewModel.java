@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -26,6 +27,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -50,12 +52,16 @@ import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
+import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -468,6 +474,26 @@ public class WalletConnectViewModel extends BaseViewModel {
     }
 
     public List<WalletConnectSessionItem> getSessions()
+    {
+        List<WalletConnectSessionItem> result = new ArrayList();
+        result.addAll(getWalletConnectV1SessionItems());
+        result.addAll(getWalletConnectV2SessionItems());
+        return result;
+    }
+
+    private List<WalletConnectSessionItem> getWalletConnectV2SessionItems()
+    {
+        List<WalletConnectSessionItem> result = new ArrayList<>();
+        List<WalletConnect.Model.SettledSession> listOfSettledSessions = WalletConnectClient.INSTANCE.getListOfSettledSessions();
+        for (WalletConnect.Model.SettledSession session : listOfSettledSessions)
+        {
+            result.add(new WalletConnectV2SessionItem(session));
+        }
+        return result;
+    }
+
+    @NonNull
+    private List<WalletConnectSessionItem> getWalletConnectV1SessionItems()
     {
         List<WalletConnectSessionItem> sessions = new ArrayList<>();
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))

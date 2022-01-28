@@ -48,6 +48,7 @@ import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.WalletConnectSessionActivity;
+import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.ui.WalletFragment;
 import com.alphawallet.app.ui.WalletsActivity;
 
@@ -194,6 +195,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletConnectModule.class)
 	abstract WalletConnectActivity bindWalletConnectActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletConnectModule.class)
+	abstract WalletConnectV2Activity bindWalletConnectV2Activity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletConnectModule.class)

@@ -3,11 +3,10 @@ package com.alphawallet.app.ui;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -15,27 +14,22 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.util.StyledStringBuilder;
+import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModelFactory;
-import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
-import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.TokenIcon;
 import com.bumptech.glide.Glide;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import dagger.android.AndroidInjection;
 
@@ -46,13 +40,10 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private ImageView icon;
     private TextView peerName;
     private TextView peerUrl;
-    private TextView statusText;
-    private TextView textName;
-    private ChainName chainName;
-    private TokenIcon chainIcon;
     private ProgressBar progressBar;
     private LinearLayout infoLayout;
     private FunctionButtonBar functionBar;
+    private ListView chainList;
 
     @Inject
     WalletConnectV2ViewModelFactory viewModelFactory;
@@ -65,7 +56,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         super.onCreate(savedInstanceState);
         AndroidInjection.inject(this);
 
-        setContentView(R.layout.activity_wallet_connect);
+        setContentView(R.layout.activity_wallet_connect_v2);
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
         initViews();
@@ -111,8 +102,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void displaySessionStatus(WalletConnectV2SessionItem session)
     {
-        statusText.setText(R.string.online);
-        statusText.setTextColor(getColor(R.color.nasty_green));
         progressBar.setVisibility(View.GONE);
         functionBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.VISIBLE);
@@ -128,12 +117,21 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                     .into(icon);
         }
         peerName.setText(session.name);
-        textName.setText(session.name);
         peerUrl.setText(session.url);
-        chainName.setChainID(session.chainId);
-        chainIcon.setVisibility(View.VISIBLE);
+
+        chainList.setAdapter(new ChainAdapter(this, getChains(session.accounts)));
 //            chainIcon.bindData(viewModel.getTokensService().getServiceToken(viewModel.getChainId(sessionId)));
 //            viewModel.startGasCycle(viewModel.getChainId(sessionId));
+    }
+
+    private List<String> getChains(List<String> accounts)
+    {
+        List<String> result = new ArrayList<>();
+        for (String account : accounts)
+        {
+            result.add(account.substring(0, account.lastIndexOf(":")));
+        }
+        return result;
     }
 
     private void initViews()
@@ -143,26 +141,15 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         icon = findViewById(R.id.icon);
         peerName = findViewById(R.id.peer_name);
         peerUrl = findViewById(R.id.peer_url);
-        statusText = findViewById(R.id.connection_status);
-        textName = findViewById(R.id.text_name);
-        chainName = findViewById(R.id.chain_name);
-        chainIcon = findViewById(R.id.chain_icon);
+        chainList = findViewById(R.id.chain_list);
 
         progressBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.GONE);
 
         functionBar = findViewById(R.id.layoutButtons);
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_end_session)));
-        functionBar.setVisibility(View.GONE);
-    }
+        functionBar.setupFunctions(this, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
 
-    @Override
-    public void handleClick(String action, int id)
-    {
-        if (id == R.string.action_end_session)
-        {
-            endSessionDialog();
-        }
+        functionBar.setVisibility(View.GONE);
     }
 
     private void endSessionDialog()
@@ -214,66 +201,52 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     @Override
     public void onSessionProposal(@NonNull WalletConnect.Model.SessionProposal sessionProposal)
     {
-        Log.d("seaborn", "onSessionProposal");
-        List<String> chains = sessionProposal.getChains();
-        for (String chain : chains)
-        {
-            Log.d("seaborn", chain);
-        }
         runOnUiThread(() ->
         {
+
             progressBar.setVisibility(View.GONE);
             functionBar.setVisibility(View.VISIBLE);
             infoLayout.setVisibility(View.VISIBLE);
-            showProposalDialog(sessionProposal);
+
+            displaySessionStatus(sessionProposal);
+
+            functionBar.setupFunctions(new StandardFunctionInterface()
+            {
+                @Override
+                public void handleClick(String action, int actionId)
+                {
+                    if (actionId == R.string.dialog_approve)
+                    {
+                        approve(sessionProposal);
+                    } else {
+                        reject(sessionProposal);
+                    }
+                }
+            }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
         });
+    }
+
+    private void displaySessionStatus(WalletConnect.Model.SessionProposal sessionProposal)
+    {
+
+        progressBar.setVisibility(View.GONE);
+        functionBar.setVisibility(View.VISIBLE);
+        infoLayout.setVisibility(View.VISIBLE);
+
+        Glide.with(this)
+                .load(sessionProposal.getIcon())
+                .circleCrop()
+                .into(icon);
+        peerName.setText(sessionProposal.getName());
+        peerUrl.setText(sessionProposal.getUrl());
+
+        chainList.setAdapter(new ChainAdapter(this, sessionProposal.getChains()));
     }
 
     @Override
     public void onSessionRequest(@NonNull WalletConnect.Model.SessionRequest sessionRequest)
     {
 
-    }
-
-    private void showProposalDialog(WalletConnect.Model.SessionProposal sessionProposal)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        AlertDialog dialog = builder
-                .setIcon(icon.getDrawable())
-                .setTitle("Wallet Connect")
-                .setMessage(buildMessage(sessionProposal.getUrl(), sessionProposal.getChains()))
-                .setPositiveButton(R.string.dialog_approve, (d, w) ->
-                {
-                    approve(sessionProposal);
-//                    client.approveSession(Arrays.asList(accounts), chainIdOverride);
-//                    viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
-//                            new Gson().toJson(session), new Gson().toJson(peer), chainIdOverride);
-//                    progressBar.setVisibility(View.GONE);
-//                    functionBar.setVisibility(View.VISIBLE);
-//                    infoLayout.setVisibility(View.VISIBLE);
-//                    setupClient(getSessionId());
-//                    if (fromDappBrowser)
-//                    {
-//                        //switch back to dappBrowser
-//                        switchToDappBrowser();
-//                    }
-                })
-                .setNeutralButton(R.string.hint_network_chain_id, (d, w) ->
-                {
-                    //pop open the selection dialog
-//                    Intent intent = new Intent(this, SelectNetworkActivity.class);
-//                    intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
-//                    intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
-//                    getNetwork.launch(intent);
-                })
-                .setNegativeButton(R.string.dialog_reject, (d, w) ->
-                {
-                    reject(sessionProposal);
-                    finish();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
     }
 
     private void reject(WalletConnect.Model.SessionProposal sessionProposal)
@@ -283,13 +256,12 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             @Override
             public void onSuccess(@NonNull WalletConnect.Model.RejectedSession rejectedSession)
             {
-
+                finish();
             }
 
             @Override
             public void onError(@NonNull Throwable throwable)
             {
-
             }
         });
     }
@@ -332,14 +304,4 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         return result;
     }
 
-    private Spannable buildMessage(String url, List<String> chains)
-    {
-        long networkId = Long.parseLong(chains.get(0).split(":")[1]);
-        StyledStringBuilder sb = new StyledStringBuilder();
-        sb.append(url);
-        sb.startStyleGroup().append("\n\n").append(EthereumNetworkBase.getShortChainName(networkId));
-        sb.setColor(ContextCompat.getColor(this, EthereumNetworkBase.getChainColour(networkId)));
-        sb.applyStyles();
-        return sb;
-    }
 }

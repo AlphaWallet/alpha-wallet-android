@@ -188,3 +188,9 @@ Java_com_alphawallet_app_service_OpenSeaService_getOpenSeaKey( JNIEnv* env, jcla
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_util_AWEnsResolver_getOpenSeaKey( JNIEnv* env, jclass thiz )
+{
+    return Java_com_alphawallet_app_service_OpenSeaService_getOpenSeaKey(env, thiz);
+}

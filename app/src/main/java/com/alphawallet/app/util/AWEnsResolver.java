@@ -47,6 +47,12 @@ public class AWEnsResolver extends EnsResolver
     private final Context context;
     private final OkHttpClient client;
 
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getOpenSeaKey();
+
     public AWEnsResolver(Web3j web3j, Context context) {
         super(web3j, DEFAULT_SYNC_THRESHOLD);
         this.context = context;
@@ -178,12 +184,17 @@ public class AWEnsResolver extends EnsResolver
         String apiBase = OpenSeaService.apiMap.get(chainId);
         if (apiBase == null) return null;
 
-        Request request = new Request.Builder()
+        Request.Builder requestB = new Request.Builder()
                     .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)
-                    .get()
-                    .build();
+                    .get();
 
-        try (okhttp3.Response response = client.newCall(request).execute())
+        String apiKey = getOpenSeaKey();
+        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+        {
+            requestB.addHeader("X-API-KEY", apiKey);
+        }
+
+        try (okhttp3.Response response = client.newCall(requestB.build()).execute())
         {
             String jsonResult = response.body().string();
             return new JSONObject(jsonResult);

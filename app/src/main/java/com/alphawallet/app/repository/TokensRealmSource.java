@@ -215,6 +215,11 @@ public class TokensRealmSource implements TokenLocalSource {
         if (rawItem != null)
         {
             String currencySymbol = rawItem.getCurrencySymbol();
+            String price = rawItem.getPrice();
+            String percentChange = rawItem.getPercentChange24h();
+            if ((price.equals("0") || TextUtils.isEmpty(price))
+                    && (percentChange.equals("0") ||  TextUtils.isEmpty(percentChange))) return null; // blank placeholder ticker to stop spamming the API
+
             if (currencySymbol == null || currencySymbol.length() == 0)
                 currencySymbol = "USD";
             tokenTicker = new TokenTicker(rawItem.getPrice(), rawItem.getPercentChange24h(), currencySymbol, rawItem.getImage(), rawItem.getUpdatedTime());
@@ -932,7 +937,12 @@ public class TokensRealmSource implements TokenLocalSource {
                     tickerMap.put(ticker.getChain(), networkMap);
                 }
 
-                networkMap.put(ticker.getContract(), convertRealmTicker(ticker));
+                TokenTicker tt = convertRealmTicker(ticker);
+
+                if (tt != null)
+                {
+                    networkMap.put(ticker.getContract(), tt);
+                }
             }
         }
         catch (Exception e)
@@ -1151,6 +1161,21 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         updateWalletTokens(tickerUpdates);
+    }
+
+    @Override
+    public void updateTicker(long chainId, String address, TokenTicker ticker)
+    {
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransaction(r -> {
+                writeTickerToRealm(r, ticker, chainId, address);
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     @Override

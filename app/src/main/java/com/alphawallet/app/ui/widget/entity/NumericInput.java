@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
 import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 
@@ -10,33 +11,32 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.R;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by JB on 20/01/2021.
  */
-public class NumericInput extends AppCompatAutoCompleteTextView
+public class NumericInput extends AppCompatAutoCompleteTextView implements TextWatcher
 {
-    private final Locale deviceSettingsLocale = LocaleUtils.getDeviceLocale(getContext());
-
-    public NumericInput(@NonNull Context context)
-    {
-        super(context);
-    }
+    //If you want to create a release that targets different locale you'll need to update the Regex matcher
+    //Also update the display settings in BalanceUtils
+    private static final String AVAILABLE_DIGITS = "0123456789. ";
+    private static final Pattern numberFormatMatcher = Pattern.compile("(^[0-9 ]+?\\.{0,1}|^\\.)([0-9 ]*)$"); //you will need to edit this if you
+    private static final Pattern removeWhiteSpace = Pattern.compile("\\s");
+    private final int colorResource;
 
     public NumericInput(@NonNull Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
-        //ensure we use the decimal separator appropriate for the phone settings
-        char separator = DecimalFormatSymbols.getInstance(deviceSettingsLocale).getDecimalSeparator();
-        setKeyListener(DigitsKeyListener.getInstance("0123456789" + separator));
+        //ensure we operate the input in US locale
+        setKeyListener(DigitsKeyListener.getInstance(AVAILABLE_DIGITS));
+        //ensure input is correct
+        addTextChangedListener(this);
+        colorResource = getCurrentTextColor();
     }
 
     /**
@@ -51,9 +51,7 @@ public class NumericInput extends AppCompatAutoCompleteTextView
 
         try
         {
-            DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(deviceSettingsLocale);
-            df.setParseBigDecimal(true);
-            value = (BigDecimal) df.parseObject(text.toString());
+            value = new BigDecimal(removeWhiteSpace.matcher(text.toString().trim()).replaceAll(""));
         }
         catch (Exception e)
         {
@@ -61,5 +59,26 @@ public class NumericInput extends AppCompatAutoCompleteTextView
         }
 
         return value;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+    @Override
+    public void afterTextChanged(Editable s)
+    {
+        //run regex
+        final Matcher addressMatch = numberFormatMatcher.matcher(s.toString());
+        if (!addressMatch.find())
+        {
+            setTextColor(getResources().getColor(R.color.warning_red));
+        }
+        else
+        {
+            setTextColor(colorResource);
+        }
     }
 }

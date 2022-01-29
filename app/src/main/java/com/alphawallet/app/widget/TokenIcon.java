@@ -239,12 +239,6 @@ public class TokenIcon extends ConstraintLayout
         pendingProgress.setVisibility(View.GONE);
         switch (type)
         {
-            case SENT:
-                statusIcon.setImageResource(R.drawable.ic_sent_white_small);
-                break;
-            case RECEIVE:
-                statusIcon.setImageResource(R.drawable.ic_receive_small);
-                break;
             case PENDING:
                 pendingProgress.setVisibility(View.VISIBLE);
                 break;
@@ -258,10 +252,7 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
                 statusBackground.setVisibility(View.VISIBLE);
                 break;
-            case SELF:
-                statusIcon.setImageResource(R.drawable.ic_send_self_small);
-                break;
-            case NONE:
+            default:
                 statusIcon.setVisibility(View.GONE);
                 break;
         }

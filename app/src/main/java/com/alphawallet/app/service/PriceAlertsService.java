@@ -8,6 +8,7 @@ import android.os.IBinder;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepository;
@@ -131,7 +132,12 @@ public class PriceAlertsService extends Service
                         {
                             return;
                         }
-                        double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price);
+                        TokenTicker tokenTicker = tokensService.getTokenTicker(token);
+                        if (tokenTicker == null)
+                        {
+                            return;
+                        }
+                        double currentTokenPrice = Double.parseDouble(tokenTicker.price);
 
                         if (priceAlert.match(rate, currentTokenPrice))
                         {

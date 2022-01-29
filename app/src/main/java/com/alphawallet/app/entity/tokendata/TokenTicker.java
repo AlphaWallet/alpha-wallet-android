@@ -2,6 +2,8 @@ package com.alphawallet.app.entity.tokendata;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
+
 import com.google.gson.annotations.SerializedName;
 
 public class TokenTicker implements Parcelable {
@@ -19,6 +21,15 @@ public class TokenTicker implements Parcelable {
         image = "";
         priceSymbol = "USD";
         updateTime = 0;
+    }
+
+    public TokenTicker(long uTime) //blank
+    {
+        price = "";
+        percentChange24h = "";
+        image = "";
+        priceSymbol = "";
+        updateTime = uTime;
     }
 
     public TokenTicker(String price, String percentChange24h, String priceSymbol, String image, long updateTime) {

@@ -1,5 +1,7 @@
 package com.alphawallet.app.widget;
 
+import static androidx.core.content.ContextCompat.getColorStateList;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -31,7 +33,6 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -41,8 +42,6 @@ import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
-
-import static androidx.core.content.ContextCompat.getColorStateList;
 
 public class TokenIcon extends ConstraintLayout
 {
@@ -235,12 +234,6 @@ public class TokenIcon extends ConstraintLayout
         pendingProgress.setVisibility(View.GONE);
         switch (type)
         {
-            case SENT:
-                statusIcon.setImageResource(R.drawable.ic_sent_white_small);
-                break;
-            case RECEIVE:
-                statusIcon.setImageResource(R.drawable.ic_receive_small);
-                break;
             case PENDING:
                 pendingProgress.setVisibility(View.VISIBLE);
                 break;
@@ -254,10 +247,7 @@ public class TokenIcon extends ConstraintLayout
                 statusIcon.setImageResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
                 statusBackground.setVisibility(View.VISIBLE);
                 break;
-            case SELF:
-                statusIcon.setImageResource(R.drawable.ic_send_self_small);
-                break;
-            case NONE:
+            default:
                 statusIcon.setVisibility(View.GONE);
                 break;
         }

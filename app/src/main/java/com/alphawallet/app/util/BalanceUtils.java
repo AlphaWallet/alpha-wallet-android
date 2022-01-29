@@ -1,6 +1,5 @@
 package com.alphawallet.app.util;
 
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 
 import org.web3j.utils.Convert;
@@ -9,20 +8,34 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 public class BalanceUtils
 {
     private static final String weiInEth  = "1000000000000000000";
     private static final int showDecimalPlaces = 5;
-    private static final String MACRO_PATTERN = "###,###,###,###,##0";
+
+    public static final String MACRO_PATTERN = "###,###,###,###,##0";
+    public static final String CURRENCY_PATTERN = MACRO_PATTERN + ".00";
+    private static final double ONE_BILLION = 1000000000.0;
 
     private static String getDigitalPattern(int precision)
     {
         return getDigitalPattern(precision, 0);
     }
 
-    // TODO: Do locale formatting here
+    // Use this to format display strings however you like, eg for French, Spanish style
+    // If you change this, it would also be advisable to change NumericInput so user has expected input format
+    private static DecimalFormat getFormat(String pattern)
+    {
+        DecimalFormatSymbols standardisedNumericFormat = new DecimalFormatSymbols(Locale.ENGLISH);
+        standardisedNumericFormat.setDecimalSeparator('.');
+        standardisedNumericFormat.setGroupingSeparator(',');
+
+        return new DecimalFormat(pattern, standardisedNumericFormat);
+    }
+
     private static String getDigitalPattern(int precision, int fixed)
     {
         StringBuilder sb = new StringBuilder();
@@ -39,18 +52,6 @@ public class BalanceUtils
     private static String convertToLocale(String value)
     {
         return value;
-
-        // TODO: Add localised values, need to do a global value rollout with override.
-        /*char separator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
-        if (separator != ',')
-        {
-            char decimalPoint = DecimalFormatSymbols.getInstance().getDecimalSeparator();
-            value = value.replace('.', '^');
-            value = value.replace(',', separator);
-            value = value.replace('^', decimalPoint);
-        }
-
-        return value;*/
     }
 
     public static BigDecimal weiToEth(BigDecimal wei) {
@@ -166,9 +167,8 @@ public class BalanceUtils
     {
         String returnValue;
         BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
-        final NumberFormat formatter = new DecimalFormat(CustomViewSettings.getDecimalFormat());
+
         final BigDecimal displayThreshold = BigDecimal.ONE.divide(BigDecimal.valueOf(Math.pow(10, dPlaces)), 18, RoundingMode.DOWN);
-        formatter.setRoundingMode(RoundingMode.DOWN);
         if (value.equals(BigDecimal.ZERO)) //zero balance
         {
             returnValue = "0";
@@ -183,7 +183,8 @@ public class BalanceUtils
         }
         else //otherwise display in standard pattern to dPlaces dp
         {
-            DecimalFormat df = new DecimalFormat(getDigitalPattern(dPlaces));
+            DecimalFormat df = getFormat(getDigitalPattern(dPlaces));
+            //DecimalFormat df = new DecimalFormat(getDigitalPattern(dPlaces));
             df.setRoundingMode(RoundingMode.DOWN);
             returnValue = convertToLocale(df.format(correctedValue));
         }
@@ -200,7 +201,7 @@ public class BalanceUtils
 
     private static String getSuffixedValue(BigDecimal correctedValue, int dPlaces)
     {
-        DecimalFormat df = new DecimalFormat(MACRO_PATTERN);
+        DecimalFormat df = getFormat(getDigitalPattern(0));
         df.setRoundingMode(RoundingMode.DOWN);
         int reductionValue = 0;
         String suffix = "";
@@ -239,7 +240,8 @@ public class BalanceUtils
 
     private static String scaledValue(BigDecimal value, String pattern, long decimals, int macroPrecision)
     {
-        DecimalFormat df = new DecimalFormat(pattern);
+        DecimalFormat df = getFormat(pattern);
+
         value = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
         if (macroPrecision > 0)
         {
@@ -247,7 +249,7 @@ public class BalanceUtils
             if (value.compareTo(displayThreshold) > 0)
             {
                 //strip decimals
-                df = new DecimalFormat(MACRO_PATTERN);
+                df = getFormat(MACRO_PATTERN);
             }
         }
         df.setRoundingMode(RoundingMode.DOWN);
@@ -286,6 +288,27 @@ public class BalanceUtils
         else
         {
             return "0";
+        }
+    }
+
+    //Currency conversion
+    public static String genCurrencyString(double price, String currencySymbol)
+    {
+        String suffix = "";
+        String format = CURRENCY_PATTERN;
+        if (price > ONE_BILLION)
+        {
+            format += "0";
+            price /= ONE_BILLION;
+            suffix = "B";
+        }
+
+        DecimalFormat df = getFormat(format);
+        df.setRoundingMode(RoundingMode.CEILING);
+        if (price >= 0) {
+            return currencySymbol + df.format(price) + suffix;
+        } else {
+            return "-" + currencySymbol + df.format(Math.abs(price));
         }
     }
 }

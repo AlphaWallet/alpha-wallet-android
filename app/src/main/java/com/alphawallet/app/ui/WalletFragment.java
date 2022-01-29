@@ -318,7 +318,8 @@ public class WalletFragment extends BaseFragment implements
         {
             // to avoid NaN
             double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second) / fiatValues.second) * 100.0 : 0.0;
-            largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
+            largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second),
+                    TickerService.getPercentageConversion(changePercent)));
             largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
             int color = ContextCompat.getColor(requireContext(), changePercent < 0 ? R.color.red : R.color.green);
             largeTitleView.subtitle.setTextColor(color);

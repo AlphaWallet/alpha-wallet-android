@@ -18,21 +18,20 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.LongSparseArray;
-import android.util.SparseLongArray;
 
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
+import com.alphawallet.app.entity.DexGuruTicker;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.DexGuruTicker;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.tools.Numeric;
 
@@ -53,7 +52,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -85,7 +82,6 @@ public class TickerService
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" + CONTRACT_ADDR + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
     private static final String DEXGURU_API = "https://api.dex.guru/v1/tokens/" + CONTRACT_ADDR + "-" + CHAIN_IDS;
     private static final String CURRENCY_CONV = "currency";
-    private static final double ONE_BILLION = 1000000000.0;
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
     public static final long TICKER_TIMEOUT = DateUtils.WEEK_IN_MILLIS; //remove ticker if not seen in one week
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
@@ -617,35 +613,19 @@ public class TickerService
         return getCurrencyString(price) + " " + currentCurrencySymbolTxt;
     }
 
-    //TODO: Refactor this as required
     public static String getCurrencyString(double price)
     {
-        if (price > ONE_BILLION)
-        {
-            return getBillionsString(price);
-        }
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        df.setRoundingMode(RoundingMode.CEILING);
-        if (price >= 0) {
-            return currentCurrencySymbol + df.format(price);
-        } else {
-            return "-" + currentCurrencySymbol + df.format(Math.abs(price));
-        }
-    }
-
-    private static String getBillionsString(double price)
-    {
-        price /= ONE_BILLION;
-        DecimalFormat df = new DecimalFormat("#,##0.000");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return currentCurrencySymbol + df.format(price) + "B";
+        return BalanceUtils.genCurrencyString(price, currentCurrencySymbol);
     }
 
     public static String getCurrencyWithoutSymbol(double price)
     {
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        df.setRoundingMode(RoundingMode.DOWN);
-        return df.format(price);
+        return BalanceUtils.genCurrencyString(price, "");
+    }
+
+    public static String getPercentageConversion(double d)
+    {
+        return BalanceUtils.getScaledValue(BigDecimal.valueOf(d), 2, 2);
     }
 
     private void initCurrency()

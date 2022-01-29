@@ -317,20 +317,6 @@ public class AWEnsResolver extends EnsResolver
         }).onErrorReturnItem("");
     }
 
-    public static boolean couldBeENS(String address)
-    {
-        if (address == null || address.length() == 0) return false;
-
-        String[] split = address.split("[.]");
-        if (split.length > 1)
-        {
-            String extension = split[split.length - 1];
-            return extension.length() > 0 && Utils.isAlNum(extension);
-        }
-
-        return false;
-    }
-
     @Override
     public String resolve(String ensName)
     {

@@ -169,7 +169,7 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:contentDescription="@string/empty"
-        android:src="@drawable/ic_sent_white_small"
+        android:src="@drawable/ic_rejected_small"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
         app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
         app:layout_constraintStart_toEndOf="@id/guidelineRightMid"

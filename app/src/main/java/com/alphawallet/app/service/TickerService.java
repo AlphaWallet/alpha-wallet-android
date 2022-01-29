@@ -93,7 +93,7 @@ public class TickerService
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
-    private static final Map<Long, Boolean> canUpdate = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> canUpdate = new ConcurrentHashMap<>();
     private static final Map<String, TokenCardMeta> dexGuruQuery = new ConcurrentHashMap<>();
 
     @Nullable
@@ -248,19 +248,30 @@ public class TickerService
         });
     }
 
+    private static final int GREATEST_MAPSIZE = 75;
+
     public Single<Integer> syncERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
-        if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
+        if (!canUpdate(chainId) || erc20Tokens.size() == 0)
             return Single.fromCallable(() -> 0);
         //this function called after sync is complete, only update tickers that need updating
         //first fetch the tickers for these
         long staleTime = System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS;
         Map<String, Long> currentTickerMap = localSource.getTickerTimeMap(chainId, erc20Tokens);
         final Map<String, TokenCardMeta> lookupMap = new HashMap<>();
+
+        canUpdate.put(chainId, System.currentTimeMillis() + 15 * DateUtils.SECOND_IN_MILLIS);
+        nextUpdate = System.currentTimeMillis() + 5 * DateUtils.SECOND_IN_MILLIS;
+
         for (TokenCardMeta tcm : erc20Tokens)
         {
-            if (!currentTickerMap.containsKey(tcm.getAddress())
-                    || currentTickerMap.get(tcm.getAddress()) < staleTime) lookupMap.put(tcm.getAddress().toLowerCase(), tcm);
+            if (!dexGuruQuery.containsKey(tcm.tokenId) // don't include any token in the dexguru queue
+                && (!currentTickerMap.containsKey(tcm.getAddress())
+                    || currentTickerMap.get(tcm.getAddress()) < staleTime)) //include tokens who's tickers have gone stale
+            {
+                lookupMap.put(tcm.getAddress().toLowerCase(), tcm);
+                if (lookupMap.size() > GREATEST_MAPSIZE) break;
+            }
         }
 
         if (lookupMap.size() == 0) return Single.fromCallable(() -> 0);
@@ -272,19 +283,20 @@ public class TickerService
         });
     }
 
-    public Single<Integer> getERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
+    private long nextUpdate = 0;
+
+    private boolean canUpdate(long chainId)
     {
-        if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
-            return Single.fromCallable(() -> 0);
+        if (System.currentTimeMillis() < nextUpdate) return false;
 
-        final Map<String, TokenCardMeta> lookupMap = new HashMap<>();
-        for (TokenCardMeta tcm : erc20Tokens) { lookupMap.put(tcm.getAddress().toLowerCase(), tcm); }
-
-        return Single.fromCallable(() -> {
-            Map<String, TokenTicker> tickerMap = fetchERC20TokenTickers(chainId, lookupMap.values());
-            localSource.updateERC20Tickers(chainId, tickerMap);
-            return tickerMap.size();
-        });
+        if (canUpdate.containsKey(chainId))
+        {
+            return System.currentTimeMillis() > canUpdate.get(chainId);
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private Map<String, TokenTicker> fetchERC20TokenTickers(long chainId, Collection<TokenCardMeta> erc20Tokens)
@@ -315,7 +327,8 @@ public class TickerService
         try (okhttp3.Response response = httpClient.newCall(request)
                 .execute())
         {
-            List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
+            String responseStr = response.body().string();
+            List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(responseStr, currentCurrencySymbolTxt, currentConversionRate);
             for (CoinGeckoTicker t : tickers)
             {
                 //store ticker
@@ -323,8 +336,19 @@ public class TickerService
                 lookupMap.remove(t.address.toLowerCase());
             }
 
-            canUpdate.put(chainId, true);
-            if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
+            if (dexGuruName != null)
+            {
+                addDexGuruTickers(lookupMap.values());
+            }
+            else
+            {
+                final Map<String, TokenTicker> blankTickers = new HashMap<>(); //These tokens have no ticker, don't check them again today
+                for (String address : lookupMap.keySet())
+                {
+                    blankTickers.put(address, new TokenTicker(System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS));
+                }
+                localSource.updateERC20Tickers(chainId, blankTickers);
+            }
         }
         catch (Exception e)
         {
@@ -379,8 +403,10 @@ public class TickerService
                         {{
                             put(tcm.getAddress(), tTicker);
                         }});
+                        return;
                     }
                 }
+                localSource.updateTicker(tcm.getChain(), tcm.getAddress(), new TokenTicker(System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS));
             }
             catch (Exception e)
             {

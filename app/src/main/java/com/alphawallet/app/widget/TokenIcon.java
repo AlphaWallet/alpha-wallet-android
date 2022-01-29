@@ -137,17 +137,12 @@ public class TokenIcon extends ConstraintLayout
      */
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
-        if (token == null) return;
-        if (this.token != null && this.token.equals(token))
-        {
-            displayTokenIcon(getIconUrl(token));
-        }
-        else
-        {
-            this.tokenName = token.getName(assetDefinition, token.getTokenCount());
-            this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
-            bind(token, getIconUrl(token));
-        }
+        if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
+        this.tokenName = token.getName(assetDefinition, token.getTokenCount());
+        //this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
+        this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
+
+        bind(token, getIconUrl(token));
     }
 
     public void bindData(Token token)

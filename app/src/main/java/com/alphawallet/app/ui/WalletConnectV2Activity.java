@@ -25,6 +25,7 @@ import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -119,6 +120,20 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
         chainList.setAdapter(new ChainAdapter(this, getChains(session.accounts)));
         methodList.setAdapter(new MethodAdapter(this, session.methods));
+        resizeList();
+
+        functionBar.setupFunctions(new StandardFunctionInterface()
+        {
+            @Override
+            public void handleClick(String action, int actionId)
+            {
+                endSessionDialog();
+            }
+        }, Collections.singletonList(R.string.action_end_session));
+    }
+
+    private void resizeList()
+    {
         LayoutHelper.resizeList(chainList);
         LayoutHelper.resizeList(methodList);
     }
@@ -233,7 +248,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         functionBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.VISIBLE);
 
-        Glide.with(this)
+        Glide.with(getApplication())
                 .load(sessionProposal.getIcon())
                 .circleCrop()
                 .into(icon);
@@ -242,6 +257,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
         chainList.setAdapter(new ChainAdapter(this, sessionProposal.getChains()));
         methodList.setAdapter(new MethodAdapter(this, sessionProposal.getMethods()));
+        resizeList();
     }
 
     @Override

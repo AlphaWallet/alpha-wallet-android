@@ -301,7 +301,8 @@
 
         <activity
             android:name=".ui.WalletConnectSessionActivity"
-            android:label="WalletConnect Sessions" />
+            android:label="WalletConnect Sessions"
+            android:launchMode="singleTask"/>
 
         <activity
             android:name=".ui.TransactionSuccessActivity"

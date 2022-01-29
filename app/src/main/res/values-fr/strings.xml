@@ -830,7 +830,7 @@
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
-    <string name="wallet_total_change">%1$s (%2$.2f%%) Aujourd\'hui</string>
+    <string name="wallet_total_change">%1$s (%2$s%%) Aujourd\'hui</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>
     <string name="network_menu_item">Network: %1$s</string>

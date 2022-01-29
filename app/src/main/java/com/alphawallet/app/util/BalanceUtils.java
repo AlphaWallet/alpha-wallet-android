@@ -31,7 +31,7 @@ public class BalanceUtils
     {
         DecimalFormatSymbols standardisedNumericFormat = new DecimalFormatSymbols(Locale.ENGLISH);
         standardisedNumericFormat.setDecimalSeparator('.');
-        standardisedNumericFormat.setGroupingSeparator(' ');
+        standardisedNumericFormat.setGroupingSeparator(',');
 
         return new DecimalFormat(pattern, standardisedNumericFormat);
     }

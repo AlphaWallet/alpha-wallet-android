@@ -1967,7 +1967,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 String hash = tsf.calcMD5();
                 XMLDsigDescriptor sig = getCertificateFromRealm(hash);
-                if (sig == null)
+                if (sig == null || (sig.result != null && sig.result.equals("fail")))
                 {
                     sig = alphaWalletService.checkTokenScriptSignature(tsf);
                     tsf.determineSignatureType(sig);

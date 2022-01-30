@@ -110,6 +110,7 @@
     <string name="currency">Currencies</string>
     <string name="advanced">Advanced Options</string>
     <string name="copy_wallet_address">Copy Wallet Address</string>
+    <string name="rename_this_wallet_action">Rename this Wallet</string>
     <string name="hint_contract_name">Name</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>
@@ -508,7 +509,7 @@
     <string name="key_error">Key Error</string>
     <string name="password_6_characters_or_more">Password 6 characters or more</string>
     <string name="create_a_new_wallet">Create a new Wallet</string>
-    <string name="watch">WATCH</string>
+    <string name="watch">Watch</string>
     <string name="already_have_a_wallet">I already have a wallet:</string>
     <string name="watch_wallet">Watch-only Wallets</string>
     <string name="suggestion_address">Enter Ethereum Address</string>
@@ -841,7 +842,7 @@
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
-    <string name="wallet_total_change">%1$s (%2$.2f%%) Today</string>
+    <string name="wallet_total_change">%1$s (%2$s%%) Today</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>
     <string name="network_menu_item">Network: %1$s</string>
@@ -870,4 +871,17 @@
     <string name="governance_header">Governance</string>
     <string name="collectibles_header">Collectibles</string>
     <string name="whats_new">What\'s new?</string>
+    <string name="price_alert_indicator_below">Below</string>
+    <string name="price_alert_indicator_above">Above</string>
+    <string name="add_new_price_alert">Add New Price Alert</string>
+    <string name="current_price">Current Price:</string>
+    <string name="tab_info">Info</string>
+    <string name="tab_activity">Activity</string>
+    <string name="tab_alert">Alerts</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
+    <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
+    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_connect_wallet">Connect Wallet</string>
+    <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
 </resources>

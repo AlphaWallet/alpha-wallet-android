@@ -25,6 +25,7 @@ public class InputFiatView extends LinearLayout {
     private final TextView headerText;
     private final LinearLayout moreLayout;
     private final ImageView icon;
+    private final ImageView expandMore;
     private final TextView symbolText;
     private final TextView subTextLabel;
     private final TextView subTextValue;
@@ -39,6 +40,7 @@ public class InputFiatView extends LinearLayout {
         headerLayout = findViewById(R.id.layout_header_amount);
         headerText = findViewById(R.id.text_header);
         moreLayout = findViewById(R.id.layout_more_click);
+        expandMore = findViewById(R.id.expand_more);
         icon = findViewById(R.id.icon);
         symbolText = findViewById(R.id.symbol);
         amountInput = findViewById(R.id.amount_entry);
@@ -74,6 +76,9 @@ public class InputFiatView extends LinearLayout {
             int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.enter_target_price);
             headerText.setText(headerTextId);
             headerLayout.setVisibility(showHeader ? View.VISIBLE : View.GONE);
+
+            boolean canChangeCurrency = a.getBoolean(R.styleable.InputView_can_change_currency, true);
+            expandMore.setVisibility(canChangeCurrency ? VISIBLE : GONE);
         } finally
         {
             a.recycle();
@@ -120,5 +125,9 @@ public class InputFiatView extends LinearLayout {
 
     public void showKeyboard() {
         amountInput.requestFocus();
+    }
+
+    public void setSubTextValue(String text) {
+        subTextValue.setText(text);
     }
 }

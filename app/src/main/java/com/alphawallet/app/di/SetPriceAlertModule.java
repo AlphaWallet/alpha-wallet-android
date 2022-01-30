@@ -14,13 +14,11 @@ class SetPriceAlertModule {
     @Provides
     SetPriceAlertViewModelFactory provideSetPriceAlertViewModelFactory(
             CurrencyRepositoryType currencyRepository,
-            PreferenceRepositoryType preferenceRepository,
             TokensService tokensService
     )
     {
         return new SetPriceAlertViewModelFactory(
                 currencyRepository,
-                preferenceRepository,
                 tokensService);
     }
 

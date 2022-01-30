@@ -1,10 +1,6 @@
 package com.alphawallet.app.ui;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,7 +10,6 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import org.jetbrains.annotations.NotNull;
 

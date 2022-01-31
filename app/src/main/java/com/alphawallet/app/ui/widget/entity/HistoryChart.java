@@ -96,7 +96,7 @@ public class HistoryChart extends View
                 try
                 {
                     Request request = new Request.Builder()
-                            .url("https://api.coingecko.com/api/v3/coins/" + tokenId + "/market_chart?days=" + range.value + "&vs_currency=USD")
+                            .url("https://api.coingecko.com/api/v3/coins/" + tokenId + "/market_chart?days=" + range.value + "&vs_currency=" + TickerService.getCurrencySymbolTxt())
                             .get()
                             .build();
                     okhttp3.Response response = httpClient.newCall(request)

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimary">
 
     <com.alphawallet.app.widget.StandardHeader
         android:id="@+id/layout_header"
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        custom:headerText="@string/recipient"/>
+        android:layout_alignParentTop="true"
+        custom:headerText="@string/recipient" />
 
     <RelativeLayout
         android:id="@+id/box_layout"
@@ -18,9 +19,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/layout_header"
         android:layout_marginStart="@dimen/dp12"
+        android:layout_marginTop="@dimen/dp22"
         android:layout_marginEnd="@dimen/dp12"
-        android:background="@drawable/background_password_entry"
-        android:layout_marginTop="@dimen/dp22">
+        android:background="@drawable/background_password_entry">
 
         <AutoCompleteTextView
             android:id="@+id/edit_text"
@@ -44,14 +45,14 @@
 
         <ImageButton
             android:id="@+id/img_scan_qr"
-            android:src="@drawable/ic_camera_scan"
-            android:contentDescription="@string/scan_qr"
-            android:background="?android:selectableItemBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/dp8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/scan_qr"
+            android:src="@drawable/ic_camera_scan" />
 
     </RelativeLayout>
 
@@ -61,16 +62,16 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
         android:layout_marginStart="31dp"
-        android:layout_marginBottom="5dp"
         android:layout_marginTop="-9dp"
-        android:background="@color/white"
+        android:layout_marginBottom="5dp"
+        android:background="@color/colorPrimary"
         android:fontFamily="@font/font_semibold"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
         android:textColor="@color/dove"
         android:textSize="@dimen/sp13"
-        tools:text="ENS Name"
-        android:visibility="visible" />
+        android:visibility="visible"
+        tools:text="ENS Name" />
 
     <TextView
         android:id="@+id/text_paste"
@@ -80,9 +81,9 @@
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="16dp"
         android:fontFamily="@font/font_semibold"
+        android:text="@string/paste"
         android:textColor="@color/azure"
         android:textSize="@dimen/sp17"
-        android:text="@string/paste"
         android:visibility="visible" />
 
     <LinearLayout
@@ -122,8 +123,8 @@
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
         android:layout_marginStart="@dimen/dp10"
-        android:layout_toStartOf="@id/text_paste"
         android:layout_marginTop="2dp"
+        android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
         android:textColor="@color/danger"
         android:textSize="@dimen/sp12"

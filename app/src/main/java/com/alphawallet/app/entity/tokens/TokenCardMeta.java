@@ -6,6 +6,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -260,7 +261,19 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     {
         float updateWeight = 0;
         //calculate balance update time
-        if (hasValidName())
+        if (isEthereum())
+        {
+            long currentTime = System.currentTimeMillis();
+            if (lastUpdate < currentTime - 30 * DateUtils.SECOND_IN_MILLIS)
+            {
+                updateWeight = 2.0f;
+            }
+            else
+            {
+                updateWeight = 1.0f;
+            }
+        }
+        else if (hasValidName())
         {
             if (isNFT())
             {

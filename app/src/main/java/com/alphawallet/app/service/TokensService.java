@@ -293,8 +293,9 @@ public class TokensService
             {
                 syncTimer = 0;
                 //sync chain tickers
-                syncChainTickers(tokenList, 0);
             }
+
+            syncChainTickers(tokenList, 0);
         }
     }
 
@@ -714,7 +715,7 @@ public class TokensService
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
             //get mainnet ERC20 token tickers
-            erc20CheckDisposable = tickerService.getERC20Tickers(chainId, getAllERC20(chainId))
+            erc20CheckDisposable = tickerService.syncERC20Tickers(chainId, getAllERC20(chainId))
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

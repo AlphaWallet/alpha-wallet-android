@@ -34,7 +34,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
@@ -182,6 +181,20 @@ public class ENSHandler implements Runnable
     public static boolean canBeENSName(String address)
     {
         return !Utils.isAddressValid(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
+    }
+
+    public static boolean couldBeENS(String address)
+    {
+        if (address == null || address.length() == 0) return false;
+
+        String[] split = address.split("[.]");
+        if (split.length > 1)
+        {
+            String extension = split[split.length - 1];
+            return extension.length() > 0 && Utils.isAlNum(extension);
+        }
+
+        return false;
     }
 
     @Override

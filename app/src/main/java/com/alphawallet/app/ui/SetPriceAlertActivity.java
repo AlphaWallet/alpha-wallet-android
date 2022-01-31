@@ -128,7 +128,6 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
     @Override
     public void onMoreClicked()
     {
-        viewModel.openCurrencySelection(this, REQUEST_SELECT_CURRENCY, newPriceAlert.getCurrency());
     }
 
     @Override

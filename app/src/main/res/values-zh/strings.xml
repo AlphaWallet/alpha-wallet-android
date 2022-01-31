@@ -804,7 +804,7 @@
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
-    <string name="wallet_total_change">%1$s (%2$.2f%%) 今天</string>
+    <string name="wallet_total_change">%1$s (%2$s%%) 今天</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>
     <string name="network_menu_item">Network: %1$s</string>
@@ -843,5 +843,7 @@
     <string name="unknown_network_title">Unkown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
+    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">助记符只能包含单词</string>
 </resources>

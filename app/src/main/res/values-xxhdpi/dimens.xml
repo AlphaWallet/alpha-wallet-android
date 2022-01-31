@@ -57,7 +57,7 @@
     <dimen name="grid_icon_height">100dp</dimen>
 
     <!-- Standard Token Icon size -->
-    <dimen name="token_icon">50dp</dimen>
+    <dimen name="token_icon">46dp</dimen>
     <dimen name="token_icon_large">100dp</dimen>
 
 </resources>

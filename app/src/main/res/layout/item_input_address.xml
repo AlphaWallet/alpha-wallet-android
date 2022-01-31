@@ -63,7 +63,7 @@
         android:layout_marginStart="31dp"
         android:layout_marginBottom="5dp"
         android:layout_marginTop="-9dp"
-        android:background="@color/white"
+        android:background="@color/colorPrimary"
         android:fontFamily="@font/font_semibold"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"

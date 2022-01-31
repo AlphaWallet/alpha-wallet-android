@@ -157,7 +157,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             try
             {
                 CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
-                editText.setText(textToPaste);
+                editText.append(textToPaste);
             }
             catch (Exception e)
             {

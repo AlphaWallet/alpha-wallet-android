@@ -386,12 +386,22 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
+        if (token.getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
+        {
+            System.out.println("YOLESS");
+        }
+
         return Single.fromCallable(() -> {
                 BigDecimal balance = BigDecimal.valueOf(-1);
                 try
                 {
                     List<BigInteger> balanceArray = null;
                     Token thisToken = token;
+
+                    if (thisToken.getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
+                    {
+                        System.out.println("YOLESS");
+                    }
 
                     switch (token.getInterfaceSpec())
                     {

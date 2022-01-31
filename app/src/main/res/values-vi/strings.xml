@@ -874,4 +874,7 @@
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Cụm từ hạt giống chỉ có thể chứa từ</string>
+    <string name="label_token_id">Token #</string>
+    <string name="label_external_link">External Link</string>
+    <string name="label_description">Description</string>
 </resources>

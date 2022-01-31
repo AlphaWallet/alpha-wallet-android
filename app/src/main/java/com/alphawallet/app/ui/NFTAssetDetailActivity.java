@@ -103,7 +103,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         if (!TextUtils.isEmpty(sequenceId))
         {
-            addInfoView("Token #", sequenceId);
+            addInfoView(getString(R.string.label_token_id), sequenceId);
         }
         if (asset.isAssetMultiple())
         {
@@ -113,8 +113,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             addInfoView(getString(R.string.hint_contract_name), asset.getName());
         }
-        addInfoView("External Link", asset.getExternalLink());
-        tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Description"));
+        addInfoView(getString(R.string.label_external_link), asset.getExternalLink());
+        tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_description)));
         attrs.bind(token, asset);
         tokenDescription.setText(asset.getDescription());
 

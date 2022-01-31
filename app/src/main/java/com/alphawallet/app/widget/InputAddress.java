@@ -225,7 +225,16 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
         else
         {
-            statusText.setText(statusTxt);
+            String status;
+            if (statusTxt.toString().startsWith("0x"))
+            {
+                status = Utils.formatAddress(statusTxt.toString());
+            }
+            else
+            {
+                status = statusTxt.toString();
+            }
+            statusText.setText(status);
             statusText.setVisibility(View.VISIBLE);
         }
     }

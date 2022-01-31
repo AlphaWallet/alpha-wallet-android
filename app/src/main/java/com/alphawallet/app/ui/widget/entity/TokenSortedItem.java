@@ -34,7 +34,8 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
     {
         if (other instanceof TokenSortedItem)
         {
-            return weight.compare(other.weight, compareTokens(other));
+            if (((TokenCardMeta)other.value).getUID() == value.getUID()) return 0; // must be equal
+            else return weight.compare(other.weight, compareTokens(other));
         }
         else
         {

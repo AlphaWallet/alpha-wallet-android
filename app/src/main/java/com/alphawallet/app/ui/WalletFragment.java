@@ -318,7 +318,8 @@ public class WalletFragment extends BaseFragment implements
         {
             // to avoid NaN
             double changePercent = fiatValues.first != 0 ? ((fiatValues.first - fiatValues.second) / fiatValues.second) * 100.0 : 0.0;
-            largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second), changePercent));
+            largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second),
+                    TickerService.getPercentageConversion(changePercent)));
             largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
             int color = ContextCompat.getColor(requireContext(), changePercent < 0 ? R.color.red : R.color.green);
             largeTitleView.subtitle.setTextColor(color);
@@ -728,24 +729,26 @@ public class WalletFragment extends BaseFragment implements
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            if (viewHolder instanceof WarningHolder) {
+            if (viewHolder instanceof WarningHolder)
+            {
                 remindMeLater(viewModel.getWallet());
-            } else {
-                if (viewHolder instanceof TokenHolder) {
-                    Token token = ((TokenHolder) viewHolder).token;
-                    viewModel.setTokenEnabled(token, false);
-                    adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+            }
+            else if (viewHolder instanceof TokenHolder)
+            {
+                Token token = ((TokenHolder) viewHolder).token;
+                viewModel.setTokenEnabled(token, false);
+                adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
 
-                    if (getContext() != null) {
-                        Snackbar snackbar = Snackbar
-                                .make(viewHolder.itemView, token.tokenInfo.name + " " + getContext().getString(R.string.token_hidden), Snackbar.LENGTH_LONG)
-                                .setAction(getString(R.string.action_snackbar_undo), view -> {
-                                    viewModel.setTokenEnabled(token, true);
-                                    //adapter.updateToken(token.tokenInfo.chainId, token.getAddress(), true);
-                                });
+                if (getContext() != null)
+                {
+                    Snackbar snackbar = Snackbar
+                            .make(viewHolder.itemView, token.tokenInfo.name + " " + getContext().getString(R.string.token_hidden), Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.action_snackbar_undo), view -> {
+                                viewModel.setTokenEnabled(token, true);
+                                //adapter.updateToken(token.tokenInfo.chainId, token.getAddress(), true);
+                            });
 
-                        snackbar.show();
-                    }
+                    snackbar.show();
                 }
             }
         }
@@ -757,8 +760,7 @@ public class WalletFragment extends BaseFragment implements
                 Token t = ((TokenHolder)viewHolder).token;
                 if (t != null && t.isEthereum()) return 0;
             }
-            else if (viewHolder.getItemViewType() == ManageTokensHolder.VIEW_TYPE ||
-                    viewHolder.getItemViewType() == TokenGridHolder.VIEW_TYPE)
+            else
             {
                 return 0;
             }

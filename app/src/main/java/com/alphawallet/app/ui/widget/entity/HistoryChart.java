@@ -36,6 +36,8 @@ import okhttp3.Request;
 public class HistoryChart extends View
 {
 
+    private static final float TEXT_MARGIN = 16.0f;
+
     static OkHttpClient httpClient = new OkHttpClient.Builder()
             .connectTimeout(5, TimeUnit.SECONDS)
             .readTimeout(5, TimeUnit.SECONDS)
@@ -272,8 +274,8 @@ public class HistoryChart extends View
         canvas.drawPath(path, paint);
 
         // add min/max values to chart
-        canvas.drawText(String.format("%.02f", datasource.minValue()),width,height,edgeValPaint);
-        canvas.drawText(String.format("%.02f",datasource.maxValue()),width,0.05f*height,edgeValPaint);
+        canvas.drawText(String.format("%.02f", datasource.minValue()),width - TEXT_MARGIN,height,edgeValPaint);
+        canvas.drawText(String.format("%.02f",datasource.maxValue()),width - TEXT_MARGIN,0.05f*height,edgeValPaint);
     }
 
     public void fetchHistory(Token token, final Range range)

@@ -403,6 +403,7 @@ public class ERC1155Token extends Token
                 else
                 {
                     realmAsset.setBalance(assets.get(tokenId).getBalance()); //update realm balance
+                    r.insertOrUpdate(realmAsset);
                 }
             }
         });
@@ -635,6 +636,8 @@ public class ERC1155Token extends Token
         EthLog receiveLogs = web3j.ethGetLogs(filter).send();
         HashSet<BigInteger> tokenIds = new HashSet<>();
         BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
+
+
 
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {

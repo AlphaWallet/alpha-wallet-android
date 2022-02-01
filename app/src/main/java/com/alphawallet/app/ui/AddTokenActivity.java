@@ -1,17 +1,20 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.ui.widget.holder.TokenHolder.CHECK_MARK;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,36 +22,39 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
-import com.alphawallet.app.widget.InputView;
-import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.tools.ParseMagicLink;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,12 +62,8 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-
 @AndroidEntryPoint
-public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface
+public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback
 {
     private AddTokenViewModel viewModel;
 
@@ -72,22 +74,17 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     LinearLayout progressLayout;
     private LinearLayout counterLayout;
     private TextView counterText;
-    private LinearLayout chainLayout;
-    private TokenIcon chainIcon;
-    private ChainName chainName;
 
     public InputAddress inputAddressView;
-    public InputView symbolInputView;
-    public InputView decimalsInputView;
-    public InputView nameInputView;
     private String contractAddress;
     private NetworkInfo networkInfo;
     private QRResult currentResult;
-    private InputView tokenType;
-    private ContractType contractType;
-    private boolean zeroBalanceToken = false;
+
+    private TokensAdapter adapter;
+    private RecyclerView recyclerView;
 
     private AWalletAlertDialog aDialog;
+    private final LongSparseArray<Token> tokenList = new LongSparseArray<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,39 +97,36 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         toolbar();
 
-        symbolInputView = findViewById(R.id.input_symbol);
-        decimalsInputView = findViewById(R.id.input_decimal);
-        nameInputView = findViewById(R.id.input_name);
         counterLayout = findViewById(R.id.layout_progress_counter);
         counterText = findViewById(R.id.text_check_counter);
 
-        chainLayout = findViewById(R.id.layout_chain);
-        chainIcon = findViewById(R.id.token_icon);
-        chainName = findViewById(R.id.chain_name);
-
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        tokenType = findViewById(R.id.input_token_type);
-        tokenType.setVisibility(View.GONE);
+
 
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_save)));
         functionBar.revealButtons();
 
         progressLayout = findViewById(R.id.layout_progress);
-
-        contractType = null;
+        recyclerView = findViewById(R.id.list);
+        progressLayout.setVisibility(View.GONE);
 
         viewModel = new ViewModelProvider(this)
                 .get(AddTokenViewModel.class);
         viewModel.error().observe(this, this::onError);
-        viewModel.result().observe(this, this::onSaved);
-        viewModel.noContract().observe(this, this::onNoContractFound);
-        viewModel.tokenFinalised().observe(this, this::onFetchedToken);
         viewModel.switchNetwork().observe(this, this::setupNetwork);
-        viewModel.tokenType().observe(this, this::onTokenType);
-        viewModel.tokenInfo().observe(this, this::onTokenInfo);
         viewModel.chainScanCount().observe(this, this::onChainScanned);
+        viewModel.onToken().observe(this, this::gotToken);
+        viewModel.allTokens().observe(this, this::gotAllTokens);
+
         lastCheck = "";
+
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
+                null);
+        adapter.setHasStableIds(true);
+        adapter.setFilterType(TokenFilter.NO_FILTER);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         inputAddressView = findViewById(R.id.input_address_view);
         inputAddressView.setAddressCallback(this);
@@ -169,43 +163,37 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
+    private void gotToken(Token token)
+    {
+        TokenCardMeta tcm = new TokenCardMeta(token, CHECK_MARK);
+        tcm.isEnabled = false;
+        adapter.updateToken(tcm, true);
+    }
+
+    private void gotAllTokens(Token[] tokens)
+    {
+        List<TokenCardMeta> tokenMetas = new ArrayList<>();
+        for (Token t : tokens)
+        {
+            tokenMetas.add(new TokenCardMeta(t, CHECK_MARK));
+            tokenList.put(t.tokenInfo.chainId, t);
+        }
+        adapter.setTokens(tokenMetas.toArray(new TokenCardMeta[0]));
+        onChainScanned(0);
+
+        if (tokens.length == 0)
+        {
+            onNoContractFound(true);
+        }
+    }
+
     private void onChainScanned(Integer count)
     {
         counterText.setText(String.valueOf(count));
-    }
 
-    private void onTokenType(Token contractTypeToken)
-    {
-        tokenType = findViewById(R.id.input_token_type);
-        showProgress(false);
-        if (contractTypeToken.getInterfaceSpec() != ContractType.OTHER)
+        if (count == 0)
         {
-            if (!contractTypeToken.hasPositiveBalance()) zeroBalanceToken = true;
-            tokenType.setVisibility(View.VISIBLE);
-            String showBalance = contractTypeToken.getStringBalance() + " " + contractTypeToken.getInterfaceSpec().toString();
-            tokenType.setText(showBalance);
-            contractType = contractTypeToken.getInterfaceSpec();
-
-            Token chainToken = viewModel.getChainToken(contractTypeToken.tokenInfo.chainId);
-
-            chainLayout.setVisibility(View.VISIBLE);
-            chainIcon.bindData(chainToken);
-            chainName.setChainID(contractTypeToken.tokenInfo.chainId);
-        }
-    }
-
-    private void onFetchedToken(Token token)
-    {
-        showProgress(false);
-        if (token != null)
-        {
-            //got it, launch send screen
-            viewModel.showSend(this, currentResult, token);
-            finish();
-        }
-        else
-        {
-            onNoContractFound(true);
+            showProgress(false);
         }
     }
 
@@ -297,14 +285,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void onTokenInfo(TokenInfo tokenInfo)
-    {
-        inputAddressView.setAddress(tokenInfo.address);
-        symbolInputView.setText(tokenInfo.symbol);
-        decimalsInputView.setText(String.valueOf(tokenInfo.decimals));
-        nameInputView.setText(tokenInfo.name);
-    }
-
     private void onError(ErrorEnvelope errorEnvelope) {
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.title_dialog_error);
@@ -339,84 +319,28 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             lastCheck = address;
             showProgress(true);
-            viewModel.testNetworks(address, networkInfo);
-        }
-    }
-
-    private void saveFinal(String address)
-    {
-        boolean isValid = true;
-        String symbol = symbolInputView.getText().toString().toLowerCase();
-        String rawDecimals = decimalsInputView.getText().toString();
-        String name = nameInputView.getText().toString();
-
-        int decimals = 0;
-
-        if (TextUtils.isEmpty(address)) {
-            inputAddressView.setError(getString(R.string.error_field_required));
-            isValid = false;
-        }
-
-        if (TextUtils.isEmpty(symbol)) {
-            symbolInputView.setError(getString(R.string.error_field_required));
-            isValid = false;
-        }
-
-        if (TextUtils.isEmpty(rawDecimals)) {
-            decimalsInputView.setError(getString(R.string.error_field_required));
-            isValid = false;
-        }
-
-        try {
-            decimals = Integer.parseInt(rawDecimals);
-        } catch (NumberFormatException ex) {
-            decimalsInputView.setError(getString(R.string.error_must_numeric));
-            isValid = false;
-        }
-
-        if (!Utils.isAddressValid(address)) {
-            inputAddressView.setError(getString(R.string.error_invalid_address));
-            isValid = false;
-        }
-
-        if (isValid)
-        {
-            showProgress(true);
-            viewModel.save(viewModel.getSelectedChain(), address, name, symbol, decimals, contractType);
+            progressLayout.setVisibility(View.VISIBLE);
+            viewModel.testNetworks(address);
         }
     }
 
     private void onSave() {
-        if (zeroBalanceToken && viewModel.shouldHideZeroBalanceTokens())
+        List<TokenCardMeta> selected = adapter.getSelected();
+        List<Token> toSave = new ArrayList<>();
+        for (TokenCardMeta tcm : selected)
         {
-            userAddingZeroBalanceToken();
+            toSave.add(tokenList.get(tcm.getChain()));
+        }
+
+        if (toSave.size() > 0)
+        {
+            viewModel.saveTokens(toSave);
+            onSaved(toSave.get(0));
         }
         else
         {
-            inputAddressView.getAddress();
+            finish();
         }
-    }
-
-    private void userAddingZeroBalanceToken()
-    {
-        //warn user we are switching on zero balance tokens
-        aDialog = new AWalletAlertDialog(this);
-        aDialog.setTitle(R.string.zero_balance_tokens_off);
-        aDialog.setIcon(AWalletAlertDialog.WARNING);
-        aDialog.setMessage(R.string.zero_balance_tokens_are_switched_off);
-        aDialog.setButtonText(R.string.dialog_switch_zero_balance_tokens_on);
-        aDialog.setButtonListener(v -> {
-            aDialog.dismiss();
-            viewModel.hideZeroBalanceTokens();
-            inputAddressView.getAddress();
-        });
-        aDialog.setSecondaryButtonText(R.string.action_cancel);
-        aDialog.setSecondaryButtonListener(v -> {
-            //don't switch on the zero balance tokens
-            aDialog.dismiss();
-            inputAddressView.getAddress();
-        });
-        aDialog.show();
     }
 
     private void onNoContractFound(Boolean noContract)
@@ -462,6 +386,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                 case Activity.RESULT_OK:
                     if (data != null) {
                         String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
+                        if (barcode == null) break;
 
                         QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         currentResult = parser.parse(barcode);
@@ -530,7 +455,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     @Override
     public void addressReady(String address, String ensName)
     {
-        saveFinal(address);
+
     }
 
     @Override
@@ -538,5 +463,17 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     {
         super.onDestroy();
         if (viewModel != null) viewModel.stopScan();
+    }
+
+    @Override
+    public void onTokenClick(View view, Token token, List<BigInteger> tokenIds, boolean selected)
+    {
+
+    }
+
+    @Override
+    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds)
+    {
+
     }
 }

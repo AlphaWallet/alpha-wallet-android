@@ -98,7 +98,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         priceETH = findViewById(R.id.textImportPrice);
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLabel = findViewById(R.id.fiat_price_txt);
-        toolbarView = findViewById(R.id.toolbar);
+        toolbarView = findViewById(R.id.certified_toolbar);
         tokenView = findViewById(R.id.web3_tokenview);
         webWrapper = findViewById(R.id.layout_webwrapper);
         priceETH.setVisibility(View.GONE);

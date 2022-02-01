@@ -86,10 +86,7 @@ public class ImportKeystoreFragment extends ImportFragment
 
     private void updateButtonState(boolean enabled)
     {
-        importButton.setActivated(enabled);
-        importButton.setClickable(enabled);
-        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
-        if (getContext() != null) importButton.setBackgroundColor(getContext().getColor(colorId));
+        importButton.setEnabled(enabled);
     }
 
     private void handleKeypress(View view)

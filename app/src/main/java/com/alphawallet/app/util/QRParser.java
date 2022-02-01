@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
-
 /**
  * Created by marat on 10/11/17.
  * Parses out protocol, address and parameters from a URL originating in QR codes used by wallets &
@@ -65,7 +63,7 @@ public class QRParser {
             if (Utils.isAddressValid(address))
                 return address;
 
-            if (couldBeENS(address))
+            if (ENSHandler.couldBeENS(address))
             {
                 return address;
             }

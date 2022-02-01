@@ -17,6 +17,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -80,7 +81,7 @@ public class TokenSearchFragment extends Fragment implements SearchToolbarCallba
         initList();
         setupKeyboardViewResizer(view, searchBar);
 
-        getActivity().getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true)
         {
             @Override
             public void handleOnBackPressed()

@@ -4,17 +4,23 @@ package com.alphawallet.app.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextPaint;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +36,7 @@ import com.alphawallet.app.viewmodel.TokenAlertsViewModel;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -41,10 +48,11 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
 
     private TokenAlertsViewModel viewModel;
 
-    private LinearLayout layoutAddPriceAlert;
     private LinearLayout noAlertsLayout;
     private RecyclerView recyclerView;
     private PriceAlertAdapter adapter;
+    private ActivityResultLauncher<Intent> launcher;
+    private Token token;
 
     @Nullable
     @Override
@@ -63,9 +71,20 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
                     .get(TokenAlertsViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-            Token token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
+            token = viewModel.getTokensService().getToken(chainId, getArguments().getString(C.EXTRA_ADDRESS));
 
-            layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
+            launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->
+                    {
+                        if (result.getResultCode() == Activity.RESULT_OK)
+                        {
+                            if (result.getData() != null)
+                            {
+                                viewModel.saveAlert(result.getData().getParcelableExtra(C.EXTRA_PRICE_ALERT));
+                            }
+                        }
+                    }
+            );
+            LinearLayout layoutAddPriceAlert = view.findViewById(R.id.layout_add_new_price_alert);
             layoutAddPriceAlert.setOnClickListener(this);
 
             recyclerView = view.findViewById(R.id.recycler_view);
@@ -88,11 +107,6 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         noAlertsLayout.setVisibility(priceAlerts.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
-    private void addAlert(PriceAlert alert)
-    {
-        viewModel.saveAlert(alert);
-    }
-
     private void removeAlert(int position)
     {
         adapter.remove(position);
@@ -104,26 +118,11 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     {
         if (v.getId() == R.id.layout_add_new_price_alert)
         {
-            viewModel.openAddPriceAlertMenu(this, REQUEST_SET_PRICE_ALERT);
-        }
-    }
+            Intent intent = new Intent(getContext(), SetPriceAlertActivity.class);
+            intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+            intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
-    {
-        if (requestCode == REQUEST_SET_PRICE_ALERT)
-        {
-            if (resultCode == Activity.RESULT_OK)
-            {
-                if (data != null)
-                {
-                    addAlert(data.getParcelableExtra(C.EXTRA_PRICE_ALERT));
-                }
-            }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
+            launcher.launch(intent);
         }
     }
 
@@ -133,21 +132,43 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         viewModel.updateStoredAlerts(adapter.getItems());
     }
 
-    public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
+    public class SwipeCallback extends ItemTouchHelper.SimpleCallback
+    {
         private Drawable icon;
         private ColorDrawable background;
+        private final Paint textPaint = new TextPaint();
+        private int swipeControlWidth;
 
         SwipeCallback()
         {
-            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+            super(0, ItemTouchHelper.LEFT);
             if (getActivity() != null)
             {
-                icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_hide_token);
+                icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_close);
                 if (icon != null)
                 {
                     icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
                 }
                 background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.cancel_red));
+
+                textPaint.setTextAlign(Paint.Align.CENTER);
+                textPaint.setTypeface(ResourcesCompat.getFont(getContext(), R.font.font_semibold));
+
+                int textSize = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_SP,
+                        17,
+                        getActivity().getResources().getDisplayMetrics()
+                );
+
+                swipeControlWidth = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        120,
+                        getActivity().getResources().getDisplayMetrics()
+                );
+
+
+                textPaint.setTextSize(textSize);
+                textPaint.setColor(getResources().getColor(R.color.white, getContext().getTheme()));
             }
         }
 
@@ -175,34 +196,29 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             View itemView = viewHolder.itemView;
             int offset = 20;
-            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
-            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconMargin = (itemView.getHeight() / 2 - icon.getIntrinsicHeight()) / 2;
+            int iconTop = itemView.getTop() + iconMargin * 2;
             int iconBottom = iconTop + icon.getIntrinsicHeight();
 
-            if (dX > 0)
+            if (dX < 0)
             {
-                int iconLeft = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
-                int iconRight = itemView.getLeft() + iconMargin;
-                icon.setBounds(iconRight, iconTop, iconLeft, iconBottom);
-                background.setBounds(itemView.getLeft(), itemView.getTop(),
-                        itemView.getLeft() + ((int) dX) + offset,
-                        itemView.getBottom());
-            }
-            else if (dX < 0)
-            {
-                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
-                int iconRight = itemView.getRight() - iconMargin;
+                int iconRight = itemView.getRight() - (iconMargin + swipeControlWidth - icon.getIntrinsicWidth()) / 2;
+                int iconLeft = iconRight - icon.getIntrinsicWidth();
+
                 icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
                 background.setBounds(itemView.getRight() + ((int) dX) - offset,
                         itemView.getTop(), itemView.getRight(), itemView.getBottom());
-            }
-            else
+            } else
             {
                 background.setBounds(0, 0, 0, 0);
             }
 
             background.draw(c);
             icon.draw(c);
+
+            int xPos = itemView.getRight() - swipeControlWidth / 2;
+            int yPos = (int) (itemView.getTop() + (itemView.getHeight() * 0.75));
+            c.drawText(requireContext().getString(R.string.delete), xPos, yPos, textPaint);
         }
     }
 }

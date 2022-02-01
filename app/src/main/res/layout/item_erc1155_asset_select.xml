@@ -11,25 +11,14 @@
     android:paddingEnd="@dimen/dp8"
     android:paddingBottom="@dimen/dp16">
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/dp8"
-        android:button="@drawable/selector_round_checkbox"
-        android:clickable="false"
-        android:visibility="gone" />
-
     <RelativeLayout
         android:id="@+id/icon_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/dp8"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_toEndOf="@id/checkbox">
+        android:layout_marginEnd="@dimen/dp16">
 
         <com.alphawallet.app.widget.NFTImageView
             android:id="@+id/icon"
@@ -66,9 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toStartOf="@id/arrow_right"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="@dimen/dp24"
+        android:layout_toStartOf="@id/action_wrapper"
         android:layout_toEndOf="@id/icon_wrapper"
         android:orientation="vertical">
 
@@ -128,13 +115,30 @@
 
     </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/arrow_right"
+    <FrameLayout
+        android:id="@+id/action_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/ic_arrow_right"
-        android:visibility="gone" />
+        android:paddingStart="@dimen/dp8"
+        android:paddingEnd="@dimen/dp8"
+        android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/arrow_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right"
+            android:visibility="gone" />
+
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:button="@drawable/selector_round_checkbox"
+            android:clickable="false"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </RelativeLayout>

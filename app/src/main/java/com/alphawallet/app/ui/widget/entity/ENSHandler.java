@@ -136,7 +136,7 @@ public class ENSHandler implements Runnable
         if (Utils.isAddressValid(resolvedAddress) && canBeENSName(ensDomain))
         {
             host.getInputView().dismissDropDown();
-            host.setStatus(resolvedAddress);
+            host.setENSAddress(resolvedAddress);
             if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(resolvedAddress, ensDomain);
@@ -145,7 +145,8 @@ public class ENSHandler implements Runnable
         else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && Utils.isAddressValid(ensDomain)) //in case user typed an address and hit an ENS name
         {
             host.getInputView().dismissDropDown();
-            host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
+            host.setENSName(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
+            //host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
             if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);

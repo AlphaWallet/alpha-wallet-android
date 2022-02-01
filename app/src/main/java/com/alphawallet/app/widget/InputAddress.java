@@ -58,6 +58,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private int hintRedId;
     private boolean noCam;
     private String imeOptions;
+    private String fullAddress;
+    private String ensName;
     private boolean handleENS = false;
     private final ENSHandler ensHandler;
     private AWalletAlertDialog dialog;
@@ -72,6 +74,9 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         inflate(context, R.layout.item_input_address, this);
         getAttrs(context, attrs);
         this.context = context;
+
+        fullAddress = null;
+        ensName = null;
 
         labelText = findViewById(R.id.label);
         editText = findViewById(R.id.edit_text);
@@ -210,6 +215,18 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         });
     }
 
+    public void setENSAddress(String address)
+    {
+        fullAddress = address;
+        setStatus(address);
+    }
+
+    public void setENSName(String _ensName)
+    {
+        ensName = _ensName;
+        setStatus(ensName);
+    }
+
     public void setStatus(CharSequence statusTxt)
     {
         if (TextUtils.isEmpty(statusTxt))
@@ -340,7 +357,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         String mainText = editText.getText().toString().trim();
         String status = statusText.getText().toString().trim();
 
-        if (Utils.isAddressValid(mainText))
+        if (Utils.isAddressValid(fullAddress))
+        {
+            return fullAddress;
+        }
+        else if (Utils.isAddressValid(mainText))
         {
             return mainText;
         }
@@ -484,7 +505,13 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         if (addressReadyCallback == null) return;
 
         final Matcher addressMatch = findAddress.matcher(s.toString());
-        addressReadyCallback.addressValid(addressMatch.find());
+        boolean addressValid = addressMatch.find();
+        addressReadyCallback.addressValid(addressValid);
+
+        if (addressValid)
+        {
+            fullAddress = s.toString().trim();
+        }
 
         setStatus(null);
         if (ensHandler != null && !TextUtils.isEmpty(getInputText()))

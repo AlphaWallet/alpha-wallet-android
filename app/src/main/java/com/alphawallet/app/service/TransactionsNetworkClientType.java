@@ -11,4 +11,5 @@ public interface TransactionsNetworkClientType {
     Single<TransactionMeta[]> fetchMoreTransactions(String walletAddress, NetworkInfo network, long lastTxTime);
     Single<Integer> readTransfers(String currentAddress, NetworkInfo networkByChain, TokensService tokensService, boolean nftCheck);
     void checkRequiresAuxReset(String walletAddr);
+    Single<Long> getEarliestContractTransaction(NetworkInfo network, String walletAddress, String address);
 }

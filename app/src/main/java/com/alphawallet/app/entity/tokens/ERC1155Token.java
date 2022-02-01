@@ -592,10 +592,6 @@ public class ERC1155Token extends Token
     @Override
     public BigDecimal updateBalance(Realm realm)
     {
-        if (getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
-        {
-            System.out.println("YOLESS");
-        }
         try
         {
             BigInteger lastEventBlockRead = getLastBlockRead(realm);

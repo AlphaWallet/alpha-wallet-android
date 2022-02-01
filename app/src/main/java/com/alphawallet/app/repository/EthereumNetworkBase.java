@@ -940,4 +940,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             return networkMap.get(MAINNET_ID).symbol;
         }
     }
+
+    public static BigInteger getMaxEventFetch(long chainId)
+    {
+        if (chainId == MATIC_ID || chainId == MATIC_TEST_ID)
+        {
+            return BigInteger.valueOf(3500L);
+        }
+        else
+        {
+            return BigInteger.valueOf(10000L);
+        }
+    }
 }

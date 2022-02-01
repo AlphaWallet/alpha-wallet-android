@@ -54,6 +54,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -66,7 +67,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 23; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 25; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -122,6 +123,31 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             //
         }
+    }
+
+    @Override
+    public Single<Long> getEarliestContractTransaction(NetworkInfo network, String walletAddress, String tokenAddress)
+    {
+        return Single.fromCallable(() -> {
+            long earliestTx = 0;
+            try (Realm instance = realmManager.getRealmInstance(walletAddress))
+            {
+                earliestTx = getFirstTransactionBlock(instance, network.chainId, tokenAddress);
+                if (earliestTx > 0) return earliestTx;
+
+                //fetch earliest
+                //https://api.polygonscan.com/api?module=account&action=txlist&address=0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D&startblock=0&endblock=999999999&sort=asc&page=1&offset=1
+                EtherscanTransaction[] earliest = readTransactions(network, walletAddress, tokenAddress, "1", true, 1, 1);
+                if (earliest.length > 0)
+                {
+                    earliestTx = Long.parseLong(earliest[0].blockNumber);
+                    storeEarliestBlockRead(instance, network.chainId, tokenAddress, earliestTx);
+                }
+
+                return earliestTx;
+            }
+        });
+
     }
 
     /*
@@ -789,6 +815,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 txBlockRead = realmToken.getEarliestTransactionBlock();
             }
+            else
+            {
+                txBlockRead = -1;
+            }
         }
         catch (Exception e)
         {
@@ -850,7 +880,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         try
         {
-            instance.executeTransactionAsync(r -> {
+            instance.executeTransaction(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", databaseKey(chainId, walletAddress))
                         .findFirst();

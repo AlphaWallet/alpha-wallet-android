@@ -88,6 +88,7 @@ public class TokensService
     private long syncStart;
     private ServiceSyncCallback completionCallback;
     private int syncCount = 0;
+    private final ConcurrentLinkedQueue<Token> firstTransactionList = new ConcurrentLinkedQueue<>();
 
     @Nullable
     private Disposable eventTimer;
@@ -618,6 +619,10 @@ public class TokensService
         {
             checkERC20(t.tokenInfo.chainId);
         }
+        else if (t.isNonFungible() && t.getFirstTransactionBlock() == 0)
+        {
+            firstTransactionList.add(t);
+        }
     }
 
     private void checkChainVisibility(Token t)
@@ -846,18 +851,13 @@ public class TokensService
 
             float weighting = check.calculateBalanceUpdateWeight();
 
-            if (check.getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
-            {
-                System.out.println("YOLESS");
-            }
-
             if ((!check.isEnabled || check.isNFT()) && !isSynced()) continue; //don't start looking at NFT balances until we sync the chain/ERC20 tokens
             if (!isSynced() && check.lastUpdate > syncStart) continue; //don't start updating already updated tokens until all ERC20 are checked
             if (!appHasFocus && (!check.isEthereum() && !isFocusToken(check))) continue; //only check chains when wallet out of focus
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastCheckDiff * (check.isEnabled ? 1 : 0.25f);
-            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS / (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
+            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS * (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
 
             if (!check.isEthereum() && lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
             {
@@ -894,11 +894,6 @@ public class TokensService
 
         if (highestToken != null)
         {
-            if (highestToken.getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
-            {
-                System.out.println("YOLESS");
-            }
-
             pendingTokenMap.put(databaseKey(highestToken.getChain(), highestToken.getAddress()), System.currentTimeMillis());
             return getToken(highestToken.getChain(), highestToken.getAddress());
         }
@@ -1251,4 +1246,8 @@ public class TokensService
         return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
     }
 
+    public Token getNextTokenInFetchList()
+    {
+        return firstTransactionList.poll();
+    }
 }

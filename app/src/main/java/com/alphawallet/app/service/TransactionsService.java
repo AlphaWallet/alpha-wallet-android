@@ -21,9 +21,11 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthTransaction;
@@ -32,6 +34,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -53,6 +59,8 @@ public class TransactionsService
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
     private boolean nftCheck;
+
+    private static final LongSparseArray<BigInteger> currentBlocks = new LongSparseArray<>();
 
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
@@ -155,6 +163,10 @@ public class TransactionsService
         if (currentChainIndex >= filters.size()) currentChainIndex = 0;
         readTokenMoves(filters.get(currentChainIndex), nftCheck); //check NFTs for same chain on next iteration or advance to next chain
         Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
+        if (pendingChainData.first != currentChainIndex)
+        {
+            updateCurrentBlock(filters.get(currentChainIndex));
+        }
         currentChainIndex = pendingChainData.first;
         nftCheck = pendingChainData.second;
     }
@@ -244,6 +256,20 @@ public class TransactionsService
         }
     }
 
+    private void updateCurrentBlock(final long chainId)
+    {
+        Single.fromCallable(() -> {
+            Web3j web3j = TokenRepository.getWeb3jService(chainId);
+            EthBlock ethBlock =
+                    web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
+            String blockValStr = ethBlock.getBlock().getNumberRaw();
+            if (!TextUtils.isEmpty(blockValStr) && blockValStr.length() > 2) return Numeric.toBigInt(blockValStr);
+            else return currentBlocks.get(chainId, BigInteger.ZERO);
+        }).subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(blockValue -> currentBlocks.put(chainId, blockValue), onError -> currentBlocks.put(chainId, BigInteger.ZERO)).isDisposed();
+    }
+
     private Token getRequiresTransactionUpdate()
     {
         List<Long> chains = tokensService.getNetworkFilters();
@@ -315,6 +341,7 @@ public class TransactionsService
 
     private void onUpdateTransactions(Transaction[] transactions, Token token)
     {
+        checkEventPoints();
         //got a new transaction
         fetchTransactionDisposable = null;
         if (transactions.length == 0) return;
@@ -325,6 +352,19 @@ public class TransactionsService
 
         //now check for unknown tokens
         checkTokens(transactions);
+    }
+
+    private void checkEventPoints()
+    {
+        Token checkToken = tokensService.getNextTokenInFetchList();
+        if (checkToken != null)
+        {
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(checkToken.tokenInfo.chainId);
+            transactionsClient.getEarliestContractTransaction(network, tokensService.getCurrentAddress(), checkToken.tokenInfo.address)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe().isDisposed();
+        }
     }
 
     /**
@@ -514,5 +554,10 @@ public class TransactionsService
     public Single<Boolean> wipeTickerData()
     {
         return transactionsCache.deleteAllTickers();
+    }
+
+    public static BigInteger getCurrentBlock(long chainId)
+    {
+        return currentBlocks.get(chainId, BigInteger.ZERO);
     }
 }

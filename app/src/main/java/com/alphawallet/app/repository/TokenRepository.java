@@ -386,22 +386,12 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
-        if (token.getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
-        {
-            System.out.println("YOLESS");
-        }
-
         return Single.fromCallable(() -> {
                 BigDecimal balance = BigDecimal.valueOf(-1);
                 try
                 {
                     List<BigInteger> balanceArray = null;
                     Token thisToken = token;
-
-                    if (thisToken.getAddress().equalsIgnoreCase("0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D"))
-                    {
-                        System.out.println("YOLESS");
-                    }
 
                     switch (token.getInterfaceSpec())
                     {
@@ -415,6 +405,8 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
+                            balance = updateERC721Balance(token, wallet);
+                            break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
                             //checking raw balance, this only gives the count of tokens
@@ -467,6 +459,16 @@ public class TokenRepository implements TokenRepositoryType {
         }
 
         return newBalance;
+    }
+
+    private BigDecimal updateERC721Balance(Token token, Wallet wallet)
+    {
+        try (Realm realm = getRealmInstance(wallet))
+        {
+            token.updateBalance(realm);
+        }
+
+        return checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
     }
 
     private Single<Token[]> updateBalances(Wallet wallet, Token[] tokens)

@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import static com.alphawallet.app.util.Utils.loadFile;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,7 +12,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Base64;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -40,23 +41,6 @@ public class NFTImageView extends RelativeLayout {
     private final WebView webView;
     private final RelativeLayout holdingView;
     private final Handler handler = new Handler(Looper.getMainLooper());
-
-    public NFTImageView(Context context, @Nullable AttributeSet attrs)
-    {
-        super(context, attrs);
-        inflate(context, R.layout.item_asset_image, this);
-        image = findViewById(R.id.image_asset);
-        webLayout = findViewById(R.id.web_view_wrapper);
-        webView = findViewById(R.id.image_web_view);
-        holdingView = findViewById(R.id.layout_holder);
-
-        webLayout.setVisibility(View.GONE);
-        webView.setVisibility(View.GONE);
-
-        //setup view attributes
-        setAttrs(context, attrs);
-    }
-
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
@@ -75,6 +59,22 @@ public class NFTImageView extends RelativeLayout {
             return false;
         }
     };
+
+    public NFTImageView(Context context, @Nullable AttributeSet attrs)
+    {
+        super(context, attrs);
+        inflate(context, R.layout.item_asset_image, this);
+        image = findViewById(R.id.image_asset);
+        webLayout = findViewById(R.id.web_view_wrapper);
+        webView = findViewById(R.id.image_web_view);
+        holdingView = findViewById(R.id.layout_holder);
+
+        webLayout.setVisibility(View.GONE);
+        webView.setVisibility(View.GONE);
+
+        //setup view attributes
+        setAttrs(context, attrs);
+    }
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
@@ -99,6 +99,8 @@ public class NFTImageView extends RelativeLayout {
         Glide.with(image.getContext())
                 .load(imageUrl)
                 .centerCrop()
+                .transition(withCrossFade())
+                .override(Target.SIZE_ORIGINAL)
                 .listener(requestListener)
                 .into(image);
 
@@ -117,6 +119,9 @@ public class NFTImageView extends RelativeLayout {
     {
         String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
         String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+
+        webView.setVerticalScrollBarEnabled(false);
+        webView.setHorizontalScrollBarEnabled(false);
 
         handler.post(() -> {
             image.setVisibility(View.GONE);
@@ -138,25 +143,18 @@ public class NFTImageView extends RelativeLayout {
             int height = a.getInteger(R.styleable.ERC721ImageView_webview_height, 0);
             if (height > 0)
             {
-                int dpHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getContext().getResources().getDisplayMetrics());
-                ViewGroup.LayoutParams layoutParams = webLayout.getLayoutParams();
-                layoutParams.height = dpHeight;
-                webLayout.setLayoutParams(layoutParams);
-                layoutParams = holdingView.getLayoutParams();
-                layoutParams.height = dpHeight;
-                findViewById(R.id.layout_holder).setLayoutParams(layoutParams);
+                setWebViewHeight(Utils.dp2px(getContext(), height));
             }
-        }
-        finally
+        } finally
         {
             a.recycle();
         }
-
     }
 
-    public void blankViews()
+    public void setWebViewHeight(int height)
     {
-        image.setVisibility(View.INVISIBLE);
-        webLayout.setVisibility(View.GONE);
+        ViewGroup.LayoutParams webLayoutParams = webLayout.getLayoutParams();
+        webLayoutParams.height = height;
+        webLayout.setLayoutParams(webLayoutParams);
     }
 }

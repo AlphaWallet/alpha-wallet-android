@@ -92,6 +92,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         if (asset == null) return;
 
+        tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
         tokenImage.setupTokenImage(asset);
 
         TextView tokenDescription = findViewById(R.id.token_description);

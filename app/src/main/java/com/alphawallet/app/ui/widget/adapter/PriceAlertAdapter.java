@@ -4,14 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.ui.widget.entity.PriceAlertCallback;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -19,10 +17,18 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.PriceAlertViewHolder> {
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import static com.alphawallet.app.service.TickerService.getCurrencyWithoutSymbol;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
+public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.PriceAlertViewHolder>
+{
     private List<PriceAlert> items;
-    private Context context;
-    private PriceAlertCallback callback;
+    private final Context context;
+    private final PriceAlertCallback callback;
 
     public PriceAlertAdapter(Context context, List<PriceAlert> items, PriceAlertCallback callback)
     {
@@ -44,23 +50,24 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
     {
         PriceAlert alert = items.get(position);
 
-        if (alert.getIndicator())
+        int indicator;
+        if (alert.getAbove())
         {
             holder.icon.setImageResource(R.drawable.ic_system_up);
-            holder.indicator.setText("Above ");
-        }
-        else
+            indicator = R.string.price_alert_indicator_above;
+        } else
         {
             holder.icon.setImageResource(R.drawable.ic_system_down);
-            holder.indicator.setText("Below ");
+            indicator = R.string.price_alert_indicator_below;
         }
 
-        // TODO: Format currency value
-        holder.value.setText(alert.getValue());
+        CurrencyItem currencyItem = CurrencyRepository.getCurrencyByISO(alert.getCurrency());
+        holder.rule.setText(format("%s %s%s", context.getText(indicator), requireNonNull(currencyItem).getSymbol(), getCurrencyWithoutSymbol(Double.parseDouble(alert.getValue()))));
 
         holder.alertSwitch.setChecked(alert.isEnabled());
 
-        holder.alertSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        holder.alertSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+        {
             PriceAlert item = items.get(position);
             item.setEnabled(isChecked);
             notifyItemChanged(position);
@@ -74,14 +81,16 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
         return items.size();
     }
 
-    public void add(PriceAlert item) {
+    public void add(PriceAlert item)
+    {
         items.add(item);
-        notifyItemChanged(items.size()-1);
+        notifyItemChanged(items.size() - 1);
     }
 
-    public void remove(int position) {
+    public void remove(int position)
+    {
         items.remove(position);
-        notifyDataSetChanged();
+        notifyItemRemoved(position);
     }
 
     public List<PriceAlert> getItems()
@@ -94,18 +103,17 @@ public class PriceAlertAdapter extends RecyclerView.Adapter<PriceAlertAdapter.Pr
         this.items = items;
     }
 
-    public static class PriceAlertViewHolder extends RecyclerView.ViewHolder {
+    public static class PriceAlertViewHolder extends RecyclerView.ViewHolder
+    {
         ImageView icon;
-        TextView indicator;
-        TextView value;
+        TextView rule;
         SwitchMaterial alertSwitch;
 
         public PriceAlertViewHolder(@NonNull View itemView)
         {
             super(itemView);
             icon = itemView.findViewById(R.id.icon);
-            indicator = itemView.findViewById(R.id.indicator);
-            value = itemView.findViewById(R.id.value);
+            rule = itemView.findViewById(R.id.rule);
             alertSwitch = itemView.findViewById(R.id.alert_switch);
         }
     }

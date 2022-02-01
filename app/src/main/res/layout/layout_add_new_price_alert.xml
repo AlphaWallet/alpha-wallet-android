@@ -16,7 +16,7 @@
         android:layout_gravity="end|center_vertical"
         android:layout_marginEnd="@dimen/dp8"
         android:fontFamily="@font/font_semibold"
-        android:text="Add New Price Alert"
+        android:text="@string/add_new_price_alert"
         android:textColor="@color/azure"
         android:textSize="@dimen/sp17" />
 

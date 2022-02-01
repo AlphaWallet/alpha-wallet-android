@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:theme="@style/AppTheme.Toolbar"
+    android:id="@+id/_app_bar"
     app:elevation="0dp">
 
     <androidx.appcompat.widget.Toolbar

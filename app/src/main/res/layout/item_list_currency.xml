@@ -40,7 +40,7 @@
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_light"
+            android:fontFamily="@font/font_regular"
             android:textColor="@color/dove"
             android:textSize="15sp"
             tools:text="AUD" />

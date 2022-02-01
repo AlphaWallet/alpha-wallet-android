@@ -17,6 +17,7 @@
         android:layout_below="@id/toolbar"
         android:layout_marginTop="-1dp"
         custom:label="@string/enter_target_price"
+        custom:can_change_currency="false"
         custom:show_header="true" />
 
     <com.alphawallet.app.widget.FunctionButtonBar

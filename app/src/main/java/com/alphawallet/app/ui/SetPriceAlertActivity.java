@@ -8,7 +8,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.CurrencyRepository;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.InputFiatCallback;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.viewmodel.SetPriceAlertViewModel;
@@ -20,17 +24,22 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class SetPriceAlertActivity extends BaseActivity implements InputFiatCallback {
     private static final int REQUEST_SELECT_CURRENCY = 3000;
 
     @Inject
     SetPriceAlertViewModelFactory viewModelFactory;
+    @Inject
+    TickerService tickerService;
 
     private InputFiatView inputView;
     private FunctionButtonBar functionBar;
     private SetPriceAlertViewModel viewModel;
     private PriceAlert newPriceAlert;
+    private Token token;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -57,12 +66,31 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
                     .get(SetPriceAlertViewModel.class);
 
             long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-            Token token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+            token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
-            newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.name);
+            newPriceAlert = new PriceAlert(viewModel.getDefaultCurrency(), token.tokenInfo.name, token.tokenInfo.address, token.tokenInfo.chainId);
 
             inputView.showKeyboard();
+            updateTokenPrice();
         }
+    }
+
+    private void updateTokenPrice() {
+        tickerService.convertPair(TickerService.getCurrencySymbolTxt(), newPriceAlert.getCurrency())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((rate) -> {
+                    TokenTicker tokenTicker = viewModel.getTokensService().getTokenTicker(token);
+                    if (tokenTicker == null) {
+                        return;
+                    }
+                    double currentTokenPrice = Double.parseDouble(tokenTicker.price);
+                    CurrencyItem currencyItem = CurrencyRepository.getCurrencyByISO(newPriceAlert.getCurrency());
+                    if (currencyItem != null) {
+                        String text = currencyItem.getCurrencyText(currentTokenPrice * rate);
+                        inputView.setSubTextValue(text);
+                    }
+                }, Throwable::printStackTrace).isDisposed();
     }
 
     private void saveAlert()
@@ -76,8 +104,12 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
     @Override
     public void onInputChanged(String s)
     {
-        if (!s.isEmpty())
-        {
+        if (s.isEmpty()) {
+            functionBar.setPrimaryButtonEnabled(false);
+            return;
+        }
+
+        try {
             double value = Double.parseDouble(s);
             if (value > 0)
             {
@@ -88,13 +120,14 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
             {
                 functionBar.setPrimaryButtonEnabled(false);
             }
+        } catch (NumberFormatException nfe) {
+            functionBar.setPrimaryButtonEnabled(false);
         }
     }
 
     @Override
     public void onMoreClicked()
     {
-        viewModel.openCurrencySelection(this, REQUEST_SELECT_CURRENCY);
     }
 
     @Override
@@ -109,6 +142,7 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
                     String currency = data.getStringExtra(C.EXTRA_CURRENCY);
                     inputView.setCurrency(currency);
                     newPriceAlert.setCurrency(currency);
+                    updateTokenPrice();
                 }
             }
         }

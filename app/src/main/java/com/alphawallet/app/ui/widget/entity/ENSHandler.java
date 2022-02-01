@@ -34,7 +34,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
@@ -137,7 +136,7 @@ public class ENSHandler implements Runnable
         if (Utils.isAddressValid(resolvedAddress) && canBeENSName(ensDomain))
         {
             host.getInputView().dismissDropDown();
-            host.setStatus(resolvedAddress);
+            host.setENSAddress(resolvedAddress);
             if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(resolvedAddress, ensDomain);
@@ -146,7 +145,8 @@ public class ENSHandler implements Runnable
         else if (!TextUtils.isEmpty(resolvedAddress) && canBeENSName(resolvedAddress) && Utils.isAddressValid(ensDomain)) //in case user typed an address and hit an ENS name
         {
             host.getInputView().dismissDropDown();
-            host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
+            host.setENSName(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
+            //host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
             if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);
@@ -182,6 +182,20 @@ public class ENSHandler implements Runnable
     public static boolean canBeENSName(String address)
     {
         return !Utils.isAddressValid(address) && !address.startsWith("0x") && address.length() > 5 && address.contains(".") && address.indexOf(".") <= address.length() - 2;
+    }
+
+    public static boolean couldBeENS(String address)
+    {
+        if (address == null || address.length() == 0) return false;
+
+        String[] split = address.split("[.]");
+        if (split.length > 1)
+        {
+            String extension = split[split.length - 1];
+            return extension.length() > 0 && Utils.isAlNum(extension);
+        }
+
+        return false;
     }
 
     @Override

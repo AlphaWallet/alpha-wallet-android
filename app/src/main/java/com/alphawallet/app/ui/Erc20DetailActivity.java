@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
@@ -40,6 +42,7 @@ import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -74,7 +77,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Token token;
     private TokenCardMeta tokenMeta;
     private RecyclerView tokenView;
-    private CertifiedToolbarView toolbarView;
+    private CertifiedToolbarView certificateToolbar;
 
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
@@ -83,13 +86,26 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private ViewPager2 viewPager2;
 
-    private TokenInfoFragment tokenInfoFragment;
-    private TokenActivityFragment tokenActivityFragment;
-    private TokenAlertsFragment tokenAlertsFragment;
-
     private enum DetailPages
     {
-        PERFORMANCE, ACTIVITY, ALERTS
+        INFO(R.string.tab_info, new TokenInfoFragment()),
+        ACTIVITY(R.string.tab_activity, new TokenActivityFragment()),
+        ALERTS(R.string.tab_alert, new TokenAlertsFragment());
+
+        private final int tabNameResourceId;
+        private final Fragment fragment;
+
+        DetailPages(int tabNameResourceId, Fragment fragment)
+        {
+            this.tabNameResourceId = tabNameResourceId;
+            this.fragment = fragment;
+        }
+
+        public Pair<String, Fragment> init(Context context, Bundle bundle)
+        {
+            this.fragment.setArguments(bundle);
+            return new Pair<>(context.getString(tabNameResourceId), fragment);
+        }
     }
 
     @Override
@@ -124,24 +140,13 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void initViews()
     {
-        tokenInfoFragment = new TokenInfoFragment();
-        tokenActivityFragment = new TokenActivityFragment();
-        tokenAlertsFragment = new TokenAlertsFragment();
-
-        List<Pair<String, Fragment>> pages = new ArrayList<>();
-
         Bundle bundle = new Bundle();
         //Samoa TODO: Use TokensService getToken in the 3 fragments
         bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
         bundle.putLong(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         bundle.putParcelable(WALLET, wallet);
-        tokenInfoFragment.setArguments(bundle);
-        tokenActivityFragment.setArguments(bundle);
-        tokenAlertsFragment.setArguments(bundle);
 
-        pages.add(DetailPages.PERFORMANCE.ordinal(), new Pair<>("Info", tokenInfoFragment));
-        pages.add(DetailPages.ACTIVITY.ordinal(), new Pair<>("Activity", tokenActivityFragment));
-        //pages.add(DetailPages.ALERTS.ordinal(), new Pair<>("Alerts", tokenAlertsFragment));  //TODO: Implement alert system
+        List<Pair<String, Fragment>> pages = getPages(bundle);
 
         viewPager2 = findViewById(R.id.viewPager);
         viewPager2.setAdapter(new TabPager2Adapter(this, pages));
@@ -175,6 +180,17 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         TabUtils.decorateTabLayout(this, tabLayout);
     }
 
+    private List<Pair<String, Fragment>> getPages(Bundle bundle)
+    {
+        List<Pair<String, Fragment>> pages = new ArrayList<>();
+        for (DetailPages detailPages : DetailPages.values())
+        {
+            pages.add(detailPages.ordinal(), detailPages.init(this, bundle));
+
+        }
+        return pages;
+    }
+
     private void setupButtons()
     {
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
@@ -194,6 +210,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             viewModel = new ViewModelProvider(this, erc20DetailViewModelFactory)
                     .get(Erc20DetailViewModel.class);
             viewModel.newScriptFound().observe(this, this::onNewScript);
+            viewModel.sig().observe(this, this::onSignature);
 //            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar
         }
     }
@@ -206,6 +223,12 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
                 token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group), true);
         viewModel.checkTokenScriptValidity(token); //check script signature
+    }
+
+    private void onSignature(XMLDsigDescriptor descriptor)
+    {
+        certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.onSigData(descriptor, this);
     }
 
     private void setUpRecentTransactionsView()
@@ -252,7 +275,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         token.group = viewModel.getTokensService().getTokenGroup(token);
-        tokenMeta = new TokenCardMeta(token);
+        tokenMeta = new TokenCardMeta(token, token.getName());
         viewModel.checkForNewScript(token);
     }
 

@@ -215,6 +215,11 @@ public class TokensRealmSource implements TokenLocalSource {
         if (rawItem != null)
         {
             String currencySymbol = rawItem.getCurrencySymbol();
+            String price = rawItem.getPrice();
+            String percentChange = rawItem.getPercentChange24h();
+            if ((price.equals("0") || TextUtils.isEmpty(price))
+                    && (percentChange.equals("0") ||  TextUtils.isEmpty(percentChange))) return null; // blank placeholder ticker to stop spamming the API
+
             if (currencySymbol == null || currencySymbol.length() == 0)
                 currencySymbol = "USD";
             tokenTicker = new TokenTicker(rawItem.getPrice(), rawItem.getPercentChange24h(), currencySymbol, rawItem.getImage(), rawItem.getUpdatedTime());
@@ -285,6 +290,10 @@ public class TokensRealmSource implements TokenLocalSource {
                 setTokenUpdateTime(r, token, assetCount);
             });
         }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
     }
 
     private void createTokenIfRequired(Realm realm, Token token)
@@ -318,10 +327,11 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setEnabled(false);
             }
 
+            realmToken.setLastTxTime(System.currentTimeMillis());
+            realmToken.setAssetUpdateTime(System.currentTimeMillis());
+
             if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(assetCount)))
             {
-                realmToken.setLastTxTime(System.currentTimeMillis());
-                realmToken.setAssetUpdateTime(System.currentTimeMillis());
                 realmToken.setBalance(String.valueOf(assetCount));
             }
         }
@@ -547,6 +557,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
                 instance.setResult(imageUrl);
                 instance.setResultTime(System.currentTimeMillis());
+                r.insertOrUpdate(instance);
             });
         }
     }
@@ -572,6 +583,7 @@ public class TokensRealmSource implements TokenLocalSource {
             token.setRealmLastBlock(realmToken);
             realmToken.setEnabled(token.tokenInfo.isEnabled);
             realmToken.setChainId(token.tokenInfo.chainId);
+            realm.insertOrUpdate(realmToken);
             wasNew = true;
         }
         else
@@ -624,6 +636,8 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             realmNFT.setMetaData(token.getAssetContract().getJSON());
         }
+
+        realm.insertOrUpdate(realmNFT);
     }
 
     @Override
@@ -701,6 +715,8 @@ public class TokensRealmSource implements TokenLocalSource {
 
         realmAsset.setMetaData(asset.jsonMetaData());
         realmAsset.setBalance(asset.getBalance());
+
+        realm.insertOrUpdate(realmAsset);
     }
 
     private void deleteAllAssets(Realm realm, String dbKey) throws RealmException
@@ -921,7 +937,12 @@ public class TokensRealmSource implements TokenLocalSource {
                     tickerMap.put(ticker.getChain(), networkMap);
                 }
 
-                networkMap.put(ticker.getContract(), convertRealmTicker(ticker));
+                TokenTicker tt = convertRealmTicker(ticker);
+
+                if (tt != null)
+                {
+                    networkMap.put(ticker.getContract(), tt);
+                }
             }
         }
         catch (Exception e)
@@ -1143,6 +1164,21 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public void updateTicker(long chainId, String address, TokenTicker ticker)
+    {
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            realm.executeTransaction(r -> {
+                writeTickerToRealm(r, ticker, chainId, address);
+            });
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+
+    @Override
     public TokenTicker getCurrentTicker(Token token)
     {
         return getCurrentTicker(databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
@@ -1293,6 +1329,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 : ticker.image);
         realmItem.setUpdatedTime(ticker.updateTime);
         realmItem.setCurrencySymbol(ticker.priceSymbol);
+        realm.insertOrUpdate(realmItem);
         return true;
     }
 

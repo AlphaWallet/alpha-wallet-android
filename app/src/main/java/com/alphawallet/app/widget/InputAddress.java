@@ -157,7 +157,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             try
             {
                 CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
-                editText.setText(textToPaste);
+                editText.append(textToPaste);
             }
             catch (Exception e)
             {
@@ -225,7 +225,16 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
         else
         {
-            statusText.setText(statusTxt);
+            String status;
+            if (statusTxt.toString().startsWith("0x"))
+            {
+                status = Utils.formatAddress(statusTxt.toString());
+            }
+            else
+            {
+                status = statusTxt.toString();
+            }
+            statusText.setText(status);
             statusText.setVisibility(View.VISIBLE);
         }
     }

@@ -270,7 +270,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         token.group = viewModel.getTokensService().getTokenGroup(token);
-        tokenMeta = new TokenCardMeta(token);
+        tokenMeta = new TokenCardMeta(token, token.getName());
         viewModel.checkForNewScript(token);
     }
 

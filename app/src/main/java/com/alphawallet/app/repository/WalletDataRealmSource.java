@@ -385,7 +385,7 @@ public class WalletDataRealmSource {
     {
         try (Realm realm = realmManager.getWalletTypeRealmInstance())
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmKeyType realmKey = r.where(RealmKeyType.class)
                         .equalTo("address", wallet.address, Case.INSENSITIVE)
                         .findFirst();
@@ -410,7 +410,7 @@ public class WalletDataRealmSource {
     {
         try (Realm realm = realmManager.getWalletDataRealmInstance())
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmWalletData item = r.where(RealmWalletData.class)
                         .equalTo("address", wallet.address, Case.INSENSITIVE)
                         .findFirst();

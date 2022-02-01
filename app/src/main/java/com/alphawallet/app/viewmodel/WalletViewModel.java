@@ -41,6 +41,7 @@ import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.NameThisWalletActivity;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
@@ -237,6 +238,11 @@ public class WalletViewModel extends BaseViewModel
             dialog.dismiss();
             Intent intent = new Intent(context, TokenManagementActivity.class);
             intent.putExtra(EXTRA_ADDRESS, getWalletAddr());
+            context.startActivity(intent);
+        });
+        actionsView.setOnRenameThisWalletClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(context, NameThisWalletActivity.class);
             context.startActivity(intent);
         });
 

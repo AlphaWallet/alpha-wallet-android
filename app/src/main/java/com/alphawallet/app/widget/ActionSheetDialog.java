@@ -41,6 +41,8 @@ import io.realm.Realm;
 
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
+import org.w3c.dom.Text;
+
 /**
  * Created by JB on 17/11/2020.
  */
@@ -191,6 +193,42 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         isAttached = true;
     }
 
+    public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, int titleId, String message, int buttonTextId,
+                             long cId, Token baseToken)
+    {
+        super(activity);
+        setContentView(R.layout.dialog_action_sheet_message);
+
+        TextView titleView = findViewById(R.id.text_sign_title);
+        TextView messageView = findViewById(R.id.text_message);
+        functionBar = findViewById(R.id.layoutButtons);
+        this.activity = activity;
+
+        actionSheetCallback = aCallback;
+        mode = ActionSheetMode.MESSAGE;
+
+        titleView.setText(titleId);
+        messageView.setText(message);
+
+        gasWidget = null;
+        balanceDisplay = null;
+        cancelButton = findViewById(R.id.image_close);
+        confirmationWidget = null;
+        addressDetail  = null;
+        amountDisplay = null;
+        assetDetailView = null;
+        detailWidget = null;
+        callbackId = cId;
+        token = baseToken;
+        tokensService = null;
+        candidateTransaction = null;
+
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
+        functionBar.revealButtons();
+        setupCancelListeners();
+        isAttached = true;
+    }
+
     public void setSignOnly()
     {
         //sign only, and return signature to process
@@ -284,6 +322,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 break;
             case SIGN_TRANSACTION:
                 signTransaction();
+                break;
+            case MESSAGE:
+                actionSheetCallback.buttonClick(callbackId, token);
                 break;
         }
 

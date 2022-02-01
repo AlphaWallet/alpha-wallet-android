@@ -45,6 +45,12 @@ public class OpenSeaService
     private static final TokenFactory tf = new TokenFactory();
     private int pageOffset;
 
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getOpenSeaKey();
+
     public OpenSeaService() {
         pageOffset = 0;
         httpClient = new OkHttpClient.Builder()
@@ -249,10 +255,19 @@ public class OpenSeaService
         sb.append("&offset=");
         sb.append(offset);
 
-        Request request = new Request.Builder()
+        Request.Builder requestB = new Request.Builder()
                 .url(sb.toString())
-                .get()
-                .build();
+                .header("User-Agent", "Chrome/74.0.3729.169")
+                .method("GET", null)
+                .addHeader("Content-Type", "application/json");
+
+        String apiKey = getOpenSeaKey();
+        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+        {
+            requestB.addHeader("X-API-KEY", apiKey);
+        }
+
+        Request request = requestB.build();
 
         try (okhttp3.Response response = httpClient.newCall(request).execute())
         {

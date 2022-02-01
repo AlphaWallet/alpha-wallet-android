@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -69,6 +70,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
+import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
@@ -119,6 +121,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
+    private String openLink;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -128,6 +131,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
     public static final String STORED_PAGE = "currentPage";
     public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
+    public static final String AW_MAGICLINK = "aw.app/"; //https://aw.app/openurl?url=http://app.uniswap.org/test/Dvalue1
+    public static final String AW_MAGICLINK_DIRECT = "openurl?url=";
 
     public HomeActivity()
     {
@@ -302,6 +307,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
             }
         });
+        
+        Intent i = new Intent(this, PriceAlertsService.class);
+        startService(i);
     }
 
     private void setupFragmentListeners()
@@ -361,8 +369,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(C.CHANGED_LOCALE, this, (requestKey, b) -> {
-                    ((WalletFragment) getFragment(WALLET)).changedLocale();
+                .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) -> {
+                    viewModel.restartHomeActivity(getApplicationContext());
                 });
     }
 
@@ -784,8 +792,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void loadingComplete()
     {
         int lastId = viewModel.getLastFragmentId();
-
-        if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
+        if (!TextUtils.isEmpty(openLink))
+        {
+            showPage(DAPP_BROWSER);
+            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
+            if (!dappFrag.isDetached()) dappFrag.loadDirect(openLink);
+            openLink = null;
+            viewModel.storeCurrentFragmentId(-1);
+        }
+        else if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
         {
             showPage(SETTINGS);
         }
@@ -839,7 +854,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private BaseFragment getFragment(WalletPage page)
     {
         //build map, return correct fragment.
-        return (BaseFragment) getSupportFragmentManager().getFragments().get(page.ordinal());
+        if (getSupportFragmentManager().getFragments().size() < page.ordinal())
+        {
+            switch (page)
+            {
+                default:
+                case WALLET:
+                    return (BaseFragment)walletFragment;
+                case ACTIVITY:
+                    return (BaseFragment)activityFragment;
+                case DAPP_BROWSER:
+                    return (BaseFragment)dappBrowserFragment;
+                case SETTINGS:
+                    return (BaseFragment)settingsFragment;
+            }
+        }
+        else return (BaseFragment) getSupportFragmentManager().getFragments().get(page.ordinal());
     }
 
     @Override
@@ -1094,9 +1124,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         break;
                 }
                 break;
-            case C.UPDATE_LOCALE:
-                updateLocale(data);
-                break;
             case C.REQUEST_UNIVERSAL_SCAN:
                 if (data != null && resultCode == Activity.RESULT_OK)
                 {
@@ -1184,14 +1211,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
     }
 
-    public void updateLocale(Intent data)
-    {
-        if (data == null) return;
-        String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
-        sendBroadcast(new Intent(CHANGED_LOCALE));
-        viewModel.updateLocale(newLocale, this);
-    }
-
     @Override
     public void onBackPressed()
     {
@@ -1230,6 +1249,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void checkIntents(String importData, String importPath, Intent startIntent)
     {
+        DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
         if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
         {
             importData = importData.substring(NotificationService.AWSTARTUP.length());
@@ -1240,21 +1260,40 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             String url = startIntent.getStringExtra("url");
             showPage(DAPP_BROWSER);
-            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
         }
-        else if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
+        else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK) )
         {
-            try
+            int directLinkIndex = importData.indexOf(AW_MAGICLINK_DIRECT);
+            if (directLinkIndex > 0)
             {
-                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                if (parser.parseUniversalLink(importData).chainId > 0)
+                //get link
+                String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
+                if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                 {
-                    new ImportTokenRouter().open(this, importData);
-                    finish();
+                    showPage(DAPP_BROWSER);
+                    if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
+                }
+                else
+                {
+                    openLink = link;
                 }
             }
-            catch (SalesOrderMalformed ignored) { }
+            else
+            {
+                try
+                {
+                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                    if (parser.parseUniversalLink(importData).chainId > 0)
+                    {
+                        new ImportTokenRouter().open(this, importData);
+                        finish();
+                    }
+                }
+                catch (SalesOrderMalformed ignored)
+                {
+                }
+            }
         }
         else if (importData != null && importData.startsWith("wc:"))
         {

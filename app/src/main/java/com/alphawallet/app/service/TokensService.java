@@ -65,7 +65,7 @@ public class TokensService
     public static final long PENDING_TIME_LIMIT = 3*DateUtils.MINUTE_IN_MILLIS; //cut off pending chain after 3 minutes
 
     private static final Map<Long, Long> pendingChainMap = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>(); //used to hold tokens that will be stored
+    private final ConcurrentLinkedDeque<Token> tokenStoreList = new ConcurrentLinkedDeque<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
     private String currentAddress = null;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -293,8 +293,9 @@ public class TokensService
             {
                 syncTimer = 0;
                 //sync chain tickers
-                syncChainTickers(tokenList, 0);
             }
+
+            syncChainTickers(tokenList, 0);
         }
     }
 
@@ -714,7 +715,7 @@ public class TokensService
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
             //get mainnet ERC20 token tickers
-            erc20CheckDisposable = tickerService.getERC20Tickers(chainId, getAllERC20(chainId))
+            erc20CheckDisposable = tickerService.syncERC20Tickers(chainId, getAllERC20(chainId))
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -981,6 +982,14 @@ public class TokensService
                     token.balance = newBalance;
                     return token;
                 }));
+    }
+
+    public void addTokens(List<Token> tokenList)
+    {
+        for (Token t : tokenList)
+        {
+            tokenStoreList.addFirst(t);
+        }
     }
 
     //Add in any tokens required to be shown - mainly used by forks for always showing a specific token

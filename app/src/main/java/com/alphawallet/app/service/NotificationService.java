@@ -88,6 +88,35 @@ public class NotificationService
         if (notificationManager != null) notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
+    void displayPriceAlertNotification(String title, String content, int priority, Intent openAppIntent)
+    {
+        checkNotificationPermission();
+        int color = context.getColor(R.color.holo_blue);
+
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+                openAppIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_alpha_notification)
+                .setColor(color)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setSound(notification, 1)
+                .setAutoCancel(true)
+                .setOngoing(true)
+                .setCategory(NotificationCompat.CATEGORY_EVENT)
+                .setContentIntent(contentIntent)
+                .setPriority(priority);
+
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
+
     private void checkNotificationPermission()
     {
         if (!(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NOTIFICATION_POLICY)

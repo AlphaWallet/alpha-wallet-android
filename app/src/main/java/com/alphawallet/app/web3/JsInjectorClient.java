@@ -37,8 +37,6 @@ public class JsInjectorClient {
     private final Context context;
     private final OkHttpClient httpClient;
 
-    private String jsLibrary;
-
     private long chainId = 1;
     private Address walletAddress;
     //Note: this default RPC is overriden before injection
@@ -73,52 +71,14 @@ public class JsInjectorClient {
         this.rpcUrl = rpcUrl;
     }
 
-    @Nullable
-    JsInjectorResponse loadUrl(final String url, final Map<String, String> headers) {
-        Request request = buildRequest(url, headers);
-        JsInjectorResponse result = null;
-        try {
-            Response response = httpClient.newCall(request).execute();
-            result = buildResponse(response);
-        } catch (Exception ex) {
-            Log.d("REQUEST_ERROR", "", ex);
-        }
-        return result;
+    public String initJs(Context context)
+    {
+        return loadInitJs(context);
     }
 
-    String assembleJs(Context context, String template) {
-        if (TextUtils.isEmpty(jsLibrary)) {
-            jsLibrary = loadFile(context, R.raw.alphawallet_min);
-        }
-        String initJs = loadInitJs(context);
-        return String.format(template, jsLibrary, initJs);
-    }
-
-    @Nullable
-    private JsInjectorResponse buildResponse(Response response) {
-        String body = null;
-        int code = response.code();
-        try {
-            if (response.isSuccessful()) {
-                body = response.body().string();
-            }
-        } catch (IOException ex) {
-            Log.d("READ_BODY_ERROR", "Ex", ex);
-        }
-        Request request = response.request();
-        Response prior = response.priorResponse();
-        boolean isRedirect = prior != null && prior.isRedirect();
-        String result = injectJS(body);
-        String contentType = getContentTypeHeader(response);
-        String charset = getCharset(contentType);
-        String mime = getMimeType(contentType);
-        String finalUrl = request.url().toString();
-        return new JsInjectorResponse(result, code, finalUrl, mime, charset, isRedirect);
-    }
-
-    String injectJS(String html) {
-        String js = assembleJs(context, JS_TAG_TEMPLATE);
-        return injectJS(html, js);
+    public String providerJs(Context context)
+    {
+        return loadFile(context, R.raw.alphawallet_min);
     }
 
     String injectWeb3TokenInit(Context ctx, String view, String tokenContent, BigInteger tokenId)
@@ -128,7 +88,7 @@ public class JsInjectorClient {
         String tokenIdWrapperName = "token-card-" + tokenId.toString(10);
         initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getDefaultNodeURL(chainId), chainId, tokenIdWrapperName);
         //now insert this source into the view
-        // note that the <div> is not closed because it is closed in njectStyleAndWrap().
+        // note that the <div> is not closed because it is closed in injectStyleAndWrap().
         String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";
         initSrc = "<script>\n" + initSrc + "</script>\n" + wrapper;
         return injectJS(view, initSrc);

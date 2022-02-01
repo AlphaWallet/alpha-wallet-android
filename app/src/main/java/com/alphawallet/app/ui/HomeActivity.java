@@ -45,7 +45,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentOnAttachListener;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -72,7 +71,6 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
-import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
@@ -105,7 +103,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private HomeViewModel viewModel;
 
     private Dialog dialog;
-    private ViewPager2 viewPager2;
+    private ViewPager2 viewPager;
     private final FragmentStateAdapter pager2Adapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
@@ -134,7 +132,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public HomeActivity()
     {
         // fragment creation is shifted to adapter
-        pager2Adapter = new ScreenSlidePager2Adapter(this);
+        pager2Adapter = new ScreenSlidePagerAdapter(this);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -210,12 +208,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         initViews();
         toolbar();
 
-        viewPager2 = findViewById(R.id.view_pager);
-        viewPager2.setUserInputEnabled(false);      // i think this replicates lockPages(true)
-        viewPager2.setAdapter(pager2Adapter);
-        viewPager2.setOffscreenPageLimit(WalletPage.values().length);
+        viewPager = findViewById(R.id.view_pager);
+        viewPager.setUserInputEnabled(false);      // i think this replicates lockPages(true)
+        viewPager.setAdapter(pager2Adapter);
+        viewPager.setOffscreenPageLimit(WalletPage.values().length);
         // vp2
-        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
@@ -251,12 +249,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     if (isOpen)
                     {
                         setNavBarVisibility(View.GONE);
-                        getFragment(WalletPage.values()[viewPager2.getCurrentItem()]).softKeyboardVisible();
+                        getFragment(WalletPage.values()[viewPager.getCurrentItem()]).softKeyboardVisible();
                     }
                     else
                     {
                         setNavBarVisibility(View.VISIBLE);
-                        getFragment(WalletPage.values()[viewPager2.getCurrentItem()]).softKeyboardGone();
+                        getFragment(WalletPage.values()[viewPager.getCurrentItem()]).softKeyboardGone();
                     }
                 });
 
@@ -498,7 +496,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt(STORED_PAGE, viewPager2.getCurrentItem());
+        savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
         if (getSelectedItem() != null)
         {
             viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
@@ -575,14 +573,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void showPage(WalletPage page)
     {
-        WalletPage oldPage = WalletPage.values()[viewPager2.getCurrentItem()];
+        WalletPage oldPage = WalletPage.values()[viewPager.getCurrentItem()];
 
         switch (page)
         {
             case DAPP_BROWSER:
             {
                 hideToolbar();
-                viewPager2.setCurrentItem(DAPP_BROWSER.ordinal());
+                viewPager.setCurrentItem(DAPP_BROWSER.ordinal());
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
                 enableDisplayHomeAsHome(true);
@@ -592,7 +590,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case WALLET:
             {
                 showToolbar();
-                viewPager2.setCurrentItem(WALLET.ordinal());
+                viewPager.setCurrentItem(WALLET.ordinal());
                 if (walletTitle == null || walletTitle.isEmpty())
                 {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -609,7 +607,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case SETTINGS:
             {
                 showToolbar();
-                viewPager2.setCurrentItem(SETTINGS.ordinal());
+                viewPager.setCurrentItem(SETTINGS.ordinal());
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
                 enableDisplayHomeAsHome(false);
@@ -619,7 +617,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case ACTIVITY:
             {
                 showToolbar();
-                viewPager2.setCurrentItem(ACTIVITY.ordinal());
+                viewPager.setCurrentItem(ACTIVITY.ordinal());
                 setTitle(getString(R.string.activity_label));
                 selectNavigationItem(ACTIVITY);
                 enableDisplayHomeAsHome(false);
@@ -628,7 +626,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             default:
                 showToolbar();
-                viewPager2.setCurrentItem(WALLET.ordinal());
+                viewPager.setCurrentItem(WALLET.ordinal());
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);
@@ -803,9 +801,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private class ScreenSlidePager2Adapter extends FragmentStateAdapter
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter
     {
-        public ScreenSlidePager2Adapter(@NonNull FragmentActivity fragmentActivity) {
+        public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);
         }
 
@@ -1198,11 +1196,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onBackPressed()
     {
         //Check if current page is WALLET or not
-        if (viewPager2.getCurrentItem() == DAPP_BROWSER.ordinal())
+        if (viewPager.getCurrentItem() == DAPP_BROWSER.ordinal())
         {
             ((DappBrowserFragment) getFragment(DAPP_BROWSER)).backPressed();
         }
-        else if (viewPager2.getCurrentItem() != WALLET.ordinal() && isNavBarVisible())
+        else if (viewPager.getCurrentItem() != WALLET.ordinal() && isNavBarVisible())
         {
             showPage(WALLET);
         }

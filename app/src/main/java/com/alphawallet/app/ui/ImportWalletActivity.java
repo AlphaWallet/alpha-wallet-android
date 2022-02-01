@@ -34,7 +34,7 @@ import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
-import com.alphawallet.app.ui.widget.adapter.TabPager2Adapter;
+import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.util.Utils;
@@ -101,7 +101,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         if (isWatch) pages.add(ImportType.WATCH_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.watch_wallet), SetWatchWalletFragment.create()));
 
         ViewPager2 viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPager2Adapter(this, pages));
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
         viewPager.setOffscreenPageLimit(pages.size());
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {

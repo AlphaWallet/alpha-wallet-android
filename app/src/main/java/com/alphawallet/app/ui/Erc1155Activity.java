@@ -26,7 +26,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.ui.widget.adapter.TabPager2Adapter;
+import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc1155ViewModel;
 import com.alphawallet.app.viewmodel.Erc1155ViewModelFactory;
@@ -105,7 +105,7 @@ public class Erc1155Activity extends BaseActivity implements StandardFunctionInt
         pages.add(2, new Pair<>("Activity", tokenActivityFragment));
 
         ViewPager2 viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPager2Adapter(this, pages));
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
         viewPager.setOffscreenPageLimit(pages.size());
         setupTabs(viewPager, pages);
     }

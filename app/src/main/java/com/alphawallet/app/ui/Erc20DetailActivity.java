@@ -6,7 +6,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -32,7 +31,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
-import com.alphawallet.app.ui.widget.adapter.TabPager2Adapter;
+import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
@@ -81,7 +80,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
 
-    private ViewPager2 viewPager2;
+    private ViewPager2 viewPager;
 
     private TokenInfoFragment tokenInfoFragment;
     private TokenActivityFragment tokenActivityFragment;
@@ -143,11 +142,11 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         pages.add(DetailPages.ACTIVITY.ordinal(), new Pair<>("Activity", tokenActivityFragment));
         //pages.add(DetailPages.ALERTS.ordinal(), new Pair<>("Alerts", tokenAlertsFragment));  //TODO: Implement alert system
 
-        viewPager2 = findViewById(R.id.viewPager);
-        viewPager2.setAdapter(new TabPager2Adapter(this, pages));
-        viewPager2.setOffscreenPageLimit(DetailPages.values().length);  // to retain fragments in memory
-        viewPager2.setUserInputEnabled(false);
-        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
+        viewPager.setOffscreenPageLimit(DetailPages.values().length);  // to retain fragments in memory
+        viewPager.setUserInputEnabled(false);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
@@ -166,7 +165,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         // connect viewPager and TabLayout
-        new TabLayoutMediator(tabLayout, viewPager2,
+        new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> tab.setText(pages.get(position).first)
         ).attach();
 
@@ -414,7 +413,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 {
                     //switch to activity view
 //                    viewPager.setCurrentItem(DetailPages.ACTIVITY.ordinal());
-                    viewPager2.setCurrentItem(DetailPages.ACTIVITY.ordinal());
+                    viewPager.setCurrentItem(DetailPages.ACTIVITY.ordinal());
                 }
                 break;
         }

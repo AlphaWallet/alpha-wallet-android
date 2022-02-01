@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity.tokens;
 
 import static com.alphawallet.app.ui.widget.entity.ChainItem.CHAIN_ITEM_WEIGHT;
+import static com.alphawallet.app.ui.widget.holder.TokenHolder.CHECK_MARK;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.os.Parcel;
@@ -18,6 +19,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -65,17 +67,17 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.group = group;
     }
 
-    public TokenCardMeta(Token token)
+    public TokenCardMeta(Token token, String filterText)
     {
         this.tokenId = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
         this.lastUpdate = token.updateBlancaTime;
         this.lastTxUpdate = token.lastTxCheck;
         this.type = token.getInterfaceSpec();
-        this.nameWeight = 1000;
+        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum());
         this.balance = token.balance.toString();
-        this.filterText = token.getShortSymbol() + "'" + token.getName(); //TODO: will not find AssetDefinition names
+        this.filterText = filterText;
         this.group = token.group;
-        this.isEnabled = true;
+        this.isEnabled = TextUtils.isEmpty(filterText) || !filterText.equals(CHECK_MARK);
     }
 
     protected TokenCardMeta(Parcel in)

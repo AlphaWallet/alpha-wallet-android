@@ -12,8 +12,10 @@ import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -33,6 +35,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.tools.Convert;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,6 +45,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
     private static final long TICKER_PERIOD_VALIDITY = 60 * DateUtils.MINUTE_IN_MILLIS; //Tickers stale after 60 minutes
+    public static final String CHECK_MARK = "[x]";
 
     private final TokenIcon tokenIcon;
     private final TextView balanceEth;
@@ -58,6 +62,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
+    private final MaterialCheckBox selectToken;
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
@@ -79,6 +84,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
+        selectToken = findViewById(R.id.select_token);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -109,6 +115,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(data.getFilterText()) && data.getFilterText().equals(CHECK_MARK))
+            {
+                setupCheckButton(data);
+            }
+            else
+            {
+                selectToken.setVisibility(View.GONE);
+            }
 
             balanceEth.setText(shortTitle());
 
@@ -307,5 +321,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         extendedInfo.setForeground(null);
         layoutAppreciation.setForeground(null);
+    }
+
+    private void setupCheckButton(final TokenCardMeta data)
+    {
+        selectToken.setVisibility(View.VISIBLE);
+        selectToken.setSelected(data.isEnabled);
+        selectToken.setOnCheckedChangeListener((buttonView, isChecked) -> data.isEnabled = isChecked);
     }
 }

@@ -6,10 +6,14 @@ import com.alphawallet.app.router.TokenDetailRouter;
 
 import dagger.Module;
 import dagger.Provides;
+import dagger.hilt.InstallIn;
+import dagger.hilt.android.components.ServiceComponent;
+
 
 @Module
-class PriceAlertServiceModule
-{
+@InstallIn(ServiceComponent.class)
+/** A module to provide dependencies to services */
+public class ServiceModule {
 
     @Provides
     GenericWalletInteract provideGenericWalletInteract(WalletRepositoryType walletRepository)

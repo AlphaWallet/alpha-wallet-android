@@ -370,5 +370,6 @@ public class TokenIcon extends ConstraintLayout
     {
         String isoCode = TickerService.getCurrencySymbolTxt();
         icon.setImageResource(CurrencyRepository.getFlagByISO(isoCode));
+        token = null;
     }
 }

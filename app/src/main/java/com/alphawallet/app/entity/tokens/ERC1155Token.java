@@ -637,8 +637,6 @@ public class ERC1155Token extends Token
         HashSet<BigInteger> tokenIds = new HashSet<>();
         BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
 
-
-
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {
             String block = ((Log) ethLog.get()).getBlockNumberRaw();

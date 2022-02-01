@@ -849,7 +849,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private BaseFragment getFragment(WalletPage page)
     {
         //build map, return correct fragment.
-        if (getSupportFragmentManager().getFragments().size() < page.ordinal())
+        if (getSupportFragmentManager().getFragments().size() == 0)
         {
             switch (page)
             {

@@ -1,40 +1,62 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
+import android.util.Pair;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthLog;
+import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+import static org.web3j.tx.Contract.staticExtractEventParameters;
+
+import io.realm.Realm;
 
 /**
  * Created by James on 3/10/2018.
@@ -382,6 +404,21 @@ public class ERC721Token extends Token
         return tokenBalanceAssets;
     }
 
+    private HashSet<BigInteger> checkBalances(Web3j web3j, HashSet<BigInteger> eventIds)
+    {
+        HashSet<BigInteger> heldTokens = new HashSet<>();
+        for (BigInteger tokenId : eventIds)
+        {
+            String owner = callSmartContractFunction(web3j, ownerOf(tokenId), getAddress(), getWallet());
+            if (owner == null || owner.toLowerCase().equals(getWallet()))
+            {
+                heldTokens.add(tokenId);
+            }
+        }
+
+        return heldTokens;
+    }
+
     @Override
     public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
     {
@@ -392,9 +429,10 @@ public class ERC721Token extends Token
         List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
 
         //Now detect differences or new tokens
-        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        for (Map.Entry<BigInteger, NFTAsset> entry : tokenBalanceAssets.entrySet())
         {
-            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
+            BigInteger tokenId = entry.getKey();
+            NFTAsset newAsset = entry.getValue();
             NFTAsset oldAsset = assetMap.get(tokenId);
 
             if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
@@ -442,6 +480,185 @@ public class ERC721Token extends Token
     @Override
     public List<Integer> getStandardFunctions()
     {
-        return Arrays.asList(R.string.action_transfer);
+        return Collections.singletonList(R.string.action_transfer);
+    }
+
+
+    //determine token balance
+    //1 determine first transaction
+
+
+    //get balance
+    private Event getTransferEvents()
+    {
+        //event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+        List<TypeReference<?>> paramList = new ArrayList<>();
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Address>(true) {});
+        paramList.add(new TypeReference<Uint256>(true) {});
+
+        return new Event("Transfer", paramList);
+    }
+
+    /**
+     * Uses both events and balance call. Each call to updateBalance uses 3 Node calls:
+     * 1. Get new Transfer events since last call
+     * 2.
+     *
+     * Once we have the current balance for potential tokens the database is updated to reflect the current status
+     *
+     * Note that this function is used even for contracts covered by OpenSea: This is because we could be looking at
+     * a contract 'join' between successive opensea reads. With accounts with huge quantity of NFT, this happens a lot
+     *
+     * @param realm
+     * @return
+     */
+    @Override
+    public BigDecimal updateBalance(Realm realm)
+    {
+        try
+        {
+            //first get current block
+            BigInteger currentBlock = TransactionsService.getCurrentBlock(tokenInfo.chainId);
+            BigInteger startingBlockVal = BigInteger.valueOf(firstTransactionBlock);
+            DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(startingBlockVal);
+            BigInteger calcEndBlock = startingBlockVal.add(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId));
+            DefaultBlockParameter endBlock = (currentBlock.compareTo(BigInteger.ZERO) > 0 && calcEndBlock.compareTo(currentBlock) < 0) ?
+                    DefaultBlockParameter.valueOf(calcEndBlock) : DefaultBlockParameterName.LATEST;
+
+            final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+
+            HashSet<BigInteger> eventIds = processTransferEvents(web3j, startBlock, endBlock);
+            updateStartBlock(realm, calcEndBlock);
+
+            HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, eventIds);
+
+            //should we check existing assets too?
+
+            //add to realm
+            updateRealmBalance(realm, tokenIdsHeld);
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        return BigDecimal.ONE;
+    }
+
+    private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds)
+    {
+        boolean updated = false;
+        //fill in balances
+        if (tokenIds != null && tokenIds.size() > 0)
+        {
+            for (BigInteger tokenId : tokenIds)
+            {
+                NFTAsset asset = tokenBalanceAssets.get(tokenId);
+                if (asset == null)
+                {
+                    tokenBalanceAssets.put(tokenId, new NFTAsset(tokenId));
+                    updated = true;
+                }
+            }
+
+            if (updated)
+            {
+                updateRealmBalances(realm, tokenIds);
+            }
+        }
+    }
+
+    private void updateRealmBalances(Realm realm, Set<BigInteger> tokenIds)
+    {
+        if (realm == null) return;
+        realm.executeTransaction(r -> {
+            for (BigInteger tokenId : tokenIds)
+            {
+                String key = RealmNFTAsset.databaseKey(this, tokenId);
+                RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                        .equalTo("tokenIdAddr", key)
+                        .findFirst();
+
+                if (realmAsset == null)
+                {
+                    realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
+                    realmAsset.setMetaData(tokenBalanceAssets.get(tokenId).jsonMetaData());
+                    r.insertOrUpdate(realmAsset);
+                }
+            }
+        });
+    }
+
+    private HashSet<BigInteger> processTransferEvents(Web3j web3j, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) throws IOException
+    {
+        final Event event = getTransferEvents();
+        EthFilter filter = getTransferFilter(event, startBlock, endBlock);
+        EthLog receiveLogs = web3j.ethGetLogs(filter).send();
+        HashSet<BigInteger> tokenIds = new HashSet<>();
+        BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
+
+        for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
+        {
+            String block = ((Log) ethLog.get()).getBlockNumberRaw();
+            if (block == null || block.length() == 0) continue;
+            BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
+
+            final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
+            BigInteger _id = new BigInteger(eventValues.getIndexedValues().get(2).getValue().toString());
+            tokenIds.add(_id);
+
+            if (blockNumber.compareTo(lastEventBlockRead) > 0)
+                lastEventBlockRead = blockNumber;
+        }
+
+        return tokenIds;
+    }
+
+    private EthFilter getTransferFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    {
+        final org.web3j.protocol.core.methods.request.EthFilter filter =
+                new org.web3j.protocol.core.methods.request.EthFilter(
+                        startBlock,
+                        endBlock,
+                        tokenInfo.address) // retort contract address
+                        .addSingleTopic(EventEncoder.encode(event));// commit event format
+
+        filter.addSingleTopic(null);
+        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'to' our wallet, we can check balance at end
+        filter.addSingleTopic(null);
+        return filter;
+    }
+
+    private void updateEventBlock(Realm realm, BigInteger lastEventBlockRead)
+    {
+        if (realm == null) return;
+
+        realm.executeTransaction(r -> {
+            RealmToken realmToken = r.where(RealmToken.class)
+                    .equalTo("address", databaseKey(tokenInfo.chainId, getAddress()))
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                realmToken.setErc1155BlockRead(lastEventBlockRead.add(BigInteger.ONE));
+            }
+        });
+    }
+
+    private void updateStartBlock(Realm realm, BigInteger startingEventBlock)
+    {
+        if (realm == null) return;
+
+        realm.executeTransaction(r -> {
+            RealmToken realmToken = r.where(RealmToken.class)
+                    .equalTo("address", databaseKey(tokenInfo.chainId, getAddress()))
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                realmToken.setEarliestTransactionBlock(startingEventBlock.add(BigInteger.ONE).longValue());
+            }
+        });
     }
 }

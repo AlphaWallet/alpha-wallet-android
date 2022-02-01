@@ -54,6 +54,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -122,6 +123,31 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             //
         }
+    }
+
+    @Override
+    public Single<Long> getEarliestContractTransaction(NetworkInfo network, String walletAddress, String tokenAddress)
+    {
+        return Single.fromCallable(() -> {
+            long earliestTx = 0;
+            try (Realm instance = realmManager.getRealmInstance(walletAddress))
+            {
+                earliestTx = getFirstTransactionBlock(instance, network.chainId, tokenAddress);
+                if (earliestTx > 0) return earliestTx;
+
+                //fetch earliest
+                //https://api.polygonscan.com/api?module=account&action=txlist&address=0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D&startblock=0&endblock=999999999&sort=asc&page=1&offset=1
+                EtherscanTransaction[] earliest = readTransactions(network, walletAddress, tokenAddress, "1", true, 1, 1);
+                if (earliest.length > 0)
+                {
+                    earliestTx = Long.parseLong(earliest[0].blockNumber);
+                    storeEarliestBlockRead(instance, network.chainId, tokenAddress, earliestTx);
+                }
+
+                return earliestTx;
+            }
+        });
+
     }
 
     /*
@@ -788,6 +814,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             if (realmToken != null)
             {
                 txBlockRead = realmToken.getEarliestTransactionBlock();
+            }
+            else
+            {
+                txBlockRead = -1;
             }
         }
         catch (Exception e)

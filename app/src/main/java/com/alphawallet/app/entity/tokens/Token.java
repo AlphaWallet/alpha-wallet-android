@@ -75,6 +75,8 @@ public class Token
     public int itemViewHeight;
     public TokenGroup group;
 
+    protected long firstTransactionBlock;
+
     private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
     private Map<BigInteger, List<String>> functionAvailabilityMap = null;
 
@@ -997,5 +999,15 @@ public class Token
         if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
         if (realmToken.getContractType() != contractType) { return true; }
         return realmToken.getDecimals() != tokenInfo.decimals;
+    }
+
+    public void setFirstTransactionBlock(long earliestTransactionBlock)
+    {
+        firstTransactionBlock = earliestTransactionBlock;
+    }
+
+    public long getFirstTransactionBlock()
+    {
+        return firstTransactionBlock;
     }
 }

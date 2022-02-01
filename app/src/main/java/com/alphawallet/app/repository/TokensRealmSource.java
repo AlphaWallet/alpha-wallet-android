@@ -1404,6 +1404,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
 
             loadAssetContract(realm, result);
+            result.setFirstTransactionBlock(realmItem.getEarliestTransactionBlock());
         }
         return result;
     }

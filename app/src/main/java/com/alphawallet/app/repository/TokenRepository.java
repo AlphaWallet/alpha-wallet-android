@@ -405,6 +405,8 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
+                            balance = updateERC721Balance(token, wallet);
+                            break;
                         case ERC20:
                         case DYNAMIC_CONTRACT:
                             //checking raw balance, this only gives the count of tokens
@@ -457,6 +459,16 @@ public class TokenRepository implements TokenRepositoryType {
         }
 
         return newBalance;
+    }
+
+    private BigDecimal updateERC721Balance(Token token, Wallet wallet)
+    {
+        try (Realm realm = getRealmInstance(wallet))
+        {
+            token.updateBalance(realm);
+        }
+
+        return checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
     }
 
     private Single<Token[]> updateBalances(Wallet wallet, Token[] tokens)

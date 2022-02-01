@@ -88,6 +88,7 @@ public class TokensService
     private long syncStart;
     private ServiceSyncCallback completionCallback;
     private int syncCount = 0;
+    private final ConcurrentLinkedQueue<Token> firstTransactionList = new ConcurrentLinkedQueue<>();
 
     @Nullable
     private Disposable eventTimer;
@@ -618,6 +619,10 @@ public class TokensService
         {
             checkERC20(t.tokenInfo.chainId);
         }
+        else if (t.isNonFungible() && t.getFirstTransactionBlock() == 0)
+        {
+            firstTransactionList.add(t);
+        }
     }
 
     private void checkChainVisibility(Token t)
@@ -852,7 +857,7 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastCheckDiff * (check.isEnabled ? 1 : 0.25f);
-            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS / (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
+            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS * (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
 
             if (!check.isEthereum() && lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
             {
@@ -1249,4 +1254,8 @@ public class TokensService
         return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
     }
 
+    public Token getNextTokenInFetchList()
+    {
+        return firstTransactionList.poll();
+    }
 }

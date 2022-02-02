@@ -46,6 +46,7 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method
+        def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
 
         buildConfigField 'int', 'DB_VERSION', '40'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
@@ -61,6 +62,7 @@ android {
             cmake {
                 cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\""
                 cFlags "-DOSKEY=\\\"" + DEFAULT_OPENSEA_API_KEY + "\\\""
+                cFlags "-DPSKEY=\\\"" + DEFAULT_POLYGONSCAN_API_KEY + "\\\""
             }
         }
     }

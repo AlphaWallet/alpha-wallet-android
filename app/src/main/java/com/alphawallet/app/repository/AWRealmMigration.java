@@ -1,9 +1,6 @@
 package com.alphawallet.app.repository;
 
-import com.alphawallet.app.repository.entity.RealmGasSpread;
-
 import io.realm.DynamicRealm;
-import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
@@ -339,7 +336,7 @@ public class AWRealmMigration implements RealmMigration
             {
                 realmData.addField("ENSAvatar", String.class);
             }
-            oldVersion++;
+            oldVersion = 34;
         }
 
         //Migrate from int to long
@@ -388,10 +385,10 @@ public class AWRealmMigration implements RealmMigration
                         .addField("address", String.class, FieldAttribute.PRIMARY_KEY);
             }
 
-            oldVersion++;
+            oldVersion = 37;
         }
 
-        if (oldVersion == 37 || oldVersion == 38)
+        if (oldVersion > 36 && oldVersion <= 40)
         {
             RealmObjectSchema realmData = schema.get("RealmTokenMapping");
             if (realmData != null) schema.remove("RealmTokenMapping");
@@ -400,15 +397,10 @@ public class AWRealmMigration implements RealmMigration
                         .addField("base", String.class)
                         .addField("group", int.class);
 
-            oldVersion = 39;
-        }
-
-        if (oldVersion == 39)
-        {
-            RealmObjectSchema realmData = schema.get("RealmAToken");
+            realmData = schema.get("RealmAToken");
             if (realmData != null) schema.remove("RealmAToken");
 
-            oldVersion++;
+            oldVersion = 41;
         }
     }
 

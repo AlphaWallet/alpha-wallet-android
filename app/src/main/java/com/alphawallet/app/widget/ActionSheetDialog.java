@@ -603,6 +603,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
     }
 
+    //Takes gas estimate from calling activity (eg WalletConnectActivity) and updates dialog
     public void setGasEstimate(BigInteger estimate)
     {
         gasWidget.setGasEstimate(estimate);

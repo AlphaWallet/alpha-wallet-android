@@ -711,6 +711,7 @@
     <string name="invalid_walletconnect_session">WalletCoonnect လုပ်ငန်းစဥ်မှားယွင်းနေပါသည်။</string>
     <string name="restart_walletconnect_session">WalletConnect နှင့်ချိတ်ဆက်ထားသောလုပ်ငန်းစဥ်ကို မှန်ကန်စွာမပိတ်ရသေးပါ။ ကျေးဇူးပြု၍ အင်တာနက်စာမျက်နှာကိုပြန်သွား၍ ချိတ်ဆက်ထားမှုကိုဖြုတ်ပါ။ ထို့နောက် ချိတ်ထားမှုလုပ်ငန်းစဥ်အသစ်ကိုပြန်စပါ။</string>
     <string name="invalid_walletconnect_data">WalletConnectမှပြထားသောQRကုတ်သည်အသုံးပြု၍မရပါ</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">ဝန်ချိန်</string>
     <string name="signed_transactions">လုပ်ငန်းစဥ်ကိုလက်မှတ်ထိုးပြီးပါပြီ</string>

@@ -23,6 +23,7 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -205,8 +206,19 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         }
         wallets.postValue(items);
 
-        startBalanceUpdateTimer(items);
-        startFullWalletSync(items);
+        if (ethereumNetworkRepository.isMainNetSelected())
+        {
+            startBalanceUpdateTimer(items);
+            startFullWalletSync(items);
+        }
+        else
+        {
+            for (Wallet w : items)
+            {
+                if (w.type == WalletType.WATCH) continue;
+                syncFromDBOnly(w, true);
+            }
+        }
     }
 
     private void startFullWalletSync(Wallet[] items)
@@ -218,6 +230,24 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::sendUnsyncedValue, e -> { }).isDisposed());
+    }
+
+    private void syncFromDBOnly(Wallet wallet, boolean complete)
+    {
+        tokenRepository.getTotalValue(wallet.address.toLowerCase(), EthereumNetworkBase.getAllMainNetworks())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(value ->
+                        {
+                            if (complete)
+                            {
+                                syncCallback.syncCompleted(wallet.address.toLowerCase(), value);
+                            }
+                            else
+                            {
+                                syncCallback.syncStarted(wallet.address.toLowerCase(), value);
+                            }
+                        }).isDisposed();
     }
 
     private void sendUnsyncedValue(Wallet wallet)

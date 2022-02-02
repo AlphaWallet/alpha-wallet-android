@@ -699,6 +699,7 @@
     <string name="invalid_walletconnect_session">WalletConnect không hợp lệ</string>
     <string name="restart_walletconnect_session">Previous WalletConnect session not correctly terminated. Please return to webpage and disconnect, then start a new session.</string>
     <string name="invalid_walletconnect_data">Dữ liệu QR WalletConnect không hợp lệ</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">Payload</string>
     <string name="signed_transactions">Giao dịch đã ký</string>

@@ -6,6 +6,8 @@ import android.app.Service;
 
 import androidx.fragment.app.Fragment;
 import com.alphawallet.app.di.DaggerAppComponent;
+import com.alphawallet.app.util.ReleaseTree;
+
 import javax.inject.Inject;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
@@ -13,6 +15,7 @@ import dagger.android.HasActivityInjector;
 import dagger.android.HasServiceInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class App extends Application implements HasActivityInjector, HasSupportFragmentInjector, HasServiceInjector {
 
@@ -34,6 +37,12 @@ public class App extends Application implements HasActivityInjector, HasSupportF
 				.application(this)
 				.build()
 				.inject(this);
+
+		if (BuildConfig.DEBUG) {
+			Timber.plant(new Timber.DebugTree());
+		} else {
+			Timber.plant(new ReleaseTree());
+		}
 
 		// enable pin code for the application
 //		LockManager<CustomPinActivity> lockManager = LockManager.getInstance();

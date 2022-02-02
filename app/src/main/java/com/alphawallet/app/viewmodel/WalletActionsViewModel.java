@@ -4,13 +4,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
@@ -98,7 +98,7 @@ public class WalletActionsViewModel extends BaseViewModel {
     public void updateWallet(Wallet wallet)
     {
         fetchWalletsInteract.updateWalletData(wallet, () -> {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Stored " + wallet.address);
+            Timber.d("Stored %s", wallet.address);
             saved.postValue(1);
         });
     }

@@ -96,6 +96,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import timber.log.Timber;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
         FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
@@ -147,7 +148,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private void onMoveToForeground()
     {
-        Log.d("LIFE", "AlphaWallet into foreground");
+        Timber.tag("LIFE").d("AlphaWallet into foreground");
         if (viewModel != null) viewModel.checkTransactionEngine();
         isForeground = true;
     }
@@ -155,7 +156,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private void onMoveToBackground()
     {
-        Log.d("LIFE", "AlphaWallet into background");
+        Timber.tag("LIFE").d("AlphaWallet into background");
         if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
         if (viewModel != null) viewModel.outOfFocus();
         isForeground = false;

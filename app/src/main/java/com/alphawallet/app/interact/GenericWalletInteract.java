@@ -16,6 +16,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class GenericWalletInteract
 {
@@ -86,7 +87,7 @@ public class GenericWalletInteract
 		{
 			wallet.balance = newBalanceStr;
 			walletRepository.updateWalletData(wallet, () -> {
-				if (BuildConfig.DEBUG) Log.d(getClass().getCanonicalName(), "Updated balance");
+				Timber.tag(getClass().getCanonicalName()).d("Updated balance");
 			});
 		}
 	}

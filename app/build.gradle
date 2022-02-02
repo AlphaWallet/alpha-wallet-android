@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 178
-        versionName "3.50.0"
+        versionCode 180
+        versionName "3.51.0"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -46,8 +46,9 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method
+        def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
 
-        buildConfigField 'int', 'DB_VERSION', '40'
+        buildConfigField 'int', 'DB_VERSION', '43'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -61,6 +62,7 @@ android {
             cmake {
                 cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\""
                 cFlags "-DOSKEY=\\\"" + DEFAULT_OPENSEA_API_KEY + "\\\""
+                cFlags "-DPSKEY=\\\"" + DEFAULT_POLYGONSCAN_API_KEY + "\\\""
             }
         }
     }
@@ -224,6 +226,9 @@ dependencies {
 
     implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
+
+    //Timber
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 }
 
 // WARNING WARNING WARNING

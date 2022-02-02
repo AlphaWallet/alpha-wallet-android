@@ -23,6 +23,8 @@ import com.alphawallet.app.ui.StaticViewer;
 import java.io.IOException;
 import java.io.InputStream;
 
+import timber.log.Timber;
+
 public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1989;
@@ -106,7 +108,7 @@ public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnCli
                 throw new IOException("Nothing is read.");
             }
         } catch (Exception ex) {
-            Log.d("READ_JS_TAG", "Ex", ex);
+            Timber.tag("READ_JS_TAG").d( ex, "Ex");
         }
         return Base64.encodeToString(buffer, Base64.DEFAULT);
     }

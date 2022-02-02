@@ -157,6 +157,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
@@ -1288,7 +1289,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             @Override
             public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.getMessage());
+                Timber.d("Initial Msg: %s", message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
 
                 confirmationDialog.success();

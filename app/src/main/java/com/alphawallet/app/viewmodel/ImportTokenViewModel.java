@@ -8,7 +8,6 @@ import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 import static com.alphawallet.token.tools.ParseMagicLink.unassigned;
 
 import android.app.Activity;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -57,6 +56,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by James on 9/03/2018.
@@ -449,7 +449,7 @@ public class ImportTokenViewModel extends BaseViewModel
             MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
-            Log.d(TAG, "Approx value of trade: " + order.price);
+            Timber.tag(TAG).d("Approx value of trade: %s", order.price);
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,

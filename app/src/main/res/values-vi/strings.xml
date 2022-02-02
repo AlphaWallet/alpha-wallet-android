@@ -699,6 +699,7 @@
     <string name="invalid_walletconnect_session">WalletConnect không hợp lệ</string>
     <string name="restart_walletconnect_session">Previous WalletConnect session not correctly terminated. Please return to webpage and disconnect, then start a new session.</string>
     <string name="invalid_walletconnect_data">Dữ liệu QR WalletConnect không hợp lệ</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">Payload</string>
     <string name="signed_transactions">Giao dịch đã ký</string>
@@ -839,6 +840,7 @@
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">Mạng lưới</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="swap">Swap</string>
     <string name="action_send_to_this_address">Send to this Address</string>
     <string name="stay_updated">Stay Updated</string>
     <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>

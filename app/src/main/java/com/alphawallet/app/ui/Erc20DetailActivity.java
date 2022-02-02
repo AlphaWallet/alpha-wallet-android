@@ -449,7 +449,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             String queryPath = "?use=v2&inputCurrency=" + (token.isEthereum() ? ETH_SYMBOL : token.getAddress());
             openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
         }
-        else if (actionId == R.string.exchange_with_oneinch)
+        else if (actionId == R.string.swap)
         {
             openDapp(formatOneInchCall(token));
         }

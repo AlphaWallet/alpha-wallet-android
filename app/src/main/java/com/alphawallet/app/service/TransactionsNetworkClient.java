@@ -54,6 +54,8 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -70,6 +72,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
+    private final String POLYGONSCAN_API_KEY;
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -82,6 +85,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public static native String getEtherscanKey();
     public static native String getBSCExplorerKey();
     public static native String getCovalentKey();
+    public static native String getPolygonScanKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -94,6 +98,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
         ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
+        POLYGONSCAN_API_KEY = getPolygonScanKey().length() > 3 ? "&apikey=" + getPolygonScanKey() : "";
     }
 
     @Override
@@ -385,14 +390,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 sb.append(pageSize);
             }
 
-            if (networkInfo.etherscanAPI.contains("etherscan"))
-            {
-                sb.append(ETHERSCAN_API_KEY);
-            }
-            else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
-            {
-                sb.append(BSC_EXPLORER_API_KEY);
-            }
+            sb.append(getNetworkAPIToken(networkInfo));
 
             fullUrl = sb.toString();
 
@@ -631,12 +629,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
-        String APIKEY_TOKEN = networkInfo.etherscanAPI.contains("etherscan") ? ETHERSCAN_API_KEY : "";
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +
                 "&address=" + walletAddress +
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
-                "&sort=asc" + APIKEY_TOKEN;
+                "&sort=asc" + getNetworkAPIToken(networkInfo);
 
         Request request = new Request.Builder()
                 .url(fullUrl)
@@ -665,6 +662,26 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
 
         return result;
+    }
+
+    private String getNetworkAPIToken(NetworkInfo networkInfo)
+    {
+        if (networkInfo.etherscanAPI.contains("etherscan"))
+        {
+            return ETHERSCAN_API_KEY;
+        }
+        else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
+        {
+            return BSC_EXPLORER_API_KEY;
+        }
+        else if (networkInfo.chainId == MATIC_ID || networkInfo.chainId == MATIC_TEST_ID)
+        {
+            return POLYGONSCAN_API_KEY;
+        }
+        else
+        {
+            return "";
+        }
     }
 
     //TODO: Instead of reading transfers we can read balances and track changes for ERC20 tokens

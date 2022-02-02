@@ -614,7 +614,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 default:
                     if (token.isERC20() || token.isEthereum())
                     {
-                        addFunction(R.string.exchange_with_oneinch);
+                        addFunction(R.string.swap);
                     }
                     return true;
             }
@@ -625,7 +625,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         {
             if (token.isERC20() || token.isEthereum())
             {
-                addFunction(R.string.exchange_with_oneinch);
+                addFunction(R.string.swap);
                 return true;
             }
         }

@@ -629,11 +629,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
-        if (networkInfo.chainId == MATIC_ID)
-        {
-            System.out.println("YOLESS");
-        }
-
         String APIKEY_TOKEN = getNetworkAPIToken(networkInfo);
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +

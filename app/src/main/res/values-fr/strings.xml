@@ -838,6 +838,7 @@
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">Réseaux</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="swap">Swap</string>
     <string name="action_send_to_this_address">Send to this Address</string>
     <string name="stay_updated">Stay Updated</string>
     <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>

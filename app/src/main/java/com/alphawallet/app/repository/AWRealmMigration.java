@@ -388,7 +388,7 @@ public class AWRealmMigration implements RealmMigration
             oldVersion = 37;
         }
 
-        if (oldVersion > 36 && oldVersion <= 40)
+        if (oldVersion >= 37 && oldVersion <= 42)
         {
             RealmObjectSchema realmData = schema.get("RealmTokenMapping");
             if (realmData != null) schema.remove("RealmTokenMapping");
@@ -400,7 +400,7 @@ public class AWRealmMigration implements RealmMigration
             realmData = schema.get("RealmAToken");
             if (realmData != null) schema.remove("RealmAToken");
 
-            oldVersion = 41;
+            oldVersion = 43;
         }
     }
 

@@ -35,8 +35,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 178
-        versionName "3.50.0"
+        versionCode 180
+        versionName "3.51.0"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -48,7 +48,7 @@ android {
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method
         def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
 
-        buildConfigField 'int', 'DB_VERSION', '40'
+        buildConfigField 'int', 'DB_VERSION', '43'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {

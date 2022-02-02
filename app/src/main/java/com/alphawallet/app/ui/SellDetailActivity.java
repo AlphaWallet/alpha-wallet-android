@@ -56,6 +56,7 @@ import java.util.MissingFormatArgumentException;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.EXTRA_PRICE;
 import static com.alphawallet.app.C.EXTRA_STATE;
@@ -437,10 +438,10 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         try {
             date = simpleDateFormat.parse(tempDateString);
             dateString = simpleDateFormat.format(date);
-            Log.d(SellDetailActivity.class.getSimpleName(), "date : " + dateString);
+            Timber.d("date : %s", dateString);
             UTCTimeStamp = (date.getTime())/1000;
         } catch (ParseException e) {
-            Log.e(SellDetailActivity.class.getSimpleName(), e.getMessage(), e);
+            Timber.e(e);
         }
 
         //1. validate price

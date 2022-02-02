@@ -47,6 +47,7 @@ import java.math.BigDecimal;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.IMPORT_STRING;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -140,7 +141,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void onError(ErrorEnvelope errorEnvelope)
     {
-        Log.d(TAG, errorEnvelope.message);
+        Timber.tag(TAG).d(errorEnvelope.message);
     }
 
     private void checkContractNetwork(String contractAddress)

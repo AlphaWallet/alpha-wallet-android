@@ -28,6 +28,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import timber.log.Timber;
 
 public class HelpActivity extends BaseActivity {
     @Inject
@@ -182,7 +183,7 @@ public class HelpActivity extends BaseActivity {
             }
             in.close();
         } catch (Exception ex) {
-            Log.d("READ_JS_TAG", "Ex", ex);
+            Timber.tag("READ_JS_TAG").d(ex, "Ex");
         }
 
         return false;

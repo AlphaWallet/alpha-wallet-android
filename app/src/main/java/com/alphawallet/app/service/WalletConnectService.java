@@ -32,6 +32,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
+import timber.log.Timber;
 
 /**
  * The purpose of this service is to manage the currently active WalletConnect sessions. Keep the connections alive and terminate where required.
@@ -54,7 +55,7 @@ public class WalletConnectService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.d(TAG, "SERVICE STARTING");
+        Timber.tag(TAG).d("SERVICE STARTING");
         try
         {
             int actionVal = Integer.parseInt(intent.getAction());
@@ -63,7 +64,7 @@ public class WalletConnectService extends Service
             switch (action)
             {
                 case CONNECT:
-                    Log.d(TAG, "SERVICE CONNECT");
+                    Timber.tag(TAG).d("SERVICE CONNECT");
                     break;
                 case APPROVE:
                     approveRequest(intent);
@@ -72,12 +73,12 @@ public class WalletConnectService extends Service
                     rejectRequest(intent);
                     break;
                 case DISCONNECT:
-                    Log.d(TAG, "SERVICE DISCONNECT");
+                    Timber.tag(TAG).d("SERVICE DISCONNECT");
                     //kill any active connection
                     disconnectCurrentSessions();
                     break;
                 case CLOSE:
-                    Log.d(TAG, "SERVICE CLOSE");
+                    Timber.tag(TAG).d("SERVICE CLOSE");
                     //result.getData().getIntExtra(C.EXTRA_CHAIN_ID, -1);
                     String sessionId = intent.getStringExtra("session");
                     disconnectSession(sessionId);
@@ -175,7 +176,7 @@ public class WalletConnectService extends Service
 
     public void putClient(String sessionId, WCClient client)
     {
-        Log.d(TAG, "Add session: " + sessionId);
+        Timber.tag(TAG).d("Add session: " + sessionId);
         clientMap.put(sessionId, client);
         broadcastConnectionCount(clientMap.size());
         clientTimes.put(sessionId, System.currentTimeMillis());
@@ -217,14 +218,14 @@ public class WalletConnectService extends Service
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, peer, client.chainIdVal()));
             broadcastSessionEvent(WALLET_CONNECT_NEW_SESSION, client.sessionId());
-            Log.d(TAG, "On Request: " + peer.getName());
+            Timber.tag(TAG).d("On Request: %s", peer.getName());
             return Unit.INSTANCE;
         });
 
         client.setOnFailure(throwable -> {
             //alert UI
             if (client.sessionId() == null) return Unit.INSTANCE;
-            Log.d(TAG, "On Fail: " + throwable.getMessage());
+            Timber.tag(TAG).d("On Fail: %s", throwable.getMessage());
             //only add if no errors already in queue
             if (queueHasNoErrors())
             {
@@ -236,7 +237,7 @@ public class WalletConnectService extends Service
         });
 
         client.setOnDisconnect((code, reason) -> {
-            Log.d(TAG, "Terminate session?");
+            Timber.tag(TAG).d("Terminate session?");
             terminateClient(client.sessionId());
             client.resetState();
             return Unit.INSTANCE;
@@ -248,7 +249,7 @@ public class WalletConnectService extends Service
             signRequests.add(new WCRequest(client.sessionId(), id, message));
             //see if this connection is live, if so then bring WC request to foreground
             switchToWalletConnectApprove(client.sessionId());
-            Log.d(TAG, "Sign Request: " + message.toString());
+            Timber.tag(TAG).d("Sign Request: %s", message.toString());
             startMessagePump();
             return Unit.INSTANCE;
         });
@@ -296,7 +297,7 @@ public class WalletConnectService extends Service
             intent.putExtra("sessionid", sessionId);
             sendBroadcast(intent);
 
-            Log.d(TAG, "Connected clients: " + clientMap.size());
+            Timber.tag(TAG).d("Connected clients: %s", clientMap.size());
         }
     }
 
@@ -318,23 +319,23 @@ public class WalletConnectService extends Service
             if (c == null) return;
             if (c.isConnected() && c.chainIdVal() != 0 && c.getAccounts() != null)
             {
-                Log.d(TAG, "Ping Key: " + sessionKey);
+                Timber.tag(TAG).d("Ping Key: %s", sessionKey);
                 c.updateSession(c.getAccounts(), c.chainIdVal(), true);
             }
 
             long lastUsed = getLastUsed(c);
             long timeUntilTerminate = CONNECTION_TIMEOUT - (System.currentTimeMillis() - lastUsed);
-            Log.d(TAG, "Time until terminate: " + timeUntilTerminate/DateUtils.SECOND_IN_MILLIS + " (" + sessionKey + ")");
+            Timber.tag(TAG).d("Time until terminate: %s (%s)", (timeUntilTerminate/DateUtils.SECOND_IN_MILLIS), sessionKey);
             if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
             {
                 if (c.getSession() != null)
                 {
-                    Log.d(TAG, "Terminate session: " + sessionKey);
+                    Timber.tag(TAG).d("Terminate session: %s", sessionKey);
                     c.killSession();
                 }
                 else
                 {
-                    Log.d(TAG, "Disconnect session: " + sessionKey);
+                    Timber.tag(TAG).d("Disconnect session: %s", sessionKey);
                     c.disconnect();
                 }
                 removeKeyList.add(sessionKey);
@@ -343,7 +344,7 @@ public class WalletConnectService extends Service
 
         for (String removeKey : removeKeyList)
         {
-            Log.d(TAG, "Removing Key: " + removeKey);
+            Timber.tag(TAG).d("Removing Key: %s", removeKey);
             terminateClient(removeKey);
         }
     }
@@ -355,7 +356,7 @@ public class WalletConnectService extends Service
         broadcastConnectionCount(clientMap.size());
         if (clientMap.size() == 0 && pingTimer != null && !pingTimer.isDisposed())
         {
-            Log.d(TAG, "Stop timer & service");
+            Timber.tag(TAG).d("Stop timer & service");
             pingTimer.dispose();
             pingTimer = null;
             stopSelf();

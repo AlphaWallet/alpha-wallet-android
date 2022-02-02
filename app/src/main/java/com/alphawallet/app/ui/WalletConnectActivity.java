@@ -85,6 +85,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import okhttp3.OkHttpClient;
+import timber.log.Timber;
 
 public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface, WalletConnectCallback
 {
@@ -149,7 +150,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         initViewModel();
 
-        Log.d(TAG, "Starting Activity: " + getSessionId());
+        Timber.tag(TAG).d("Starting Activity: %s", getSessionId());
 
         retrieveQrCode();
         viewModel.prepare();
@@ -190,7 +191,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         String sessionId = getSessionId();
         retrieveQrCode();
         String newSessionId = getSessionId();
-        Log.d(TAG, "Received New Intent: " + newSessionId + " (" + sessionId + ")");
+        Timber.tag(TAG).d("Received New Intent: %s (%s)", newSessionId, sessionId);
         viewModel.getClient(this, newSessionId, client -> {
             if (client == null || !client.isConnected())
             {
@@ -201,7 +202,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             else
             {
                 //setup the screen
-                Log.d(TAG, "Resume Connection session: " + newSessionId);
+                Timber.tag(TAG).d("Resume Connection session: %s", newSessionId);
                 setClient(client);
             }
         });
@@ -311,7 +312,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     //TODO: Refactor this into elements - this function is unmaintainable
     private void onDefaultWallet(Wallet wallet)
     {
-        Log.d(TAG, "Open Connection: " + getSessionId());
+        Timber.tag(TAG).d("Open Connection: %s", getSessionId());
 
         String peerId;
         String sessionId = getSessionId();
@@ -320,7 +321,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             if (connectionId == null && session != null) //new session request
             {
-                Log.d(TAG, "New Session: " + getSessionId());
+                Timber.tag(TAG).d("New Session: %s", getSessionId());
                 //new connection, create a random ID to identify us to the remotePeer.
                 peerId = UUID.randomUUID().toString(); //Create a new ID for our side of this session. The remote peer uses this ID to identify us
                 connectionId = null; //connectionId is only relevant for resuming a session
@@ -334,7 +335,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 displaySessionStatus(sessionId);
 
                 viewModel.getClient(this, sessionId, client -> {
-                    Log.d(TAG, "Resume Session: " + getSessionId());
+                    Timber.tag(TAG).d("Resume Session: %s", getSessionId());
 
                     if (client == null && fromSessionActivity)
                     {
@@ -366,8 +367,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 return;
             }
 
-            Log.d(TAG, "connect: peerID " + peerId);
-            Log.d(TAG, "connect: remotePeerID " + connectionId);
+            Timber.tag(TAG).d("connect: peerID %s", peerId);
+            Timber.tag(TAG).d("connect: remotePeerID %s", connectionId);
 
             initWalletConnectPeerMeta();
             initWalletConnectClient();
@@ -378,22 +379,22 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Received message");
+            Timber.tag(TAG).d("Received message");
             String action = intent.getAction();
             switch (action)
             {
                 case C.WALLET_CONNECT_REQUEST:
                 case C.WALLET_CONNECT_NEW_SESSION:
-                    Log.d(TAG, "MSG: WALLET CONNECT RQ");
+                    Timber.tag(TAG).d("MSG: WALLET CONNECT RQ");
                     getPendingRequest();
                     break;
                 case C.WALLET_CONNECT_FAIL:
-                    Log.d(TAG, "MSG: FAIL CONNECTION");
+                    Timber.tag(TAG).d("MSG: FAIL CONNECTION");
                     getPendingRequest();
                     break;
                 case C.WALLET_CONNECT_CLIENT_TERMINATE:
                     String sessionId = intent.getStringExtra("sessionid");
-                    Log.d(TAG, "MSG: TERMINATE: " + sessionId);
+                    Timber.tag(TAG).d("MSG: TERMINATE: %s", sessionId);
                     if (getSessionId() != null && getSessionId().equals(sessionId))
                     {
                         setupClient(sessionId);
@@ -442,7 +443,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     });
                     break;
                 case SESSION_REQUEST:
-                    Log.d(TAG, "On Request: " + rq.peer.getName());
+                    Timber.tag(TAG).d("On Request: %s", rq.peer.getName());
                     runOnUiThread(() -> {
                         onSessionRequest(rq.id, rq.peer, rq.chainId);
                     });
@@ -520,11 +521,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             return;
         }
 
-        Log.d(TAG, "Connect: " + getSessionId() + " (" + connectionId + ")");
+        Timber.tag(TAG).d("Connect: %s (%s)", getSessionId(), connectionId);
         client.connect(session, peerMeta, peerId, connectionId);
 
         client.setOnFailure(throwable -> {
-            Log.d(TAG, "On Fail: " + throwable.getMessage());
+            Timber.tag(TAG).d("On Fail: %s", throwable.getMessage());
             showErrorDialog("Error: " + throwable.getMessage());
             return Unit.INSTANCE;
         });
@@ -572,7 +573,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         client.setOnWCOpen(peerId -> {
             viewModel.putClient(this, getSessionId(), client);
-            Log.d(TAG, "On Open: " + peerId);
+            Timber.tag(TAG).d("On Open: %s", peerId);
             return Unit.INSTANCE;
         });
     }
@@ -904,7 +905,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void killSession()
     {
-        Log.d(TAG, ": Terminate Session: " + getSessionId());
+        Timber.tag(TAG).d(": Terminate Session: %s", getSessionId());
         if (client != null && session != null && client.isConnected())
         {
             client.killSession();

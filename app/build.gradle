@@ -226,6 +226,9 @@ dependencies {
 
     implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
+
+    //Timber
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 }
 
 // WARNING WARNING WARNING

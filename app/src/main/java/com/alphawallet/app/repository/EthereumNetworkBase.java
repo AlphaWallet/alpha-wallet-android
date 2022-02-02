@@ -685,6 +685,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return hasValue.contains(chainId);
     }
 
+    public static List<Long> getAllMainNetworks()
+    {
+        return hasValue;
+    }
+
     public static String getSecondaryNodeURL(long networkId)
     {
         NetworkInfo info = networkMap.get(networkId);

@@ -696,6 +696,7 @@
     <string name="invalid_walletconnect_session">Session WalletConnect Invalide</string>
     <string name="restart_walletconnect_session">La session précédente de WalletConnect ne s\'est pas correctement terminée. Veuillez retourner à la page Web et vous déconnecter, puis démarrer une nouvelle session.</string>
     <string name="invalid_walletconnect_data">Données QR WalletConnect Invalide</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">Puissance</string>
     <string name="signed_transactions">Transactions Signés</string>

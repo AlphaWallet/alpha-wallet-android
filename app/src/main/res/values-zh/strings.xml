@@ -679,6 +679,7 @@
     <string name="invalid_walletconnect_session">无效的WalletConnect会话</string>
     <string name="restart_walletconnect_session">先前的WalletConnect会话未正确终止。请返回网页并断开连接，然后开始新的会话。</string>
     <string name="invalid_walletconnect_data">无效的WalletConnect二维码数据</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">数据</string>
     <string name="signed_transactions">签署的交易</string>

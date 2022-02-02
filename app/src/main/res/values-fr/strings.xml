@@ -875,4 +875,5 @@
     <string name="label_token_id">Token #</string>
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
+    <string name="label_details">Details</string>
 </resources>

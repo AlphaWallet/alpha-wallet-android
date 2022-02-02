@@ -17,12 +17,14 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -40,6 +42,8 @@ public class NFTImageView extends RelativeLayout {
     private final RelativeLayout webLayout;
     private final WebView webView;
     private final RelativeLayout holdingView;
+    private final RelativeLayout fallbackLayout;
+    private final TokenIcon fallbackIcon;
     private final Handler handler = new Handler(Looper.getMainLooper());
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
@@ -60,6 +64,8 @@ public class NFTImageView extends RelativeLayout {
         }
     };
 
+    private boolean hasContent;
+
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
@@ -68,6 +74,8 @@ public class NFTImageView extends RelativeLayout {
         webLayout = findViewById(R.id.web_view_wrapper);
         webView = findViewById(R.id.image_web_view);
         holdingView = findViewById(R.id.layout_holder);
+        fallbackLayout = findViewById(R.id.layout_fallback);
+        fallbackIcon = findViewById(R.id.icon_fallback);
 
         webLayout.setVisibility(View.GONE);
         webView.setVisibility(View.GONE);
@@ -113,6 +121,8 @@ public class NFTImageView extends RelativeLayout {
         {
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
+
+        hasContent = true;
     }
 
     private void setWebView(String imageUrl)
@@ -156,5 +166,18 @@ public class NFTImageView extends RelativeLayout {
         ViewGroup.LayoutParams webLayoutParams = webLayout.getLayoutParams();
         webLayoutParams.height = height;
         webLayout.setLayoutParams(webLayoutParams);
+    }
+
+    public void showFallbackLayout(Token token)
+    {
+        fallbackLayout.setVisibility(View.VISIBLE);
+        fallbackIcon.bindData(token);
+
+        hasContent = true;
+    }
+
+    public boolean hasContent()
+    {
+        return hasContent;
     }
 }

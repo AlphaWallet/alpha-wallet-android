@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_holder"
     android:layout_width="match_parent"
@@ -10,8 +11,8 @@
         android:id="@+id/image_asset"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
         android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
         tools:src="@drawable/ic_token_eth" />
 
     <ProgressBar
@@ -44,5 +45,23 @@
             android:src="@drawable/white_circle"
             android:visibility="gone" />
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_fallback"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone">
+
+        <com.alphawallet.app.widget.TokenIcon
+            android:id="@+id/icon_fallback"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:clickable="false"
+            android:focusable="false"
+            custom:square="true" />
     </RelativeLayout>
 </RelativeLayout>

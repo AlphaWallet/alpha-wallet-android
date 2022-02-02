@@ -92,19 +92,28 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         if (asset == null) return;
 
-        tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
-        tokenImage.setupTokenImage(asset);
+        if (asset.isBlank())
+        {
+            tokenImage.showFallbackLayout(token);
+        }
+        else
+        {
+            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
+            tokenImage.setupTokenImage(asset);
+        }
 
         TextView tokenDescription = findViewById(R.id.token_description);
-
-        tokenInfoLayout.addView(new TokenInfoCategoryView(this, "Details"));
+        tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_details)));
 
         //can be either: FT with a balance (balance > 1)
         //unique NFT with tokenId (sequenceId)
-
         if (!TextUtils.isEmpty(sequenceId))
         {
             addInfoView(getString(R.string.label_token_id), sequenceId);
+        }
+        else
+        {
+            addInfoView(getString(R.string.label_token_id), tokenId.toString());
         }
         if (asset.isAssetMultiple())
         {
@@ -115,9 +124,14 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             addInfoView(getString(R.string.hint_contract_name), asset.getName());
         }
         addInfoView(getString(R.string.label_external_link), asset.getExternalLink());
-        tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_description)));
         attrs.bind(token, asset);
-        tokenDescription.setText(asset.getDescription());
+
+        String description = asset.getDescription();
+        if (description != null)
+        {
+            tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_description)));
+            tokenDescription.setText(asset.getDescription());
+        }
 
         tokenInfoLayout.forceLayout();
     }

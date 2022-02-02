@@ -42,6 +42,22 @@ public class NFTAsset implements Parcelable
     private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK);
     private static final List<String> ATTRIBUTE_DESCRIPTOR = Arrays.asList("attributes", "traits");
 
+    public enum Category {
+        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection");
+
+        private String category;
+
+        Category(String category)
+        {
+            this.category = category;
+        }
+
+        public String getValue()
+        {
+            return this.category;
+        }
+    }
+
     private final Map<String, String> assetMap = new HashMap<>();
     private final Map<String, String> attributeMap = new HashMap<>();
 
@@ -439,20 +455,20 @@ public class NFTAsset implements Parcelable
         return tokenIdList;
     }
 
-    public String getAssetCategory()
+    public Category getAssetCategory()
     {
         if (tokenIdList != null && isCollection())
         {
-            return "Collection";
+            return Category.COLLECTION;
         }
         else if (tokenIdList == null || tokenIdList.size() == 1
                 && ERC1155Token.isNFT(tokenIdList.get(0)))
         {
-            return "NFT";
+            return Category.NFT;
         }
         else
         {
-            return "Fungible Token";
+            return Category.FT;
         }
     }
 }

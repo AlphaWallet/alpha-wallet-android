@@ -25,7 +25,6 @@ import com.alphawallet.app.widget.NFTImageView;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,9 +96,11 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
         if (item != null && item.requiresReplacement())
         {
-            //fetch asset
             fetchAsset(holder, pair);
-            holder.loadingSpinner.setVisibility(View.VISIBLE);
+            if (!holder.icon.hasContent())
+            {
+                holder.loadingSpinner.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -107,18 +108,43 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     {
         int assetCount = asset.isCollection() ? asset.getCollectionCount() : asset.getBalance().intValue();
         int textId = assetCount == 1 ? R.string.asset_description_text : R.string.asset_description_text_plural;
-        holder.title.setText(asset.getName());
-        if (asset.getAssetCategory().equals("NFT"))
+
+        if (asset.isBlank())
         {
-            // Hide subtitle containing redundant information
-            holder.subtitle.setVisibility(View.GONE);
+            holder.title.setText(String.format("ID #%s", tokenId));
         }
         else
         {
-            holder.subtitle.setVisibility(View.VISIBLE);
-            holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory()));
+            if (asset.getName() != null)
+            {
+                holder.title.setText(asset.getName());
+                if (asset.getAssetCategory() == NFTAsset.Category.NFT)
+                {
+                    // Hide subtitle containing redundant information
+                    holder.subtitle.setVisibility(View.GONE);
+                }
+                else
+                {
+                    holder.subtitle.setVisibility(View.VISIBLE);
+                    holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory().getValue()));
+                }
+            }
+            else
+            {
+                holder.title.setText(String.format("ID #%s", tokenId));
+                holder.subtitle.setVisibility(View.GONE);
+            }
+
+            if (!asset.needsLoading())
+            {
+                holder.icon.setupTokenImageThumbnail(asset);
+            }
+            else
+            {
+                holder.icon.showFallbackLayout(token);
+            }
         }
-        holder.icon.setupTokenImageThumbnail(asset);
+
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
         holder.loadingSpinner.setVisibility(View.GONE);
     }
@@ -205,5 +231,11 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             if (arrowRight != null) arrowRight.setVisibility(View.VISIBLE);
 
         }
+    }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        return position;
     }
 }

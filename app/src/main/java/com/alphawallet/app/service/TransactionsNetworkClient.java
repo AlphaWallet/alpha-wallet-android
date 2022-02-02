@@ -629,12 +629,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
-        String APIKEY_TOKEN = getNetworkAPIToken(networkInfo);
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +
                 "&address=" + walletAddress +
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
-                "&sort=asc" + APIKEY_TOKEN;
+                "&sort=asc" + getNetworkAPIToken(networkInfo);
 
         Request request = new Request.Builder()
                 .url(fullUrl)

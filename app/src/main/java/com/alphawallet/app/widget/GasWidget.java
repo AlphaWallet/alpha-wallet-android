@@ -564,7 +564,7 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private boolean isSendingAll(Web3Transaction tx)
     {
-        if (token.isEthereum())
+        if (token.isEthereum() && token.balance.compareTo(BigDecimal.ZERO) > 0)
         {
             //gas fee:
             BigDecimal networkFee = new BigDecimal(tx.gasPrice.multiply(BigInteger.valueOf(GAS_LIMIT_MIN)));

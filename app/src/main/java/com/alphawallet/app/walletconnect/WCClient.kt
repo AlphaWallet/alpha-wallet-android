@@ -4,12 +4,13 @@ import android.util.Log
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
-import com.alphawallet.ethereum.EthereumNetworkBase
+import com.alphawallet.app.walletconnect.entity.ethTransactionSerializer;
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
+import com.google.gson.JsonSyntaxException
 import okhttp3.*
 import okio.ByteString
 import java.util.*
@@ -58,9 +59,9 @@ open class WCClient(
 
     private var chainId: String? = null
 
-    fun chainIdVal(): Int
+    fun chainIdVal(): Long
     {
-        return chainId?.toInt() ?: 0
+        return chainId?.toLong() ?: 0
     }
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
@@ -97,6 +98,8 @@ open class WCClient(
             decrypted = decryptMessage(text)
             Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)
+        } catch (e: JsonSyntaxException) {
+            //...
         } catch (e: Exception) {
             onFailure(e)
         } finally {
@@ -154,6 +157,7 @@ open class WCClient(
         var useChainId: Long = _chainId
         if (this.chainId?.toIntOrNull() != 1) useChainId = _chainId
         chainId = useChainId.toString()
+        this.accounts = accounts;
 
         val result = WCApproveSessionResponse(
                 chainId = useChainId,

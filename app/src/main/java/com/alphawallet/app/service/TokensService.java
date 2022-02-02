@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -781,7 +782,7 @@ public class TokensService
 
     public Single<Pair<Double, Double>> getFiatValuePair()
     {
-        return tokenRepository.getTotalValue(currentAddress, networkFilter);
+        return tokenRepository.getTotalValue(currentAddress, EthereumNetworkBase.getAllMainNetworks());
     }
 
     public Single<List<String>> getTickerUpdateList()

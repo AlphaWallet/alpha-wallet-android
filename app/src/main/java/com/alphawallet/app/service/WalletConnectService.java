@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
 
@@ -40,10 +41,10 @@ import timber.log.Timber;
 public class WalletConnectService extends Service
 {
     private final long CONNECTION_TIMEOUT = 10*DateUtils.MINUTE_IN_MILLIS;
-    private final ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
+    private final static ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
+    private final static ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
 
-    private final ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
     private WCRequest currentRequest = null;
 
     private static final String TAG = "WCClientSvs";
@@ -225,8 +226,13 @@ public class WalletConnectService extends Service
             //alert UI
             if (client.sessionId() == null) return Unit.INSTANCE;
             Timber.tag(TAG).d("On Fail: %s", throwable.getMessage());
-            signRequests.add(new WCRequest(client.sessionId(), throwable, client.chainIdVal()));
-            broadcastSessionEvent(WALLET_CONNECT_FAIL, client.sessionId());
+            //only add if no errors already in queue
+            if (queueHasNoErrors())
+            {
+                signRequests.add(new WCRequest(client.sessionId(), throwable, client.chainIdVal()));
+                broadcastSessionEvent(WALLET_CONNECT_FAIL, client.sessionId());
+            }
+            startMessagePump();
             return Unit.INSTANCE;
         });
 
@@ -314,7 +320,7 @@ public class WalletConnectService extends Service
             if (c.isConnected() && c.chainIdVal() != 0 && c.getAccounts() != null)
             {
                 Timber.tag(TAG).d("Ping Key: %s", sessionKey);
-                c.approveSession(c.getAccounts(), c.chainIdVal());
+                c.updateSession(c.getAccounts(), c.chainIdVal(), true);
             }
 
             long lastUsed = getLastUsed(c);
@@ -384,11 +390,25 @@ public class WalletConnectService extends Service
         WCRequest rq = signRequests.peek();
         if (rq != null)
         {
-            switchToWalletConnectApprove(rq.sessionId);
+            WCClient cc = clientMap.get(rq.sessionId);
+            if (cc != null)
+            {
+                switchToWalletConnectApprove(rq.sessionId);
+            }
         }
         else if (messagePump != null && !messagePump.isDisposed())
         {
             messagePump.dispose();
         }
+    }
+
+    private boolean queueHasNoErrors()
+    {
+        for (WCRequest rq : signRequests.toArray(new WCRequest[0]))
+        {
+            if (rq.type == SignType.FAILURE) return false;
+        }
+
+        return true;
     }
 }

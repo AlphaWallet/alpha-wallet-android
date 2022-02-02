@@ -163,10 +163,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
                 {
                     case 0:
                         showFunctionBar(true);
-                        hideMenu();
-                        break;
-                    case 1:
-                        showFunctionBar(false);
                         showMenu();
                         break;
                     default:

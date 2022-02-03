@@ -1692,7 +1692,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
+            Timber.d("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {
@@ -2012,7 +2012,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void RefreshEvent()
     {
         //determine scroll position
-        Log.i("Touch", "SCROLL: " + web3.getScrollY());
+        Timber.tag("Touch").i("SCROLL: %s", web3.getScrollY());
         if (web3.getScrollY() == 0)
         {
             loadUrl(web3.getUrl());

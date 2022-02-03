@@ -3,6 +3,8 @@ package com.alphawallet.app;
 import org.junit.Test;
 import org.web3j.utils.Numeric;
 
+import timber.log.Timber;
+
 public class AssetGenerationTest
 {
     @Test
@@ -69,7 +71,7 @@ public class AssetGenerationTest
 
         sb.append("]");
 
-        System.out.println(sb.toString());
+        Timber.d(sb.toString());
     }
 
 
@@ -166,7 +168,7 @@ public class AssetGenerationTest
 //        }
         sb.append("]");
 
-        System.out.println(sb.toString());
+        Timber.d(sb.toString());
     }
 }
 

@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 /**
  * Created by James on 2/10/2018.
@@ -91,7 +92,7 @@ public class OpenSeaService
 
             if (receivedTokens < PAGE_SIZE)
             {
-                if (BuildConfig.DEBUG) System.out.println("Reset OpenSeaAPI reads at: " + pageOffset);
+                Timber.d("Reset OpenSeaAPI reads at: " + pageOffset);
                 pageOffset = 0;
             }
 

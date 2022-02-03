@@ -36,6 +36,8 @@ import java.util.List;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
+import timber.log.Timber;
+
 /**
  * EnsResolver from Web3j adapted for Android Java's BigInteger
  */
@@ -189,7 +191,7 @@ public class EnsResolver {
             catch (Exception e)
             {
                 //
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
         }
 
@@ -210,7 +212,7 @@ public class EnsResolver {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
                 //throw new RuntimeException("Unable to execute Ethereum request", e);
             }
         }

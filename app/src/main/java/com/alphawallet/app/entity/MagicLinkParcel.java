@@ -22,6 +22,8 @@ import com.alphawallet.token.tools.ParseMagicLink;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 
+import timber.log.Timber;
+
 public class MagicLinkParcel implements Parcelable
 {
     public MagicLinkData magicLink;
@@ -129,7 +131,7 @@ public class MagicLinkParcel implements Parcelable
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);;
         }
 
         return data;

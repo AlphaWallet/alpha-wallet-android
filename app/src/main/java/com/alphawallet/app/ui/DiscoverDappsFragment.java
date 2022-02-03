@@ -22,6 +22,8 @@ import java.util.List;
 
 import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
 
+import timber.log.Timber;
+
 
 public class DiscoverDappsFragment extends Fragment implements OnDappClickListener {
 
@@ -82,7 +84,7 @@ public class DiscoverDappsFragment extends Fragment implements OnDappClickListen
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -105,7 +107,7 @@ public class DiscoverDappsFragment extends Fragment implements OnDappClickListen
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return dapps;

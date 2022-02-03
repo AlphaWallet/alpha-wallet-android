@@ -22,6 +22,8 @@ import static com.alphawallet.app.entity.EIP681Type.OTHER;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 
+import timber.log.Timber;
+
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
@@ -227,11 +229,11 @@ public class QRExtractorTest {
         assertTrue(result.type == EIP681Type.MAGIC_LINK);
 
         result = parser.parse("https://www.alphawallet.com");
-        System.out.println(result.getAddress());
+        Timber.d(result.getAddress());
         assertTrue(result.type == EIP681Type.URL);
 
         result = parser.parse("http://www.alphawallet.com");
-        System.out.println(result.getAddress());
+        Timber.d(result.getAddress());
         assertTrue(result.type == EIP681Type.URL);
     }
 }

@@ -70,6 +70,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -168,7 +169,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         // Fetch attributes local to this action and add them to the injected token properties
@@ -220,14 +221,14 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void onError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
         displayFunction(attrs.toString());
     }
 
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
         //is the attr incomplete?
-        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+        Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
         TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
@@ -318,7 +319,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             @Override
             public void calculationCompleted(String value, String result, TokenscriptElement e, Attribute attr)
             {
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve " + value + " : " + result);
+                Timber.d("ATTR/FA: Resolve " + value + " : " + result);
                 //need to find attr
                 e.value = viewModel.getAssetDefinitionService().convertInputValue(attr, result);
 
@@ -338,7 +339,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             @Override
             public void unresolvedSymbolError(String value)
             {
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve: ERROR: " + value);
+                Timber.d("ATTR/FA: Resolve: ERROR: " + value);
                 tokenScriptError(value, null);
             }
         };
@@ -552,7 +553,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionFailed()
     {
-        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: FAIL: " + actionMethod);
+        Timber.d("ATTR/FA: FAIL: " + actionMethod);
     }
 
     @Override
@@ -636,11 +637,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         String prefix = DappBrowserFragment.PERSONAL_MESSAGE_PREFIX + message.length();
         byte[] msgHash = (prefix + message).getBytes();
         String msgBytes = Numeric.toHexString(msgHash);
-        if (BuildConfig.DEBUG) System.out.println(msgBytes);
+        Timber.d(msgBytes);
 
         byte[] equivHash = Hash.sha3(msgHash);
         String hashBytes = Numeric.toHexString(equivHash);
-        if (BuildConfig.DEBUG) System.out.println(hashBytes);
+        Timber.d(hashBytes);
 
         byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
         Sign.SignatureData sd = sigFromByteArray(signatureBytes);
@@ -650,7 +651,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
+            Timber.d("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {
@@ -948,7 +949,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.evaluateJavascript(
                 "(function() { document.getElementById(\"" + key + "\").innerHTML = \"" + value + "\"; })();",
                 html -> {
-                    System.out.println("Worked?");
+                    Timber.d("Worked?");
                 });
     }
 }

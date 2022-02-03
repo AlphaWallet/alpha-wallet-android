@@ -69,6 +69,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import timber.log.Timber;
 
 public class TickerService
 {
@@ -143,7 +144,7 @@ public class TickerService
 
     private void tickersUpdated(int tickerCount)
     {
-        if (BuildConfig.DEBUG) System.out.println("Tickers Updated: " + tickerCount);
+        Timber.d("Tickers Updated: " + tickerCount);
         mainTickerUpdate = null;
     }
 
@@ -207,7 +208,7 @@ public class TickerService
             }
             catch (IOException e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return tickers;
@@ -352,7 +353,7 @@ public class TickerService
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return erc20Tickers;
@@ -410,7 +411,7 @@ public class TickerService
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
         }
         else
@@ -460,7 +461,7 @@ public class TickerService
 
     private int checkTickers(int tickerSize)
     {
-        if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
+        Timber.d("Tickers received: %s", tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
         localSource.updateEthTickers(ethTickers);
         //localSource.removeOutdatedTickers();

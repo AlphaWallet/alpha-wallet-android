@@ -578,7 +578,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                         showCameraDenied();
                         break;
                     default:
-                        Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                        Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
                                                     "Code: " + resultCode
                         ));
                         break;
@@ -816,7 +816,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Log.w(this.getLocalClassName(), throwable.getMessage());
+        Timber.w(throwable.getMessage());
         checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
     }
 

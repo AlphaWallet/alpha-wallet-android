@@ -44,6 +44,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class AdvancedSettingsActivity extends BaseActivity {
     @Inject
@@ -308,7 +309,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
 
     private void askWritePermission() {
         final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        Log.w(AdvancedSettingsActivity.class.getSimpleName(), "Folder write permission is not granted. Requesting permission");
+        Timber.w("Folder write permission is not granted. Requesting permission");
         ActivityCompat.requestPermissions(this, permissions, HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM);
     }
 

@@ -269,7 +269,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
         this.qrCode = wcCode;
         session = WCSession.Companion.from(qrCode);
-        if (BuildConfig.DEBUG) System.out.println("WCClient: " + qrCode);
+        Timber.d("WCClient: " + qrCode);
     }
 
     private void initViewModel()
@@ -897,7 +897,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         catch (Exception e)
         {
             confDialog = null;
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return confDialog;

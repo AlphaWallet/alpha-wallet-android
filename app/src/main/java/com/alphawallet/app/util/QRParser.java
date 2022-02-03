@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 /**
  * Created by marat on 10/11/17.
  * Parses out protocol, address and parameters from a URL originating in QR codes used by wallets &
@@ -165,7 +167,7 @@ public class QRParser {
         catch (Exception e)
         {
             // No action
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return false;

@@ -16,6 +16,8 @@ import java.util.Map;
 import static com.alphawallet.app.entity.TransactionDecoder.ReadState.ARGS;
 import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 
+import timber.log.Timber;
+
 /**
  * Created by James on 2/02/2018.
  *
@@ -83,7 +85,7 @@ public class TransactionDecoder
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         thisData.setOperationType(null, null); //works for most cases; for magiclink requires tx and wallet data - but we don't see many of these now

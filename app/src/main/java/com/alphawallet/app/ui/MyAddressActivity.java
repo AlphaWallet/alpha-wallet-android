@@ -47,6 +47,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
@@ -389,7 +390,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         {
             //generate payment request link
             //EIP681 format
-            if (BuildConfig.DEBUG) System.out.println("AMT: " + weiAmount.toString());
+            Timber.d("AMT: %s", weiAmount.toString());
             EIP681Request request;
             String eip681String;
             if (token.isEthereum())

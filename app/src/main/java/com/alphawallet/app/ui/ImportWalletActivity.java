@@ -61,6 +61,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.ErrorCode.ALREADY_ADDED;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -457,7 +458,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                 showCameraDenied();
                 break;
             default:
-                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
                                             "Code: " + resultCode
                 ));
                 break;

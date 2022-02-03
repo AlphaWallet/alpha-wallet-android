@@ -49,6 +49,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
+import timber.log.Timber;
 
 public class TokensRealmSource implements TokenLocalSource {
 
@@ -184,7 +185,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case CREATION:
                 break;
             default:
-                if (BuildConfig.DEBUG) System.out.println("Unknown Token Contract");
+                Timber.d("Unknown Token Contract");
                 break;
         }
     }
@@ -292,7 +293,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -458,7 +459,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         realmToken.setBalance(newBalance);
                         deleteAllAssets(r, key);
                     });
-                    if (BuildConfig.DEBUG) Log.d(TAG, "Zero out ERC721 balance: " + realmToken.getName() + " :" + token.getAddress());
+                    Timber.tag(TAG).d("Zero out ERC721 balance: %s :%s", realmToken.getName(), token.getAddress());
                     balanceChanged = true;
                 }
                 else if (!newBalance.equals(currentBalance) || !checkEthToken(realm, token))
@@ -467,7 +468,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         realmToken.setBalance(newBalance);
                         if (token.isEthereum()) updateEthToken(r, token, newBalance);
                     });
-                    if (BuildConfig.DEBUG) Log.d(TAG, "Update Token Balance: " + realmToken.getName() + " :" + token.getAddress());
+                    Timber.tag(TAG).d("Update Token Balance: %s :%s",realmToken.getName(), token.getAddress());
                     balanceChanged = true;
                 }
 
@@ -502,7 +503,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return balanceChanged;
@@ -573,7 +574,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
         if (realmToken == null)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address + " : " + token.balance.toString());
+            Timber.tag(TAG).d("Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address + " : " + token.balance.toString());
             realmToken = realm.createObject(RealmToken.class, databaseKey);
             realmToken.setName(token.tokenInfo.name);
             realmToken.setSymbol(token.tokenInfo.symbol);
@@ -588,7 +589,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         else
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Update Token: " + token.getFullName());
+            Timber.tag(TAG).d("Update Token: %s", token.getFullName());
             realmToken.updateTokenInfoIfRequired(token.tokenInfo);
             Token oldToken = convertSingle(realmToken, realm, null, new Wallet(token.getWallet()));
 
@@ -606,7 +607,7 @@ public class TokensRealmSource implements TokenLocalSource {
         if ((token.balance.compareTo(BigDecimal.ZERO) > 0 || token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0)
                 && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
-            if (wasNew && BuildConfig.DEBUG) Log.d(TAG, "Save New Token set enable");
+            if (wasNew) Timber.tag(TAG).d("Save New Token set enable");
             token.tokenInfo.isEnabled = true;
             realmToken.setEnabled(true);
         }
@@ -811,7 +812,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         finally
         {
@@ -878,7 +879,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return tokenMetas.toArray(new TokenCardMeta[0]);

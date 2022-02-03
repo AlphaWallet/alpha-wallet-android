@@ -16,6 +16,8 @@ import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 
+import timber.log.Timber;
+
 /**
  * Created by James on 9/02/2019.
  * Stormbird in Singapore
@@ -62,7 +64,7 @@ public class UniversalLinkTypeTest
         //now complete the link by adding the signature on the end
         String universalLink = parser.completeUniversalLink(1,linkMessage, signature);
 
-        System.out.println(universalLink);
+        Timber.d(universalLink);
 
         //now ensure we can extract all the information correctly
         CheckCurrencyLink(universalLink);

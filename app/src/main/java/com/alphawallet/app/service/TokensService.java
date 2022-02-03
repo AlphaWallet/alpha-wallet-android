@@ -57,6 +57,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class TokensService
 {
@@ -157,7 +158,7 @@ public class TokensService
 
     private void onCheckError(Throwable throwable, ContractAddress t)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     private void finishTokenCheck()
@@ -576,7 +577,7 @@ public class TokensService
 
         if (t != null)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
+            Timber.tag(TAG).d("Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
             balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -602,7 +603,7 @@ public class TokensService
 
         if (balanceChange && BuildConfig.DEBUG)
         {
-            Log.d(TAG, "Change Registered: * " + t.getFullName());
+            Timber.tag(TAG).d("Change Registered: * %s", t.getFullName());
         }
 
         //update check time
@@ -626,7 +627,7 @@ public class TokensService
         //Switch this token chain on
         if (!networkFilter.contains(t.tokenInfo.chainId) && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId) == this.mainNetActive)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Detected balance");
+            Timber.tag(TAG).d("Detected balance");
             //activate this filter
             networkFilter.add(t.tokenInfo.chainId);
             //now update the default filters
@@ -648,7 +649,7 @@ public class TokensService
 
     private void onError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     private void checkOpenSea()
@@ -666,8 +667,7 @@ public class TokensService
 
         final Wallet wallet = new Wallet(currentAddress);
 
-        if (BuildConfig.DEBUG)
-            Log.d(TAG, "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
+        Timber.tag(TAG).d("Fetch from opensea : %s : %s", currentAddress, info.getShortName());
 
         openSeaCheckId = info.chainId;
         openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
@@ -691,10 +691,10 @@ public class TokensService
     {
         openSeaQueryDisposable = null;
         openSeaCheckId = 0;
-        if (BuildConfig.DEBUG) Log.d(TAG, "Checked " + info.name + " Opensea");
+        Timber.tag(TAG).d("Checked " + info.name + " Opensea");
         if (openseaService.getCurrentOffset() > 0)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "OpenSeaAPI offset:" + openseaService.getCurrentOffset());
+            Timber.tag(TAG).d("OpenSeaAPI offset:%s", openseaService.getCurrentOffset());
             openSeaCheck = System.currentTimeMillis() + 5 * DateUtils.SECOND_IN_MILLIS;
         }
         else
@@ -707,7 +707,7 @@ public class TokensService
     {
         openSeaCheckId = 0;
         openSeaQueryDisposable = null;
-        if (BuildConfig.DEBUG) e.printStackTrace();
+        Timber.e(e);
         openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
     }
 
@@ -746,7 +746,7 @@ public class TokensService
     private void onERC20Error(Throwable throwable)
     {
         erc20CheckDisposable = null;
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     public void updateTickers()
@@ -904,7 +904,7 @@ public class TokensService
         Long chainId = baseTokenCheck.poll();
         if (chainId != null)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Base Token Check: " + ethereumNetworkRepository.getNetworkByChain(chainId).name);
+            Timber.tag(TAG).d("Base Token Check: " + ethereumNetworkRepository.getNetworkByChain(chainId).name);
             //return new TokenCardMeta(getToken(chainId, currentAddress));
             return createCurrencyToken(ethereumNetworkRepository.getNetworkByChain(chainId), new Wallet(currentAddress));
         }

@@ -84,6 +84,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
@@ -585,7 +586,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singletonList(tokenId)), null)
@@ -597,14 +598,14 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void onError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
         displayFunction(attrs.toString());
     }
 
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
         //is the attr incomplete?
-        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+       Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
         TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 

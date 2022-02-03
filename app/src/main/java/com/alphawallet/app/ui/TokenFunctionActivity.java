@@ -48,6 +48,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
@@ -125,7 +126,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void txError(Throwable throwable)
     {
         throwable.getStackTrace();
-        if (BuildConfig.DEBUG) System.out.println("ERROR: " + throwable.getMessage());
+        Timber.d("ERROR: " + throwable.getMessage());
     }
 
     private void onWalletUpdate(Wallet w)

@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 /**
  * Created by JB on 20/01/2021.
  */
@@ -55,7 +57,7 @@ public class NumericInput extends AppCompatAutoCompleteTextView implements TextW
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return value;

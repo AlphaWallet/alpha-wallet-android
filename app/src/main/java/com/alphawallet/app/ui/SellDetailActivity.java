@@ -441,7 +441,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
             Timber.d("date : %s", dateString);
             UTCTimeStamp = (date.getTime())/1000;
         } catch (ParseException e) {
-            Timber.e(e);
+            Timber.e(e);;
         }
 
         //1. validate price

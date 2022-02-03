@@ -35,6 +35,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by James on 3/10/2018.
@@ -112,7 +113,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
 
     private void handleError(Throwable e, BigInteger tokenId)
     {
-        if (BuildConfig.DEBUG) e.printStackTrace();
+        Timber.e(e);
         NFTAsset asset = token.getAssetForToken(tokenId.toString());
         loadingSpinner.setVisibility(View.GONE);
         String assetName;

@@ -37,6 +37,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class QRSelectionTest
 {
@@ -308,8 +309,8 @@ public class QRSelectionTest
             bas.read(signatureBuf); //signature as string bytes
             BigInteger signatureBi = new BigInteger(new String(signatureBuf));
 
-            System.out.println("ctest[TokenID2: 0x" + tokenId.toString(16));
-            System.out.println("ctest[Sig2    : 0x" + signatureBi.toString(16));
+            Timber.d("ctest[TokenID2: 0x" + tokenId.toString(16));
+            Timber.d("ctest[Sig2    : 0x" + signatureBi.toString(16));
         }
         catch (IOException e)
         {

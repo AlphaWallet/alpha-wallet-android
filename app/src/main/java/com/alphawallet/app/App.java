@@ -1,6 +1,9 @@
 package com.alphawallet.app;
 
 import android.app.Application;
+
+import com.alphawallet.app.util.ReleaseTree;
+
 import dagger.hilt.android.HiltAndroidApp;
 import io.realm.Realm;
 import timber.log.Timber;

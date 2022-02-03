@@ -1,13 +1,19 @@
 package com.alphawallet.app.ui;
 
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_UP;
 import static com.alphawallet.app.service.TickerService.chainPairs;
 import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -94,6 +100,7 @@ public class TokenInfoFragment extends BaseFragment {
         return inflater.inflate(R.layout.fragment_token_info, container, false);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
@@ -157,6 +164,24 @@ public class TokenInfoFragment extends BaseFragment {
             tokenInfoLayout.addView(stats1YearHigh);
 
             historyChart.fetchHistory(token, HistoryChart.Range.Day);
+
+            historyChart.setOnTouchListener((v, event) -> {
+                switch (event.getAction())
+                {
+                    case ACTION_DOWN:
+                    case ACTION_MOVE:
+                        System.out.println("boop moving");
+                        historyChart.showIntercept(event.getX());
+                        return true;
+                    case ACTION_UP:
+                        System.out.println("boop out");
+                        historyChart.hideIntercept();
+                        return true;
+                    default:
+                        break;
+                }
+                return false;
+            });
             populateStats(token)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

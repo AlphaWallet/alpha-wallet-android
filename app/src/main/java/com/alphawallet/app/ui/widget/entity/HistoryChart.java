@@ -2,6 +2,8 @@ package com.alphawallet.app.ui.widget.entity;
 
 import static com.alphawallet.app.service.TickerService.chainPairs;
 import static com.alphawallet.app.service.TickerService.coinGeckoChainIdToAPIName;
+import static java.lang.Math.floor;
+import static io.realm.Realm.getApplicationContext;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -18,6 +20,7 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.util.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,14 +56,82 @@ public class HistoryChart extends View
 
         private final int value;
 
-        Range(int value) {
+        Range(int value)
+        {
             this.value = value;
         }
 
-        public int getValue() {
+        public int getValue()
+        {
             return value;
         }
+    }
 
+    public void showIntercept(float x)
+    {
+        Datasource datasource = cache.getCurrentDatasource(cache.range);
+
+        float width = getWidth();
+        float height = getHeight();
+
+        float xScale = width / (datasource.maxTime() - datasource.minTime());
+        float yScale = ((height * 0.9f) / (datasource.maxValue() - datasource.minValue()));
+
+        int color = datasource.isGreen() ? R.color.green : R.color.danger;
+        interceptPaint.setColor(getResources().getColor(color,getContext().getTheme()));
+        long timeStamp = (long) floor(x/xScale + datasource.minTime());
+
+        float price = 0;
+        float y = -1;
+
+        //find from timeStamp
+        for(int i = (int) floor((x/width)*datasource.entries.size()); i < datasource.entries.size(); i++)
+        {
+            System.out.println(String.format("i ratio is %d // %d",x,width));
+            if(i < datasource.entries.size()-1)
+            {
+                Pair<Long, Float> entry_lower = datasource.entries.get(i);
+                Pair<Long, Float> entry_higher = datasource.entries.get(i+1);
+                if(entry_lower.first < timeStamp && entry_higher.first >= timeStamp)
+                {
+                    long diff = (timeStamp - entry_lower.first) - (entry_higher.first - timeStamp);
+                    price = diff >= 0 ? entry_lower.second: entry_higher.second;
+                    y = height - (price - datasource.minValue()) * yScale;
+
+                    break;
+                }
+            }
+
+        }
+        System.out.println(String.format("boop coord %f,%f",x,y));
+
+        //draw intercepts
+        try
+        {
+            interceptLines.reset();
+            interceptLines.moveTo(0,y);
+            interceptLines.lineTo(width,y);
+
+            interceptLines.moveTo(x,0);
+            interceptLines.moveTo(x,height);
+            canvas.drawPath(interceptLines,interceptPaint);
+
+            canvas.drawTextOnPath(Utils.localiseUnixDate(getApplicationContext(),timeStamp),
+                    interceptLines,
+                    0,0,
+                    edgeValPaint);
+        }
+        catch (Exception e)
+        {
+            //do nothing
+        }
+
+
+    }
+
+    public void hideIntercept()
+    {
+        canvas.restore();
     }
 
     // store tokens mapping and chart data
@@ -166,6 +237,9 @@ public class HistoryChart extends View
     Paint greyPaint = new Paint();
     Path greyLines = new Path();
     Paint edgeValPaint = new Paint();
+    Paint interceptPaint = new Paint();
+    Path interceptLines = new Path();
+    Canvas canvas;
 
     private void init()
     {
@@ -180,6 +254,9 @@ public class HistoryChart extends View
 
         paint.setStrokeWidth(strokeWidth);
         paint.setDither(true);
+
+        interceptPaint.setColor(getResources().getColor(R.color.green,getContext().getTheme()));
+        interceptPaint.setStrokeWidth(1);
 
 
         greyPaint.setColor(getResources().getColor(R.color.black_12,getContext().getTheme()));
@@ -298,7 +375,6 @@ public class HistoryChart extends View
                     .subscribe(datasource -> onEntries(range, datasource), this::onError).isDisposed();
         }
     }
-
 
     private void onEntries(Range range, Datasource datasource)
     {

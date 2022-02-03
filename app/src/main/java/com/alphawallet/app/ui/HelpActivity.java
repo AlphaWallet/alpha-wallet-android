@@ -27,6 +27,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HelpActivity extends BaseActivity {
@@ -179,7 +180,7 @@ public class HelpActivity extends BaseActivity {
             }
             in.close();
         } catch (Exception ex) {
-            Log.d("READ_JS_TAG", "Ex", ex);
+            Timber.tag("READ_JS_TAG").d(ex, "Ex");
         }
 
         return false;

@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel;
 import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.tokens.Token;
 import io.reactivex.disposables.Disposable;
+import timber.log.Timber;
 
 public class BaseViewModel extends ViewModel
 {
@@ -66,7 +66,7 @@ public class BaseViewModel extends ViewModel
 
 	protected void onError(Throwable throwable)
 	{
-		Log.d("TAG", "Err", throwable);
+		Timber.tag("TAG").d(throwable, "Err");
 		if (throwable instanceof ServiceException)
 		{
 			error.postValue(((ServiceException) throwable).error);

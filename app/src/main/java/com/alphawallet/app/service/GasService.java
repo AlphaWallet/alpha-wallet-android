@@ -313,7 +313,7 @@ public class GasService implements ContractGasProvider
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
                     .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData))
-                    .map(estimate -> convertToGasLimit(estimate, defaultLimit));
+                    .map(estimate -> convertToGasLimit(estimate, BigInteger.valueOf(GAS_LIMIT_CONTRACT)));
         }
         else
         {
@@ -328,7 +328,14 @@ public class GasService implements ContractGasProvider
     {
         if (estimate.hasError())
         {
-            return BigInteger.ZERO;
+            if (estimate.getError().getCode() == -32000) //out of gas
+            {
+                return defaultLimit;
+            }
+            else
+            {
+                return BigInteger.ZERO;
+            }
         }
         else if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
         {

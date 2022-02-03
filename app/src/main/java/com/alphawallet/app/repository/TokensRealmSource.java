@@ -904,7 +904,8 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 long chainId = meta.getChain();
                 String address = meta.isEthereum() ? "eth" : meta.getAddress();
-                TokenTicker ticker = tickerMap.containsKey(chainId) ? tickerMap.get(chainId).get(address) : null;
+                Map<String, TokenTicker> localTickers = tickerMap.get(chainId);
+                TokenTicker ticker = localTickers != null ? localTickers.get(address) : null;
                 if (ticker != null && meta.hasPositiveBalance() && !meta.isNFT()) //Currently we don't add NFT value. TODO: potentially get value from OpenSea
                 {
                     Token t = fetchToken(chainId, wallet, meta.getAddress());

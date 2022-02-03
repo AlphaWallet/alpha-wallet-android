@@ -83,6 +83,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 @HiltViewModel
 public class HomeViewModel extends BaseViewModel {
@@ -215,7 +216,7 @@ public class HomeViewModel extends BaseViewModel {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.tag(TAG).e(e);
         }
 
         return filterPass;
@@ -348,7 +349,7 @@ public class HomeViewModel extends BaseViewModel {
 
     private void onENSError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.tag(TAG).e(throwable);
     }
 
     public void setErrorCallback(FragmentMessenger callback)
@@ -607,7 +608,7 @@ public class HomeViewModel extends BaseViewModel {
                         return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>() {
                         }.getType());
                     } catch (Exception e) {
-                        if (BuildConfig.DEBUG) e.printStackTrace();
+                        Timber.tag(TAG).e(e);
                     }
                     return null;
                 }).subscribeOn(Schedulers.io())

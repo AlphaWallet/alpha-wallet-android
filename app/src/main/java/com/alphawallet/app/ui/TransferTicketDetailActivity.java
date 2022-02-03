@@ -90,6 +90,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by James on 21/02/2018.
@@ -389,12 +390,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             date = simpleDateFormat.parse(tempDateString);
             dateString = simpleDateFormat.format(date);
-            Log.d(SellDetailActivity.class.getSimpleName(), "date : " + dateString);
+            Timber.d("date : %s", dateString);
             UTCTimeStamp = (date.getTime()) / 1000;
         }
         catch (ParseException e)
         {
-            Log.e(SellDetailActivity.class.getSimpleName(), e.getMessage(), e);
+            Timber.e(e, e.getMessage());
         }
 
         return UTCTimeStamp;

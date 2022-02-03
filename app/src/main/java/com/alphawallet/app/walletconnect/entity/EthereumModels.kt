@@ -23,6 +23,8 @@ data class WCEthereumTransaction(
         val to: String?,
         val nonce: String?,
         val gasPrice: String?,
+        val maxFeePerGas: String?,
+        val maxPriorityFeePerGas: String?,
         val gas: String?,
         val gasLimit: String?,
         val value: String?,

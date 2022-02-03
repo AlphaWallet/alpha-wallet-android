@@ -43,6 +43,7 @@ import java.util.Map;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 
@@ -283,7 +284,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
-        if (BuildConfig.DEBUG) Log.d("RealmDebug", "gotcredentials + " + address);
+        Timber.tag("RealmDebug").d("gotcredentials + %s", address);
         return credentials;
     }
 

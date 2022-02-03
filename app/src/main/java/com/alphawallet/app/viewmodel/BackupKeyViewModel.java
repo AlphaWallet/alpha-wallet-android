@@ -4,7 +4,6 @@ import android.app.Activity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -25,6 +24,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class BackupKeyViewModel extends BaseViewModel {
@@ -53,11 +53,11 @@ public class BackupKeyViewModel extends BaseViewModel {
     }
 
     public void exportWallet(Wallet wallet, String keystorePassword, String storePassword) {
-        if (BuildConfig.DEBUG) Log.d("RealmDebug", "exportWallet + " + wallet.address);
+        Timber.tag("RealmDebug").d("exportWallet + %s", wallet.address);
         disposable = exportWalletInteract
                 .export(wallet, keystorePassword, storePassword)
                 .subscribe(pp -> {
-                    if (BuildConfig.DEBUG) Log.d("RealmDebug", "exportedStore + " + wallet.address);
+                    Timber.tag("RealmDebug").d("exportedStore + %s", wallet.address);
                     exportedStore.postValue(pp);
                 }, this::onExportWalletError);
     }
@@ -97,7 +97,7 @@ public class BackupKeyViewModel extends BaseViewModel {
                 wallet.authLevel = KeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION;
                 break;
         }
-        Log.d("HVM", "Wallet " + wallet.address + " Upgraded to: " + wallet.authLevel.toString());
+        Timber.tag("HVM").d("Wallet %s Upgraded to: %s", wallet.address, wallet.authLevel.toString());
     }
 
     private Wallet upgradeWallet(Wallet wallet)

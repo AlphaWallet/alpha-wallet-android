@@ -32,6 +32,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
@@ -118,7 +119,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         if (walletAddress == null)
         {
             progress.postValue(false);
-            System.out.println("ERROR");
+            Timber.e("ERROR");
             badSeed.postValue(true);
         }
         else

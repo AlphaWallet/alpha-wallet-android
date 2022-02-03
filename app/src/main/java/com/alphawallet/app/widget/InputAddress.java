@@ -382,7 +382,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             return status;
         }
-        else if (Utils.isAddressValid(status) && !TextUtils.isEmpty(mainText) && mainText.contains("."))
+        else if (Utils.isAddressValid(fullAddress) && !TextUtils.isEmpty(mainText) && mainText.contains("."))
         {
             return mainText;
         }

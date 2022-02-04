@@ -30,7 +30,6 @@ import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.widget.entity.NumericInputBottomSheet;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModel;
-import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
@@ -42,12 +41,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class Erc1155AssetSelectActivity extends BaseActivity implements StandardFunctionInterface, OnAssetSelectListener, AmountReadyCallback
 {
-    @Inject
-    Erc1155AssetSelectViewModelFactory viewModelFactory;
+
     Erc1155AssetSelectViewModel viewModel;
     List<NFTAsset> selectedAssets = new ArrayList<>();
     private Token token;
@@ -60,7 +59,6 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc1155_asset_select);
         toolbar();
@@ -91,7 +89,7 @@ public class Erc1155AssetSelectActivity extends BaseActivity implements Standard
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(Erc1155AssetSelectViewModel.class);
         viewModel.assets().observe(this, this::onAssets);
     }

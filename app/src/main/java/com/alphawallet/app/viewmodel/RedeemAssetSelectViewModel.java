@@ -13,16 +13,21 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.token.entity.TicketRange;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
 /**
  * Created by James on 27/02/2018.
  */
-
+@HiltViewModel
 public class RedeemAssetSelectViewModel extends BaseViewModel {
     private final RedeemSignatureDisplayRouter redeemSignatureDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final GenericWalletInteract genericWalletInteract;
 
+    @Inject
     public RedeemAssetSelectViewModel(
             RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
             AssetDefinitionService assetDefinitionService,

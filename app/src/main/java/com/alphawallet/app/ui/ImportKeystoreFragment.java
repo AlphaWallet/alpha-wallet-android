@@ -18,7 +18,9 @@ import com.alphawallet.app.widget.PasswordInputView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class ImportKeystoreFragment extends ImportFragment
 {
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};

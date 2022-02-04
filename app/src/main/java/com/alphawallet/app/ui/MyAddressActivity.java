@@ -33,7 +33,6 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
-import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.InputAmount;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -44,20 +43,19 @@ import java.math.BigDecimal;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+@AndroidEntryPoint
 public class MyAddressActivity extends BaseActivity implements AmountReadyCallback
 {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_MODE = "mode";
     public static final String OVERRIDE_DEFAULT = "override";
 
-    @Inject
-    MyAddressViewModelFactory myAddressViewModelFactory;
     private MyAddressViewModel viewModel;
 
     private Wallet wallet;
@@ -82,7 +80,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         screenWidth = (int) ((float)DisplayUtils.getScreenResolution(this).x * 0.8f);
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         initViewModel();
         overrideNetwork = 0;
@@ -126,7 +123,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, myAddressViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(MyAddressViewModel.class);
     }
 

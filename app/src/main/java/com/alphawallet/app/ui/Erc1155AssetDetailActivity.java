@@ -21,7 +21,6 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModel;
-import com.alphawallet.app.viewmodel.Erc1155AssetDetailViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
@@ -36,11 +35,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class Erc1155AssetDetailActivity extends BaseActivity implements StandardFunctionInterface {
-    @Inject
-    Erc1155AssetDetailViewModelFactory viewModelFactory;
     Erc1155AssetDetailViewModel viewModel;
 
     private Token token;
@@ -53,7 +51,6 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc1155_asset_detail);
 
@@ -110,7 +107,7 @@ public class Erc1155AssetDetailActivity extends BaseActivity implements Standard
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(Erc1155AssetDetailViewModel.class);
     }
 

@@ -39,7 +39,6 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ImportWalletViewModel;
-import com.alphawallet.app.viewmodel.ImportWalletViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.google.android.material.tabs.TabLayout;
@@ -59,13 +58,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.ErrorCode.ALREADY_ADDED;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
+@AndroidEntryPoint
 public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback, OnImportKeystoreListener, OnImportPrivateKeyListener
 {
     private enum ImportType
@@ -75,15 +75,12 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
     private final List<Pair<String, Fragment>> pages = new ArrayList<>();
 
-    @Inject
-    ImportWalletViewModelFactory importWalletViewModelFactory;
     ImportWalletViewModel importWalletViewModel;
     private AWalletAlertDialog dialog;
     private ImportType currentPage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_import_wallet);
@@ -143,7 +140,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             setTitle(getString(R.string.title_import));
         }
 
-        importWalletViewModel = new ViewModelProvider(this, importWalletViewModelFactory)
+        importWalletViewModel = new ViewModelProvider(this)
                 .get(ImportWalletViewModel.class);
         importWalletViewModel.progress().observe(this, this::onProgress);
         importWalletViewModel.error().observe(this, this::onError);

@@ -26,10 +26,15 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletFile;
 import org.web3j.utils.Numeric;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
+@HiltViewModel
 public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
 {
     private final ImportWalletInteract importWalletInteract;
@@ -42,6 +47,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     private final MutableLiveData<String> watchExists = new MutableLiveData<>();
     private String importWalletType = "";
 
+    @Inject
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService,
                           AnalyticsServiceType analyticsService) {
         this.importWalletInteract = importWalletInteract;
@@ -113,7 +119,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         if (walletAddress == null)
         {
             progress.postValue(false);
-            System.out.println("ERROR");
+            Timber.e("ERROR");
             badSeed.postValue(true);
         }
         else

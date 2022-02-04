@@ -16,6 +16,9 @@ import com.alphawallet.app.service.TransactionsService;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -25,6 +28,7 @@ import io.realm.Realm;
 /**
  * Created by JB on 26/06/2020.
  */
+@HiltViewModel
 public class ActivityViewModel extends BaseViewModel
 {
     private final int TRANSACTION_FETCH_LIMIT = 150;
@@ -47,6 +51,7 @@ public class ActivityViewModel extends BaseViewModel
     }
     public LiveData<ActivityMeta[]> activityItems() { return activityItems; }
 
+    @Inject
     ActivityViewModel(
             GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,

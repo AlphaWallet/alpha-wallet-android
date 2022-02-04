@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -77,7 +78,6 @@ import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -86,22 +86,24 @@ import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
+import net.yslibrary.android.keyboardvisibilityevent.AutoActivityLifecycleCallback;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.inject.Inject;
+import dagger.hilt.android.AndroidEntryPoint;
 
-import dagger.android.AndroidInjection;
+import timber.log.Timber;
 
+@AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
         FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
 {
-    @Inject
-    HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
 
     private Dialog dialog;
@@ -122,6 +124,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
+    private boolean inWalletConnect;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -131,7 +134,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
     public static final String STORED_PAGE = "currentPage";
     public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
-    public static final String AW_MAGICLINK = "aw.app/"; //https://aw.app/openurl?url=http://app.uniswap.org/test/Dvalue1
+    public static final String AW_MAGICLINK = "aw.app/";
     public static final String AW_MAGICLINK_DIRECT = "openurl?url=";
 
     public HomeActivity()
@@ -143,7 +146,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private void onMoveToForeground()
     {
-        Log.d("LIFE", "AlphaWallet into foreground");
+        Timber.tag("LIFE").d("AlphaWallet into foreground");
         if (viewModel != null) viewModel.checkTransactionEngine();
         isForeground = true;
     }
@@ -151,7 +154,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private void onMoveToBackground()
     {
-        Log.d("LIFE", "AlphaWallet into background");
+        Timber.tag("LIFE").d("AlphaWallet into background");
         if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
         if (viewModel != null) viewModel.outOfFocus();
         isForeground = false;
@@ -194,7 +197,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         LocaleUtils.setDeviceLocale(getBaseContext());
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
@@ -202,7 +204,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
-        viewModel = new ViewModelProvider(this, homeViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(HomeViewModel.class);
         viewModel.identify(this);
         viewModel.setWalletStartup();
@@ -938,10 +940,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void openWalletConnect(String sessionId)
     {
-        Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-        intent.putExtra("session", sessionId);
-        startActivity(intent);
+        if (isForeground)
+        {
+            Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            intent.putExtra("session", sessionId);
+            startActivity(intent);
+        }
     }
 
     private void hideDialog()
@@ -1249,39 +1254,40 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void checkIntents(String importData, String importPath, Intent startIntent)
     {
-        DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
-        if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
+        try
         {
-            importData = importData.substring(NotificationService.AWSTARTUP.length());
-            //move window to token if found
-            ((WalletFragment) getFragment(WALLET)).setImportFilename(importData);
-        }
-        else if (startIntent.getStringExtra("url") != null)
-        {
-            String url = startIntent.getStringExtra("url");
-            showPage(DAPP_BROWSER);
-            if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
-        }
-        else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK) )
-        {
-            int directLinkIndex = importData.indexOf(AW_MAGICLINK_DIRECT);
-            if (directLinkIndex > 0)
+            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
+            if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
             {
-                //get link
-                String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
-                if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
+                importData = importData.substring(NotificationService.AWSTARTUP.length());
+                //move window to token if found
+                ((WalletFragment) getFragment(WALLET)).setImportFilename(importData);
+            }
+            else if (startIntent.getStringExtra("url") != null)
+            {
+                String url = startIntent.getStringExtra("url");
+                showPage(DAPP_BROWSER);
+                if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
+            }
+            else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
+            {
+                int directLinkIndex = importData.indexOf(AW_MAGICLINK_DIRECT);
+                if (directLinkIndex > 0)
                 {
-                    showPage(DAPP_BROWSER);
-                    if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
+                    //get link
+                    String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
+                    if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
+                    {
+                        link = URLDecoder.decode(link, "UTF-8");
+                        showPage(DAPP_BROWSER);
+                        if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
+                    }
+                    else
+                    {
+                        openLink = link;
+                    }
                 }
                 else
-                {
-                    openLink = link;
-                }
-            }
-            else
-            {
-                try
                 {
                     ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                     if (parser.parseUniversalLink(importData).chainId > 0)
@@ -1290,24 +1296,29 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         finish();
                     }
                 }
-                catch (SalesOrderMalformed ignored)
-                {
-                }
+            }
+            else if (importData != null && importData.startsWith("wc:"))
+            {
+                WCSession session = WCSession.Companion.from(importData);
+                String importPassData = WalletConnectActivity.WC_INTENT + importData;
+                Intent intent = new Intent(this, WalletConnectActivity.class);
+                intent.putExtra("qrCode", importPassData);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+            }
+            else if (importPath != null)
+            {
+                boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
+                viewModel.importScriptFile(this, importData, useAppExternalDir);
             }
         }
-        else if (importData != null && importData.startsWith("wc:"))
+        catch (SalesOrderMalformed s)
         {
-            WCSession session = WCSession.Companion.from(importData);
-            String importPassData = WalletConnectActivity.WC_INTENT + importData;
-            Intent intent = new Intent(this, WalletConnectActivity.class);
-            intent.putExtra("qrCode", importPassData);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
+            //No report, expected
         }
-        else if (importPath != null)
+        catch (Exception e)
         {
-            boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
-            viewModel.importScriptFile(this, importData, useAppExternalDir);
+            Timber.tag("Intent").w(e);
         }
     }
 }

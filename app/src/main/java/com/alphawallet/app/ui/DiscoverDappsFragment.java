@@ -22,7 +22,9 @@ import java.util.List;
 
 import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class DiscoverDappsFragment extends Fragment implements OnDappClickListener {
 
     @Nullable

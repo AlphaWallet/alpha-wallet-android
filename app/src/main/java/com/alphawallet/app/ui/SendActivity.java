@@ -43,7 +43,6 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SendViewModel;
-import com.alphawallet.app.viewmodel.SendViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -65,17 +64,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+@AndroidEntryPoint
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
-    @Inject
-    SendViewModelFactory sendViewModelFactory;
     SendViewModel viewModel;
 
     private Wallet wallet;
@@ -98,12 +96,11 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         toolbar();
 
-        viewModel = new ViewModelProvider(this, sendViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(SendViewModel.class);
 
         String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);

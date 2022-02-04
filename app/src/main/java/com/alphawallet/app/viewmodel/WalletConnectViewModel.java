@@ -10,7 +10,6 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -59,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -66,9 +66,13 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import timber.log.Timber;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class WalletConnectViewModel extends BaseViewModel {
     public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -92,6 +96,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
     private static final String TAG = "WCClientVM";
 
+    @Inject
     WalletConnectViewModel(KeyService keyService,
                            FindDefaultNetworkInteract findDefaultNetworkInteract,
                            CreateTransactionInteract createTransactionInteract,
@@ -122,10 +127,10 @@ public class WalletConnectViewModel extends BaseViewModel {
             public void onServiceConnected(ComponentName name, IBinder service)
             {
                 WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
-                Log.d(TAG, "Service connected");
+                Timber.tag(TAG).d("Service connected");
                 for (String sessionId : clientBuffer.keySet())
                 {
-                    Log.d(TAG, "put from buffer: " + sessionId);
+                    Timber.tag(TAG).d("put from buffer: %s", sessionId);
                     WCClient c = clientBuffer.get(sessionId);
                     walletConnectService.putClient(sessionId, c);
                 }
@@ -136,7 +141,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceDisconnected(ComponentName name)
             {
-                Log.d(TAG, "Service disconnected");
+                Timber.tag(TAG).d("Service disconnected");
             }
         };
 
@@ -177,7 +182,7 @@ public class WalletConnectViewModel extends BaseViewModel {
 
             if (item != null && signItems.size() == 0)
             {
-                Log.d(TAG, "Delete from realm: " + sessionId);
+                Timber.tag(TAG).d("Delete from realm: %s", sessionId);
                 item.deleteFromRealm();
             }
         });
@@ -500,7 +505,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             public void onServiceDisconnected(ComponentName name)
             {
                 //walletConnectService = null;
-                Log.d(TAG, "Service disconnected");
+                Timber.tag(TAG).d("Service disconnected");
             }
         };
 
@@ -528,7 +533,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceDisconnected(ComponentName name)
             {
-                Log.d(TAG, "Service disconnected");
+                Timber.tag(TAG).d("Service disconnected");
             }
         };
 
@@ -551,7 +556,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceDisconnected(ComponentName name)
             {
-                Log.d(TAG, "Service disconnected");
+                Timber.tag(TAG).d("Service disconnected");
             }
         };
 

@@ -14,11 +14,15 @@ import com.alphawallet.app.service.TokensService;
 
 import java.util.concurrent.TimeUnit;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final TokensService tokensService;
@@ -32,6 +36,7 @@ public class TransferTicketViewModel extends BaseViewModel {
     @Nullable
     private Disposable getBalanceDisposable;
 
+    @Inject
     TransferTicketViewModel(
             TokensService tokensService,
             GenericWalletInteract genericWalletInteract,

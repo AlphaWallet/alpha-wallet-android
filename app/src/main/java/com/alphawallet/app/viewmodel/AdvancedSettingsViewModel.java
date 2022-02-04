@@ -18,9 +18,13 @@ import com.alphawallet.app.util.LocaleUtils;
 import java.io.File;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.realm.Realm;
 
+@HiltViewModel
 public class AdvancedSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
@@ -28,6 +32,7 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     private final PreferenceRepositoryType preferenceRepository;
     private final TransactionsService transactionsService;
 
+    @Inject
     AdvancedSettingsViewModel(
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,

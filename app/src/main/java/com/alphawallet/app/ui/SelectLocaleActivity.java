@@ -19,6 +19,9 @@ import com.alphawallet.app.ui.widget.divider.ListDivider;
 
 import java.util.ArrayList;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SelectLocaleActivity extends BaseActivity {
     private RecyclerView recyclerView;
     private CustomAdapter adapter;

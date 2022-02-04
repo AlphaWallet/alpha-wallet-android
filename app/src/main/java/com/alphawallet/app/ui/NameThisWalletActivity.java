@@ -16,9 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.viewmodel.NameThisWalletViewModel;
-import com.alphawallet.app.viewmodel.NameThisWalletViewModelFactory;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
-import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputView;
 
@@ -27,18 +25,16 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+@AndroidEntryPoint
 public class NameThisWalletActivity extends BaseActivity implements StandardFunctionInterface {
 
-    @Inject
-    NameThisWalletViewModelFactory viewModelFactory;
 
     private NameThisWalletViewModel viewModel;
 
@@ -52,7 +48,6 @@ public class NameThisWalletActivity extends BaseActivity implements StandardFunc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_name_this_wallet);
-        AndroidInjection.inject(this);
 
         toolbar();
 
@@ -75,7 +70,7 @@ public class NameThisWalletActivity extends BaseActivity implements StandardFunc
             }
         });
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(NameThisWalletViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.ensName().observe(this, this::onENSSuccess);

@@ -18,7 +18,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.Erc1155InfoViewModel;
-import com.alphawallet.app.viewmodel.Erc1155InfoViewModelFactory;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
@@ -26,11 +25,11 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class Erc1155InfoFragment extends BaseFragment {
-    @Inject
-    Erc1155InfoViewModelFactory viewModelFactory;
+
     private Erc1155InfoViewModel viewModel;
 
     private Token token;
@@ -42,7 +41,6 @@ public class Erc1155InfoFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_erc1155_info, container, false);
     }
 
@@ -52,7 +50,7 @@ public class Erc1155InfoFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(Erc1155InfoViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

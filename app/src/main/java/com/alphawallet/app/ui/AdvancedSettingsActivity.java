@@ -31,7 +31,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
-import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
@@ -39,15 +38,14 @@ import com.bumptech.glide.Glide;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+@AndroidEntryPoint
 public class AdvancedSettingsActivity extends BaseActivity {
-    @Inject
-    AdvancedSettingsViewModelFactory viewModelFactory;
     private AdvancedSettingsViewModel viewModel;
 
     private SettingsItemView console;
@@ -66,8 +64,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AndroidInjection.inject(this);
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(AdvancedSettingsViewModel.class);
 
         setContentView(R.layout.activity_generic_settings);

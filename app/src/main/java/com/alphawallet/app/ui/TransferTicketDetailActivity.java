@@ -58,7 +58,6 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
-import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -87,7 +86,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -96,13 +95,11 @@ import timber.log.Timber;
 /**
  * Created by James on 21/02/2018.
  */
-
+@AndroidEntryPoint
 public class TransferTicketDetailActivity extends BaseActivity
         implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
 
-    @Inject
-    protected TransferTicketDetailViewModelFactory viewModelFactory;
     protected TransferTicketDetailViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
@@ -148,11 +145,10 @@ public class TransferTicketDetailActivity extends BaseActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TransferTicketDetailViewModel.class);
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);

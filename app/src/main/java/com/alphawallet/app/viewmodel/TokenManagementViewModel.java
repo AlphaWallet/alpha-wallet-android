@@ -11,11 +11,15 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
+@HiltViewModel
 public class TokenManagementViewModel extends BaseViewModel {
     private final TokenRepositoryType tokenRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
@@ -26,6 +30,7 @@ public class TokenManagementViewModel extends BaseViewModel {
 
     private Disposable fetchTokensDisposable;
 
+    @Inject
     public TokenManagementViewModel(TokenRepositoryType tokenRepository,
                                     ChangeTokenEnableInteract changeTokenEnableInteract,
                                     AssetDefinitionService assetDefinitionService,

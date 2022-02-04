@@ -26,7 +26,6 @@ import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.util.KittyUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -42,7 +41,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
@@ -50,10 +48,11 @@ import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class TokenDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
-    @Inject
-    protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
     private NFTImageView assetImage;
@@ -94,11 +93,10 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_detail);
-        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.transactionFinalised().observe(this, this::txWritten);

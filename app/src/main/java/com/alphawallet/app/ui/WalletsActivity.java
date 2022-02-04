@@ -33,7 +33,6 @@ import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
-import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.SignTransactionDialog;
@@ -44,8 +43,9 @@ import com.google.android.material.snackbar.Snackbar;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
         AddWalletView.OnNewWalletClickListener,
@@ -55,8 +55,6 @@ public class WalletsActivity extends BaseActivity implements
         CreateWalletCallbackInterface,
         SyncCallback
 {
-    @Inject
-    WalletsViewModelFactory walletsViewModelFactory;
     WalletsViewModel viewModel;
 
     private RecyclerView list;
@@ -74,7 +72,6 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallets);
         toolbar();
@@ -94,7 +91,7 @@ public class WalletsActivity extends BaseActivity implements
         if (viewModel == null)
         {
             systemView = findViewById(R.id.system_view);
-            viewModel = new ViewModelProvider(this, walletsViewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(WalletsViewModel.class);
             viewModel.error().observe(this, this::onError);
             viewModel.progress().observe(this, systemView::showProgress);

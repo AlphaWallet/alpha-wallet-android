@@ -31,6 +31,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ImportSeedFragment extends ImportFragment implements OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";

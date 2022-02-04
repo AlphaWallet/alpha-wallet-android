@@ -16,22 +16,20 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.InputFiatCallback;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.viewmodel.SetPriceAlertViewModel;
-import com.alphawallet.app.viewmodel.SetPriceAlertViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputFiatView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+@AndroidEntryPoint
 public class SetPriceAlertActivity extends BaseActivity implements InputFiatCallback {
     private static final int REQUEST_SELECT_CURRENCY = 3000;
 
-    @Inject
-    SetPriceAlertViewModelFactory viewModelFactory;
     @Inject
     TickerService tickerService;
 
@@ -44,7 +42,6 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
@@ -62,7 +59,7 @@ public class SetPriceAlertActivity extends BaseActivity implements InputFiatCall
             functionBar.setPrimaryButtonClickListener(v -> saveAlert());
             functionBar.setPrimaryButtonEnabled(false);
 
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(SetPriceAlertViewModel.class);
 
             long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

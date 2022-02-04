@@ -52,6 +52,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -61,7 +64,7 @@ import timber.log.Timber;
 /**
  * Created by James on 9/03/2018.
  */
-
+@HiltViewModel
 public class ImportTokenViewModel extends BaseViewModel
 {
     private static final long CHECK_BALANCE_INTERVAL = 10;
@@ -105,6 +108,7 @@ public class ImportTokenViewModel extends BaseViewModel
     @Nullable
     private Disposable getBalanceDisposable;
 
+    @Inject
     ImportTokenViewModel(GenericWalletInteract genericWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,

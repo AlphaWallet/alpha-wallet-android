@@ -22,6 +22,9 @@ import java.util.List;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class AddEditDappActivity extends BaseActivity {
     public static final String KEY_MODE = "mode";
     public static final String KEY_DAPP = "dapp";

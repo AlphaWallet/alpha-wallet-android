@@ -22,8 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 
+@HiltViewModel
 public class Erc1155AssetDetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -31,6 +35,7 @@ public class Erc1155AssetDetailViewModel extends BaseViewModel {
 
     private final MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
 
+    @Inject
     public Erc1155AssetDetailViewModel(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,

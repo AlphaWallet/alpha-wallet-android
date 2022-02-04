@@ -33,7 +33,6 @@ import com.alphawallet.app.ui.widget.adapter.PriceAlertAdapter;
 import com.alphawallet.app.ui.widget.entity.PriceAlert;
 import com.alphawallet.app.ui.widget.entity.PriceAlertCallback;
 import com.alphawallet.app.viewmodel.TokenAlertsViewModel;
-import com.alphawallet.app.viewmodel.TokenAlertsViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.List;
@@ -41,12 +40,12 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
-public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener, PriceAlertCallback
-{
-    @Inject
-    TokenAlertsViewModelFactory viewModelFactory;
+@AndroidEntryPoint
+public class TokenAlertsFragment extends BaseFragment implements View.OnClickListener, PriceAlertCallback {
+    public static final int REQUEST_SET_PRICE_ALERT = 4000;
+
     private TokenAlertsViewModel viewModel;
 
     private LinearLayout noAlertsLayout;
@@ -59,7 +58,6 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_token_alerts, container, false);
     }
 
@@ -69,7 +67,7 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(TokenAlertsViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

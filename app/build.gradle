@@ -19,6 +19,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
+apply plugin: 'dagger.hilt.android.plugin'
 
 repositories {
     maven {
@@ -178,16 +179,9 @@ dependencies {
 
     // Dagger 2
 
-    // Dagger core
-    implementation "com.google.dagger:dagger:2.27"
-    annotationProcessor "com.google.dagger:dagger-compiler:2.22"
-
-    // Dagger Android
-    implementation "com.google.dagger:dagger-android-support:2.22"
-    annotationProcessor "com.google.dagger:dagger-android-processor:2.22"
-
-    // if you are not using support library, include this instead
-    implementation "com.google.dagger:dagger-android:2.22"
+    // dagger-hilt
+    implementation "com.google.dagger:hilt-android:2.40.5"
+    annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
 
     //Use Leak Canary for debug builds only
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'

@@ -22,18 +22,16 @@ import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.viewmodel.SplashViewModel;
-import com.alphawallet.app.viewmodel.SplashViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface, Runnable
 {
-    @Inject
-    SplashViewModelFactory splashViewModelFactory;
     SplashViewModel splashViewModel;
 
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -47,12 +45,10 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
-
         super.onCreate(savedInstanceState);
 
         //detect previous launch
-        splashViewModel = new ViewModelProvider(this, splashViewModelFactory)
+        splashViewModel = new ViewModelProvider(this)
                 .get(SplashViewModel.class);
 
         splashViewModel.cleanAuxData(getApplicationContext());

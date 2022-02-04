@@ -11,18 +11,16 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.ui.widget.adapter.TokenScriptManagementAdapter;
 import com.alphawallet.app.viewmodel.TokenScriptManagementViewModel;
-import com.alphawallet.app.viewmodel.TokenScriptManagementViewModelFactory;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class TokenScriptManagementActivity extends BaseActivity {
 
-    @Inject
-    TokenScriptManagementViewModelFactory tokenScriptManagementViewModelFactory;
 
     private TokenScriptManagementViewModel viewModel;
 
@@ -32,7 +30,6 @@ public class TokenScriptManagementActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_script_management);
 
@@ -46,7 +43,7 @@ public class TokenScriptManagementActivity extends BaseActivity {
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, tokenScriptManagementViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenScriptManagementViewModel.class);
     }
 

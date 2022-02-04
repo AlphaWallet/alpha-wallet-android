@@ -20,7 +20,6 @@ import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
-import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -32,9 +31,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TICKET_RANGE;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Created by James on 27/02/2018.
@@ -43,10 +43,9 @@ import static com.alphawallet.app.C.Key.TICKET_RANGE;
 /**
  * This is where we select indices to redeem
  */
+@AndroidEntryPoint
 public class RedeemAssetSelectActivity extends BaseActivity implements TokensAdapterCallback
 {
-    @Inject
-    protected RedeemAssetSelectViewModelFactory viewModelFactory;
     protected RedeemAssetSelectViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
@@ -65,10 +64,9 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(RedeemAssetSelectViewModel.class);
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

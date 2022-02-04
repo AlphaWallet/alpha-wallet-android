@@ -10,7 +10,6 @@ import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
@@ -50,8 +49,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -84,16 +81,11 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private ScrollControlViewPager viewPager;
 
-    private enum DetailPages
-    {
-        INFO(R.string.tab_info, new TokenInfoFragment()),
-        ACTIVITY(R.string.tab_activity, new TokenActivityFragment()),
-        ALERTS(R.string.tab_alert, new TokenAlertsFragment());
-
+    private class DetailPage {
         private final int tabNameResourceId;
         private final Fragment fragment;
 
-        DetailPages(int tabNameResourceId, Fragment fragment)
+        DetailPage(int tabNameResourceId, Fragment fragment)
         {
             this.tabNameResourceId = tabNameResourceId;
             this.fragment = fragment;
@@ -105,6 +97,12 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             return new Pair<>(context.getString(tabNameResourceId), fragment);
         }
     }
+
+    private final DetailPage[] detailPages = new DetailPage[] {
+            new DetailPage(R.string.tab_info, new TokenInfoFragment()),
+            new DetailPage(R.string.tab_activity, new TokenActivityFragment()),
+            new DetailPage(R.string.tab_alert, new TokenAlertsFragment())
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -176,10 +174,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private List<Pair<String, Fragment>> getPages(Bundle bundle)
     {
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        for (DetailPages detailPages : DetailPages.values())
-        {
-            pages.add(detailPages.ordinal(), detailPages.init(this, bundle));
-
+        for (int i = 0; i< detailPages.length; i++) {
+            pages.add(i, detailPages[i].init(this, bundle));
         }
         return pages;
     }
@@ -429,7 +425,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 if (transactionHash != null)
                 {
                     //switch to activity view
-                    viewPager.setCurrentItem(DetailPages.ACTIVITY.ordinal());
+                    viewPager.setCurrentItem(1);        // 0-INFO, 1-ACTIVITY, 2-ALERTS
                 }
                 break;
         }

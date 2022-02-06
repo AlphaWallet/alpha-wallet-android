@@ -11,17 +11,21 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.NFTAssetDetailActivity;
 import com.alphawallet.app.ui.Erc1155AssetListActivity;
+import com.alphawallet.app.ui.NFTAssetDetailActivity;
 
 import java.math.BigInteger;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class NFTAssetsViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OpenSeaService openSeaService;
 
+    @Inject
     public NFTAssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                               AssetDefinitionService assetDefinitionService,
                               TokensService tokensService,
@@ -43,7 +47,10 @@ public class NFTAssetsViewModel extends BaseViewModel {
         return openSeaService;
     }
 
-    public TokensService getTokensService() { return tokensService; }
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
 
     public Intent showAssetListDetails(Context context, Wallet wallet, Token token, NFTAsset asset)
     {

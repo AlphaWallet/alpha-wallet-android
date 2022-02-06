@@ -43,21 +43,25 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
+import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
 
 @Module
+@InstallIn(SingletonComponent.class)
 public class RepositoriesModule {
 	@Singleton
 	@Provides
-	PreferenceRepositoryType providePreferenceRepository(Context context) {
+	PreferenceRepositoryType providePreferenceRepository(@ApplicationContext Context context) {
 		return new SharedPreferenceRepository(context);
 	}
 
 	@Singleton
 	@Provides
-    AccountKeystoreService provideAccountKeyStoreService(Context context, KeyService keyService) {
+    AccountKeystoreService provideAccountKeyStoreService(@ApplicationContext Context context, KeyService keyService) {
         File file = new File(context.getFilesDir(), KEYSTORE_FOLDER);
 		return new KeystoreAccountService(file, context.getFilesDir(), keyService);
 	}
@@ -72,7 +76,7 @@ public class RepositoriesModule {
 	@Provides
 	EthereumNetworkRepositoryType provideEthereumNetworkRepository(
             PreferenceRepositoryType preferenceRepository,
-			Context context) {
+			@ApplicationContext Context context) {
 		return new EthereumNetworkRepository(preferenceRepository, context);
 	}
 
@@ -104,7 +108,7 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	OnRampRepositoryType provideOnRampRepository(Context context, AnalyticsServiceType analyticsServiceType) {
+	OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context, AnalyticsServiceType analyticsServiceType) {
 		return new OnRampRepository(context, analyticsServiceType);
 	}
 
@@ -129,7 +133,7 @@ public class RepositoriesModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
 			OkHttpClient httpClient,
-			Context context,
+			@ApplicationContext Context context,
 			TickerService tickerService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
@@ -192,13 +196,13 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-    NotificationService provideNotificationService(Context ctx) {
+    NotificationService provideNotificationService(@ApplicationContext Context ctx) {
 		return new NotificationService(ctx);
 	}
 
 	@Singleton
 	@Provides
-    AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager,
+    AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
 														 TokensService tokensService, TokenLocalSource tls, TransactionRepositoryType trt,
 														 AlphaWalletService alphaService) {
 		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, tokensService, tls, trt, alphaService);
@@ -206,13 +210,13 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	KeyService provideKeyService(Context ctx, AnalyticsServiceType analyticsService) {
+	KeyService provideKeyService(@ApplicationContext Context ctx, AnalyticsServiceType analyticsService) {
 		return new KeyService(ctx, analyticsService);
 	}
 
 	@Singleton
 	@Provides
-	AnalyticsServiceType provideAnalyticsService(Context ctx) {
+	AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx) {
 		return new AnalyticsService(ctx);
 	}
 }

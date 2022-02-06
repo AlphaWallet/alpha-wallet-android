@@ -75,6 +75,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -82,6 +85,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import timber.log.Timber;
 
+@HiltViewModel
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
@@ -115,6 +119,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
     private BottomSheetDialog dialog;
 
+    @Inject
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,

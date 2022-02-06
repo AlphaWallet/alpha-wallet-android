@@ -42,7 +42,6 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
-import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -50,11 +49,10 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class NewSettingsFragment extends BaseFragment {
-    @Inject
-    NewSettingsViewModelFactory newSettingsViewModelFactory;
 
     private NewSettingsViewModel viewModel;
 
@@ -90,8 +88,7 @@ public class NewSettingsFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        AndroidSupportInjection.inject(this);
-        viewModel = new ViewModelProvider(this, newSettingsViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.backUpMessage().observe(getViewLifecycleOwner(), this::backupWarning);

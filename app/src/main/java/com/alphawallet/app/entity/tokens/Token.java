@@ -98,6 +98,8 @@ public class Token
         walletUIUpdateRequired = false;
         hasTokenScript = false;
         resultMap.clear();
+
+        if (group == null) group = TokenGroup.ASSET; //default to Asset
     }
 
     public String getStringBalance()

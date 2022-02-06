@@ -29,7 +29,6 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -49,7 +48,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -79,13 +78,12 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
  * Note that we need to pre-calculate both the view-iconified and views. If these are the same then an optimisation skips the normal view.
  *
  */
+@AndroidEntryPoint
 public class AssetDisplayActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback,
                                                                     Runnable, ActionSheetCallback
 {
     private static final int TOKEN_SIZING_DELAY = 3000; //3 seconds until timeout waiting for tokenview size calculation
 
-    @Inject
-    protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
     private SystemView systemView;
@@ -108,13 +106,12 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
 
         wallet = getIntent().getParcelableExtra(WALLET);
 
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
 
         String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);

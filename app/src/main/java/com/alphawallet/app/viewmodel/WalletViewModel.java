@@ -47,10 +47,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
+@HiltViewModel
 public class WalletViewModel extends BaseViewModel
 {
     public static long BALANCE_BACKUP_CHECK_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
@@ -75,6 +79,7 @@ public class WalletViewModel extends BaseViewModel
     private BottomSheetDialog dialog;
     private final OnRampRepositoryType onRampRepository;
 
+    @Inject
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
             TokenDetailRouter tokenDetailRouter,

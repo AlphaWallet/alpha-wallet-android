@@ -16,10 +16,13 @@ import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.widget.InputAddress;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Created by James on 26/07/2019.
  * Stormbird in Sydney
  */
+@AndroidEntryPoint
 public class SetWatchWalletFragment extends ImportFragment implements AddressReadyCallback
 {
     private static final OnSetWatchWalletListener dummyWatchWalletListener = key -> {

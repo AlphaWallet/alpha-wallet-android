@@ -104,7 +104,6 @@ import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
-import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
 import com.alphawallet.app.web3.OnEthCallListener;
 import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
@@ -149,7 +148,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -159,6 +158,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import timber.log.Timber;
 
+@AndroidEntryPoint
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
@@ -194,8 +194,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
      */
     private final int ANIMATION_DURATION = 100;
 
-    @Inject
-    DappBrowserViewModelFactory dappBrowserViewModelFactory;
     private DappBrowserViewModel viewModel;
 
     private DappBrowserSwipeLayout swipeRefreshLayout;
@@ -277,7 +275,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        AndroidSupportInjection.inject(this);
         LocaleUtils.setActiveLocale(getContext());
         loadOnInit = null;
         int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
@@ -767,7 +764,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, dappBrowserViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
@@ -898,18 +895,20 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void displayCloseWC()
     {
-        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
-        resultDialog = new AWalletAlertDialog(getContext());
-        resultDialog.setIcon(WARNING);
-        resultDialog.setTitle(R.string.title_wallet_connect);
-        resultDialog.setMessage(getString(R.string.unsupported_walletconnect));
-        resultDialog.setButtonText(R.string.button_ok);
-        resultDialog.setButtonListener(v -> {
-            launchWalletConnectSessionCancel();
-            launchNetworkPicker();
-            resultDialog.dismiss();
+        handler.post(() -> {
+            if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+            resultDialog = new AWalletAlertDialog(getContext());
+            resultDialog.setIcon(WARNING);
+            resultDialog.setTitle(R.string.title_wallet_connect);
+            resultDialog.setMessage(getString(R.string.unsupported_walletconnect));
+            resultDialog.setButtonText(R.string.button_ok);
+            resultDialog.setButtonListener(v -> {
+                launchWalletConnectSessionCancel();
+                launchNetworkPicker();
+                resultDialog.dismiss();
+            });
+            resultDialog.show();
         });
-        resultDialog.show();
     }
 
     private void setupWeb3() {
@@ -1099,7 +1098,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         catch (ActivityNotFoundException e)
         {
             uploadMessage = null;
-            Toast.makeText(getActivity().getApplicationContext(), "Cannot Open File Chooser", Toast.LENGTH_LONG).show();
+            Toast.makeText(requireActivity().getApplicationContext(), "Cannot Open File Chooser", Toast.LENGTH_LONG).show();
             return false;
         }
 
@@ -1199,7 +1198,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         // at this stage, we know if it's testnet or not
         if (!info.hasRealValue() && (activeNetwork != null && activeNetwork.hasRealValue()))
         {
-            TestNetDialog testnetDialog = new TestNetDialog(getContext(), info.chainId, this);
+            TestNetDialog testnetDialog = new TestNetDialog(requireContext(), info.chainId, this);
             testnetDialog.show();
         }
         else
@@ -1269,7 +1268,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             message += "\n" + getString(R.string.warning_switching_to_test);
         }
 
-        confirmationDialog = new ActionSheetDialog(getActivity(), this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+        confirmationDialog = new ActionSheetDialog(requireActivity(), this, R.string.switch_chain_request, message, R.string.switch_and_reload,
                                 callbackId, baseToken);
 
         confirmationDialog.setCanceledOnTouchOutside(true);
@@ -1298,7 +1297,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
         if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
-            confirmationDialog = new ActionSheetDialog(getActivity(), this, this, message);
+            confirmationDialog = new ActionSheetDialog(requireActivity(), this, this, message);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
             confirmationDialog.fullExpand();
@@ -1318,7 +1317,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
                 Token token = viewModel.getTokenService().getTokenOrBase(activeNetwork.chainId, transaction.recipient.toString());
-                confirmationDialog = new ActionSheetDialog(getActivity(), transaction, token,
+                confirmationDialog = new ActionSheetDialog(requireActivity(), transaction, token,
                         "", transaction.recipient.toString(), viewModel.getTokenService(), this);
                 confirmationDialog.setURL(url);
                 confirmationDialog.setCanceledOnTouchOutside(false);
@@ -1371,7 +1370,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void txError(Throwable throwable)
     {
         if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
-        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog = new AWalletAlertDialog(requireContext());
         resultDialog.setIcon(ERROR);
         resultDialog.setTitle(R.string.error_transaction_failed);
         resultDialog.setMessage(throwable.getMessage());
@@ -1387,7 +1386,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void showWalletWatch()
     {
         if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
-        resultDialog = new AWalletAlertDialog(getContext());
+        resultDialog = new AWalletAlertDialog(requireContext());
         resultDialog.setIcon(AWalletAlertDialog.WARNING);
         resultDialog.setTitle(R.string.title_wallet_connect);
         resultDialog.setMessage(R.string.action_watch_account);
@@ -1795,7 +1794,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void copyToClipboard(String address)
     {
-        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = (ClipboardManager) requireActivity().getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(KEY_ADDRESS, address);
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
@@ -1831,7 +1830,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private boolean checkReadPermission()
     {
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED)
         {
             return true;
@@ -1839,7 +1838,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         else
         {
             String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
-            getActivity().requestPermissions(permissions, REQUEST_FILE_ACCESS);
+            requireActivity().requestPermissions(permissions, REQUEST_FILE_ACCESS);
             return false;
         }
     }
@@ -1848,13 +1847,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     // Note: If you intend allowing geo-location in your app you need to ask the permission.
     private void requestGeoPermission(String origin, GeolocationPermissions.Callback callback)
     {
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ContextCompat.checkSelfPermission(requireContext().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
         {
             geoCallback = callback;
             geoOrigin = origin;
             String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
-            getActivity().requestPermissions(permissions, REQUEST_FINE_LOCATION);
+            requireActivity().requestPermissions(permissions, REQUEST_FINE_LOCATION);
         }
         else
         {
@@ -1872,7 +1871,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
             {
                 final String[] permissions = new String[]{Manifest.permission.CAMERA};
-                getActivity().requestPermissions(permissions, REQUEST_CAMERA_ACCESS);
+                requireActivity().requestPermissions(permissions, REQUEST_CAMERA_ACCESS);
             }
         }
     }
@@ -1932,7 +1931,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void writeBundleToLocalStorage(Bundle bundle)
     {
-        File file = new File(getContext().getFilesDir(), BUNDLE_FILE);
+        File file = new File(requireContext().getFilesDir(), BUNDLE_FILE);
         try (FileOutputStream fos = new FileOutputStream(file))
         {
             getSerialisedBundle(bundle).writeTo(fos);
@@ -1978,7 +1977,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private Bundle readBundleFromLocal()
     {
-        File file = new File(getContext().getFilesDir(), BUNDLE_FILE);
+        File file = new File(requireContext().getFilesDir(), BUNDLE_FILE);
         try (FileInputStream fis = new FileInputStream(file))
         {
             ObjectInputStream oos = new ObjectInputStream(fis);

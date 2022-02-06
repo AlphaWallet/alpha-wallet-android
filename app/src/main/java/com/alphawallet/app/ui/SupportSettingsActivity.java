@@ -14,6 +14,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.widget.SettingsItemView;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SupportSettingsActivity extends BaseActivity {
 
     private LinearLayout supportSettingsLayout;

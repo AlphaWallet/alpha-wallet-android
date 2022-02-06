@@ -30,7 +30,6 @@ import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.ActivityViewModel;
-import com.alphawallet.app.viewmodel.ActivityViewModelFactory;
 import com.alphawallet.app.widget.EmptyTransactionsView;
 import com.alphawallet.app.widget.SystemView;
 
@@ -39,17 +38,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
 /**
  * Created by JB on 26/06/2020.
  */
+@AndroidEntryPoint
 public class ActivityFragment extends BaseFragment implements View.OnClickListener, ActivityDataInteract
 {
-    @Inject
-    ActivityViewModelFactory activityViewModelFactory;
     private ActivityViewModel viewModel;
 
     private SystemView systemView;
@@ -65,7 +63,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        AndroidSupportInjection.inject(this);
         LocaleUtils.setActiveLocale(getContext());
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
         toolbar(view);
@@ -79,7 +76,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         if (viewModel == null)
         {
-            viewModel = new ViewModelProvider(this, activityViewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(ActivityViewModel.class);
             viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
             viewModel.activityItems().observe(getViewLifecycleOwner(), this::onItemsLoaded);

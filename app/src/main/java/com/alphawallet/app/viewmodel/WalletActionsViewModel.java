@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
@@ -19,6 +20,9 @@ import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.router.HomeRouter;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class WalletActionsViewModel extends BaseViewModel {
     private final static String TAG = WalletActionsViewModel.class.getSimpleName();
 
@@ -33,6 +37,7 @@ public class WalletActionsViewModel extends BaseViewModel {
     private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isTaskRunning = new MutableLiveData<>();
 
+    @Inject
     WalletActionsViewModel(
             HomeRouter homeRouter,
             DeleteWalletInteract deleteWalletInteract,

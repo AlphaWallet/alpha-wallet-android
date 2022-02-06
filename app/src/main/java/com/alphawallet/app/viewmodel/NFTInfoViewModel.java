@@ -17,9 +17,10 @@ import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 public class NFTInfoViewModel extends BaseViewModel {
     private final MutableLiveData<ActivityMeta[]> transactions = new MutableLiveData<>();
@@ -29,6 +30,7 @@ public class NFTInfoViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
+    @Inject
     public NFTInfoViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                             AssetDefinitionService assetDefinitionService,
                             TokensService tokensService)

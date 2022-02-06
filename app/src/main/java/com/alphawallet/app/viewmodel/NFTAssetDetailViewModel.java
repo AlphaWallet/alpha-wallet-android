@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import io.reactivex.Single;
 
+@HiltViewModel
 public class NFTAssetDetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -31,6 +34,7 @@ public class NFTAssetDetailViewModel extends BaseViewModel {
 
     private final MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
 
+    @Inject
     public NFTAssetDetailViewModel(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,

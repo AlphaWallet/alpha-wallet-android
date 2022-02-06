@@ -30,7 +30,6 @@ import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.NFTViewModel;
-import com.alphawallet.app.viewmodel.NFTViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.android.material.tabs.TabLayout;
@@ -41,7 +40,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 
 public class NFTActivity extends BaseActivity implements StandardFunctionInterface {
     @Inject
@@ -77,7 +75,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nft);
         toolbar();

@@ -21,7 +21,6 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.viewmodel.NFTAssetDetailViewModel;
-import com.alphawallet.app.viewmodel.NFTAssetDetailViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
@@ -36,8 +35,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface {
     @Inject
     NFTAssetDetailViewModelFactory viewModelFactory;
@@ -66,7 +66,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nft_asset_detail);
 

@@ -24,7 +24,9 @@ import java.util.List;
 import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
 import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_REMOVE_HISTORY;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class BrowserHistoryFragment extends Fragment {
     private BrowserHistoryAdapter adapter;
     private AWalletAlertDialog dialog;

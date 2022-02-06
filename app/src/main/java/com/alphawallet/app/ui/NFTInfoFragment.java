@@ -19,7 +19,6 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.NFTInfoViewModel;
-import com.alphawallet.app.viewmodel.NFTInfoViewModelFactory;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
@@ -28,15 +27,13 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 import java.math.BigInteger;
 import java.util.List;
 
-import javax.inject.Inject;
+import dagger.hilt.android.AndroidEntryPoint;
 
-import dagger.android.support.AndroidSupportInjection;
-
+@AndroidEntryPoint
 public class NFTInfoFragment extends BaseFragment {
-    @Inject
-    NFTInfoViewModelFactory viewModelFactory;
+    NFTInfoViewModel viewModel;
+
     NFTImageView assetImage;
-    private NFTInfoViewModel viewModel;
     private Token token;
     private LinearLayout tokenInfoLayout;
     private TextView tokenDescription;
@@ -45,7 +42,6 @@ public class NFTInfoFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_nft_info, container, false);
     }
 
@@ -55,7 +51,7 @@ public class NFTInfoFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(NFTInfoViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

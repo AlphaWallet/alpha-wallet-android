@@ -18,6 +18,8 @@ import java.math.BigInteger;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
 @HiltViewModel
 public class NFTAssetsViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;

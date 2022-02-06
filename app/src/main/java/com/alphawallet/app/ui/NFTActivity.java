@@ -40,10 +40,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class NFTActivity extends BaseActivity implements StandardFunctionInterface {
-    @Inject
-    NFTViewModelFactory viewModelFactory;
     NFTViewModel viewModel;
 
     private Menu menu;
@@ -98,7 +98,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(NFTViewModel.class);
     }
 

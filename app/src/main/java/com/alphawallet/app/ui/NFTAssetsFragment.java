@@ -40,21 +40,17 @@ import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
-import com.alphawallet.app.viewmodel.NFTAssetsViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigInteger;
 import java.util.List;
 
-import javax.inject.Inject;
+import dagger.hilt.android.AndroidEntryPoint;
 
-import dagger.android.support.AndroidSupportInjection;
-
+@AndroidEntryPoint
 public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback {
     private final Handler delayHandler = new Handler(Looper.getMainLooper());
-    @Inject
-    NFTAssetsViewModelFactory viewModelFactory;
-    private NFTAssetsViewModel viewModel;
+    NFTAssetsViewModel viewModel;
     private Token token;
     private Wallet wallet;
     private RecyclerView recyclerView;
@@ -81,7 +77,6 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_nft_assets, container, false);
     }
 
@@ -91,7 +86,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(NFTAssetsViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

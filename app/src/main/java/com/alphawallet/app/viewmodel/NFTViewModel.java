@@ -21,6 +21,8 @@ import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -35,6 +37,7 @@ public class NFTViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
+    @Inject
     public NFTViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                         AssetDefinitionService assetDefinitionService,
                         TokensService tokensService)

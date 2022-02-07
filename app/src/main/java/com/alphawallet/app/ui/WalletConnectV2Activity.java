@@ -14,6 +14,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
+import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.util.LayoutHelper;
@@ -34,7 +35,7 @@ import androidx.lifecycle.ViewModelProvider;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class WalletConnectV2Activity extends BaseActivity implements StandardFunctionInterface, WalletConnectClient.WalletDelegate
+public class WalletConnectV2Activity extends BaseActivity implements StandardFunctionInterface
 {
     private WalletConnectV2ViewModel viewModel;
 
@@ -47,7 +48,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private ListView chainList;
     private ListView methodList;
 
-    private String url;
     private WalletConnectV2SessionItem session;
 
     @Override
@@ -59,20 +59,15 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
         initViews();
-        initViewModel();
-        this.url = retrieveQrCode();
+//        initViewModel();
         this.session = retrieveSession();
-        viewModel.prepare();
+        displaySessionStatus(this.session);
+//        viewModel.prepare();
     }
 
     private WalletConnectV2SessionItem retrieveSession()
     {
         return getIntent().getParcelableExtra("session");
-    }
-
-    private String retrieveQrCode()
-    {
-        return getIntent().getExtras().getString("qrCode");
     }
 
     private void initViewModel()
@@ -86,17 +81,10 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void onDefaultWallet(Wallet wallet)
     {
-        if (url == null)
-        {
-            progressBar.setVisibility(View.GONE);
-            functionBar.setVisibility(View.VISIBLE);
-            infoLayout.setVisibility(View.VISIBLE);
-            displaySessionStatus(session);
-        } else
-        {
-            WalletConnectClient.INSTANCE.setWalletDelegate(this);
-            viewModel.pair(url);
-        }
+        progressBar.setVisibility(View.GONE);
+        functionBar.setVisibility(View.VISIBLE);
+        infoLayout.setVisibility(View.VISIBLE);
+        displaySessionStatus(session);
     }
 
     private void displaySessionStatus(WalletConnectV2SessionItem session)
@@ -118,7 +106,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerName.setText(session.name);
         peerUrl.setText(session.url);
 
-        chainList.setAdapter(new ChainAdapter(this, getChains(session.accounts)));
+        chainList.setAdapter(new ChainAdapter(this, session.chains));
         methodList.setAdapter(new MethodAdapter(this, session.methods));
         resizeList();
 
@@ -127,9 +115,24 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             @Override
             public void handleClick(String action, int actionId)
             {
-                endSessionDialog();
+                if (actionId == R.string.dialog_approve)
+                {
+                    approve(AWWalletConnectClient.sessionProposal);
+                } else
+                {
+                    reject(AWWalletConnectClient.sessionProposal);
+                }
             }
-        }, Collections.singletonList(R.string.action_end_session));
+        }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
+
+//        functionBar.setupFunctions(new StandardFunctionInterface()
+//        {
+//            @Override
+//            public void handleClick(String action, int actionId)
+//            {
+//                endSessionDialog();
+//            }
+//        }, Collections.singletonList(R.string.action_end_session));
     }
 
     private void resizeList()
@@ -169,13 +172,16 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void endSessionDialog()
     {
-        runOnUiThread(() -> {
+        runOnUiThread(() ->
+        {
             AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectV2Activity.this);
             AlertDialog dialog = builder.setTitle(R.string.dialog_title_disconnect_session)
-                    .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                    .setPositiveButton(R.string.dialog_ok, (d, w) ->
+                    {
                         killSession(session);
                     })
-                    .setNegativeButton(R.string.action_cancel, (d, w) -> {
+                    .setNegativeButton(R.string.action_cancel, (d, w) ->
+                    {
                         d.dismiss();
                     })
                     .create();
@@ -201,19 +207,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         });
     }
 
-    @Override
-    public void onSessionDelete(@NonNull WalletConnect.Model.DeletedSession deletedSession)
-    {
-
-    }
-
-    @Override
-    public void onSessionNotification(@NonNull WalletConnect.Model.SessionNotification sessionNotification)
-    {
-
-    }
-
-    @Override
     public void onSessionProposal(@NonNull WalletConnect.Model.SessionProposal sessionProposal)
     {
         runOnUiThread(() ->
@@ -225,19 +218,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
             displaySessionStatus(sessionProposal);
 
-            functionBar.setupFunctions(new StandardFunctionInterface()
-            {
-                @Override
-                public void handleClick(String action, int actionId)
-                {
-                    if (actionId == R.string.dialog_approve)
-                    {
-                        approve(sessionProposal);
-                    } else {
-                        reject(sessionProposal);
-                    }
-                }
-            }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
         });
     }
 
@@ -260,12 +240,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         resizeList();
     }
 
-    @Override
-    public void onSessionRequest(@NonNull WalletConnect.Model.SessionRequest sessionRequest)
-    {
-
-    }
-
     private void reject(WalletConnect.Model.SessionProposal sessionProposal)
     {
         WalletConnectClient.INSTANCE.reject(new WalletConnect.Params.Reject(getString(R.string.message_reject_request), sessionProposal.getTopic()), new WalletConnect.Listeners.SessionReject()
@@ -285,7 +259,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void approve(WalletConnect.Model.SessionProposal sessionProposal)
     {
-        List<String> accounts = getAccounts(sessionProposal.getChains());
+        List<String> accounts = getAccounts(session.chains);
         WalletConnect.Params.Approve approve = new WalletConnect.Params.Approve(sessionProposal, accounts);
         WalletConnectClient.INSTANCE.approve(approve, new WalletConnect.Listeners.SessionApprove()
         {

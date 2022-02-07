@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.walletconnect;
 
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,8 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.annotation.RequiresApi;
+
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
+    public final List<String> chains = new ArrayList<>();
     public final List<String> accounts = new ArrayList<>();
     public final List<String> methods = new ArrayList<>();
     public WalletConnectV2SessionItem(WalletConnect.Model.SettledSession s)
@@ -32,8 +36,27 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         icon = in.readString();
         sessionId = in.readString();
         localSessionId = in.readString();
+        in.readStringList(chains);
         in.readStringList(accounts);
         in.readStringList(methods);
+    }
+
+    public WalletConnectV2SessionItem()
+    {
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static WalletConnectV2SessionItem from(WalletConnect.Model.SessionProposal sessionProposal)
+    {
+        WalletConnectV2SessionItem item = new WalletConnectV2SessionItem();
+        item.name = sessionProposal.getName();
+        item.url = sessionProposal.getUrl();
+        item.icon = sessionProposal.getIcon();
+        item.sessionId = sessionProposal.getTopic();
+        item.chains.addAll(sessionProposal.getChains());
+        item.methods.addAll(sessionProposal.getMethods());
+        return item;
     }
 
     @Override
@@ -50,6 +73,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeString(icon);
         dest.writeString(sessionId);
         dest.writeString(localSessionId);
+        dest.writeStringList(chains);
         dest.writeStringList(accounts);
         dest.writeStringList(methods);
     }

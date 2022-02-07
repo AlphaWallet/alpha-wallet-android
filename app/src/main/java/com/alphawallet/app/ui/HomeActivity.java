@@ -68,6 +68,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
+import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
@@ -309,30 +310,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
 
-        initWalletConnectV2Client();
+        startWalletConnectV2Service();
     }
 
-    private void initWalletConnectV2Client()
+    private void startWalletConnectV2Service()
     {
-        WalletConnect.Model.AppMetaData appMetaData = getAppMetaData();
-        WalletConnect.Params.Init init = new WalletConnect.Params.Init(getApplication(),
-                "wss://relay.walletconnect.com/?projectId=40c6071febfd93f4fe485c232a8a4cd9",
-                true,
-                appMetaData);
-
-        WalletConnectClient.INSTANCE.initialize(init);
-    }
-
-    @NonNull
-    private WalletConnect.Model.AppMetaData getAppMetaData()
-    {
-
-        String name = getString(R.string.app_name);
-        String url = "https://alphawallet.com";
-        String[] icons = {"https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"};
-
-        String description = "The ultimate Web3 Wallet to power your tokens.";
-        return new WalletConnect.Model.AppMetaData(name, description, url, Arrays.asList(icons));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Context context = getApplicationContext();
+            Intent intent = new Intent(context, WalletConnectV2Service.class);
+            context.startService(intent);
+            Log.d("seaborn", "startWalletConnectV2Service: " + Build.VERSION.SDK_INT);
+        }
     }
 
     private void setupFragmentListeners()

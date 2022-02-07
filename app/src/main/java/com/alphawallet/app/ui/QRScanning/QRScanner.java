@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -44,6 +45,8 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
+import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -358,19 +361,36 @@ public class QRScanner extends BaseActivity
 
     private void startWalletConnect(String qrCode)
     {
-        Class<? extends Activity> cls;
         if (QRCodeHelper.isWalletConnectV1(qrCode)) {
-            cls = WalletConnectActivity.class;
+            Intent intent = new Intent(this, WalletConnectActivity.class);
+            intent.putExtra("qrCode", qrCode);
+            intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
+            startActivity(intent);
+            setResult(WALLET_CONNECT);
         } else {
-            cls = WalletConnectV2Activity.class;
+            pairWalletConnectV2(qrCode);
         }
-
-        Intent intent = new Intent(this, cls);
-        intent.putExtra("qrCode", qrCode);
-        intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
-        startActivity(intent);
-        setResult(WALLET_CONNECT);
         finish();
+    }
+
+    private void pairWalletConnectV2(String url)
+    {
+        Log.d("seaborn", "pairWalletConnectV2: " + url);
+        WalletConnect.Params.Pair pair = new WalletConnect.Params.Pair(url);
+        WalletConnectClient.INSTANCE.pair(pair, new WalletConnect.Listeners.Pairing()
+        {
+            @Override
+            public void onSuccess(@NonNull WalletConnect.Model.SettledPairing settledPairing)
+            {
+
+            }
+
+            @Override
+            public void onError(@NonNull Throwable throwable)
+            {
+
+            }
+        });
     }
 
     @Override

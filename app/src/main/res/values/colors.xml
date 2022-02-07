@@ -84,6 +84,7 @@
 
 	<!-- Functional Palette -->
 	<color name="transparent">#00000000</color>
+	<color name="translucent_white">#B3FFFFFF</color>
 	<color name="blur">#80000000</color>
 	<color name="danger_10_percent">#19ff3b30</color>
 	<color name="green_10_percent">#1975b943</color>

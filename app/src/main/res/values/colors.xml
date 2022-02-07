@@ -106,6 +106,7 @@
 
 	<!-- Fiji Colour Palette -->
 	<color name="black">#000000</color>
+	<color name="cod">#141414</color>
 	<color name="mine">#2f2f2f</color>
 	<color name="dove">#727272</color>
 	<color name="dove_hint">#66727272</color>

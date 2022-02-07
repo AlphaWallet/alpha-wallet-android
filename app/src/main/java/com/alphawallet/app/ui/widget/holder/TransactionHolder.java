@@ -177,7 +177,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);
-            transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
+            transactionBackground.setBackgroundResource(R.color.mercury);
         }
         else if (transactionBackground != null)
         {

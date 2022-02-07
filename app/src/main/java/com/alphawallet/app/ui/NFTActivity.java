@@ -78,7 +78,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nft);
         toolbar();
-        findViewById(R.id.user_address_blockie).setVisibility(View.GONE);
         initViewModel();
         getIntentData();
         setTitle(token.tokenInfo.name);

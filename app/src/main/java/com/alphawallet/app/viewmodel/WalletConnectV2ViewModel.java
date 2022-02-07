@@ -1,39 +1,41 @@
 package com.alphawallet.app.viewmodel;
 
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.interact.FetchWalletsInteract;
 
 import javax.inject.Inject;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class WalletConnectV2ViewModel extends BaseViewModel
 {
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final GenericWalletInteract genericWalletInteract;
+    private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
+
+    private final FetchWalletsInteract fetchWalletsInteract;
+
+    public LiveData<Wallet[]> wallets()
+    {
+        return wallets;
+    }
 
     @Inject
-    WalletConnectV2ViewModel(GenericWalletInteract genericWalletInteract)
+    WalletConnectV2ViewModel(FetchWalletsInteract fetchWalletsInteract)
     {
-        this.genericWalletInteract = genericWalletInteract;
+        this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
-    public void prepare()
+    public void fetchWallets()
     {
-        genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
+        disposable = fetchWalletsInteract
+                .fetch()
+                .subscribe(this::onWallets, this::onError);
     }
 
-    private void onDefaultWallet(Wallet wallet)
+    private void onWallets(Wallet[] wallets)
     {
-        defaultWallet.postValue(wallet);
-    }
-
-    public MutableLiveData<Wallet> defaultWallet()
-    {
-        return defaultWallet;
+        this.wallets.postValue(wallets);
     }
 }

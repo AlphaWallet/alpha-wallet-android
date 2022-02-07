@@ -14,9 +14,11 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
+import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
+import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -46,9 +48,11 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private LinearLayout infoLayout;
     private FunctionButtonBar functionBar;
     private ListView chainList;
+    private ListView walletList;
     private ListView methodList;
 
     private WalletConnectV2SessionItem session;
+    private Wallet[] wallets;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -59,10 +63,10 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
         initViews();
-//        initViewModel();
+        initViewModel();
         this.session = retrieveSession();
-        displaySessionStatus(this.session);
-//        viewModel.prepare();
+//        displaySessionStatus(this.session);
+        viewModel.fetchWallets();
     }
 
     private WalletConnectV2SessionItem retrieveSession()
@@ -76,7 +80,13 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         viewModel = new ViewModelProvider(this)
                 .get(WalletConnectV2ViewModel.class);
 
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.wallets().observe(this, this::onWalletsFetched);
+    }
+
+    private void onWalletsFetched(Wallet[] wallets)
+    {
+        this.wallets = wallets;
+        displaySessionStatus(session);
     }
 
     private void onDefaultWallet(Wallet wallet)
@@ -107,6 +117,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(session.url);
 
         chainList.setAdapter(new ChainAdapter(this, session.chains));
+        walletList.setAdapter(new WalletAdapter(this, this.wallets));
         methodList.setAdapter(new MethodAdapter(this, session.methods));
         resizeList();
 
@@ -138,6 +149,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private void resizeList()
     {
         LayoutHelper.resizeList(chainList);
+        LayoutHelper.resizeList(walletList);
         LayoutHelper.resizeList(methodList);
     }
 
@@ -159,6 +171,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerName = findViewById(R.id.peer_name);
         peerUrl = findViewById(R.id.peer_url);
         chainList = findViewById(R.id.chain_list);
+        walletList = findViewById(R.id.wallet_list);
         methodList = findViewById(R.id.method_list);
 
         progressBar.setVisibility(View.VISIBLE);
@@ -236,6 +249,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(sessionProposal.getUrl());
 
         chainList.setAdapter(new ChainAdapter(this, sessionProposal.getChains()));
+//        walletList.setAdapter(new WalletAdapter(this, getWallets()));
         methodList.setAdapter(new MethodAdapter(this, sessionProposal.getMethods()));
         resizeList();
     }
@@ -281,7 +295,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private void showSessionsActivity()
     {
         Intent intent = new Intent(getApplication(), WalletConnectSessionActivity.class);
-        intent.putExtra("wallet", viewModel.defaultWallet().getValue());
+//        intent.putExtra("wallet", viewModel.defaultWallet().getValue());
         startActivity(intent);
     }
 
@@ -290,7 +304,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         List<String> result = new ArrayList<>();
         for (String chain : chains)
         {
-            result.add(chain + ":" + viewModel.defaultWallet().getValue().address);
+//            result.add(chain + ":" + viewModel.defaultWallet().getValue().address);
         }
         return result;
     }

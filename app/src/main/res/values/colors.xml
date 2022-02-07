@@ -51,8 +51,6 @@
 	<color name="atlantis">#7cca42</color>
 
 	<!-- Network Palette  -->
-	<color name="pending">#f5a623</color>
-	<color name="incomplete">#fb6523</color>
 	<color name="mainnet">#2986AF</color>
 	<color name="ropsten">#FF4A8D</color>
 	<color name="kovan">#70578D</color>

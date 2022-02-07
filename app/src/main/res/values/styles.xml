@@ -16,12 +16,6 @@
         <item name="colorSurface">#FFFFFF</item>
     </style>
 
-    <style name="AWLightAlertDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- Splash Screen theme. -->

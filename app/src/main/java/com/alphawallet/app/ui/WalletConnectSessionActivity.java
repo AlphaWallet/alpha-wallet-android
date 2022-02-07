@@ -1,7 +1,5 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.Key.WALLET;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,28 +18,27 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
+import com.alphawallet.app.viewmodel.WalletConnectViewModel;
+import com.bumptech.glide.Glide;
+
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.viewmodel.WalletConnectViewModel;
-import com.alphawallet.app.widget.ChainName;
-import com.bumptech.glide.Glide;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
+
+import static com.alphawallet.app.C.Key.WALLET;
 
 
 /**
@@ -221,10 +218,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             holder.peerUrl.setText(session.url);
             holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {
-                //go to wallet connect session page
-                Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-                intent.putExtra("session", session.sessionId);
-                startActivity(intent);
+                viewSession(session);
             });
 
             setupClient(session.sessionId, holder);
@@ -240,6 +234,20 @@ public class WalletConnectSessionActivity extends BaseActivity
         public int getItemCount()
         {
             return wcSessions.size();
+        }
+    }
+
+    private void viewSession(WalletConnectSessionItem session)
+    {
+        if (session instanceof WalletConnectV2SessionItem)
+        {
+            Intent intent = new Intent(getApplication(), WalletConnectV2Activity.class);
+            intent.putExtra("session", (WalletConnectV2SessionItem) session);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+            intent.putExtra("session", session.sessionId);
+            startActivity(intent);
         }
     }
 

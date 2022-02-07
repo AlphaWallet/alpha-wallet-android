@@ -287,6 +287,11 @@
             android:launchMode="singleTop" />
 
         <activity
+            android:name=".ui.WalletConnectV2Activity"
+            android:launchMode="singleTop"
+            android:label="WalletConnectV2" />
+
+        <activity
             android:name=".ui.BackupFlowActivity"
             android:label="WalletConnect" />
 

@@ -81,6 +81,8 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
+import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -88,6 +90,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -305,6 +308,31 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
+
+        initWalletConnectV2Client();
+    }
+
+    private void initWalletConnectV2Client()
+    {
+        WalletConnect.Model.AppMetaData appMetaData = getAppMetaData();
+        WalletConnect.Params.Init init = new WalletConnect.Params.Init(getApplication(),
+                "wss://relay.walletconnect.com/?projectId=40c6071febfd93f4fe485c232a8a4cd9",
+                true,
+                appMetaData);
+
+        WalletConnectClient.INSTANCE.initialize(init);
+    }
+
+    @NonNull
+    private WalletConnect.Model.AppMetaData getAppMetaData()
+    {
+
+        String name = getString(R.string.app_name);
+        String url = "https://alphawallet.com";
+        String[] icons = {"https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"};
+
+        String description = "The ultimate Web3 Wallet to power your tokens.";
+        return new WalletConnect.Model.AppMetaData(name, description, url, Arrays.asList(icons));
     }
 
     private void setupFragmentListeners()

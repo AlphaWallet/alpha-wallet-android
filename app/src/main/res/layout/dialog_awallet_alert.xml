@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -54,41 +55,28 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_sub_text" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/dialog_button1"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/AwButton.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_view"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-            android:background="@drawable/selector_settings_item_reverse"
-            android:fontFamily="@font/font_regular"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="10dp"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:text="Primary"
+            tools:visibility="visible" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/dialog_button2"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/AwButton.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_button1"
-            android:background="@color/white"
-            android:fontFamily="@font/font_regular"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp"
-            android:textAllCaps="false"
-            android:textColor="@color/danger"
-            android:textSize="20sp"
-            android:visibility="gone" />
+            android:layout_marginTop="@dimen/dp16"
+            tools:text="Secondary"
+            tools:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/dialog_progress"

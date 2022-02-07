@@ -63,7 +63,7 @@
             android:fontFamily="@font/font_bold"
             android:padding="10dp"
             android:text="@string/action_remove"
-            android:textColor="@color/red"
+            android:textColor="@color/danger"
             android:textSize="11sp" />
 
     </LinearLayout>

@@ -317,7 +317,7 @@ public class WalletFragment extends BaseFragment implements
             largeTitleView.subtitle.setText(getString(R.string.wallet_total_change, TickerService.getCurrencyString(fiatValues.first - fiatValues.second),
                     TickerService.getPercentageConversion(changePercent)));
             largeTitleView.title.setText(TickerService.getCurrencyString(fiatValues.first));
-            int color = ContextCompat.getColor(requireContext(), changePercent < 0 ? R.color.red : R.color.green);
+            int color = ContextCompat.getColor(requireContext(), changePercent < 0 ? R.color.danger : R.color.green);
             largeTitleView.subtitle.setTextColor(color);
 
             if (viewModel.getWallet() != null && viewModel.getWallet().type != WalletType.WATCH && isVisible)
@@ -554,8 +554,8 @@ public class WalletFragment extends BaseFragment implements
                 wData.title = getString(R.string.time_to_backup_wallet);
                 wData.detail = getString(R.string.recommend_monthly_backup);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = R.color.slate_grey;
-                wData.buttonColour = R.color.backup_grey;
+                wData.colour = R.color.dove;
+                wData.buttonColour = R.color.mine;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -564,8 +564,8 @@ public class WalletFragment extends BaseFragment implements
                 wData.title = getString(R.string.wallet_not_backed_up);
                 wData.detail = getString(R.string.not_backed_up_detail);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = R.color.warning_red;
-                wData.buttonColour = R.color.warning_dark_red;
+                wData.colour = R.color.danger;
+                wData.buttonColour = R.color.danger;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -714,7 +714,7 @@ public class WalletFragment extends BaseFragment implements
                 if (icon != null) {
                     icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
                 }
-                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.cancel_red));
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.danger));
             }
         }
 

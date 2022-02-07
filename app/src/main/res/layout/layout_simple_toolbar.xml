@@ -31,7 +31,7 @@
         android:paddingRight="15dp"
         android:singleLine="true"
         tools:text="Activity Title"
-        android:textColor="@color/toolbar_text_color"
+        android:textColor="@color/black"
         android:textSize="20sp" />
 
 </androidx.appcompat.widget.Toolbar>

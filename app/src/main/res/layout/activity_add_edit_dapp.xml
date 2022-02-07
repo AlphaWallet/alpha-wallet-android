@@ -30,7 +30,7 @@
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center"
                 android:text="@string/edit_dapp"
-                android:textColor="@color/text_dark_gray"
+                android:textColor="@color/dove"
                 android:textSize="20sp" />
 
             <ImageView
@@ -48,7 +48,7 @@
                 android:layout_marginBottom="5dp"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/dapp_title"
-                android:textColor="@color/text_dark_gray"
+                android:textColor="@color/dove"
                 android:textSize="16sp" />
 
             <EditText
@@ -64,8 +64,8 @@
                 android:maxLines="1"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:textColor="@color/text_dark_gray"
-                android:textColorHint="@color/light_gray"
+                android:textColor="@color/dove"
+                android:textColorHint="@color/dusty"
                 android:textSize="16sp" />
 
             <TextView
@@ -75,7 +75,7 @@
                 android:layout_marginTop="20dp"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/dapp_address"
-                android:textColor="@color/text_dark_gray"
+                android:textColor="@color/dove"
                 android:textSize="16sp" />
 
             <EditText
@@ -91,8 +91,8 @@
                 android:maxLines="1"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:textColor="@color/text_dark_gray"
-                android:textColorHint="@color/light_gray"
+                android:textColor="@color/dove"
+                android:textColorHint="@color/dusty"
                 android:textSize="16sp" />
         </LinearLayout>
 

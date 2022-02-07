@@ -5,7 +5,7 @@
             <solid android:color="@color/white" />
             <stroke
                 android:width="3dp"
-                android:color="@color/button_green" />
+                android:color="@color/green" />
             <padding
                 android:left="3dp"
                 android:top="3dp"

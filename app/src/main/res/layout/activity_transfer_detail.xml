@@ -60,7 +60,7 @@
                         android:fontFamily="@font/font_regular"
                         android:text="@string/quantity_of_tickets"
                         android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
+                        android:textColor="@color/dusty"
                         android:textSize="10sp" />
 
                     <LinearLayout
@@ -154,7 +154,7 @@
                         <!--android:layout_marginBottom="10dp"-->
                         <!--android:gravity="center"-->
                         <!--android:text="@string/transfer_method"-->
-                        <!--android:textColor="@color/text_black"-->
+                        <!--android:textColor="@color/mine"-->
                         <!--android:textAllCaps="true"-->
                         <!--android:textSize="10sp" />-->
 
@@ -226,7 +226,7 @@
                                 android:fontFamily="@font/font_light"
                                 android:gravity="center"
                                 android:text="@string/generate_pick_up_link"
-                                android:textColor="@color/text_black"
+                                android:textColor="@color/mine"
                                 android:textSize="18sp" />
 
                         </LinearLayout>
@@ -257,7 +257,7 @@
                                 android:fontFamily="@font/font_light"
                                 android:gravity="center"
                                 android:text="@string/transfer_now"
-                                android:textColor="@color/text_black"
+                                android:textColor="@color/mine"
                                 android:textSize="18sp" />
 
                         </LinearLayout>
@@ -295,7 +295,7 @@
                                 android:fontFamily="@font/font_regular"
                                 android:text="@string/link_expiry_date"
                                 android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
+                                android:textColor="@color/dusty"
                                 android:textSize="10sp" />
 
                             <RelativeLayout
@@ -317,7 +317,7 @@
                                     android:inputType="datetime"
                                     android:paddingStart="15dp"
                                     android:textColor="@color/colorPrimaryDark"
-                                    android:textColorHint="@color/light_gray"
+                                    android:textColorHint="@color/dusty"
                                     android:textSize="18sp" />
 
                                 <ImageView
@@ -337,7 +337,7 @@
                                 android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/error_date"
-                                android:textColor="@color/cancel_red"
+                                android:textColor="@color/danger"
                                 android:textSize="12sp"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -361,7 +361,7 @@
                                 android:fontFamily="@font/font_regular"
                                 android:text="@string/link_expiry_time"
                                 android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
+                                android:textColor="@color/dusty"
                                 android:textSize="10sp" />
 
                             <RelativeLayout
@@ -383,7 +383,7 @@
                                     android:inputType="time"
                                     android:paddingStart="15dp"
                                     android:textColor="@color/colorPrimaryDark"
-                                    android:textColorHint="@color/light_gray"
+                                    android:textColorHint="@color/dusty"
                                     android:textSize="18sp" />
 
                                 <ImageView
@@ -403,7 +403,7 @@
                                 android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/error_time"
-                                android:textColor="@color/cancel_red"
+                                android:textColor="@color/danger"
                                 android:textSize="12sp"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -416,7 +416,7 @@
                         android:fontFamily="@font/font_light"
                         android:gravity="center"
                         android:layout_gravity="center"
-                        android:textColor="@color/text_black"
+                        android:textColor="@color/mine"
                         android:layout_marginTop="15dp"
                         android:textSize="16sp" />
 

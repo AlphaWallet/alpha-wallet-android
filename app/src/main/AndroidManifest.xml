@@ -211,10 +211,6 @@
             android:label="@string/label_transfer_ticket_detail" />
 
         <activity
-            android:name=".ui.HelpActivity"
-            android:label="@string/toolbar_header_help" />
-
-        <activity
             android:name=".ui.TokenDetailActivity"
             android:label="@string/token_details" />
 

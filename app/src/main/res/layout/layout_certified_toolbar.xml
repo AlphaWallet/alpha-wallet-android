@@ -37,7 +37,7 @@
         android:gravity="center"
         android:paddingHorizontal="15dp"
         android:singleLine="true"
-        android:textColor="@color/toolbar_text_color"
+        android:textColor="@color/black"
         tools:text="Wrapped Ether (WETH)"
         android:textSize="20sp" />
 

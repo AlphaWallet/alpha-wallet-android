@@ -22,7 +22,7 @@
             android:fontFamily="@font/font_light"
             android:gravity="center"
             android:text="@string/select_tickets_redeem"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:textSize="25sp" />
     </LinearLayout>
 </LinearLayout>

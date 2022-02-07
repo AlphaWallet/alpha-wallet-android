@@ -16,14 +16,14 @@
         android:layout_marginBottom="20dp"
         android:fontFamily="@font/font_light"
         android:gravity="center"
-        android:textColor="@color/text_black"
+        android:textColor="@color/mine"
         android:textSize="25sp" />
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/super_light_grey"
+        android:background="@color/mercury"
         android:orientation="vertical"
         android:layout_marginBottom="30dp"
         android:padding="30dp">
@@ -36,7 +36,7 @@
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_light"
             android:gravity="center"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:textSize="16sp" />
 
         <TextView
@@ -79,7 +79,7 @@
             android:layout_marginBottom="20dp"
             android:fontFamily="@font/font_light"
             android:gravity="center"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:textSize="25sp" />
 
         <LinearLayout
@@ -90,7 +90,7 @@
             android:gravity="center"
             android:background="@drawable/background_round_primary">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/dialog_button1"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
@@ -127,7 +127,7 @@
             android:paddingRight="20dp"
             android:paddingTop="10dp"
             android:textAllCaps="false"
-            android:textColor="@color/cancel_red"
+            android:textColor="@color/danger"
             android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>

@@ -65,7 +65,7 @@
                 android:layout_marginEnd="5dp"
                 android:fontFamily="@font/font_regular"
                 android:text="0.0"
-                android:textColor="@color/toolbar_text_color"
+                android:textColor="@color/black"
                 android:textSize="16sp" />
 
             <TextView
@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/eth"
-                android:textColor="@color/toolbar_text_color"
+                android:textColor="@color/black"
                 android:textSize="16sp" />
 
         </LinearLayout>

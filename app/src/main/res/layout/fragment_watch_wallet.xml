@@ -38,7 +38,7 @@
         android:layout_marginBottom="25dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:background="@color/nasty_green"
+        android:background="@color/green"
         android:fontFamily="@font/font_semibold"
         android:text="@string/action_watch_account"
         android:textAllCaps="true"

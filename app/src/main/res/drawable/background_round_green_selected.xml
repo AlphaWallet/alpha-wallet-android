@@ -17,7 +17,7 @@
     <shape android:shape="rectangle">
         <solid
             android:width="3dp"
-            android:color="@color/nasty_green" />
+            android:color="@color/green" />
         <padding
             android:bottom="8dp"
             android:left="8dp"

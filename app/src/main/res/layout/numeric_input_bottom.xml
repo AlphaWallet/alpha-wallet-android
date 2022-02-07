@@ -100,7 +100,7 @@
             android:imeOptions="actionDone"
             android:inputType="numberDecimal"
             android:textColor="@color/black"
-            android:textColorHint="@color/light_gray"
+            android:textColorHint="@color/dusty"
             tools:text="25"
             android:textSize="@dimen/sp24" />
 

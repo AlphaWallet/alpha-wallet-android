@@ -83,12 +83,12 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:hint="@string/token_name_hint"
-                android:textColorHint="@color/dove_hint"
+                android:textColorHint="@color/dusty"
                 android:imeOptions="flagNoExtractUi|actionSearch"
                 android:inputType="text"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/text_black"
+                android:textColor="@color/mine"
                 app:layout_constraintEnd_toStartOf="@id/st_clear"
                 app:layout_constraintStart_toEndOf="@id/st_backArrow" />
 

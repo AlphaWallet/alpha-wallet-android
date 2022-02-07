@@ -73,7 +73,7 @@ public class TokenInfoHeaderView extends LinearLayout {
     {
         try {
             priceChange.setVisibility(View.VISIBLE);
-            int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.red : R.color.green);
+            int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.danger : R.color.green);
             BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
             String formattedPercents = (percentChange24h < 0 ? "(" : "(+") + percentChangeBI + "%)";
             priceChange.setText(formattedPercents);

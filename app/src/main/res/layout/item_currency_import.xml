@@ -8,6 +8,7 @@
     android:clickable="true"
     android:layout_marginBottom="10dp"
     android:visibility="gone"
+    tools:visibility="visible"
     android:orientation="horizontal">
 
 
@@ -31,7 +32,7 @@
             android:fontFamily="@font/font_light"
             android:layout_marginBottom="5dp"
             android:textColor="@color/black"
-            android:text="" />
+            tools:text="Sample" />
 
     </LinearLayout>
 

@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:fontFamily="@font/font_light"
-            android:textColor="@color/cancel_red"
+            android:textColor="@color/danger"
             android:text="@string/ticket_not_valid" />
     </LinearLayout>
 

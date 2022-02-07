@@ -72,8 +72,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		wallet24hChange = findViewById(R.id.wallet_24h_change);
 		clickCallback = callback;
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
-		greyColor = parent.getContext().getColor(R.color.greyffive);
-		blackColor = parent.getContext().getColor(R.color.text_black);
+		greyColor = parent.getContext().getColor(R.color.concrete);
+		blackColor = parent.getContext().getColor(R.color.mine);
 		this.realm = realm;
 	}
 
@@ -151,7 +151,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	{
 		//This sets the 24hr percentage change (rightmost value)
 		try {
-			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.red : R.color.green);
+			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.danger : R.color.green);
 			BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
 			String formattedPercents = (percentChange24h < 0 ? "-" : "+") + percentChangeBI + "%";
 			//wallet24hChange.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);

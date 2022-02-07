@@ -13,7 +13,7 @@
         android:fontFamily="@font/font_semibold"
         android:gravity="center_vertical"
         android:text="@string/activity_label"
-        android:textColor="@color/text_dark_gray"
+        android:textColor="@color/dove"
         android:textSize="@dimen/sp24" />
 
 </LinearLayout>

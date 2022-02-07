@@ -76,7 +76,7 @@
                         style="@style/TransactionDetailsStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/warning_red"
+                        android:textColor="@color/danger"
                         android:text="@string/failed"
                         android:visibility="gone"/>
 
@@ -84,7 +84,7 @@
                         android:id="@+id/failedFace"
                         style="@style/TransactionDetailsStyle"
                         android:layout_marginStart="@dimen/dp5"
-                        android:textColor="@color/warning_red"
+                        android:textColor="@color/danger"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="☹"

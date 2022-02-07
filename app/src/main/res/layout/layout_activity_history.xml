@@ -9,7 +9,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/super_light_grey" />
+        android:background="@color/mercury" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

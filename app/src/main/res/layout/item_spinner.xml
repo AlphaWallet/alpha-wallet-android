@@ -5,6 +5,6 @@
     android:fontFamily="@font/font_regular"
     android:gravity="center"
     android:textSize="15sp"
-    android:textColor="@color/light_gray">
+    android:textColor="@color/dusty">
 
 </TextView>

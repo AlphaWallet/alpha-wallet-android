@@ -213,7 +213,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             error.setText(resId);
             error.setVisibility(View.VISIBLE);
             editText.setBackgroundResource(R.drawable.background_password_error);
-            label.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_red));
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.danger));
         }
     }
 
@@ -241,7 +241,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
             error.setText(message);
             error.setVisibility(View.VISIBLE);
             editText.setBackgroundResource(R.drawable.background_password_error);
-            label.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_red));
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.danger));
         }
     }
 

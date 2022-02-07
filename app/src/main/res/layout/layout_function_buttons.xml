@@ -31,7 +31,7 @@
             android:layout_marginStart="2dp"
             android:layout_marginBottom="1dp"
             android:text="DEBUG"
-            android:textColor="@color/dark_seed_danger"
+            android:textColor="@color/danger"
             android:textSize="10sp"
             android:visibility="gone"
             tools:ignore="HardcodedText,SmallSp" />

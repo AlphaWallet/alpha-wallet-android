@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/font_semibold"
         android:gravity="center_horizontal"
-        android:shadowColor="@color/greyf6"
+        android:shadowColor="@color/alabaster"
         android:text="@string/legacy_wallets"
         android:textAllCaps="true"
         android:textColor="@color/dove"

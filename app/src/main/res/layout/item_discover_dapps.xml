@@ -32,7 +32,7 @@
             android:fontFamily="@font/font_bold"
             android:lines="1"
             android:text="DApp"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:textSize="12sp" />
 
         <TextView
@@ -43,7 +43,7 @@
             android:fontFamily="@font/font_regular"
             android:lines="1"
             android:text="Description goes here"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:textSize="10sp" />
     </LinearLayout>
 

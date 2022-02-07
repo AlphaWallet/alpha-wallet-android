@@ -60,7 +60,7 @@
             android:id="@+id/view_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/translucentWhite"
+            android:background="@color/dusty"
             android:visibility="gone" />
 
     </RelativeLayout>

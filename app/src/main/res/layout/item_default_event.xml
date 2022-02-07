@@ -54,7 +54,7 @@
         android:layout_marginEnd="@dimen/dp24"
         android:fontFamily="@font/font_regular"
 
-        android:textColor="@color/grey2"
+        android:textColor="@color/mine"
         android:textSize="@dimen/sp16"
         tools:text="Sent 4.23 awDAI to 0x123456789abcdef1234567890123456789abcdef"/>
 
@@ -70,7 +70,7 @@
         android:visibility="gone"
         android:fontFamily="@font/font_regular"
 
-        android:textColor="@color/grey2"
+        android:textColor="@color/mine"
         android:textSize="@dimen/sp16"
         tools:text="+1.0 ETH" />
 

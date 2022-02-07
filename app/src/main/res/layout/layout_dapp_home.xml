@@ -54,7 +54,7 @@
                     android:layout_marginTop="10dp"
                     android:fontFamily="@font/font_regular"
                     android:text="@string/my_dapps"
-                    android:textColor="@color/text_black" />
+                    android:textColor="@color/mine" />
             </LinearLayout>
 
             <LinearLayout
@@ -78,7 +78,7 @@
                     android:layout_marginTop="10dp"
                     android:fontFamily="@font/font_regular"
                     android:text="@string/discover_dapps"
-                    android:textColor="@color/text_black" />
+                    android:textColor="@color/mine" />
             </LinearLayout>
 
             <LinearLayout
@@ -102,7 +102,7 @@
                     android:layout_marginTop="10dp"
                     android:fontFamily="@font/font_regular"
                     android:text="@string/history"
-                    android:textColor="@color/text_black" />
+                    android:textColor="@color/mine" />
             </LinearLayout>
         </LinearLayout>
 

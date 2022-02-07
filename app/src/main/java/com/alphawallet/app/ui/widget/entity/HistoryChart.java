@@ -184,7 +184,7 @@ public class HistoryChart extends View
         paint.setDither(true);
 
 
-        greyPaint.setColor(getResources().getColor(R.color.black_12,getContext().getTheme()));
+        greyPaint.setColor(getResources().getColor(R.color.mine,getContext().getTheme()));
         greyPaint.setStrokeWidth(1);
 
         noDataTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -194,7 +194,7 @@ public class HistoryChart extends View
                 r.getDisplayMetrics()
         );
         noDataTextPaint.setTextSize(textSize);
-        noDataTextPaint.setColor(getResources().getColor(R.color.black_12, getContext().getTheme()));
+        noDataTextPaint.setColor(getResources().getColor(R.color.mine, getContext().getTheme()));
 
         edgeValPaint.setTextAlign(Paint.Align.RIGHT);
         edgeValPaint.setTextSize(

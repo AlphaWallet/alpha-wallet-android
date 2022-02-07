@@ -60,7 +60,7 @@ public class TokenInfoView extends LinearLayout {
         String prefix = hasPrefix && v > 0 ? "+" : "";
         value.setText(prefix + TickerService.getFullCurrencyString(v));
 
-        int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.red : R.color.green);
+        int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.danger : R.color.green);
         value.setTextColor(color);
     }
 

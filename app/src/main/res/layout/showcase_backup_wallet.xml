@@ -23,7 +23,7 @@
             android:layout_marginBottom="21dp"
             android:fontFamily="@font/font_regular"
             android:text="@string/title_back_up_your_wallet"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:gravity="center_horizontal"
             android:textSize="25sp" />
 
@@ -34,7 +34,7 @@
             android:layout_marginBottom="23dp"
             android:fontFamily="@font/font_regular"
             android:text="@string/nudge_user_to_backup_wallet"
-            android:textColor="@color/text_dark_gray"
+            android:textColor="@color/dove"
             android:textSize="17sp" />
 
         <Button

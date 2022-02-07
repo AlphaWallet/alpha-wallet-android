@@ -37,7 +37,7 @@
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
             android:text="@string/you_have_no_dapps_displayed_yet_start_by_surfing_the_browser"
-            android:textColor="@color/text_dark_gray"
+            android:textColor="@color/dove"
             android:textSize="18sp"
             android:visibility="gone" />
 

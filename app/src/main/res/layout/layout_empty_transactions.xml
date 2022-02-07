@@ -26,7 +26,7 @@
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:text="@string/no_transactions_yet"
-        android:textColor="@color/text_dark_gray"
+        android:textColor="@color/dove"
         android:textSize="@dimen/sp20"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

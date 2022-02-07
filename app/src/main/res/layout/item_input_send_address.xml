@@ -49,8 +49,8 @@
             android:maxLines="1"
             android:paddingEnd="60dp"
             android:paddingStart="15dp"
-            android:textColor="@color/text_dark_gray"
-            android:textColorHint="@color/light_gray"
+            android:textColor="@color/dove"
+            android:textColorHint="@color/dusty"
             android:textSize="11sp" />
 
         <TextView
@@ -92,7 +92,7 @@
         android:layout_marginTop="10dp"
         android:fontFamily="@font/font_regular"
         android:text="@string/error_invalid_address"
-        android:textColor="@color/cancel_red"
+        android:textColor="@color/danger"
         android:textSize="11sp"
         android:visibility="gone" />
 
@@ -112,7 +112,7 @@
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/font_regular"
             android:textAllCaps="true"
-            android:textColor="@color/light_gray"
+            android:textColor="@color/dusty"
             android:textSize="11sp" />
 
         <TextView
@@ -145,7 +145,7 @@
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
                 android:paddingTop="8dp"
-                android:textColor="@color/text_dark_gray"
+                android:textColor="@color/dove"
                 android:textSize="11sp" />
 
         </LinearLayout>

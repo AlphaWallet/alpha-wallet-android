@@ -10,7 +10,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/greye5"/>
+        android:background="@color/mercury"/>
 
     <TextView
         android:id="@+id/title"

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/greyffive"
+    android:background="@color/concrete"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -23,7 +23,7 @@
             android:layout_alignTop="@id/total_wrapper"
             android:layout_alignBottom="@id/total_wrapper"
             android:layout_centerInParent="true"
-            android:indeterminateTint="@color/tealish"
+            android:indeterminateTint="@color/azure"
             android:visibility="visible" />
 
         <LinearLayout

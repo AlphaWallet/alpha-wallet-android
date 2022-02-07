@@ -28,7 +28,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:fontFamily="@font/font_light"
-                android:textColor="@color/text_black"
+                android:textColor="@color/mine"
                 android:textSize="18sp" />
 
             <ImageView
@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_light"
-                android:textColor="@color/text_black" />
+                android:textColor="@color/mine" />
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

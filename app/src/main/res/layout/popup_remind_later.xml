@@ -15,7 +15,7 @@
         android:paddingRight="40dp"
         android:paddingBottom="15dp"
         android:text="@string/action_remind_later"
-        android:textColor="@color/text_black"
+        android:textColor="@color/mine"
         android:textSize="16sp" />
 
 </LinearLayout>

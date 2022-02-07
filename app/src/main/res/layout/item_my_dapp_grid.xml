@@ -18,7 +18,7 @@
         android:layout_alignRight="@id/icon"
         android:layout_centerHorizontal="true"
         android:src="@drawable/ic_remove_dapp"
-        android:tint="@color/red"
+        android:tint="@color/danger"
         android:visibility="gone" />
 
     <TextView

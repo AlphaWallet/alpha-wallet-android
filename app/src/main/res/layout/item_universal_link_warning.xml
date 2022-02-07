@@ -21,7 +21,7 @@
             android:fontFamily="@font/font_bold"
             android:text="@string/label_important"
             android:textAllCaps="true"
-            android:textColor="@color/cancel_red"
+            android:textColor="@color/danger"
             android:textSize="16sp" />
 
         <TextView
@@ -31,7 +31,7 @@
             android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:text="@string/universal_link_notice"
-            android:textColor="@color/cancel_red" />
+            android:textColor="@color/danger" />
 
     </LinearLayout>
 </LinearLayout>

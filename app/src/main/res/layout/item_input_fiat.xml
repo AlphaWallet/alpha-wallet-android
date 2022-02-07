@@ -101,8 +101,8 @@
                 android:maxLines="1"
                 android:paddingStart="@dimen/dp5"
                 android:paddingEnd="@dimen/dp5"
-                android:textColor="@color/text_dark_gray"
-                android:textColorHint="@color/light_gray"
+                android:textColor="@color/dove"
+                android:textColorHint="@color/dusty"
                 android:textSize="36sp" />
 
         </LinearLayout>

@@ -57,7 +57,7 @@
         android:id="@+id/layout_eth_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/greyffive"
+        android:background="@color/concrete"
         android:focusable="true"
         android:visibility="gone"
         android:focusableInTouchMode="true">

@@ -29,7 +29,7 @@
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:singleLine="true"
-        android:textColor="@color/toolbar_text_color"
+        android:textColor="@color/black"
         android:textSize="20sp" />
 
 </androidx.appcompat.widget.Toolbar>

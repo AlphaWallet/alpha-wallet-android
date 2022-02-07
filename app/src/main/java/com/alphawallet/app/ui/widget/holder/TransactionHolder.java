@@ -155,7 +155,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         layoutParams.setMarginStart(10);
         String failure = getString(R.string.failed) + " ☹";
         supplemental.setText(failure);
-        supplemental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        supplemental.setTextColor(ContextCompat.getColor(getContext(), R.color.danger));
     }
 
     private void setTransactionStatus(String blockNumber, String error, boolean isPending)

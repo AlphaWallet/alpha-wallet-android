@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textAllCaps="true"
-            android:textColor="@color/warning_red"
+            android:textColor="@color/danger"
             android:text="@string/skip_upgrade"/>
 
     </LinearLayout>
@@ -28,7 +28,7 @@
         android:id="@+id/button_next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/nasty_green"
+        android:background="@color/green"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"

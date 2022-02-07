@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/layoutButtons"
             android:layout_alignParentTop="true"
-            android:background="@color/greyffive"
+            android:background="@color/concrete"
             android:orientation="vertical">
 
             <include layout="@layout/item_ticket" />

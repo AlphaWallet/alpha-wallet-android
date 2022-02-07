@@ -23,7 +23,7 @@
             android:layout_centerInParent="true"
             android:fontFamily="@font/font_semibold"
             android:text="@string/title_dialog_add_account"
-            android:textColor="@color/text_black"
+            android:textColor="@color/mine"
             android:textSize="17sp" />
 
     </RelativeLayout>

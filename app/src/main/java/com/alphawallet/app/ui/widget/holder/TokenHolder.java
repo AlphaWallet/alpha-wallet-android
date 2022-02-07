@@ -161,7 +161,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         if (pendingDiff != null)
         {
             pendingText.setText(pendingDiff);
-            pendingText.setTextColor(ContextCompat.getColor(getContext(), (pendingDiff.startsWith("-")) ? R.color.red : R.color.green));
+            pendingText.setTextColor(ContextCompat.getColor(getContext(), (pendingDiff.startsWith("-")) ? R.color.danger : R.color.green));
         }
         else
         {
@@ -215,8 +215,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
         {
-            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhiteSolid));
-            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.dove_hint));
+            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.silver));
+            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.dusty));
         }
         else
         {
@@ -290,7 +290,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         double percentage = 0;
         try {
             percentage = Double.parseDouble(ticker.percentChange24h);
-            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
+            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.danger : R.color.green);
             formattedPercents = ticker.percentChange24h.replace("-", "") + "%";
             root24Hours.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
             text24Hours.setText(formattedPercents);

@@ -32,7 +32,7 @@
                 android:text=""
                 android:paddingEnd="5dp"
                 android:paddingStart="5dp"
-                android:textColor="@color/text_black"
+                android:textColor="@color/mine"
                 android:textSize="16sp"
                 android:visibility="visible" />
 
@@ -52,7 +52,7 @@
                 android:layout_marginBottom="10dp"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/importing_tickets"
-                android:textColor="@color/text_black"
+                android:textColor="@color/mine"
                 android:textSize="20sp" />
 
             <LinearLayout
@@ -74,7 +74,7 @@
                     android:fontFamily="@font/font_light"
                     android:gravity="center"
                     android:text="@string/total_cost_label"
-                    android:textColor="@color/text_black"
+                    android:textColor="@color/mine"
                     android:textSize="21sp" />
 
                 <View
@@ -82,7 +82,7 @@
                     android:layout_height="1dp"
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
-                    android:background="@color/grey" />
+                    android:background="@color/mercury" />
 
                 <TextView
                     android:id="@+id/textImportPrice"
@@ -99,7 +99,7 @@
                     android:layout_height="1dp"
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
-                    android:background="@color/grey" />
+                    android:background="@color/mercury" />
 
                 <TextView
                     android:id="@+id/fiat_price_txt"
@@ -109,7 +109,7 @@
                     android:gravity="center"
                     android:text="@string/equivalent_in_usd"
                     android:textAllCaps="true"
-                    android:textColor="@color/light_gray"
+                    android:textColor="@color/dusty"
                     android:textSize="10sp" />
 
 
@@ -125,7 +125,7 @@
                     android:paddingRight="20dp"
                     android:paddingTop="10dp"
                     android:text="$0"
-                    android:textColor="@color/light_gray"
+                    android:textColor="@color/dusty"
                     android:textSize="21sp" />
 
             </LinearLayout>
@@ -138,7 +138,7 @@
             android:layout_height="?actionBarSize"
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
-            android:background="@color/button_green"
+            android:background="@color/green"
             android:orientation="horizontal">
 
             <Button

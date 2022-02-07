@@ -18,7 +18,7 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:titleEnabled="false">
 
-            <include layout="@layout/layout_simple_toolbar_no_divider" />
+            <include layout="@layout/layout_simple_toolbar" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 

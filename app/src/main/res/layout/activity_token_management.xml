@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:scrollbarAlwaysDrawVerticalTrack="true"
@@ -14,72 +14,64 @@
         android:id="@+id/layout_search_tokens"
         android:layout_width="match_parent"
         android:layout_height="44dp"
-        android:orientation="horizontal"
         android:layout_marginStart="@dimen/dp8"
+        android:layout_marginTop="?actionBarSize"
         android:layout_marginEnd="@dimen/dp8"
         android:layout_marginBottom="@dimen/dp16"
-        android:gravity="center_vertical"
         android:background="@drawable/background_round_search"
-        android:layout_marginTop="?actionBarSize">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="@dimen/dp24"
             android:layout_height="@dimen/dp24"
             android:layout_marginStart="@dimen/dp12"
-            android:src="@drawable/ic_search_small"/>
+            android:src="@drawable/ic_search_small" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edit_search"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dp8"
-            android:inputType="textFilter"
-            android:hint="@string/search_for_tokens"
-            android:background="@null"
             android:layout_marginEnd="@dimen/dp16"
-            android:maxLines="1"
+            android:background="@null"
+            android:hint="@string/search_for_tokens"
+            android:inputType="textFilter"
             android:maxLength="20"
+            android:maxLines="1"
             android:textColor="@color/dove"
             android:textColorHint="@color/dove"
-            android:textSize="@dimen/sp17"/>
+            android:textSize="@dimen/sp17" />
 
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/token_list"
-        android:layout_below="@id/layout_search_tokens"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/layout_buttons"
+        android:layout_below="@id/layout_search_tokens"
         tools:listitem="@layout/item_manage_token" />
 
     <LinearLayout
         android:id="@+id/layout_buttons"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="center"
         android:layout_marginTop="15dp"
         android:background="@color/white"
         android:gravity="center"
-        android:visibility="gone"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_apply"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
+            style="@style/AwButton.Primary"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/selector_round_button"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:text="@string/apply_filters"
-            android:textAllCaps="true"
-            android:textColor="@color/button_text_color"
-            android:textSize="16sp" />
+            android:layout_margin="@dimen/dp16"
+            android:text="@string/apply_filters" />
 
     </LinearLayout>
 

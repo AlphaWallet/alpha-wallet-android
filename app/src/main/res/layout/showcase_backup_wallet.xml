@@ -37,7 +37,7 @@
             android:textColor="@color/dove"
             android:textSize="17sp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_close"
             style="@style/AwButton.Primary"
             android:layout_width="match_parent"

@@ -11,7 +11,7 @@
     android:focusable="true"
     android:orientation="vertical"
     android:paddingStart="@dimen/dp16"
-    android:paddingTop="@dimen/dp23"
+    android:paddingTop="@dimen/dp23"c
     android:paddingEnd="@dimen/dp16"
     android:paddingBottom="@dimen/dp25">
 

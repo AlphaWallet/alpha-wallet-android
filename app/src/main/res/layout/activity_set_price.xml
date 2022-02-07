@@ -26,17 +26,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:paddingBottom="15dp"
                     android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:paddingRight="15dp"
+                    android:paddingBottom="15dp">
 
                     <TextView
                         android:id="@+id/title_set_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
                         android:fontFamily="@font/font_light"
                         android:gravity="center"
                         android:text="@string/set_a_price"
@@ -56,8 +56,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center"
                         android:text="@string/learn_more_about_ethereum"
@@ -257,8 +257,8 @@
                             <View
                                 android:layout_width="match_parent"
                                 android:layout_height="1dp"
-                                android:layout_marginBottom="10dp"
                                 android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
                                 android:background="@color/mercury" />
 
                             <TextView
@@ -274,8 +274,8 @@
                             <View
                                 android:layout_width="match_parent"
                                 android:layout_height="1dp"
-                                android:layout_marginBottom="10dp"
                                 android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
                                 android:background="@color/mercury" />
 
                             <TextView
@@ -297,10 +297,10 @@
                                 android:layout_gravity="center"
                                 android:layout_marginTop="5dp"
                                 android:background="@drawable/background_round_grey"
-                                android:paddingBottom="10dp"
                                 android:paddingLeft="20dp"
-                                android:paddingRight="20dp"
                                 android:paddingTop="10dp"
+                                android:paddingRight="20dp"
+                                android:paddingBottom="10dp"
                                 android:text="$0"
                                 android:textColor="@color/dusty"
                                 android:textSize="21sp" />
@@ -493,33 +493,23 @@
             </LinearLayout>
         </ScrollView>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_next"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/AwButton.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:layout_margin="@dimen/dp16"
+            android:text="@string/action_next" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_sell"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/AwButton.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
+            android:layout_margin="@dimen/dp16"
             android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp"
             android:visibility="gone" />
     </RelativeLayout>
 </LinearLayout>

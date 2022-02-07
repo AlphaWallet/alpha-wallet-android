@@ -20,10 +20,10 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/close_action"
             android:layout_centerHorizontal="true"
-            android:fontFamily="@font/font_bold"
-            android:text="@string/title_dialog_what_testnet"
             android:layout_marginTop="@dimen/dp16"
             android:layout_marginBottom="@dimen/dp16"
+            android:fontFamily="@font/font_bold"
+            android:text="@string/title_dialog_what_testnet"
             android:textColor="@color/mine"
             android:textSize="24sp" />
 
@@ -42,18 +42,12 @@
         android:textColor="@color/black"
         android:textSize="17sp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/enable_testnet_action"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        style="@style/AwButton.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/selector_round_button"
-        android:fontFamily="@font/font_semibold"
-        android:gravity="center"
-        android:text="@string/action_enable_testnet"
-        android:textAllCaps="false"
-        android:textColor="@color/button_text_color"
-        android:textSize="20sp" />
+        android:text="@string/action_enable_testnet" />
 
 </LinearLayout>
 

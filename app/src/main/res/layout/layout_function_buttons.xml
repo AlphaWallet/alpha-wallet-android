@@ -6,9 +6,9 @@
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="12dp"
+    android:paddingStart="@dimen/dp16"
+    android:paddingEnd="@dimen/dp16"
+    android:paddingBottom="@dimen/dp16"
     android:visibility="visible">
 
     <ProgressBar
@@ -20,19 +20,16 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="12dp"
-        android:background="@color/colorPrimary"
+        android:layout_height="@dimen/dp16"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/text_debug"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginBottom="1dp"
             android:text="DEBUG"
             android:textColor="@color/danger"
-            android:textSize="10sp"
+            android:textSize="@dimen/dp10"
             android:visibility="gone"
             tools:ignore="HardcodedText,SmallSp" />
 
@@ -48,8 +45,7 @@
             android:id="@+id/primary_button_wrapper"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
             android:layout_weight="0.5"
             android:visibility="gone"
             tools:visibility="visible">
@@ -79,8 +75,7 @@
             style="@style/AwButton.Secondary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginStart="4dp"
             android:layout_weight="0.5"
             android:visibility="gone"
             tools:text="Secondary"
@@ -90,14 +85,14 @@
             android:id="@+id/more_button"
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginStart="@dimen/dp8"
             android:layout_weight="0.2"
             android:background="@drawable/selector_round_button_secondary"
             android:drawableTint="@color/azure"
             android:gravity="center"
             android:src="@drawable/ic_menu_azure"
             android:visibility="gone"
-            app:tint="@drawable/selector_button_text_secondary" />
+            app:tint="@drawable/selector_button_text_secondary"
+            tools:visibility="visible" />
     </LinearLayout>
 </LinearLayout>

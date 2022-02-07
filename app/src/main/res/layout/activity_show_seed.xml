@@ -73,14 +73,4 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.4" />
-    <!--<Button
-        android:id="@+id/action_buy"
-        android:text="@string/action_buy"
-        android:textAllCaps="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/big_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Colored"
-        />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

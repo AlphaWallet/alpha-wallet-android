@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white">
 
     <LinearLayout
@@ -38,9 +39,10 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:orientation="vertical"
+        tools:visibility="visible"
         android:visibility="gone">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_create"
             style="@style/AwButton.Primary"
             android:layout_width="match_parent"
@@ -73,7 +75,7 @@
             android:layout_marginBottom="@dimen/bottom_buttons_holder_margin_bottom"
             android:orientation="horizontal">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_watch"
                 style="@style/AwButton.Secondary"
                 android:layout_width="wrap_content"
@@ -82,7 +84,7 @@
                 android:layout_weight="1.0"
                 android:text="@string/watch" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_import"
                 style="@style/AwButton.Secondary"
                 android:layout_width="wrap_content"

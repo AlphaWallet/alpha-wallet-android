@@ -8,7 +8,7 @@
     <com.alphawallet.app.widget.CertifiedToolbarView
         android:id="@+id/certified_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -16,9 +16,9 @@
         android:background="@drawable/background_card">
 
         <LinearLayout
-            android:layout_marginBottom="?actionBarSize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="?actionBarSize"
             android:orientation="vertical"
             android:paddingLeft="15dp"
             android:paddingRight="15dp">
@@ -29,9 +29,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_regular"
-                android:text=""
-                android:paddingEnd="5dp"
                 android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:text=""
                 android:textColor="@color/mine"
                 android:textSize="16sp"
                 android:visibility="visible" />
@@ -80,8 +80,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@color/mercury" />
 
                 <TextView
@@ -97,8 +97,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@color/mercury" />
 
                 <TextView
@@ -120,10 +120,10 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/background_round_grey"
-                    android:paddingBottom="10dp"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
                     android:paddingTop="10dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="10dp"
                     android:text="$0"
                     android:textColor="@color/dusty"
                     android:textSize="21sp" />
@@ -135,45 +135,28 @@
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
-            android:background="@color/green"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="@dimen/dp16">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/import_ticket"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/AwButton.Primary"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/dp8"
                 android:layout_weight="1"
-                android:background="@drawable/selector_button"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_import"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="20sp" />
+                android:text="@string/action_import" />
 
-            <include layout="@layout/button_divider" />
-
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/cancel_button"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/AwButton.Secondary"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/selector_button"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_cancel"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="20sp" />
+                android:text="@string/action_cancel" />
         </LinearLayout>
 
     </RelativeLayout>

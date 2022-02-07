@@ -33,19 +33,14 @@
 
         </RelativeLayout>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_next"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/AwButton.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:padding="15dp"
-            android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:layout_margin="@dimen/dp16"
+            android:text="@string/action_next" />
 
     </RelativeLayout>
 

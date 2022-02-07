@@ -17,41 +17,32 @@
             android:id="@+id/input_watch_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            custom:hint="@string/input_address"
-            custom:label="@string/input_address"
-            custom:show_header="false"
-            custom:nocam="true"
-            custom:imeOptions="actionDone"
-            android:layout_marginBottom="5dp"
             android:layout_marginTop="20dp"
-            custom:ens="true"/>
+            android:layout_marginBottom="5dp"
+            custom:ens="true"
+            custom:hint="@string/input_address"
+            custom:imeOptions="actionDone"
+            custom:label="@string/input_address"
+            custom:nocam="true"
+            custom:show_header="false" />
 
     </LinearLayout>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/import_action_ww"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        style="@style/AwButton.Primary"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="25dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:background="@color/green"
-        android:fontFamily="@font/font_semibold"
-        android:text="@string/action_watch_account"
-        android:textAllCaps="true"
-        android:textColor="@color/white"
-        android:textSize="18sp" />
+        android:layout_margin="@dimen/dp16"
+        android:text="@string/action_watch_account" />
 
     <LinearLayout
         android:id="@+id/bottom_marker_ww"
         android:layout_width="wrap_content"
         android:layout_height="1dp"
-        android:visibility="invisible"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-    </LinearLayout>
+        android:orientation="vertical"
+        android:visibility="invisible"></LinearLayout>
 
 </RelativeLayout>

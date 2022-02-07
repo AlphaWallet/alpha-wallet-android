@@ -58,7 +58,7 @@
                 android:textColor="@color/mine"
                 android:textSize="@dimen/sp17" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_connect_wallet"
                 style="@style/AwButton.Primary"
                 android:layout_width="250dp"

@@ -38,8 +38,8 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="15dp"
                 android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
                 android:src="@drawable/ic_logo" />
 
             <TextView
@@ -62,8 +62,8 @@
                 android:inputType="text"
                 android:lines="1"
                 android:maxLines="1"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
+                android:paddingEnd="15dp"
                 android:textColor="@color/dove"
                 android:textColorHint="@color/dusty"
                 android:textSize="16sp" />
@@ -71,8 +71,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:layout_marginTop="20dp"
+                android:layout_marginBottom="5dp"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/dapp_address"
                 android:textColor="@color/dove"
@@ -89,8 +89,8 @@
                 android:inputType="textUri"
                 android:lines="1"
                 android:maxLines="1"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
+                android:paddingEnd="15dp"
                 android:textColor="@color/dove"
                 android:textColorHint="@color/dusty"
                 android:textSize="16sp" />
@@ -107,21 +107,12 @@
             android:orientation="horizontal"
             android:padding="20dp">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_confirm"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
+                style="@style/AwButton.Primary"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_add"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
+                android:text="@string/action_add" />
 
         </LinearLayout>
     </RelativeLayout>

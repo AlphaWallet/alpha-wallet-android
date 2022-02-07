@@ -90,4 +90,7 @@ public interface PreferenceRepositoryType {
 
     int getLastVersionCode(int currentCode);
     void setLastVersionCode(int code);
+
+    int getDarkModeState();
+    void setDarkModeState(int state);
 }

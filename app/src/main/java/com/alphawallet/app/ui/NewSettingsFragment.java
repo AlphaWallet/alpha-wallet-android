@@ -5,7 +5,6 @@ import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
@@ -47,8 +46,6 @@ import com.alphawallet.app.widget.SettingsItemView;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -67,6 +64,7 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView biometricsSetting;
     private SettingsItemView selectNetworksSetting;
     private SettingsItemView advancedSetting;
+    private SettingsItemView darkModeSetting;
     private SettingsItemView supportSetting;
     private SettingsItemView walletConnectSetting;
     private SettingsItemView showSeedPhrase;
@@ -220,6 +218,14 @@ public class NewSettingsFragment extends BaseFragment {
                         .withListener(this::onAdvancedSettingClicked)
                         .build();
 
+        darkModeSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withType(SettingsItemView.Type.TOGGLE)
+                        .withIcon(R.drawable.ic_settings_notifications)
+                        .withTitle(R.string.title_dark_mode)
+                        .withListener(this::onDarkModeSettingClicked)
+                        .build();
+
         supportSetting =
                 new SettingsItemView.Builder(getContext())
                         .withIcon(R.drawable.ic_settings_support)
@@ -255,6 +261,8 @@ public class NewSettingsFragment extends BaseFragment {
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         systemSettingsLayout.addView(advancedSetting, systemIndex++);
+
+        systemSettingsLayout.addView(darkModeSetting, systemIndex++);
 
         supportSettingsLayout.addView(supportSetting, supportIndex++);
     }
@@ -524,6 +532,13 @@ public class NewSettingsFragment extends BaseFragment {
     private void onAdvancedSettingClicked() {
         Intent intent = new Intent(getActivity(), AdvancedSettingsActivity.class);
         advancedSettingsHandler.launch(intent);
+    }
+
+    private void onDarkModeSettingClicked() {
+        if (darkModeSetting.getToggleState())
+            viewModel.setDarkModeState(1);
+        else
+            viewModel.setDarkModeState(0);
     }
 
     private void onSupportSettingClicked() {

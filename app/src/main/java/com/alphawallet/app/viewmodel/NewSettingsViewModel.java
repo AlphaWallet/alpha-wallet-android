@@ -52,6 +52,15 @@ public class NewSettingsViewModel extends BaseViewModel {
         preferenceRepository.setNotificationState(notificationState);
     }
 
+    public int getDarkModeState()
+    {
+        return preferenceRepository.getDarkModeState();
+    }
+    public void setDarkModeState(int state)
+    {
+        preferenceRepository.setDarkModeState(state);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

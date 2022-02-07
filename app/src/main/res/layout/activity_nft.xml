@@ -30,7 +30,6 @@
             android:layout_gravity="top"
             android:layout_marginStart="@dimen/dp10"
             android:layout_marginEnd="@dimen/dp10"
-            android:background="@drawable/background_tab_layout"
             app:layout_scrollFlags="enterAlways"
             app:tabIndicatorColor="@color/colorHighlight"
             app:tabIndicatorFullWidth="true"

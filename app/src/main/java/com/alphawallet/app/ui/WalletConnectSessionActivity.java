@@ -112,24 +112,21 @@ public class WalletConnectSessionActivity extends BaseActivity
     {
         wcSessions = viewModel.getSessions();
 
-        if (wcSessions != null)
+        if (wcSessions.isEmpty())
         {
-            if (wcSessions.isEmpty())
-            {
-                layoutNoActiveSessions.setVisibility(View.VISIBLE);
-                bottomDivider.setVisibility(View.GONE);
-            }
-            else
-            {
-                layoutNoActiveSessions.setVisibility(View.GONE);
-                bottomDivider.setVisibility(View.VISIBLE);
-                recyclerView = findViewById(R.id.list);
-                recyclerView.setLayoutManager(new LinearLayoutManager(this));
-                adapter = new CustomAdapter();
-                recyclerView.setAdapter(adapter);
-                recyclerView.addItemDecoration(new ListDivider(this));
-                adapter.notifyDataSetChanged();
-            }
+            layoutNoActiveSessions.setVisibility(View.VISIBLE);
+            bottomDivider.setVisibility(View.GONE);
+        }
+        else
+        {
+            layoutNoActiveSessions.setVisibility(View.GONE);
+            bottomDivider.setVisibility(View.VISIBLE);
+            recyclerView = findViewById(R.id.list);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new CustomAdapter();
+            recyclerView.setAdapter(adapter);
+            recyclerView.addItemDecoration(new ListDivider(this));
+            adapter.notifyDataSetChanged();
         }
     }
 

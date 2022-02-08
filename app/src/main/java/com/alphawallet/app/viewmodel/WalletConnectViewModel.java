@@ -509,7 +509,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public List<WalletConnectSessionItem> getSessions()
     {
-        List<WalletConnectSessionItem> result = new ArrayList();
+        List<WalletConnectSessionItem> result = new ArrayList<>();
         result.addAll(getWalletConnectV1SessionItems());
         result.addAll(getWalletConnectV2SessionItems());
         return result;

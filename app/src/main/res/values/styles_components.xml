@@ -10,4 +10,8 @@
         <item name="background">@color/colorPrimary</item>
         <item name="popupTheme">@style/AppTheme.PopupOverlay</item>
     </style>
+
+    <style name="AWLightAlertDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorSurface">#FFFFFF</item>
+    </style>
 </resources>

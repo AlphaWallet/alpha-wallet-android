@@ -215,8 +215,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
         {
-            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.silver));
-            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.dusty));
+            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucent_white));
+            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.translucent_dove));
         }
         else
         {

@@ -11,7 +11,7 @@
 
     <com.alphawallet.app.widget.InputAddress
         android:id="@+id/input_address_view"
-        android:layout_below="@id/_app_bar"
+        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"

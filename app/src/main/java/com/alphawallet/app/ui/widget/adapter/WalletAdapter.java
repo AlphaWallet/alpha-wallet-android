@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -17,9 +18,12 @@ import androidx.annotation.Nullable;
 
 public class WalletAdapter extends ArrayAdapter<Wallet>
 {
-    public WalletAdapter(Context context, Wallet[] wallets)
+    private Wallet defaultWallet;
+
+    public WalletAdapter(Context context, Wallet[] wallets, Wallet defaultWallet)
     {
         super(context, 0, wallets);
+        this.defaultWallet = defaultWallet;
     }
 
     @NonNull
@@ -48,6 +52,11 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         holder.walletAddress.setText(wallet.address);
         holder.userAvatar.bind(wallet);
         holder.balance.setText(String.format("%s %s", wallet.balance, wallet.balanceSymbol));
+
+        if (wallet.address.equals(defaultWallet.address))
+        {
+            holder.checkbox.setSelected(true);
+        }
         return convertView;
     }
 
@@ -57,6 +66,7 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         TextView balance;
         TextView walletAddressSeparator;
         UserAvatar userAvatar;
+        ImageView checkbox;
 
         public ViewHolder(@NonNull View view)
         {
@@ -65,6 +75,7 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
             balance = view.findViewById(R.id.wallet_balance);
             walletAddressSeparator = view.findViewById(R.id.wallet_address_separator);
             userAvatar = view.findViewById(R.id.wallet_icon);
+            checkbox = view.findViewById(R.id.checkbox);
         }
     }
 }

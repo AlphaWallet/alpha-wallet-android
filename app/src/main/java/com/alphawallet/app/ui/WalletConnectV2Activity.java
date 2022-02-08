@@ -14,7 +14,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
-import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
@@ -84,16 +83,16 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void onWalletsFetched(Wallet[] wallets)
     {
-        this.wallets = wallets;
-        displaySessionStatus(session);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
     }
 
     private void onDefaultWallet(Wallet wallet)
     {
-        progressBar.setVisibility(View.GONE);
-        functionBar.setVisibility(View.VISIBLE);
-        infoLayout.setVisibility(View.VISIBLE);
         displaySessionStatus(session);
+//        progressBar.setVisibility(View.GONE);
+//        functionBar.setVisibility(View.VISIBLE);
+//        infoLayout.setVisibility(View.VISIBLE);
+//        displaySessionStatus(session);
     }
 
     private void displaySessionStatus(WalletConnectV2SessionItem session)
@@ -116,7 +115,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(session.url);
 
         chainList.setAdapter(new ChainAdapter(this, session.chains));
-        walletList.setAdapter(new WalletAdapter(this, this.wallets));
+        walletList.setAdapter(new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue()));
         methodList.setAdapter(new MethodAdapter(this, session.methods));
         resizeList();
 

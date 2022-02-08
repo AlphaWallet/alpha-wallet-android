@@ -7,15 +7,17 @@ import android.os.Parcelable;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import androidx.annotation.RequiresApi;
 
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
     public final List<String> chains = new ArrayList<>();
-    public final List<String> accounts = new ArrayList<>();
+    public final List<String> wallets = new ArrayList<>();
     public final List<String> methods = new ArrayList<>();
     public WalletConnectV2SessionItem(WalletConnect.Model.SettledSession s)
     {
@@ -25,8 +27,20 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         icon = s.getPeerAppMetaData().getIcons().isEmpty() ? null : s.getPeerAppMetaData().getIcons().get(0);
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
-        accounts.addAll(s.getAccounts());
+        extractChainsAndAddress(s.getAccounts());
         methods.addAll(s.getPermissions().getJsonRpc().getMethods());
+    }
+
+    private void extractChainsAndAddress(List<String> accounts)
+    {
+        Set<String> networks = new HashSet<>();
+        for (String account : accounts)
+        {
+            int index = account.lastIndexOf(":");
+            wallets.add(account.substring(index + 1));
+            networks.add(account.substring(0, index));
+        }
+        chains.addAll(networks);
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -37,7 +51,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         sessionId = in.readString();
         localSessionId = in.readString();
         in.readStringList(chains);
-        in.readStringList(accounts);
+        in.readStringList(wallets);
         in.readStringList(methods);
     }
 
@@ -54,6 +68,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         item.url = sessionProposal.getUrl();
         item.icon = sessionProposal.getIcon();
         item.sessionId = sessionProposal.getTopic();
+        item.wallets.addAll(sessionProposal.getAccounts());
         item.chains.addAll(sessionProposal.getChains());
         item.methods.addAll(sessionProposal.getMethods());
         return item;
@@ -74,7 +89,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeString(sessionId);
         dest.writeString(localSessionId);
         dest.writeStringList(chains);
-        dest.writeStringList(accounts);
+        dest.writeStringList(wallets);
         dest.writeStringList(methods);
     }
 

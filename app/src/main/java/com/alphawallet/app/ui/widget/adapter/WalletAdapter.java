@@ -13,17 +13,29 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.widget.UserAvatar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class WalletAdapter extends ArrayAdapter<Wallet>
 {
-    private final Wallet defaultWallet;
+    private Wallet defaultWallet;
+    private boolean[] selected;
+    private boolean readOnly;
 
     public WalletAdapter(Context context, Wallet[] wallets, Wallet defaultWallet)
     {
         super(context, 0, wallets);
+        selected = new boolean[wallets.length];
         this.defaultWallet = defaultWallet;
+    }
+
+    public WalletAdapter(Context context, List<Wallet> wallets)
+    {
+        super(context, 0, wallets);
+        readOnly = true;
     }
 
     @NonNull
@@ -53,14 +65,37 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         holder.userAvatar.bind(wallet);
         holder.balance.setText(String.format("%s %s", wallet.balance, wallet.balanceSymbol));
 
-        if (wallet.address.equals(defaultWallet.address))
+        if (readOnly)
         {
-            holder.checkbox.setSelected(true);
-        }
+            holder.checkbox.setVisibility(View.GONE);
+        } else {
+            if (wallet.address.equals(defaultWallet.address))
+            {
+                holder.checkbox.setSelected(true);
+                selected[position] = true;
+            }
 
-        holder.container.setOnClickListener(v ->
-                holder.checkbox.setSelected(!holder.checkbox.isSelected()));
+            holder.container.setOnClickListener(v ->
+            {
+                holder.checkbox.setSelected(!holder.checkbox.isSelected());
+                selected[position] = !selected[position];
+            });
+
+        }
         return convertView;
+    }
+
+    public List<Wallet> getSelectedWallets()
+    {
+        List<Wallet> selectedWallets = new ArrayList<>();
+        for (int i = 0; i < getCount(); i++)
+        {
+            if (selected[i])
+            {
+                selectedWallets.add(getItem(i));
+            }
+        }
+        return selectedWallets;
     }
 
     static class ViewHolder {

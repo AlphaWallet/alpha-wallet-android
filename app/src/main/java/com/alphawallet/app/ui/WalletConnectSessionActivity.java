@@ -243,6 +243,7 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             Intent intent = new Intent(getApplication(), WalletConnectV2Activity.class);
             intent.putExtra("session", (WalletConnectV2SessionItem) session);
+            intent.putExtra("settled", true);
             startActivity(intent);
         } else {
             Intent intent = new Intent(getApplication(), WalletConnectActivity.class);

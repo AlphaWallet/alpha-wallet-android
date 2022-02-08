@@ -27,7 +27,9 @@ import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +53,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private WalletConnectV2SessionItem session;
     private Wallet[] wallets;
+    private WalletAdapter walletAdapter;
+    private boolean settled;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -64,6 +68,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         initViewModel();
         this.session = retrieveSession();
 //        displaySessionStatus(this.session);
+        this.settled = getIntent().getBooleanExtra("settled", false);
         viewModel.fetchWallets();
     }
 
@@ -115,33 +120,58 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(session.url);
 
         chainList.setAdapter(new ChainAdapter(this, session.chains));
-        walletList.setAdapter(new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue()));
+        if (settled)
+        {
+            walletAdapter = new WalletAdapter(this, filterWallets(session.wallets));
+        } else
+        {
+            walletAdapter = new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue());
+        }
+        walletList.setAdapter(walletAdapter);
         methodList.setAdapter(new MethodAdapter(this, session.methods));
         resizeList();
 
-        functionBar.setupFunctions(new StandardFunctionInterface()
+        if (settled)
         {
-            @Override
-            public void handleClick(String action, int actionId)
+            functionBar.setupFunctions(new StandardFunctionInterface()
             {
-                if (actionId == R.string.dialog_approve)
+                @Override
+                public void handleClick(String action, int actionId)
                 {
-                    approve(AWWalletConnectClient.sessionProposal);
-                } else
-                {
-                    reject(AWWalletConnectClient.sessionProposal);
+                    endSessionDialog();
                 }
-            }
-        }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
+            }, Collections.singletonList(R.string.action_end_session));
+        } else
+        {
+            functionBar.setupFunctions(new StandardFunctionInterface()
+            {
+                @Override
+                public void handleClick(String action, int actionId)
+                {
+                    if (actionId == R.string.dialog_approve)
+                    {
+                        approve(AWWalletConnectClient.sessionProposal);
+                    } else
+                    {
+                        reject(AWWalletConnectClient.sessionProposal);
+                    }
+                }
+            }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
+        }
 
-//        functionBar.setupFunctions(new StandardFunctionInterface()
-//        {
-//            @Override
-//            public void handleClick(String action, int actionId)
-//            {
-//                endSessionDialog();
-//            }
-//        }, Collections.singletonList(R.string.action_end_session));
+    }
+
+    private List<Wallet> filterWallets(List<String> accounts)
+    {
+        List<Wallet> result = new ArrayList<>();
+        for (Wallet wallet : Objects.requireNonNull(viewModel.wallets().getValue()))
+        {
+            if (accounts.contains(wallet.address))
+            {
+                result.add(wallet);
+            }
+        }
+        return result;
     }
 
     private void resizeList()
@@ -271,7 +301,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void approve(WalletConnect.Model.SessionProposal sessionProposal)
     {
-        List<String> accounts = getAccounts(session.chains);
+        List<String> accounts = getAccounts(sessionProposal.getChains());
         WalletConnect.Params.Approve approve = new WalletConnect.Params.Approve(sessionProposal, accounts);
         WalletConnectClient.INSTANCE.approve(approve, new WalletConnect.Listeners.SessionApprove()
         {
@@ -293,16 +323,20 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private void showSessionsActivity()
     {
         Intent intent = new Intent(getApplication(), WalletConnectSessionActivity.class);
-//        intent.putExtra("wallet", viewModel.defaultWallet().getValue());
+        intent.putExtra("wallet", viewModel.defaultWallet().getValue());
         startActivity(intent);
     }
 
     private List<String> getAccounts(List<String> chains)
     {
+        List<Wallet> wallets = walletAdapter.getSelectedWallets();
         List<String> result = new ArrayList<>();
         for (String chain : chains)
         {
-//            result.add(chain + ":" + viewModel.defaultWallet().getValue().address);
+            for (Wallet wallet : wallets)
+            {
+                result.add(chain + ":" + wallet.address);
+            }
         }
         return result;
     }

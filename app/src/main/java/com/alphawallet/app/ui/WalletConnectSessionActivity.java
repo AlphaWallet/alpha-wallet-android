@@ -65,13 +65,15 @@ public class WalletConnectSessionActivity extends BaseActivity
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_wallet_connect_sessions);
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
         wallet = getIntent().getParcelableExtra(WALLET);
         initViewModel();
 
+        recyclerView = findViewById(R.id.list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new ListDivider(this));
         layoutNoActiveSessions = findViewById(R.id.layout_no_sessions);
         bottomDivider = findViewById(R.id.bottom_divider);
         btnConnectWallet = findViewById(R.id.btn_connect_wallet);
@@ -121,13 +123,10 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             layoutNoActiveSessions.setVisibility(View.GONE);
             bottomDivider.setVisibility(View.VISIBLE);
-            recyclerView = findViewById(R.id.list);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new CustomAdapter();
-            recyclerView.setAdapter(adapter);
-            recyclerView.addItemDecoration(new ListDivider(this));
-            adapter.notifyDataSetChanged();
         }
+
+        adapter = new CustomAdapter();
+        recyclerView.setAdapter(adapter);
     }
 
     @Override

@@ -9,7 +9,7 @@
         android:background="@color/colorPrimary"
         android:orientation="vertical">
 
-        <include layout="@layout/layout_app_bar" />
+        <include layout="@layout/layout_simple_toolbar" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"

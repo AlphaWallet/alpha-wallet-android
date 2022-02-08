@@ -7,8 +7,7 @@
     android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include
-        layout="@layout/layout_app_bar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <com.alphawallet.app.widget.InputAddress
         android:id="@+id/input_address_view"
@@ -58,7 +57,6 @@
             tools:text="1" />
 
     </LinearLayout>
-
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

@@ -7,7 +7,7 @@
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
-    <include layout="@layout/layout_app_bar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
         android:id="@+id/layout_list"

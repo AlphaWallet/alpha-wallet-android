@@ -7,14 +7,12 @@
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
-    <include
-        android:id="@+id/include3"
-        layout="@layout/layout_app_bar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/include3">
+        android:layout_below="@id/toolbar">
 
         <LinearLayout
             android:id="@+id/layout_list"

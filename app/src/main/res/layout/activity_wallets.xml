@@ -7,7 +7,7 @@
     android:background="@color/colorPrimary"
     android:fitsSystemWindows="true">
 
-    <include layout="@layout/layout_app_bar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 
 public class WalletAdapter extends ArrayAdapter<Wallet>
 {
-    private Wallet defaultWallet;
+    private final Wallet defaultWallet;
 
     public WalletAdapter(Context context, Wallet[] wallets, Wallet defaultWallet)
     {
@@ -57,10 +57,14 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         {
             holder.checkbox.setSelected(true);
         }
+
+        holder.container.setOnClickListener(v ->
+                holder.checkbox.setSelected(!holder.checkbox.isSelected()));
         return convertView;
     }
 
     static class ViewHolder {
+        View container;
         TextView walletName;
         TextView walletAddress;
         TextView balance;
@@ -70,6 +74,7 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
 
         public ViewHolder(@NonNull View view)
         {
+            container = view;
             walletName = view.findViewById(R.id.wallet_name);
             walletAddress = view.findViewById(R.id.wallet_address);
             balance = view.findViewById(R.id.wallet_balance);

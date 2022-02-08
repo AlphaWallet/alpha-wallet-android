@@ -14,11 +14,9 @@
 
         <com.alphawallet.app.widget.CertifiedToolbarView
             android:id="@+id/certified_toolbar"
+            style="@style/Aw.Component.Toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:contentInsetEnd="0dp"
-            app:contentInsetStart="0dp"
-            app:contentInsetStartWithNavigation="0dp" />
+            android:layout_height="wrap_content" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"

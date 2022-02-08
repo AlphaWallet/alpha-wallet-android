@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
     android:descendantFocusability="blocksDescendants"
     android:focusable="false"
-    android:minHeight="80dp"
+    android:minHeight="50dp"
     android:orientation="horizontal"
     android:paddingStart="5dp"
     android:paddingEnd="@dimen/dp16">
@@ -24,8 +25,8 @@
 
         <com.alphawallet.app.widget.UserAvatar
             android:id="@+id/wallet_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
             android:layout_marginStart="10dp" />
     </LinearLayout>
 
@@ -53,7 +54,7 @@
                 tools:text="3.2345"
                 android:textColor="@color/text_black"
                 android:textIsSelectable="true"
-                android:textSize="20sp" />
+                custom:font_size="16" />
 
             <TextView
                 android:id="@+id/wallet_currency"
@@ -64,7 +65,7 @@
                 tools:text="ETH"
                 android:textColor="@color/text_black"
                 android:textIsSelectable="true"
-                android:textSize="16sp"
+                custom:font_size="16"
                 android:visibility="gone" />
 
         </LinearLayout>

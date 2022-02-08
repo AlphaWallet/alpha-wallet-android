@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
 
-    <include layout="@layout/layout_white_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <ScrollView
         android:layout_width="match_parent"

@@ -17,7 +17,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setTitle(getTitle());
+            toolbar.setTitle(R.string.empty);
         }
         enableDisplayHomeAsUp();
         return toolbar;

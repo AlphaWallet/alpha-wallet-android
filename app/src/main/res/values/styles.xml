@@ -9,6 +9,7 @@
         <item name="android:windowLightStatusBar">true</item>
 
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
+        <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">

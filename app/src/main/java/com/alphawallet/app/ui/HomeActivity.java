@@ -6,6 +6,7 @@ import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
 import static com.alphawallet.app.C.SHOW_BACKUP;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
@@ -193,6 +194,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
+    int fragCount = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
@@ -219,7 +222,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewPager.setUserInputEnabled(false);      // i think this replicates lockPages(true)
         viewPager.setAdapter(pager2Adapter);
         viewPager.setOffscreenPageLimit(WalletPage.values().length);
-        // vp2
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -299,16 +301,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
             checkIntents(importData, importPath, intent);
         }
-
-        // once settings fragment is added, need to call loadingComplete().
-        getSupportFragmentManager().addFragmentOnAttachListener(new FragmentOnAttachListener() {
-            @Override
-            public void onAttachFragment(@NonNull FragmentManager fragmentManager, @NonNull Fragment fragment) {
-                if (fragment instanceof NewSettingsFragment) {
-                    loadingComplete();
-                }
-            }
-        });
         
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
@@ -373,6 +365,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         getSupportFragmentManager()
                 .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) -> {
                     viewModel.restartHomeActivity(getApplicationContext());
+                });
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(SETTINGS_INSTANTIATED, this, (k, b) -> {
+                    loadingComplete();
                 });
     }
 
@@ -460,7 +457,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             walletTitle = getString(R.string.toolbar_header_wallet);
         }
 
-        ((WalletFragment) getFragment(WALLET)).setToolbarTitle(walletTitle);
+        getFragment(WALLET).setToolbarTitle(walletTitle);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -527,10 +524,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onClick(View view)
     {
-        if (view.getId() == R.id.try_again)
-        {
-            //What is try again?
-        }
+
     }
 
     @Override
@@ -584,23 +578,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void showPage(WalletPage page)
     {
         WalletPage oldPage = WalletPage.values()[viewPager.getCurrentItem()];
+        boolean enableDisplayAsHome = false;
 
         switch (page)
         {
             case DAPP_BROWSER:
-            {
                 hideToolbar();
-                viewPager.setCurrentItem(DAPP_BROWSER.ordinal());
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
-                enableDisplayHomeAsHome(true);
-                invalidateOptionsMenu();
+                enableDisplayAsHome = true;
                 break;
-            }
+
+            default:
+                page = WALLET;
             case WALLET:
-            {
                 showToolbar();
-                viewPager.setCurrentItem(WALLET.ordinal());
                 if (walletTitle == null || walletTitle.isEmpty())
                 {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -610,42 +602,33 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     setTitle(walletTitle);
                 }
                 selectNavigationItem(WALLET);
-                enableDisplayHomeAsHome(false);
-                invalidateOptionsMenu();
                 break;
-            }
+
             case SETTINGS:
-            {
                 showToolbar();
-                viewPager.setCurrentItem(SETTINGS.ordinal());
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
-                enableDisplayHomeAsHome(false);
-                invalidateOptionsMenu();
                 break;
-            }
+
             case ACTIVITY:
-            {
                 showToolbar();
-                viewPager.setCurrentItem(ACTIVITY.ordinal());
                 setTitle(getString(R.string.activity_label));
                 selectNavigationItem(ACTIVITY);
-                enableDisplayHomeAsHome(false);
-                invalidateOptionsMenu();
-                break;
-            }
-            default:
-                showToolbar();
-                viewPager.setCurrentItem(WALLET.ordinal());
-                setTitle(getString(R.string.toolbar_header_wallet));
-                selectNavigationItem(WALLET);
-                enableDisplayHomeAsHome(false);
-                invalidateOptionsMenu();
                 break;
         }
+
+        enableDisplayHomeAsHome(enableDisplayAsHome);
+        switchAdapterToPage(page);
+        invalidateOptionsMenu();
         checkWarnings();
 
         signalPageVisibilityChange(oldPage, page);
+    }
+
+    //Switch from main looper
+    private void switchAdapterToPage(WalletPage page)
+    {
+        handler.post(() -> viewPager.setCurrentItem(page.ordinal(), false));
     }
 
     private void signalPageVisibilityChange(WalletPage oldPage, WalletPage newPage)

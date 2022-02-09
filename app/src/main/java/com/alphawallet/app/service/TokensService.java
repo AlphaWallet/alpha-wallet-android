@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -65,7 +66,7 @@ public class TokensService
     public static final long PENDING_TIME_LIMIT = 3*DateUtils.MINUTE_IN_MILLIS; //cut off pending chain after 3 minutes
 
     private static final Map<Long, Long> pendingChainMap = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<Token> tokenStoreList = new ConcurrentLinkedQueue<>(); //used to hold tokens that will be stored
+    private final ConcurrentLinkedDeque<Token> tokenStoreList = new ConcurrentLinkedDeque<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
     private String currentAddress = null;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -781,7 +782,7 @@ public class TokensService
 
     public Single<Pair<Double, Double>> getFiatValuePair()
     {
-        return tokenRepository.getTotalValue(currentAddress, networkFilter);
+        return tokenRepository.getTotalValue(currentAddress, EthereumNetworkBase.getAllMainNetworks());
     }
 
     public Single<List<String>> getTickerUpdateList()
@@ -982,6 +983,14 @@ public class TokensService
                     token.balance = newBalance;
                     return token;
                 }));
+    }
+
+    public void addTokens(List<Token> tokenList)
+    {
+        for (Token t : tokenList)
+        {
+            tokenStoreList.addFirst(t);
+        }
     }
 
     //Add in any tokens required to be shown - mainly used by forks for always showing a specific token

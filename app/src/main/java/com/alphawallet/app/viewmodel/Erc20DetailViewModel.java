@@ -24,10 +24,14 @@ import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
+@HiltViewModel
 public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<ActivityMeta[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
@@ -38,6 +42,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final TokensService tokensService;
     private final OnRampRepositoryType onRampRepository;
 
+    @Inject
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AssetDefinitionService assetDefinitionService,

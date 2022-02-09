@@ -386,6 +386,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             case ATTESTATIONS:
                 //TODO
                 break;
+            case NO_FILTER:
+                allowThroughFilter = true;
+                break;
         }
 
         return allowThroughFilter;
@@ -531,5 +534,21 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
             }
         }
+    }
+
+    public List<TokenCardMeta> getSelected()
+    {
+        List<TokenCardMeta> selected = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenCardMeta tcm = ((TokenSortedItem) si).value;
+                if (tcm.isEnabled) selected.add(tcm);
+            }
+        }
+
+        return selected;
     }
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -41,10 +42,12 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.service.AssetDefinitionService;
 
+import javax.inject.Inject;
+
 /**
  * Created by James on 25/01/2018.
  */
-
+@HiltViewModel
 public class RedeemSignatureDisplayModel extends BaseViewModel
 {
     private static final long CYCLE_SIGNATURE_INTERVAL = 10 * 60; //cycle every 10 minutes
@@ -78,6 +81,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
 
     private String address;
 
+    @Inject
     RedeemSignatureDisplayModel(
             GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,

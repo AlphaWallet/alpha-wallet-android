@@ -26,6 +26,10 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import javax.inject.Inject;
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class TokenAlertsViewModel extends BaseViewModel {
     private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
@@ -33,6 +37,7 @@ public class TokenAlertsViewModel extends BaseViewModel {
     private final MutableLiveData<List<PriceAlert>> priceAlerts = new MutableLiveData<>();
     private Token token;
 
+    @Inject
     public TokenAlertsViewModel(PreferenceRepositoryType preferenceRepository,
                                 TokensService tokensService, TickerService tickerService)
     {

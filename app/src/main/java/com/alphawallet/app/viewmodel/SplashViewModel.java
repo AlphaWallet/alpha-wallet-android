@@ -20,10 +20,14 @@ import com.alphawallet.app.service.KeyService;
 
 import java.io.File;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+@HiltViewModel
 public class SplashViewModel extends ViewModel
 {
     private static final String LEGACY_CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
@@ -36,6 +40,7 @@ public class SplashViewModel extends ViewModel
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
+    @Inject
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     PreferenceRepositoryType preferenceRepository,
                     KeyService keyService) {

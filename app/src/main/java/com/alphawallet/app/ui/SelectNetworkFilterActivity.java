@@ -22,7 +22,6 @@ import com.alphawallet.app.ui.widget.adapter.MultiSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
-import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModelFactory;
 import com.alphawallet.app.widget.TestNetDialog;
 import com.alphawallet.ethereum.NetworkInfo;
 
@@ -32,13 +31,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.ui.AddCustomRPCNetworkActivity.CHAIN_ID;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
-    @Inject
-    SelectNetworkFilterViewModelFactory viewModelFactory;
     private SelectNetworkFilterViewModel viewModel;
 
     private MultiSelectNetworkAdapter mainNetAdapter;
@@ -47,13 +46,12 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
         setTitle(getString(R.string.select_active_networks));
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
 
         setupList();

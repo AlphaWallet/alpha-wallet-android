@@ -9,6 +9,13 @@
     android:clickable="true"
     android:focusable="true">
 
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/select_token"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerVertical="true" />
+
     <TextView
         android:id="@+id/balance_eth_pending"
         android:layout_width="wrap_content"
@@ -25,7 +32,7 @@
         android:id="@+id/wrapped_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        android:layout_toEndOf="@id/select_token"
         android:layout_alignParentTop="true"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
@@ -40,7 +47,6 @@
             android:paddingStart="16dp"
             android:paddingEnd="2dp"
             android:paddingTop="14dp">
-
 
             <com.alphawallet.app.widget.TokenIcon
                 android:id="@+id/token_icon"

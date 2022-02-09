@@ -8,8 +8,12 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.realm.Realm;
 
+@HiltViewModel
 public class TokenActivityViewModel extends BaseViewModel {
     private final MutableLiveData<ActivityMeta[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
@@ -17,6 +21,7 @@ public class TokenActivityViewModel extends BaseViewModel {
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
 
+    @Inject
     public TokenActivityViewModel(AssetDefinitionService assetDefinitionService,
                                   FetchTransactionsInteract fetchTransactionsInteract,
                                   TokensService tokensService)

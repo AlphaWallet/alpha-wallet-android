@@ -38,7 +38,6 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
-import com.alphawallet.app.viewmodel.BackupKeyViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.LayoutCallbackListener;
@@ -53,10 +52,11 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
+@AndroidEntryPoint
 public class BackupKeyActivity extends BaseActivity implements
         View.OnClickListener,
         CreateWalletCallbackInterface,
@@ -66,8 +66,6 @@ public class BackupKeyActivity extends BaseActivity implements
         LayoutCallbackListener,
         StandardFunctionInterface {
 
-    @Inject
-    BackupKeyViewModelFactory backupKeyViewModelFactory;
     BackupKeyViewModel viewModel;
 
     private BackupState state;
@@ -91,7 +89,6 @@ public class BackupKeyActivity extends BaseActivity implements
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         secureWindow();
 
@@ -740,7 +737,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, backupKeyViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(BackupKeyViewModel.class);
         viewModel.exportedStore().observe(this, this::onExportKeystore);
     }

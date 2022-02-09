@@ -27,12 +27,14 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
-import dagger.android.AndroidInjection;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+@AndroidEntryPoint
 public class PriceAlertsService extends Service
 {
 
@@ -80,7 +82,6 @@ public class PriceAlertsService extends Service
     public void onCreate()
     {
         super.onCreate();
-        AndroidInjection.inject(this);
 
         genericWalletInteract
                 .find()

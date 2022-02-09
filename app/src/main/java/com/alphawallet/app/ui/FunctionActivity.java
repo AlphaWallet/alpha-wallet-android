@@ -30,7 +30,6 @@ import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -67,7 +66,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -80,13 +79,13 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
  * Created by James on 4/04/2019.
  * Stormbird in Singapore
  */
+@AndroidEntryPoint
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
                                                               PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback,
                                                               StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback,
                                                               OnSetValuesListener, ActionSheetCallback
 {
-    @Inject
-    protected TokenFunctionViewModelFactory viewModelFactory;
+
     private TokenFunctionViewModel viewModel;
 
     private Token token;
@@ -239,7 +238,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
         setupViews();
@@ -274,7 +272,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         systemView = findViewById(R.id.system_view);
         systemView.hide();

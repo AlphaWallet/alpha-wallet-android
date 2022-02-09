@@ -80,6 +80,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
+import timber.log.Timber;
 import wallet.core.jni.CoinType;
 import wallet.core.jni.Curve;
 import wallet.core.jni.HDWallet;
@@ -628,7 +629,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (Exception ex)
         {
             deleteKey(fileName);
-            Log.d(TAG, "Key store error", ex);
+            Timber.tag(TAG).d(ex, "Key store error");
         }
 
         return false;

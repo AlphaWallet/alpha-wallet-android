@@ -25,6 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class Erc1155AssetSelectViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -32,7 +37,7 @@ public class Erc1155AssetSelectViewModel extends BaseViewModel {
 
     private final MutableLiveData<Map<BigInteger, NFTAsset>> assets = new MutableLiveData<>();
 
-
+    @Inject
     public Erc1155AssetSelectViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                                        AssetDefinitionService assetDefinitionService,
                                        TokensService tokensService)

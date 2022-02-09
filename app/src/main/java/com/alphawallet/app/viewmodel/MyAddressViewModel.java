@@ -5,11 +5,17 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class MyAddressViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokenService;
     private final AssetDefinitionService assetDefinitionService;
 
+    @Inject
     MyAddressViewModel(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokensService tokensService,

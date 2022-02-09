@@ -33,7 +33,6 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
-import com.alphawallet.app.viewmodel.BackupKeyViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.LayoutCallbackListener;
@@ -52,7 +51,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
-import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.BackupState.ENTER_BACKUP_STATE_HD;
@@ -60,6 +58,9 @@ import static com.alphawallet.app.entity.BackupState.ENTER_JSON_BACKUP;
 import static com.alphawallet.app.entity.BackupState.SHOW_SEED_PHRASE_SINGLE;
 import static com.alphawallet.app.entity.BackupState.UPGRADE_KEY_SECURITY;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ScammerWarningActivity extends BaseActivity {
     private FunctionButtonBar functionButtonBar;
     private Wallet wallet;

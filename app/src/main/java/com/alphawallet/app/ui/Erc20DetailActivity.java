@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -34,14 +34,13 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
-import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
-import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -52,6 +51,7 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.Key.WALLET;
@@ -59,10 +59,11 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_MODE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import javax.inject.Inject;
+
 @AndroidEntryPoint
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
 {
-
     Erc20DetailViewModel viewModel;
 
     public static final int HISTORY_LENGTH = 5;
@@ -79,7 +80,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
 
-    private ScrollControlViewPager viewPager;
+    private ViewPager2 viewPager;
 
     private class DetailPage {
         private final int tabNameResourceId;
@@ -144,27 +145,31 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         List<Pair<String, Fragment>> pages = getPages(bundle);
 
         viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
+        viewPager.setOffscreenPageLimit(detailPages.length);  // to retain fragments in memory
+        viewPager.setUserInputEnabled(false);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-            {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
             }
 
             @Override
-            public void onPageSelected(int position)
-            {
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state)
-            {
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
             }
         });
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-
-        tabLayout.setupWithViewPager(viewPager);
+        // connect viewPager and TabLayout
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> tab.setText(pages.get(position).first)
+        ).attach();
 
         // TODO: addOnTabSelectedListener if you need to refresh values when switching tabs
 

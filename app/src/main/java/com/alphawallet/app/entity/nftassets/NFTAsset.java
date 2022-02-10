@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
@@ -21,6 +23,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by JB on 1/07/2021.
@@ -45,7 +49,7 @@ public class NFTAsset implements Parcelable
     public enum Category {
         NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection");
 
-        private String category;
+        private final String category;
 
         Category(String category)
         {
@@ -65,6 +69,9 @@ public class NFTAsset implements Parcelable
     private BigDecimal selected; //for ERC1155 transfer
 
     private List<BigInteger> tokenIdList; // for ERC1155 collections
+
+    @Nullable
+    public Disposable metaDataLoader;
 
     public boolean isChecked = false;
     public boolean exposeRadio = false;
@@ -165,14 +172,6 @@ public class NFTAsset implements Parcelable
     public String getExternalLink()
     {
         return assetMap.get(EXTERNAL_LINK);
-    }
-
-    public void setDecimals(BigDecimal rawBalance)
-    {
-        if (assetMap.containsKey("decimals"))
-        {
-            BigDecimal decimals = new BigDecimal(assetMap.get("decimals"));
-        }
     }
 
     public boolean setBalance(BigDecimal value)

@@ -151,7 +151,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     private void fetchAsset(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
     {
-        holder.assetLoader = Single.fromCallable(() -> {
+        pair.second.metaDataLoader = Single.fromCallable(() -> {
             return token.fetchTokenMetadata(pair.first); //fetch directly from token
         }).map(newAsset -> storeAsset(pair.first, newAsset, pair.second))
                 .subscribeOn(Schedulers.io())
@@ -215,9 +215,6 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         ProgressBar loadingSpinner;
         ImageView arrowRight;
 
-        @Nullable
-        private Disposable assetLoader;
-
         ViewHolder(View view)
         {
             super(view);
@@ -237,5 +234,17 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     public int getItemViewType(int position)
     {
         return position;
+    }
+
+    public void onDestroy()
+    {
+        //clear all loaders
+        for (Pair<BigInteger, NFTAsset> assetPair : displayData)
+        {
+            if (assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
+            {
+                assetPair.second.metaDataLoader.dispose();
+            }
+        }
     }
 }

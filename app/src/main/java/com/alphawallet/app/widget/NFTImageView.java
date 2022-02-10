@@ -104,12 +104,6 @@ public class NFTImageView extends RelativeLayout {
 
     private void loadTokenImage(NFTAsset asset, String imageUrl)
     {
-        if (getContext() == null ||
-                (getContext() instanceof Activity && ((Activity) getContext()).isDestroyed()))
-        {
-            return;
-        }
-
         image.setVisibility(View.VISIBLE);
 
         Glide.with(image.getContext())

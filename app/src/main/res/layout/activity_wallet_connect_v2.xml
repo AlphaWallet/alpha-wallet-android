@@ -139,7 +139,7 @@
                         android:layout_width="95dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_regular"
-                        android:text="方法"
+                        android:text="@string/wc_methods"
                         android:paddingTop="@dimen/dp16"
                         android:textColor="@color/dove"
                         android:textSize="18sp" />

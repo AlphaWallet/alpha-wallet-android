@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -27,12 +28,12 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
-import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.NFTViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -137,16 +138,18 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         pages.add(0, new Pair<>("Assets", assetsFragment));
         pages.add(1, new Pair<>("Activity", tokenActivityFragment));
 
-        ScrollControlViewPager viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
-        setupTabs(viewPager);
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
+        viewPager.setOffscreenPageLimit(pages.size());
+        setupTabs(viewPager, pages);
     }
 
-    private void setupTabs(ScrollControlViewPager viewPager)
+    private void setupTabs(ViewPager2 viewPager, List<Pair<String, Fragment>> pages)
     {
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-
-        tabLayout.setupWithViewPager(viewPager);
+        new TabLayoutMediator(tabLayout, viewPager ,
+                ((tab, position) -> tab.setText(pages.get(position).first))
+        ).attach();
 
         TabUtils.decorateTabLayout(this, tabLayout);
 

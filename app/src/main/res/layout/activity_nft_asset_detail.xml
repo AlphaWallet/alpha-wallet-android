@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:custom="http://schemas.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -30,12 +30,21 @@
                 app:cardCornerRadius="0dp"
                 app:cardElevation="2dp">
 
-                <com.alphawallet.app.widget.NFTImageView
-                    android:id="@+id/asset_image"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    custom:webview_height="350"
-                    android:gravity="center" />
+                    android:minHeight="350dp">
+
+                    <com.alphawallet.app.widget.NFTImageView
+                        android:id="@+id/asset_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        custom:webview_height="350" />
+
+                </RelativeLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout

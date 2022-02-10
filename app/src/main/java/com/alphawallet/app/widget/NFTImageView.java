@@ -16,8 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -44,6 +44,7 @@ public class NFTImageView extends RelativeLayout {
     private final RelativeLayout holdingView;
     private final RelativeLayout fallbackLayout;
     private final TokenIcon fallbackIcon;
+    private final ProgressBar progressBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
@@ -53,18 +54,23 @@ public class NFTImageView extends RelativeLayout {
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             //couldn't load using glide, fallback to webview
-            if (model != null) setWebView(model.toString());
+            if (model != null) {
+                progressBar.setVisibility(View.GONE);
+                setWebView(model.toString());
+            }
             return false;
         }
 
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource)
         {
+            progressBar.setVisibility(View.GONE);
             return false;
         }
     };
 
     private boolean hasContent;
+    private boolean showProgress;
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
     {
@@ -76,6 +82,7 @@ public class NFTImageView extends RelativeLayout {
         holdingView = findViewById(R.id.layout_holder);
         fallbackLayout = findViewById(R.id.layout_fallback);
         fallbackIcon = findViewById(R.id.icon_fallback);
+        progressBar = findViewById(R.id.avatar_progress_spinner);
 
         webLayout.setVisibility(View.GONE);
         webView.setVisibility(View.GONE);
@@ -91,6 +98,7 @@ public class NFTImageView extends RelativeLayout {
 
     public void setupTokenImage(NFTAsset asset)
     {
+        progressBar.setVisibility(showProgress? View.VISIBLE : View.GONE);
         loadTokenImage(asset, asset.getImage());
     }
 
@@ -179,5 +187,9 @@ public class NFTImageView extends RelativeLayout {
     public boolean hasContent()
     {
         return hasContent;
+    }
+
+    public void showLoadingProgress(boolean showProgress) {
+        this.showProgress = showProgress;
     }
 }

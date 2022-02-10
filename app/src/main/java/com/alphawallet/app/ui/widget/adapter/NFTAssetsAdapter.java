@@ -42,8 +42,8 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     private final Token token;
     private final boolean isGrid;
 
-    private List<Pair<BigInteger, NFTAsset>> actualData;
-    private List<Pair<BigInteger, NFTAsset>> displayData;
+    private final List<Pair<BigInteger, NFTAsset>> actualData;
+    private final List<Pair<BigInteger, NFTAsset>> displayData;
 
     public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, boolean isGrid)
     {
@@ -53,21 +53,25 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         this.isGrid = isGrid;
 
         actualData = new ArrayList<>();
-        if (token.isERC721())
+        switch (token.getInterfaceSpec())
         {
-            for (BigInteger i : token.getUniqueTokenIds())
-            {
-                NFTAsset asset = token.getAssetForToken(i);
-                actualData.add(new Pair<>(i, asset));
-            }
-        }
-        else if (token.getInterfaceSpec() == ContractType.ERC1155)
-        {
-            Map<BigInteger, NFTAsset> data = token.getCollectionMap();
-            for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
-            {
-                actualData.add(new Pair<>(d.getKey(), d.getValue()));
-            }
+            case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                for (BigInteger i : token.getUniqueTokenIds())
+                {
+                    NFTAsset asset = token.getAssetForToken(i);
+                    actualData.add(new Pair<>(i, asset));
+                }
+                break;
+            case ERC1155:
+                Map<BigInteger, NFTAsset> data = token.getCollectionMap();
+                for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
+                {
+                    actualData.add(new Pair<>(d.getKey(), d.getValue()));
+                }
+                break;
         }
 
         displayData = actualData;
@@ -189,7 +193,8 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     public void updateList(List<Pair<BigInteger, NFTAsset>> list)
     {
-        displayData = list;
+        displayData.clear();
+        displayData.addAll(list);
         notifyDataSetChanged();
     }
 

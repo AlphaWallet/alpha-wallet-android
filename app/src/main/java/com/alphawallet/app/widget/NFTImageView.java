@@ -3,7 +3,6 @@ package com.alphawallet.app.widget;
 import static com.alphawallet.app.util.Utils.loadFile;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;

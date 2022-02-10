@@ -69,8 +69,8 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
                 {
                     Intent intent = new Intent();
                     intent.putExtra(C.EXTRA_TXHASH, transactionHash);
-                    getActivity().setResult(RESULT_OK, intent);
-                    getActivity().finish();
+                    requireActivity().setResult(RESULT_OK, intent);
+                    requireActivity().finish();
                 }
             });
 

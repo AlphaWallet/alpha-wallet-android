@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,40 +16,50 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
-import com.alphawallet.app.viewmodel.NFTAssetDetailViewModel;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.entity.TSAction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 
 @AndroidEntryPoint
-public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface {
-    NFTAssetDetailViewModel viewModel;
+public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
+{
+    private TokenFunctionViewModel viewModel;
 
     private Token token;
     private Wallet wallet;
     private BigInteger tokenId;
     private String sequenceId;
     private LinearLayout tokenInfoLayout;
+    private ActionSheetDialog confirmationDialog;
+    private AWalletAlertDialog dialog;
 
-    private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
@@ -80,6 +92,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setupFunctionBar();
     }
 
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (viewModel != null)viewModel.prepare();
+    }
+
     private void initViews()
     {
         tokenInfoLayout = findViewById(R.id.layout_token_info);
@@ -105,6 +124,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         //can be either: FT with a balance (balance > 1)
         //unique NFT with tokenId (sequenceId)
+        //TODO: This should be done in a common widget together with all other instances
         if (!TextUtils.isEmpty(sequenceId))
         {
             addInfoView(getString(R.string.label_token_id), sequenceId);
@@ -146,7 +166,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void initViewModel()
     {
         viewModel = new ViewModelProvider(this)
-                .get(NFTAssetDetailViewModel.class);
+                .get(TokenFunctionViewModel.class);
+        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
     }
 
     private void setupFunctionBar()
@@ -188,5 +209,115 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
                     .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
         }
+    }
+
+    @Override
+    public void handleTokenScriptFunction(String function, List<BigInteger> selection)
+    {
+        //does the function have a view? If it's transaction only then handle here
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(function);
+        token.clearResultMap();
+
+        //handle TS function
+        if (action != null && action.view == null && action.function != null)
+        {
+            //open action sheet after we determine the gas limit
+            Web3Transaction web3Tx = viewModel.handleFunction(action, selection.get(0), token, this);
+            if (web3Tx.gasLimit.equals(BigInteger.ZERO))
+            {
+                calculateEstimateDialog();
+                //get gas estimate
+                viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
+            }
+            else
+            {
+                //go straight to confirmation
+                checkConfirm(web3Tx);
+            }
+        }
+        else
+        {
+            viewModel.showFunction(this, token, function, selection);
+        }
+    }
+
+    private void calculateEstimateDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.calc_gas_limit));
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private void estimateError(final Web3Transaction w3tx)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.confirm_transaction);
+        dialog.setMessage(R.string.error_transaction_may_fail);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setButtonListener(v -> {
+            BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
+            checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
+        });
+
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void checkConfirm(Web3Transaction w3tx)
+    {
+        if (w3tx.gasLimit.equals(BigInteger.ZERO))
+        {
+            estimateError(w3tx);
+        }
+        else
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
+                    w3tx.recipient.toString(), viewModel.getTokenService(), this);
+            confirmationDialog.setURL("TokenScript");
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
+        }
+    }
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction tx)
+    {
+        viewModel.sendTransaction(tx, token.tokenInfo.chainId, ""); //return point is txWritten
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        if (actionCompleted)
+        {
+            Intent intent = new Intent();
+            intent.putExtra(C.EXTRA_TXHASH, txHash);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+        viewModel.actionSheetConfirm(mode);
     }
 }

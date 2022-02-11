@@ -319,8 +319,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             Context context = getApplicationContext();
             Intent intent = new Intent(context, WalletConnectV2Service.class);
-            context.startService(intent);
-            Log.d("seaborn", "startWalletConnectV2Service: " + Build.VERSION.SDK_INT);
+            context.startForegroundService(intent);
         }
     }
 

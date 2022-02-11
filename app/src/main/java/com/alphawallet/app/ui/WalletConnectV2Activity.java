@@ -24,6 +24,7 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.bumptech.glide.Glide;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
+import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class WalletConnectV2Activity extends BaseActivity implements StandardFunctionInterface
@@ -232,20 +234,26 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void killSession(WalletConnectV2SessionItem session)
     {
-        WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(session.sessionId, "User disconnect the session."), new WalletConnect.Listeners.SessionDelete()
+        try
         {
-            @Override
-            public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)
+            WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(session.sessionId, "User disconnect the session."), new WalletConnect.Listeners.SessionDelete()
             {
-                finish();
-            }
+                @Override
+                public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)
+                {
+                    finish();
+                }
 
-            @Override
-            public void onError(@NonNull Throwable throwable)
-            {
-
-            }
-        });
+                @Override
+                public void onError(@NonNull Throwable throwable)
+                {
+                    Timber.e(throwable);
+                }
+            });
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+        }
     }
 
     public void onSessionProposal(@NonNull WalletConnect.Model.SessionProposal sessionProposal)

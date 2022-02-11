@@ -31,7 +31,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
-import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -47,6 +46,7 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
+import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -375,22 +375,27 @@ public class QRScanner extends BaseActivity
 
     private void pairWalletConnectV2(String url)
     {
-        Log.d("seaborn", "pairWalletConnectV2: " + url);
         WalletConnect.Params.Pair pair = new WalletConnect.Params.Pair(url);
-        WalletConnectClient.INSTANCE.pair(pair, new WalletConnect.Listeners.Pairing()
+        try
         {
-            @Override
-            public void onSuccess(@NonNull WalletConnect.Model.SettledPairing settledPairing)
+            WalletConnectClient.INSTANCE.pair(pair, new WalletConnect.Listeners.Pairing()
             {
+                @Override
+                public void onSuccess(@NonNull WalletConnect.Model.SettledPairing settledPairing)
+                {
 
-            }
+                }
 
-            @Override
-            public void onError(@NonNull Throwable throwable)
-            {
-
-            }
-        });
+                @Override
+                public void onError(@NonNull Throwable throwable)
+                {
+                    Timber.e(throwable);
+                }
+            });
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+        }
     }
 
     @Override

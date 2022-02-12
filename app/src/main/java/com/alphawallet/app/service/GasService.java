@@ -305,11 +305,7 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        if (transactionBytes == null || transactionBytes.length == 0)
-        {
-            return Single.fromCallable(() -> BigInteger.valueOf(GAS_LIMIT_MIN));
-        }
-        else if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
+        if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
                     .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData))

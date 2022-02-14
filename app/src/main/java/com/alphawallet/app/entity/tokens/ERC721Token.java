@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
+import android.util.Pair;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -94,9 +95,10 @@ public class ERC721Token extends Token
     }
 
     @Override
-    public byte[] getTransferBytes(String to, List<BigInteger> tokenIds) throws NumberFormatException
+    public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData) throws NumberFormatException
     {
-        Function txFunc = getTransferFunction(to, tokenIds);
+        if (transferData == null || transferData.size() != 1) return Numeric.hexStringToByteArray("0x");
+        Function txFunc = getTransferFunction(to, new ArrayList<>(Collections.singleton(transferData.get(0).first)));
         String encodedFunction = FunctionEncoder.encode(txFunc);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }

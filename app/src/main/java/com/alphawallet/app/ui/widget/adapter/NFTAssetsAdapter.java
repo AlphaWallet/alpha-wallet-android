@@ -71,8 +71,8 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
                 break;
         }
 
-        displayData = actualData;
-
+        displayData = new ArrayList<>();
+        displayData.addAll(actualData);
         sortData();
     }
 
@@ -192,6 +192,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     {
         displayData.clear();
         displayData.addAll(list);
+        sortData();
         notifyDataSetChanged();
     }
 

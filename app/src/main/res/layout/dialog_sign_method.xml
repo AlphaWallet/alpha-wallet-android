@@ -27,26 +27,26 @@
             android:id="@+id/text_sign_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="@dimen/dp8"
+            android:layout_marginTop="@dimen/dp8"
             android:layout_toEndOf="@id/image_close"
             android:layout_toStartOf="@id/logo"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center_horizontal"
             android:text="@string/dialog_title_sign_message"
             android:textColor="@color/black"
-            android:fontFamily="@font/font_semibold"
-            android:layout_centerVertical="true"
-            android:gravity="center_horizontal"
-            android:layout_marginTop="@dimen/dp8"
-            android:layout_marginBottom="@dimen/dp8"
-            android:textSize="@dimen/sp20"/>
+            android:textSize="@dimen/sp20" />
 
         <ImageView
             android:id="@+id/logo"
-            android:contentDescription="@string/app_name"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher_foreground" />
 
     </RelativeLayout>
 
@@ -56,15 +56,124 @@
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="wrap_content"/>-->
 
-    <com.alphawallet.app.widget.SignDataWidget
-        android:id="@+id/sign_widget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/mercury" />
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:paddingVertical="@dimen/dp16"-->
+<!--        android:paddingHorizontal="@dimen/dp16">-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Name:"/>-->
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Test dApp"-->
+<!--            android:paddingStart="@dimen/dp16"/>-->
+<!--    </LinearLayout>-->
+
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_card">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name" />
+
+            <TextView
+                android:id="@+id/dapp_name"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="React Sample DApp" />
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="URL" />
+
+            <TextView
+                android:id="@+id/url"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="https://app.walletconnect.com" />
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wallet" />
+
+            <TextView
+                android:id="@+id/wallet"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="seabornlee.eth | 0xabcdefughhhoheutohestuh" />
+
+            <TextView
+                    style="@style/TransactionDetailsSubTitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp16"
+                    android:text="Message" />
+
+            <TextView
+                android:id="@+id/message"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="0xabced" />
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/subtitle_network" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/network_icon"
+                    android:layout_width="@dimen/dp24"
+                    android:layout_height="@dimen/dp24"
+                    android:layout_marginEnd="@dimen/dp5"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_coin_eth_small" />
+
+                <com.alphawallet.app.widget.ChainName
+                    android:id="@+id/network_name"
+                    style="@style/TransactionDetailsStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:text="@string/ethereum" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
     <com.alphawallet.app.widget.ConfirmationWidget
         android:id="@+id/confirmation_view"

@@ -16,6 +16,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import timber.log.Timber;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -59,6 +60,8 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     {
         String method = sessionRequest.getRequest().getMethod();
 
+        Timber.tag("seaborn").d(sessionRequest.getRequest().getParams());
+
         WalletConnect.Model.SettledSession settledSession = getSession(sessionRequest.getTopic());
         if ("personal_sign".equals(method))
         {
@@ -72,7 +75,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         Activity topActivity = App.getInstance().getTopActivity();
         topActivity.runOnUiThread(() ->
         {
-            SignMethodDialog signMethodDialog = new SignMethodDialog(topActivity);
+            SignMethodDialog signMethodDialog = new SignMethodDialog(topActivity, settledSession, sessionRequest);
             signMethodDialog.show();
         });
     }

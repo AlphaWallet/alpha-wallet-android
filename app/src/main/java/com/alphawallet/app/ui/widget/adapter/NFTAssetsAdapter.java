@@ -12,11 +12,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.NFTActivity;
@@ -33,7 +31,6 @@ import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder> {
@@ -204,12 +201,41 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         for (Pair<BigInteger, NFTAsset> data : actualData)
         {
             NFTAsset asset = data.second;
-            if (asset.getName().toLowerCase().contains(searchFilter.toLowerCase()))
+            if (asset.getName() != null)
             {
-                filteredList.add(data);
+                if (asset.getName().toLowerCase().contains(searchFilter.toLowerCase()))
+                {
+                    filteredList.add(data);
+                }
+            }
+            else
+            {
+                String id = data.first.toString();
+                if (id.contains(searchFilter))
+                {
+                    filteredList.add(data);
+                }
             }
         }
         updateList(filteredList);
+    }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        return position;
+    }
+
+    public void onDestroy()
+    {
+        //clear all loaders
+        for (Pair<BigInteger, NFTAsset> assetPair : displayData)
+        {
+            if (assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
+            {
+                assetPair.second.metaDataLoader.dispose();
+            }
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -232,24 +258,6 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             arrowRight = view.findViewById(R.id.arrow_right);
             if (arrowRight != null) arrowRight.setVisibility(View.VISIBLE);
 
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position)
-    {
-        return position;
-    }
-
-    public void onDestroy()
-    {
-        //clear all loaders
-        for (Pair<BigInteger, NFTAsset> assetPair : displayData)
-        {
-            if (assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
-            {
-                assetPair.second.metaDataLoader.dispose();
-            }
         }
     }
 }

@@ -852,4 +852,7 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="send_multiple_tokens">Send Multiple Tokens</string>
+    <string name="switch_to_grid_view">Switch to Grid View</string>
+    <string name="switch_to_list_view">Switch to List View</string>
 </resources>

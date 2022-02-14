@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -184,5 +185,11 @@ public class NFTImageView extends RelativeLayout {
 
     public void showLoadingProgress(boolean showProgress) {
         this.showProgress = showProgress;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev)
+    {
+        return true;
     }
 }

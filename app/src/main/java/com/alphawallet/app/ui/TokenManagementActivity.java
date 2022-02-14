@@ -31,19 +31,17 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
-import com.alphawallet.app.viewmodel.TokenManagementViewModelFactory;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+@AndroidEntryPoint
 public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.ItemClickListener {
-    @Inject
-    TokenManagementViewModelFactory viewModelFactory;
 
     private TokenManagementViewModel viewModel;
 
@@ -62,7 +60,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_management);
         toolbar();
@@ -72,7 +69,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     private void initViews() {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenManagementViewModel.class);
         viewModel.tokens().observe(this, this::onTokens);
 

@@ -34,13 +34,11 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 
-import dagger.android.AndroidInjection;
 import timber.log.Timber;
 
 import com.alphawallet.app.R;
 
 import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModel;
-import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 
@@ -50,17 +48,17 @@ import static com.alphawallet.app.C.Key.*;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Created by James on 24/01/2018.
  */
-
+@AndroidEntryPoint
 public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback, PageReadyCallback
 {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
 
-    @Inject
-    protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
     private RedeemSignatureDisplayModel viewModel;
 
     private FinishReceiver finishReceiver;
@@ -75,7 +73,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
@@ -85,7 +82,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         setTitle(getString(R.string.action_redeem));
 
-        viewModel = new ViewModelProvider(this, redeemSignatureDisplayModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(RedeemSignatureDisplayModel.class);
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

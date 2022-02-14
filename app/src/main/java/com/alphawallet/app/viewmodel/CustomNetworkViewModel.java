@@ -4,10 +4,16 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.entity.NetworkInfo;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class CustomNetworkViewModel extends BaseViewModel
 {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
+    @Inject
     CustomNetworkViewModel(
             EthereumNetworkRepositoryType ethereumNetworkRepository)
     {

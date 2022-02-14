@@ -45,6 +45,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -52,6 +55,7 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by James on 21/02/2018.
  */
+@HiltViewModel
 public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -73,6 +77,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private byte[] linkMessage;
 
+    @Inject
     TransferTicketDetailViewModel(GenericWalletInteract genericWalletInteract,
                                   KeyService keyService,
                                   CreateTransactionInteract createTransactionInteract,

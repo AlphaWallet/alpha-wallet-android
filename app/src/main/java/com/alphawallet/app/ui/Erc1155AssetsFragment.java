@@ -26,7 +26,6 @@ import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.Erc1155AssetsViewModel;
-import com.alphawallet.app.viewmodel.Erc1155AssetsViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigDecimal;
@@ -34,13 +33,12 @@ import java.math.BigInteger;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
 import static android.app.Activity.RESULT_OK;
 
+@AndroidEntryPoint
 public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickListener {
-    @Inject
-    Erc1155AssetsViewModelFactory viewModelFactory;
     private Erc1155AssetsViewModel viewModel;
 
     private Token token;
@@ -52,7 +50,6 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_erc1155_assets, container, false);
     }
 
@@ -62,7 +59,7 @@ public class Erc1155AssetsFragment extends BaseFragment implements OnAssetClickL
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(Erc1155AssetsViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

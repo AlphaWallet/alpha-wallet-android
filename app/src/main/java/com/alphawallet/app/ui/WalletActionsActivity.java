@@ -30,7 +30,6 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
-import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.SettingsItemView;
@@ -38,12 +37,11 @@ import com.alphawallet.app.widget.UserAvatar;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback
 {
-    @Inject
-    WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
 
     private UserAvatar walletIcon;
@@ -66,7 +64,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallet_actions);
         toolbar();
@@ -92,7 +89,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     private void initViewModel() {
-        viewModel = new ViewModelProvider(this, walletActionsViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(WalletActionsViewModel.class);
 
         viewModel.saved().observe(this, this::onSaved);

@@ -30,10 +30,14 @@ import com.alphawallet.token.tools.ParseMagicLink;
 import java.math.BigInteger;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
 /**
  * Created by James on 21/02/2018.
  */
-
+@HiltViewModel
 public class SellDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Double> ethereumPrice = new MutableLiveData<>();
@@ -51,6 +55,7 @@ public class SellDetailViewModel extends BaseViewModel {
 
     private byte[] linkMessage;
 
+    @Inject
     SellDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                         TokensService tokensService,
                         CreateTransactionInteract createTransactionInteract,

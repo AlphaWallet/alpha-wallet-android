@@ -12,7 +12,11 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 
+import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class NewSettingsViewModel extends BaseViewModel {
 
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -23,6 +27,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final ManageWalletsRouter manageWalletsRouter;
     private final PreferenceRepositoryType preferenceRepository;
 
+    @Inject
     NewSettingsViewModel(
             GenericWalletInteract genericWalletInteract,
             MyAddressRouter myAddressRouter,

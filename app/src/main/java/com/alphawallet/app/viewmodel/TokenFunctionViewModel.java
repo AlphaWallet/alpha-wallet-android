@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -72,10 +73,13 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
+import javax.inject.Inject;
+
 /**
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
+@HiltViewModel
 public class TokenFunctionViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
@@ -102,6 +106,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
 
+    @Inject
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,

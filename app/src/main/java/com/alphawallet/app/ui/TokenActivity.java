@@ -43,7 +43,6 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
@@ -78,7 +77,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -97,11 +96,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 /**
  * Created by JB on 6/08/2020.
  */
+@AndroidEntryPoint
 public class TokenActivity extends BaseActivity implements PageReadyCallback, StandardFunctionInterface, ActionSheetCallback,
                                                             TokenScriptRenderCallback, WebCompletionCallback, OnSetValuesListener
 {
-    @Inject
-    protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
     private TokenIcon icon;
@@ -130,7 +128,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_activity);
 
@@ -164,7 +161,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void setupViewModel()
     {
-        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.walletUpdate().observe(this, this::onWallet);
         viewModel.transactionFinalised().observe(this, this::txWritten);

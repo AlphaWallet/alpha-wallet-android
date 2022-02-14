@@ -16,10 +16,16 @@ import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class Erc1155AssetListViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
+    @Inject
     public Erc1155AssetListViewModel(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService)

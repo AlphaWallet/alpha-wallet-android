@@ -24,7 +24,6 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
@@ -45,7 +44,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import timber.log.Timber;
@@ -58,11 +57,10 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
+@AndroidEntryPoint
 public class TokenFunctionActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback,
                                                                     OnSetValuesListener, ActionSheetCallback
 {
-    @Inject
-    protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
     private Web3TokenView tokenView;
@@ -98,11 +96,10 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
 
-        viewModel = new ViewModelProvider(this, tokenFunctionViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);

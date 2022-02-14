@@ -16,7 +16,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.viewmodel.TokenActivityViewModel;
-import com.alphawallet.app.viewmodel.TokenActivityViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
@@ -24,11 +23,10 @@ import java.math.BigInteger;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class TokenActivityFragment extends BaseFragment {
-    @Inject
-    TokenActivityViewModelFactory viewModelFactory;
 
     private TokenActivityViewModel viewModel;
 
@@ -42,7 +40,6 @@ public class TokenActivityFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_token_activity, container, false);
     }
 
@@ -53,7 +50,7 @@ public class TokenActivityFragment extends BaseFragment {
 
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(TokenActivityViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);

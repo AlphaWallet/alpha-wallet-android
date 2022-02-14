@@ -35,7 +35,6 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.viewmodel.SellDetailModelFactory;
 import com.alphawallet.app.viewmodel.SellDetailViewModel;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
@@ -54,8 +53,6 @@ import java.util.Locale;
 import java.util.MissingFormatArgumentException;
 
 import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 import timber.log.Timber;
 
 import static com.alphawallet.app.C.EXTRA_PRICE;
@@ -66,10 +63,12 @@ import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.token.tools.Convert.getEthString;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Created by James on 21/02/2018.
  */
-
+@AndroidEntryPoint
 public class SellDetailActivity extends BaseActivity implements TokensAdapterCallback, Runnable, SignAuthenticationCallback
 {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -77,8 +76,6 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
     public static final int SET_EXPIRY = 2;
     public static final int SET_MARKET_SALE = 3;
 
-    @Inject
-    protected SellDetailModelFactory viewModelFactory;
     protected SellDetailViewModel viewModel;
 
     private FinishReceiver finishReceiver;
@@ -119,9 +116,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(SellDetailViewModel.class);
         setContentView(R.layout.activity_set_price);
         toolbar();

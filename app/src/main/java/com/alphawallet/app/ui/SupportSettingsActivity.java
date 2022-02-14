@@ -16,6 +16,9 @@ import com.alphawallet.app.widget.SettingsItemView;
 
 import timber.log.Timber;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SupportSettingsActivity extends BaseActivity {
 
     private LinearLayout supportSettingsLayout;

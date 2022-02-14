@@ -13,7 +13,10 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.AWEnsResolver;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -22,6 +25,7 @@ import io.realm.Realm;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+@HiltViewModel
 public class NameThisWalletViewModel extends BaseViewModel
 {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -33,7 +37,8 @@ public class NameThisWalletViewModel extends BaseViewModel
     @Nullable
     Disposable ensResolveDisposable;
 
-    NameThisWalletViewModel(GenericWalletInteract genericWalletInteract, Context context)
+    @Inject
+    NameThisWalletViewModel(GenericWalletInteract genericWalletInteract, @ApplicationContext Context context)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);

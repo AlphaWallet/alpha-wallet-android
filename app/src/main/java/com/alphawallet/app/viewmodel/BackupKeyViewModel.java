@@ -17,13 +17,16 @@ import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.KeyService;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
-
+@HiltViewModel
 public class BackupKeyViewModel extends BaseViewModel {
     private final static String TAG = BackupKeyViewModel.class.getSimpleName();
 
@@ -34,6 +37,8 @@ public class BackupKeyViewModel extends BaseViewModel {
     private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
 
+
+    @Inject
     public BackupKeyViewModel(
             KeyService keyService,
             ExportWalletInteract exportWalletInteract,

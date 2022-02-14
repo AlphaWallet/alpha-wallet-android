@@ -7,14 +7,19 @@ import com.alphawallet.app.service.AssetDefinitionService;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+@HiltViewModel
 public class TokenScriptManagementViewModel extends BaseViewModel {
 
     private final AssetDefinitionService assetDefinitionService;
     private final MutableLiveData<List<TokenLocator>> tokenLocatorsLiveData;
 
+    @Inject
     public TokenScriptManagementViewModel(AssetDefinitionService assetDefinitionService) {
         this.assetDefinitionService = assetDefinitionService;
         tokenLocatorsLiveData = new MutableLiveData<>();

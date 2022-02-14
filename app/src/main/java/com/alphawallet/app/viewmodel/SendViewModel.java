@@ -34,10 +34,14 @@ import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+@HiltViewModel
 public class SendViewModel extends BaseViewModel {
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
@@ -53,6 +57,7 @@ public class SendViewModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
 
+    @Inject
     public SendViewModel(MyAddressRouter myAddressRouter,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                          TokensService tokensService,

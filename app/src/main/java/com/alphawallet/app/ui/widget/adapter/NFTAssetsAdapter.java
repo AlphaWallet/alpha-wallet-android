@@ -122,7 +122,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             if (asset.getName() != null)
             {
                 holder.title.setText(asset.getName());
-                if (asset.getAssetCategory() == NFTAsset.Category.NFT)
+                if (token.isERC721())
                 {
                     // Hide subtitle containing redundant information
                     holder.subtitle.setVisibility(View.GONE);
@@ -130,7 +130,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
                 else
                 {
                     holder.subtitle.setVisibility(View.VISIBLE);
-                    holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory().getValue()));
+                    holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory(tokenId).getValue()));
                 }
             }
             else

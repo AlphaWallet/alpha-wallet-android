@@ -47,7 +47,7 @@ public class NFTAsset implements Parcelable
     private static final List<String> ATTRIBUTE_DESCRIPTOR = Arrays.asList("attributes", "traits");
 
     public enum Category {
-        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection");
+        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible");
 
         private final String category;
 
@@ -454,16 +454,22 @@ public class NFTAsset implements Parcelable
         return tokenIdList;
     }
 
-    public Category getAssetCategory()
+    public Category getAssetCategory(BigInteger tokenId)
     {
         if (tokenIdList != null && isCollection())
         {
             return Category.COLLECTION;
         }
-        else if (tokenIdList == null || tokenIdList.size() == 1
-                && ERC1155Token.isNFT(tokenIdList.get(0)))
+        else if (ERC1155Token.isNFT(tokenId))
         {
-            return Category.NFT;
+            if (balance.equals(BigDecimal.ONE))
+            {
+                return Category.NFT;
+            }
+            else
+            {
+                return Category.SEMI_FT; //Should not see this, but there could have been a mis-labelling
+            }
         }
         else
         {

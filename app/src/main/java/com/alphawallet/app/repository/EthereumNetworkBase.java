@@ -136,7 +136,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String ARBITRUM_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getInfuraKey();
     public static final String ARBITRUM_FALLBACK_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String ARBITRUM_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey();
-    public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://rinkeby.arbitrum.io/rpc";
     public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/" + getInfuraKey();
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/" + getInfuraKey();
     public static final String PALM_RPC_FALLBACK_URL = "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
@@ -255,8 +255,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api.arbiscan.io/api?"));
             put(ARBITRUM_TEST_ID, new NetworkInfo(C.ARBITRUM_TEST_NETWORK, C.ARBITRUM_TEST_SYMBOL,
                     ARBITRUM_TESTNET_RPC,
-                    "https://rinkeby-explorer.arbitrum.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
-                    "")); //no transaction API
+                    "https://testnet.arbiscan.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
+                    "https://testnet.arbiscan.io/api?")); //no transaction API
             put(PALM_ID, new NetworkInfo(C.PALM_NAME, C.PALM_SYMBOL,
                     PALM_RPC_URL,
                     "https://explorer.palm.io/tx/", PALM_ID, PALM_RPC_FALLBACK_URL,

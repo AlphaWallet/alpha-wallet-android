@@ -30,16 +30,16 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.NFTViewModel;
+import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -79,7 +79,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nft);
         toolbar();
-        findViewById(R.id.user_address_blockie).setVisibility(View.GONE);
         initViewModel();
         getIntentData();
         setTitle(token.tokenInfo.name);
@@ -92,6 +91,12 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 
+    private void onSignature(XMLDsigDescriptor descriptor)
+    {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.onSigData(descriptor, this);
+    }
+
     public void storeAsset(BigInteger tokenId, NFTAsset asset)
     {
         viewModel.getTokensService().storeAsset(token, tokenId, asset);
@@ -101,6 +106,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     {
         viewModel = new ViewModelProvider(this)
                 .get(NFTViewModel.class);
+        viewModel.sig().observe(this, this::onSignature);
     }
 
     private void getIntentData()
@@ -112,6 +118,8 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
             long chainId = data.getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             String address = data.getStringExtra(C.EXTRA_ADDRESS);
             token = viewModel.getTokensService().getToken(chainId, address);
+            viewModel.checkTokenScriptValidity(token);
+            viewModel.checkForNewScript(token);
         }
         else
         {

@@ -162,11 +162,11 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
                 switch (tab.getPosition())
                 {
                     case 0:
-                        showFunctionBar(true);
+                        // showFunctionBar(true);
                         showMenu();
                         break;
                     default:
-                        showFunctionBar(false);
+                        // showFunctionBar(false);
                         hideMenu();
                         break;
                 }

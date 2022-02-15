@@ -12,11 +12,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.NFTActivity;
@@ -33,7 +31,6 @@ import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder> {
@@ -42,8 +39,8 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     private final Token token;
     private final boolean isGrid;
 
-    private List<Pair<BigInteger, NFTAsset>> actualData;
-    private List<Pair<BigInteger, NFTAsset>> displayData;
+    private final List<Pair<BigInteger, NFTAsset>> actualData;
+    private final List<Pair<BigInteger, NFTAsset>> displayData;
 
     public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, boolean isGrid)
     {
@@ -53,25 +50,29 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         this.isGrid = isGrid;
 
         actualData = new ArrayList<>();
-        if (token.isERC721())
+        switch (token.getInterfaceSpec())
         {
-            for (BigInteger i : token.getUniqueTokenIds())
-            {
-                NFTAsset asset = token.getAssetForToken(i);
-                actualData.add(new Pair<>(i, asset));
-            }
-        }
-        else if (token.getInterfaceSpec() == ContractType.ERC1155)
-        {
-            Map<BigInteger, NFTAsset> data = token.getCollectionMap();
-            for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
-            {
-                actualData.add(new Pair<>(d.getKey(), d.getValue()));
-            }
+            case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                for (BigInteger i : token.getUniqueTokenIds())
+                {
+                    NFTAsset asset = token.getAssetForToken(i);
+                    actualData.add(new Pair<>(i, asset));
+                }
+                break;
+            case ERC1155:
+                Map<BigInteger, NFTAsset> data = token.getCollectionMap();
+                for (Map.Entry<BigInteger, NFTAsset> d : data.entrySet())
+                {
+                    actualData.add(new Pair<>(d.getKey(), d.getValue()));
+                }
+                break;
         }
 
-        displayData = actualData;
-
+        displayData = new ArrayList<>();
+        displayData.addAll(actualData);
         sortData();
     }
 
@@ -118,7 +119,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             if (asset.getName() != null)
             {
                 holder.title.setText(asset.getName());
-                if (asset.getAssetCategory() == NFTAsset.Category.NFT)
+                if (token.isERC721())
                 {
                     // Hide subtitle containing redundant information
                     holder.subtitle.setVisibility(View.GONE);
@@ -126,7 +127,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
                 else
                 {
                     holder.subtitle.setVisibility(View.VISIBLE);
-                    holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory().getValue()));
+                    holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory(tokenId).getValue()));
                 }
             }
             else
@@ -151,7 +152,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     private void fetchAsset(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
     {
-        holder.assetLoader = Single.fromCallable(() -> {
+        pair.second.metaDataLoader = Single.fromCallable(() -> {
             return token.fetchTokenMetadata(pair.first); //fetch directly from token
         }).map(newAsset -> storeAsset(pair.first, newAsset, pair.second))
                 .subscribeOn(Schedulers.io())
@@ -189,7 +190,9 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     public void updateList(List<Pair<BigInteger, NFTAsset>> list)
     {
-        displayData = list;
+        displayData.clear();
+        displayData.addAll(list);
+        sortData();
         notifyDataSetChanged();
     }
 
@@ -199,12 +202,41 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         for (Pair<BigInteger, NFTAsset> data : actualData)
         {
             NFTAsset asset = data.second;
-            if (asset.getName().toLowerCase().contains(searchFilter.toLowerCase()))
+            if (asset.getName() != null)
             {
-                filteredList.add(data);
+                if (asset.getName().toLowerCase().contains(searchFilter.toLowerCase()))
+                {
+                    filteredList.add(data);
+                }
+            }
+            else
+            {
+                String id = data.first.toString();
+                if (id.contains(searchFilter))
+                {
+                    filteredList.add(data);
+                }
             }
         }
         updateList(filteredList);
+    }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        return position;
+    }
+
+    public void onDestroy()
+    {
+        //clear all loaders
+        for (Pair<BigInteger, NFTAsset> assetPair : displayData)
+        {
+            if (assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
+            {
+                assetPair.second.metaDataLoader.dispose();
+            }
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -214,9 +246,6 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         TextView subtitle;
         ProgressBar loadingSpinner;
         ImageView arrowRight;
-
-        @Nullable
-        private Disposable assetLoader;
 
         ViewHolder(View view)
         {
@@ -231,11 +260,5 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             if (arrowRight != null) arrowRight.setVisibility(View.VISIBLE);
 
         }
-    }
-
-    @Override
-    public int getItemViewType(int position)
-    {
-        return position;
     }
 }

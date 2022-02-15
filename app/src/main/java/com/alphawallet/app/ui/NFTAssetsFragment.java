@@ -58,6 +58,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     private ListDivider listItemDecoration;
     private EditText search;
     private LinearLayout searchLayout;
+    private RecyclerView.Adapter<?> adapter;
 
     private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -68,8 +69,8 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
                 {
                     Intent intent = new Intent();
                     intent.putExtra(C.EXTRA_TXHASH, transactionHash);
-                    getActivity().setResult(RESULT_OK, intent);
-                    getActivity().finish();
+                    requireActivity().setResult(RESULT_OK, intent);
+                    requireActivity().finish();
                 }
             });
 
@@ -163,16 +164,16 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         if (hasTokenScriptOverride(token))
         {
             searchLayout.setVisibility(View.GONE);
-            NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), isGridView);
-            recyclerView.setAdapter(adapter);
+            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), isGridView);
         }
         else
         {
             searchLayout.setVisibility(View.VISIBLE);
-            NFTAssetsAdapter adapter = new NFTAssetsAdapter(getActivity(), token, this, isGridView);
-            search.addTextChangedListener(setupTextWatcher(adapter));
-            recyclerView.setAdapter(adapter);
+            adapter = new NFTAssetsAdapter(getActivity(), token, this, isGridView);
+            search.addTextChangedListener(setupTextWatcher((NFTAssetsAdapter)adapter));
         }
+
+        recyclerView.setAdapter(adapter);
     }
 
     private boolean hasTokenScriptOverride(Token t)
@@ -204,5 +205,15 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
                 }, 200);
             }
         };
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (adapter instanceof NFTAssetsAdapter)
+        {
+            ((NFTAssetsAdapter)adapter).onDestroy();
+        }
     }
 }

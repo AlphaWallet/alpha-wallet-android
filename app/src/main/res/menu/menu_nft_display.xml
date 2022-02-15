@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_send_multiple_tokens"
-        android:title="Send Multiple Tokens"
+        android:title="@string/send_multiple_tokens"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_grid_view"
         android:icon="@drawable/ic_menu_grid"
-        android:title="Switch to Grid View"
+        android:title="@string/switch_to_grid_view"
         app:showAsAction="collapseActionView" />
 
     <item
         android:id="@+id/action_list_view"
         android:icon="@drawable/ic_menu_list"
-        android:title="Switch to List View"
+        android:title="@string/switch_to_list_view"
         app:showAsAction="collapseActionView" />
 </menu>

@@ -19,6 +19,7 @@
         android:id="@+id/avatar_progress_spinner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_centerInParent="true"
         android:indeterminateDrawable="@drawable/progress_bar_spinner"
         android:visibility="gone"
         tools:visibility="visible" />

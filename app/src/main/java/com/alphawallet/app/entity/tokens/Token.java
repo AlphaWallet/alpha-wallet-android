@@ -416,10 +416,6 @@ public class Token
     {
         return null;
     }
-    public byte[] getTransferBytes(String to, List<BigInteger> transferData)
-    {
-        return Numeric.hexStringToByteArray("0x");
-    }
     public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData)
     {
         return Numeric.hexStringToByteArray("0x");

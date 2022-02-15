@@ -1,37 +1,31 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.List;
 
-public class TabPagerAdapter extends FragmentPagerAdapter {
+public class TabPagerAdapter extends FragmentStateAdapter {
 
     private final List<Pair<String, Fragment>> pages;
 
-    public TabPagerAdapter(FragmentManager fm, List<Pair<String, Fragment>> pages) {
-        super(fm);
-
+    public TabPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<Pair<String, Fragment>> pages) {
+        super(fragmentActivity);
         this.pages = pages;
     }
 
-    // Return fragment with respect to position.
+    @NonNull
     @Override
-    public Fragment getItem(int position) {
+    public Fragment createFragment(int position) {
+        // don't forget to set 'offScreenPageLimit' of viewPager as we are not creating fragments here, just returning existing instances
         return pages.get(position).second;
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return pages.size();
     }
-
-    // This method returns the title of the tab according to its position.
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return pages.get(position).first;
-    }
-
 }

@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -27,18 +28,18 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
-import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.NFTViewModel;
+import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -90,6 +91,12 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 
+    private void onSignature(XMLDsigDescriptor descriptor)
+    {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.onSigData(descriptor, this);
+    }
+
     public void storeAsset(BigInteger tokenId, NFTAsset asset)
     {
         viewModel.getTokensService().storeAsset(token, tokenId, asset);
@@ -99,6 +106,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     {
         viewModel = new ViewModelProvider(this)
                 .get(NFTViewModel.class);
+        viewModel.sig().observe(this, this::onSignature);
     }
 
     private void getIntentData()
@@ -110,6 +118,8 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
             long chainId = data.getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
             String address = data.getStringExtra(C.EXTRA_ADDRESS);
             token = viewModel.getTokensService().getToken(chainId, address);
+            viewModel.checkTokenScriptValidity(token);
+            viewModel.checkForNewScript(token);
         }
         else
         {
@@ -136,16 +146,18 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         pages.add(0, new Pair<>("Assets", assetsFragment));
         pages.add(1, new Pair<>("Activity", tokenActivityFragment));
 
-        ScrollControlViewPager viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
-        setupTabs(viewPager);
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
+        viewPager.setOffscreenPageLimit(pages.size());
+        setupTabs(viewPager, pages);
     }
 
-    private void setupTabs(ScrollControlViewPager viewPager)
+    private void setupTabs(ViewPager2 viewPager, List<Pair<String, Fragment>> pages)
     {
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-
-        tabLayout.setupWithViewPager(viewPager);
+        new TabLayoutMediator(tabLayout, viewPager ,
+                ((tab, position) -> tab.setText(pages.get(position).first))
+        ).attach();
 
         TabUtils.decorateTabLayout(this, tabLayout);
 
@@ -158,11 +170,11 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
                 switch (tab.getPosition())
                 {
                     case 0:
-                        showFunctionBar(true);
+                        // showFunctionBar(true);
                         showMenu();
                         break;
                     default:
-                        showFunctionBar(false);
+                        // showFunctionBar(false);
                         hideMenu();
                         break;
                 }

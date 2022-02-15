@@ -5,6 +5,8 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -58,6 +60,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private LinearLayout tokenInfoLayout;
     private ActionSheetDialog confirmationDialog;
     private AWalletAlertDialog dialog;
+    private NFTImageView tokenImage;
+    private NFTAttributeLayout attrs;
+    private TextView tokenDescription;
 
     private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -89,6 +94,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         initViews();
 
+        loadData();
+
         setupFunctionBar();
     }
 
@@ -99,11 +106,38 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (viewModel != null)viewModel.prepare();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_refresh, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_reload_metadata)
+        {
+            reloadMetadata();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void reloadMetadata()
+    {
+        // TODO: implement refresh
+    }
+
     private void initViews()
     {
         tokenInfoLayout = findViewById(R.id.layout_token_info);
-        NFTImageView tokenImage = findViewById(R.id.asset_image);
-        NFTAttributeLayout attrs = findViewById(R.id.attributes);
+        tokenImage = findViewById(R.id.asset_image);
+        attrs = findViewById(R.id.attributes);
+        tokenDescription = findViewById(R.id.token_description);
+    }
+
+    private void loadData()
+    {
         NFTAsset asset = token.getTokenAssets().get(tokenId);
 
         if (asset == null) return;
@@ -119,7 +153,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             tokenImage.setupTokenImage(asset);
         }
 
-        TextView tokenDescription = findViewById(R.id.token_description);
         tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_details)));
 
         //can be either: FT with a balance (balance > 1)

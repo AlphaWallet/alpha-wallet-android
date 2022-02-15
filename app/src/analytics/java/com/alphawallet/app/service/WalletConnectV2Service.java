@@ -6,17 +6,29 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 
+import com.alphawallet.app.interact.FetchWalletsInteract;
+import com.alphawallet.app.repository.TransactionRepository;
+import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
-import androidx.annotation.Nullable;
+import javax.inject.Inject;
+
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import dagger.hilt.android.AndroidEntryPoint;
 
 public class WalletConnectV2Service extends Service
 {
+    @Override
+    public IBinder onBind(Intent intent)
+    {
+        return null;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate()
@@ -48,12 +60,5 @@ public class WalletConnectV2Service extends Service
     {
         super.onDestroy();
         stopForeground(true);
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent)
-    {
-        return null;
     }
 }

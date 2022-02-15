@@ -8,6 +8,7 @@ import android.os.Build;
 import com.alphawallet.app.App;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
+import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.widget.SignMethodDialog;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
@@ -24,6 +25,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 {
     public static WalletConnect.Model.SessionProposal sessionProposal;
 
+    public static SignMethodDialogViewModel viewModel;
     private static final String TAG = "AlphaWallet";
     private Context context;
 

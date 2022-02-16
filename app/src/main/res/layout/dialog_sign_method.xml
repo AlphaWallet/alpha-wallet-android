@@ -7,6 +7,13 @@
     android:orientation="vertical"
     android:background="@drawable/background_card">
 
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:indeterminateTint="@color/azure" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

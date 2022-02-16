@@ -16,21 +16,11 @@ import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.OnLifecycleEvent;
-import androidx.preference.PreferenceManager;
-
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -44,20 +34,25 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
-import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.preference.PreferenceManager;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.os.Build.VERSION.SDK_INT;
@@ -361,41 +356,18 @@ public class QRScanner extends BaseActivity
 
     private void startWalletConnect(String qrCode)
     {
+        Intent intent;
         if (QRCodeHelper.isWalletConnectV1(qrCode)) {
-            Intent intent = new Intent(this, WalletConnectActivity.class);
+            intent = new Intent(this, WalletConnectActivity.class);
             intent.putExtra("qrCode", qrCode);
             intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
-            startActivity(intent);
-            setResult(WALLET_CONNECT);
         } else {
-            pairWalletConnectV2(qrCode);
+            intent = new Intent(this, WalletConnectV2Activity.class);
+            intent.putExtra("url", qrCode);
         }
+        startActivity(intent);
+        setResult(WALLET_CONNECT);
         finish();
-    }
-
-    private void pairWalletConnectV2(String url)
-    {
-        WalletConnect.Params.Pair pair = new WalletConnect.Params.Pair(url);
-        try
-        {
-            WalletConnectClient.INSTANCE.pair(pair, new WalletConnect.Listeners.Pairing()
-            {
-                @Override
-                public void onSuccess(@NonNull WalletConnect.Model.SettledPairing settledPairing)
-                {
-
-                }
-
-                @Override
-                public void onError(@NonNull Throwable throwable)
-                {
-                    Timber.e(throwable);
-                }
-            });
-        } catch (WalletConnectException e)
-        {
-            Timber.e(e);
-        }
     }
 
     @Override

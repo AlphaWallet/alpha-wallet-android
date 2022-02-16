@@ -21,8 +21,12 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class WalletConnectV2Service extends Service
 {
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
     @Override
     public IBinder onBind(Intent intent)
     {
@@ -51,7 +55,7 @@ public class WalletConnectV2Service extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        WalletConnectClient.INSTANCE.setWalletDelegate(new AWWalletConnectClient(getApplication().getApplicationContext()));
+        WalletConnectClient.INSTANCE.setWalletDelegate(awWalletConnectClient);
         return super.onStartCommand(intent, flags, startId);
     }
 

@@ -12,6 +12,7 @@ import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.widget.SignMethodDialog;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
+import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.List;
 
@@ -26,7 +27,6 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     public static WalletConnect.Model.SessionProposal sessionProposal;
 
     public static SignMethodDialogViewModel viewModel;
-    private static final String TAG = "AlphaWallet";
     private Context context;
 
     public AWWalletConnectClient(Context context)
@@ -93,5 +93,30 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             }
         }
         return null;
+    }
+
+    public void pair(String url)
+    {
+        WalletConnect.Params.Pair pair = new WalletConnect.Params.Pair(url);
+        try
+        {
+            WalletConnectClient.INSTANCE.pair(pair, new WalletConnect.Listeners.Pairing()
+            {
+                @Override
+                public void onSuccess(@NonNull WalletConnect.Model.SettledPairing settledPairing)
+                {
+                    Timber.i("onSuccess");
+                }
+
+                @Override
+                public void onError(@NonNull Throwable throwable)
+                {
+                    Timber.e(throwable);
+                }
+            });
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+        }
     }
 }

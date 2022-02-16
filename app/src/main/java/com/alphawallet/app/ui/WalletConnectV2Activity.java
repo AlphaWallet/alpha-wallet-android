@@ -3,6 +3,7 @@ package com.alphawallet.app.ui;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -41,6 +44,8 @@ import timber.log.Timber;
 @AndroidEntryPoint
 public class WalletConnectV2Activity extends BaseActivity implements StandardFunctionInterface
 {
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
     private WalletConnectV2ViewModel viewModel;
 
     private ImageView icon;
@@ -54,7 +59,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private ListView methodList;
 
     private WalletConnectV2SessionItem session;
-    private Wallet[] wallets;
     private WalletAdapter walletAdapter;
     private boolean settled;
 
@@ -67,47 +71,71 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
         initViews();
+
+        String url = retrieveUrl();
+        if (!TextUtils.isEmpty(url))
+        {
+            progressBar.setVisibility(View.VISIBLE);
+            awWalletConnectClient.pair(url);
+            return;
+        }
+
+        this.session = retrieveSession(getIntent());
+        this.settled = true;
         initViewModel();
-        this.session = retrieveSession();
-//        displaySessionStatus(this.session);
-        this.settled = getIntent().getBooleanExtra("settled", false);
-        viewModel.fetchWallets();
     }
 
-    private WalletConnectV2SessionItem retrieveSession()
+    @Override
+    protected void onNewIntent(Intent intent)
     {
-        return getIntent().getParcelableExtra("session");
+        super.onNewIntent(intent);
+        this.session = retrieveSession(intent);
+        this.settled = false;
+        initViewModel();
+    }
+
+    private String retrieveUrl()
+    {
+        return getIntent().getStringExtra("url");
+    }
+
+    private WalletConnectV2SessionItem retrieveSession(Intent intent)
+    {
+        return intent.getParcelableExtra("session");
     }
 
     private void initViewModel()
     {
-
         viewModel = new ViewModelProvider(this)
                 .get(WalletConnectV2ViewModel.class);
 
         viewModel.wallets().observe(this, this::onWalletsFetched);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
     }
 
     private void onWalletsFetched(Wallet[] wallets)
     {
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        tryDisplaySessionStatus();
+    }
+
+    private void tryDisplaySessionStatus()
+    {
+        if (viewModel.wallets().getValue() != null && viewModel.defaultWallet().getValue() != null)
+        {
+            displaySessionStatus(session);
+            progressBar.setVisibility(View.GONE);
+            functionBar.setVisibility(View.VISIBLE);
+            infoLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet)
     {
-        displaySessionStatus(session);
-//        progressBar.setVisibility(View.GONE);
-//        functionBar.setVisibility(View.VISIBLE);
-//        infoLayout.setVisibility(View.VISIBLE);
-//        displaySessionStatus(session);
+        tryDisplaySessionStatus();
     }
 
     private void displaySessionStatus(WalletConnectV2SessionItem session)
     {
-        progressBar.setVisibility(View.GONE);
-        functionBar.setVisibility(View.VISIBLE);
-        infoLayout.setVisibility(View.VISIBLE);
-
         if (session.icon == null)
         {
             icon.setImageResource(R.drawable.ic_coin_eth_small);

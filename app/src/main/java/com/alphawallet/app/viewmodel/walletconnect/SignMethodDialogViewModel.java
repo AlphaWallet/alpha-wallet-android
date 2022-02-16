@@ -16,6 +16,8 @@ import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import androidx.lifecycle.LiveData;
@@ -54,7 +56,9 @@ public class SignMethodDialogViewModel extends BaseViewModel
                     {
                         long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
                         Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, ethereumMessage, chainId);
-                        signature.subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);
+                        signature
+                                .delay(3, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
+                                .subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);
                     }
                 }
 

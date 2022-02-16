@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -39,7 +38,6 @@ public class SignMethodDialog extends BottomSheetDialog
     private final ImageView networkIcon;
     private final ChainName networkName;
     private final Activity activity;
-    private final ProgressBar progressBar;
     private WalletConnect.Model.SettledSession settledSession;
     private String messageTextHex;
     private final String walletAddress;
@@ -58,7 +56,6 @@ public class SignMethodDialog extends BottomSheetDialog
         behavior.setState(STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
 
-        progressBar = findViewById(R.id.progress);
         logo = findViewById(R.id.logo);
         dAppName = findViewById(R.id.dapp_name);
         url = findViewById(R.id.url);
@@ -101,6 +98,7 @@ public class SignMethodDialog extends BottomSheetDialog
             {
                 if (actionId == R.string.dialog_approve)
                 {
+                    functionBar.setPrimaryButtonWaiting();
                     approve(sessionRequest);
                 } else if (actionId == R.string.dialog_reject)
                 {
@@ -119,7 +117,6 @@ public class SignMethodDialog extends BottomSheetDialog
     private void approve(WalletConnect.Model.SessionRequest sessionRequest)
     {
         AWWalletConnectClient.viewModel = viewModel;
-        progressBar.setVisibility(View.VISIBLE);
         viewModel.completed().observe((LifecycleOwner) activity, completed ->
         {
             if (completed)

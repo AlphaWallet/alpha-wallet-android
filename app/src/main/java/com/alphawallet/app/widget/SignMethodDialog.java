@@ -13,14 +13,10 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
-import com.alphawallet.token.entity.EthereumMessage;
-import com.alphawallet.token.entity.SignMessageType;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
-import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
-import timber.log.Timber;
 
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
@@ -109,7 +104,8 @@ public class SignMethodDialog extends BottomSheetDialog
                     approve(sessionRequest);
                 } else if (actionId == R.string.dialog_reject)
                 {
-                    reject(sessionRequest);
+                    viewModel.reject(sessionRequest);
+                    dismiss();
                 }
             }
         }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
@@ -118,38 +114,21 @@ public class SignMethodDialog extends BottomSheetDialog
     private void initViewModel()
     {
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignMethodDialogViewModel.class);
-        viewModel.completed().observe((LifecycleOwner) activity, this::onCompleted);
-    }
-
-    private void onCompleted(Boolean completed)
-    {
-        if (completed)
-        {
-            dismiss();
-            AWWalletConnectClient.viewModel = null;
-        }
-    }
-
-    private void reject(WalletConnect.Model.SessionRequest sessionRequest)
-    {
-        WalletConnect.Model.JsonRpcResponse jsonRpcResponse = new WalletConnect.Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), new WalletConnect.Model.JsonRpcResponse.Error(0, "User rejected."));
-        WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
-        try
-        {
-            WalletConnectClient.INSTANCE.respond(response, Timber::e);
-        } catch (WalletConnectException e)
-        {
-            Timber.e(e);
-        }
-        dismiss();
     }
 
     private void approve(WalletConnect.Model.SessionRequest sessionRequest)
     {
         AWWalletConnectClient.viewModel = viewModel;
-        EthereumMessage ethereumMessage = new EthereumMessage(messageTextHex, null, 0, SignMessageType.SIGN_PERSONAL_MESSAGE);
         progressBar.setVisibility(View.VISIBLE);
-        viewModel.sign(activity, ethereumMessage, walletAddress, sessionRequest);
+        viewModel.completed().observe((LifecycleOwner) activity, completed ->
+        {
+            if (completed)
+            {
+                dismiss();
+                AWWalletConnectClient.viewModel = null;
+            }
+        });
+        viewModel.sign(activity, walletAddress, sessionRequest, messageTextHex);
     }
 
 }

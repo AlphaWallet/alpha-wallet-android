@@ -119,4 +119,30 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             Timber.e(e);
         }
     }
+
+    public void approve(WalletConnect.Model.SessionRequest sessionRequest, String result)
+    {
+        WalletConnect.Model.JsonRpcResponse jsonRpcResponse = new WalletConnect.Model.JsonRpcResponse.JsonRpcResult(sessionRequest.getRequest().getId(), result);
+        WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
+        try
+        {
+            WalletConnectClient.INSTANCE.respond(response, Timber::e);
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+        }
+    }
+
+    public void reject(WalletConnect.Model.SessionRequest sessionRequest)
+    {
+        WalletConnect.Model.JsonRpcResponse jsonRpcResponse = new WalletConnect.Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), new WalletConnect.Model.JsonRpcResponse.Error(0, "User rejected."));
+        WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
+        try
+        {
+            WalletConnectClient.INSTANCE.respond(response, Timber::e);
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+        }
+    }
 }

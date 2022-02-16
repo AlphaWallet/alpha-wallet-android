@@ -8,13 +8,13 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
-import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +29,9 @@ import timber.log.Timber;
 @HiltViewModel
 public class SignMethodDialogViewModel extends BaseViewModel
 {
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
     private FetchWalletsInteract fetchWalletsInteract;
     private TransactionRepositoryType transactionRepositoryType;
     private KeyService keyService;
@@ -42,8 +45,9 @@ public class SignMethodDialogViewModel extends BaseViewModel
         this.keyService = keyService;
     }
 
-    public void sign(Activity activity, EthereumMessage ethereumMessage, String walletAddress, WalletConnect.Model.SessionRequest sessionRequest)
+    public void sign(Activity activity, String walletAddress, WalletConnect.Model.SessionRequest sessionRequest, String messageTextHex)
     {
+        EthereumMessage ethereumMessage = new EthereumMessage(messageTextHex, null, 0, SignMessageType.SIGN_PERSONAL_MESSAGE);
         Single<Wallet> signer = fetchWalletsInteract.getWallet(walletAddress);
         signer.subscribe(wallet ->
         {
@@ -85,16 +89,8 @@ public class SignMethodDialogViewModel extends BaseViewModel
     {
 
         String result = Numeric.toHexString(signatureFromKey.signature);
-        WalletConnect.Model.JsonRpcResponse jsonRpcResponse = new WalletConnect.Model.JsonRpcResponse.JsonRpcResult(sessionRequest.getRequest().getId(), result);
-        WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
-        try
-        {
-            WalletConnectClient.INSTANCE.respond(response, Timber::e);
-            completed.postValue(true);
-        } catch (WalletConnectException e)
-        {
-            Timber.e(e);
-        }
+        awWalletConnectClient.approve(sessionRequest, result);
+        completed.postValue(true);
     }
 
     public void completeAuthentication(Operation taskCode)
@@ -110,5 +106,11 @@ public class SignMethodDialogViewModel extends BaseViewModel
     public LiveData<Boolean> completed()
     {
         return completed;
+    }
+
+    public void reject(WalletConnect.Model.SessionRequest sessionRequest)
+    {
+
+        awWalletConnectClient.reject(sessionRequest);
     }
 }

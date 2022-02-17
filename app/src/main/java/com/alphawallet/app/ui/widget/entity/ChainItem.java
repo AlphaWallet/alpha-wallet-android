@@ -9,7 +9,7 @@ import com.alphawallet.app.ui.widget.holder.HeaderHolder;
  */
 public class ChainItem extends SortedItem<Long> {
 
-    public static long CHAIN_ITEM_WEIGHT = 2;
+    public static long CHAIN_ITEM_WEIGHT = 4;
 
     public ChainItem(Long networkId, TokenGroup group) {
         super(ChainNameHeaderHolder.VIEW_TYPE, networkId, new TokenPosition(group, networkId, CHAIN_ITEM_WEIGHT));

@@ -1,10 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.TextUtils;
-import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -23,6 +19,7 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.ChainItem;
 import com.alphawallet.app.ui.widget.entity.HeaderItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
@@ -42,6 +39,7 @@ import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
+import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 
 import java.math.BigDecimal;
@@ -173,6 +171,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
             case WarningHolder.VIEW_TYPE:
                 holder = new WarningHolder(R.layout.item_warning, parent);
+                break;
+
+            case WalletConnectSessionHolder.VIEW_TYPE:
+                holder = new WalletConnectSessionHolder(R.layout.item_wallet_connect_sessions, parent);
                 break;
 
             case AssetInstanceScriptHolder.VIEW_TYPE:
@@ -548,5 +550,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         return selected;
+    }
+
+    public void detectActiveWalletConnectSessions()
+    {
+        int activeSessionsCount = 1;
+        items.add(new WalletConnectSessionSortedItem(activeSessionsCount, 2));
     }
 }

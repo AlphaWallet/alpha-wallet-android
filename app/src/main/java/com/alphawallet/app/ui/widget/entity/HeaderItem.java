@@ -10,7 +10,7 @@ import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
 public class HeaderItem extends SortedItem<TokenGroup> {
 
     public HeaderItem(TokenGroup group) {
-        super(HeaderHolder.VIEW_TYPE, group, new TokenPosition(group, 1, 1, true));
+        super(HeaderHolder.VIEW_TYPE, group, new TokenPosition(group, 1, 3, true));
     }
 
     @Override

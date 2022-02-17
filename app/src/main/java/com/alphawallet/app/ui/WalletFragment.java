@@ -525,6 +525,7 @@ public class WalletFragment extends BaseFragment implements
         {
             setRealmListener(realmUpdateTime);
         }
+        adapter.detectActiveWalletConnectSessions();
     }
 
     /**

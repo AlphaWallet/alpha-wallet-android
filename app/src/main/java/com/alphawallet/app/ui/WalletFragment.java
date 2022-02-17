@@ -511,6 +511,11 @@ public class WalletFragment extends BaseFragment implements
 
     private void onTokens(TokenCardMeta[] tokens)
     {
+        if (currentTabPos.equals(TokenFilter.ALL))
+        {
+            adapter.detectActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
+        }
+
         if (tokens != null)
         {
             adapter.setTokens(tokens);
@@ -529,7 +534,6 @@ public class WalletFragment extends BaseFragment implements
         {
             setRealmListener(realmUpdateTime);
         }
-        adapter.detectActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
     }
 
     /**

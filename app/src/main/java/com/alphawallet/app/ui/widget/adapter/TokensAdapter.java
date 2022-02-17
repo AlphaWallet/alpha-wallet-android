@@ -552,9 +552,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return selected;
     }
 
-    public void detectActiveWalletConnectSessions()
+    public void detectActiveWalletConnectSessions(int activeSessionsCount)
     {
-        int activeSessionsCount = 1;
         items.add(new WalletConnectSessionSortedItem(activeSessionsCount, 2));
     }
 }

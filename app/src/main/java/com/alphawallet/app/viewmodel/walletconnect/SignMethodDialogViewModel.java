@@ -29,17 +29,16 @@ import timber.log.Timber;
 @HiltViewModel
 public class SignMethodDialogViewModel extends BaseViewModel
 {
-    @Inject
-    AWWalletConnectClient awWalletConnectClient;
-
+    private AWWalletConnectClient awWalletConnectClient;
     private FetchWalletsInteract fetchWalletsInteract;
     private TransactionRepositoryType transactionRepositoryType;
     private KeyService keyService;
     private MutableLiveData<Boolean> completed = new MutableLiveData<>(false);
 
     @Inject
-    public SignMethodDialogViewModel(FetchWalletsInteract fetchWalletsInteract, TransactionRepositoryType transactionRepositoryType, KeyService keyService)
+    public SignMethodDialogViewModel(AWWalletConnectClient awWalletConnectClient, FetchWalletsInteract fetchWalletsInteract, TransactionRepositoryType transactionRepositoryType, KeyService keyService)
     {
+        this.awWalletConnectClient = awWalletConnectClient;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.transactionRepositoryType = transactionRepositoryType;
         this.keyService = keyService;

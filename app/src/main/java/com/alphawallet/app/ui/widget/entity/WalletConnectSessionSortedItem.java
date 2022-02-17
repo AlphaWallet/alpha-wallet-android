@@ -12,7 +12,7 @@ public class WalletConnectSessionSortedItem extends SortedItem<Integer>
     @Override
     public boolean areContentsTheSame(SortedItem newItem)
     {
-        return false;
+        return true;
     }
 
     @Override

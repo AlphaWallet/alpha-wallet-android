@@ -120,6 +120,7 @@ public class WalletFragment extends BaseFragment implements
 
     @Inject
     WalletConnectInteract walletConnectInteract;
+    private boolean paused;
 
     @Nullable
     @Override
@@ -382,6 +383,7 @@ public class WalletFragment extends BaseFragment implements
     public void onPause()
     {
         super.onPause();
+        paused = true;
     }
 
     private void initTabLayout(View view)
@@ -508,16 +510,15 @@ public class WalletFragment extends BaseFragment implements
         {
             largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
         }
-        adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
+
+        if (paused)
+        {
+            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
+        }
     }
 
     private void onTokens(TokenCardMeta[] tokens)
     {
-        if (currentTabPos.equals(TokenFilter.ALL))
-        {
-            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
-        }
-
         if (tokens != null)
         {
             adapter.setTokens(tokens);
@@ -535,6 +536,11 @@ public class WalletFragment extends BaseFragment implements
         if (isVisible)
         {
             setRealmListener(realmUpdateTime);
+        }
+
+        if (currentTabPos.equals(TokenFilter.ALL))
+        {
+            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
         }
     }
 

@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -8,7 +10,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -22,10 +23,10 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
-import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
@@ -47,16 +48,14 @@ import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
@@ -65,12 +64,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import timber.log.Timber;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
-import javax.inject.Inject;
 
 @HiltViewModel
 public class WalletConnectViewModel extends BaseViewModel
@@ -83,6 +77,7 @@ public class WalletConnectViewModel extends BaseViewModel
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final WalletConnectInteract walletConnectInteract;
     private final RealmManager realmManager;
     private final GasService gasService;
     private final TokensService tokensService;
@@ -103,7 +98,7 @@ public class WalletConnectViewModel extends BaseViewModel
                            FindDefaultNetworkInteract findDefaultNetworkInteract,
                            CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
-                           RealmManager realmManager,
+                           WalletConnectInteract walletConnectInteract, RealmManager realmManager,
                            GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
@@ -113,6 +108,7 @@ public class WalletConnectViewModel extends BaseViewModel
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.genericWalletInteract = genericWalletInteract;
+        this.walletConnectInteract = walletConnectInteract;
         this.realmManager = realmManager;
         this.gasService = gasService;
         this.tokensService = tokensService;
@@ -509,40 +505,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public List<WalletConnectSessionItem> getSessions()
     {
-        List<WalletConnectSessionItem> result = new ArrayList<>();
-        result.addAll(getWalletConnectV1SessionItems());
-        result.addAll(getWalletConnectV2SessionItems());
-        return result;
-    }
-
-    private List<WalletConnectSessionItem> getWalletConnectV2SessionItems()
-    {
-        List<WalletConnectSessionItem> result = new ArrayList<>();
-        List<WalletConnect.Model.SettledSession> listOfSettledSessions = WalletConnectClient.INSTANCE.getListOfSettledSessions();
-        for (WalletConnect.Model.SettledSession session : listOfSettledSessions)
-        {
-            result.add(new WalletConnectV2SessionItem(session));
-        }
-        return result;
-    }
-
-    @NonNull
-    private List<WalletConnectSessionItem> getWalletConnectV1SessionItems()
-    {
-        List<WalletConnectSessionItem> sessions = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
-                    .sort("lastUsageTime", Sort.DESCENDING)
-                    .findAll();
-
-            for (RealmWCSession r : items)
-            {
-                sessions.add(new WalletConnectSessionItem(r));
-            }
-        }
-
-        return sessions;
+        return walletConnectInteract.getSessions();
     }
 
     public void removePendingRequest(Activity activity, long id)

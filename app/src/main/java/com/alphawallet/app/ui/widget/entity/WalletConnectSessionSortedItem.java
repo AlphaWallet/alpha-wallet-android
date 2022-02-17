@@ -2,11 +2,11 @@ package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 
-public class WalletConnectSessionSortedItem extends SortedItem
+public class WalletConnectSessionSortedItem extends SortedItem<Integer>
 {
-    public WalletConnectSessionSortedItem(int activeSessionsCount, int weight)
+    public WalletConnectSessionSortedItem(int weight)
     {
-        super(WalletConnectSessionHolder.VIEW_TYPE, activeSessionsCount, new TokenPosition(weight));
+        super(WalletConnectSessionHolder.VIEW_TYPE, 0, new TokenPosition(weight));
     }
 
     @Override

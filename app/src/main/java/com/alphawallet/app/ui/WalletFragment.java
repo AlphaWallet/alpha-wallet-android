@@ -77,6 +77,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -338,8 +340,7 @@ public class WalletFragment extends BaseFragment implements
             {
                 viewModel.checkBackup(fiatValues.first);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             // empty: expected if view has terminated before we can shut down the service return
         }
@@ -507,13 +508,14 @@ public class WalletFragment extends BaseFragment implements
         {
             largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
         }
+        adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
     }
 
     private void onTokens(TokenCardMeta[] tokens)
     {
         if (currentTabPos.equals(TokenFilter.ALL))
         {
-            adapter.detectActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
+            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
         }
 
         if (tokens != null)
@@ -699,7 +701,7 @@ public class WalletFragment extends BaseFragment implements
         handler.post(() ->
         {
             if (viewModel != null) viewModel.setKeyWarningDismissTime(wallet.address);
-            if (adapter != null) adapter.removeBackupWarning();
+            if (adapter != null) adapter.removeItem(WarningHolder.VIEW_TYPE);
         });
     }
 
@@ -718,7 +720,7 @@ public class WalletFragment extends BaseFragment implements
         handler.post(() ->
         {
             if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey);
-            if (adapter != null) adapter.removeBackupWarning();
+            if (adapter != null) adapter.removeItem(WarningHolder.VIEW_TYPE);
         });
     }
 
@@ -767,8 +769,7 @@ public class WalletFragment extends BaseFragment implements
             if (viewHolder instanceof WarningHolder)
             {
                 remindMeLater(viewModel.getWallet());
-            }
-            else if (viewHolder instanceof TokenHolder)
+            } else if (viewHolder instanceof TokenHolder)
             {
                 Token token = ((TokenHolder) viewHolder).token;
                 viewModel.setTokenEnabled(token, false);
@@ -796,8 +797,7 @@ public class WalletFragment extends BaseFragment implements
             {
                 Token t = ((TokenHolder) viewHolder).token;
                 if (t != null && t.isEthereum()) return 0;
-            }
-            else
+            } else
             {
                 return 0;
             }

@@ -257,19 +257,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.add(new WarningSortedItem(data, 1));
     }
 
-    public void removeBackupWarning()
-    {
-        for (int i = 0; i < items.size(); i++)
-        {
-            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
-            {
-                items.removeItemAt(i);
-                notifyItemRemoved(i);
-                break;
-            }
-        }
-    }
-
     public void setTokens(TokenCardMeta[] tokens)
     {
         populateTokens(tokens, false);
@@ -552,8 +539,26 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return selected;
     }
 
-    public void detectActiveWalletConnectSessions(int activeSessionsCount)
+    public void showActiveWalletConnectSessions(int activeSessionsCount)
     {
-        items.add(new WalletConnectSessionSortedItem(activeSessionsCount, 2));
+        if (activeSessionsCount > 0)
+        {
+            items.add(new WalletConnectSessionSortedItem(2));
+        } else {
+            removeItem(WalletConnectSessionHolder.VIEW_TYPE);
+        }
+    }
+
+    public void removeItem(int viewType)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).viewType == viewType)
+            {
+                items.removeItemAt(i);
+                notifyItemRemoved(i);
+                break;
+            }
+        }
     }
 }

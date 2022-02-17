@@ -641,7 +641,6 @@ public class NewSettingsFragment extends BaseFragment
     private void onWalletConnectSettingClicked()
     {
         Intent intent = new Intent(getActivity(), WalletConnectSessionActivity.class);
-        intent.putExtra("wallet", wallet);
         startActivity(intent);
     }
 

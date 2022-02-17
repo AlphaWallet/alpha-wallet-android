@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -38,8 +37,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import dagger.hilt.android.AndroidEntryPoint;
 
-import static com.alphawallet.app.C.Key.WALLET;
-
 
 /**
  * Created by JB on 9/09/2020.
@@ -54,7 +51,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     private View bottomDivider;
     private LinearLayout layoutNoActiveSessions;
     private CustomAdapter adapter;
-    private Wallet wallet;
     private List<WalletConnectSessionItem> wcSessions;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -68,7 +64,6 @@ public class WalletConnectSessionActivity extends BaseActivity
         setContentView(R.layout.activity_wallet_connect_sessions);
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
-        wallet = getIntent().getParcelableExtra(WALLET);
         initViewModel();
 
         recyclerView = findViewById(R.id.list);
@@ -162,7 +157,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     private void openQrScanner()
     {
         Intent intent = new Intent(this, QRScanner.class);
-        intent.putExtra("wallet", wallet);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         startActivity(intent);
     }

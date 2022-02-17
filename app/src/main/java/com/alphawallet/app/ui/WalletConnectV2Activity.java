@@ -359,7 +359,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private void showSessionsActivity()
     {
         Intent intent = new Intent(getApplication(), WalletConnectSessionActivity.class);
-        intent.putExtra("wallet", viewModel.defaultWallet().getValue());
         startActivity(intent);
     }
 

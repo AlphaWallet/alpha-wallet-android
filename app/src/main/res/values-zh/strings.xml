@@ -878,4 +878,5 @@
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
     <string name="action_reset_network" >重置</string>
     <string name="wc_methods">方法</string>
+    <string name="wc_card_subtitle">与基于浏览器的 Dapp 的活跃连接</string>
 </resources>

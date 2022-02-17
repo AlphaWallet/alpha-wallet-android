@@ -897,4 +897,5 @@
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
     <string name="action_reset_network" >Cài lại</string>
     <string name="wc_methods">Phương pháp</string>
+    <string name="wc_card_subtitle">Kết nối đang hoạt động với Dapp dựa trên trình duyệt</string>
 </resources>

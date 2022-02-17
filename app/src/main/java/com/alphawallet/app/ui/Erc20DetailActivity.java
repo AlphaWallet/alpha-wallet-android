@@ -230,7 +230,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (activityHistoryList != null) return;
         activityHistoryList = findViewById(R.id.history_list);
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService());
+                viewModel.getAssetDefinitionService(), viewModel.getAddressBookInteract());
 
         adapter.setDefaultWallet(wallet);
 

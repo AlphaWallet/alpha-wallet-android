@@ -402,6 +402,18 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion = 43;
         }
+
+        if (oldVersion == 43)
+        {
+            RealmObjectSchema userData = schema.get("RealmContact");
+            if (userData == null)
+                schema.create("RealmContact")
+                        .addField("walletAddress", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("name", String.class)
+                        .addField("ethName", String.class);
+
+            oldVersion++;
+        }
     }
 
     @Override

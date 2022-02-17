@@ -16,6 +16,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -28,6 +29,8 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.token.entity.ContractAddress;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
+import timber.log.Timber;
 
 public class TransactionHolder extends BinderViewHolder<TransactionMeta> implements View.OnClickListener
 {
@@ -47,12 +50,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final LinearLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
     private final AssetDefinitionService assetService;
+    private final AddressBookInteract addressBookInteract;
 
     private Transaction transaction;
     private String defaultAddress;
     private boolean fromTokenView;
 
-    public TransactionHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs)
+    public TransactionHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs, AddressBookInteract addressBookInteract)
     {
         super(R.layout.item_transaction, parent);
         date = findViewById(R.id.text_tx_time);
@@ -66,6 +70,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         transactionsInteract = interact;
         assetService = svs;
         itemView.setOnClickListener(this);
+        this.addressBookInteract = addressBookInteract;
     }
 
     @Override
@@ -117,6 +122,14 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         String detailStr = token.getTransactionDetail(getContext(), transaction, tokensService);
         address.setText(detailStr);
+        Timber.d(detailStr);
+        String walletAddress = detailStr.split(" ")[1];
+        // set name from address book
+        addressBookInteract.searchContactAsync(walletAddress, (contact) -> {
+            if (contact != null) {
+                address.setText(contact.getName());     // wont work as address is formatted with ... in middle
+            }
+        });
     }
 
     @Override

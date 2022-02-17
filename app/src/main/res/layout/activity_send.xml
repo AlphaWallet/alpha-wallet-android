@@ -59,6 +59,7 @@
                     custom:label="@string/recipient"
                     custom:hint="@string/recipient_address"
                     custom:show_header="true"
+                    custom:showAddressBook="true"
                     custom:ens="true"/>
 
             </LinearLayout>

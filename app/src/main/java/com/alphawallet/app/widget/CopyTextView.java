@@ -12,7 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.router.AddEditAddressRouter;
 
 import org.web3j.crypto.WalletUtils;
 
@@ -24,6 +26,7 @@ public class CopyTextView extends LinearLayout {
     private ImageView copy;
     private TextView text;
     private LinearLayout layout;
+    private ImageView addressBook;
 
     private int textResId;
     private int textColor;
@@ -33,6 +36,7 @@ public class CopyTextView extends LinearLayout {
     private boolean removePadding;
     private String rawAddress;
     private float marginRight;
+    private boolean showAddressBook = false;
 
     public CopyTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,6 +64,7 @@ public class CopyTextView extends LinearLayout {
             boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
             removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);
             marginRight = a.getDimension(R.styleable.CopyTextView_marginRight, 0.0f);
+            showAddressBook = a.getBoolean(R.styleable.CopyTextView_showAddressBook, false);
         } finally {
             a.recycle();
         }
@@ -72,6 +77,7 @@ public class CopyTextView extends LinearLayout {
         text.setText(textResId);
         text.setTextColor(textColor);
         text.setGravity(gravity);
+        addressBook = findViewById(R.id.img_address_book);
 
         LayoutParams layoutParams = (LayoutParams) text.getLayoutParams();
         layoutParams.rightMargin = (int) marginRight;
@@ -89,6 +95,18 @@ public class CopyTextView extends LinearLayout {
 
         layout.setOnClickListener(v -> copyToClipboard());
         copy.setOnClickListener(v -> copyToClipboard());
+
+        if (showAddressBook) {
+            copy.setVisibility(GONE);
+            addressBook.setVisibility(VISIBLE);
+            addressBook.setOnClickListener( v -> {
+                new AddEditAddressRouter().open(
+                        getContext(),
+                        C.ADD_ADDRESS_REQUEST_CODE,
+                        text.getText().toString()
+                );
+            });
+        }
     }
 
     public String getText() {
@@ -115,5 +133,11 @@ public class CopyTextView extends LinearLayout {
         }
 
         if(showToast) Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+    }
+
+    public void setAddressName(String name) {
+        text.setText(name);
+        addressBook.setVisibility(GONE);
+        copy.setVisibility(VISIBLE);
     }
 }

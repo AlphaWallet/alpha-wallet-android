@@ -357,6 +357,12 @@
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 
+        <activity android:name=".ui.AddressBookActivity"
+            android:label="@string/title_address_book" />
+
+        <activity android:name=".ui.AddEditAddressActivity"
+            android:label="@string/title_add_address" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

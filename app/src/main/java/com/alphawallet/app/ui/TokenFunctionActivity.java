@@ -160,7 +160,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void setEventListener(Wallet wallet)
     {
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService());
+                viewModel.getAssetDefinitionService(), viewModel.getAddressBookInteract());
 
         adapter.setDefaultWallet(wallet);
 

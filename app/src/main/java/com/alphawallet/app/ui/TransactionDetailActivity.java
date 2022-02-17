@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.AddressBookContact;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -43,8 +44,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Inject;
 
 
 import static com.alphawallet.app.C.Key.WALLET;
@@ -71,6 +70,9 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private ActionSheetDialog confirmationDialog;
     private String tokenAddress;
 
+    private CopyTextView toValue;
+    private CopyTextView fromValue;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,12 +84,17 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         viewModel.onTransaction().observe(this, this::onTransaction);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
+        viewModel.senderAddressContact().observe(this, this::onSenderContactFound);
+        viewModel.receiverAddressContact().observe(this, this::onReceiverContactFound);
 
         String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         wallet = getIntent().getParcelableExtra(WALLET);
         tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
         viewModel.fetchTransaction(wallet, txHash, chainId);
+
+        toValue = findViewById(R.id.to);
+        fromValue = findViewById(R.id.from);
     }
 
     private void onTransaction(Transaction tx)
@@ -118,12 +125,16 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         setupVisibilities();
 
         amount = findViewById(R.id.amount);
-        CopyTextView toValue = findViewById(R.id.to);
-        CopyTextView fromValue = findViewById(R.id.from);
+        toValue = findViewById(R.id.to);
+        fromValue = findViewById(R.id.from);
         CopyTextView txHashView = findViewById(R.id.txn_hash);
 
         fromValue.setText(transaction.from != null ? transaction.from : "");
         toValue.setText(transaction.to != null ? transaction.to : "");
+
+        viewModel.resolveSenderAddress(fromValue.getText());
+        viewModel.resolveReceiverAddress(toValue.getText());
+
         txHashView.setText(transaction.hash != null ? transaction.hash : "");
         ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
 
@@ -366,6 +377,19 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
                 confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
             }
         }
+        else if (requestCode == C.ADD_ADDRESS_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                viewModel.loadAddressBook();
+                viewModel.resolveSenderAddress(fromValue.getText());
+                viewModel.resolveReceiverAddress(toValue.getText());
+                // show tick dialog
+                AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+                dialog.setIcon(AWalletAlertDialog.SUCCESS);
+                dialog.setMessage(getString(R.string.msg_address_added_succes));
+                dialog.setTextStyle(AWalletAlertDialog.TEXT_STYLE.CENTERED);
+                dialog.show();
+            }
+        }
         else
         {
             super.onActivityResult(requestCode, resultCode, data);
@@ -426,5 +450,15 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         });
         dialog.show();
         confirmationDialog.dismiss();
+    }
+
+    private void onSenderContactFound(AddressBookContact addressBookContact) {
+        CopyTextView fromValue = findViewById(R.id.from);
+        fromValue.setAddressName(addressBookContact.getName());
+    }
+
+    private void onReceiverContactFound(AddressBookContact addressBookContact) {
+        CopyTextView toValue = findViewById(R.id.to);
+        toValue.setAddressName(addressBookContact.getName());
     }
 }

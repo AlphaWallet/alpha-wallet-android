@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.OnRampRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
@@ -41,19 +42,22 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OnRampRepositoryType onRampRepository;
+    private final AddressBookInteract addressBookInteract;
 
     @Inject
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
-                                OnRampRepositoryType onRampRepository)
+                                OnRampRepositoryType onRampRepository,
+                                AddressBookInteract addressBookInteract)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.onRampRepository = onRampRepository;
+        this.addressBookInteract = addressBookInteract;
     }
 
     public LiveData<XMLDsigDescriptor> sig()
@@ -89,6 +93,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return this.assetDefinitionService;
+    }
+
+    public AddressBookInteract getAddressBookInteract() {
+        return addressBookInteract;
     }
 
     public void showSendToken(Activity act, Wallet wallet, Token token)

@@ -19,6 +19,9 @@ public abstract class C {
     public static final int SEND_INTENT_REQUEST_CODE = 4;
     public static final int TERMINATE_ACTIVITY = 5;
     public static final int ADDED_TOKEN_RETURN = 9;
+    public static final int ADD_ADDRESS_REQUEST_CODE = 6;
+    public static final int ADDRESS_BOOK_CONTACT_REQUEST_CODE = 7;
+    public static final int UPDATE_ADDRESS_REQUEST_CODE = 8;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -138,6 +141,8 @@ public abstract class C {
     public static final String DAPP_URL_LOAD = "DAPP_URL";
     public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
     public static final String EXTRA_PRICE_ALERT = "EXTRA_PRICE_ALERT";
+    public static final String EXTRA_CONTACT_WALLET_ADDRESS = "WALLET_ADDRESS";
+    public static final String EXTRA_CONTACT = "CONTACT";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";

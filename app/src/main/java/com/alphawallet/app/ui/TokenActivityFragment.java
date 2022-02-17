@@ -66,7 +66,7 @@ public class TokenActivityFragment extends BaseFragment {
     private void setUpRecentTransactionsView()
     {
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService());
+                viewModel.getAssetDefinitionService(), viewModel.getAddressBookInteract());
         adapter.setDefaultWallet(wallet);
         history.setupAdapter(adapter);
         history.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,

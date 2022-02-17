@@ -180,7 +180,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private void initViews(View view)
     {
         adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.provideTransactionsInteract(),
-                viewModel.getAssetDefinitionService(), this);
+                viewModel.getAssetDefinitionService(), this, viewModel.getAddressBookInteract());
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         listView = view.findViewById(R.id.list);

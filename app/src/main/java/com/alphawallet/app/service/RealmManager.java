@@ -64,4 +64,8 @@ public class RealmManager {
     public Realm getWalletTypeRealmInstance() {
         return getRealmInstanceInternal("WalletType-db.realm");
     }
+
+    public Realm getAddressBookRealmInstance() {
+        return getRealmInstanceInternal("AddressBook-db.realm");
+    }
 }

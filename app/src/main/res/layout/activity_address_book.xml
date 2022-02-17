@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
+    android:scrollbars="vertical">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/layout_simple_toolbar_no_divider" />
+
+    <LinearLayout
+        android:id="@+id/layout_search_tokens"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginBottom="@dimen/dp16"
+        android:gravity="center_vertical"
+        android:background="@drawable/background_round_search"
+        android:layout_marginTop="?actionBarSize">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="@dimen/dp24"
+            android:layout_height="@dimen/dp24"
+            android:layout_marginStart="@dimen/dp12"
+            android:src="@drawable/ic_search_small"/>
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dp8"
+            android:inputType="textFilter"
+            android:hint="@string/search_for_tokens"
+            android:background="@null"
+            android:layout_marginEnd="@dimen/dp16"
+            android:maxLines="1"
+            android:maxLength="20"
+            android:textColor="@color/dove"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contact_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layout_buttons"
+        android:layout_below="@id/layout_search_tokens"
+        tools:listitem="@layout/item_manage_token" />
+
+    <LinearLayout
+        android:id="@+id/layout_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:background="@color/white"
+        android:gravity="center"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_apply"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/selector_round_button"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:text="@string/apply_filters"
+            android:textAllCaps="true"
+            android:textColor="@color/button_text_color"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/layout_empty_address_book"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/toolbar"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:visibility="gone">
+        
+        <ImageView
+            android:id="@+id/image_empty"
+            android:layout_width="206dp"
+            android:layout_height="152dp"
+            android:src="@drawable/illustration_empty_2"/>
+
+        <TextView
+            android:id="@+id/text_contacts_appear_here"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/mine"
+            android:text="@string/msg_contacts_will_appear_here"
+            android:textSize="17sp"
+            android:gravity="center"
+            android:layout_marginTop="22dp"/>
+
+        <Button
+            android:id="@+id/btn_add_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:background="@drawable/selector_round_button"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:textColor="@color/button_text_color"
+            android:textSize="20sp"
+            android:text="@string/action_add_contact"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="55dp"/>
+        
+    </LinearLayout>
+
+</RelativeLayout>

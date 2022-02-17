@@ -55,6 +55,8 @@
     <string name="label_old_gas_price">Old Gas Price</string>
     <string name="label_network_fee">Network Fee (Maximum)</string>
     <string name="button_ok">OK</string>
+    <string name="label_address">Address</string>
+    <string name="label_name">Name</string>
 
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
@@ -886,4 +888,16 @@
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
+
+    <string name="title_address_book">Address Book</string>
+    <string name="title_add_address">Add Address</string>
+    <string name="title_edit_address">Edit Address</string>
+    <string name="error_contact_address_exists">That address already exists as: %s</string>
+    <string name="error_contact_name_taken">The name is already taken. Try another one.</string>
+    <string name="msg_address_added_succes">Address added successfully</string>
+    <string name="action_save_address">Save Address</string>
+    <string name="action_add_contact">Add Contact</string>
+    <string name="msg_contacts_will_appear_here">Contacts will appear here</string>
+    <string name="title_select_recipient">Select Recipient</string>
+    <string name="msg_address_update_succes">Address updated successfully</string>
 </resources>

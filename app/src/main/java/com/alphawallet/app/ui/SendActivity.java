@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
@@ -30,6 +29,7 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.AddressBookContact;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -286,6 +286,15 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     ));
                     break;
             }
+        } else if (requestCode == C.ADDRESS_BOOK_CONTACT_REQUEST_CODE) {
+            if (data != null) {
+                // set selected contact returned by AddressBook
+                AddressBookContact addressBookContact = data.getParcelableExtra(C.EXTRA_CONTACT);
+                if (addressBookContact != null) {
+                    addressInput.onContactSelected(addressBookContact);
+                }
+            }
+//            addressInput.onContactSelected();
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }

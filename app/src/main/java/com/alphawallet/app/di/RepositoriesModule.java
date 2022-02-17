@@ -2,6 +2,8 @@ package com.alphawallet.app.di;
 
 import android.content.Context;
 
+import com.alphawallet.app.repository.ContactRepository;
+import com.alphawallet.app.repository.ContactRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.OnRampRepository;
@@ -218,5 +220,11 @@ public class RepositoriesModule {
 	@Provides
 	AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx) {
 		return new AnalyticsService(ctx);
+	}
+
+	@Singleton
+	@Provides
+	ContactRepositoryType provideContactRepository(TokensService tokensService, RealmManager realmManager) {
+		return new ContactRepository(tokensService, realmManager);
 	}
 }

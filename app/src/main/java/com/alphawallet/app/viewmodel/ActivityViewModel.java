@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -42,6 +43,7 @@ public class ActivityViewModel extends BaseViewModel
     private final TokensService tokensService;
     private final TransactionsService transactionsService;
     private final RealmManager realmManager;
+    private final AddressBookInteract addressBookInteract;
 
     @Nullable
     private Disposable queryUnknownTokensDisposable;
@@ -58,13 +60,15 @@ public class ActivityViewModel extends BaseViewModel
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             TransactionsService transactionsService,
-            RealmManager realmManager) {
+            RealmManager realmManager,
+            AddressBookInteract addressBookInteract) {
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.transactionsService = transactionsService;
         this.realmManager = realmManager;
+        this.addressBookInteract = addressBookInteract;
     }
 
     public void prepare()
@@ -136,5 +140,10 @@ public class ActivityViewModel extends BaseViewModel
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public AddressBookInteract getAddressBookInteract()
+    {
+        return addressBookInteract;
     }
 }

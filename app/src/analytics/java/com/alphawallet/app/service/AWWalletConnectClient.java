@@ -8,6 +8,7 @@ import android.os.Build;
 import com.alphawallet.app.App;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
+import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.widget.SignMethodDialog;
@@ -17,6 +18,8 @@ import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import timber.log.Timber;
@@ -25,14 +28,16 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 {
+    private final WalletConnectInteract walletConnectInteract;
     public static WalletConnect.Model.SessionProposal sessionProposal;
 
     public static SignMethodDialogViewModel viewModel;
     private Context context;
 
-    public AWWalletConnectClient(Context context)
+    public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract)
     {
         this.context = context;
+        this.walletConnectInteract = walletConnectInteract;
     }
 
     @Override
@@ -167,8 +172,13 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         });
     }
 
-    private void showNotification()
+    public void showNotification()
     {
+        if (walletConnectInteract.getSessionsCount() == 0)
+        {
+            return;
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             Intent intent = new Intent(context, WalletConnectV2Service.class);

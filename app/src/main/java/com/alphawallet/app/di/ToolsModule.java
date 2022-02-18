@@ -2,6 +2,7 @@ package com.alphawallet.app.di;
 
 import android.content.Context;
 
+import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.google.gson.Gson;
 import com.alphawallet.app.service.RealmManager;
@@ -47,7 +48,7 @@ public class ToolsModule {
 
     @Singleton
 	@Provides
-	AWWalletConnectClient provideAWWalletConnectClient(@ApplicationContext Context context) {
-		return new AWWalletConnectClient(context);
+	AWWalletConnectClient provideAWWalletConnectClient(@ApplicationContext Context context, WalletConnectInteract walletConnectInteract) {
+		return new AWWalletConnectClient(context, walletConnectInteract);
 	}
 }

@@ -156,6 +156,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             public void onSuccess(@NonNull WalletConnect.Model.SettledSession settledSession)
             {
                 callback.onSessionProposalApproved();
+                showNotification();
             }
 
             @Override
@@ -164,6 +165,15 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 
             }
         });
+    }
+
+    private void showNotification()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Intent intent = new Intent(context, WalletConnectV2Service.class);
+            context.startForegroundService(intent);
+        }
     }
 
     public void reject(WalletConnect.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)

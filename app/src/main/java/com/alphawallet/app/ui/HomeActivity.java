@@ -1,19 +1,5 @@
 package com.alphawallet.app.ui;
 
-import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.C.CHANGED_LOCALE;
-import static com.alphawallet.app.C.CHANGE_CURRENCY;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.C.RESET_WALLET;
-import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
-import static com.alphawallet.app.C.SHOW_BACKUP;
-import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
-import static com.alphawallet.app.entity.WalletPage.SETTINGS;
-import static com.alphawallet.app.entity.WalletPage.WALLET;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,6 +19,45 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.FragmentMessenger;
+import com.alphawallet.app.entity.HomeCommsInterface;
+import com.alphawallet.app.entity.HomeReceiver;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.ImportTokenRouter;
+import com.alphawallet.app.service.NotificationService;
+import com.alphawallet.app.service.PriceAlertsService;
+import com.alphawallet.app.ui.widget.entity.PagerCallback;
+import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.UpdateUtils;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.BaseNavigationActivity;
+import com.alphawallet.app.viewmodel.HomeViewModel;
+import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.ParseMagicLink;
+import com.github.florent37.tutoshowcase.TutoShowcase;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -49,53 +74,22 @@ import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-
-import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.FragmentMessenger;
-import com.alphawallet.app.entity.HomeCommsInterface;
-import com.alphawallet.app.entity.HomeReceiver;
-import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.router.ImportTokenRouter;
-import com.alphawallet.app.service.NotificationService;
-import com.alphawallet.app.service.PriceAlertsService;
-import com.alphawallet.app.service.WalletConnectV2Service;
-import com.alphawallet.app.ui.widget.entity.PagerCallback;
-import com.alphawallet.app.util.LocaleUtils;
-import com.alphawallet.app.util.UpdateUtils;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseNavigationActivity;
-import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.walletconnect.WCSession;
-import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.github.florent37.tutoshowcase.TutoShowcase;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
-
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.List;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
+
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.C.CHANGED_LOCALE;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
+import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
+import static com.alphawallet.app.C.SHOW_BACKUP;
+import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
+import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
+import static com.alphawallet.app.entity.WalletPage.SETTINGS;
+import static com.alphawallet.app.entity.WalletPage.WALLET;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
@@ -309,18 +303,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
-
-//        startWalletConnectV2Service();
-    }
-
-    private void startWalletConnectV2Service()
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            Context context = getApplicationContext();
-            Intent intent = new Intent(context, WalletConnectV2Service.class);
-            context.startForegroundService(intent);
-        }
     }
 
     private void setupFragmentListeners()

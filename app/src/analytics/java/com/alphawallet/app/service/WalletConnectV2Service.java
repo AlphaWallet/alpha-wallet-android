@@ -3,6 +3,7 @@ package com.alphawallet.app.service;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,9 +11,11 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.TransactionRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.ui.WalletConnectSessionActivity;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import javax.inject.Inject;
@@ -43,13 +46,20 @@ public class WalletConnectV2Service extends Service
                 "WalletConnect V2",
                 NotificationManager.IMPORTANCE_DEFAULT);
 
-        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(channel);
 
+        Intent intent = new Intent(getApplicationContext(), WalletConnectSessionActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("AlphaWallet Wallet Connect")
-                .setContentText("Content is here").build();
+                .setSmallIcon(R.drawable.ic_logo)
+                .setContentTitle("WalletConnect is active")
+                .setContentText("Click to view active sessions")
+                .setContentIntent(pendingIntent)
+                .build();
 
         startForeground(1, notification);
+        notificationManager.notify(1, notification);
     }
 
     @Override

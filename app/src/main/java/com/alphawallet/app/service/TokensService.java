@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
 import android.text.TextUtils;
@@ -660,6 +661,8 @@ public class TokensService
             info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
         else if (networkFilter.contains(RINKEBY_ID))
             info = ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
+        //else if (networkFilter.contains(MATIC_ID)) //TODO: Add polygon route when API is ready
+        //    info = ethereumNetworkRepository.getNetworkByChain(MATIC_ID);
         else return;
 
         if (info.chainId == transferCheckChain) return; //currently checking this chainId
@@ -715,7 +718,6 @@ public class TokensService
     {
         if (erc20CheckDisposable == null || erc20CheckDisposable.isDisposed())
         {
-            //get mainnet ERC20 token tickers
             erc20CheckDisposable = tickerService.syncERC20Tickers(chainId, getAllERC20(chainId))
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())

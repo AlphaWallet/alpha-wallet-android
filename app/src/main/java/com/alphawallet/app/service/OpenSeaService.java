@@ -238,6 +238,7 @@ public class OpenSeaService
         {
             put(EthereumNetworkBase.MAINNET_ID, "https://api.opensea.io");
             put(EthereumNetworkBase.RINKEBY_ID, "https://rinkeby-api.opensea.io");
+            //put(EthereumNetworkBase.MATIC_ID, "http://"); //TODO: Complete once Polygon API is ready
         }
     };
 

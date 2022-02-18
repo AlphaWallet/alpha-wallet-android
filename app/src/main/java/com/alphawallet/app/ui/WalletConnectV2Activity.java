@@ -30,7 +30,9 @@ import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -152,7 +154,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         chainList.setAdapter(new ChainAdapter(this, session.chains));
         if (settled)
         {
-            walletAdapter = new WalletAdapter(this, filterWallets(session.wallets));
+            walletAdapter = new WalletAdapter(this, findWallets(session.wallets));
         } else
         {
             walletAdapter = new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue());
@@ -191,17 +193,30 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     }
 
-    private List<Wallet> filterWallets(List<String> accounts)
+    private List<Wallet> findWallets(List<String> addresses)
     {
         List<Wallet> result = new ArrayList<>();
-        for (Wallet wallet : Objects.requireNonNull(viewModel.wallets().getValue()))
+        Map<String, Wallet> map = toMap(Objects.requireNonNull(viewModel.wallets().getValue()));
+        for (String address : addresses)
         {
-            if (accounts.contains(wallet.address))
+            Wallet wallet = map.get(address);
+            if (wallet == null)
             {
-                result.add(wallet);
+                wallet = new Wallet(address);
             }
+            result.add(wallet);
         }
         return result;
+    }
+
+    private Map<String, Wallet> toMap(Wallet[] wallets)
+    {
+        HashMap<String, Wallet> map = new HashMap<>();
+        for (Wallet wallet : wallets)
+        {
+            map.put(wallet.address, wallet);
+        }
+        return map;
     }
 
     private void resizeList()

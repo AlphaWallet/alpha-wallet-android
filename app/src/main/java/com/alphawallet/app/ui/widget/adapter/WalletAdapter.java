@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.widget.UserAvatar;
 
 import java.util.ArrayList;
@@ -62,6 +64,10 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
             holder.walletAddressSeparator.setVisibility(View.GONE);
         }
         holder.walletAddress.setText(wallet.address);
+        if (wallet.type == WalletType.NOT_DEFINED)
+        {
+            holder.walletAddress.setPaintFlags(holder.walletAddress.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
         holder.userAvatar.bind(wallet);
         holder.balance.setText(String.format("%s %s", wallet.balance, wallet.balanceSymbol));
 

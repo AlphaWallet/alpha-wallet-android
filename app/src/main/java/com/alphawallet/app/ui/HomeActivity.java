@@ -310,7 +310,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
 
-        startWalletConnectV2Service();
+//        startWalletConnectV2Service();
     }
 
     private void startWalletConnectV2Service()

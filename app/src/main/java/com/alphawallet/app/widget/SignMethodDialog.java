@@ -1,13 +1,17 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
@@ -24,6 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
@@ -39,6 +45,7 @@ public class SignMethodDialog extends BottomSheetDialog
     private final ChainName networkName;
     private final Activity activity;
     private WalletConnect.Model.SettledSession settledSession;
+    private WalletConnect.Model.SessionRequest sessionRequest;
     private String messageTextHex;
     private final String walletAddress;
     private SignMethodDialogViewModel viewModel;
@@ -48,6 +55,7 @@ public class SignMethodDialog extends BottomSheetDialog
         super(activity, R.style.FullscreenBottomSheetDialogStyle);
         this.activity = activity;
         this.settledSession = settledSession;
+        this.sessionRequest = sessionRequest;
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_sign_method, null);
         setContentView(view);
         initViewModel();
@@ -98,8 +106,7 @@ public class SignMethodDialog extends BottomSheetDialog
             {
                 if (actionId == R.string.dialog_approve)
                 {
-                    functionBar.setPrimaryButtonWaiting();
-                    approve(sessionRequest);
+                    approve();
                 } else if (actionId == R.string.dialog_reject)
                 {
                     viewModel.reject(sessionRequest);
@@ -114,7 +121,7 @@ public class SignMethodDialog extends BottomSheetDialog
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignMethodDialogViewModel.class);
     }
 
-    private void approve(WalletConnect.Model.SessionRequest sessionRequest)
+    private void approve()
     {
         AWWalletConnectClient.viewModel = viewModel;
         viewModel.completed().observe((LifecycleOwner) activity, completed ->
@@ -125,7 +132,23 @@ public class SignMethodDialog extends BottomSheetDialog
                 AWWalletConnectClient.viewModel = null;
             }
         });
-        viewModel.sign(activity, walletAddress, sessionRequest, messageTextHex);
+
+        viewModel.findWallet(walletAddress)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onWalletFound);
+    }
+
+    private void onWalletFound(Wallet wallet)
+    {
+        if (wallet.watchOnly())
+        {
+            Toast.makeText(getContext(), "You don't have permission with this wallet.", Toast.LENGTH_SHORT).show();
+        } else
+        {
+            functionBar.setPrimaryButtonWaiting();
+            viewModel.sign(activity, walletAddress, sessionRequest, messageTextHex);
+        }
     }
 
 }

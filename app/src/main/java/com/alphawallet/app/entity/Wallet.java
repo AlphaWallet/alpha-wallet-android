@@ -119,6 +119,11 @@ public class Wallet implements Parcelable {
 
     public boolean canSign()
     {
-		return BuildConfig.DEBUG || type != WalletType.WATCH;
+		return BuildConfig.DEBUG || !watchOnly();
     }
+
+	public boolean watchOnly()
+	{
+		return type == WalletType.WATCH;
+	}
 }

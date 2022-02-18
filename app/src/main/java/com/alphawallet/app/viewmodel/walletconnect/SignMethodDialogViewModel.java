@@ -112,4 +112,9 @@ public class SignMethodDialogViewModel extends BaseViewModel
 
         awWalletConnectClient.reject(sessionRequest);
     }
+
+    public Single<Wallet> findWallet(String walletAddress)
+    {
+        return fetchWalletsInteract.getWallet(walletAddress);
+    }
 }

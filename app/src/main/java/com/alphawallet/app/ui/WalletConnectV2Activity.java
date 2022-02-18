@@ -24,8 +24,6 @@ import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.bumptech.glide.Glide;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
-import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,14 +35,12 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import dagger.hilt.android.AndroidEntryPoint;
-import timber.log.Timber;
 
 @AndroidEntryPoint
-public class WalletConnectV2Activity extends BaseActivity implements StandardFunctionInterface
+public class WalletConnectV2Activity extends BaseActivity implements StandardFunctionInterface, AWWalletConnectClient.WalletConnectV2Callback
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -264,7 +260,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             AlertDialog dialog = builder.setTitle(R.string.dialog_title_disconnect_session)
                     .setPositiveButton(R.string.dialog_ok, (d, w) ->
                     {
-                        killSession(session);
+                        killSession(session.sessionId);
                     })
                     .setNegativeButton(R.string.action_cancel, (d, w) ->
                     {
@@ -275,100 +271,20 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         });
     }
 
-    private void killSession(WalletConnectV2SessionItem session)
+    private void killSession(String sessionId)
     {
-        try
-        {
-            WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(session.sessionId, "User disconnect the session."), new WalletConnect.Listeners.SessionDelete()
-            {
-                @Override
-                public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)
-                {
-                    finish();
-                }
-
-                @Override
-                public void onError(@NonNull Throwable throwable)
-                {
-                    Timber.e(throwable);
-                }
-            });
-        } catch (WalletConnectException e)
-        {
-            Timber.e(e);
-        }
-    }
-
-    public void onSessionProposal(@NonNull WalletConnect.Model.SessionProposal sessionProposal)
-    {
-        runOnUiThread(() ->
-        {
-
-            progressBar.setVisibility(View.GONE);
-            functionBar.setVisibility(View.VISIBLE);
-            infoLayout.setVisibility(View.VISIBLE);
-
-            displaySessionStatus(sessionProposal);
-
-        });
-    }
-
-    private void displaySessionStatus(WalletConnect.Model.SessionProposal sessionProposal)
-    {
-
-        progressBar.setVisibility(View.GONE);
-        functionBar.setVisibility(View.VISIBLE);
-        infoLayout.setVisibility(View.VISIBLE);
-
-        Glide.with(getApplication())
-                .load(sessionProposal.getIcon())
-                .circleCrop()
-                .into(icon);
-        peerName.setText(sessionProposal.getName());
-        peerUrl.setText(sessionProposal.getUrl());
-
-        chainList.setAdapter(new ChainAdapter(this, sessionProposal.getChains()));
-//        walletList.setAdapter(new WalletAdapter(this, getWallets()));
-        methodList.setAdapter(new MethodAdapter(this, sessionProposal.getMethods()));
-        resizeList();
+        awWalletConnectClient.disconnect(sessionId, this);
     }
 
     private void reject(WalletConnect.Model.SessionProposal sessionProposal)
     {
-        WalletConnectClient.INSTANCE.reject(new WalletConnect.Params.Reject(getString(R.string.message_reject_request), sessionProposal.getTopic()), new WalletConnect.Listeners.SessionReject()
-        {
-            @Override
-            public void onSuccess(@NonNull WalletConnect.Model.RejectedSession rejectedSession)
-            {
-                finish();
-            }
-
-            @Override
-            public void onError(@NonNull Throwable throwable)
-            {
-            }
-        });
+        awWalletConnectClient.reject(sessionProposal, this);
     }
 
     private void approve(WalletConnect.Model.SessionProposal sessionProposal)
     {
         List<String> accounts = getAccounts(sessionProposal.getChains());
-        WalletConnect.Params.Approve approve = new WalletConnect.Params.Approve(sessionProposal, accounts);
-        WalletConnectClient.INSTANCE.approve(approve, new WalletConnect.Listeners.SessionApprove()
-        {
-            @Override
-            public void onSuccess(@NonNull WalletConnect.Model.SettledSession settledSession)
-            {
-                showSessionsActivity();
-                finish();
-            }
-
-            @Override
-            public void onError(@NonNull Throwable throwable)
-            {
-
-            }
-        });
+        awWalletConnectClient.approve(sessionProposal, accounts, this);
     }
 
     private void showSessionsActivity()
@@ -391,4 +307,22 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         return result;
     }
 
+    @Override
+    public void onSessionProposalApproved()
+    {
+        showSessionsActivity();
+        finish();
+    }
+
+    @Override
+    public void onSessionProposalRejected()
+    {
+        finish();
+    }
+
+    @Override
+    public void onSessionDisconnected()
+    {
+        finish();
+    }
 }

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 
 import com.alphawallet.app.App;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
@@ -145,4 +146,72 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             Timber.e(e);
         }
     }
+
+    public void approve(WalletConnect.Model.SessionProposal sessionProposal, List<String> accounts, WalletConnectV2Callback callback)
+    {
+        WalletConnect.Params.Approve approve = new WalletConnect.Params.Approve(sessionProposal, accounts);
+        WalletConnectClient.INSTANCE.approve(approve, new WalletConnect.Listeners.SessionApprove()
+        {
+            @Override
+            public void onSuccess(@NonNull WalletConnect.Model.SettledSession settledSession)
+            {
+                callback.onSessionProposalApproved();
+            }
+
+            @Override
+            public void onError(@NonNull Throwable throwable)
+            {
+
+            }
+        });
+    }
+
+    public void reject(WalletConnect.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
+    {
+
+        WalletConnectClient.INSTANCE.reject(new WalletConnect.Params.Reject(context.getString(R.string.message_reject_request), sessionProposal.getTopic()), new WalletConnect.Listeners.SessionReject()
+        {
+            @Override
+            public void onSuccess(@NonNull WalletConnect.Model.RejectedSession rejectedSession)
+            {
+                callback.onSessionProposalRejected();
+            }
+
+            @Override
+            public void onError(@NonNull Throwable throwable)
+            {
+            }
+        });
+    }
+
+    public void disconnect(String sessionId, WalletConnectV2Callback callback)
+    {
+        try
+        {
+            WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(sessionId, "User disconnect the session."), new WalletConnect.Listeners.SessionDelete()
+            {
+                @Override
+                public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)
+                {
+                    callback.onSessionDisconnected();
+                }
+
+                @Override
+                public void onError(@NonNull Throwable throwable)
+                {
+                    Timber.e(throwable);
+                }
+            });
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+        }
+    }
+
+    public interface WalletConnectV2Callback {
+        void onSessionProposalApproved();
+        void onSessionProposalRejected();
+        void onSessionDisconnected();
+    }
 }
+

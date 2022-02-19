@@ -7,16 +7,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.interact.FetchWalletsInteract;
-import com.alphawallet.app.repository.TransactionRepository;
-import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectSessionActivity;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
 import javax.inject.Inject;
 
@@ -27,8 +23,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class WalletConnectV2Service extends Service
 {
+//    @Inject
+//    AWWalletConnectClient awWalletConnectClient;
+
     @Inject
-    AWWalletConnectClient awWalletConnectClient;
+    WalletConnectInteract walletConnectInteract;
 
     @Override
     public IBinder onBind(Intent intent)
@@ -49,7 +48,7 @@ public class WalletConnectV2Service extends Service
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(channel);
 
-        Intent intent = new Intent(getApplicationContext(), WalletConnectSessionActivity.class);
+        Intent intent = WalletConnectSessionActivity.getIntent(walletConnectInteract.getSessions(), getApplicationContext());
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logo)
@@ -65,7 +64,7 @@ public class WalletConnectV2Service extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        WalletConnectClient.INSTANCE.setWalletDelegate(awWalletConnectClient);
+//        WalletConnectClient.INSTANCE.setWalletDelegate(awWalletConnectClient);
         return super.onStartCommand(intent, flags, startId);
     }
 

@@ -37,6 +37,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import dagger.hilt.android.AndroidEntryPoint;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 
 /**
  * Created by JB on 9/09/2020.
@@ -208,7 +210,8 @@ public class WalletConnectSessionActivity extends BaseActivity
             holder.peerUrl.setText(session.url);
             holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {
-                viewSession(session);
+                Context context = getApplicationContext();
+                context.startActivity(getIntent(session, context));
             });
 
             setupClient(session.sessionId, holder);
@@ -227,18 +230,29 @@ public class WalletConnectSessionActivity extends BaseActivity
         }
     }
 
-    private void viewSession(WalletConnectSessionItem session)
+    public static Intent getIntent(List<WalletConnectSessionItem> sessions, Context context)
     {
+        if (sessions.size() == 1)
+        {
+            return WalletConnectSessionActivity.getIntent(sessions.get(0), context);
+        }
+
+        return new Intent(context, WalletConnectSessionActivity.class);
+    }
+
+    private static Intent getIntent(WalletConnectSessionItem session, Context context)
+    {
+        Intent intent;
         if (session instanceof WalletConnectV2SessionItem)
         {
-            Intent intent = new Intent(getApplication(), WalletConnectV2Activity.class);
+            intent = new Intent(context, WalletConnectV2Activity.class);
             intent.putExtra("session", (WalletConnectV2SessionItem) session);
-            startActivity(intent);
         } else {
-            Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+            intent = new Intent(context, WalletConnectActivity.class);
             intent.putExtra("session", session.sessionId);
-            startActivity(intent);
         }
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 
     private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)

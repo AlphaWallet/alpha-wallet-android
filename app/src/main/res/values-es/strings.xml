@@ -848,6 +848,4 @@
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">La frase de semillas solo puede contener palabras</string>
-
-    <string name="title_scan_qr">Scan QR Code</string>
 </resources>

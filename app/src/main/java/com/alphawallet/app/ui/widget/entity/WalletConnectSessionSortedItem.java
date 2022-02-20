@@ -1,18 +1,21 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 
-public class WalletConnectSessionSortedItem extends SortedItem<Integer>
+import java.util.List;
+
+public class WalletConnectSessionSortedItem extends SortedItem<List<WalletConnectSessionItem>>
 {
-    public WalletConnectSessionSortedItem(int weight)
+    public WalletConnectSessionSortedItem(List<WalletConnectSessionItem> sessions, int weight)
     {
-        super(WalletConnectSessionHolder.VIEW_TYPE, 0, new TokenPosition(weight));
+        super(WalletConnectSessionHolder.VIEW_TYPE, sessions, new TokenPosition(weight));
     }
 
     @Override
     public boolean areContentsTheSame(SortedItem newItem)
     {
-        return true;
+        return false; // always override the existed one
     }
 
     @Override

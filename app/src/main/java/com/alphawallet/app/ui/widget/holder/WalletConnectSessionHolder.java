@@ -1,16 +1,20 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.ui.WalletConnectSessionActivity;
 
-import androidx.annotation.NonNull;
+import java.util.List;
 
-public class WalletConnectSessionHolder extends BinderViewHolder<Integer>
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+public class WalletConnectSessionHolder extends BinderViewHolder<List<WalletConnectSessionItem>>
 {
     public static final int VIEW_TYPE = 2024;
     private final View container;
@@ -21,15 +25,14 @@ public class WalletConnectSessionHolder extends BinderViewHolder<Integer>
         container = findViewById(R.id.layout_item_wallet_connect);
     }
 
-    @Override
-    public void bind(Integer data, @NonNull Bundle addition)
+    public void bind(@Nullable List<WalletConnectSessionItem> sessionItemList, @NonNull Bundle addition)
     {
-        container.setOnClickListener(this::onClick);
+        container.setOnClickListener(view -> onClick(sessionItemList));
     }
 
-    private void onClick(View view)
+    private void onClick(List<WalletConnectSessionItem> sessions)
     {
-        Intent intent = new Intent(getContext(), WalletConnectSessionActivity.class);
-        getContext().startActivity(intent);
+        Context context = getContext();
+        context.startActivity(WalletConnectSessionActivity.getIntent(sessions, context));
     }
 }

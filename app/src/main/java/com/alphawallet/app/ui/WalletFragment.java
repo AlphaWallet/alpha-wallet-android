@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -50,6 +51,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -513,7 +515,7 @@ public class WalletFragment extends BaseFragment implements
 
         if (paused)
         {
-            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
+            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessions());
         }
     }
 
@@ -540,7 +542,7 @@ public class WalletFragment extends BaseFragment implements
 
         if (currentTabPos.equals(TokenFilter.ALL))
         {
-            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessionsCount());
+            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessions());
         }
     }
 

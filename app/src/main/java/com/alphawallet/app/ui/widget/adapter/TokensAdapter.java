@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -539,11 +540,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return selected;
     }
 
-    public void showActiveWalletConnectSessions(int activeSessionsCount)
+    public void showActiveWalletConnectSessions(List<WalletConnectSessionItem> sessions)
     {
-        if (activeSessionsCount > 0)
+        if (sessions.size() > 0)
         {
-            items.add(new WalletConnectSessionSortedItem(2));
+            items.add(new WalletConnectSessionSortedItem(sessions, 2));
         } else {
             removeItem(WalletConnectSessionHolder.VIEW_TYPE);
         }

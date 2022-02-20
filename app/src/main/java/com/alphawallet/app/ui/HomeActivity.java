@@ -310,7 +310,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
 
-        awWalletConnectClient.showNotification();
+        awWalletConnectClient.updateNotification();
     }
 
     private void setupFragmentListeners()

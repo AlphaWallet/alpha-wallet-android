@@ -18,8 +18,6 @@ import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import timber.log.Timber;
@@ -161,7 +159,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             public void onSuccess(@NonNull WalletConnect.Model.SettledSession settledSession)
             {
                 callback.onSessionProposalApproved();
-                showNotification();
+                updateNotification();
             }
 
             @Override
@@ -172,17 +170,20 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         });
     }
 
-    public void showNotification()
+    public void updateNotification()
     {
-        if (walletConnectInteract.getSessionsCount() == 0)
+        if (walletConnectInteract.getSessionsCount() > 0)
         {
-            return;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            Intent service = new Intent(context, WalletConnectV2Service.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                context.startForegroundService(service);
+            } else {
+                context.startService(service);
+            }
+        } else
         {
-            Intent intent = new Intent(context, WalletConnectV2Service.class);
-            context.startForegroundService(intent);
+            context.stopService(new Intent(context, WalletConnectV2Service.class));
         }
     }
 
@@ -214,6 +215,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
                 public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)
                 {
                     callback.onSessionDisconnected();
+                    updateNotification();
                 }
 
                 @Override

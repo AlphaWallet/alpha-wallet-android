@@ -58,7 +58,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private WalletConnectV2SessionItem session;
     private WalletAdapter walletAdapter;
-    private boolean settled;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -79,7 +78,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         }
 
         this.session = retrieveSession(getIntent());
-        this.settled = true;
         initViewModel();
     }
 
@@ -88,7 +86,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         super.onNewIntent(intent);
         this.session = retrieveSession(intent);
-        this.settled = false;
         initViewModel();
     }
 
@@ -148,7 +145,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         peerUrl.setText(session.url);
 
         chainList.setAdapter(new ChainAdapter(this, session.chains));
-        if (settled)
+        if (session.settled)
         {
             walletAdapter = new WalletAdapter(this, findWallets(session.wallets));
         } else
@@ -159,7 +156,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         methodList.setAdapter(new MethodAdapter(this, session.methods));
         resizeList();
 
-        if (settled)
+        if (session.settled)
         {
             functionBar.setupFunctions(new StandardFunctionInterface()
             {
@@ -220,16 +217,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         LayoutHelper.resizeList(chainList);
         LayoutHelper.resizeList(walletList);
         LayoutHelper.resizeList(methodList);
-    }
-
-    private List<String> getChains(List<String> accounts)
-    {
-        List<String> result = new ArrayList<>();
-        for (String account : accounts)
-        {
-            result.add(account.substring(0, account.lastIndexOf(":")));
-        }
-        return result;
     }
 
     private void initViews()

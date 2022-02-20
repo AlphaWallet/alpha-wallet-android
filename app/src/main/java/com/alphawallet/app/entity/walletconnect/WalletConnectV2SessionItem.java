@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi;
 
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
+    public boolean settled;
     public final List<String> chains = new ArrayList<>();
     public final List<String> wallets = new ArrayList<>();
     public final List<String> methods = new ArrayList<>();
@@ -27,6 +28,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         icon = s.getPeerAppMetaData().getIcons().isEmpty() ? null : s.getPeerAppMetaData().getIcons().get(0);
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
+        settled = true;
         extractChainsAndAddress(s.getAccounts());
         methods.addAll(s.getPermissions().getJsonRpc().getMethods());
     }
@@ -50,6 +52,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         icon = in.readString();
         sessionId = in.readString();
         localSessionId = in.readString();
+        settled = in.readInt() == 1;
         in.readStringList(chains);
         in.readStringList(wallets);
         in.readStringList(methods);
@@ -68,6 +71,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         item.url = sessionProposal.getUrl();
         item.icon = sessionProposal.getIcon();
         item.sessionId = sessionProposal.getTopic();
+        item.settled = false;
         item.wallets.addAll(sessionProposal.getAccounts());
         item.chains.addAll(sessionProposal.getChains());
         item.methods.addAll(sessionProposal.getMethods());
@@ -88,6 +92,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeString(icon);
         dest.writeString(sessionId);
         dest.writeString(localSessionId);
+        dest.writeInt(settled ? 1 : 0);
         dest.writeStringList(chains);
         dest.writeStringList(wallets);
         dest.writeStringList(methods);

@@ -211,7 +211,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {
                 Context context = getApplicationContext();
-                context.startActivity(getIntent(session, context));
+                context.startActivity(newIntent(context, session));
             });
 
             setupClient(session.sessionId, holder);
@@ -230,17 +230,8 @@ public class WalletConnectSessionActivity extends BaseActivity
         }
     }
 
-    public static Intent getIntent(List<WalletConnectSessionItem> sessions, Context context)
-    {
-        if (sessions.size() == 1)
-        {
-            return WalletConnectSessionActivity.getIntent(sessions.get(0), context);
-        }
 
-        return new Intent(context, WalletConnectSessionActivity.class);
-    }
-
-    private static Intent getIntent(WalletConnectSessionItem session, Context context)
+    public static Intent newIntent(Context context, WalletConnectSessionItem session)
     {
         Intent intent;
         if (session instanceof WalletConnectV2SessionItem)

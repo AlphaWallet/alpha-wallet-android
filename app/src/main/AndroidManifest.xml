@@ -299,6 +299,10 @@
             android:label="WalletConnectV2" />
 
         <activity
+            android:name=".ui.WalletConnectNotificationActivity"
+            android:label="WalletConnectV2" />
+
+        <activity
             android:name=".ui.BackupFlowActivity"
             android:label="WalletConnect" />
 

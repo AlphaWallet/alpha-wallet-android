@@ -12,6 +12,7 @@ import android.os.IBinder;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.interact.WalletConnectInteract;
+import com.alphawallet.app.ui.WalletConnectNotificationActivity;
 import com.alphawallet.app.ui.WalletConnectSessionActivity;
 
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class WalletConnectV2Service extends Service
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(channel);
 
-        Intent intent = WalletConnectSessionActivity.getIntent(walletConnectInteract.getSessions(), getApplicationContext());
+        Intent intent = new Intent(getApplicationContext(), WalletConnectNotificationActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logo)
